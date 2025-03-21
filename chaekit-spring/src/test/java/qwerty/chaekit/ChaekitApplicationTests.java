@@ -1,4 +1,4 @@
-package com.qwerty.chaekit;
+package qwerty.chaekit;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
