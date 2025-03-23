@@ -7,6 +7,7 @@ import qwerty.chaekit.service.JoinService;
 
 @RestController
 public class JoinController {
+
     private final JoinService joinService;
 
     public JoinController(JoinService joinService){

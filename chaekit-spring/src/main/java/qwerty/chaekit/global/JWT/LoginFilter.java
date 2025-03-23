@@ -1,4 +1,4 @@
-package qwerty.chaekit.global;
+package qwerty.chaekit.global.JWT;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;

@@ -1,4 +1,4 @@
-package qwerty.chaekit.global;
+package qwerty.chaekit.global.JWT;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -7,9 +7,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.filter.OncePerRequestFilter;
-import qwerty.chaekit.domain.User;
+import qwerty.chaekit.domain.Member.Member;
 import qwerty.chaekit.dto.CustomUserDetails;
 
 import java.io.IOException;
@@ -51,16 +50,12 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-
         String username = jwtUtil.getUsername(token);
         String role = jwtUtil.getRole(token);
 
-        User userEntity = new User();
-        userEntity.setUsername(username);
-        userEntity.setPassword("temppassword");
-        userEntity.setRole(role);
+        Member member = Member.builder().username(username).role(role).build();
 
-        CustomUserDetails customUserDetails = new CustomUserDetails(userEntity);
+        CustomUserDetails customUserDetails = new CustomUserDetails(member);
 
         Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
 

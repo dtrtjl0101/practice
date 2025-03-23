@@ -1,4 +1,4 @@
-package qwerty.chaekit.global;
+package qwerty.chaekit.global.JWT;
 
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;

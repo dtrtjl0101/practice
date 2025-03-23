@@ -2,15 +2,15 @@ package qwerty.chaekit.dto;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import qwerty.chaekit.domain.User;
+import qwerty.chaekit.domain.Member.Member;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
 public class CustomUserDetails implements UserDetails {
-    private final User userEntity;
+    private final Member userEntity;
 
-    public CustomUserDetails(User userEntity) {
+    public CustomUserDetails(Member userEntity) {
         this.userEntity = userEntity;
     }
 

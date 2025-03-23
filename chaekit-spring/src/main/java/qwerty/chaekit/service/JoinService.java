@@ -2,9 +2,9 @@ package qwerty.chaekit.service;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import qwerty.chaekit.domain.User;
+import qwerty.chaekit.domain.Member.Member;
 import qwerty.chaekit.dto.JoinDto;
-import qwerty.chaekit.repository.UserRepository;
+import qwerty.chaekit.domain.Member.UserRepository;
 
 @Service
 public class JoinService {
@@ -29,11 +29,11 @@ public class JoinService {
             return;
         }
 
-        User data = new User();
-
-        data.setUsername(username);
-        data.setPassword(bCryptPasswordEncoder.encode(password));
-        data.setRole("ROLE_ADMIN");
+        Member data=Member.builder()
+                .username(username)
+                .password(bCryptPasswordEncoder.encode(password))
+                .role("ROLE_ADMIN")
+                .build();
 
         userRepository.save(data);
     }
