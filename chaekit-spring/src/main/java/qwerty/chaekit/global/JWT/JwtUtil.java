@@ -1,5 +1,6 @@
 package qwerty.chaekit.global.JWT;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -12,7 +13,7 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private SecretKey secretKey;
+    private final SecretKey secretKey;
 
     public JwtUtil(@Value("${spring.jwt.secret}")String secret) {
 
@@ -30,8 +31,15 @@ public class JwtUtil {
     }
 
     public Boolean isExpired(String token) {
-
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
+        try {
+            Jwts.parser()
+                    .verifyWith(secretKey)
+                    .build()
+                    .parseSignedClaims(token);
+            return false;
+        } catch (ExpiredJwtException e) {
+            return true;
+        }
     }
 
 
