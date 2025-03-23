@@ -2,11 +2,12 @@ package qwerty.chaekit.domain.Member;
 
 import jakarta.persistence.*;
 import lombok.*;
+import qwerty.chaekit.domain.BaseEntity;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Member {
+public class Member extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

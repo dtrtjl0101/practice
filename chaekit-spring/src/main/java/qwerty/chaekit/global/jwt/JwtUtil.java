@@ -1,4 +1,4 @@
-package qwerty.chaekit.global.JWT;
+package qwerty.chaekit.global.jwt;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;

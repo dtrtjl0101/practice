@@ -3,8 +3,9 @@ package qwerty.chaekit.service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import qwerty.chaekit.domain.Member.Member;
-import qwerty.chaekit.dto.JoinDto;
+import qwerty.chaekit.dto.JoinRequest;
 import qwerty.chaekit.domain.Member.MemberRepository;
+import qwerty.chaekit.global.exception.BadRequestException;
 
 @Service
 public class JoinService {
@@ -17,16 +18,14 @@ public class JoinService {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
-    public void joinProcess(JoinDto joinDto) {
-
-        String username = joinDto.getUsername();
-        String password = joinDto.getPassword();
+    public void joinProcess(JoinRequest joinRequest) {
+        String username = joinRequest.username();
+        String password = joinRequest.password();
 
         Boolean isExist = memberRepository.existsByUsername(username);
 
         if (isExist) {
-
-            return;
+            throw new BadRequestException("USER_ALREADY_EXISTS","이미 존재하는 회원입니다");
         }
 
         Member data=Member.builder()

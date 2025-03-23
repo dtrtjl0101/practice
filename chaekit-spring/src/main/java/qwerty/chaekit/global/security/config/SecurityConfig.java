@@ -1,35 +1,40 @@
-package qwerty.chaekit.global.Config;
+package qwerty.chaekit.global.security.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import qwerty.chaekit.global.JWT.JwtFilter;
-import qwerty.chaekit.global.JWT.JwtUtil;
-import qwerty.chaekit.global.JWT.LoginFilter;
+import qwerty.chaekit.global.security.filter.JwtFilter;
+import qwerty.chaekit.global.jwt.JwtUtil;
+import qwerty.chaekit.global.security.filter.LoginFilter;
+import qwerty.chaekit.global.security.handler.CustomAccessDeniedHandler;
+import qwerty.chaekit.global.security.handler.CustomAuthenticationEntryPoint;
+import qwerty.chaekit.global.util.SecurityResponseSender;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
-
-    private final AuthenticationConfiguration authenticationConfiguration;
+    private final ObjectMapper objectMapper;
     private final JwtUtil jwtUtil;
+    private final AuthenticationConfiguration authConfig;
 
-    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JwtUtil jwtUtil) {
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
+    private final SecurityResponseSender responseSender;
 
-        this.authenticationConfiguration = authenticationConfiguration;
-        this.jwtUtil = jwtUtil;
-    }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-
         return configuration.getAuthenticationManager();
     }
 
@@ -43,24 +48,34 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-                .csrf((auth) -> auth.disable());
+                .csrf(AbstractHttpConfigurer::disable);
 
         http
-                .formLogin((auth) -> auth.disable());
+                .formLogin(AbstractHttpConfigurer::disable);
 
         http
-                .httpBasic((auth) -> auth.disable());
+                .httpBasic(AbstractHttpConfigurer::disable);
 
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login", "/", "/join").permitAll()
+                        .requestMatchers("/", "/join", "/login").permitAll()
                         .requestMatchers("/admin").hasRole("ADMIN")
                         .anyRequest().authenticated());
 
         http
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler)
+                );
+
+        http
                 .addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class);
         http
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
+                .addFilterAt(new LoginFilter(
+                        objectMapper,
+                        authenticationManager(authConfig),
+                        jwtUtil,
+                        responseSender), UsernamePasswordAuthenticationFilter.class);
 
         http
                 .sessionManagement((session) -> session

@@ -1,29 +1,27 @@
-package qwerty.chaekit.global.JWT;
+package qwerty.chaekit.global.security.filter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 import qwerty.chaekit.domain.Member.Member;
-import qwerty.chaekit.dto.CustomUserDetails;
+import qwerty.chaekit.global.security.model.CustomUserDetails;
+import qwerty.chaekit.global.jwt.JwtUtil;
 
 import java.io.IOException;
 
+@RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
 
-    public JwtFilter(JwtUtil jwtUtil) {
-
-        this.jwtUtil = jwtUtil;
-    }
-
-
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain filterChain) throws ServletException, IOException {
 
         //request에서 Authorization 헤더를 찾음
         String authorization= request.getHeader("Authorization");
@@ -42,7 +40,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
         //토큰 소멸 시간 검증
         if (jwtUtil.isExpired(token)) {
-
             System.out.println("token expired");
             filterChain.doFilter(request, response);
 
