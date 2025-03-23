@@ -6,21 +6,21 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import qwerty.chaekit.domain.Member.Member;
 import qwerty.chaekit.dto.CustomUserDetails;
-import qwerty.chaekit.domain.Member.UserRepository;
+import qwerty.chaekit.domain.Member.MemberRepository;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
-    private final UserRepository userRepository;
+    private final MemberRepository memberRepository;
 
-    public CustomUserDetailsService(UserRepository userRepository) {
+    public CustomUserDetailsService(MemberRepository memberRepository) {
 
-        this.userRepository = userRepository;
+        this.memberRepository = memberRepository;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-        Member userData = userRepository.findByUsername(username);
+        Member userData = memberRepository.findByUsername(username);
 
         if (userData != null) {
 

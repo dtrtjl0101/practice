@@ -4,16 +4,16 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import qwerty.chaekit.domain.Member.Member;
 import qwerty.chaekit.dto.JoinDto;
-import qwerty.chaekit.domain.Member.UserRepository;
+import qwerty.chaekit.domain.Member.MemberRepository;
 
 @Service
 public class JoinService {
-    private final UserRepository userRepository;
+    private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public JoinService(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public JoinService(MemberRepository memberRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
 
-        this.userRepository = userRepository;
+        this.memberRepository = memberRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
@@ -22,7 +22,7 @@ public class JoinService {
         String username = joinDto.getUsername();
         String password = joinDto.getPassword();
 
-        Boolean isExist = userRepository.existsByUsername(username);
+        Boolean isExist = memberRepository.existsByUsername(username);
 
         if (isExist) {
 
@@ -35,6 +35,6 @@ public class JoinService {
                 .role("ROLE_ADMIN")
                 .build();
 
-        userRepository.save(data);
+        memberRepository.save(data);
     }
 }
