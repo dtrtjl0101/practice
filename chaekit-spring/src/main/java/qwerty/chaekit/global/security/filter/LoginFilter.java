@@ -25,14 +25,12 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
-
     @Value("${spring.jwt.expiration}")
     private final Long jwtExpirationMs;
     private final ObjectMapper objectMapper;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final SecurityResponseSender responseSender;
-
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -57,8 +55,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         String role = authorities.stream().findFirst().map(GrantedAuthority::getAuthority).orElse("ROLE_USER");
-
         String token = jwtUtil.createJwt(username, role, jwtExpirationMs);
+
         sendSuccessResponse(response, token, username);
     }
 
