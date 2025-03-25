@@ -5,6 +5,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,6 +25,8 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
+    @Value("${spring.jwt.expiration}")
+    private final Long jwtExpirationMs;
     private final ObjectMapper objectMapper;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
@@ -52,8 +55,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         String role = authorities.stream().findFirst().map(GrantedAuthority::getAuthority).orElse("ROLE_USER");
+        String token = jwtUtil.createJwt(username, role, jwtExpirationMs);
 
-        String token = jwtUtil.createJwt(username, role, 60 * 60 * 10L);
         sendSuccessResponse(response, token, username);
     }
 
