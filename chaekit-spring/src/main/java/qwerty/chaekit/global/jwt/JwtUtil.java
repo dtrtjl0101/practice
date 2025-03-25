@@ -1,7 +1,9 @@
 package qwerty.chaekit.global.jwt;
 
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.DecodingException;
+import io.jsonwebtoken.security.SignatureException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -10,6 +12,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+@Slf4j
 @Component
 public class JwtUtil {
 
@@ -30,18 +33,23 @@ public class JwtUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("role", String.class);
     }
 
-    public Boolean isExpired(String token) {
+    public boolean isValidToken(String token) {
         try {
             Jwts.parser()
                     .verifyWith(secretKey)
                     .build()
                     .parseSignedClaims(token);
-            return false;
-        } catch (ExpiredJwtException e) {
             return true;
+        } catch (ExpiredJwtException e) {
+            log.info("token expired");
+            return false;
+        }
+        catch (JwtException | IllegalArgumentException | NullPointerException e) {
+            // 서명 오류, 잘못된 형식, 지원하지 않는 토큰 등
+            log.info("token invalid");
+            return false;
         }
     }
-
 
     public String createJwt(String username, String role, Long expiredMs) {
 
