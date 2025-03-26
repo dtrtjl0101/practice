@@ -61,9 +61,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
-                }, ()->{
-                    responseSender.sendError(response, 500, "INVALID_ROLE", "권한 정보가 존재하지 않습니다.");
-                }
+                }, ()-> responseSender.sendError(response, 500, "INVALID_ROLE", "권한 정보가 존재하지 않습니다.")
         );
     }
 
@@ -75,7 +73,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     }
 
     @Override
-    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException {
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
         if (failed instanceof BadCredentialsException) {
             responseSender.sendError(response, 401, "BAD_CREDENTIAL", "아이디 또는 비밀번호가 올바르지 않습니다.");
         } else {

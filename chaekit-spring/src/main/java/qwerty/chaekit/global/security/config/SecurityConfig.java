@@ -102,7 +102,7 @@ public class SecurityConfig {
                 .addFilterBefore(exceptionHandlingFilter, SecurityContextHolderFilter.class)
                 .addFilterBefore(jwtFilter, LoginFilter.class)
                 .addFilterAt(userLoginFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAt(publisherLoginFilter, UsernamePasswordAuthenticationFilter.class);;
+                .addFilterAt(publisherLoginFilter, UsernamePasswordAuthenticationFilter.class);
 
         http
                 .sessionManagement((session) -> session
