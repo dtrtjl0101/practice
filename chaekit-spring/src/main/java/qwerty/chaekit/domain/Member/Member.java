@@ -3,6 +3,7 @@ package qwerty.chaekit.domain.Member;
 import jakarta.persistence.*;
 import lombok.*;
 import qwerty.chaekit.domain.BaseEntity;
+import qwerty.chaekit.domain.Member.enums.Role;
 
 @Entity
 @Getter
@@ -15,10 +16,11 @@ public class Member extends BaseEntity {
     private String username;
     private String password;
 
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     @Builder
-    public Member(final String username,final String password,final String role) {
+    public Member(final String username,final String password,final Role role) {
         this.username = username;
         this.password = password;
         this.role = role;
