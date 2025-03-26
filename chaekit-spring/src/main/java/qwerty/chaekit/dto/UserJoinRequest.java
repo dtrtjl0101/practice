@@ -2,7 +2,9 @@ package qwerty.chaekit.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record LoginRequest(
+public record UserJoinRequest(
+        @NotBlank
+        String nickname,
         @NotBlank
         String username,
         @NotBlank

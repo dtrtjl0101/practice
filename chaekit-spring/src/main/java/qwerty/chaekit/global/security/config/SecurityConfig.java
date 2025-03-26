@@ -17,7 +17,9 @@ import qwerty.chaekit.domain.Member.enums.Role;
 import qwerty.chaekit.global.security.filter.CustomExceptionHandlingFilter;
 import qwerty.chaekit.global.security.filter.JwtFilter;
 import qwerty.chaekit.global.jwt.JwtUtil;
-import qwerty.chaekit.global.security.filter.LoginFilter;
+import qwerty.chaekit.global.security.filter.login.LoginFilter;
+import qwerty.chaekit.global.security.filter.login.PublisherLoginFilter;
+import qwerty.chaekit.global.security.filter.login.UserLoginFilter;
 import qwerty.chaekit.global.security.handler.CustomAccessDeniedHandler;
 import qwerty.chaekit.global.security.handler.CustomAuthenticationEntryPoint;
 import qwerty.chaekit.global.util.SecurityRequestReader;
@@ -54,16 +56,19 @@ public class SecurityConfig {
     }
 
     @Bean
-    public LoginFilter loginFilter(AuthenticationManager authManager) throws Exception {
-        LoginFilter filter = new LoginFilter(authManager, jwtUtil, requestReader, responseSender);
-        filter.setAuthenticationManager(authManager); // need AuthenticationManager
-        filter.setFilterProcessesUrl("/api/users/login");
-        return filter;
+    public UserLoginFilter userLoginFilter(AuthenticationManager authManager) {
+        return new UserLoginFilter(authManager, jwtUtil, requestReader, responseSender);
+    }
+
+    @Bean
+    public PublisherLoginFilter publisherLoginFilter(AuthenticationManager authManager) {
+        return new PublisherLoginFilter(authManager, jwtUtil, requestReader, responseSender);
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http,
-                                           LoginFilter loginFilter,
+                                           UserLoginFilter userLoginFilter,
+                                           PublisherLoginFilter publisherLoginFilter,
                                            JwtFilter jwtFilter,
                                            CustomExceptionHandlingFilter exceptionHandlingFilter) throws Exception {
         http
@@ -80,7 +85,7 @@ public class SecurityConfig {
                         .requestMatchers("/api", "/api/users/join", "/api/users/login").permitAll()
                         .requestMatchers("/api/users/**").hasAuthority(Role.ROLE_USER.name())
 
-                        .requestMatchers("/api/publishers/register", "/api/publishers/login").permitAll()
+                        .requestMatchers("/api/publishers/join", "/api/publishers/login").permitAll()
                         .requestMatchers("/api/publishers/**").hasAuthority(Role.ROLE_PUBLISHER.name())
 
                         .requestMatchers("/admin/**").hasAuthority(Role.ROLE_ADMIN.name())
@@ -96,7 +101,8 @@ public class SecurityConfig {
         http
                 .addFilterBefore(exceptionHandlingFilter, SecurityContextHolderFilter.class)
                 .addFilterBefore(jwtFilter, LoginFilter.class)
-                .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterAt(userLoginFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAt(publisherLoginFilter, UsernamePasswordAuthenticationFilter.class);;
 
         http
                 .sessionManagement((session) -> session
