@@ -3,7 +3,6 @@ package qwerty.chaekit.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import qwerty.chaekit.domain.Member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.Member.publisher.PublisherProfileRepository;
 import qwerty.chaekit.dto.PublisherMyInfoResponse;
 import qwerty.chaekit.global.exception.NotFoundException;
