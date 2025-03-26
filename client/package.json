@@ -16,6 +16,7 @@
     "@tanstack/react-router": "^1.114.27",
     "epubjs": "^0.3.93",
     "jotai": "^2.12.2",
+    "nanoid": "^5.1.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-reader": "^2.0.13"
