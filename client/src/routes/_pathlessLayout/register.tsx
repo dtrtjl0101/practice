@@ -2,6 +2,7 @@ import {
   Button,
   Card,
   CardContent,
+  CardHeader,
   Container,
   Divider,
   InputLabel,
@@ -20,6 +21,7 @@ function RouteComponent() {
   return (
     <Container maxWidth="sm" sx={{ mt: theme.spacing(4) }}>
       <Card>
+        <CardHeader title="회원가입" />
         <CardContent
           sx={{
             display: "flex",
