@@ -5,16 +5,22 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.dto.PublisherJoinRequest;
 import qwerty.chaekit.dto.PublisherJoinResponse;
+import qwerty.chaekit.dto.PublisherMyInfoResponse;
+import qwerty.chaekit.global.security.resolver.Login;
+import qwerty.chaekit.global.security.resolver.LoginMember;
 import qwerty.chaekit.service.PublisherJoinService;
+import qwerty.chaekit.service.PublisherService;
 
 @RestController
 @RequestMapping("/api/publishers")
 @RequiredArgsConstructor
 public class PublisherController {
     private final PublisherJoinService joinService;
+    private final PublisherService publisherService;
+
     @GetMapping("/me")
-    public String publisherInfo() {
-        return "TODO...";
+    public PublisherMyInfoResponse publisherInfo(@Login LoginMember loginMember) {
+        return publisherService.getPublisherProfile(loginMember);
     }
 
     @PostMapping("/join")

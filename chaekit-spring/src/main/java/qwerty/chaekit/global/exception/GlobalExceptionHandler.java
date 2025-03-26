@@ -14,6 +14,12 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+    @ExceptionHandler(NotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ApiErrorResponse handleNoSuchElementException(NotFoundException ex) {
+        return ApiErrorResponse.of(ex.getErrorCode(), ex.getMessage());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiErrorResponse handleNoResourceFoundException(MethodArgumentNotValidException ex) {
@@ -33,7 +39,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadRequestException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiErrorResponse handleBadRequestException(BadRequestException ex) {
-        log.info("Bad request: {}", ex.getMessage());
         return ApiErrorResponse.of(ex.getErrorCode(), ex.getMessage());
     }
 
