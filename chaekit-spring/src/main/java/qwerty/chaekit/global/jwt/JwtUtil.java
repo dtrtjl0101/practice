@@ -1,8 +1,6 @@
 package qwerty.chaekit.global.jwt;
 
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.DecodingException;
-import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -43,8 +41,7 @@ public class JwtUtil {
         } catch (ExpiredJwtException e) {
             log.info("token expired");
             return false;
-        }
-        catch (JwtException | IllegalArgumentException | NullPointerException e) {
+        } catch (Exception e) {
             // 서명 오류, 잘못된 형식, 지원하지 않는 토큰 등
             log.info("token invalid");
             return false;
