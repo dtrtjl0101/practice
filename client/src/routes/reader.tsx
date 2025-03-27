@@ -1,4 +1,14 @@
-import { Box, Button, useTheme } from "@mui/material";
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Drawer,
+  Stack,
+  Typography,
+  useTheme,
+} from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
 import { EpubCFI, Rendition } from "epubjs";
 import { nanoid } from "nanoid";
@@ -25,6 +35,7 @@ function RouteComponent() {
   const [memosInPage, setMemosInPage] = useState<Memo[]>([]);
   const [epubUrl, setEpubUrl] = useState<ArrayBuffer>(new ArrayBuffer());
   const [rendition, setRendition] = useState<Rendition | undefined>(undefined);
+  const [openMemoDrawer, setOpenMemoDrawer] = useState(false);
   const previousMemosInPage = useRef<Memo[]>([]);
 
   const uploadEpub = useCallback(() => {
@@ -101,7 +112,28 @@ function RouteComponent() {
         }}
       >
         <Button onClick={uploadEpub}>Upload EPUB</Button>
+        <Button onClick={() => setOpenMemoDrawer(true)}>Open Memo</Button>
       </Box>
+      <Drawer
+        anchor="right"
+        open={openMemoDrawer}
+        onClose={() => setOpenMemoDrawer(false)}
+      >
+        <Stack spacing={theme.spacing(2)} p={theme.spacing(2)} width={256}>
+          <Card>
+            <CardHeader title="Memo" />
+            <CardContent>
+              <Typography variant="body1">Memos in page</Typography>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader title="Memo" />
+            <CardContent>
+              <Typography variant="body1">Memos in page</Typography>
+            </CardContent>
+          </Card>
+        </Stack>
+      </Drawer>
       <ReactReader
         url={epubUrl}
         epubOptions={{
