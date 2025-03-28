@@ -15,7 +15,7 @@ public class PublisherService {
     private final PublisherProfileRepository profileRepository;
 
     public PublisherMyInfoResponse getPublisherProfile(LoginMember loginMember) {
-        String publisherName = profileRepository.findByMember_Username(loginMember.username())
+        String publisherName = profileRepository.findByMember_Id(loginMember.memberId())
                 .orElseThrow(() -> new NotFoundException("PUBLISHER_NOT_FOUND", "해당 출판사가 없습니다.")).getPublisherName();
 
         return PublisherMyInfoResponse.builder()
