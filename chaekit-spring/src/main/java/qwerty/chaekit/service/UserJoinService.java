@@ -8,7 +8,7 @@ import qwerty.chaekit.domain.Member.enums.Role;
 import qwerty.chaekit.domain.Member.user.UserProfile;
 import qwerty.chaekit.domain.Member.user.UserProfileRepository;
 import qwerty.chaekit.dto.UserJoinRequest;
-import qwerty.chaekit.dto.UserMyInfoResponse;
+import qwerty.chaekit.dto.UserMemberResponse;
 import qwerty.chaekit.global.exception.BadRequestException;
 
 @Service
@@ -18,7 +18,7 @@ public class UserJoinService {
     private final UserProfileRepository userProfileRepository;
 
     @Transactional
-    public UserMyInfoResponse join(UserJoinRequest request) {
+    public UserMemberResponse join(UserJoinRequest request) {
         String username = request.username();
         String password = request.password();
 
@@ -42,8 +42,8 @@ public class UserJoinService {
                 .build());
     }
 
-    private UserMyInfoResponse toResponse(UserJoinRequest request, Member member) {
-        return UserMyInfoResponse.builder()
+    private UserMemberResponse toResponse(UserJoinRequest request, Member member) {
+        return UserMemberResponse.builder()
                 .id(member.getId())
                 .username(member.getUsername())
                 .nickname(request.nickname())

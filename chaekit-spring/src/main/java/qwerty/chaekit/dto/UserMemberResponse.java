@@ -3,7 +3,7 @@ package qwerty.chaekit.dto;
 import lombok.Builder;
 
 @Builder
-public record UserMyInfoResponse(
+public record UserMemberResponse(
         Long id,
         String nickname,
         String username,
