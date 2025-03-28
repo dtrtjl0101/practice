@@ -16,7 +16,7 @@ public class UserService {
 
     public UserMemberResponse getUserProfile(LoginMember loginMember) {
         String nickname = profileRepository.findByMember_Id(loginMember.memberId())
-                .orElseThrow(() -> new NotFoundException("USER_NOT_FOUND", "해당 출판사가 없습니다.")).getNickname();
+                .orElseThrow(() -> new NotFoundException("USER_NOT_FOUND", "해당 사용자가 없습니다.")).getNickname();
 
         return UserMemberResponse.builder()
                 .id(loginMember.memberId())
