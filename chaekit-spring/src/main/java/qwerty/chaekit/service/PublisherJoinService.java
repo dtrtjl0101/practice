@@ -8,7 +8,7 @@ import qwerty.chaekit.domain.Member.enums.Role;
 import qwerty.chaekit.domain.Member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.Member.publisher.PublisherProfileRepository;
 import qwerty.chaekit.dto.PublisherJoinRequest;
-import qwerty.chaekit.dto.PublisherMyInfoResponse;
+import qwerty.chaekit.dto.PublisherMemberResponse;
 import qwerty.chaekit.global.exception.BadRequestException;
 
 @Service
@@ -18,7 +18,7 @@ public class PublisherJoinService {
     private final PublisherProfileRepository profileRepository;
 
     @Transactional
-    public PublisherMyInfoResponse join(PublisherJoinRequest request) {
+    public PublisherMemberResponse join(PublisherJoinRequest request) {
         String username = request.username();
         String password = request.password();
 
@@ -42,12 +42,13 @@ public class PublisherJoinService {
                 .build());
     }
 
-    private PublisherMyInfoResponse toResponse(PublisherJoinRequest request, Member member) {
-        return PublisherMyInfoResponse.builder()
+    private PublisherMemberResponse toResponse(PublisherJoinRequest request, Member member) {
+        return PublisherMemberResponse.builder()
                 .id(member.getId())
                 .username(member.getUsername())
                 .publisherName(request.publisherName())
                 .role(member.getRole().name())
+                .isAccepted(false)
                 .build();
     }
 }
