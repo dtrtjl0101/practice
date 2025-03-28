@@ -27,7 +27,7 @@ function PostList() {
 
   return (
     <div>
-      <Typography variant="h4" gutterBottom>
+      <Typography variant="h4" gutterBottom align="center">
         게시판
       </Typography>
       <Button
