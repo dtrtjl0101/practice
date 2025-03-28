@@ -3,9 +3,7 @@ package qwerty.chaekit.global.security.filter.login;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -69,21 +67,18 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         authorities.stream().findFirst().map(GrantedAuthority::getAuthority).ifPresentOrElse(
-                (role)->{
+                (role)-> {
                     String token = jwtUtil.createJwt(memberId, username, role, jwtProperties.expirationMs());
-                    try {
-                        sendSuccessResponse(response, token, memberId);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
+                    sendSuccessResponse(response, token, memberId, role);
                 }, ()-> responseSender.sendError(response, 500, "INVALID_ROLE", "권한 정보가 존재하지 않습니다.")
         );
     }
 
-    private void sendSuccessResponse(HttpServletResponse response, String token, Long memberId) throws IOException {
+    private void sendSuccessResponse(HttpServletResponse response, String token, Long memberId, String role) {
         response.setHeader("Authorization", "Bearer " + token);
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("memberId", memberId);
+        responseData.put("role", role);
         responseSender.sendSuccess(response, responseData);
     }
 

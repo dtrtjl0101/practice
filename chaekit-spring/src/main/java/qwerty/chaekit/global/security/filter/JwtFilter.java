@@ -29,7 +29,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         //Authorization 헤더 검증
         if (authorization == null || !authorization.startsWith("Bearer ")) {
-            log.info("No token found in header");
+            log.info("No token");
             filterChain.doFilter(request, response);
             return;
         }
