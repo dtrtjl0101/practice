@@ -14,6 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
 import qwerty.chaekit.domain.Member.enums.Role;
+import qwerty.chaekit.global.properties.JwtProperties;
 import qwerty.chaekit.global.security.filter.CustomExceptionHandlingFilter;
 import qwerty.chaekit.global.security.filter.JwtFilter;
 import qwerty.chaekit.global.jwt.JwtUtil;
@@ -56,13 +57,13 @@ public class SecurityConfig {
     }
 
     @Bean
-    public UserLoginFilter userLoginFilter(AuthenticationManager authManager) {
-        return new UserLoginFilter(authManager, jwtUtil, requestReader, responseSender);
+    public UserLoginFilter userLoginFilter(AuthenticationManager authManager, JwtProperties jwtProperties) {
+        return new UserLoginFilter("/api/users/login", jwtProperties, jwtUtil, authManager, requestReader, responseSender);
     }
 
     @Bean
-    public PublisherLoginFilter publisherLoginFilter(AuthenticationManager authManager) {
-        return new PublisherLoginFilter(authManager, jwtUtil, requestReader, responseSender);
+    public PublisherLoginFilter publisherLoginFilter(AuthenticationManager authManager, JwtProperties jwtProperties) {
+        return new PublisherLoginFilter("/api/publishers/login", jwtProperties, jwtUtil, authManager, requestReader, responseSender);
     }
 
     @Bean

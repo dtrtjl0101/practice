@@ -4,6 +4,7 @@ import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import qwerty.chaekit.global.properties.JwtProperties;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -13,12 +14,13 @@ import java.util.Date;
 @Slf4j
 @Component
 public class JwtUtil {
-
     private final SecretKey secretKey;
 
-    public JwtUtil(@Value("${spring.jwt.secret}")String secret) {
-
-        this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
+    public JwtUtil(JwtProperties jwtProperties) {
+        this.secretKey = new SecretKeySpec(
+                jwtProperties.secret().getBytes(StandardCharsets.UTF_8),
+                Jwts.SIG.HS256.key().build().getAlgorithm()
+        );
     }
 
     public Claims parseJwt(String token) {

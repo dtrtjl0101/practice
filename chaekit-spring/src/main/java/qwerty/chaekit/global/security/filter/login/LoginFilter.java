@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import qwerty.chaekit.global.properties.JwtProperties;
 import qwerty.chaekit.global.security.model.CustomUserDetails;
 import qwerty.chaekit.dto.LoginRequest;
 import qwerty.chaekit.global.jwt.JwtUtil;
@@ -25,15 +26,28 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-@RequiredArgsConstructor
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
-    private final AuthenticationManager authenticationManager;
+    private final JwtProperties jwtProperties;
     private final JwtUtil jwtUtil;
+    private final AuthenticationManager authenticationManager;
     private final SecurityRequestReader requestReader;
     private final SecurityResponseSender responseSender;
 
-    @Value("${spring.jwt.expiration}")
-    private Long jwtExpirationMs;
+    public LoginFilter(String loginUrl,
+                       JwtProperties jwtProperties,
+                       JwtUtil jwtUtil,
+                       AuthenticationManager authManager,
+                       SecurityRequestReader reader,
+                       SecurityResponseSender sender) {
+        this.jwtProperties = jwtProperties;
+        this.jwtUtil = jwtUtil;
+        this.authenticationManager = authManager;
+        this.requestReader = reader;
+        this.responseSender = sender;
+
+        setAuthenticationManager(authManager);
+        setFilterProcessesUrl(loginUrl);
+    }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -56,7 +70,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         authorities.stream().findFirst().map(GrantedAuthority::getAuthority).ifPresentOrElse(
                 (role)->{
-                    String token = jwtUtil.createJwt(memberId, username, role, jwtExpirationMs);
+                    String token = jwtUtil.createJwt(memberId, username, role, jwtProperties.expirationMs());
                     try {
                         sendSuccessResponse(response, token, memberId);
                     } catch (IOException e) {
