@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.dto.PublisherJoinRequest;
-import qwerty.chaekit.dto.PublisherJoinResponse;
 import qwerty.chaekit.dto.PublisherMyInfoResponse;
 import qwerty.chaekit.global.security.resolver.Login;
 import qwerty.chaekit.global.security.resolver.LoginMember;
@@ -24,7 +23,7 @@ public class PublisherController {
     }
 
     @PostMapping("/join")
-    public PublisherJoinResponse publisherJoin(@RequestBody @Valid PublisherJoinRequest joinRequest) {
+    public PublisherMyInfoResponse publisherJoin(@RequestBody @Valid PublisherJoinRequest joinRequest) {
         return joinService.join(joinRequest);
     }
 }

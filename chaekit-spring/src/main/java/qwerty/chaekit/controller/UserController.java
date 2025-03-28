@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.dto.UserJoinRequest;
-import qwerty.chaekit.dto.UserJoinResponse;
 import qwerty.chaekit.dto.UserMyInfoResponse;
 import qwerty.chaekit.global.security.resolver.Login;
 import qwerty.chaekit.global.security.resolver.LoginMember;
@@ -24,7 +23,7 @@ public class UserController {
     }
 
     @PostMapping("/join")
-    public UserJoinResponse userJoin(@RequestBody @Valid UserJoinRequest joinRequest) {
+    public UserMyInfoResponse userJoin(@RequestBody @Valid UserJoinRequest joinRequest) {
         return joinService.join(joinRequest);
     }
 }

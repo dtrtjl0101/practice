@@ -20,7 +20,12 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         if (userData != null) {
 
-            return new CustomUserDetails(userData);
+            return new CustomUserDetails(
+                    userData.getId(),
+                    userData.getUsername(),
+                    userData.getPassword(),
+                    userData.getRole().name()
+            );
         }
         throw new UsernameNotFoundException("존재하지 않는 사용자입니다.");
     }

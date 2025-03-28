@@ -50,14 +50,15 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
                                             FilterChain chain, Authentication authentication) {
 
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long memberId = customUserDetails.getMemberId();
         String username = customUserDetails.getUsername();
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         authorities.stream().findFirst().map(GrantedAuthority::getAuthority).ifPresentOrElse(
                 (role)->{
-                    String token = jwtUtil.createJwt(username, role, jwtExpirationMs);
+                    String token = jwtUtil.createJwt(memberId, username, role, jwtExpirationMs);
                     try {
-                        sendSuccessResponse(response, token, username);
+                        sendSuccessResponse(response, token, memberId);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -65,10 +66,10 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         );
     }
 
-    private void sendSuccessResponse(HttpServletResponse response, String token, String username) throws IOException {
+    private void sendSuccessResponse(HttpServletResponse response, String token, Long memberId) throws IOException {
         response.setHeader("Authorization", "Bearer " + token);
         Map<String, Object> responseData = new HashMap<>();
-        responseData.put("username", username);
+        responseData.put("memberId", memberId);
         responseSender.sendSuccess(response, responseData);
     }
 

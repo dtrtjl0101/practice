@@ -19,6 +19,7 @@ public class PublisherService {
                 .orElseThrow(() -> new NotFoundException("PUBLISHER_NOT_FOUND", "해당 출판사가 없습니다.")).getPublisherName();
 
         return PublisherMyInfoResponse.builder()
+                .id(loginMember.memberId())
                 .publisherName(publisherName)
                 .username(loginMember.username())
                 .role(loginMember.role())

@@ -34,6 +34,7 @@ public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
         }
 
         return LoginMember.builder()
+                .memberId(userDetails.getMemberId())
                 .username(userDetails.getUsername())
                 .role(userDetails.getAuthorities().iterator().next().getAuthority())
                 .build();

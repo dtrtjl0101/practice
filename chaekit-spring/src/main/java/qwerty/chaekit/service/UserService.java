@@ -19,6 +19,7 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("USER_NOT_FOUND", "해당 출판사가 없습니다.")).getNickname();
 
         return UserMyInfoResponse.builder()
+                .id(loginMember.memberId())
                 .nickname(nickname)
                 .username(loginMember.username())
                 .role(loginMember.role())
