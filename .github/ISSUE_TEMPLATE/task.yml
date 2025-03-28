@@ -1,0 +1,39 @@
+name: Task
+description: User Story에서 도출된 개발 작업을 기록합니다
+title: "[TASK] "
+labels: [Backlog]
+
+body:
+  - type: markdown
+    attributes:
+      value: "### 🎯 관련 User Story를 적어주세요"
+
+  - type: textarea
+    id: user-story
+    attributes:
+      label: 관련 User Story
+      placeholder: ex) 사용자는 로그인 시 잘못된 비밀번호 입력 시 오류 메시지를 받아야 한다.
+    validations:
+      required: true
+
+  - type: textarea
+    id: task-list
+    attributes:
+      label: 할 일
+      placeholder: |
+        - [ ] 기능 구현
+        - [ ] 테스트 작성
+    validations:
+      required: true
+
+  - type: input
+    id: expected-time
+    attributes:
+      label: 예상 시간
+      placeholder: ex) 3시간
+
+  - type: textarea
+    id: note
+    attributes:
+      label: 비고
+      placeholder: 필요한 API 명세나 참고 링크 등을 적어주세요
