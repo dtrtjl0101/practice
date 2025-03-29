@@ -12,10 +12,12 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^7.0.1",
     "@mui/material": "^6.4.7",
     "@tanstack/react-router": "^1.114.27",
     "epubjs": "^0.3.93",
     "jotai": "^2.12.2",
+    "nanoid": "^5.1.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-reader": "^2.0.13"

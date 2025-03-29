@@ -92,7 +92,6 @@ function RouteComponent() {
           <Button fullWidth variant="contained" onClick={onRegisterButtonClick}>
             가입하기
           </Button>
-          {/* TODO: Add more fields */}
         </CardContent>
       </Card>
     </Container>
