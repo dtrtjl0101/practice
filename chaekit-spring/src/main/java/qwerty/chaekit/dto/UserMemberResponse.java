@@ -3,8 +3,9 @@ package qwerty.chaekit.dto;
 import lombok.Builder;
 
 @Builder
-public record PublisherJoinResponse(
-        String publisherName,
+public record UserMemberResponse(
+        Long id,
+        String nickname,
         String username,
         String role
 ){ }

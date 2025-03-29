@@ -1,39 +1,32 @@
 name: Task
-description: User Story에서 도출된 개발 작업을 기록합니다
-title: "[TASK] "
+description: 백로그에 작업를 등록합니다
+title: "[TASK]"
 labels: [Backlog]
 
 body:
-  - type: markdown
-    attributes:
-      value: "### 🎯 관련 User Story를 적어주세요"
-
   - type: textarea
-    id: user-story
+    id: goal
     attributes:
-      label: 관련 User Story
-      placeholder: ex) 사용자는 로그인 시 잘못된 비밀번호 입력 시 오류 메시지를 받아야 한다.
+      label: 🎯 목표
+      description: 이 작업을 통해 무엇을 해결하거나 구현하고자 하는지 간단히 작성해주세요.
+      placeholder: |
+        예) 회원가입 시 일반 사용자와 출판사를 구분하여 처리할 수 있도록 API를 분기합니다.
+        예) 로그인 실패 시 클라이언트에 적절한 오류 메시지를 반환하도록 처리합니다.
     validations:
       required: true
 
   - type: textarea
     id: task-list
     attributes:
-      label: 할 일
+      label: ✅ 할 일
       placeholder: |
         - [ ] 기능 구현
+        - [ ] 예외 처리
         - [ ] 테스트 작성
     validations:
       required: true
 
-  - type: input
-    id: expected-time
-    attributes:
-      label: 예상 시간
-      placeholder: ex) 3시간
-
   - type: textarea
     id: note
     attributes:
-      label: 비고
-      placeholder: 필요한 API 명세나 참고 링크 등을 적어주세요
+      label: 🔗 비고

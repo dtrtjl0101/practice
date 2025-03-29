@@ -2,8 +2,8 @@ package qwerty.chaekit.global.jwt;
 
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import qwerty.chaekit.global.properties.JwtProperties;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -13,22 +13,29 @@ import java.util.Date;
 @Slf4j
 @Component
 public class JwtUtil {
-
     private final SecretKey secretKey;
 
-    public JwtUtil(@Value("${spring.jwt.secret}")String secret) {
-
-        this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
+    public JwtUtil(JwtProperties jwtProperties) {
+        this.secretKey = new SecretKeySpec(
+                jwtProperties.secret().getBytes(StandardCharsets.UTF_8),
+                Jwts.SIG.HS256.key().build().getAlgorithm()
+        );
     }
 
-    public String getUsername(String token) {
-
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("username", String.class);
+    public Claims parseJwt(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload();
     }
 
-    public String getRole(String token) {
+    public Long getMemberId(Claims claims) {
+        return claims.get("memberId", Long.class);
+    }
 
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("role", String.class);
+    public String getUsername(Claims claims) {
+        return claims.get("username", String.class);
+    }
+
+    public String getRole(Claims claims) {
+        return claims.get("role", String.class);
     }
 
     public boolean isValidToken(String token) {
@@ -48,9 +55,10 @@ public class JwtUtil {
         }
     }
 
-    public String createJwt(String username, String role, Long expiredMs) {
+    public String createJwt(Long memberId, String username, String role, Long expiredMs) {
 
         return Jwts.builder()
+                .claim("memberId", memberId)
                 .claim("username", username)
                 .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))

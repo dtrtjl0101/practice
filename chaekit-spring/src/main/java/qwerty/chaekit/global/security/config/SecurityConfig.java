@@ -14,12 +14,11 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
 import qwerty.chaekit.domain.Member.enums.Role;
+import qwerty.chaekit.global.properties.JwtProperties;
 import qwerty.chaekit.global.security.filter.CustomExceptionHandlingFilter;
 import qwerty.chaekit.global.security.filter.JwtFilter;
 import qwerty.chaekit.global.jwt.JwtUtil;
 import qwerty.chaekit.global.security.filter.login.LoginFilter;
-import qwerty.chaekit.global.security.filter.login.PublisherLoginFilter;
-import qwerty.chaekit.global.security.filter.login.UserLoginFilter;
 import qwerty.chaekit.global.security.handler.CustomAccessDeniedHandler;
 import qwerty.chaekit.global.security.handler.CustomAuthenticationEntryPoint;
 import qwerty.chaekit.global.util.SecurityRequestReader;
@@ -56,19 +55,13 @@ public class SecurityConfig {
     }
 
     @Bean
-    public UserLoginFilter userLoginFilter(AuthenticationManager authManager) {
-        return new UserLoginFilter(authManager, jwtUtil, requestReader, responseSender);
-    }
-
-    @Bean
-    public PublisherLoginFilter publisherLoginFilter(AuthenticationManager authManager) {
-        return new PublisherLoginFilter(authManager, jwtUtil, requestReader, responseSender);
+    public LoginFilter loginFilter(JwtProperties jwtProperties, AuthenticationManager authManager) {
+        return new LoginFilter("/api/login", jwtProperties, jwtUtil, authManager, requestReader, responseSender);
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http,
-                                           UserLoginFilter userLoginFilter,
-                                           PublisherLoginFilter publisherLoginFilter,
+                                           LoginFilter loginFilter,
                                            JwtFilter jwtFilter,
                                            CustomExceptionHandlingFilter exceptionHandlingFilter) throws Exception {
         http
@@ -82,10 +75,10 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api", "/api/users/join", "/api/users/login").permitAll()
+                        .requestMatchers("/api", "/api/users/join").permitAll()
                         .requestMatchers("/api/users/**").hasAuthority(Role.ROLE_USER.name())
 
-                        .requestMatchers("/api/publishers/join", "/api/publishers/login").permitAll()
+                        .requestMatchers("/api/publishers/join").permitAll()
                         .requestMatchers("/api/publishers/**").hasAuthority(Role.ROLE_PUBLISHER.name())
 
                         .requestMatchers("/admin/**").hasAuthority(Role.ROLE_ADMIN.name())
@@ -101,8 +94,7 @@ public class SecurityConfig {
         http
                 .addFilterBefore(exceptionHandlingFilter, SecurityContextHolderFilter.class)
                 .addFilterBefore(jwtFilter, LoginFilter.class)
-                .addFilterAt(userLoginFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAt(publisherLoginFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class);
 
         http
                 .sessionManagement((session) -> session

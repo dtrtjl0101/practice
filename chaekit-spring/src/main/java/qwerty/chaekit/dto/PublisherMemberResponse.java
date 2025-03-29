@@ -3,8 +3,10 @@ package qwerty.chaekit.dto;
 import lombok.Builder;
 
 @Builder
-public record PublisherMyInfoResponse(
+public record PublisherMemberResponse(
+        Long id,
         String publisherName,
         String username,
-        String role
+        String role,
+        Boolean isAccepted
 ){ }

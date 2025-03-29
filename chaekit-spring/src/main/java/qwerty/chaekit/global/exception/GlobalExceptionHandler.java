@@ -2,6 +2,7 @@ package qwerty.chaekit.global.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -30,12 +31,18 @@ public class GlobalExceptionHandler {
         return ApiErrorResponse.of("INVALID_INPUT", message);
     }
 
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+    public ApiErrorResponse handleMethodNotSupportedException() {
+        return ApiErrorResponse.of("METHOD_NOT_ALLOWED", "지원하지 않는 HTTP 메서드입니다.");
+    }
+
     @ExceptionHandler(NoResourceFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiErrorResponse handleNoResourceFoundException() {
         return ApiErrorResponse.of("NOT_FOUND", "존재하지 않는 경로입니다.");
     }
-    // TODO: 추후에 모든 CustomException을 ENUM으로 통일시키는 것 고려할것
+
     @ExceptionHandler(BadRequestException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiErrorResponse handleBadRequestException(BadRequestException ex) {

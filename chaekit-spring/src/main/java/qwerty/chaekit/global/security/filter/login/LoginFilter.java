@@ -3,9 +3,7 @@ package qwerty.chaekit.global.security.filter.login;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import qwerty.chaekit.global.properties.JwtProperties;
 import qwerty.chaekit.global.security.model.CustomUserDetails;
 import qwerty.chaekit.dto.LoginRequest;
 import qwerty.chaekit.global.jwt.JwtUtil;
@@ -25,15 +24,28 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-@RequiredArgsConstructor
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
-    private final AuthenticationManager authenticationManager;
+    private final JwtProperties jwtProperties;
     private final JwtUtil jwtUtil;
+    private final AuthenticationManager authenticationManager;
     private final SecurityRequestReader requestReader;
     private final SecurityResponseSender responseSender;
 
-    @Value("${spring.jwt.expiration}")
-    private Long jwtExpirationMs;
+    public LoginFilter(String loginUrl,
+                       JwtProperties jwtProperties,
+                       JwtUtil jwtUtil,
+                       AuthenticationManager authManager,
+                       SecurityRequestReader reader,
+                       SecurityResponseSender sender) {
+        this.jwtProperties = jwtProperties;
+        this.jwtUtil = jwtUtil;
+        this.authenticationManager = authManager;
+        this.requestReader = reader;
+        this.responseSender = sender;
+
+        setAuthenticationManager(authManager);
+        setFilterProcessesUrl(loginUrl);
+    }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -50,25 +62,23 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
                                             FilterChain chain, Authentication authentication) {
 
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long memberId = customUserDetails.getMemberId();
         String username = customUserDetails.getUsername();
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         authorities.stream().findFirst().map(GrantedAuthority::getAuthority).ifPresentOrElse(
-                (role)->{
-                    String token = jwtUtil.createJwt(username, role, jwtExpirationMs);
-                    try {
-                        sendSuccessResponse(response, token, username);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
+                (role)-> {
+                    String token = jwtUtil.createJwt(memberId, username, role, jwtProperties.expirationMs());
+                    sendSuccessResponse(response, token, memberId, role);
                 }, ()-> responseSender.sendError(response, 500, "INVALID_ROLE", "권한 정보가 존재하지 않습니다.")
         );
     }
 
-    private void sendSuccessResponse(HttpServletResponse response, String token, String username) throws IOException {
+    private void sendSuccessResponse(HttpServletResponse response, String token, Long memberId, String role) {
         response.setHeader("Authorization", "Bearer " + token);
         Map<String, Object> responseData = new HashMap<>();
-        responseData.put("username", username);
+        responseData.put("memberId", memberId);
+        responseData.put("role", role);
         responseSender.sendSuccess(response, responseData);
     }
 

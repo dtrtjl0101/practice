@@ -23,9 +23,16 @@ public class PublisherProfile extends BaseEntity {
     @Column(nullable = false)
     private String publisherName;
 
+    @Column(nullable = false)
+    private boolean accepted = false;
+
     @Builder
     public PublisherProfile(Member member, String publisherName) {
         this.member = member;
         this.publisherName = publisherName;
+    }
+
+    public void acceptPublisher() {
+        accepted = true;
     }
 }
