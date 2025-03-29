@@ -20,6 +20,7 @@ export const Route = createFileRoute("/_pathlessLayout/register")({
 function RouteComponent() {
   const theme = useTheme();
   const { join } = useJoin();
+  const [nickname, setNickname] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -33,6 +34,7 @@ function RouteComponent() {
     }
 
     join({
+      nickname,
       username,
       password,
     });
@@ -49,6 +51,16 @@ function RouteComponent() {
             gap: theme.spacing(2),
           }}
         >
+          <InputLabel>Nickname</InputLabel>
+          <OutlinedInput
+            placeholder="Nickname"
+            fullWidth
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+          />
+
+          <Divider />
+
           <InputLabel>ID</InputLabel>
           <OutlinedInput
             placeholder="ID"
