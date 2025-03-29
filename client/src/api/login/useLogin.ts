@@ -3,7 +3,7 @@ import { ApiBuilder } from "../apiBuilder";
 import { useSetAtom } from "jotai";
 import State from "../../states";
 
-export default function useJoin() {
+export default function useLogin() {
   const setLoggedInUser = useSetAtom(State.Auth.user);
 
   const login = useCallback(
