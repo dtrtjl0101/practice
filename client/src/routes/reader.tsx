@@ -2,9 +2,13 @@ import {
   Box,
   Button,
   Card,
+  CardActionArea,
+  CardActions,
   CardContent,
   CardHeader,
   Drawer,
+  Input,
+  Modal,
   Stack,
   Typography,
   useTheme,
@@ -36,6 +40,9 @@ function RouteComponent() {
   const [epubUrl, setEpubUrl] = useState<ArrayBuffer>(new ArrayBuffer());
   const [rendition, setRendition] = useState<Rendition | undefined>(undefined);
   const [openMemoDrawer, setOpenMemoDrawer] = useState(false);
+  const [selection, setSelection] = useState<string | null>(null);
+  const [openMemoCreationModal, setOpenMemoCreationModal] =
+    useState<boolean>(true);
   const previousMemosInPage = useRef<Memo[]>([]);
 
   const uploadEpub = useCallback(() => {
@@ -114,24 +121,20 @@ function RouteComponent() {
         <Button onClick={uploadEpub}>Upload EPUB</Button>
         <Button onClick={() => setOpenMemoDrawer(true)}>Open Memo</Button>
       </Box>
+      <MemoCreationModal
+        open={openMemoCreationModal}
+        onClose={() => setOpenMemoCreationModal(false)}
+        selection={selection}
+      />
       <Drawer
         anchor="right"
         open={openMemoDrawer}
         onClose={() => setOpenMemoDrawer(false)}
       >
         <Stack spacing={theme.spacing(2)} p={theme.spacing(2)} width={256}>
-          <Card>
-            <CardHeader title="Memo" />
-            <CardContent>
-              <Typography variant="body1">Memos in page</Typography>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader title="Memo" />
-            <CardContent>
-              <Typography variant="body1">Memos in page</Typography>
-            </CardContent>
-          </Card>
+          {memosInPage.map((memo) => (
+            <MemoCard key={memo.id} memo={memo} />
+          ))}
         </Stack>
       </Drawer>
       <ReactReader
@@ -144,8 +147,8 @@ function RouteComponent() {
           setLocation(epubcfi);
         }}
         handleTextSelected={(cfiRange, _contents) => {
-          // TODO: Add memo with button
-          setMemos((prev) => [...prev, { id: nanoid(), cfiRange }]);
+          setSelection(cfiRange);
+          // setMemos((prev) => [...prev, { id: nanoid(), cfiRange }]);
         }}
         showToc={false}
         getRendition={(newRendition) => {
@@ -168,4 +171,56 @@ function diffMemos(prev: Memo[], next: Memo[]): MemoDiff {
     added,
     removed,
   };
+}
+
+function MemoCard({ memo }: { memo: Memo }) {
+  return (
+    <Card>
+      <CardHeader title="Memo" />
+      <CardContent>
+        <Typography variant="body1">{memo.id}</Typography>
+      </CardContent>
+    </Card>
+  );
+}
+
+function MemoCreationModal({
+  open,
+  onClose,
+  selection,
+}: {
+  open: boolean;
+  onClose: () => void;
+  selection: string | null;
+}) {
+  const [content, setContent] = useState("");
+
+  if (!selection) {
+    return null;
+  }
+
+  return (
+    <Modal open={open} onClose={onClose}>
+      <Box
+        sx={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: 400,
+        }}
+      >
+        <Card>
+          <CardHeader title="Create Memo" />
+          <CardContent>
+            <Input type="textarea" multiline fullWidth />
+          </CardContent>
+          <CardActions>
+            <Button onClick={onClose}>Cancel</Button>
+            <Button onClick={onClose}>Create</Button>
+          </CardActions>
+        </Card>
+      </Box>
+    </Modal>
+  );
 }
