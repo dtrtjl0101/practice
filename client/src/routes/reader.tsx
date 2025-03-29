@@ -29,6 +29,7 @@ export const Route = createFileRoute("/reader")({
 type Memo = {
   id: string;
   cfiRange: string;
+  content: string;
 };
 type MemoDiff = {
   added: Memo[];
@@ -243,9 +244,9 @@ function diffMemos(prev: Memo[], next: Memo[]): MemoDiff {
 function MemoCard({ memo }: { memo: Memo }) {
   return (
     <Card>
-      <CardHeader title="Memo" />
+      <CardHeader title="Nickname" avatar="N" />
       <CardContent>
-        <Typography variant="body1">{memo.id}</Typography>
+        <Typography variant="body1">{memo.content}</Typography>
       </CardContent>
     </Card>
   );
@@ -308,6 +309,7 @@ function MemoCreationModal({
                 const newMemo: Memo = {
                   id: nanoid(),
                   cfiRange: selection.epubcfi,
+                  content,
                 };
                 addMemo(newMemo);
                 setContent("");
