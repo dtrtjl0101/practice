@@ -310,6 +310,7 @@ function MemoCreationModal({
                   cfiRange: selection.epubcfi,
                 };
                 addMemo(newMemo);
+                setContent("");
                 onClose();
               }}
             >
