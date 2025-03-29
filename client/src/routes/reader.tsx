@@ -1,12 +1,14 @@
+import { NoteAdd } from "@mui/icons-material";
 import {
   Box,
   Button,
   Card,
-  CardActionArea,
   CardActions,
   CardContent,
   CardHeader,
+  Divider,
   Drawer,
+  Fab,
   Input,
   Modal,
   Stack,
@@ -31,6 +33,12 @@ type MemoDiff = {
   added: Memo[];
   removed: Memo[];
 };
+type Selection = {
+  left: number;
+  top: number;
+  text: string;
+  epubcfi: string;
+};
 
 function RouteComponent() {
   const theme = useTheme();
@@ -40,9 +48,9 @@ function RouteComponent() {
   const [epubUrl, setEpubUrl] = useState<ArrayBuffer>(new ArrayBuffer());
   const [rendition, setRendition] = useState<Rendition | undefined>(undefined);
   const [openMemoDrawer, setOpenMemoDrawer] = useState(false);
-  const [selection, setSelection] = useState<string | null>(null);
+  const [selection, setSelection] = useState<Selection | null>(null);
   const [openMemoCreationModal, setOpenMemoCreationModal] =
-    useState<boolean>(true);
+    useState<boolean>(false);
   const previousMemosInPage = useRef<Memo[]>([]);
 
   const uploadEpub = useCallback(() => {
@@ -120,11 +128,30 @@ function RouteComponent() {
       >
         <Button onClick={uploadEpub}>Upload EPUB</Button>
         <Button onClick={() => setOpenMemoDrawer(true)}>Open Memo</Button>
+        {selection && (
+          <Fab
+            size="small"
+            sx={{
+              position: "absolute",
+              left: selection.left,
+              top: selection.top,
+              translate: "50% 50%",
+            }}
+            onClick={() => {
+              setOpenMemoCreationModal(true);
+            }}
+          >
+            <NoteAdd />
+          </Fab>
+        )}
       </Box>
       <MemoCreationModal
         open={openMemoCreationModal}
         onClose={() => setOpenMemoCreationModal(false)}
         selection={selection}
+        addMemo={(memo) => {
+          setMemos((prev) => [...prev, memo]);
+        }}
       />
       <Drawer
         anchor="right"
@@ -146,9 +173,34 @@ function RouteComponent() {
         locationChanged={(epubcfi: string) => {
           setLocation(epubcfi);
         }}
-        handleTextSelected={(cfiRange, _contents) => {
-          setSelection(cfiRange);
-          // setMemos((prev) => [...prev, { id: nanoid(), cfiRange }]);
+        handleTextSelected={(cfiRange, contents) => {
+          const window = contents.window;
+          const selection = window.getSelection();
+          if (!selection) {
+            setSelection(null);
+            return;
+          }
+
+          contents.document.addEventListener(
+            "selectionchange",
+            () => {
+              const selection = window.getSelection();
+              if (!selection || selection.isCollapsed) {
+                setSelection(null);
+              }
+            },
+            { once: true }
+          );
+
+          const boundingClientRect = selection
+            .getRangeAt(0)
+            .getBoundingClientRect();
+          setSelection({
+            left: boundingClientRect.left,
+            top: boundingClientRect.top,
+            text: selection.toString(),
+            epubcfi: cfiRange,
+          });
         }}
         showToc={false}
         getRendition={(newRendition) => {
@@ -188,10 +240,12 @@ function MemoCreationModal({
   open,
   onClose,
   selection,
+  addMemo,
 }: {
   open: boolean;
   onClose: () => void;
-  selection: string | null;
+  selection: Selection | null;
+  addMemo: (memo: Memo) => void;
 }) {
   const [content, setContent] = useState("");
 
@@ -213,11 +267,39 @@ function MemoCreationModal({
         <Card>
           <CardHeader title="Create Memo" />
           <CardContent>
-            <Input type="textarea" multiline fullWidth />
+            <Typography color="textSecondary" variant="body1">
+              {selection.text}
+            </Typography>
+            <Divider />
+            <Input
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              type="textarea"
+              multiline
+              fullWidth
+            />
           </CardContent>
           <CardActions>
-            <Button onClick={onClose}>Cancel</Button>
-            <Button onClick={onClose}>Create</Button>
+            <Button color="secondary" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                if (!selection) {
+                  return;
+                }
+                const newMemo: Memo = {
+                  id: nanoid(),
+                  cfiRange: selection.epubcfi,
+                };
+                addMemo(newMemo);
+                onClose();
+              }}
+            >
+              Create
+            </Button>
           </CardActions>
         </Card>
       </Box>
