@@ -1,5 +1,6 @@
-import { NoteAdd } from "@mui/icons-material";
+import { Note, NoteAdd } from "@mui/icons-material";
 import {
+  Badge,
   Box,
   Button,
   Card,
@@ -127,7 +128,21 @@ function RouteComponent() {
         }}
       >
         <Button onClick={uploadEpub}>Upload EPUB</Button>
-        <Button onClick={() => setOpenMemoDrawer(true)}>Open Memo</Button>
+        <Fab
+          size="small"
+          sx={{
+            position: "absolute",
+            right: theme.spacing(2),
+            top: theme.spacing(2),
+          }}
+          onClick={() => {
+            setOpenMemoDrawer(true);
+          }}
+        >
+          <Badge badgeContent={memosInPage.length} color="primary">
+            <Note />
+          </Badge>
+        </Fab>
         {selection && (
           <Fab
             size="small"
