@@ -2,8 +2,12 @@ package qwerty.chaekit.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.dto.PublisherInfoResponse;
+import qwerty.chaekit.dto.upload.EbookDownloadResponse;
+import qwerty.chaekit.dto.upload.EbookUploadRequest;
 import qwerty.chaekit.service.AdminService;
+import qwerty.chaekit.service.EbookFileService;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -11,6 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminController {
     private final AdminService adminService;
+    private final EbookFileService ebookFileService;
 
     @GetMapping("/publishers/pending")
     public List<PublisherInfoResponse> fetchPendingList() {
@@ -20,5 +25,15 @@ public class AdminController {
     @PostMapping("/publishers/{id}/accept")
     public Boolean acceptPublisher(@PathVariable Long id) {
         return adminService.acceptPublisher(id);
+    }
+
+    @PostMapping("/book/upload")
+    public String uploadFile(@ModelAttribute EbookUploadRequest request) throws IOException {
+        return ebookFileService.uploadEbookByAdmin(request);
+    }
+
+    @GetMapping("/book/{ebookId}")
+    public EbookDownloadResponse downloadFile(@PathVariable Long ebookId) {
+        return ebookFileService.getPresignedEbookUrl(ebookId);
     }
 }

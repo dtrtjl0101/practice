@@ -1,5 +1,6 @@
 package qwerty.chaekit.service;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,14 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AdminService {
     private final PublisherProfileRepository publisherProfileRepository;
+    @Getter
+    private Long adminId;
+
+    public void setAdminId(Long adminId) {
+        if (this.adminId == null) {
+            this.adminId = adminId;
+        }
+    }
 
     @Transactional(readOnly = true)
     public List<PublisherInfoResponse> getNotAcceptedPublishers() {
