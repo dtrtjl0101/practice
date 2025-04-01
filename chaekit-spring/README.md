@@ -15,7 +15,7 @@
    SHOW DATABASES;
    ```
    
-## 🔐 MySQL .env 설정
+## 🔐 .env 설정
 
 프로젝트 루트에 `.env` 파일을 생성하고 아래 내용을 채워주세요:
 

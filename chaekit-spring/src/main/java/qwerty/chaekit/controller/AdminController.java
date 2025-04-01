@@ -32,17 +32,17 @@ public class AdminController {
         return adminService.acceptPublisher(id);
     }
 
-    @PostMapping("/book/upload")
+    @PostMapping("/books/upload")
     public String uploadFile(@ModelAttribute EbookUploadRequest request) throws IOException {
         return ebookFileService.uploadEbookByAdmin(request);
     }
 
-    @GetMapping("/book/{ebookId}")
+    @GetMapping("/books/{ebookId}")
     public EbookDownloadResponse downloadFile(@PathVariable Long ebookId) {
         return ebookFileService.getPresignedEbookUrl(ebookId);
     }
 
-    @GetMapping("/book")
+    @GetMapping("/books")
     public EbookListResponse getBooks(Pageable pageable) {
         return ebookService.fetchEbookList(pageable);
     }
