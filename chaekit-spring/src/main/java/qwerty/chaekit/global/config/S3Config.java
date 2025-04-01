@@ -34,7 +34,7 @@ public class S3Config {
     }
 
     @Bean
-    public S3Presigner s3Presigner(S3Client s3Client) {
+    public S3Presigner s3Presigner() {
         AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKeyId, secretAccessKey);
         AwsCredentialsProvider provider = StaticCredentialsProvider.create(credentials);
 
