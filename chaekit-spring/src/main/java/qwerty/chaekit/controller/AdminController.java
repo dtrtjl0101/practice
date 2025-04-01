@@ -1,11 +1,15 @@
 package qwerty.chaekit.controller;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.dto.PublisherInfoResponse;
+import qwerty.chaekit.dto.ebook.EbookListResponse;
+import qwerty.chaekit.dto.ebook.EbookResponse;
 import qwerty.chaekit.dto.upload.EbookDownloadResponse;
 import qwerty.chaekit.dto.upload.EbookUploadRequest;
 import qwerty.chaekit.service.AdminService;
 import qwerty.chaekit.service.EbookFileService;
+import qwerty.chaekit.service.EbookService;
 
 import java.io.IOException;
 import java.util.List;
@@ -16,6 +20,7 @@ import java.util.List;
 public class AdminController {
     private final AdminService adminService;
     private final EbookFileService ebookFileService;
+    private final EbookService ebookService;
 
     @GetMapping("/publishers/pending")
     public List<PublisherInfoResponse> fetchPendingList() {
@@ -35,5 +40,10 @@ public class AdminController {
     @GetMapping("/book/{ebookId}")
     public EbookDownloadResponse downloadFile(@PathVariable Long ebookId) {
         return ebookFileService.getPresignedEbookUrl(ebookId);
+    }
+
+    @GetMapping("/book")
+    public EbookListResponse getBooks(Pageable pageable) {
+        return ebookService.fetchEbookList(pageable);
     }
 }

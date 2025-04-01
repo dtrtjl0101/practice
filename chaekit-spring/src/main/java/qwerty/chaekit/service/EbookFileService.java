@@ -2,6 +2,7 @@ package qwerty.chaekit.service;
 
 import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import qwerty.chaekit.domain.Member.Member;
 import qwerty.chaekit.domain.Member.ebook.Ebook;
@@ -52,6 +53,7 @@ public class EbookFileService {
         this.presignedUrlExpirationTime = awsProperties.presignedUrlExpirationTime();
     }
 
+    @Transactional
     public String uploadEbookByAdmin(EbookUploadRequest request) throws IOException {
         String title = request.title();
         String author = request.author();
@@ -131,6 +133,7 @@ public class EbookFileService {
         return false; // "mimetype"이 없거나, 내용이 맞지 않으면 EPUB 파일이 아님
     }
 
+    @Transactional
     public EbookDownloadResponse getPresignedEbookUrl(Long ebookId) {
         Ebook ebook = ebookRepository.findById(ebookId)
                 .orElseThrow(() -> new NotFoundException("EBOOK_NOT_FOUND", "해당 전자책이 존재하지 않습니다"));
