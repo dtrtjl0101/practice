@@ -15,7 +15,7 @@
    SHOW DATABASES;
    ```
    
-## 🔐 MySQL .env 설정
+## 🔐 .env 설정
 
 프로젝트 루트에 `.env` 파일을 생성하고 아래 내용을 채워주세요:
 
@@ -38,6 +38,15 @@ ADMIN_PASSWORD=0000
 
 # Spring
 SPRING_PROFILES_ACTIVE=dev
+
+# AWS
+EBOOK_BUCKET_NAME=chaekit
+AWS_S3_REGION=ap-northeast-2
+AWS_ACCESS_KEY_ID={S3 버킷 access key}
+SECRET_ACCESS_KEY={S3 버킷 secret key}
+EBOOK_MAX_FILE_SIZE=20971520
+PRESIGNED_URL_EXPIRATION_TIME=3600
+
 ```
 
 ### H2

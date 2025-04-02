@@ -3,7 +3,6 @@ package qwerty.chaekit.global.response.advice;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -34,15 +33,20 @@ import qwerty.chaekit.global.response.ApiSuccessResponse;
 public class ApiResponseWrapperAdvice implements ResponseBodyAdvice<Object> {
     private final ObjectMapper objectMapper;
     @Override
-    public boolean supports(@NotNull MethodParameter returnType, @NotNull Class<? extends HttpMessageConverter<?>> converterType) {
+    public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
         return true;
     }
 
     @Override
-    public Object beforeBodyWrite(Object body, @NotNull MethodParameter returnType,
-                                  @NotNull MediaType selectedContentType,
-                                  @NotNull Class<? extends HttpMessageConverter<?>> selectedConverterType,
-                                  @NotNull ServerHttpRequest request, @NotNull ServerHttpResponse response) {
+    public Object beforeBodyWrite(Object body, MethodParameter returnType,
+                                  MediaType selectedContentType,
+                                  Class<? extends HttpMessageConverter<?>> selectedConverterType,
+                                  ServerHttpRequest request, ServerHttpResponse response) {
+        String path = request.getURI().getPath();
+        if (path.startsWith("/v3/api-docs") || path.startsWith("/swagger-resources") || path.startsWith("/swagger-ui")) {
+            return body;
+        }
+
         if (body instanceof ApiSuccessResponse<?> || body instanceof ApiErrorResponse) {
             return body;
         }

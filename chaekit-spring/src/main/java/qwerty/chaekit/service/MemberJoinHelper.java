@@ -1,7 +1,6 @@
 package qwerty.chaekit.service;
 
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import qwerty.chaekit.domain.Member.Member;
@@ -15,7 +14,6 @@ public class MemberJoinHelper {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    @NotNull
     public Member saveMember(String username, String password, Role role) {
         validateUsername(username);
         return memberRepository.save(Member.builder()
