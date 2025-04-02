@@ -4,9 +4,9 @@ import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import qwerty.chaekit.domain.Member.Member;
 import qwerty.chaekit.domain.Member.ebook.Ebook;
 import qwerty.chaekit.domain.Member.ebook.EbookRepository;
+import qwerty.chaekit.domain.Member.publisher.PublisherProfile;
 import qwerty.chaekit.dto.upload.EbookDownloadResponse;
 import qwerty.chaekit.dto.upload.EbookUploadRequest;
 import qwerty.chaekit.global.exception.BadRequestException;
@@ -91,7 +91,7 @@ public class EbookFileService {
                 .description(description)
                 .size(file.getSize())
                 .fileKey(fileKey)
-                .publisher(em.getReference(Member.class, adminService.getAdminId()))
+                .publisher(em.getReference(PublisherProfile.class, adminService.getAdminPublisherId()))
                 .build();
         ebookRepository.save(ebook);
 

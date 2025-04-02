@@ -7,6 +7,7 @@ import java.util.Optional;
 
 public interface PublisherProfileRepository extends JpaRepository<PublisherProfile,Long> {
     Optional<PublisherProfile> findByMember_Id(Long id);
+    Optional<PublisherProfile> findByMember_Username(String username);
     boolean existsByPublisherName(String publisherName);
     List<PublisherProfile> findAllByAcceptedFalseOrderByCreatedAtDesc();
 }
