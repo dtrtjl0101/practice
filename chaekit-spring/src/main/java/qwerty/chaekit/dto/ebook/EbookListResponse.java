@@ -5,7 +5,7 @@ import java.util.List;
 
 @Builder
 public record EbookListResponse(
-        List<EbookResponse> ebooks,
+        List<EbookResponse> books,
         Integer currentPage,
         Long totalItems,
         Integer totalPages

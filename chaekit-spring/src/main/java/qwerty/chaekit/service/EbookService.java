@@ -17,7 +17,7 @@ public class EbookService {
         Page<EbookResponse> page = ebookRepository.findAll(pageable)
                 .map(EbookResponse::of);
         return EbookListResponse.builder()
-                .ebooks(page.getContent())
+                .books(page.getContent())
                 .currentPage(page.getNumber())
                 .totalItems(page.getTotalElements())
                 .totalPages(page.getTotalPages())
