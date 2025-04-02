@@ -8,8 +8,6 @@ import qwerty.chaekit.domain.Member.ebook.EbookRepository;
 import qwerty.chaekit.dto.ebook.EbookListResponse;
 import qwerty.chaekit.dto.ebook.EbookResponse;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class EbookService {

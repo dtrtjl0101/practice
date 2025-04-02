@@ -4,7 +4,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.dto.PublisherInfoResponse;
 import qwerty.chaekit.dto.ebook.EbookListResponse;
-import qwerty.chaekit.dto.ebook.EbookResponse;
 import qwerty.chaekit.dto.upload.EbookDownloadResponse;
 import qwerty.chaekit.dto.upload.EbookUploadRequest;
 import qwerty.chaekit.service.AdminService;
@@ -43,7 +42,7 @@ public class AdminController {
     }
 
     @GetMapping("/books")
-    public EbookListResponse getBooks(Pageable pageable) {
+    public EbookListResponse getBooks(@RequestBody Pageable pageable) {
         return ebookService.fetchEbookList(pageable);
     }
 }

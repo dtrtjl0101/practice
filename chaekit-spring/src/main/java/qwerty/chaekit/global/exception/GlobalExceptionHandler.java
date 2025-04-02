@@ -1,5 +1,6 @@
 package qwerty.chaekit.global.exception;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -12,6 +13,7 @@ import qwerty.chaekit.global.response.ApiErrorResponse;
 
 import java.util.stream.Collectors;
 
+@Hidden
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {

@@ -25,4 +25,18 @@ public class SwaggerConfig {
                         .version("1.0")
                         .description("책잇 API 명세서"));
     }
+
+    @Bean
+    public GroupedOpenApi hideLoginMemberParams() {
+        return GroupedOpenApi.builder()
+                .group("springdoc-hidden")
+                .addOperationCustomizer((operation, handlerMethod) -> {
+                    if (operation.getParameters() != null) {
+                        operation.getParameters().removeIf(param -> param.getName().equals("loginMember"));
+                    }
+                    return operation;
+                })
+                .pathsToMatch("/**") // 모든 경로에 대해 적용
+                .build();
+    }
 }

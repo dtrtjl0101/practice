@@ -42,6 +42,11 @@ public class ApiResponseWrapperAdvice implements ResponseBodyAdvice<Object> {
                                   MediaType selectedContentType,
                                   Class<? extends HttpMessageConverter<?>> selectedConverterType,
                                   ServerHttpRequest request, ServerHttpResponse response) {
+        String path = request.getURI().getPath();
+        if (path.startsWith("/v3/api-docs") || path.startsWith("/swagger-resources") || path.startsWith("/swagger-ui")) {
+            return body;
+        }
+
         if (body instanceof ApiSuccessResponse<?> || body instanceof ApiErrorResponse) {
             return body;
         }
