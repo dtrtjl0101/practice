@@ -13,7 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
-import qwerty.chaekit.domain.Member.enums.Role;
+import qwerty.chaekit.domain.member.enums.Role;
 import qwerty.chaekit.global.security.filter.CustomExceptionHandlingFilter;
 import qwerty.chaekit.global.security.filter.JwtFilter;
 import qwerty.chaekit.global.jwt.JwtUtil;

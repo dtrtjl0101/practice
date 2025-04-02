@@ -1,7 +1,7 @@
 package qwerty.chaekit.dto.ebook;
 
 import lombok.Builder;
-import qwerty.chaekit.domain.Member.ebook.Ebook;
+import qwerty.chaekit.domain.ebook.Ebook;
 
 @Builder
 public record EbookResponse(

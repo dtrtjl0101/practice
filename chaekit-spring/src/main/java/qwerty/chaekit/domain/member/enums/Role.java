@@ -1,4 +1,4 @@
-package qwerty.chaekit.domain.Member.enums;
+package qwerty.chaekit.domain.member.enums;
 
 import java.util.Arrays;
 

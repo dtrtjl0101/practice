@@ -1,9 +1,9 @@
-package qwerty.chaekit.domain.Member;
+package qwerty.chaekit.domain.member;
 
 import jakarta.persistence.*;
 import lombok.*;
 import qwerty.chaekit.domain.BaseEntity;
-import qwerty.chaekit.domain.Member.enums.Role;
+import qwerty.chaekit.domain.member.enums.Role;
 
 @Entity
 @Getter

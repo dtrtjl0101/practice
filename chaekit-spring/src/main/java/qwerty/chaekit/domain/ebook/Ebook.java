@@ -1,4 +1,4 @@
-package qwerty.chaekit.domain.Member.ebook;
+package qwerty.chaekit.domain.ebook;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import qwerty.chaekit.domain.BaseEntity;
-import qwerty.chaekit.domain.Member.publisher.PublisherProfile;
+import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 
 @Entity
 @Getter

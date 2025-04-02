@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import qwerty.chaekit.domain.Member.ebook.EbookRepository;
+import qwerty.chaekit.domain.ebook.EbookRepository;
 import qwerty.chaekit.dto.ebook.EbookListResponse;
 import qwerty.chaekit.dto.ebook.EbookResponse;
 
