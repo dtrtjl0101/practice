@@ -24,7 +24,6 @@ import java.util.Optional;
 public class AdminInitializer implements ApplicationRunner {
     private final AdminProperties adminProperties;
     private final MemberJoinHelper memberJoinHelper;
-    private final MemberRepository memberRepository;
     private final PublisherProfileRepository publisherProfileRepository;
     private final AdminService adminService;
 
