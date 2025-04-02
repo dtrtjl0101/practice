@@ -16,6 +16,7 @@ import qwerty.chaekit.dto.highlight.HighlightFetchResponse;
 import qwerty.chaekit.dto.highlight.HighlightListResponse;
 import qwerty.chaekit.dto.highlight.HighlightPostRequest;
 import qwerty.chaekit.dto.highlight.HighlightPostResponse;
+import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.LoginMember;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -69,6 +70,9 @@ public class HighlightService {
             jpaQuery.where(highlight.book.id.eq(bookId));
         }
         if (spine != null) {
+            if(bookId == null) {
+                throw new BadRequestException("BOOK_ID_REQUIRED", "책 ID가 필요합니다.");
+            }
             jpaQuery.where(highlight.spine.eq(spine));
         }
         if (me == null || me) {
