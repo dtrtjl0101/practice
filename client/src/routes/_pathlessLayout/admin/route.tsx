@@ -1,4 +1,4 @@
-import { HomeFilled, Home, Book, Menu } from "@mui/icons-material";
+import { HomeFilled, Home, Book, Menu, Upload } from "@mui/icons-material";
 import {
   Box,
   Container,
@@ -68,6 +68,18 @@ function SideMenu() {
                   <Book />
                 </ListItemIcon>
                 <ListItemText primary={"Book"} />
+              </ListItemButton>
+            );
+          }}
+        </LinkListItem>
+        <LinkListItem disablePadding to="/admin/uploadBook">
+          {({ isActive }) => {
+            return (
+              <ListItemButton selected={isActive}>
+                <ListItemIcon>
+                  <Upload />
+                </ListItemIcon>
+                <ListItemText primary={"Upload"} />
               </ListItemButton>
             );
           }}
