@@ -35,3 +35,5 @@ aws:
   ebook-max-file-size: ${EBOOK_MAX_FILE_SIZE}
   s3-region: ${AWS_S3_REGION}
   presigned-url-expiration-time: ${PRESIGNED_URL_EXPIRATION_TIME}
+cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
