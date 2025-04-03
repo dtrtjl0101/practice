@@ -34,7 +34,12 @@ function RouteComponent() {
         alert("Please select a file to upload.");
         return;
       }
-      await uploadBook({ title, file, description, author });
+      const response = await uploadBook({ title, file, description, author });
+      if (response?.isSuccessful) {
+        setTitle("");
+        setAuthor("");
+        setDescription("");
+      }
     };
     inputElement.click();
   };
