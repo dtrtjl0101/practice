@@ -1,4 +1,6 @@
 import { ENV } from "../env";
+import { AuthState } from "../states/auth";
+import { BookMetadata } from "../types/book";
 import { Role } from "../types/role";
 
 export type ApiMethod = "GET" | "POST" | "PUT" | "DELETE";
@@ -19,15 +21,7 @@ type ApiSpec = {
         username: string;
         password: string;
       };
-      response: BaseResponseBody<
-        {
-          id: number;
-          nickname: string;
-          username: string;
-          role: Role;
-        },
-        undefined
-      >;
+      response: BaseResponseBody<AuthState.LoggedInUser, undefined>;
     };
     GET: {
       request: undefined;
@@ -71,6 +65,75 @@ type ApiSpec = {
       response: undefined;
     };
   };
+  "admin/books/upload": {
+    POST: {
+      request: {
+        title: string;
+        file: File;
+        description: string;
+        author: string;
+      };
+      response: BaseResponseBody<string, undefined>;
+    };
+    GET: {
+      request: undefined;
+      response: undefined;
+    };
+    PUT: {
+      request: undefined;
+      response: undefined;
+    };
+    DELETE: {
+      request: undefined;
+      response: undefined;
+    };
+  };
+  "admin/books": {
+    POST: {
+      request: undefined;
+      response: undefined;
+    };
+    GET: {
+      request: undefined;
+      response: BaseResponseBody<
+        {
+          books: BookMetadata[];
+        },
+        undefined
+      >;
+    };
+    PUT: {
+      request: undefined;
+      response: undefined;
+    };
+    DELETE: {
+      request: undefined;
+      response: undefined;
+    };
+  };
+  "admin/books/{id}": {
+    POST: {
+      request: undefined;
+      response: undefined;
+    };
+    GET: {
+      request: undefined;
+      response: BaseResponseBody<
+        {
+          presignedUrl: string;
+        },
+        undefined
+      >;
+    };
+    PUT: {
+      request: undefined;
+      response: undefined;
+    };
+    DELETE: {
+      request: undefined;
+      response: undefined;
+    };
+  };
 };
 
 export type ApiPath = keyof ApiSpec;
@@ -94,7 +157,7 @@ export class ApiBuilder<
   private _method: ApiMethod = "GET";
   private _body: Body | undefined = undefined;
 
-  constructor(method: ApiMethod, path: ApiPath) {
+  constructor(method: ApiMethod, path: string) {
     this._path = path;
     this._method = method;
   }
@@ -110,6 +173,19 @@ export class ApiBuilder<
     }
 
     this._body = body;
+    return this;
+  }
+
+  public formData(body: Body) {
+    const formData = new FormData();
+    for (const key in body) {
+      if (body[key] instanceof File) {
+        formData.append(key, body[key]);
+      } else {
+        formData.append(key, JSON.stringify(body[key]));
+      }
+    }
+    this._body = formData as unknown as Body;
     return this;
   }
 
