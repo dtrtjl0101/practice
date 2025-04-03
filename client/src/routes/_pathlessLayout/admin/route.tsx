@@ -25,7 +25,7 @@ function RouteComponent() {
   return (
     <Box sx={{ display: "flex" }}>
       <SideMenu />
-      <Container sx={{ margin: 2 }}>
+      <Container sx={{ margin: 2, marginX: "auto" }}>
         <Outlet />
       </Container>
     </Box>
