@@ -9,7 +9,10 @@ export default function useGetBooks() {
   const getBooks = useCallback(async () => {
     if (!user) {
       console.error("User is not logged in");
-      return;
+      return {
+        isSuccessful: false,
+        error: "User is not logged in",
+      } as const;
     }
 
     return new ApiBuilder<"GET", "admin/books">("GET", "admin/books")
