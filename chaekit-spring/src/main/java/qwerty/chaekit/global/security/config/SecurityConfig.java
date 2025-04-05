@@ -1,5 +1,6 @@
 package qwerty.chaekit.global.security.config;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +14,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
-import qwerty.chaekit.domain.member.enums.Role;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
+import qwerty.chaekit.domain.Member.enums.Role;
+import qwerty.chaekit.global.properties.CorsProperties;
 import qwerty.chaekit.global.security.filter.CustomExceptionHandlingFilter;
 import qwerty.chaekit.global.security.filter.JwtFilter;
 import qwerty.chaekit.global.jwt.JwtUtil;
@@ -23,10 +29,15 @@ import qwerty.chaekit.global.security.handler.CustomAuthenticationEntryPoint;
 import qwerty.chaekit.global.util.SecurityRequestReader;
 import qwerty.chaekit.global.util.SecurityResponseSender;
 
+import java.util.Collections;
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+    private final CorsProperties corsProperties;
+
     private final JwtUtil jwtUtil;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
     private final CustomAccessDeniedHandler accessDeniedHandler;
@@ -65,6 +76,21 @@ public class SecurityConfig {
                                            CustomExceptionHandlingFilter exceptionHandlingFilter) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable);
+
+        http.cors(cors -> cors
+                .configurationSource(new CorsConfigurationSource() {
+                    @Override
+                    public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+                        CorsConfiguration config = new CorsConfiguration();
+
+                        config.setAllowedOrigins(List.of(corsProperties.allowedOrigins().split(",")));
+                        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                        config.setAllowedHeaders(List.of("*"));
+
+                        config.setExposedHeaders(Collections.singletonList("Authorization"));
+                        return config;
+                    }
+                }));
 
         http
                 .formLogin(AbstractHttpConfigurer::disable);

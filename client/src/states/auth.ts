@@ -7,6 +7,7 @@ export namespace AuthState {
     nickname: string;
     username: string;
     role: Role;
+    accessToken: string;
   };
   export const user = atom<LoggedInUser | undefined>();
 }
