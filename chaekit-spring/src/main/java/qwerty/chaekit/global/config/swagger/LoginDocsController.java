@@ -16,6 +16,7 @@ public class LoginDocsController {
     @Operation(summary = "로그인", description = "Spring Security가 처리하는 로그인 API")
     @PostMapping
     public LoginResponse login(@RequestBody LoginRequest loginRequest) {
-        return null;
+        // This endpoint is only for Swagger documentation and should not be invoked.
+        throw new UnsupportedOperationException("This endpoint is not implemented. It is only for Swagger documentation.");
     }
 }
