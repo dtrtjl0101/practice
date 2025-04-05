@@ -17,11 +17,13 @@ import qwerty.chaekit.dto.highlight.HighlightListResponse;
 import qwerty.chaekit.dto.highlight.HighlightPostRequest;
 import qwerty.chaekit.dto.highlight.HighlightPostResponse;
 import qwerty.chaekit.global.exception.BadRequestException;
+import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.LoginMember;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -98,6 +100,21 @@ public class HighlightService {
                 .totalItems(total)
                 .totalPages((int) Math.ceil((double) total / pageable.getPageSize()))
                 .build();
+    }
+
+    public HighlightPostResponse updateHighlight(LoginMember loginMember, Long id, HighlightPostRequest request) {
+        Highlight highlight = highlightRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("HIGHLIGHT_NOT_FOUND", "해당 하이라이트가 없습니다."));
+        if(!Objects.equals(loginMember.memberId(), highlight.getAuthor().getMember().getId())) {
+            throw new ForbiddenException("HIGHLIGHT_NOT_YOURS", "해당 하이라이트에 대한 권한이 없습니다.");
+        }
+        highlight.updateMemo(request.memo());
+
+        // TODO: activityId 업데이트 로직 추가(활동에 공개하기)
+        // 기존 activityId가 null일때만 activityId 변경 가능.
+        //
+
+        return HighlightPostResponse.of(highlightRepository.save(highlight));
     }
 
 }

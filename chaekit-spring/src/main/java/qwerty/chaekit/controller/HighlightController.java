@@ -31,4 +31,9 @@ public class HighlightController {
     public HighlightPostResponse createHighlight(@Login LoginMember loginMember, @RequestBody HighlightPostRequest request) {
         return highlightService.createHighlight(loginMember, request);
     }
+
+    @PutMapping("/{id}")
+    public HighlightPostResponse updateHighlight(@Login LoginMember loginMember, @PathVariable Long id, @RequestBody HighlightPostRequest request) {
+        return highlightService.updateHighlight(loginMember, id, request);
+    }
 }
