@@ -1,6 +1,7 @@
 package qwerty.chaekit.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.dto.group.*;
@@ -21,7 +22,7 @@ public class GroupController {
     }
 
     @GetMapping
-    public GroupListResponse getAllGroups(Pageable pageable) {
+    public GroupListResponse getAllGroups(@ParameterObject Pageable pageable) {
         return groupService.fetchGroupList(pageable);
     }
 
