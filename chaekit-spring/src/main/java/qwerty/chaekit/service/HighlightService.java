@@ -12,10 +12,7 @@ import qwerty.chaekit.domain.highlight.HighlightRepository;
 import qwerty.chaekit.domain.highlight.QHighlight;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
-import qwerty.chaekit.dto.highlight.HighlightFetchResponse;
-import qwerty.chaekit.dto.highlight.HighlightListResponse;
-import qwerty.chaekit.dto.highlight.HighlightPostRequest;
-import qwerty.chaekit.dto.highlight.HighlightPostResponse;
+import qwerty.chaekit.dto.highlight.*;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
@@ -102,7 +99,7 @@ public class HighlightService {
                 .build();
     }
 
-    public HighlightPostResponse updateHighlight(LoginMember loginMember, Long id, HighlightPostRequest request) {
+    public HighlightPostResponse updateHighlight(LoginMember loginMember, Long id, HighlightPutRequest request) {
         Highlight highlight = highlightRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("HIGHLIGHT_NOT_FOUND", "해당 하이라이트가 없습니다."));
         if(!Objects.equals(loginMember.memberId(), highlight.getAuthor().getMember().getId())) {
