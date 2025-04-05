@@ -27,7 +27,6 @@ public class ReadingGroup extends BaseEntity {
     private UserProfile groupLeader;
 
     @OneToMany(mappedBy = "readingGroup", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Column(nullable = false)
     private List<GroupTag> tags = new ArrayList<>();
 
     @Column(nullable = false)
