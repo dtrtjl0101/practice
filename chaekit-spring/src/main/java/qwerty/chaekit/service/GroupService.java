@@ -9,10 +9,7 @@ import qwerty.chaekit.domain.group.GroupRepository;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
-import qwerty.chaekit.dto.group.GroupFetchResponse;
-import qwerty.chaekit.dto.group.GroupListResponse;
-import qwerty.chaekit.dto.group.GroupPostRequest;
-import qwerty.chaekit.dto.group.GroupPostResponse;
+import qwerty.chaekit.dto.group.*;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.LoginMember;
@@ -57,7 +54,7 @@ public class GroupService {
     }
 
     @Transactional
-    public GroupPostResponse updateGroup(LoginMember loginMember, long groupId, GroupPostRequest request) {
+    public GroupPostResponse updateGroup(LoginMember loginMember, long groupId, GroupPutRequest request) {
         UserProfile userProfile = userProfileRepository.findByMember_Id(loginMember.memberId())
                 .orElseThrow(() -> new NotFoundException("USER_NOT_FOUND", "일반 회원이 아니거나 존재하지 않습니다."));
 

@@ -3,10 +3,7 @@ package qwerty.chaekit.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-import qwerty.chaekit.dto.group.GroupFetchResponse;
-import qwerty.chaekit.dto.group.GroupListResponse;
-import qwerty.chaekit.dto.group.GroupPostRequest;
-import qwerty.chaekit.dto.group.GroupPostResponse;
+import qwerty.chaekit.dto.group.*;
 import qwerty.chaekit.global.security.resolver.Login;
 import qwerty.chaekit.global.security.resolver.LoginMember;
 import qwerty.chaekit.service.GroupService;
@@ -32,4 +29,13 @@ public class GroupController {
     public GroupFetchResponse getGroup(@PathVariable long groupId) {
         return groupService.fetchGroup(groupId);
     }
+
+    @PutMapping("/{groupId}")
+    public GroupPostResponse updateGroup(@Login LoginMember loginMember,
+                                         @PathVariable long groupId,
+                                         @RequestBody GroupPutRequest request) {
+        return groupService.updateGroup(loginMember, groupId, request);
+    }
+
+
 }
