@@ -3,9 +3,9 @@ package qwerty.chaekit.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import qwerty.chaekit.domain.Member.Member;
-import qwerty.chaekit.domain.Member.enums.Role;
-import qwerty.chaekit.domain.Member.MemberRepository;
+import qwerty.chaekit.domain.member.Member;
+import qwerty.chaekit.domain.member.enums.Role;
+import qwerty.chaekit.domain.member.MemberRepository;
 import qwerty.chaekit.global.exception.BadRequestException;
 
 @Service

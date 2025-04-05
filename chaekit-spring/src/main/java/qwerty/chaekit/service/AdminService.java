@@ -2,10 +2,11 @@ package qwerty.chaekit.service;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import qwerty.chaekit.domain.Member.publisher.PublisherProfile;
-import qwerty.chaekit.domain.Member.publisher.PublisherProfileRepository;
+import qwerty.chaekit.domain.member.publisher.PublisherProfile;
+import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
 import qwerty.chaekit.dto.PublisherInfoResponse;
 import qwerty.chaekit.global.exception.NotFoundException;
 
@@ -17,13 +18,8 @@ import java.util.Optional;
 public class AdminService {
     private final PublisherProfileRepository publisherProfileRepository;
     @Getter
-    private Long adminId;
-
-    public void setAdminId(Long adminId) {
-        if (this.adminId == null) {
-            this.adminId = adminId;
-        }
-    }
+    @Setter
+    private Long adminPublisherId;
 
     @Transactional(readOnly = true)
     public List<PublisherInfoResponse> getNotAcceptedPublishers() {

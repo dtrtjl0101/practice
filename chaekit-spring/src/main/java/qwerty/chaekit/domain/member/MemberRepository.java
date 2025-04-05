@@ -1,4 +1,4 @@
-package qwerty.chaekit.domain.Member;
+package qwerty.chaekit.domain.member;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

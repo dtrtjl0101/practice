@@ -1,4 +1,4 @@
-package qwerty.chaekit.domain.Member.ebook;
+package qwerty.chaekit.domain.ebook;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import qwerty.chaekit.domain.BaseEntity;
-import qwerty.chaekit.domain.Member.Member;
+import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 
 @Entity
 @Getter
@@ -31,10 +31,10 @@ public class Ebook extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "publisher_id")
-    private Member publisher;
+    private PublisherProfile publisher;
 
     @Builder
-    public Ebook(String title, String author, String description, long size, String fileKey, Member publisher) {
+    public Ebook(String title, String author, String description, long size, String fileKey, PublisherProfile publisher) {
         this.title = title;
         this.author = author;
         this.description = description;

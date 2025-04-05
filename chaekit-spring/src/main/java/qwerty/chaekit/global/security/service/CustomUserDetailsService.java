@@ -5,9 +5,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import qwerty.chaekit.domain.Member.Member;
+import qwerty.chaekit.domain.member.Member;
 import qwerty.chaekit.global.security.model.CustomUserDetails;
-import qwerty.chaekit.domain.Member.MemberRepository;
+import qwerty.chaekit.domain.member.MemberRepository;
 
 @Service
 @RequiredArgsConstructor

@@ -1,7 +1,7 @@
 package qwerty.chaekit.dto;
 
 import lombok.Builder;
-import qwerty.chaekit.domain.Member.publisher.PublisherProfile;
+import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 
 import java.time.LocalDateTime;
 

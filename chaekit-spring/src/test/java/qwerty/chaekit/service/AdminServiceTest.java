@@ -6,8 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import qwerty.chaekit.domain.Member.publisher.PublisherProfile;
-import qwerty.chaekit.domain.Member.publisher.PublisherProfileRepository;
+import qwerty.chaekit.domain.member.publisher.PublisherProfile;
+import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
 import qwerty.chaekit.global.exception.NotFoundException;
 
 import java.util.Optional;

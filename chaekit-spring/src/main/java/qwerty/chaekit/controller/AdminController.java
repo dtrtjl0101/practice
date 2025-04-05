@@ -42,7 +42,7 @@ public class AdminController {
     }
 
     @GetMapping("/books")
-    public EbookListResponse getBooks(@RequestBody Pageable pageable) {
+    public EbookListResponse getBooks(Pageable pageable) {
         return ebookService.fetchEbookList(pageable);
     }
 }

@@ -1,4 +1,4 @@
-package qwerty.chaekit.domain.Member.publisher;
+package qwerty.chaekit.domain.member.user;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -6,12 +6,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import qwerty.chaekit.domain.BaseEntity;
-import qwerty.chaekit.domain.Member.Member;
+import qwerty.chaekit.domain.member.Member;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class PublisherProfile extends BaseEntity {
+public class UserProfile extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,18 +21,11 @@ public class PublisherProfile extends BaseEntity {
     private Member member;
 
     @Column(nullable = false)
-    private String publisherName;
-
-    @Column(nullable = false)
-    private boolean accepted = false;
+    private String nickname;
 
     @Builder
-    public PublisherProfile(Member member, String publisherName) {
+    public UserProfile(Member member, String nickname) {
         this.member = member;
-        this.publisherName = publisherName;
-    }
-
-    public void acceptPublisher() {
-        accepted = true;
+        this.nickname = nickname;
     }
 }
