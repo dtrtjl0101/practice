@@ -1,0 +1,350 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Chaekit API",
+    "description": "책잇 API 명세서",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "http://ec2-3-37-230-34.ap-northeast-2.compute.amazonaws.com:8080",
+      "description": "Generated server url"
+    }
+  ],
+  "paths": {
+    "/api/users/join": {
+      "post": {
+        "tags": ["user-controller"],
+        "operationId": "userJoin",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UserJoinRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/UserJoinResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/publishers/join": {
+      "post": {
+        "tags": ["publisher-controller"],
+        "operationId": "publisherJoin",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PublisherJoinRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublisherJoinResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/publishers/{id}/accept": {
+      "post": {
+        "tags": ["admin-controller"],
+        "operationId": "acceptPublisher",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "*/*": { "schema": { "type": "boolean" } } }
+          }
+        }
+      }
+    },
+    "/api/admin/books/upload": {
+      "post": {
+        "tags": ["admin-controller"],
+        "operationId": "uploadFile",
+        "parameters": [
+          {
+            "name": "request",
+            "in": "query",
+            "required": true,
+            "schema": { "$ref": "#/components/schemas/EbookUploadRequest" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "*/*": { "schema": { "type": "string" } } }
+          }
+        }
+      }
+    },
+    "/api": {
+      "get": {
+        "tags": ["main-controller"],
+        "operationId": "mainApi",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "*/*": { "schema": { "type": "string" } } }
+          }
+        }
+      }
+    },
+    "/api/users/me": {
+      "get": {
+        "tags": ["user-controller"],
+        "operationId": "userInfo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/UserMemberResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/publishers/me": {
+      "get": {
+        "tags": ["publisher-controller"],
+        "operationId": "publisherInfo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublisherMemberResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/publishers/pending": {
+      "get": {
+        "tags": ["admin-controller"],
+        "operationId": "fetchPendingList",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PublisherInfoResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/books": {
+      "get": {
+        "tags": ["admin-controller"],
+        "operationId": "getBooks",
+        "parameters": [
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": { "$ref": "#/components/schemas/Pageable" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/EbookListResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/books/{ebookId}": {
+      "get": {
+        "tags": ["admin-controller"],
+        "operationId": "downloadFile",
+        "parameters": [
+          {
+            "name": "ebookId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EbookDownloadResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UserJoinRequest": {
+        "required": ["nickname", "password", "username"],
+        "type": "object",
+        "properties": {
+          "nickname": { "type": "string" },
+          "username": { "type": "string" },
+          "password": { "type": "string" }
+        }
+      },
+      "UserJoinResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "accessToken": { "type": "string" },
+          "nickname": { "type": "string" },
+          "username": { "type": "string" },
+          "role": { "type": "string" }
+        }
+      },
+      "PublisherJoinRequest": {
+        "required": ["password", "publisherName", "username"],
+        "type": "object",
+        "properties": {
+          "publisherName": { "type": "string" },
+          "username": { "type": "string" },
+          "password": { "type": "string" }
+        }
+      },
+      "PublisherJoinResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "accessToken": { "type": "string" },
+          "publisherName": { "type": "string" },
+          "username": { "type": "string" },
+          "role": { "type": "string" },
+          "isAccepted": { "type": "boolean" }
+        }
+      },
+      "EbookUploadRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "책 제목",
+            "example": "이상한 나라의 앨리스"
+          },
+          "author": {
+            "type": "string",
+            "description": "책 저자",
+            "example": "루이스 캐럴"
+          },
+          "description": {
+            "type": "string",
+            "description": "책 설명",
+            "example": "《이상한 나라의 앨리스》는 영국의 수학자이자 작가인 찰스 루트위지 도지슨이 루이스 캐럴이라는 필명으로 1865년에 발표한 소설이다."
+          },
+          "file": { "type": "string", "format": "binary" }
+        }
+      },
+      "UserMemberResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "nickname": { "type": "string" },
+          "username": { "type": "string" },
+          "role": { "type": "string" }
+        }
+      },
+      "PublisherMemberResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "publisherName": { "type": "string" },
+          "username": { "type": "string" },
+          "role": { "type": "string" },
+          "isAccepted": { "type": "boolean" }
+        }
+      },
+      "PublisherInfoResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "publisherName": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Pageable": {
+        "type": "object",
+        "properties": {
+          "page": { "minimum": 0, "type": "integer", "format": "int32" },
+          "size": { "minimum": 1, "type": "integer", "format": "int32" },
+          "sort": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "EbookListResponse": {
+        "type": "object",
+        "properties": {
+          "books": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/EbookResponse" }
+          },
+          "currentPage": { "type": "integer", "format": "int32" },
+          "totalItems": { "type": "integer", "format": "int64" },
+          "totalPages": { "type": "integer", "format": "int32" }
+        }
+      },
+      "EbookResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "title": { "type": "string" },
+          "author": { "type": "string" },
+          "description": { "type": "string" },
+          "size": { "type": "integer", "format": "int64" }
+        }
+      },
+      "EbookDownloadResponse": {
+        "type": "object",
+        "properties": { "presignedUrl": { "type": "string" } }
+      }
+    }
+  }
+}
