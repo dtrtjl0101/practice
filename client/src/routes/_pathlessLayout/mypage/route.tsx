@@ -1,9 +1,9 @@
-import { Home, Book, Upload } from "@mui/icons-material";
 import { Box, Container } from "@mui/material";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import SideNavigationBar from "../../../component/SideNavigatorBar";
+import { Group, Home } from "@mui/icons-material";
 
-export const Route = createFileRoute("/_pathlessLayout/admin")({
+export const Route = createFileRoute("/_pathlessLayout/mypage")({
   component: RouteComponent,
 });
 
@@ -13,13 +13,12 @@ function RouteComponent() {
       <SideNavigationBar
         items={[
           {
-            to: "/admin",
+            to: "/mypage",
             icon: <Home />,
             label: "Home",
             disableShowActive: true,
           },
-          { to: "/admin/books", icon: <Book />, label: "Books" },
-          { to: "/admin/uploadBook", icon: <Upload />, label: "Upload" },
+          { to: "/mypage/groups", icon: <Group />, label: "Groups" },
         ]}
       />
       <Container sx={{ margin: 2, marginX: "auto" }}>
