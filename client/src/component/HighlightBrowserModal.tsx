@@ -3,6 +3,7 @@ import {
   Button,
   CardActions,
   Container,
+  Dialog,
   Divider,
   Grid2,
   IconButton,
@@ -48,6 +49,7 @@ export default function HighlightBrowserModal(props: {
   const [selectedHighlight, setSelectedHighlight] = useState<Highlight | null>(
     null
   );
+  const [openFilterDialog, setOpenFilterDialog] = useState(false);
 
   const onHighlightClick = (highlight: Highlight) => {
     setSelectedHighlight(highlight);
@@ -66,62 +68,116 @@ export default function HighlightBrowserModal(props: {
 
   return (
     <Modal open={open} onClose={onClose}>
-      <Box
-        sx={{
-          width: "100vw",
-          height: "100vh",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Container sx={{ height: "65vh" }}>
-          <Paper sx={{ width: "100%", height: "100%", padding: 2 }}>
-            <Grid2 container spacing={1} height={"100%"}>
-              <Grid2 size={4} sx={{ height: "100%" }}>
-                <Paper
-                  elevation={2}
-                  sx={{
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
-                  <Stack spacing={1} sx={{ flexGrow: 1, overflow: "hidden" }}>
-                    <Box
-                      padding={1}
-                      sx={{ display: "flex", justifyContent: "flex-end" }}
-                    >
-                      <IconButton>
-                        <Sort />
-                      </IconButton>
-                    </Box>
-                    <Divider />
-                    <List sx={{ flexGrow: 1, overflowY: "auto" }}>
-                      {highlights.map((highlight, index) => (
-                        <HighlightListItem
-                          key={index}
-                          highlight={highlight}
-                          onClick={onHighlightClick}
-                        />
-                      ))}
-                    </List>
-                  </Stack>
-                </Paper>
+      <>
+        {/* TODO: 용도 구체화 후 UI 개선, 쿼리에 사용용 */}
+        <Dialog
+          open={openFilterDialog}
+          onClose={() => setOpenFilterDialog(false)}
+        >
+          <Box sx={{ padding: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              필터 선택
+            </Typography>
+            <List>
+              <ListItemButton
+                onClick={() => {
+                  console.log("내 모든 하이라이트");
+                  setOpenFilterDialog(false);
+                }}
+              >
+                <ListItemText primary="내 모든 하이라이트" />
+              </ListItemButton>
+              <ListItemButton
+                onClick={() => {
+                  console.log("특정 책의 내 하이라이트 목록");
+                  setOpenFilterDialog(false);
+                }}
+              >
+                <ListItemText primary="특정 책의 내 하이라이트 목록" />
+              </ListItemButton>
+              <ListItemButton
+                onClick={() => {
+                  console.log("특정 활동에서 공개된 내 하이라이트 목록");
+                  setOpenFilterDialog(false);
+                }}
+              >
+                <ListItemText primary="특정 활동에서 공개된 내 하이라이트 목록" />
+              </ListItemButton>
+              <ListItemButton
+                onClick={() => {
+                  console.log("특정 활동에서 공개된 모든 하이라이트 조회");
+                  setOpenFilterDialog(false);
+                }}
+              >
+                <ListItemText primary="특정 활동에서 공개된 모든 하이라이트 조회" />
+              </ListItemButton>
+            </List>
+            <Box
+              sx={{ display: "flex", justifyContent: "flex-end", marginTop: 2 }}
+            >
+              <Button variant="text" onClick={() => setOpenFilterDialog(false)}>
+                닫기
+              </Button>
+            </Box>
+          </Box>
+        </Dialog>
+        <Box
+          sx={{
+            width: "100vw",
+            height: "100vh",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Container sx={{ height: "65vh" }}>
+            <Paper sx={{ width: "100%", height: "100%", padding: 2 }}>
+              <Grid2 container spacing={1} height={"100%"}>
+                <Grid2 size={4} sx={{ height: "100%" }}>
+                  <Paper
+                    elevation={2}
+                    sx={{
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
+                  >
+                    <Stack spacing={1} sx={{ flexGrow: 1, overflow: "hidden" }}>
+                      <Box
+                        padding={1}
+                        sx={{ display: "flex", justifyContent: "flex-end" }}
+                      >
+                        <IconButton onClick={() => setOpenFilterDialog(true)}>
+                          <Sort />
+                        </IconButton>
+                      </Box>
+                      <Divider />
+                      <List sx={{ flexGrow: 1, overflowY: "auto" }}>
+                        {highlights.map((highlight, index) => (
+                          <HighlightListItem
+                            key={index}
+                            highlight={highlight}
+                            onClick={onHighlightClick}
+                          />
+                        ))}
+                      </List>
+                    </Stack>
+                  </Paper>
+                </Grid2>
+                {selectedHighlight ? (
+                  <HighlightViewer
+                    highlight={selectedHighlight}
+                    onClose={onClose}
+                    onHighlightUseButtonClick={onHighlightUseButtonClick}
+                  />
+                ) : (
+                  <HighlightViewerPlaceholder />
+                )}
               </Grid2>
-              {selectedHighlight ? (
-                <HighlightViewer
-                  highlight={selectedHighlight}
-                  onClose={onClose}
-                  onHighlightUseButtonClick={onHighlightUseButtonClick}
-                />
-              ) : (
-                <HighlightViewerPlaceholder />
-              )}
-            </Grid2>
-          </Paper>
-        </Container>
-      </Box>
+            </Paper>
+          </Container>
+        </Box>
+      </>
     </Modal>
   );
 }
