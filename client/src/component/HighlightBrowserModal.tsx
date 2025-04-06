@@ -1,0 +1,244 @@
+import {
+  Box,
+  Button,
+  CardActions,
+  Container,
+  Divider,
+  Grid2,
+  IconButton,
+  List,
+  ListItemButton,
+  ListItemText,
+  Modal,
+  Paper,
+  Stack,
+  Typography,
+} from "@mui/material";
+import { Highlight } from "../types/highlight";
+import { useState } from "react";
+import { Delete, Edit, Sort } from "@mui/icons-material";
+
+const dummyHighlights: Highlight[] = [
+  {
+    id: 1,
+    bookId: 1,
+    spine: "chapter-1",
+    cfi: "epubcfi(/6!0;vnd.epub.chapter.section1!x,0:0-1)",
+    memo: "이 구절은 그저 하나의 구절일 뿐입니다.",
+  },
+  {
+    id: 2,
+    bookId: 1,
+    spine: "chapter-1",
+    cfi: "epubcfi(/6!0;vnd.epub.chapter.section1!x,0:0-1)",
+    memo: "이 구절은 그저 두개의 구절일 뿐입니다.",
+  },
+];
+
+export default function HighlightBrowserModal(props: {
+  open: boolean;
+  onClose: () => void;
+  onSelectHighlight?: (highlight: Highlight) => void;
+  onUseHighlight?: (highlight: Highlight) => void;
+}) {
+  const { open, onClose, onSelectHighlight, onUseHighlight } = props;
+
+  // TODO: query highlights from server
+  const highlights = dummyHighlights;
+  const [selectedHighlight, setSelectedHighlight] = useState<Highlight | null>(
+    null
+  );
+
+  const onHighlightClick = (highlight: Highlight) => {
+    setSelectedHighlight(highlight);
+    if (onSelectHighlight) {
+      onSelectHighlight(highlight);
+    }
+  };
+
+  const onHighlightUseButtonClick = (highlight: Highlight) => {
+    if (onUseHighlight) {
+      onUseHighlight(highlight);
+    }
+    setSelectedHighlight(null);
+    onClose();
+  };
+
+  return (
+    <Modal open={open} onClose={onClose}>
+      <Box
+        sx={{
+          width: "100vw",
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Container sx={{ height: "65vh" }}>
+          <Paper sx={{ width: "100%", height: "100%", padding: 2 }}>
+            <Grid2 container spacing={1} height={"100%"}>
+              <Grid2 size={4} sx={{ height: "100%" }}>
+                <Paper
+                  elevation={2}
+                  sx={{
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <Stack spacing={1} sx={{ flexGrow: 1, overflow: "hidden" }}>
+                    <Box
+                      padding={1}
+                      sx={{ display: "flex", justifyContent: "flex-end" }}
+                    >
+                      <IconButton>
+                        <Sort />
+                      </IconButton>
+                    </Box>
+                    <Divider />
+                    <List sx={{ flexGrow: 1, overflowY: "auto" }}>
+                      {highlights.map((highlight, index) => (
+                        <HighlightListItem
+                          key={index}
+                          highlight={highlight}
+                          onClick={onHighlightClick}
+                        />
+                      ))}
+                    </List>
+                  </Stack>
+                </Paper>
+              </Grid2>
+              {selectedHighlight ? (
+                <HighlightViewer
+                  highlight={selectedHighlight}
+                  onClose={onClose}
+                  onHighlightUseButtonClick={onHighlightUseButtonClick}
+                />
+              ) : (
+                <HighlightViewerPlaceholder />
+              )}
+            </Grid2>
+          </Paper>
+        </Container>
+      </Box>
+    </Modal>
+  );
+}
+
+function HighlightListItem(props: {
+  highlight: Highlight;
+  onClick: (highlight: Highlight) => void;
+}) {
+  const { highlight, onClick } = props;
+
+  return (
+    <ListItemButton onClick={() => onClick(highlight)}>
+      <ListItemText
+        primary={
+          highlight.memo.length > 20
+            ? highlight.memo.slice(0, 20) + "..."
+            : highlight.memo
+        }
+        secondary={
+          <>
+            <Typography variant="body2" color="textSecondary">
+              {`${
+                highlight.memo.length > 20
+                  ? highlight.memo.slice(0, 20) + "..."
+                  : highlight.memo
+              }`}
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              2025.04.06
+            </Typography>
+          </>
+        }
+      />
+    </ListItemButton>
+  );
+}
+
+function HighlightViewerPlaceholder() {
+  return (
+    <Grid2 size={8} sx={{ height: "100%" }}>
+      <Paper
+        elevation={2}
+        sx={{
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+        }}
+      >
+        <Typography variant="body2" color="textSecondary" textAlign={"center"}>
+          하이라이트를 선택하세요
+        </Typography>
+      </Paper>
+    </Grid2>
+  );
+}
+
+function HighlightViewer(props: {
+  highlight: Highlight;
+  onClose: () => void;
+  onHighlightUseButtonClick: (highlight: Highlight) => void;
+}) {
+  const { highlight, onClose, onHighlightUseButtonClick } = props;
+
+  return (
+    <Grid2 size={8} sx={{ height: "100%" }}>
+      <Paper
+        elevation={2}
+        sx={{
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <Stack spacing={1} sx={{ flexGrow: 1, overflow: "hidden" }}>
+          <Box padding={1} sx={{ display: "flex", justifyContent: "flex-end" }}>
+            <IconButton color="secondary">
+              <Edit />
+            </IconButton>
+            <IconButton color="error">
+              <Delete />
+            </IconButton>
+          </Box>
+          <Divider />
+          <Stack
+            spacing={1}
+            sx={{ flexGrow: 1, overflowY: "auto", padding: 2 }}
+          >
+            <Typography
+              variant="body2"
+              color="textSecondary"
+              textAlign={"right"}
+            >
+              2025.04.06
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              {`${highlight.memo}`}
+            </Typography>
+            <Divider />
+            <Typography variant="body1">{`${highlight.memo}`}</Typography>
+          </Stack>
+          <CardActions sx={{ justifyContent: "flex-end" }}>
+            <Button variant="text" color="secondary" onClick={onClose}>
+              취소
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() =>
+                onHighlightUseButtonClick &&
+                onHighlightUseButtonClick(highlight)
+              }
+            >
+              선택
+            </Button>
+          </CardActions>
+        </Stack>
+      </Paper>
+    </Grid2>
+  );
+}
