@@ -1,27 +1,35 @@
 import { useCallback } from "react";
-import { ApiBuilder } from "../apiBuilder";
 import { useSetAtom } from "jotai";
 import State from "../../states";
+import { ENV } from "../../env";
+import { Role } from "../../types/role";
 
+// TODO: Use swagger
 export default function useLogin() {
   const setLoggedInUser = useSetAtom(State.Auth.user);
 
   const login = useCallback(
     async ({ username, password }: { username: string; password: string }) => {
-      new ApiBuilder<"POST", "login">("POST", "login")
-        .body({
+      fetch(`${ENV.CHAEKIT_API_ENDPOINT}/api/login`, {
+        body: JSON.stringify({
           username,
           password,
-        })
-        .send()
-        .then((response) => {
-          if (response.isSuccessful) {
-            setLoggedInUser(response.data);
-            console.log(response.data);
-          } else {
-            console.error(response.error);
-          }
-        });
+        }),
+        method: "POST",
+      }).then(async (response) => {
+        if (!response.ok) {
+          console.error(await response.text());
+          return;
+        }
+        const data = (await response.json()) as {
+          id: number;
+          nickname: string;
+          username: string;
+          role: Role;
+          accessToken: string;
+        };
+        setLoggedInUser(data);
+      });
     },
     [setLoggedInUser]
   );

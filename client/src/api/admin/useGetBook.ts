@@ -1,7 +1,7 @@
 import { useCallback } from "react";
-import { ApiBuilder } from "../apiBuilder";
 import { useAtomValue } from "jotai";
 import { AuthState } from "../../states/auth";
+import API from "../api";
 
 export default function useGetBook() {
   const user = useAtomValue(AuthState.user);
@@ -13,20 +13,16 @@ export default function useGetBook() {
         return;
       }
 
-      return new ApiBuilder<"GET", "admin/books/{id}">(
-        "GET",
-        `admin/books/${bookId}`
-      )
-        .authToken(user.accessToken)
-        .send()
-        .then((response) => {
-          if (response.isSuccessful) {
-            console.log(response.data);
-          } else {
-            console.error(response.error);
-          }
-          return response;
-        });
+      return API.downloadFile(bookId, {
+        headers: { authorization: `Bearer ${user.accessToken}` },
+      }).then((response) => {
+        if (response.data) {
+          console.log(response.data);
+        } else {
+          console.error(response.error);
+        }
+        return response.data;
+      });
     },
     [user]
   );
