@@ -23,9 +23,9 @@ services:
     volumes:
       - chaekit-mysql-data:/var/lib/mysql
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping" ]
+      test: ["CMD", "mysqladmin", "ping"]
       interval: 5s
       retries: 10
 
 volumes:
-    chaekit-mysql-data:
+  chaekit-mysql-data:
