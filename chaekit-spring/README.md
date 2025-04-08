@@ -1,4 +1,22 @@
-## 🐬 MySQL 세팅
+## docker-compose 실행
+
+1. 아래 명령어로 포트 사용 중인지 확인
+   ```bash
+   lsof -i :3306
+   lsof -i :8080
+   ```
+2. 루트 디렉토리에 .env 파일을 생성
+3. Docker 컨테이너 실행
+   ```bash
+   # 백그라운드 실행
+   docker compose up -d
+   # 정상 작동 확인
+   docker compose ps
+   # 정지
+   docker compose down
+   ```
+
+## 🐬 MySQL 설정
 
 1. MySQL 설치
     - macOS: `brew install mysql`
@@ -15,7 +33,7 @@
    SHOW DATABASES;
    ```
    
-## 🔐 .env 설정
+## 🔐 개발용 .env 설정
 
 프로젝트 루트에 `.env` 파일을 생성하고 아래 내용을 채워주세요:
 
@@ -49,6 +67,9 @@ PRESIGNED_URL_EXPIRATION_TIME=3600
 
 # CORS
 CORS_ALLOWED_ORIGINS=http://localhost:5173
+
+# Local Server Port
+LOCAL_SERVER_PORT=8080
 
 ```
 
