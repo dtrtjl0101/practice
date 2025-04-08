@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import qwerty.chaekit.dto.LoginRequest;
 import qwerty.chaekit.dto.LoginResponse;
+import qwerty.chaekit.global.response.ApiSuccessResponse;
 
 @RestController(value = "LoginController")
 @RequestMapping("/api/login")
@@ -15,7 +16,7 @@ import qwerty.chaekit.dto.LoginResponse;
 public class LoginDocsController {
     @Operation(summary = "로그인", description = "Spring Security가 처리하는 로그인 API")
     @PostMapping
-    public LoginResponse login(@RequestBody LoginRequest loginRequest) {
+    public ApiSuccessResponse<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
         // This endpoint is only for Swagger documentation and should not be invoked.
         throw new UnsupportedOperationException("This endpoint is not implemented. It is only for Swagger documentation.");
     }

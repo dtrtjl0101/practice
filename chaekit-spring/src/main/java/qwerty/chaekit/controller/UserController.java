@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.dto.UserJoinRequest;
 import qwerty.chaekit.dto.UserJoinResponse;
 import qwerty.chaekit.dto.UserMemberResponse;
+import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
 import qwerty.chaekit.global.security.resolver.LoginMember;
 import qwerty.chaekit.service.UserJoinService;
@@ -21,12 +22,12 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/me")
-    public UserMemberResponse userInfo(@Login LoginMember loginMember) {
-        return userService.getUserProfile(loginMember);
+    public ApiSuccessResponse<UserMemberResponse> userInfo(@Login LoginMember loginMember) {
+        return ApiSuccessResponse.of(userService.getUserProfile(loginMember));
     }
 
     @PostMapping("/join")
-    public UserJoinResponse userJoin(@RequestBody @Valid UserJoinRequest joinRequest) {
-        return joinService.join(joinRequest);
+    public ApiSuccessResponse<UserJoinResponse> userJoin(@RequestBody @Valid UserJoinRequest joinRequest) {
+        return ApiSuccessResponse.of(joinService.join(joinRequest));
     }
 }

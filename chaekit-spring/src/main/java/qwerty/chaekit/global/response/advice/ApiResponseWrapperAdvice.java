@@ -28,7 +28,7 @@ import qwerty.chaekit.global.response.ApiSuccessResponse;
  * }
  */
 
-@RestControllerAdvice
+//@RestControllerAdvice
 @RequiredArgsConstructor
 public class ApiResponseWrapperAdvice implements ResponseBodyAdvice<Object> {
     private final ObjectMapper objectMapper;
