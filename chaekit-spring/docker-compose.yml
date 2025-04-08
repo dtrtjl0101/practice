@@ -1,0 +1,31 @@
+services:
+  chaekit-spring:
+    build: .
+    env_file:
+      - .env
+    environment:
+      DB_URL: jdbc:mysql://chaekit-mysql:3306/chaekit
+    depends_on:
+      chaekit-mysql:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+  chaekit-mysql:
+    image: mysql
+    restart: always
+    env_file:
+      - .env
+    environment:
+      MYSQL_DATABASE: chaekit
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - chaekit-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping" ]
+      interval: 5s
+      retries: 10
+
+volumes:
+    chaekit-mysql-data:
