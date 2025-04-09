@@ -10,8 +10,10 @@ import {
   useTheme,
 } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
-import useJoin from "../../api/join/useJoin";
 import { useCallback, useState } from "react";
+import API_CLIENT, { wrapApiResponse } from "../../api/api";
+import useLogin from "../../api/login/useLogin";
+import { Role } from "../../types/role";
 
 export const Route = createFileRoute("/_pathlessLayout/register")({
   component: RouteComponent,
@@ -19,13 +21,14 @@ export const Route = createFileRoute("/_pathlessLayout/register")({
 
 function RouteComponent() {
   const theme = useTheme();
-  const { join } = useJoin();
+  const { login } = useLogin();
+  const navigate = Route.useNavigate();
   const [nickname, setNickname] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const onRegisterButtonClick = useCallback(() => {
+  const onRegisterButtonClick = useCallback(async () => {
     // TODO: Test username and password constraints
 
     if (password !== confirmPassword) {
@@ -33,12 +36,37 @@ function RouteComponent() {
       return;
     }
 
-    join({
-      nickname,
-      username,
-      password,
-    });
-  }, [join, username, password, confirmPassword]);
+    const response = await wrapApiResponse(
+      API_CLIENT.userController.userJoin({
+        nickname,
+        username,
+        password,
+      })
+    );
+
+    if (response.isSuccessful) {
+      alert("회원가입이 완료되었습니다.");
+      const { id, accessToken, role, nickname, username } = response.data;
+      login({
+        id: id!,
+        accessToken: accessToken!,
+        role: role as Role,
+        nickname: nickname!,
+        username: username!,
+      });
+      navigate({
+        to: "/",
+        replace: true,
+      });
+      return;
+    }
+    switch (response.errorCode) {
+      case "NICKNAME_EXISTS": {
+        alert("이미 존재하는 닉네임입니다.");
+        break;
+      }
+    }
+  }, [login, navigate, username, password, confirmPassword]);
 
   return (
     <Container maxWidth="sm" sx={{ mt: theme.spacing(4) }}>

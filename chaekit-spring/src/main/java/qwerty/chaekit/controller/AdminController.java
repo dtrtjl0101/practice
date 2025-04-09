@@ -44,7 +44,7 @@ public class AdminController {
     }
 
     @GetMapping("/books")
-    public EbookListResponse getBooks(@ParameterObject Pageable pageable) {
-        return ebookService.fetchEbookList(pageable);
+    public ApiSuccessResponse<EbookListResponse> getBooks(@ParameterObject Pageable pageable) {
+        return ApiSuccessResponse.of(ebookService.fetchEbookList(pageable));
     }
 }

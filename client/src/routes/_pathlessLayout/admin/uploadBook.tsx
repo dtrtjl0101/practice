@@ -9,15 +9,13 @@ import {
 } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import useUploadBook from "../../../api/admin/useUploadBook";
+import API_CLIENT, { wrapApiResponse } from "../../../api/api";
 
 export const Route = createFileRoute("/_pathlessLayout/admin/uploadBook")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const { uploadBook } = useUploadBook();
-
   // States for form fields
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
@@ -34,8 +32,17 @@ function RouteComponent() {
         alert("Please select a file to upload.");
         return;
       }
-      const response = await uploadBook({ title, file, description, author });
-      if (response?.isSuccessful) {
+      const response = await wrapApiResponse(
+        API_CLIENT.adminController.uploadFile({
+          request: {
+            title,
+            file,
+            description,
+            author,
+          },
+        })
+      );
+      if (response.isSuccessful) {
         setTitle("");
         setAuthor("");
         setDescription("");
