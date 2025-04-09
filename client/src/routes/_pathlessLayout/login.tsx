@@ -11,6 +11,8 @@ import {
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import useLogin from "../../api/login/useLogin";
 import { useCallback, useState } from "react";
+import API_CLIENT, { wrapApiResponse } from "../../api/api";
+import { Role } from "../../types/role";
 
 export const Route = createFileRoute("/_pathlessLayout/login")({
   component: RouteComponent,
@@ -23,14 +25,33 @@ function RouteComponent() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const onLoginButtonClick = useCallback(() => {
-    // TODO: handle error
+  const onLoginButtonClick = useCallback(async () => {
+    const response = await wrapApiResponse(
+      API_CLIENT.loginFilter.login({
+        username,
+        password,
+      })
+    );
 
+    if (!response.isSuccessful) {
+      // TODO: Handle error
+      return;
+    }
+
+    const { id, accessToken, role } = response.data;
     login({
-      username,
-      password,
+      id: id!,
+      accessToken: accessToken!,
+      role: role as Role,
+      nickname: "닉네임",
+      username: username,
     });
-  }, [login, username, password]);
+    navigate({
+      to: "/",
+      replace: true,
+    });
+  }, [login, navigate, username, password]);
+
   return (
     <Container maxWidth="sm" sx={{ mt: theme.spacing(4) }}>
       <Card>

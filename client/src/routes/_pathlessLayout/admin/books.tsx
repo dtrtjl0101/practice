@@ -10,27 +10,37 @@ import {
   TableRow,
 } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
-import useGetBooks from "../../../api/admin/useGetBooks";
 import { useEffect, useState } from "react";
 import { BookMetadata } from "../../../types/book";
+import API_CLIENT, { wrapApiResponse } from "../../../api/api";
 
 export const Route = createFileRoute("/_pathlessLayout/admin/books")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const { getBooks } = useGetBooks();
   const [books, setBooks] = useState<BookMetadata[]>([]);
 
   useEffect(() => {
-    getBooks().then((response) => {
+    wrapApiResponse(API_CLIENT.adminController.getBooks()).then((response) => {
       if (response.isSuccessful) {
-        setBooks(response.data.books);
+        const books =
+          response.data.books?.map((book) => {
+            const { id, title, author, description, size } = book;
+            return {
+              id: id!,
+              title: title!,
+              author: author!,
+              description: description!,
+              size: size!,
+            } as BookMetadata;
+          }) || [];
+        setBooks(books);
       } else {
-        console.error(response.error);
+        console.error(response.errorCode, response.errorMessage);
       }
     });
-  }, [getBooks, setBooks]);
+  }, [setBooks]);
 
   return (
     <Card>

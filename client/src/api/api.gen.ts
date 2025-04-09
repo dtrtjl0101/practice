@@ -10,10 +10,62 @@
  * ---------------------------------------------------------------
  */
 
+export interface HighlightPutRequest {
+  /** @format int64 */
+  activityId?: number;
+  memo?: string;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseHighlightPostResponse {
+  isSuccessful?: boolean;
+  data?: HighlightPostResponse;
+}
+
+export interface HighlightPostResponse {
+  /** @format int64 */
+  id?: number;
+  /** @format int64 */
+  bookId?: number;
+  spine?: string;
+  cfi?: string;
+  memo?: string;
+}
+
+export interface GroupPutRequest {
+  description?: string;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseGroupPostResponse {
+  isSuccessful?: boolean;
+  data?: GroupPostResponse;
+}
+
+export interface GroupFetchResponse {
+  /** @format int64 */
+  groupId?: number;
+  name?: string;
+  description?: string;
+  tags?: string[];
+  /** @format int32 */
+  memberCount?: number;
+}
+
+export interface GroupPostResponse {
+  group?: GroupFetchResponse;
+}
+
 export interface UserJoinRequest {
   nickname: string;
   username: string;
   password: string;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseUserJoinResponse {
+  isSuccessful?: boolean;
+  data?: UserJoinResponse;
 }
 
 export interface UserJoinResponse {
@@ -31,6 +83,12 @@ export interface PublisherJoinRequest {
   password: string;
 }
 
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponsePublisherJoinResponse {
+  isSuccessful?: boolean;
+  data?: PublisherJoinResponse;
+}
+
 export interface PublisherJoinResponse {
   /** @format int64 */
   id?: number;
@@ -39,6 +97,46 @@ export interface PublisherJoinResponse {
   username?: string;
   role?: string;
   isAccepted?: boolean;
+}
+
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseLoginResponse {
+  isSuccessful?: boolean;
+  data?: LoginResponse;
+}
+
+export interface LoginResponse {
+  /** @format int64 */
+  id?: number;
+  role?: string;
+  accessToken?: string;
+}
+
+export interface HighlightPostRequest {
+  /** @format int64 */
+  bookId?: number;
+  spine?: string;
+  cfi?: string;
+  /** @format int64 */
+  activityId?: number;
+  memo?: string;
+}
+
+export interface GroupPostRequest {
+  name?: string;
+  description?: string;
+  tags?: string[];
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseBoolean {
+  isSuccessful?: boolean;
+  data?: boolean;
 }
 
 export interface EbookUploadRequest {
@@ -61,12 +159,30 @@ export interface EbookUploadRequest {
   file?: File;
 }
 
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseString {
+  isSuccessful?: boolean;
+  data?: string;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseUserMemberResponse {
+  isSuccessful?: boolean;
+  data?: UserMemberResponse;
+}
+
 export interface UserMemberResponse {
   /** @format int64 */
   id?: number;
   nickname?: string;
   username?: string;
   role?: string;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponsePublisherMemberResponse {
+  isSuccessful?: boolean;
+  data?: PublisherMemberResponse;
 }
 
 export interface PublisherMemberResponse {
@@ -78,30 +194,26 @@ export interface PublisherMemberResponse {
   isAccepted?: boolean;
 }
 
-export interface PublisherInfoResponse {
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseHighlightListResponse {
+  isSuccessful?: boolean;
+  data?: HighlightListResponse;
+}
+
+export interface HighlightFetchResponse {
   /** @format int64 */
   id?: number;
-  publisherName?: string;
-  /** @format date-time */
-  createdAt?: string;
+  /** @format int64 */
+  bookId?: number;
+  spine?: string;
+  cfi?: string;
+  memo?: string;
+  /** @format int64 */
+  activityId?: number;
 }
 
-export interface Pageable {
-  /**
-   * @format int32
-   * @min 0
-   */
-  page?: number;
-  /**
-   * @format int32
-   * @min 1
-   */
-  size?: number;
-  sort?: string[];
-}
-
-export interface EbookListResponse {
-  books?: EbookResponse[];
+export interface HighlightListResponse {
+  highlights?: HighlightFetchResponse[];
   /** @format int32 */
   currentPage?: number;
   /** @format int64 */
@@ -110,7 +222,49 @@ export interface EbookListResponse {
   totalPages?: number;
 }
 
-export interface EbookResponse {
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseGroupListResponse {
+  isSuccessful?: boolean;
+  data?: GroupListResponse;
+}
+
+export interface GroupListResponse {
+  groups?: GroupFetchResponse[];
+  /** @format int32 */
+  currentPage?: number;
+  /** @format int64 */
+  totalItems?: number;
+  /** @format int32 */
+  totalPages?: number;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseGroupFetchResponse {
+  isSuccessful?: boolean;
+  data?: GroupFetchResponse;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseListPublisherInfoResponse {
+  isSuccessful?: boolean;
+  data?: PublisherInfoResponse[];
+}
+
+export interface PublisherInfoResponse {
+  /** @format int64 */
+  id?: number;
+  publisherName?: string;
+  /** @format date-time */
+  createdAt?: string;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseEbookListResponse {
+  isSuccessful?: boolean;
+  data?: EbookListResponse;
+}
+
+export interface EbookFetchResponse {
   /** @format int64 */
   id?: number;
   title?: string;
@@ -118,6 +272,22 @@ export interface EbookResponse {
   description?: string;
   /** @format int64 */
   size?: number;
+}
+
+export interface EbookListResponse {
+  books?: EbookFetchResponse[];
+  /** @format int32 */
+  currentPage?: number;
+  /** @format int64 */
+  totalItems?: number;
+  /** @format int32 */
+  totalPages?: number;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseEbookDownloadResponse {
+  isSuccessful?: boolean;
+  data?: EbookDownloadResponse;
 }
 
 export interface EbookDownloadResponse {
@@ -170,7 +340,7 @@ export enum ContentType {
 }
 
 export class HttpClient<SecurityDataType = unknown> {
-  public baseUrl: string = "http://ec2-3-37-230-34.ap-northeast-2.compute.amazonaws.com:8080";
+  public baseUrl: string = "";
   private securityData: SecurityDataType | null = null;
   private securityWorker?: ApiConfig<SecurityDataType>["securityWorker"];
   private abortControllers = new Map<CancelToken, AbortController>();
@@ -337,12 +507,163 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title Chaekit API
  * @version 1.0
- * @baseUrl http://ec2-3-37-230-34.ap-northeast-2.compute.amazonaws.com:8080
  *
  * 책잇 API 명세서
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
-  api = {
+  highlightController = {
+    /**
+     * No description
+     *
+     * @tags highlight-controller
+     * @name UpdateHighlight
+     * @request PUT:/api/highlights/{id}
+     */
+    updateHighlight: (id: number, data: HighlightPutRequest, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseHighlightPostResponse, any>({
+        path: `/api/highlights/${id}`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags highlight-controller
+     * @name GetHighlights
+     * @request GET:/api/highlights
+     */
+    getHighlights: (
+      query?: {
+        /**
+         * Zero-based page index (0..N)
+         * @min 0
+         * @default 0
+         */
+        page?: number;
+        /**
+         * The size of the page to be returned
+         * @min 1
+         * @default 20
+         */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        /** @format int64 */
+        activityId?: number;
+        /** @format int64 */
+        bookId?: number;
+        spine?: string;
+        me?: boolean;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponseHighlightListResponse, any>({
+        path: `/api/highlights`,
+        method: "GET",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags highlight-controller
+     * @name CreateHighlight
+     * @request POST:/api/highlights
+     */
+    createHighlight: (data: HighlightPostRequest, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseHighlightPostResponse, any>({
+        path: `/api/highlights`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+  };
+  groupController = {
+    /**
+     * No description
+     *
+     * @tags group-controller
+     * @name UpdateGroup
+     * @request PUT:/api/groups/{groupId}
+     */
+    updateGroup: (groupId: number, data: GroupPutRequest, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseGroupPostResponse, any>({
+        path: `/api/groups/${groupId}`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags group-controller
+     * @name GetAllGroups
+     * @request GET:/api/groups
+     */
+    getAllGroups: (
+      query?: {
+        /**
+         * Zero-based page index (0..N)
+         * @min 0
+         * @default 0
+         */
+        page?: number;
+        /**
+         * The size of the page to be returned
+         * @min 1
+         * @default 20
+         */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponseGroupListResponse, any>({
+        path: `/api/groups`,
+        method: "GET",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags group-controller
+     * @name CreateGroup
+     * @request POST:/api/groups
+     */
+    createGroup: (data: GroupPostRequest, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseGroupPostResponse, any>({
+        path: `/api/groups`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags group-controller
+     * @name GetGroup
+     * @request GET:/api/groups/{groupId}/info
+     */
+    getGroup: (groupId: number, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseGroupFetchResponse, any>({
+        path: `/api/groups/${groupId}/info`,
+        method: "GET",
+        ...params,
+      }),
+  };
+  userController = {
     /**
      * No description
      *
@@ -351,7 +672,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request POST:/api/users/join
      */
     userJoin: (data: UserJoinRequest, params: RequestParams = {}) =>
-      this.request<UserJoinResponse, any>({
+      this.request<ApiSuccessResponseUserJoinResponse, any>({
         path: `/api/users/join`,
         method: "POST",
         body: data,
@@ -362,12 +683,27 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @tags user-controller
+     * @name UserInfo
+     * @request GET:/api/users/me
+     */
+    userInfo: (params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseUserMemberResponse, any>({
+        path: `/api/users/me`,
+        method: "GET",
+        ...params,
+      }),
+  };
+  publisherController = {
+    /**
+     * No description
+     *
      * @tags publisher-controller
      * @name PublisherJoin
      * @request POST:/api/publishers/join
      */
     publisherJoin: (data: PublisherJoinRequest, params: RequestParams = {}) =>
-      this.request<PublisherJoinResponse, any>({
+      this.request<ApiSuccessResponsePublisherJoinResponse, any>({
         path: `/api/publishers/join`,
         method: "POST",
         body: data,
@@ -378,12 +714,45 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @tags publisher-controller
+     * @name PublisherInfo
+     * @request GET:/api/publishers/me
+     */
+    publisherInfo: (params: RequestParams = {}) =>
+      this.request<ApiSuccessResponsePublisherMemberResponse, any>({
+        path: `/api/publishers/me`,
+        method: "GET",
+        ...params,
+      }),
+  };
+  loginFilter = {
+    /**
+     * @description Spring Security가 처리하는 로그인 API
+     *
+     * @tags login-filter
+     * @name Login
+     * @summary 로그인
+     * @request POST:/api/login
+     */
+    login: (data: LoginRequest, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseLoginResponse, any>({
+        path: `/api/login`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+  };
+  adminController = {
+    /**
+     * No description
+     *
      * @tags admin-controller
      * @name AcceptPublisher
      * @request POST:/api/admin/publishers/{id}/accept
      */
     acceptPublisher: (id: number, params: RequestParams = {}) =>
-      this.request<boolean, any>({
+      this.request<ApiSuccessResponseBoolean, any>({
         path: `/api/admin/publishers/${id}/accept`,
         method: "POST",
         ...params,
@@ -402,52 +771,10 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       },
       params: RequestParams = {},
     ) =>
-      this.request<string, any>({
+      this.request<ApiSuccessResponseString, any>({
         path: `/api/admin/books/upload`,
         method: "POST",
         query: query,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags main-controller
-     * @name MainApi
-     * @request GET:/api
-     */
-    mainApi: (params: RequestParams = {}) =>
-      this.request<string, any>({
-        path: `/api`,
-        method: "GET",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags user-controller
-     * @name UserInfo
-     * @request GET:/api/users/me
-     */
-    userInfo: (params: RequestParams = {}) =>
-      this.request<UserMemberResponse, any>({
-        path: `/api/users/me`,
-        method: "GET",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags publisher-controller
-     * @name PublisherInfo
-     * @request GET:/api/publishers/me
-     */
-    publisherInfo: (params: RequestParams = {}) =>
-      this.request<PublisherMemberResponse, any>({
-        path: `/api/publishers/me`,
-        method: "GET",
         ...params,
       }),
 
@@ -459,7 +786,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request GET:/api/admin/publishers/pending
      */
     fetchPendingList: (params: RequestParams = {}) =>
-      this.request<PublisherInfoResponse[], any>({
+      this.request<ApiSuccessResponseListPublisherInfoResponse, any>({
         path: `/api/admin/publishers/pending`,
         method: "GET",
         ...params,
@@ -473,12 +800,25 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request GET:/api/admin/books
      */
     getBooks: (
-      query: {
-        pageable: Pageable;
+      query?: {
+        /**
+         * Zero-based page index (0..N)
+         * @min 0
+         * @default 0
+         */
+        page?: number;
+        /**
+         * The size of the page to be returned
+         * @min 1
+         * @default 20
+         */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
       },
       params: RequestParams = {},
     ) =>
-      this.request<EbookListResponse, any>({
+      this.request<ApiSuccessResponseEbookListResponse, any>({
         path: `/api/admin/books`,
         method: "GET",
         query: query,
@@ -493,8 +833,23 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request GET:/api/admin/books/{ebookId}
      */
     downloadFile: (ebookId: number, params: RequestParams = {}) =>
-      this.request<EbookDownloadResponse, any>({
+      this.request<ApiSuccessResponseEbookDownloadResponse, any>({
         path: `/api/admin/books/${ebookId}`,
+        method: "GET",
+        ...params,
+      }),
+  };
+  mainController = {
+    /**
+     * No description
+     *
+     * @tags main-controller
+     * @name MainApi
+     * @request GET:/api
+     */
+    mainApi: (params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseString, any>({
+        path: `/api`,
         method: "GET",
         ...params,
       }),
