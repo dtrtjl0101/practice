@@ -1,4 +1,4 @@
-package qwerty.chaekit.domain.group;
+package qwerty.chaekit.domain.group.tag;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
