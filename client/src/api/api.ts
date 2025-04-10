@@ -67,10 +67,13 @@ export async function wrapApiResponse<
 
 const api = new Api<string>({
   baseUrl: ENV.CHAEKIT_API_ENDPOINT,
-  securityWorker: (accessToken) => {
+  baseApiParams: {
+    secure: true,
+  },
+  securityWorker: async (accessToken) => {
     return {
       headers: {
-        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+        ...(accessToken ? { Authorization: accessToken } : {}),
       },
     };
   },
