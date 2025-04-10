@@ -35,11 +35,7 @@ function List() {
 
       {/*게시글 생성 버튼*/}
       <Box sx={{ textAlign: "right", my: 4 }}>
-        <Button
-          variant="contained"
-          component={Link}
-          to={`/posts/${posts.length + 1}/edit`}
-        >
+        <Button variant="contained" component={Link} to={`/posts/new`}>
           새 게시글 추가
         </Button>
       </Box>
