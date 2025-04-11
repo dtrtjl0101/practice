@@ -47,6 +47,30 @@
         {
           "name": "CORS_ALLOWED_ORIGINS",
           "value": "http://localhost:5173/"
+        },
+        {
+            "name": "DB_USERNAME",
+            "value": ""
+        },
+        {
+            "name": "DB_PASSWORD",
+            "value": ""
+        },
+        {
+            "name": "JWT_SECRET",
+            "value": ""
+        },
+        {
+            "name": "ADMIN_PASSWORD",
+            "value": ""
+        },
+        {
+            "name": "AWS_ACCESS_KEY_ID",
+            "value": ""
+        },
+        {
+            "name": "SECRET_ACCESS_KEY",
+            "value": ""
         }
       ],
       "environmentFiles": [],
