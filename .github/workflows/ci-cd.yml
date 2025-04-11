@@ -73,6 +73,9 @@ jobs:
           echo "Task Definition Content:"
           cat chaekit-spring/task-definition.json.tpl
 
+      - name: Check rendered task definition (safe check)
+        run: |
+          cat ${{ steps.task-def.outputs.task-definition }} | grep -v -E '("DB_|"JWT_|"PASSWORD|AWS_ACCESS_KEY_ID|SECRET_ACCESS_KEY)'
       - name: Create ECS task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
