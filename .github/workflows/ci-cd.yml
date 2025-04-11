@@ -81,10 +81,6 @@ jobs:
           container-name: ecs-container
           image: ${{ steps.image-path.outputs.ecs-deploy-image }}
 
-      - name: Check rendered task definition (safe check)
-        run: |
-          cat ${{ steps.task-def.outputs.task-definition }} | grep -v -E '("DB_|"JWT_|"PASSWORD|AWS_ACCESS_KEY_ID|SECRET_ACCESS_KEY)'
-
       - name: Deploy ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
