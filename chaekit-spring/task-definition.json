@@ -8,7 +8,7 @@
       "portMappings": [
         {
           "name": "ecs-container-80-tcp",
-          "containerPort": 80,
+          "containerPort": 8080,
           "hostPort": 0,
           "protocol": "tcp",
           "appProtocol": "http"
