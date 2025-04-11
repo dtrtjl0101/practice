@@ -14,13 +14,6 @@
           "appProtocol": "http"
         }
       ],
-      "loadBalancers": [
-        {
-          "targetGroupArn": "arn:aws:elasticloadbalancing:ap-northeast-2:880996438467:targetgroup/chaekit0411security/5a935a7f4101f498",
-          "containerName": "chaekit-backend",
-          "containerPort": 8080
-        }
-      ],
       "essential": true,
       "environment": [
         {
