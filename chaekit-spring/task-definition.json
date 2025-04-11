@@ -57,32 +57,25 @@
           "value": "org.hibernate.dialect.MySQL8Dialect"
         },
         {
-          "name": "DB_URL",
-          "value": ""
+          "name": "DB_URL"
         },
         {
-          "name": "DB_USERNAME",
-          "value": ""
+          "name": "DB_USERNAME"
         },
         {
-          "name": "DB_PASSWORD",
-          "value": ""
+          "name": "DB_PASSWORD"
         },
         {
-          "name": "JWT_SECRET",
-          "value": ""
+          "name": "JWT_SECRET"
         },
         {
-          "name": "ADMIN_PASSWORD",
-          "value": ""
+          "name": "ADMIN_PASSWORD"
         },
         {
-          "name": "AWS_ACCESS_KEY_ID",
-          "value": ""
+          "name": "AWS_ACCESS_KEY_ID"
         },
         {
-          "name": "SECRET_ACCESS_KEY",
-          "value": ""
+          "name": "SECRET_ACCESS_KEY"
         }
       ],
       "environmentFiles": [],
