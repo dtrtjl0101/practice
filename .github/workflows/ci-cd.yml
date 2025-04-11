@@ -80,6 +80,14 @@ jobs:
           task-definition: chaekit-spring/task-definition.json
           container-name: ecs-container
           image: ${{ steps.image-path.outputs.ecs-deploy-image }}
+          environment-variables: |
+            DB_URL=${{ secrets.DB_URL }}
+            DB_USERNAME=${{ secrets.DB_USERNAME }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
+            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            SECRET_ACCESS_KEY=${{ secrets.SECRET_ACCESS_KEY }}
 
       - name: Deploy ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
