@@ -17,6 +17,7 @@ RUN chmod +x gradlew
 #Download the Gradle distribution
 RUN ./gradlew --version
 
+ENV EBOOK_MAX_FILE_SIZE=20971520
 #Build the application
 RUN ./gradlew clean build -x test
 
