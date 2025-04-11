@@ -71,13 +71,13 @@ jobs:
       - name: Check task definition content
         run: |
           echo "Task Definition Content:"
-          cat chaekit-spring/task-definition.json.tpl
+          cat chaekit-spring/task-definition.json
 
       - name: Create ECS task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: chaekit-spring/task-definition.json.tpl
+          task-definition: chaekit-spring/task-definition.json
           container-name: ecs-container
           image: ${{ steps.image-path.outputs.ecs-deploy-image }}
 
