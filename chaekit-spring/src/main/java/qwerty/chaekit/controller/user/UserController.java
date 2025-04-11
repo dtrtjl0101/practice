@@ -1,4 +1,4 @@
-package qwerty.chaekit.controller;
+package qwerty.chaekit.controller.user;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
