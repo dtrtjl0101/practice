@@ -12,25 +12,30 @@ import {
 } from "@mui/material";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import API_CLIENT, { wrapApiResponse } from "../api/api";
-import { PropsWithChildren, useState } from "react";
+import { JSX, PropsWithChildren, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-
-const PAGE_SIZE = 12;
 const ITEM_HEIGHT = 384 - 20;
 
-export default function GroupList() {
+export default function GroupList(props: {
+  size: "small" | "large";
+  action?: JSX.Element;
+}) {
+  const { size, action } = props;
+
   const [page, setPage] = useState(0);
   const [sort, setSort] = useState<string[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const navigate = useNavigate();
 
+  const pageSize = size === "small" ? 6 : 12;
+
   const { data } = useQuery({
-    queryKey: ["groupList", page, sort],
+    queryKey: ["groupList", page, sort, pageSize],
     queryFn: async () => {
       const response = await wrapApiResponse(
         API_CLIENT.groupController.getAllGroups({
           page,
-          size: PAGE_SIZE,
+          size: pageSize,
           sort,
         })
       );
@@ -42,14 +47,21 @@ export default function GroupList() {
 
       throw new Error(response.errorMessage);
     },
-    initialData: new Array(PAGE_SIZE).fill(undefined),
+    initialData: new Array(pageSize).fill(undefined),
     placeholderData: keepPreviousData,
   });
 
   return (
     <Card>
       <Stack spacing={2} sx={{ padding: 2 }}>
-        <Typography variant="h4">Groups</Typography>
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <Typography variant="h4">모임</Typography>
+          {action}
+        </Stack>
         <PageNavigation
           pageZeroBased={page}
           setPage={setPage}
