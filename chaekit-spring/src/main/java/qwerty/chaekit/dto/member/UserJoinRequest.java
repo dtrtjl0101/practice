@@ -1,8 +1,10 @@
-package qwerty.chaekit.dto;
+package qwerty.chaekit.dto.member;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record LoginRequest(
+public record UserJoinRequest(
+        @NotBlank
+        String nickname,
         @NotBlank
         String username,
         @NotBlank

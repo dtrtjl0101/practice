@@ -1,10 +1,11 @@
-package qwerty.chaekit.dto;
+package qwerty.chaekit.dto.member;
+
 
 import jakarta.validation.constraints.NotBlank;
 
-public record UserJoinRequest(
+public record PublisherJoinRequest(
         @NotBlank
-        String nickname,
+        String publisherName,
         @NotBlank
         String username,
         @NotBlank

@@ -1,11 +1,11 @@
-package qwerty.chaekit.controller.publisher;
+package qwerty.chaekit.controller.member.publisher;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import qwerty.chaekit.dto.PublisherJoinRequest;
-import qwerty.chaekit.dto.PublisherJoinResponse;
-import qwerty.chaekit.dto.PublisherMemberResponse;
+import qwerty.chaekit.dto.member.PublisherJoinRequest;
+import qwerty.chaekit.dto.member.PublisherJoinResponse;
+import qwerty.chaekit.dto.member.PublisherMemberResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
 import qwerty.chaekit.global.security.resolver.LoginMember;

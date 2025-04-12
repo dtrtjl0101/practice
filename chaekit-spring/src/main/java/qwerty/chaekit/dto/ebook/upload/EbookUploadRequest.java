@@ -1,4 +1,4 @@
-package qwerty.chaekit.dto.upload;
+package qwerty.chaekit.dto.ebook.upload;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.web.multipart.MultipartFile;

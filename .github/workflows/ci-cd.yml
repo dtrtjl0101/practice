@@ -4,7 +4,7 @@ on:
     paths:
       - "chaekit-spring/**"
     branches:
-      - feat/be/entity
+      - dev
 
 permissions:
   id-token: write
