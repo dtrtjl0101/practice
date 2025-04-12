@@ -1,5 +1,9 @@
 import {
   Card,
+  CardActionArea,
+  CardContent,
+  CardHeader,
+  CardMedia,
   Grid2,
   Pagination,
   Skeleton,
@@ -9,15 +13,16 @@ import {
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import API_CLIENT, { wrapApiResponse } from "../api/api";
 import { PropsWithChildren, useState } from "react";
-import { GroupFetchResponse } from "../api/api.gen";
+import { useNavigate } from "@tanstack/react-router";
 
 const PAGE_SIZE = 12;
-const ITEM_HEIGHT = 192;
+const ITEM_HEIGHT = 384 - 20;
 
 export default function GroupList() {
   const [page, setPage] = useState(0);
   const [sort, setSort] = useState<string[]>([]);
   const [totalPages, setTotalPages] = useState(1);
+  const navigate = useNavigate();
 
   const { data } = useQuery({
     queryKey: ["groupList", page, sort],
@@ -32,20 +37,12 @@ export default function GroupList() {
 
       if (response.isSuccessful) {
         setTotalPages(response.data.totalPages!);
-        const length = response.data.groups?.length ?? 0;
-        if (length < PAGE_SIZE) {
-          const groups: (GroupFetchResponse | undefined)[] =
-            response.data.groups ?? [];
-          for (let i = length; i < PAGE_SIZE; i++) {
-            groups.push(undefined);
-          }
-          return groups;
-        }
         return response.data.groups;
       }
 
       throw new Error(response.errorMessage);
     },
+    initialData: new Array(PAGE_SIZE).fill(undefined),
     placeholderData: keepPreviousData,
   });
 
@@ -62,9 +59,46 @@ export default function GroupList() {
           {data?.map((group, index) =>
             group ? (
               <ItemContainer key={group.groupId}>
-                <Card sx={{ height: ITEM_HEIGHT }}>
-                  <Typography variant="h6">{group.name}</Typography>
-                  <Typography variant="body2">{group.description}</Typography>
+                <Card sx={{ height: ITEM_HEIGHT }} elevation={3}>
+                  <CardActionArea
+                    sx={{
+                      height: ITEM_HEIGHT,
+                      display: "flex",
+                      alignItems: "start",
+                      flexDirection: "column",
+                      justifyContent: "start",
+                    }}
+                    onClick={() => {
+                      navigate({
+                        to: "/groups/$groupId",
+                        params: { groupId: group.groupId.toString() },
+                      });
+                    }}
+                  >
+                    <CardHeader title={group.name} />
+                    <CardMedia
+                      height={192}
+                      component={"img"}
+                      // TODO: Use group image
+                      image="https://picsum.photos/512/512"
+                    />
+                    <CardContent>
+                      <Typography
+                        variant="body2"
+                        color="textSecondary"
+                        component={"div"}
+                        sx={{
+                          textOverflow: "ellipsis",
+                          overflow: "hidden",
+                          whiteSpace: "wrap",
+                          lineBreak: "anywhere",
+                          height: 80,
+                        }}
+                      >
+                        {group.description}
+                      </Typography>
+                    </CardContent>
+                  </CardActionArea>
                 </Card>
               </ItemContainer>
             ) : (
