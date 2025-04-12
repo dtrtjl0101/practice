@@ -1,5 +1,7 @@
 import { Box, Container, Modal } from "@mui/material";
 import GroupEditForm, { GroupEditData } from "./GroupEditForm";
+import API_CLIENT, { wrapApiResponse } from "../../api/api";
+import { useNavigate } from "@tanstack/react-router";
 
 export default function GroupCreateModal(props: {
   open: boolean;
@@ -7,9 +9,29 @@ export default function GroupCreateModal(props: {
   onCreateGroup?: () => void;
 }) {
   const { open, onClose, onCreateGroup } = props;
+  const navigate = useNavigate();
 
-  const handleEditDone = (data: GroupEditData) => {
-    // TODO: create group with data
+  const handleEditDone = async (data: GroupEditData) => {
+    const { name, description, tags } = data;
+    const response = await wrapApiResponse(
+      API_CLIENT.groupController.createGroup({
+        name,
+        description,
+        tags,
+      })
+    );
+
+    if (!response.isSuccessful) {
+      console.error(response.errorMessage);
+      alert("Failed to create group");
+      return;
+    }
+
+    navigate({
+      to: "/groups/$groupId",
+      params: { groupId: response.data.group!.groupId!.toString() },
+    });
+
     if (onCreateGroup) {
       onCreateGroup();
     }
@@ -27,7 +49,7 @@ export default function GroupCreateModal(props: {
         }}
       >
         <Container sx={{ height: "65vh" }}>
-          <GroupEditForm onEditDone={handleEditDone} />
+          <GroupEditForm onEditDone={handleEditDone} onCancel={onClose} />
         </Container>
       </Box>
     </Modal>

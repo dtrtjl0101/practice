@@ -1,5 +1,6 @@
-import { Container, Paper, Typography } from "@mui/material";
+import { Container, Stack } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
+import GroupList from "../../../component/groupList";
 
 export const Route = createFileRoute("/_pathlessLayout/groups/")({
   component: RouteComponent,
@@ -7,10 +8,10 @@ export const Route = createFileRoute("/_pathlessLayout/groups/")({
 
 function RouteComponent() {
   return (
-    <Container sx={{ mt: 4 }}>
-      <Paper sx={{ p: 2 }}>
-        <Typography>여기에 모임들 표시</Typography>
-      </Paper>
+    <Container maxWidth="lg" sx={{ mt: 4 }}>
+      <Stack spacing={2}>
+        <GroupList size="large" />
+      </Stack>
     </Container>
   );
 }
