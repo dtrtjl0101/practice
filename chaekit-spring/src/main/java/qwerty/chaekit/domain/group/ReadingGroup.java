@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import qwerty.chaekit.domain.BaseEntity;
+import qwerty.chaekit.domain.group.tag.GroupTag;
 import qwerty.chaekit.domain.member.user.UserProfile;
 
 import java.util.ArrayList;

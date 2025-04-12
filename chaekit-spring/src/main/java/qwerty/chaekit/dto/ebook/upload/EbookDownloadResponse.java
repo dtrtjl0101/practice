@@ -1,4 +1,4 @@
-package qwerty.chaekit.dto.upload;
+package qwerty.chaekit.dto.ebook.upload;
 
 import lombok.Builder;
 

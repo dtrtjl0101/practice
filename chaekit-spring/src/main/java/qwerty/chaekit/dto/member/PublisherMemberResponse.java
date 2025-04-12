@@ -1,4 +1,4 @@
-package qwerty.chaekit.dto;
+package qwerty.chaekit.dto.member;
 
 import lombok.Builder;
 

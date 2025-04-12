@@ -1,4 +1,4 @@
-package qwerty.chaekit.controller;
+package qwerty.chaekit.controller.group;
 
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;

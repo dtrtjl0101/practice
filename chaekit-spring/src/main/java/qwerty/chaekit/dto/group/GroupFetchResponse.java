@@ -1,7 +1,7 @@
 package qwerty.chaekit.dto.group;
 
 import lombok.Builder;
-import qwerty.chaekit.domain.group.GroupTag;
+import qwerty.chaekit.domain.group.tag.GroupTag;
 import qwerty.chaekit.domain.group.ReadingGroup;
 
 import java.util.List;

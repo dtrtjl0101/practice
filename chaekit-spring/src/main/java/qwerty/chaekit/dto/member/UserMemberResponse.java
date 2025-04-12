@@ -1,11 +1,10 @@
-package qwerty.chaekit.dto;
+package qwerty.chaekit.dto.member;
 
 import lombok.Builder;
 
 @Builder
-public record UserJoinResponse(
+public record UserMemberResponse(
         Long id,
-        String accessToken,
         String nickname,
         String username,
         String role

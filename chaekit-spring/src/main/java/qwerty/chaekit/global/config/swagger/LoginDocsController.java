@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import qwerty.chaekit.dto.LoginRequest;
-import qwerty.chaekit.dto.LoginResponse;
+import qwerty.chaekit.dto.member.LoginRequest;
+import qwerty.chaekit.dto.member.LoginResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 
 @RestController(value = "LoginController")

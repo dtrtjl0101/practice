@@ -1,12 +1,12 @@
-package qwerty.chaekit.controller;
+package qwerty.chaekit.controller.member.user;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import qwerty.chaekit.dto.UserJoinRequest;
-import qwerty.chaekit.dto.UserJoinResponse;
-import qwerty.chaekit.dto.UserMemberResponse;
+import qwerty.chaekit.dto.member.UserJoinRequest;
+import qwerty.chaekit.dto.member.UserJoinResponse;
+import qwerty.chaekit.dto.member.UserMemberResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
 import qwerty.chaekit.global.security.resolver.LoginMember;

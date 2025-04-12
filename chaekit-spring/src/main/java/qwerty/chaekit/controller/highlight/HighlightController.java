@@ -1,4 +1,4 @@
-package qwerty.chaekit.controller;
+package qwerty.chaekit.controller.highlight;
 
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
