@@ -145,19 +145,13 @@ function PageNavigation(props: {
   const page = pageZeroBased + 1;
 
   return (
-    <Stack
-      direction="row"
-      justifyContent="space-between"
-      alignItems="center"
-      spacing={2}
-    >
-      <Pagination
-        count={totalPages}
-        page={page}
-        onChange={(_, page) => {
-          setPage(page - 1);
-        }}
-      />
-    </Stack>
+    <Pagination
+      count={totalPages}
+      page={page}
+      onChange={(_, page) => {
+        setPage(page - 1);
+      }}
+      sx={{ width: "100%", display: "flex", justifyContent: "center" }}
+    />
   );
 }
