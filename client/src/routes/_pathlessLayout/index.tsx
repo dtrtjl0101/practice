@@ -1,5 +1,6 @@
-import { Container, Typography } from "@mui/material";
+import { Container, Stack, Typography } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
+import GroupList from "../../component/groupList";
 
 export const Route = createFileRoute("/_pathlessLayout/")({
   component: Home,
@@ -8,9 +9,9 @@ export const Route = createFileRoute("/_pathlessLayout/")({
 function Home() {
   return (
     <Container maxWidth="lg">
-      <Typography variant="h2" align="center">
-        qwerty
-      </Typography>
+      <Stack spacing={2} sx={{ padding: 2 }}>
+        <GroupList />
+      </Stack>
     </Container>
   );
 }
