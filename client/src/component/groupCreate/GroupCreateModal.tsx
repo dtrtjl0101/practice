@@ -49,7 +49,7 @@ export default function GroupCreateModal(props: {
         }}
       >
         <Container sx={{ height: "65vh" }}>
-          <GroupEditForm onEditDone={handleEditDone} />
+          <GroupEditForm onEditDone={handleEditDone} onCancel={onClose} />
         </Container>
       </Box>
     </Modal>

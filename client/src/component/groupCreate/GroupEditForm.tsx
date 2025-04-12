@@ -20,8 +20,9 @@ export type GroupEditData = {
 
 export default function GroupEditForm(props: {
   onEditDone: (data: GroupEditData) => void;
+  onCancel: () => void;
 }) {
-  const { onEditDone } = props;
+  const { onEditDone, onCancel } = props;
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -104,7 +105,9 @@ export default function GroupEditForm(props: {
           })}
         </Grid2>
         <Stack direction="row" spacing={2} sx={{ justifyContent: "flex-end" }}>
-          <Button color="secondary">취소</Button>
+          <Button color="secondary" onClick={onCancel}>
+            취소
+          </Button>
           <Button variant="contained" onClick={handleEditDoneButtonClicked}>
             완료
           </Button>
