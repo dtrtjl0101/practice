@@ -9,6 +9,7 @@ export default function useLogout() {
   const logout = useCallback(async () => {
     API_CLIENT.setSecurityData(null);
     setLoggedInUser(undefined);
+    localStorage.removeItem("loggedInUser");
   }, [setLoggedInUser]);
 
   return {
