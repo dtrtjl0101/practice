@@ -1,10 +1,5 @@
-import {
-  Toolbar,
-  Typography,
-  AppBar as MuiAppBar,
-  Button,
-} from "@mui/material";
-import { Link } from "@tanstack/react-router";
+import { Toolbar, AppBar as MuiAppBar, Button } from "@mui/material";
+import { createLink, Link } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
 import { AuthState } from "../states/auth";
 import { Role } from "../types/role";
@@ -18,9 +13,10 @@ export default function AppBar() {
   return (
     <MuiAppBar position="static">
       <Toolbar>
-        <Typography variant="h6" sx={{ mr: "auto" }}>
-          QWERTY
-        </Typography>
+        <LogoButton to="/" sx={{ mr: "auto" }}>
+          <img src="/logoTitle.png" alt="Logo" height={40} />
+        </LogoButton>
+
         {user && user.role === Role.ROLE_ADMIN && (
           <Link to="/admin">
             {({ isActive }) => {
@@ -49,3 +45,5 @@ export default function AppBar() {
     </MuiAppBar>
   );
 }
+
+const LogoButton = createLink(Button);
