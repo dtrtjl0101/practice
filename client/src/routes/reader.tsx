@@ -1,4 +1,11 @@
-import { Comment, Note, NoteAdd, Send } from "@mui/icons-material";
+import {
+  Comment,
+  Note,
+  NoteAdd,
+  Send,
+  ThumbUp,
+  ThumbUpOutlined,
+} from "@mui/icons-material";
 import {
   Badge,
   Box,
@@ -314,24 +321,24 @@ function diffMemos(prev: Highlight[], next: Highlight[]): HighlightDiff {
 function HighlightCard({ highlight }: { highlight: Highlight }) {
   const [openComments, setOpenComments] = useState(false);
   const [commentContent, setCommentContent] = useState("");
+  const liked = false; // TODO
 
   return (
     <Card>
-      <CardHeader
-        title="Nickname"
-        avatar="N"
-        action={
-          <IconButton onClick={() => setOpenComments(!openComments)}>
-            <Badge badgeContent={2} color="primary">
-              <Comment />
-            </Badge>
-          </IconButton>
-        }
-        sx={{ pb: 0 }}
-      />
+      <CardHeader title="NicknameNickname" avatar="N" sx={{ pb: 0 }} />
       <CardContent sx={{ pt: 1 }}>
         <Typography variant="body1">{highlight.memo}</Typography>
       </CardContent>
+      <CardActions sx={{ justifyContent: "flex-end" }}>
+        <IconButton size="small" onClick={() => setOpenComments(!openComments)}>
+          <Badge badgeContent={2} color="primary">
+            <Comment />
+          </Badge>
+        </IconButton>
+        <IconButton size="small">
+          {liked ? <ThumbUp /> : <ThumbUpOutlined />}
+        </IconButton>
+      </CardActions>
       {openComments && (
         <>
           {new Array(2).fill(0).map(() => {
