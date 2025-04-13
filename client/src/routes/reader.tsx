@@ -327,12 +327,24 @@ function HighlightCard({ highlight }: { highlight: Highlight }) {
             </Badge>
           </IconButton>
         }
+        sx={{ pb: 0 }}
       />
-      <CardContent>
+      <CardContent sx={{ pt: 1 }}>
         <Typography variant="body1">{highlight.memo}</Typography>
       </CardContent>
       {openComments && (
         <>
+          {new Array(2).fill(0).map(() => {
+            return (
+              <>
+                <Divider />
+                <CardHeader title="Nickname2" avatar="2" sx={{ pb: 0 }} />
+                <CardContent sx={{ pt: 1 }}>
+                  <Typography variant="body1">Comment</Typography>
+                </CardContent>
+              </>
+            );
+          })}
           <Divider />
           <CardActions>
             <Input
