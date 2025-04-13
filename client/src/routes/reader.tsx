@@ -1,5 +1,6 @@
 import {
   Comment,
+  CommentOutlined,
   Note,
   NoteAdd,
   Send,
@@ -332,7 +333,7 @@ function HighlightCard({ highlight }: { highlight: Highlight }) {
       <CardActions sx={{ justifyContent: "flex-end" }}>
         <IconButton size="small" onClick={() => setOpenComments(!openComments)}>
           <Badge badgeContent={2} color="primary">
-            <Comment />
+            {openComments ? <Comment /> : <CommentOutlined />}
           </Badge>
         </IconButton>
         <IconButton size="small">
