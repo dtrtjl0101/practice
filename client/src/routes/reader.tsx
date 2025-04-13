@@ -1,4 +1,4 @@
-import { Note, NoteAdd } from "@mui/icons-material";
+import { Comment, Note, NoteAdd, Send } from "@mui/icons-material";
 import {
   Badge,
   Box,
@@ -10,7 +10,9 @@ import {
   Divider,
   Drawer,
   Fab,
+  IconButton,
   Input,
+  InputAdornment,
   Modal,
   Stack,
   Typography,
@@ -86,6 +88,16 @@ function RouteComponent() {
       );
     },
     placeholderData: keepPreviousData,
+    initialData: [
+      {
+        id: 0,
+        bookId: 0,
+        cfi: "epubcfi(/6/22!/4/2/2/18,/1:4,/1:20)",
+        memo: "셋!",
+        spine: "10",
+        activityId: 0,
+      },
+    ],
   });
 
   const previousHighlightsInPage = useRef<Highlight[]>([]);
@@ -300,12 +312,46 @@ function diffMemos(prev: Highlight[], next: Highlight[]): HighlightDiff {
 }
 
 function HighlightCard({ highlight }: { highlight: Highlight }) {
+  const [openComments, setOpenComments] = useState(false);
+  const [commentContent, setCommentContent] = useState("");
+
   return (
     <Card>
-      <CardHeader title="Nickname" avatar="N" />
+      <CardHeader
+        title="Nickname"
+        avatar="N"
+        action={
+          <IconButton onClick={() => setOpenComments(!openComments)}>
+            <Badge badgeContent={2} color="primary">
+              <Comment />
+            </Badge>
+          </IconButton>
+        }
+      />
       <CardContent>
         <Typography variant="body1">{highlight.memo}</Typography>
       </CardContent>
+      {openComments && (
+        <>
+          <Divider />
+          <CardActions>
+            <Input
+              value={commentContent}
+              onChange={(e) => setCommentContent(e.target.value)}
+              fullWidth
+              multiline
+              size="small"
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton edge="end">
+                    <Send />
+                  </IconButton>
+                </InputAdornment>
+              }
+            />
+          </CardActions>
+        </>
+      )}
     </Card>
   );
 }
