@@ -64,6 +64,6 @@ jobs:
         working-directory: client/cdk
         run: |
           CDK_STACK_NAME=${{ env.STACK_NAME }} bunx cdk deploy CdkStack --require-approval never \
-              --parameters bucketName=${{ env.BRANCH_NAME}} \
+              --parameters bucketName=${{ env.BRANCH_NAME}}-client \
               --parameters domainName=${{ env.DOMAIN_NAME }} \
               --parameters subDomainName=${{ env.BRANCH_NAME }}
