@@ -7,25 +7,18 @@ export class CdkStack extends cdk.Stack {
     super(scope, id, props);
 
     // ==============================================================
-    const bucketName = new cdk.CfnParameter(this, "bucketName", {
-      type: "String",
-      description: "S3 bucket name for client static files",
-    });
-    const domainName = new cdk.CfnParameter(this, "domainName", {
-      type: "String",
-      description: "Domain name for client",
-    });
-    const subDomainName = new cdk.CfnParameter(this, "subDomainName", {
-      type: "String",
-      description: "Subdomain name for client",
-    });
-    console.log("bucketName", bucketName.valueAsString);
-    console.log("domainName", domainName.valueAsString);
-    console.log("subDomainName", subDomainName.valueAsString);
+    const bucketName = `${process.env.BRANCH_NAME}-client`;
+    const domainName = `${process.env.DOMAIN_NAME}`;
+    const subDomainName = `${process.env.SUB_DOMAIN_NAME}`;
+    const clientDomainName =
+      subDomainName === "main" ? domainName : `${subDomainName}.${domainName}`;
+    console.log("bucketName", bucketName);
+    console.log("domainName", domainName);
+    console.log("subDomainName", subDomainName);
 
     // ==============================================================
     const bucket = new cdk.aws_s3.Bucket(this, "ClientBucket", {
-      bucketName: bucketName.valueAsString,
+      bucketName: bucketName,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
       publicReadAccess: false,
@@ -38,12 +31,8 @@ export class CdkStack extends cdk.Stack {
     });
 
     // ==============================================================
-    const clientDomainName =
-      subDomainName.valueAsString === "main"
-        ? domainName.valueAsString
-        : `${subDomainName.valueAsString}.${domainName.valueAsString}`;
     const zone = cdk.aws_route53.HostedZone.fromLookup(this, "Zone", {
-      domainName: domainName.valueAsString,
+      domainName: domainName,
     });
 
     const certificate = new cdk.aws_certificatemanager.Certificate(
@@ -104,7 +93,7 @@ export class CdkStack extends cdk.Stack {
       ),
     });
 
-    const clientDomain = new cdk.CfnOutput(this, "client url", {
+    new cdk.CfnOutput(this, "Client url", {
       value: `https://${clientDomainName}`,
     });
   }
