@@ -23,7 +23,7 @@ export default function GroupList(props: {
   const { size, action } = props;
 
   const [page, setPage] = useState(0);
-  const [sort, setSort] = useState<string[]>([]);
+  const [sort, _setSort] = useState<string[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const navigate = useNavigate();
 

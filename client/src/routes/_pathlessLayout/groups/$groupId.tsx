@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_pathlessLayout/groups/$groupId")({
 });
 
 function RouteComponent() {
-  const { groupId } = Route.useParams();
+  // const { groupId } = Route.useParams();
 
   // TODO: Fetch group data using groupId
   const group: GroupInfo = {
