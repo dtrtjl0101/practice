@@ -39,6 +39,7 @@ export class CdkStack extends cdk.Stack {
       subDomainName.valueAsString === "main"
         ? domainName.valueAsString
         : `${subDomainName.valueAsString}.${domainName.valueAsString}`;
+    console.log("DomainName", domainName.valueAsString);
     const zone = cdk.aws_route53.HostedZone.fromLookup(this, "Zone", {
       domainName: domainName.valueAsString,
     });
