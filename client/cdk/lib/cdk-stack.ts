@@ -34,10 +34,13 @@ export class CdkStack extends cdk.Stack {
     });
 
     // ==============================================================
-    const zone = cdk.aws_route53.HostedZone.fromHostedZoneId(
+    const zone = cdk.aws_route53.HostedZone.fromHostedZoneAttributes(
       this,
       "Zone",
-      zoneId
+      {
+        hostedZoneId: zoneId,
+        zoneName: domainName,
+      }
     );
 
     const certificate = new cdk.aws_certificatemanager.Certificate(
