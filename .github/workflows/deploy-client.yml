@@ -1,0 +1,58 @@
+name: deploy-client
+on:
+  push:
+    branches:
+      - "*"
+    paths:
+      - "client/**"
+concurrency:
+  group: deploy-client
+  cancel-in-progress: true
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: ap-northeast-2
+  DOMAIN_NAME: chaekit.com
+  BRANCH_NAME: "" # Should be set in the job
+  STACK_NAME: "" # Should be set in the job
+jobs:
+  deploy-client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: set BRANCH_NAME, STACK_NAME
+        run: |
+          export BRANCH_NAME=$(echo "${{ github.event.ref }}" | tr "[:upper:]" "[:lower:]" | sed -e "s#refs/heads/##g" -e 's/\//-/g' -e 's/|/-/g')
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          export STACK_NAME=$(echo $BRANCH_NAME | tr "[:upper:]" "[:lower:]" | tr -cd '[:alnum:]')
+          echo "STACK_NAME=$STACK_NAME" >> $GITHUB_ENV
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Cache bun dependencies
+        id: cache-bun
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun
+          key: ${{ runner.os }}-bun-${{ hashFiles('client/bun.lock') }}
+
+      - name: Install client bun dependencies if cache miss
+        if: steps.cache-bun.outputs.cache-hit != 'true'
+        working-directory: client
+        run: bun install --frozen-lockfile
+
+      - name: Build client
+        working-directory: client
+        run: bun run build
+
+      - name: Deploy client
+        working-directory: client/cdk
+        run: |
+          CDK_STACK_NAME=${{ env.STACK_NAME }} bunx cdk deploy CdkStack --require-approval never \
+              --parameters bucketName=${{ env.BRANCH_NAME}} \
+              --parameters domainName=${{ env.DOMAIN_NAME }} \
+              --parameters subDomainName=${{ env.BRANCH_NAME }}
