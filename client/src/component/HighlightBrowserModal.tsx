@@ -26,6 +26,7 @@ const dummyHighlights: Highlight[] = [
     spine: "chapter-1",
     cfi: "epubcfi(/6!0;vnd.epub.chapter.section1!x,0:0-1)",
     memo: "이 구절은 그저 하나의 구절일 뿐입니다.",
+    activityId: 1,
   },
   {
     id: 2,
@@ -33,6 +34,7 @@ const dummyHighlights: Highlight[] = [
     spine: "chapter-1",
     cfi: "epubcfi(/6!0;vnd.epub.chapter.section1!x,0:0-1)",
     memo: "이 구절은 그저 두개의 구절일 뿐입니다.",
+    activityId: 1,
   },
 ];
 

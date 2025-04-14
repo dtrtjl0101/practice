@@ -91,9 +91,7 @@ function RouteComponent() {
         throw new Error(response.errorMessage);
       }
 
-      return response.data.highlights!.map(
-        (highlight) => highlight as Highlight
-      );
+      return response.data.content!.map((highlight) => highlight as Highlight);
     },
     placeholderData: keepPreviousData,
     initialData: [

@@ -42,7 +42,7 @@ export default function GroupList(props: {
 
       if (response.isSuccessful) {
         setTotalPages(response.data.totalPages!);
-        return response.data.groups;
+        return response.data.content;
       }
 
       throw new Error(response.errorMessage);

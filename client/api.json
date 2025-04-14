@@ -213,7 +213,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiSuccessResponseHighlightListResponse"
+                  "$ref": "#/components/schemas/ApiSuccessResponsePageResponseHighlightFetchResponse"
                 }
               }
             }
@@ -279,7 +279,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiSuccessResponseGroupListResponse"
+                  "$ref": "#/components/schemas/ApiSuccessResponsePageResponseGroupFetchResponse"
                 }
               }
             }
@@ -446,17 +446,58 @@
         }
       }
     },
-    "/api/admin/publishers/pending": {
+    "/api/ebook/api": {
       "get": {
-        "tags": ["admin-controller"],
-        "operationId": "fetchPendingList",
+        "tags": ["ebook-controller"],
+        "operationId": "mainApi_1",
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiSuccessResponseListPublisherInfoResponse"
+                  "$ref": "#/components/schemas/ApiSuccessResponseString"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/publishers/pending": {
+      "get": {
+        "tags": ["admin-controller"],
+        "operationId": "fetchPendingList",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "required": false,
+            "schema": { "minimum": 0, "type": "integer", "default": 0 }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "The size of the page to be returned",
+            "required": false,
+            "schema": { "minimum": 1, "type": "integer", "default": 20 }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+            "required": false,
+            "schema": { "type": "array", "items": { "type": "string" } }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponsePageResponsePublisherInfoResponse"
                 }
               }
             }
@@ -497,7 +538,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiSuccessResponseEbookListResponse"
+                  "$ref": "#/components/schemas/ApiSuccessResponsePageResponseEbookFetchResponse"
                 }
               }
             }
@@ -756,11 +797,13 @@
           "isAccepted": { "type": "boolean" }
         }
       },
-      "ApiSuccessResponseHighlightListResponse": {
+      "ApiSuccessResponsePageResponseHighlightFetchResponse": {
         "type": "object",
         "properties": {
           "isSuccessful": { "type": "boolean" },
-          "data": { "$ref": "#/components/schemas/HighlightListResponse" }
+          "data": {
+            "$ref": "#/components/schemas/PageResponseHighlightFetchResponse"
+          }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
@@ -775,10 +818,10 @@
           "activityId": { "type": "integer", "format": "int64" }
         }
       },
-      "HighlightListResponse": {
+      "PageResponseHighlightFetchResponse": {
         "type": "object",
         "properties": {
-          "highlights": {
+          "content": {
             "type": "array",
             "items": { "$ref": "#/components/schemas/HighlightFetchResponse" }
           },
@@ -787,18 +830,20 @@
           "totalPages": { "type": "integer", "format": "int32" }
         }
       },
-      "ApiSuccessResponseGroupListResponse": {
+      "ApiSuccessResponsePageResponseGroupFetchResponse": {
         "type": "object",
         "properties": {
           "isSuccessful": { "type": "boolean" },
-          "data": { "$ref": "#/components/schemas/GroupListResponse" }
+          "data": {
+            "$ref": "#/components/schemas/PageResponseGroupFetchResponse"
+          }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
-      "GroupListResponse": {
+      "PageResponseGroupFetchResponse": {
         "type": "object",
         "properties": {
-          "groups": {
+          "content": {
             "type": "array",
             "items": { "$ref": "#/components/schemas/GroupFetchResponse" }
           },
@@ -815,16 +860,27 @@
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
-      "ApiSuccessResponseListPublisherInfoResponse": {
+      "ApiSuccessResponsePageResponsePublisherInfoResponse": {
         "type": "object",
         "properties": {
           "isSuccessful": { "type": "boolean" },
           "data": {
-            "type": "array",
-            "items": { "$ref": "#/components/schemas/PublisherInfoResponse" }
+            "$ref": "#/components/schemas/PageResponsePublisherInfoResponse"
           }
         },
         "description": "API 에러 응답을 감싸는 클래스"
+      },
+      "PageResponsePublisherInfoResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/PublisherInfoResponse" }
+          },
+          "currentPage": { "type": "integer", "format": "int32" },
+          "totalItems": { "type": "integer", "format": "int64" },
+          "totalPages": { "type": "integer", "format": "int32" }
+        }
       },
       "PublisherInfoResponse": {
         "type": "object",
@@ -834,11 +890,13 @@
           "createdAt": { "type": "string", "format": "date-time" }
         }
       },
-      "ApiSuccessResponseEbookListResponse": {
+      "ApiSuccessResponsePageResponseEbookFetchResponse": {
         "type": "object",
         "properties": {
           "isSuccessful": { "type": "boolean" },
-          "data": { "$ref": "#/components/schemas/EbookListResponse" }
+          "data": {
+            "$ref": "#/components/schemas/PageResponseEbookFetchResponse"
+          }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
@@ -852,10 +910,10 @@
           "size": { "type": "integer", "format": "int64" }
         }
       },
-      "EbookListResponse": {
+      "PageResponseEbookFetchResponse": {
         "type": "object",
         "properties": {
-          "books": {
+          "content": {
             "type": "array",
             "items": { "$ref": "#/components/schemas/EbookFetchResponse" }
           },

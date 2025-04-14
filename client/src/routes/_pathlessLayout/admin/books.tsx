@@ -25,7 +25,7 @@ function RouteComponent() {
     wrapApiResponse(API_CLIENT.adminController.getBooks()).then((response) => {
       if (response.isSuccessful) {
         const books =
-          response.data.books?.map((book) => {
+          response.data.content?.map((book) => {
             const { id, title, author, description, size } = book;
             return {
               id: id!,
