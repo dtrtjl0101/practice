@@ -60,6 +60,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
 
+      - name: Bootstrap cdk
+        working-directory: client/cdk
+        run: bunx cdk bootstrap
+
       - name: Deploy client
         working-directory: client/cdk
         run: |
