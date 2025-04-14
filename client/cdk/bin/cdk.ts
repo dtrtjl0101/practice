@@ -18,3 +18,4 @@ new ClientDeploymentStack(app, "ClientDeploymentStack", {
     region: process.env.AWS_DEFAULT_REGION,
   },
 });
+app.synth();

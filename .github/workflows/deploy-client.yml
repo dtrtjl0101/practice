@@ -68,4 +68,4 @@ jobs:
       - name: Deploy client
         working-directory: client/cdk
         run: |
-          bunx cdk deploy CdkStack --require-approval never
+          bunx cdk deploy --require-approval never --all
