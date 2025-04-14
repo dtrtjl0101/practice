@@ -14,4 +14,7 @@ new ClientDeploymentStack(app, "ClientDeploymentStack", {
   certificate: certificationStack.certificate,
   stackName: `${process.env.CDK_STACK_NAME}ClientDeploymentStack`,
   crossRegionReferences: true,
+  env: {
+    region: process.env.AWS_DEFAULT_REGION,
+  },
 });
