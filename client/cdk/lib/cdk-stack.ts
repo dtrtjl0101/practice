@@ -47,6 +47,7 @@ export class CdkStack extends cdk.Stack {
           cdk.aws_certificatemanager.CertificateValidation.fromDns(zone),
       }
     );
+    console.log("Certificate ARN: ", certificate.certificateArn);
 
     // ==============================================================
     const originAccessIdentity = new cdk.aws_cloudfront.OriginAccessIdentity(
