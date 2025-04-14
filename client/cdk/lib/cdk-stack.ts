@@ -6,8 +6,6 @@ export class CdkStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    console.log("account: ", this.account);
-
     // ==============================================================
     const bucketName = new cdk.CfnParameter(this, "bucketName", {
       type: "String",
