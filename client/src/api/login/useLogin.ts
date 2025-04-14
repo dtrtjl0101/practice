@@ -12,6 +12,7 @@ export default function useLogin() {
     async (loggedInUser: AuthState.LoggedInUser) => {
       API_CLIENT.setSecurityData(loggedInUser.accessToken);
       setLoggedInUser(loggedInUser);
+      localStorage.setItem("loggedInUser", JSON.stringify(loggedInUser));
     },
     [setLoggedInUser]
   );

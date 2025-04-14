@@ -7,8 +7,8 @@ import qwerty.chaekit.domain.member.Member;
 import qwerty.chaekit.domain.member.enums.Role;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
-import qwerty.chaekit.dto.UserJoinRequest;
-import qwerty.chaekit.dto.UserJoinResponse;
+import qwerty.chaekit.dto.member.UserJoinRequest;
+import qwerty.chaekit.dto.member.UserJoinResponse;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.jwt.JwtUtil;
 

@@ -20,5 +20,5 @@ RUN ./gradlew --version
 #Build the application
 RUN ./gradlew clean build -x test
 
-#Run the application
+#Run the application#
 CMD ["java", "-jar", "build/libs/chaekit-0.0.1-SNAPSHOT.jar"]

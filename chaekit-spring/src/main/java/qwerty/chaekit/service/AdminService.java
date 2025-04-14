@@ -9,11 +9,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
-import qwerty.chaekit.dto.PublisherInfoResponse;
+import qwerty.chaekit.dto.member.PublisherInfoResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.exception.NotFoundException;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service

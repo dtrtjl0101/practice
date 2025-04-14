@@ -1,4 +1,12 @@
-import { Note, NoteAdd } from "@mui/icons-material";
+import {
+  Comment,
+  CommentOutlined,
+  Note,
+  NoteAdd,
+  Send,
+  ThumbUp,
+  ThumbUpOutlined,
+} from "@mui/icons-material";
 import {
   Badge,
   Box,
@@ -10,7 +18,9 @@ import {
   Divider,
   Drawer,
   Fab,
+  IconButton,
   Input,
+  InputAdornment,
   Modal,
   Stack,
   Typography,
@@ -18,22 +28,24 @@ import {
 } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
 import { EpubCFI, Rendition } from "epubjs";
-import { nanoid } from "nanoid";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ReactReader } from "react-reader";
+import API_CLIENT, { wrapApiResponse } from "../api/api";
+import {
+  keepPreviousData,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { Highlight } from "../types/highlight";
+import useAutoLogin from "../api/login/useAutoLogin";
 
 export const Route = createFileRoute("/reader")({
   component: RouteComponent,
 });
 
-type Memo = {
-  id: string;
-  cfiRange: string;
-  content: string;
-};
-type MemoDiff = {
-  added: Memo[];
-  removed: Memo[];
+type HighlightDiff = {
+  added: Highlight[];
+  removed: Highlight[];
 };
 type Selection = {
   left: number;
@@ -45,15 +57,58 @@ type Selection = {
 function RouteComponent() {
   const theme = useTheme();
   const [location, setLocation] = useState<string | number>(10);
-  const [memos, setMemos] = useState<Memo[]>([]);
-  const [memosInPage, setMemosInPage] = useState<Memo[]>([]);
+  const [highlightsInPage, setHighlightsInPage] = useState<Highlight[]>([]);
   const [epubUrl, setEpubUrl] = useState<ArrayBuffer>(new ArrayBuffer());
   const [rendition, setRendition] = useState<Rendition | undefined>(undefined);
-  const [openMemoDrawer, setOpenMemoDrawer] = useState(false);
+  const [openHighlightDrawer, setOpenHighlightDrawer] = useState(false);
   const [selection, setSelection] = useState<Selection | null>(null);
-  const [openMemoCreationModal, setOpenMemoCreationModal] =
+  const [openHighlightCreationModal, setOpenHighlightCreationModal] =
     useState<boolean>(false);
-  const previousMemosInPage = useRef<Memo[]>([]);
+  const queryClient = useQueryClient();
+  useAutoLogin();
+
+  const spine = useMemo(() => {
+    try {
+      const spinePos = new EpubCFI(location.toString()).spinePos;
+      return spinePos.toString();
+    } catch (e) {
+      console.error("Error parsing spine position", e);
+      return undefined;
+    }
+  }, [location]);
+
+  const { data: highlights } = useQuery({
+    queryKey: ["memos", spine],
+    queryFn: async () => {
+      const response = await wrapApiResponse(
+        API_CLIENT.highlightController.getHighlights({
+          page: 0,
+          size: 100,
+          spine,
+        })
+      );
+      if (!response.isSuccessful) {
+        throw new Error(response.errorMessage);
+      }
+
+      return response.data.highlights!.map(
+        (highlight) => highlight as Highlight
+      );
+    },
+    placeholderData: keepPreviousData,
+    initialData: [
+      {
+        id: 0,
+        bookId: 0,
+        cfi: "epubcfi(/6/22!/4/2/2/18,/1:4,/1:20)",
+        memo: "셋!",
+        spine: "10",
+        activityId: 0,
+      },
+    ],
+  });
+
+  const previousHighlightsInPage = useRef<Highlight[]>([]);
 
   const uploadEpub = useCallback(() => {
     let inputElement = document.createElement("input");
@@ -72,28 +127,32 @@ function RouteComponent() {
   }, [setEpubUrl]);
 
   useEffect(() => {
-    previousMemosInPage.current = memosInPage;
+    previousHighlightsInPage.current = highlightsInPage;
     if (!rendition || !rendition.location) {
-      setMemosInPage([]);
+      setHighlightsInPage([]);
       return;
     }
 
     const cfi = new EpubCFI();
     const startCfi = rendition.location.start.cfi;
     const endCfi = rendition.location.end.cfi;
-    const newMemosInPage = memos.filter((memo) => {
-      if (cfi.compare(startCfi, memo.cfiRange) >= 0) {
+    if (!highlights) {
+      setHighlightsInPage([]);
+      return;
+    }
+    const newMemosInPage = highlights.filter((highlight) => {
+      if (cfi.compare(startCfi, highlight.cfi) >= 0) {
         return false;
       }
-      if (cfi.compare(memo.cfiRange, endCfi) >= 0) {
+      if (cfi.compare(highlight.cfi, endCfi) >= 0) {
         return false;
       }
       return true;
     });
 
-    setMemosInPage(newMemosInPage);
+    setHighlightsInPage(newMemosInPage);
     return;
-  }, [memos, rendition, location, setMemosInPage]);
+  }, [highlights, rendition, location, setHighlightsInPage]);
 
   useEffect(() => {
     if (!rendition) {
@@ -101,16 +160,16 @@ function RouteComponent() {
     }
 
     const { added, removed } = diffMemos(
-      previousMemosInPage.current,
-      memosInPage
+      previousHighlightsInPage.current,
+      highlightsInPage
     );
-    added.forEach((memo) => {
-      rendition.annotations.highlight(memo.cfiRange, {}, () => {});
+    added.forEach((highlight) => {
+      rendition.annotations.highlight(highlight.cfi, {}, () => {});
     });
-    removed.forEach((memo) => {
-      rendition.annotations.remove(memo.cfiRange, "highlight");
+    removed.forEach((highlight) => {
+      rendition.annotations.remove(highlight.cfi, "highlight");
     });
-  }, [rendition, memosInPage]);
+  }, [rendition, highlightsInPage]);
 
   return (
     <Box
@@ -137,10 +196,10 @@ function RouteComponent() {
             top: theme.spacing(2),
           }}
           onClick={() => {
-            setOpenMemoDrawer(true);
+            setOpenHighlightDrawer(true);
           }}
         >
-          <Badge badgeContent={memosInPage.length} color="primary">
+          <Badge badgeContent={highlightsInPage.length} color="primary">
             <Note />
           </Badge>
         </Fab>
@@ -154,29 +213,46 @@ function RouteComponent() {
               translate: "50% 50%",
             }}
             onClick={() => {
-              setOpenMemoCreationModal(true);
+              setOpenHighlightCreationModal(true);
             }}
           >
             <NoteAdd />
           </Fab>
         )}
       </Box>
-      <MemoCreationModal
-        open={openMemoCreationModal}
-        onClose={() => setOpenMemoCreationModal(false)}
+      <HighlightCreationModal
+        open={openHighlightCreationModal}
+        onClose={() => setOpenHighlightCreationModal(false)}
         selection={selection}
-        addMemo={(memo) => {
-          setMemos((prev) => [...prev, memo]);
+        addHighlight={async ({ cfi, memo }) => {
+          const response = await wrapApiResponse(
+            API_CLIENT.highlightController.createHighlight({
+              memo,
+              cfi,
+              spine,
+              // TODO: use BookId and ActivityId
+              bookId: 1,
+              activityId: 1,
+            })
+          );
+
+          if (!response.isSuccessful) {
+            throw new Error(response.errorMessage);
+          }
+
+          queryClient.resetQueries({
+            queryKey: ["memos", spine],
+          });
         }}
       />
       <Drawer
         anchor="right"
-        open={openMemoDrawer}
-        onClose={() => setOpenMemoDrawer(false)}
+        open={openHighlightDrawer}
+        onClose={() => setOpenHighlightDrawer(false)}
       >
         <Stack spacing={theme.spacing(2)} p={theme.spacing(2)} width={256}>
-          {memosInPage.map((memo) => (
-            <MemoCard key={memo.id} memo={memo} />
+          {highlightsInPage.map((highlight) => (
+            <HighlightCard key={highlight.id} highlight={highlight} />
           ))}
         </Stack>
       </Drawer>
@@ -227,12 +303,14 @@ function RouteComponent() {
   );
 }
 
-function diffMemos(prev: Memo[], next: Memo[]): MemoDiff {
+function diffMemos(prev: Highlight[], next: Highlight[]): HighlightDiff {
   const added = next.filter(
-    (memo) => !prev.some((prevMemo) => prevMemo.id === memo.id)
+    (highlight) =>
+      !prev.some((prevHighlight) => prevHighlight.id === highlight.id)
   );
   const removed = prev.filter(
-    (memo) => !next.some((nextMemo) => nextMemo.id === memo.id)
+    (highlight) =>
+      !next.some((nextHighlight) => nextHighlight.id === highlight.id)
   );
 
   return {
@@ -241,27 +319,73 @@ function diffMemos(prev: Memo[], next: Memo[]): MemoDiff {
   };
 }
 
-function MemoCard({ memo }: { memo: Memo }) {
+function HighlightCard({ highlight }: { highlight: Highlight }) {
+  const [openComments, setOpenComments] = useState(false);
+  const [commentContent, setCommentContent] = useState("");
+  const liked = false; // TODO
+
   return (
     <Card>
-      <CardHeader title="Nickname" avatar="N" />
-      <CardContent>
-        <Typography variant="body1">{memo.content}</Typography>
+      <CardHeader title="NicknameNickname" avatar="N" sx={{ pb: 0 }} />
+      <CardContent sx={{ pt: 1 }}>
+        <Typography variant="body1">{highlight.memo}</Typography>
       </CardContent>
+      <CardActions sx={{ justifyContent: "flex-end" }}>
+        <IconButton size="small" onClick={() => setOpenComments(!openComments)}>
+          <Badge badgeContent={2} color="primary">
+            {openComments ? <Comment /> : <CommentOutlined />}
+          </Badge>
+        </IconButton>
+        <IconButton size="small">
+          {liked ? <ThumbUp /> : <ThumbUpOutlined />}
+        </IconButton>
+      </CardActions>
+      {openComments && (
+        <>
+          {new Array(2).fill(0).map(() => {
+            return (
+              <>
+                <Divider />
+                <CardHeader title="Nickname2" avatar="2" sx={{ pb: 0 }} />
+                <CardContent sx={{ pt: 1 }}>
+                  <Typography variant="body1">Comment</Typography>
+                </CardContent>
+              </>
+            );
+          })}
+          <Divider />
+          <CardActions>
+            <Input
+              value={commentContent}
+              onChange={(e) => setCommentContent(e.target.value)}
+              fullWidth
+              multiline
+              size="small"
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton edge="end">
+                    <Send />
+                  </IconButton>
+                </InputAdornment>
+              }
+            />
+          </CardActions>
+        </>
+      )}
     </Card>
   );
 }
 
-function MemoCreationModal({
+function HighlightCreationModal({
   open,
   onClose,
   selection,
-  addMemo,
+  addHighlight,
 }: {
   open: boolean;
   onClose: () => void;
   selection: Selection | null;
-  addMemo: (memo: Memo) => void;
+  addHighlight: (props: { memo: string; cfi: string }) => void;
 }) {
   const [content, setContent] = useState("");
 
@@ -306,12 +430,10 @@ function MemoCreationModal({
                 if (!selection) {
                   return;
                 }
-                const newMemo: Memo = {
-                  id: nanoid(),
-                  cfiRange: selection.epubcfi,
-                  content,
-                };
-                addMemo(newMemo);
+                addHighlight({
+                  memo: content,
+                  cfi: selection.epubcfi,
+                });
                 setContent("");
                 onClose();
               }}
