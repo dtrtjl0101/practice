@@ -5,6 +5,7 @@ on:
       - "**"
     paths:
       - "client/**"
+      - ".github/workflows/deploy-client.yml"
 concurrency:
   group: deploy-client
   cancel-in-progress: true
