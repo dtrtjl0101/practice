@@ -12,9 +12,12 @@ export class CdkStack extends cdk.Stack {
     const subDomainName = `${process.env.BRANCH_NAME}`;
     const clientDomainName =
       subDomainName === "main" ? domainName : `${subDomainName}.${domainName}`;
+    const zoneId = `${process.env.ZONE_ID}`;
     console.log("bucketName", bucketName);
     console.log("domainName", domainName);
     console.log("subDomainName", subDomainName);
+    console.log("clientDomainName", clientDomainName);
+    console.log("zoneId", zoneId);
 
     // ==============================================================
     const bucket = new cdk.aws_s3.Bucket(this, "ClientBucket", {
@@ -31,9 +34,11 @@ export class CdkStack extends cdk.Stack {
     });
 
     // ==============================================================
-    const zone = cdk.aws_route53.HostedZone.fromLookup(this, "Zone", {
-      domainName: domainName,
-    });
+    const zone = cdk.aws_route53.HostedZone.fromHostedZoneId(
+      this,
+      "Zone",
+      zoneId
+    );
 
     const certificate = new cdk.aws_certificatemanager.Certificate(
       this,
