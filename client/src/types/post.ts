@@ -32,7 +32,7 @@ export const initialPosts: Post[] = [
   },
 ];
 
-const PostManager = () => {
+export const PostManager = () => {
   const [posts, setPosts] = useState(initialPosts);
 
   const addPost = (
