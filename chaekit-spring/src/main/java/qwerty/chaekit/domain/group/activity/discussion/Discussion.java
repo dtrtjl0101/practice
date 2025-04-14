@@ -4,8 +4,6 @@ package qwerty.chaekit.domain.group.activity.discussion;
 import jakarta.persistence.*;
 import lombok.Getter;
 import qwerty.chaekit.domain.BaseEntity;
-import qwerty.chaekit.domain.ebook.Ebook;
-import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.member.user.UserProfile;
 
