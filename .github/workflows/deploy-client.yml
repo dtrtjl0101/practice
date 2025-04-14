@@ -2,7 +2,7 @@ name: deploy-client
 on:
   push:
     branches:
-      - "*"
+      - "**"
     paths:
       - "client/**"
 concurrency:
