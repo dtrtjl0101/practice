@@ -195,9 +195,9 @@ export interface PublisherMemberResponse {
 }
 
 /** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponseHighlightListResponse {
+export interface ApiSuccessResponsePageResponseHighlightFetchResponse {
   isSuccessful?: boolean;
-  data?: HighlightListResponse;
+  data?: PageResponseHighlightFetchResponse;
 }
 
 export interface HighlightFetchResponse {
@@ -212,8 +212,8 @@ export interface HighlightFetchResponse {
   activityId?: number;
 }
 
-export interface HighlightListResponse {
-  highlights?: HighlightFetchResponse[];
+export interface PageResponseHighlightFetchResponse {
+  content?: HighlightFetchResponse[];
   /** @format int32 */
   currentPage?: number;
   /** @format int64 */
@@ -223,13 +223,13 @@ export interface HighlightListResponse {
 }
 
 /** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponseGroupListResponse {
+export interface ApiSuccessResponsePageResponseGroupFetchResponse {
   isSuccessful?: boolean;
-  data?: GroupListResponse;
+  data?: PageResponseGroupFetchResponse;
 }
 
-export interface GroupListResponse {
-  groups?: GroupFetchResponse[];
+export interface PageResponseGroupFetchResponse {
+  content?: GroupFetchResponse[];
   /** @format int32 */
   currentPage?: number;
   /** @format int64 */
@@ -245,9 +245,19 @@ export interface ApiSuccessResponseGroupFetchResponse {
 }
 
 /** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponseListPublisherInfoResponse {
+export interface ApiSuccessResponsePageResponsePublisherInfoResponse {
   isSuccessful?: boolean;
-  data?: PublisherInfoResponse[];
+  data?: PageResponsePublisherInfoResponse;
+}
+
+export interface PageResponsePublisherInfoResponse {
+  content?: PublisherInfoResponse[];
+  /** @format int32 */
+  currentPage?: number;
+  /** @format int64 */
+  totalItems?: number;
+  /** @format int32 */
+  totalPages?: number;
 }
 
 export interface PublisherInfoResponse {
@@ -259,9 +269,9 @@ export interface PublisherInfoResponse {
 }
 
 /** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponseEbookListResponse {
+export interface ApiSuccessResponsePageResponseEbookFetchResponse {
   isSuccessful?: boolean;
-  data?: EbookListResponse;
+  data?: PageResponseEbookFetchResponse;
 }
 
 export interface EbookFetchResponse {
@@ -274,8 +284,8 @@ export interface EbookFetchResponse {
   size?: number;
 }
 
-export interface EbookListResponse {
-  books?: EbookFetchResponse[];
+export interface PageResponseEbookFetchResponse {
+  content?: EbookFetchResponse[];
   /** @format int32 */
   currentPage?: number;
   /** @format int64 */
@@ -560,7 +570,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       },
       params: RequestParams = {},
     ) =>
-      this.request<ApiSuccessResponseHighlightListResponse, any>({
+      this.request<ApiSuccessResponsePageResponseHighlightFetchResponse, any>({
         path: `/api/highlights`,
         method: "GET",
         query: query,
@@ -626,7 +636,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       },
       params: RequestParams = {},
     ) =>
-      this.request<ApiSuccessResponseGroupListResponse, any>({
+      this.request<ApiSuccessResponsePageResponseGroupFetchResponse, any>({
         path: `/api/groups`,
         method: "GET",
         query: query,
@@ -785,10 +795,29 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name FetchPendingList
      * @request GET:/api/admin/publishers/pending
      */
-    fetchPendingList: (params: RequestParams = {}) =>
-      this.request<ApiSuccessResponseListPublisherInfoResponse, any>({
+    fetchPendingList: (
+      query?: {
+        /**
+         * Zero-based page index (0..N)
+         * @min 0
+         * @default 0
+         */
+        page?: number;
+        /**
+         * The size of the page to be returned
+         * @min 1
+         * @default 20
+         */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponsePageResponsePublisherInfoResponse, any>({
         path: `/api/admin/publishers/pending`,
         method: "GET",
+        query: query,
         ...params,
       }),
 
@@ -818,7 +847,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       },
       params: RequestParams = {},
     ) =>
-      this.request<ApiSuccessResponseEbookListResponse, any>({
+      this.request<ApiSuccessResponsePageResponseEbookFetchResponse, any>({
         path: `/api/admin/books`,
         method: "GET",
         query: query,
@@ -850,6 +879,21 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     mainApi: (params: RequestParams = {}) =>
       this.request<ApiSuccessResponseString, any>({
         path: `/api`,
+        method: "GET",
+        ...params,
+      }),
+  };
+  ebookController = {
+    /**
+     * No description
+     *
+     * @tags ebook-controller
+     * @name MainApi1
+     * @request GET:/api/ebook/api
+     */
+    mainApi1: (params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseString, any>({
+        path: `/api/ebook/api`,
         method: "GET",
         ...params,
       }),

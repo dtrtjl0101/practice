@@ -1,5 +1,7 @@
 package qwerty.chaekit.domain.member.publisher;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -9,5 +11,5 @@ public interface PublisherProfileRepository extends JpaRepository<PublisherProfi
     Optional<PublisherProfile> findByMember_Id(Long id);
     Optional<PublisherProfile> findByMember_Username(String username);
     boolean existsByPublisherName(String publisherName);
-    List<PublisherProfile> findAllByAcceptedFalseOrderByCreatedAtDesc();
+    Page<PublisherProfile> findAllByAcceptedFalseOrderByCreatedAtDesc(Pageable pageable);
 }

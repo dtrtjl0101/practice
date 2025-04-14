@@ -5,7 +5,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import qwerty.chaekit.domain.BaseEntity;
-import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.highlight.Highlight;
 import qwerty.chaekit.domain.member.user.UserProfile;
 

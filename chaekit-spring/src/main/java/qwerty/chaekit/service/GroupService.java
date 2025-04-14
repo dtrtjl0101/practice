@@ -10,6 +10,7 @@ import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.dto.group.*;
+import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.LoginMember;
@@ -36,14 +37,9 @@ public class GroupService {
     }
 
     @Transactional(readOnly = true)
-    public GroupListResponse fetchGroupList(Pageable pageable) {
+    public PageResponse<GroupFetchResponse> fetchGroupList(Pageable pageable) {
         Page<GroupFetchResponse> page = groupRepository.findAll(pageable).map(GroupFetchResponse::of);
-        return GroupListResponse.builder()
-                .groups(page.getContent())
-                .currentPage(page.getNumber())
-                .totalItems(page.getTotalElements())
-                .totalPages(page.getTotalPages())
-                .build();
+        return PageResponse.of(page);
     }
 
     @Transactional(readOnly = true)

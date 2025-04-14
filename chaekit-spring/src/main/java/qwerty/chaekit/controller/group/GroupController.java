@@ -5,6 +5,7 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.dto.group.*;
+import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
 import qwerty.chaekit.global.security.resolver.LoginMember;
@@ -23,7 +24,7 @@ public class GroupController {
     }
 
     @GetMapping
-    public ApiSuccessResponse<GroupListResponse> getAllGroups(@ParameterObject Pageable pageable) {
+    public ApiSuccessResponse<PageResponse<GroupFetchResponse>> getAllGroups(@ParameterObject Pageable pageable) {
         return ApiSuccessResponse.of(groupService.fetchGroupList(pageable));
     }
 

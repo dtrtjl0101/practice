@@ -1,10 +1,12 @@
 package qwerty.chaekit.controller.member.admin;
+
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.dto.member.PublisherInfoResponse;
-import qwerty.chaekit.dto.ebook.EbookListResponse;
+import qwerty.chaekit.dto.ebook.EbookFetchResponse;
+import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.dto.ebook.upload.EbookDownloadResponse;
 import qwerty.chaekit.dto.ebook.upload.EbookUploadRequest;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
@@ -13,7 +15,6 @@ import qwerty.chaekit.service.EbookFileService;
 import qwerty.chaekit.service.EbookService;
 
 import java.io.IOException;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -24,8 +25,8 @@ public class AdminController {
     private final EbookService ebookService;
 
     @GetMapping("/publishers/pending")
-    public ApiSuccessResponse<List<PublisherInfoResponse>> fetchPendingList() {
-        return ApiSuccessResponse.of(adminService.getNotAcceptedPublishers());
+    public ApiSuccessResponse<PageResponse<PublisherInfoResponse>> fetchPendingList(@ParameterObject Pageable pageable) {
+        return ApiSuccessResponse.of(adminService.getNotAcceptedPublishers(pageable));
     }
 
     @PostMapping("/publishers/{id}/accept")
@@ -44,7 +45,7 @@ public class AdminController {
     }
 
     @GetMapping("/books")
-    public ApiSuccessResponse<EbookListResponse> getBooks(@ParameterObject Pageable pageable) {
+    public ApiSuccessResponse<PageResponse<EbookFetchResponse>> getBooks(@ParameterObject Pageable pageable) {
         return ApiSuccessResponse.of(ebookService.fetchEbookList(pageable));
     }
 }
