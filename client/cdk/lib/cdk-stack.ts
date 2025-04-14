@@ -19,6 +19,9 @@ export class CdkStack extends cdk.Stack {
       type: "String",
       description: "Subdomain name for client",
     });
+    console.log("bucketName", bucketName.valueAsString);
+    console.log("domainName", domainName.valueAsString);
+    console.log("subDomainName", subDomainName.valueAsString);
 
     // ==============================================================
     const bucket = new cdk.aws_s3.Bucket(this, "ClientBucket", {
@@ -39,7 +42,6 @@ export class CdkStack extends cdk.Stack {
       subDomainName.valueAsString === "main"
         ? domainName.valueAsString
         : `${subDomainName.valueAsString}.${domainName.valueAsString}`;
-    console.log("DomainName", domainName.valueAsString);
     const zone = cdk.aws_route53.HostedZone.fromLookup(this, "Zone", {
       domainName: domainName.valueAsString,
     });
