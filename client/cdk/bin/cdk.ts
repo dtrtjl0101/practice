@@ -7,7 +7,7 @@ new CdkStack(app, "CdkStack", {
   stackName: process.env.CDK_STACK_NAME,
   env: {
     account: process.env.AWS_ACCESS_KEY_ID,
-    region: process.env.AWS_REGION,
+    region: process.env.AWS_DEFAULT_REGION,
   },
   /* If you don't specify 'env', this stack will be environment-agnostic.
    * Account/Region-dependent features and context lookups will not work,
