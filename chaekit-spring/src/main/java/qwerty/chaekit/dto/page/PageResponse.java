@@ -12,14 +12,6 @@ public record PageResponse<T>(
         Long totalItems,
         Integer totalPages
 ) {
-    public static <T> PageResponse<T> of(List<T> content, Integer currentPage, Long totalItems, Integer totalPages) {
-        return PageResponse.<T>builder()
-                .content(content)
-                .currentPage(currentPage)
-                .totalItems(totalItems)
-                .totalPages(totalPages)
-                .build();
-    }
     public static <T> PageResponse<T> of(Page<T> page) {
         return PageResponse.<T>builder()
                 .content(page.getContent())
