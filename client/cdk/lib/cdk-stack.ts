@@ -9,7 +9,7 @@ export class CdkStack extends cdk.Stack {
     // ==============================================================
     const bucketName = `${process.env.BRANCH_NAME}-client`;
     const domainName = `${process.env.DOMAIN_NAME}`;
-    const subDomainName = `${process.env.SUB_DOMAIN_NAME}`;
+    const subDomainName = `${process.env.BRANCH_NAME}`;
     const clientDomainName =
       subDomainName === "main" ? domainName : `${subDomainName}.${domainName}`;
     console.log("bucketName", bucketName);
