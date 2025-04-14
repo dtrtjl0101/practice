@@ -2,9 +2,16 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
-export class CdkStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+export class ClientDeploymentStack extends cdk.Stack {
+  constructor(
+    scope: Construct,
+    id: string,
+    props: cdk.StackProps & {
+      certificate: cdk.aws_certificatemanager.ICertificate;
+    }
+  ) {
     super(scope, id, props);
+    const { certificate } = props;
 
     // ==============================================================
     const bucketName = `${process.env.BRANCH_NAME}-client`;
@@ -37,17 +44,6 @@ export class CdkStack extends cdk.Stack {
         zoneName: domainName,
       }
     );
-
-    const certificate = new cdk.aws_certificatemanager.Certificate(
-      this,
-      "Certificate",
-      {
-        domainName: clientDomainName,
-        validation:
-          cdk.aws_certificatemanager.CertificateValidation.fromDns(zone),
-      }
-    );
-    console.log("Certificate ARN: ", certificate.certificateArn);
 
     // ==============================================================
     const originAccessIdentity = new cdk.aws_cloudfront.OriginAccessIdentity(
