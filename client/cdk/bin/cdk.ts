@@ -9,7 +9,6 @@ const certificationStack = new CertificationStack(app, "CertificationStack", {
   env: {
     region: "us-east-1",
   },
-  crossRegionReferences: true,
 });
 new ClientDeploymentStack(app, "ClientStack", {
   certificate: certificationStack.certificate,
