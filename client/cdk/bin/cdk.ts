@@ -10,7 +10,7 @@ const certificationStack = new CertificationStack(app, "CertificationStack", {
     region: "us-east-1",
   },
 });
-new ClientDeploymentStack(app, "ClientStack", {
+new ClientDeploymentStack(app, "ClientDeploymentStack", {
   certificate: certificationStack.certificate,
   stackName: `${process.env.CDK_STACK_NAME}ClientDeploymentStack`,
   crossRegionReferences: true,
