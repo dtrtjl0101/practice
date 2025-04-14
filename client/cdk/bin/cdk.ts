@@ -13,4 +13,5 @@ const certificationStack = new CertificationStack(app, "CertificationStack", {
 new ClientDeploymentStack(app, "ClientStack", {
   certificate: certificationStack.certificate,
   stackName: `${process.env.CDK_STACK_NAME}ClientDeploymentStack`,
+  crossRegionReferences: true,
 });
