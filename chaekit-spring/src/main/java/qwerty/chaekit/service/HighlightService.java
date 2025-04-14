@@ -1,8 +1,9 @@
 package qwerty.chaekit.service;
 
-import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.core.BooleanBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import qwerty.chaekit.domain.ebook.Ebook;
@@ -13,6 +14,7 @@ import qwerty.chaekit.domain.highlight.QHighlight;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.dto.highlight.*;
+import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
@@ -21,6 +23,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -56,47 +59,51 @@ public class HighlightService {
     // 3. 특정 활동에서 공개된 내 하이라이트 목록
     // 4. 특정 활동에서 공개된 모든 하이라이트 조회
 
-    public HighlightListResponse fetchHighlights(LoginMember loginMember, Pageable pageable, Long activityId, Long bookId, String spine, Boolean me) {
+    public PageResponse<HighlightFetchResponse> fetchHighlights(LoginMember loginMember, Pageable pageable, Long activityId, Long bookId, String spine, Boolean me) {
         // 추후 repository layer로 이동
         QHighlight highlight = QHighlight.highlight;
 
-        JPAQuery<Highlight> jpaQuery = jpaQueryFactory.selectFrom(highlight);
+        // 동적 쿼리 조건 생성
+        BooleanBuilder where = new BooleanBuilder();
 
         if (activityId != null) {
             throw new IllegalStateException("Not Implemented Yet");
         }
         if (bookId != null) {
-            jpaQuery.where(highlight.book.id.eq(bookId));
+            where.and(highlight.book.id.eq(bookId));
         }
         if (spine != null) {
             if(bookId == null) {
                 throw new BadRequestException("BOOK_ID_REQUIRED", "책 ID가 필요합니다.");
             }
-            jpaQuery.where(highlight.spine.eq(spine));
+            where.and(highlight.spine.eq(spine));
         }
         if (me == null || me) {
-            jpaQuery.where(highlight.author.member.id.eq(loginMember.memberId()));
+            where.and(highlight.author.member.id.eq(loginMember.memberId()));
         } else {
-            // activityId에 현재 자신이 속해 있는 경우만 가능
+            // TODO: activityId에 현재 자신이 속해 있는 경우만 가능
             throw new IllegalStateException("Not Implemented Yet");
         }
 
-        List<Highlight> highlights = jpaQuery
+        List<HighlightFetchResponse> highlights = jpaQueryFactory
+                .selectFrom(highlight)
+                .where(where)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .fetch();
+                .fetch()
+                .stream()
+                .map(HighlightFetchResponse::of)
+                .toList();
 
-        long total = highlights.size();
+        long totalElement = Optional.ofNullable(
+                jpaQueryFactory
+                        .select(highlight.count())
+                        .from(highlight)
+                        .where(where)
+                        .fetchOne()
+        ).orElse(0L);
 
-        return HighlightListResponse.builder()
-                .highlights(
-                        highlights.stream()
-                        .map(HighlightFetchResponse::of)
-                        .toList())
-                .currentPage(pageable.getPageNumber())
-                .totalItems(total)
-                .totalPages((int) Math.ceil((double) total / pageable.getPageSize()))
-                .build();
+        return PageResponse.of(new PageImpl<>(highlights, pageable, totalElement));
     }
 
     public HighlightPostResponse updateHighlight(LoginMember loginMember, Long id, HighlightPutRequest request) {
@@ -109,7 +116,6 @@ public class HighlightService {
 
         // TODO: activityId 업데이트 로직 추가(활동에 공개하기)
         // 기존 activityId가 null일때만 activityId 변경 가능.
-        //
 
         return HighlightPostResponse.of(highlightRepository.save(highlight));
     }
