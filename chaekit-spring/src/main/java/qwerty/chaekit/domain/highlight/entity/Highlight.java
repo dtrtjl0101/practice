@@ -1,4 +1,4 @@
-package qwerty.chaekit.domain.highlight;
+package qwerty.chaekit.domain.highlight.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
