@@ -7,6 +7,8 @@ import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.group.ReadingGroup;
 
+import java.time.LocalDate;
+
 @Entity
 @Getter
 @Table(name = "activity")
@@ -23,5 +25,11 @@ public class Activity extends BaseEntity {
     @JoinColumn(name = "book_id")
     private Ebook book;
 
+    @Column(nullable = false)
+    private LocalDate startTime;
 
+    @Column(nullable = false)
+    private LocalDate endTime;
+
+    private String description;
 }
