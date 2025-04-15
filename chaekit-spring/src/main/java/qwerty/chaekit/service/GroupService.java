@@ -10,6 +10,7 @@ import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.dto.group.*;
+import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
@@ -24,7 +25,7 @@ public class GroupService {
     @Transactional
     public GroupPostResponse createGroup(LoginMember loginMember, GroupPostRequest request) {
         UserProfile userProfile = userProfileRepository.findByMember_Id(loginMember.memberId())
-                .orElseThrow(() -> new NotFoundException("USER_NOT_FOUND", "일반 회원이 아니거나 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         ReadingGroup groupEntity = ReadingGroup.builder()
                 .name(request.name())
@@ -45,20 +46,20 @@ public class GroupService {
     @Transactional(readOnly = true)
     public GroupFetchResponse fetchGroup(long groupId) {
         ReadingGroup group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new NotFoundException("GROUP_NOT_FOUND", "독서모임을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.GROUP_NOT_FOUND));
         return GroupFetchResponse.of(group);
     }
 
     @Transactional
     public GroupPostResponse updateGroup(LoginMember loginMember, long groupId, GroupPutRequest request) {
         UserProfile userProfile = userProfileRepository.findByMember_Id(loginMember.memberId())
-                .orElseThrow(() -> new NotFoundException("USER_NOT_FOUND", "일반 회원이 아니거나 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         ReadingGroup group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new NotFoundException("GROUP_NOT_FOUND", "독서모임을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.GROUP_NOT_FOUND));
 
         if (!group.getGroupLeader().getId().equals(userProfile.getId())) {
-            throw new ForbiddenException("GROUP_FORBIDDEN", "독서모임의 리더가 아닙니다.");
+            throw new ForbiddenException(ErrorCode.GROUP_UPDATE_FORBIDDEN);
         }
         if(request.description() != null) {
             group.updateDescription(request.description());

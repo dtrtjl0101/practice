@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.dto.member.UserMemberResponse;
+import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.LoginMember;
 
@@ -16,7 +17,7 @@ public class UserService {
 
     public UserMemberResponse getUserProfile(LoginMember loginMember) {
         String nickname = profileRepository.findByMember_Id(loginMember.memberId())
-                .orElseThrow(() -> new NotFoundException("USER_NOT_FOUND", "해당 사용자가 없습니다.")).getNickname();
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND)).getNickname();
 
         return UserMemberResponse.builder()
                 .id(loginMember.memberId())

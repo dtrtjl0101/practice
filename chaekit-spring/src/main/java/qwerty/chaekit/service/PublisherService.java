@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
 import qwerty.chaekit.dto.member.PublisherMemberResponse;
+import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.LoginMember;
 
@@ -17,7 +18,7 @@ public class PublisherService {
 
     public PublisherMemberResponse getPublisherProfile(LoginMember loginMember) {
         PublisherProfile profile = profileRepository.findByMember_Id(loginMember.memberId())
-                .orElseThrow(() -> new NotFoundException("PUBLISHER_NOT_FOUND", "해당 출판사가 없습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));
 
         return PublisherMemberResponse.builder()
                 .id(loginMember.memberId())

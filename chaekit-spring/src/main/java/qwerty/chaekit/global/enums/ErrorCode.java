@@ -1,0 +1,41 @@
+package qwerty.chaekit.global.enums;
+
+
+import lombok.Getter;
+
+@Getter
+public enum ErrorCode {
+    // BAD_REQUEST
+    // book
+    EBOOK_FILE_MISSING("EBOOK_FILE_MISSING", "파일이 누락되었습니다"),
+    EBOOK_FILE_SIZE_EXCEEDED("EBOOK_FILE_SIZE_EXCEEDED", "파일 크기가 초과되었습니다"),
+    INVALID_EBOOK_FILE("INVALID_EBOOK_FILE", "유효하지 않은 전자책 파일입니다"),
+    // highlight
+    BOOK_ID_REQUIRED("BOOK_ID_REQUIRED", "책 ID가 필요합니다"),
+    // member
+    MEMBER_ALREADY_EXISTS("MEMBER_ALREADY_EXISTS", "이미 존재하는 회원입니다"),
+    PUBLISHER_ALREADY_EXISTS("PUBLISHER_ALREADY_EXISTS", "이미 존재하는 출판사 이름입니다"),
+    NICKNAME_ALREADY_EXISTS("NICKNAME_ALREADY_EXISTS", "이미 존재하는 닉네임입니다"),
+
+    // FORBIDDEN
+    NO_VALID_TOKEN("NO_VALID_TOKEN", "유효한 토큰이 없습니다"),
+    GROUP_UPDATE_FORBIDDEN("GROUP_UPDATE_FORBIDDEN", "독서모임 수정 권한이 없습니다"),
+    HIGHLIGHT_NOT_YOURS("HIGHLIGHT_NOT_YOURS", "하이라이트는 본인만 수정할 수 있습니다"),
+
+    // NOT_FOUND
+    EBOOK_NOT_FOUND("EBOOK_NOT_FOUND", "해당 전자책이 존재하지 않습니다"),
+    PUBLISHER_NOT_FOUND("PUBLISHER_NOT_FOUND", "해당 출판사가 존재하지 않습니다"),
+    USER_NOT_FOUND("USER_NOT_FOUND", "일반 회원이 아니거나 존재하지 않습니다"),
+    GROUP_NOT_FOUND("GROUP_NOT_FOUND", "해당 독서모임이 존재하지 않습니다"),
+    HIGHLIGHT_NOT_FOUND("HIGHLIGHT_NOT_FOUND", "해당 하이라이트가 존재하지 않습니다"),
+    ;
+
+    private final String code;
+    private final String message;
+
+    ErrorCode(String code, String message) {
+        this.code = code;
+        this.message = message;
+    }
+
+}

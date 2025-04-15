@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import qwerty.chaekit.domain.member.Member;
 import qwerty.chaekit.domain.member.enums.Role;
 import qwerty.chaekit.domain.member.MemberRepository;
+import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
 
 @Service
@@ -25,7 +26,7 @@ public class MemberJoinHelper {
 
     private void validateUsername(String username) {
         if (memberRepository.existsByUsername(username)) {
-            throw new BadRequestException("MEMBER_ALREADY_EXISTS","이미 존재하는 회원입니다");
+            throw new BadRequestException(ErrorCode.MEMBER_ALREADY_EXISTS);
         }
     }
 }

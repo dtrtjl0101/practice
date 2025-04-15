@@ -9,6 +9,7 @@ import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.dto.member.UserJoinRequest;
 import qwerty.chaekit.dto.member.UserJoinResponse;
+import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.jwt.JwtUtil;
 
@@ -33,7 +34,7 @@ public class UserJoinService {
 
     private void validateNickname(String nickname) {
         if (userProfileRepository.existsByNickname(nickname)) {
-            throw new BadRequestException("NICKNAME_EXISTS", "이미 사용중인 이름입니다");
+            throw new BadRequestException(ErrorCode.NICKNAME_ALREADY_EXISTS);
         }
     }
 
