@@ -9,22 +9,18 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.ebook.Ebook;
-import qwerty.chaekit.domain.ebook.EbookRepository;
 import qwerty.chaekit.domain.highlight.entity.Highlight;
 import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
-import qwerty.chaekit.domain.member.Member;
-import qwerty.chaekit.domain.member.MemberRepository;
 import qwerty.chaekit.domain.member.enums.Role;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
-import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
-import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.dto.highlight.HighlightFetchResponse;
 import qwerty.chaekit.dto.highlight.HighlightPostRequest;
 import qwerty.chaekit.dto.highlight.HighlightPostResponse;
 import qwerty.chaekit.dto.highlight.HighlightPutRequest;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.security.resolver.LoginMember;
+import qwerty.chaekit.util.TestFixtureFactory;
 
 import java.util.Optional;
 
@@ -38,19 +34,10 @@ class HighlightServiceTest {
     private HighlightService highlightService;
 
     @Autowired
-    private MemberRepository memberRepository;
-
-    @Autowired
     private HighlightRepository highlightRepository;
 
     @Autowired
-    private EbookRepository ebookRepository;
-
-    @Autowired
-    private UserProfileRepository userProfileRepository;
-
-    @Autowired
-    private PublisherProfileRepository publisherProfileRepository;
+    private TestFixtureFactory testFixtureFactory;
 
     private UserProfile dummyUserProfile;
     private Ebook dummyEbook;
@@ -58,55 +45,17 @@ class HighlightServiceTest {
 
     @BeforeEach
     void setUp() {
-        Member userAccount = memberRepository.save(
-                Member.builder()
-                    .username("user_account")
-                    .password("user_password")
-                    .role(Role.ROLE_USER)
-                    .build());
-        dummyUserProfile = userProfileRepository.save(
-                UserProfile.builder()
-                        .member(userAccount)
-                        .nickname("test_nickname")
-                        .build()
-        );
+        dummyUserProfile = testFixtureFactory.createUser("user_username", "user_nickname");
+        PublisherProfile dummyPublisherProfile = testFixtureFactory.createPublisher("publisher_username", "publisher_name");
+        dummyEbook = testFixtureFactory.createEbook("dummy_ebook", dummyPublisherProfile, "book_author", "book_description", "book_file_key");
+        dummyLoginMember = testFixtureFactory.createLoginMember(dummyUserProfile.getMember(), Role.ROLE_USER);
 
-        Member publisherAccount = memberRepository.save(
-                Member.builder()
-                    .username("publisher_account")
-                    .password("publisher_password")
-                    .role(Role.ROLE_PUBLISHER)
-                    .build());
-        PublisherProfile dummyPublisherProfile = publisherProfileRepository.save(
-                PublisherProfile.builder()
-                        .member(publisherAccount)
-                        .publisherName("test_publisher_name")
-                        .build());
-
-        dummyEbook = ebookRepository.save(Ebook.builder()
-                .title("test-title")
-                .description("test-description")
-                .size(2 * 1024 * 1024)
-                .fileKey("test-file-key")
-                .author("test-author")
-                .publisher(dummyPublisherProfile)
-                .build());
-        dummyLoginMember = new LoginMember(
-                dummyUserProfile.getMember().getId(),
-                dummyUserProfile.getMember().getUsername(),
-                dummyUserProfile.getMember().getRole().name()
-        );
     }
 
     @Test
     @DisplayName("Highlight 생성 테스트")
     void createHighlightTest() {
         // Given
-        LoginMember loginMember = new LoginMember(
-                dummyUserProfile.getMember().getId(),
-                dummyUserProfile.getMember().getUsername(),
-                dummyUserProfile.getMember().getRole().name()
-        );
         HighlightPostRequest request = HighlightPostRequest.builder()
                 .bookId(dummyEbook.getId())
                 .spine("spine1")
@@ -115,11 +64,13 @@ class HighlightServiceTest {
                 .build();
 
         // When
-        HighlightPostResponse response = highlightService.createHighlight(loginMember, request);
+        HighlightPostResponse response = highlightService.createHighlight(dummyLoginMember, request);
 
         // Then
         assertThat(response).isNotNull();
         assertThat(response.bookId()).isEqualTo(dummyEbook.getId());
+        assertThat(response.spine()).isEqualTo("spine1");
+        assertThat(response.cfi()).isEqualTo("cfi1");
         assertThat(response.memo()).isEqualTo("Test Memo");
     }
 
@@ -134,6 +85,7 @@ class HighlightServiceTest {
                 .cfi("cfi1")
                 .memo("Test Memo")
                 .build());
+
         Pageable pageable = PageRequest.of(0, 10);
 
         // When
@@ -142,7 +94,7 @@ class HighlightServiceTest {
                 pageable,
                 null,
                 dummyEbook.getId(),
-                null,
+                "spine1",
                 true
         );
 
@@ -185,7 +137,6 @@ class HighlightServiceTest {
     @DisplayName("권한 없는 Highlight 업데이트 시 예외 발생 테스트")
     void updateHighlightForbiddenTest() {
         // Given
-        // Highlight를 생성합니다.
         Highlight highlight = highlightRepository.save(Highlight.builder()
                 .author(dummyUserProfile)
                 .book(dummyEbook)
@@ -194,27 +145,8 @@ class HighlightServiceTest {
                 .memo("Old Memo")
                 .build());
 
-        // 다른 사용자의 프로필을 생성합니다.
-        Member anotherMember = Member.builder()
-                .username("another_member")
-                .password("another_member_password")
-                .role(Role.ROLE_USER)
-                .build();
-        memberRepository.save(anotherMember);
-
-        UserProfile dummyUserProfile2 = userProfileRepository.save(
-                UserProfile.builder()
-                        .member(anotherMember)
-                        .nickname("another_test_nickname")
-                        .build()
-        );
-
-        UserProfile anotherUserProfile = userProfileRepository.save(dummyUserProfile2);
-        LoginMember anotherLoginMember = LoginMember.builder()
-                .memberId(anotherUserProfile.getMember().getId())
-                .username(anotherUserProfile.getMember().getUsername())
-                .role(anotherUserProfile.getMember().getRole().name())
-                .build();
+        UserProfile anotherUserProfile = testFixtureFactory.createUser("another_user", "another_nickname");
+        LoginMember anotherLoginMember = testFixtureFactory.createLoginMember(anotherUserProfile.getMember(), Role.ROLE_USER);
         HighlightPutRequest request = HighlightPutRequest.builder()
                 .memo("Updated Memo")
                 .build();

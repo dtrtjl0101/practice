@@ -56,7 +56,7 @@
         },
         {
           "name": "JPA_DIALECT",
-          "value": "org.hibernate.dialect.MySQL8Dialect"
+          "value": "org.hibernate.dialect.MySQLDialect"
         },
         {
           "name": "DB_URL"
