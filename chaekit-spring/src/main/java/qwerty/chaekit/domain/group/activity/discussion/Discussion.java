@@ -9,6 +9,7 @@ import qwerty.chaekit.domain.member.user.UserProfile;
 
 @Entity
 @Getter
+@Table(name = "discussion")
 public class Discussion extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

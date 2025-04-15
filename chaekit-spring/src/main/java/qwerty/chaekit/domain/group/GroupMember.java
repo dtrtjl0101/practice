@@ -9,6 +9,7 @@ import qwerty.chaekit.domain.member.user.UserProfile;
 
 @Entity
 @Getter
+@Table(name = "group_member")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class GroupMember {
     @Id

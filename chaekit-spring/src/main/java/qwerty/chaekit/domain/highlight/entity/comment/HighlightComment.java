@@ -10,6 +10,7 @@ import qwerty.chaekit.domain.member.user.UserProfile;
 
 @Entity
 @Getter
+@Table(name = "highlight_comment")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class HighlightComment extends BaseEntity {
     @Id

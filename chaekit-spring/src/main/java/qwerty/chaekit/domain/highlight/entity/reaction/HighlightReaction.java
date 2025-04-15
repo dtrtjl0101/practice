@@ -10,6 +10,7 @@ import qwerty.chaekit.domain.member.user.UserProfile;
 
 @Entity
 @Getter
+@Table(name = "highlight_reaction")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class HighlightReaction extends BaseEntity {
     @Id

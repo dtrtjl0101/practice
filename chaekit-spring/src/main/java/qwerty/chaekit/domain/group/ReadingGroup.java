@@ -14,6 +14,7 @@ import java.util.List;
 
 @Entity
 @Getter
+@Table(name = "reading_group")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReadingGroup extends BaseEntity {
     @Id

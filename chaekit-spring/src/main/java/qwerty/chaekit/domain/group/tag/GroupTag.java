@@ -9,6 +9,7 @@ import qwerty.chaekit.domain.group.ReadingGroup;
 
 @Entity
 @Getter
+@Table(name= "group_tag")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class GroupTag extends BaseEntity {
     @Id

@@ -11,6 +11,7 @@ import qwerty.chaekit.domain.member.user.UserProfile;
 
 @Entity
 @Getter
+@Table(name = "highlight")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Highlight extends BaseEntity {
     @Id

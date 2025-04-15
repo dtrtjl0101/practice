@@ -10,6 +10,7 @@ import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 
 @Entity
 @Getter
+@Table(name = "ebook")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Ebook extends BaseEntity {
     @Id

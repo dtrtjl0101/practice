@@ -9,6 +9,7 @@ import qwerty.chaekit.domain.group.ReadingGroup;
 
 @Entity
 @Getter
+@Table(name = "activity")
 public class Activity extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
