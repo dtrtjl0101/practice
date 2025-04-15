@@ -9,6 +9,7 @@ import qwerty.chaekit.domain.ebook.EbookRepository;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.dto.ebook.upload.EbookDownloadResponse;
 import qwerty.chaekit.dto.ebook.upload.EbookUploadRequest;
+import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.properties.AwsProperties;
@@ -61,19 +62,18 @@ public class EbookFileService {
         MultipartFile file = request.file();
 
         if (file == null || file.getOriginalFilename() == null) {
-            throw new BadRequestException("EBOOK_FILE_MISSING", "파일이 누락되었습니다.");
+            throw new BadRequestException(ErrorCode.EBOOK_FILE_MISSING);
         }
         String fileName = file.getOriginalFilename();
         String fileKey = UUID.randomUUID() + fileName.substring(fileName.lastIndexOf("."));
 
 
         if (file.getSize() > ebookMaxFileSize) {
-            throw new BadRequestException("EBOOK_FILE_SIZE_EXCEEDED",
-                    "업로드 용량이 " + (ebookMaxFileSize / 1024 / 1024) + "MB를 초과했습니다.");
+            throw new BadRequestException(ErrorCode.EBOOK_FILE_SIZE_EXCEEDED);
         }
 
         if (!isValidEpub(file)) {
-            throw new BadRequestException("INVALID_EBOOK_FILE", "epub 파일이 아닙니다.");
+            throw new BadRequestException(ErrorCode.INVALID_EBOOK_FILE);
         }
 
         // 업로드
@@ -136,7 +136,7 @@ public class EbookFileService {
     @Transactional
     public EbookDownloadResponse getPresignedEbookUrl(Long ebookId) {
         Ebook ebook = ebookRepository.findById(ebookId)
-                .orElseThrow(() -> new NotFoundException("EBOOK_NOT_FOUND", "해당 전자책이 존재하지 않습니다"));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.EBOOK_NOT_FOUND));
 
         String fileKey = ebook.getFileKey();
 

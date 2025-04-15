@@ -9,6 +9,7 @@ import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
 import qwerty.chaekit.dto.member.PublisherJoinRequest;
 import qwerty.chaekit.dto.member.PublisherJoinResponse;
+import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.jwt.JwtUtil;
 
@@ -33,7 +34,7 @@ public class PublisherJoinService {
 
     private void validatePublisherName(String name) {
         if (profileRepository.existsByPublisherName(name)) {
-            throw new BadRequestException("PUBLISHER_EXISTS", "이미 사용중인 이름입니다");
+            throw new BadRequestException(ErrorCode.PUBLISHER_ALREADY_EXISTS);
         }
     }
 

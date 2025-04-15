@@ -10,9 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
 import qwerty.chaekit.dto.member.PublisherInfoResponse;
+import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.exception.NotFoundException;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -39,7 +41,7 @@ public class AdminService {
             profile.get().acceptPublisher();
             return true;
         } else {
-            throw new NotFoundException("PUBLISHER_NOT_FOUND", "해당 출판사가 존재하지 않습니다");
+            throw new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND);
         }
     }
 }

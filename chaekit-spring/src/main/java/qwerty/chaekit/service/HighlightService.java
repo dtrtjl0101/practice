@@ -15,6 +15,7 @@ import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.dto.highlight.*;
 import qwerty.chaekit.dto.page.PageResponse;
+import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
@@ -36,9 +37,9 @@ public class HighlightService {
 
     public HighlightPostResponse createHighlight(LoginMember loginMember, HighlightPostRequest request) {
         UserProfile userProfile = userProfileRepository.findByMember_Id(loginMember.memberId())
-                .orElseThrow(() -> new NotFoundException("USER_NOT_FOUND", "일반 회원이 아니거나 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
         Ebook ebook = ebookRepository.findById(request.bookId())
-                .orElseThrow(() -> new NotFoundException("BOOK_NOT_FOUND", "해당 전자책이 없습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.EBOOK_NOT_FOUND));
 
         // Activity를 추가하는 경우 권한 체크 필요
 
@@ -74,7 +75,7 @@ public class HighlightService {
         }
         if (spine != null) {
             if(bookId == null) {
-                throw new BadRequestException("BOOK_ID_REQUIRED", "책 ID가 필요합니다.");
+                throw new BadRequestException(ErrorCode.BOOK_ID_REQUIRED);
             }
             where.and(highlight.spine.eq(spine));
         }
@@ -108,14 +109,15 @@ public class HighlightService {
 
     public HighlightPostResponse updateHighlight(LoginMember loginMember, Long id, HighlightPutRequest request) {
         Highlight highlight = highlightRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("HIGHLIGHT_NOT_FOUND", "해당 하이라이트가 없습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));
         if(!Objects.equals(loginMember.memberId(), highlight.getAuthor().getMember().getId())) {
-            throw new ForbiddenException("HIGHLIGHT_NOT_YOURS", "해당 하이라이트에 대한 권한이 없습니다.");
+            throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_YOURS);
         }
         highlight.updateMemo(request.memo());
 
         // TODO: activityId 업데이트 로직 추가(활동에 공개하기)
         // 기존 activityId가 null일때만 activityId 변경 가능.
+        //
 
         return HighlightPostResponse.of(highlightRepository.save(highlight));
     }
