@@ -41,8 +41,7 @@ jobs:
           path: ~/.bun
           key: ${{ runner.os }}-bun-${{ hashFiles('client/bun.lock', 'client/cdk/bun.lock') }}
 
-      - name: Install client bun dependencies if cache miss
-        if: steps.cache-bun.outputs.cache-hit != 'true'
+      - name: Install client bun dependencies
         working-directory: client
         run: bun install --frozen-lockfile
 
@@ -50,8 +49,7 @@ jobs:
         working-directory: client
         run: bun run build
 
-      - name: Install cdk bun dependencies if cache miss
-        if: steps.cache-bun.outputs.cache-hit != 'true'
+      - name: Install cdk bun dependencies
         working-directory: client/cdk
         run: bun install --frozen-lockfile
 
