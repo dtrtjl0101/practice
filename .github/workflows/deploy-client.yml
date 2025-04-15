@@ -39,7 +39,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.bun
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          key: ${{ runner.os }}-bun-${{ hashFiles('client/bun.lock', 'client/cdk/bun.lock') }}
 
       - name: Install client bun dependencies if cache miss
         if: steps.cache-bun.outputs.cache-hit != 'true'
