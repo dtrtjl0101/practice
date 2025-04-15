@@ -14,7 +14,7 @@ export class ClientDeploymentStack extends cdk.Stack {
     const { certificate } = props;
 
     // ==============================================================
-    const bucketName = `${process.env.BRANCH_NAME}-client`;
+    const bucketName = `${process.env.BRANCH_NAME}-chaekit-client`;
     const domainName = `${process.env.DOMAIN_NAME}`;
     const subDomainName = `${process.env.BRANCH_NAME}`;
     const clientDomainName =

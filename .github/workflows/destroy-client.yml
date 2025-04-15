@@ -32,6 +32,14 @@ jobs:
           path: ~/.bun
           key: ${{ runner.os }}-bun-${{ hashFiles('client/bun.lock', 'client/cdk/bun.lock') }}
 
+      - name: Install client bun dependencies
+        working-directory: client
+        run: bun install --frozen-lockfile
+
+      - name: Build client
+        working-directory: client
+        run: bun run build
+
       - name: Install cdk bun dependencies
         working-directory: client/cdk
         run: bun install --frozen-lockfile
