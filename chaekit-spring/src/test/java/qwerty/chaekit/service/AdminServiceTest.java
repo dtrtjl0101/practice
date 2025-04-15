@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
 import qwerty.chaekit.global.exception.NotFoundException;
+import qwerty.chaekit.service.member.admin.AdminService;
 
 import java.util.Optional;
 

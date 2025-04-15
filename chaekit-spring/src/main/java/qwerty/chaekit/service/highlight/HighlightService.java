@@ -1,4 +1,4 @@
-package qwerty.chaekit.service;
+package qwerty.chaekit.service.highlight;
 
 import com.querydsl.core.BooleanBuilder;
 import lombok.RequiredArgsConstructor;

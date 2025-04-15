@@ -10,9 +10,9 @@ import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.dto.ebook.upload.EbookDownloadResponse;
 import qwerty.chaekit.dto.ebook.upload.EbookUploadRequest;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
-import qwerty.chaekit.service.AdminService;
-import qwerty.chaekit.service.EbookFileService;
-import qwerty.chaekit.service.EbookService;
+import qwerty.chaekit.service.member.admin.AdminService;
+import qwerty.chaekit.service.ebook.EbookFileService;
+import qwerty.chaekit.service.ebook.EbookService;
 
 import java.io.IOException;
 

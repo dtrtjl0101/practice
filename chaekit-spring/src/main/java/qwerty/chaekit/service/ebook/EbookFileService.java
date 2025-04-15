@@ -1,4 +1,4 @@
-package qwerty.chaekit.service;
+package qwerty.chaekit.service.ebook;
 
 import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Service;
@@ -13,6 +13,7 @@ import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.properties.AwsProperties;
+import qwerty.chaekit.service.member.admin.AdminService;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.S3Client;

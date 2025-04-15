@@ -1,4 +1,4 @@
-package qwerty.chaekit.service;
+package qwerty.chaekit.service.member;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

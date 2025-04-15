@@ -1,4 +1,4 @@
-package qwerty.chaekit.service;
+package qwerty.chaekit.service.ebook;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

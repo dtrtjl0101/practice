@@ -1,4 +1,4 @@
-package qwerty.chaekit.service;
+package qwerty.chaekit.service.member.admin;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,6 @@ import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.exception.NotFoundException;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
