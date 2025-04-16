@@ -44,4 +44,19 @@ public class Activity extends BaseEntity {
         this.endTime = endTime;
         this.description = description;
     }
+
+    public void updateTime(LocalDate startTime, LocalDate endTime) {
+        if(startTime != null) {
+            this.startTime = startTime;
+        }
+        if(endTime != null) {
+            this.endTime = endTime;
+        }
+    }
+
+    public void updateDescription(String description) {
+        if(description != null) {
+            this.description = description;
+        }
+    }
 }

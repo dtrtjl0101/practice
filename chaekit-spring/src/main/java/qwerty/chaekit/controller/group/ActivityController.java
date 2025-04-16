@@ -34,10 +34,10 @@ public class ActivityController {
         return ApiSuccessResponse.of(activityService.fetchAllActivities(pageable, groupId));
     }
 
-    @PatchMapping("/{activityId}")
+    @PatchMapping
     public ApiSuccessResponse<ActivityPostResponse> updateActivity(@Login LoginMember loginMember,
                                          @PathVariable long groupId,
-                                         @RequestBody ActivityPatchRequest request) {
+                                         @RequestBody @Valid ActivityPatchRequest request) {
         return ApiSuccessResponse.of(activityService.updateActivity(loginMember, groupId, request));
     }
 

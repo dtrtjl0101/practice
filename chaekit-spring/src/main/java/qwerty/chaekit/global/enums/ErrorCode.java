@@ -25,6 +25,7 @@ public enum ErrorCode {
     GROUP_UPDATE_FORBIDDEN("GROUP_UPDATE_FORBIDDEN", "독서모임 수정 권한이 없습니다"),
     HIGHLIGHT_NOT_YOURS("HIGHLIGHT_NOT_YOURS", "하이라이트는 본인만 수정할 수 있습니다"),
     GROUP_LEADER_ONLY("GROUP_LEADER_ONLY", "모임지기만 사용할 수 있는 기능입니다"),
+    ACTIVITY_GROUP_MISMATCH("ACTIVITY_GROUP_MISMATCH", "해당 독서모임의 활동이 아닙니다"),
 
     // NOT_FOUND
     EBOOK_NOT_FOUND("EBOOK_NOT_FOUND", "해당 전자책이 존재하지 않습니다"),
@@ -32,6 +33,7 @@ public enum ErrorCode {
     USER_NOT_FOUND("USER_NOT_FOUND", "일반 회원이 아니거나 존재하지 않습니다"),
     GROUP_NOT_FOUND("GROUP_NOT_FOUND", "해당 독서모임이 존재하지 않습니다"),
     HIGHLIGHT_NOT_FOUND("HIGHLIGHT_NOT_FOUND", "해당 하이라이트가 존재하지 않습니다"),
+    ACTIVITY_NOT_FOUND("ACTIVITY_NOT_FOUND", "해당 활동이 존재하지 않습니다"),
     ;
 
     private final String code;

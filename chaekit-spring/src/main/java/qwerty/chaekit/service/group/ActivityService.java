@@ -1,6 +1,7 @@
 package qwerty.chaekit.service.group;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,8 @@ import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.LoginMember;
+
+import java.time.LocalDate;
 
 @Service
 @Transactional
@@ -74,11 +77,56 @@ public class ActivityService {
     }
 
     public ActivityPostResponse updateActivity(LoginMember loginMember, long groupId, ActivityPatchRequest request) {
-        throw new RuntimeException("Not implemented yet");
+        // 1. 사용자 프로필 조회
+        UserProfile userProfile = userRepository.findByMember_Id(loginMember.memberId())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
+        // 2. 그룹 조회
+        ReadingGroup group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.GROUP_NOT_FOUND));
+
+        // 3. 활동 조회 및 그룹 일치 검증
+        Activity activity = activityRepository.findById(request.activityId())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.ACTIVITY_NOT_FOUND));
+
+        if (!activity.getGroup().getId().equals(groupId)) {
+            throw new ForbiddenException(ErrorCode.ACTIVITY_GROUP_MISMATCH);
+        }
+
+        // 4. 모임장 권한 확인
+        if (!group.getGroupLeader().equals(userProfile)) {
+            throw new ForbiddenException(ErrorCode.GROUP_LEADER_ONLY);
+        }
+
+        // 5. 시간 유효성 검증
+        LocalDate startTime = request.startTime() != null ? request.startTime() : activity.getStartTime();
+        LocalDate endTime = request.endTime() != null ? request.endTime() : activity.getEndTime();
+
+        if (startTime.isAfter(endTime)) {
+            throw new BadRequestException(ErrorCode.ACTIVITY_TIME_INVALID);
+        }
+
+        // 6. 중복 시간 체크 (자기 자신 제외)
+        activityRepository.findByGroup_Id(groupId).stream()
+                .filter(a -> !a.getId().equals(activity.getId()))
+                .forEach(a -> {
+                    boolean isBefore = endTime.isBefore(a.getStartTime());
+                    boolean isAfter = startTime.isAfter(a.getEndTime());
+                    if (!(isBefore || isAfter)) {
+                        throw new BadRequestException(ErrorCode.ACTIVITY_TIME_CONFLICT);
+                    }
+                });
+
+        // 7. 수정 적용
+        activity.updateTime(startTime, endTime);
+        activity.updateDescription(request.description());
+
+        return ActivityPostResponse.of(activity);
     }
 
     public PageResponse<ActivityFetchResponse> fetchAllActivities(Pageable pageable, long groupId) {
-        throw new RuntimeException("Not implemented yet");
+        Page<ActivityFetchResponse> page = activityRepository.findByGroup_Id(groupId, pageable)
+                .map(ActivityFetchResponse::of);
+        return PageResponse.of(page);
     }
-
 }
