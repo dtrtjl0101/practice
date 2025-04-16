@@ -15,19 +15,24 @@ env:
   BRANCH_NAME: "" # Should be set in the job
   STACK_NAME: "" # Should be set in the job
   ZONE_ID: ${{ secrets.ZONE_ID }}
-  VITE_CHAEKIT_API_ENDPOINT: ${{ vars.CHAEKIT_API_ENDPOINT }}
+  VITE_CHAEKIT_API_ENDPOINT: "" # Should be set in the job
 jobs:
   deploy-client:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: set BRANCH_NAME, STACK_NAME
+      - name: set BRANCH_NAME, STACK_NAME, VITE_CHAEKIT_API_ENDPOINT
         run: |
           export BRANCH_NAME=$(echo "${{ github.event.ref }}" | tr "[:upper:]" "[:lower:]" | sed -e "s#refs/heads/##g" -e 's/\//-/g' -e 's/|/-/g')
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
           export STACK_NAME=$(echo $BRANCH_NAME | tr "[:upper:]" "[:lower:]" | tr -cd '[:alnum:]')
           echo "STACK_NAME=$STACK_NAME" >> $GITHUB_ENV
+          if [ $BRANCH_NAME = "main" ]; \
+            then export VITE_CHAEKIT_API_ENDPOINT="${{ vars.CHAEKIT_API_ENDPOINT }}"; \
+            else export VITE_CHAEKIT_API_ENDPOINT="${{ vars.CHAEKIT_DEV_API_ENDPOINT }}"; \
+          fi
+          echo "VITE_CHAEKIT_API_ENDPOINT=$VITE_CHAEKIT_API_ENDPOINT" >> $GITHUB_ENV
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
