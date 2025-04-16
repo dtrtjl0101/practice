@@ -7,7 +7,7 @@
   "memory": "512",
   "containerDefinitions": [
     {
-      "name": "ecs-dev-container",
+      "name": "ecs-prod-container",
       "essential": true,
       "portMappings": [
         {
