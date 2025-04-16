@@ -1,0 +1,157 @@
+package qwerty.chaekit.service.highlight;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
+import qwerty.chaekit.domain.ebook.Ebook;
+import qwerty.chaekit.domain.highlight.entity.Highlight;
+import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
+import qwerty.chaekit.domain.member.enums.Role;
+import qwerty.chaekit.domain.member.publisher.PublisherProfile;
+import qwerty.chaekit.domain.member.user.UserProfile;
+import qwerty.chaekit.dto.highlight.HighlightFetchResponse;
+import qwerty.chaekit.dto.highlight.HighlightPostRequest;
+import qwerty.chaekit.dto.highlight.HighlightPostResponse;
+import qwerty.chaekit.dto.highlight.HighlightPutRequest;
+import qwerty.chaekit.dto.page.PageResponse;
+import qwerty.chaekit.global.security.resolver.LoginMember;
+import qwerty.chaekit.util.TestFixtureFactory;
+
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+@SpringBootTest
+@Transactional
+class HighlightServiceTest {
+    @Autowired
+    private HighlightService highlightService;
+
+    @Autowired
+    private HighlightRepository highlightRepository;
+
+    @Autowired
+    private TestFixtureFactory testFixtureFactory;
+
+    private UserProfile dummyUserProfile;
+    private Ebook dummyEbook;
+    private LoginMember dummyLoginMember;
+
+    @BeforeEach
+    void setUp() {
+        dummyUserProfile = testFixtureFactory.createUser("user_username", "user_nickname");
+        PublisherProfile dummyPublisherProfile = testFixtureFactory.createPublisher("publisher_username", "publisher_name");
+        dummyEbook = testFixtureFactory.createEbook("dummy_ebook", dummyPublisherProfile, "book_author", "book_description", "book_file_key");
+        dummyLoginMember = testFixtureFactory.createLoginMember(dummyUserProfile.getMember(), Role.ROLE_USER);
+
+    }
+
+    @Test
+    @DisplayName("Highlight 생성 테스트")
+    void createHighlightTest() {
+        // Given
+        HighlightPostRequest request = HighlightPostRequest.builder()
+                .bookId(dummyEbook.getId())
+                .spine("spine1")
+                .cfi("cfi1")
+                .memo("Test Memo")
+                .build();
+
+        // When
+        HighlightPostResponse response = highlightService.createHighlight(dummyLoginMember, request);
+
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.bookId()).isEqualTo(dummyEbook.getId());
+        assertThat(response.spine()).isEqualTo("spine1");
+        assertThat(response.cfi()).isEqualTo("cfi1");
+        assertThat(response.memo()).isEqualTo("Test Memo");
+    }
+
+    @Test
+    @DisplayName("Highlight 조회 테스트")
+    void fetchHighlightsTest() {
+        // Given
+        Highlight highlight = highlightRepository.save(Highlight.builder()
+                .author(dummyUserProfile)
+                .book(dummyEbook)
+                .spine("spine1")
+                .cfi("cfi1")
+                .memo("Test Memo")
+                .build());
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // When
+        PageResponse<HighlightFetchResponse> response = highlightService.fetchHighlights(
+                dummyLoginMember,
+                pageable,
+                null,
+                dummyEbook.getId(),
+                "spine1",
+                true
+        );
+
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.content()).hasSize(1);
+        HighlightFetchResponse fetchResponse = response.content().get(0);
+        assertThat(fetchResponse.id()).isEqualTo(highlight.getId());
+        assertThat(fetchResponse.memo()).isEqualTo("Test Memo");
+    }
+
+    @Test
+    @DisplayName("Highlight 업데이트 테스트")
+    void updateHighlightTest() {
+        // Given
+        Highlight highlight = highlightRepository.save(Highlight.builder()
+                .author(dummyUserProfile)
+                .book(dummyEbook)
+                .spine("spine1")
+                .cfi("cfi1")
+                .memo("Old Memo")
+                .build());
+        HighlightPutRequest request = HighlightPutRequest.builder()
+                .memo("Updated Memo")
+                .build();
+
+        // When
+        HighlightPostResponse response = highlightService.updateHighlight(dummyLoginMember, highlight.getId(), request);
+
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.memo()).isEqualTo("Updated Memo");
+
+        Optional<Highlight> updatedHighlight = highlightRepository.findById(highlight.getId());
+        assertThat(updatedHighlight).isPresent();
+        assertThat(updatedHighlight.get().getMemo()).isEqualTo("Updated Memo");
+    }
+
+    @Test
+    @DisplayName("권한 없는 Highlight 업데이트 시 예외 발생 테스트")
+    void updateHighlightForbiddenTest() {
+        // Given
+        Highlight highlight = highlightRepository.save(Highlight.builder()
+                .author(dummyUserProfile)
+                .book(dummyEbook)
+                .spine("spine1")
+                .cfi("cfi1")
+                .memo("Old Memo")
+                .build());
+
+        UserProfile anotherUserProfile = testFixtureFactory.createUser("another_user", "another_nickname");
+        LoginMember anotherLoginMember = testFixtureFactory.createLoginMember(anotherUserProfile.getMember(), Role.ROLE_USER);
+        HighlightPutRequest request = HighlightPutRequest.builder()
+                .memo("Updated Memo")
+                .build();
+
+        // When & Then
+        assertThrows(Exception.class, () -> highlightService.updateHighlight(anotherLoginMember, highlight.getId(), request));
+    }
+}

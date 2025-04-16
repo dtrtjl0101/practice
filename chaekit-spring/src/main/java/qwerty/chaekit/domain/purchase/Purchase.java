@@ -10,6 +10,7 @@ import qwerty.chaekit.domain.member.user.UserProfile;
 
 @Entity
 @Getter
+@Table(name = "purchase")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Purchase extends BaseEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

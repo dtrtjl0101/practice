@@ -1,4 +1,4 @@
-package qwerty.chaekit.service;
+package qwerty.chaekit.service.member.publisher;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,6 +12,7 @@ import qwerty.chaekit.dto.member.PublisherJoinResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.jwt.JwtUtil;
+import qwerty.chaekit.service.member.MemberJoinHelper;
 
 @Service
 @RequiredArgsConstructor

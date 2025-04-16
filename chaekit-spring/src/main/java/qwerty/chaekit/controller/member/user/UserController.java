@@ -10,8 +10,8 @@ import qwerty.chaekit.dto.member.UserMemberResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
 import qwerty.chaekit.global.security.resolver.LoginMember;
-import qwerty.chaekit.service.UserJoinService;
-import qwerty.chaekit.service.UserService;
+import qwerty.chaekit.service.member.user.UserJoinService;
+import qwerty.chaekit.service.member.user.UserService;
 
 @RestController
 @RequestMapping("/api/users")

@@ -10,6 +10,7 @@ import qwerty.chaekit.domain.member.Member;
 
 @Entity
 @Getter
+@Table(name = "user_profile")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserProfile extends BaseEntity {
     @Id

@@ -9,8 +9,8 @@ import qwerty.chaekit.dto.member.PublisherMemberResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
 import qwerty.chaekit.global.security.resolver.LoginMember;
-import qwerty.chaekit.service.PublisherJoinService;
-import qwerty.chaekit.service.PublisherService;
+import qwerty.chaekit.service.member.publisher.PublisherJoinService;
+import qwerty.chaekit.service.member.publisher.PublisherService;
 
 @RestController
 @RequestMapping("/api/publishers")

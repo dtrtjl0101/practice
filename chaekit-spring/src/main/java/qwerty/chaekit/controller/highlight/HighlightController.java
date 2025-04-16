@@ -9,7 +9,7 @@ import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
 import qwerty.chaekit.global.security.resolver.LoginMember;
-import qwerty.chaekit.service.HighlightService;
+import qwerty.chaekit.service.highlight.HighlightService;
 
 @RestController
 @RequestMapping("/api/highlights")

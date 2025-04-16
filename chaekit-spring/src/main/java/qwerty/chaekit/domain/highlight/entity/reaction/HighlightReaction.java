@@ -1,15 +1,16 @@
-package qwerty.chaekit.domain.highlight.reaction;
+package qwerty.chaekit.domain.highlight.entity.reaction;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import qwerty.chaekit.domain.BaseEntity;
-import qwerty.chaekit.domain.highlight.Highlight;
+import qwerty.chaekit.domain.highlight.entity.Highlight;
 import qwerty.chaekit.domain.member.user.UserProfile;
 
 @Entity
 @Getter
+@Table(name = "highlight_reaction")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class HighlightReaction extends BaseEntity {
     @Id

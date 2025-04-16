@@ -12,8 +12,8 @@ import qwerty.chaekit.domain.member.enums.Role;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
 import qwerty.chaekit.global.properties.AdminProperties;
-import qwerty.chaekit.service.AdminService;
-import qwerty.chaekit.service.MemberJoinHelper;
+import qwerty.chaekit.service.member.admin.AdminService;
+import qwerty.chaekit.service.member.MemberJoinHelper;
 
 import java.util.Optional;
 

@@ -1,15 +1,16 @@
-package qwerty.chaekit.domain.highlight.comment;
+package qwerty.chaekit.domain.highlight.entity.comment;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import qwerty.chaekit.domain.BaseEntity;
-import qwerty.chaekit.domain.highlight.Highlight;
+import qwerty.chaekit.domain.highlight.entity.Highlight;
 import qwerty.chaekit.domain.member.user.UserProfile;
 
 @Entity
 @Getter
+@Table(name = "highlight_comment")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class HighlightComment extends BaseEntity {
     @Id

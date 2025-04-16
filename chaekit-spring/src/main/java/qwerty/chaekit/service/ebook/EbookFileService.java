@@ -1,21 +1,22 @@
-package qwerty.chaekit.service;
+package qwerty.chaekit.service.ebook;
 
-import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.ebook.EbookRepository;
-import qwerty.chaekit.domain.member.publisher.PublisherProfile;
+import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
 import qwerty.chaekit.dto.ebook.upload.EbookDownloadResponse;
 import qwerty.chaekit.dto.ebook.upload.EbookUploadRequest;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.properties.AwsProperties;
+import qwerty.chaekit.service.member.admin.AdminService;
 import software.amazon.awssdk.core.sync.RequestBody;
-import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
@@ -30,7 +31,6 @@ import java.util.zip.ZipInputStream;
 
 @Service
 public class EbookFileService {
-    private final EntityManager em;
     private final EbookRepository ebookRepository;
     private final AdminService adminService;
 
@@ -40,9 +40,9 @@ public class EbookFileService {
     private final String bucketName;
     private final Long ebookMaxFileSize;
     private final Long presignedUrlExpirationTime;
+    private final PublisherProfileRepository publisherRepository;
 
-    public EbookFileService(EntityManager em, EbookRepository ebookRepository, AdminService adminService, S3Client s3Client, S3Presigner s3Presigner, AwsProperties awsProperties) {
-        this.em = em;
+    public EbookFileService(EbookRepository ebookRepository, AdminService adminService, S3Client s3Client, S3Presigner s3Presigner, AwsProperties awsProperties, PublisherProfileRepository publisherRepository) {
         this.ebookRepository = ebookRepository;
         this.adminService = adminService;
 
@@ -52,6 +52,7 @@ public class EbookFileService {
         this.bucketName = awsProperties.ebookBucketName();
         this.ebookMaxFileSize = awsProperties.ebookMaxFileSize();
         this.presignedUrlExpirationTime = awsProperties.presignedUrlExpirationTime();
+        this.publisherRepository = publisherRepository;
     }
 
     @Transactional
@@ -91,7 +92,7 @@ public class EbookFileService {
                 .description(description)
                 .size(file.getSize())
                 .fileKey(fileKey)
-                .publisher(em.getReference(PublisherProfile.class, adminService.getAdminPublisherId()))
+                .publisher(publisherRepository.getReferenceById(adminService.getAdminPublisherId()))
                 .build();
         ebookRepository.save(ebook);
 

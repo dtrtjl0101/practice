@@ -1,4 +1,4 @@
-package qwerty.chaekit.domain.highlight;
+package qwerty.chaekit.domain.highlight.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -11,6 +11,7 @@ import qwerty.chaekit.domain.member.user.UserProfile;
 
 @Entity
 @Getter
+@Table(name = "highlight")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Highlight extends BaseEntity {
     @Id
