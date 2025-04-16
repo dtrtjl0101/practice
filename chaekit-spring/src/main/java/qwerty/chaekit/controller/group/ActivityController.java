@@ -1,5 +1,6 @@
 package qwerty.chaekit.controller.group;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +24,7 @@ public class ActivityController {
     @PostMapping
     public ApiSuccessResponse<ActivityPostResponse> createActivity(@Login LoginMember loginMember,
                                                                    @PathVariable long groupId,
-                                                                   @RequestBody ActivityPostRequest activityPostRequest) {
+                                                                   @RequestBody @Valid ActivityPostRequest activityPostRequest) {
         return ApiSuccessResponse.of(activityService.createActivity(loginMember, groupId, activityPostRequest));
     }
 
