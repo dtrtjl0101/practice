@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.ebook.EbookRepository;
+import qwerty.chaekit.domain.group.GroupRepository;
+import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.member.Member;
 import qwerty.chaekit.domain.member.MemberRepository;
 import qwerty.chaekit.domain.member.enums.Role;
@@ -19,6 +21,8 @@ public class TestFixtureFactory {
     @Autowired private UserProfileRepository userProfileRepository;
     @Autowired private PublisherProfileRepository publisherProfileRepository;
     @Autowired private EbookRepository ebookRepository;
+    @Autowired
+    private GroupRepository groupRepository;
 
     public UserProfile createUser(String username, String nickname) {
         Member member = createMember(username, Role.ROLE_USER);
@@ -58,6 +62,16 @@ public class TestFixtureFactory {
                         .size(2 * 1024 * 1024)
                         .fileKey(fileKey)
                         .publisher(publisher).build()
+        );
+    }
+
+    public ReadingGroup createGroup(String groupName, UserProfile groupLeader) {
+        return groupRepository.save(
+                ReadingGroup.builder()
+                        .name(groupName)
+                        .groupLeader(groupLeader)
+                        .description("Test group description")
+                        .build()
         );
     }
 }

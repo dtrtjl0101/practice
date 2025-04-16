@@ -10,7 +10,8 @@ public record ActivityFetchResponse(
         Long activityId,
         Long bookId,
         LocalDate startTime,
-        LocalDate endTime
+        LocalDate endTime,
+        String description
 ) {
     public static ActivityFetchResponse of(Activity activity) {
         return ActivityFetchResponse.builder()
@@ -18,6 +19,7 @@ public record ActivityFetchResponse(
                 .bookId(activity.getBook().getId())
                 .startTime(activity.getStartTime())
                 .endTime(activity.getEndTime())
+                .description(activity.getDescription())
                 .build();
     }
 }
