@@ -1,5 +1,5 @@
 {
-  "family": "new-chaekit-task",
+  "family": "chaekit-dev-task",
   "networkMode": "bridge",
   "executionRoleArn": "arn:aws:iam::880996438467:role/ecsTaskExecutionRole",
   "requiresCompatibilities": ["EC2"],
@@ -7,8 +7,6 @@
   "memory": "512",
   "containerDefinitions": [
     {
-      "name": "ecs-container",
-      "image": "880996438467.dkr.ecr.ap-northeast-2.amazonaws.com/chaekit/chaekit_spirngbackend:latest",
       "essential": true,
       "portMappings": [
         {
@@ -28,7 +26,7 @@
         },
         {
           "name": "SPRING_PROFILES_ACTIVE",
-          "value": "prod"
+          "value": "dev"
         },
         {
           "name": "EBOOK_BUCKET_NAME",
