@@ -13,7 +13,6 @@ import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.group.activity.ActivityRepository;
-import qwerty.chaekit.domain.member.enums.Role;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.dto.group.activity.ActivityFetchResponse;
