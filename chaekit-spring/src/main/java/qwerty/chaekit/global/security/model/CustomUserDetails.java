@@ -14,6 +14,7 @@ public class CustomUserDetails implements UserDetails {
     private final Long memberId;
     @Getter
     private final Long profileId;
+    @Getter
     private final String email;
     private final String password;
     private final String role;
@@ -48,10 +49,6 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email;
-    }
-
-    public String getEmail() {
         return email;
     }
 

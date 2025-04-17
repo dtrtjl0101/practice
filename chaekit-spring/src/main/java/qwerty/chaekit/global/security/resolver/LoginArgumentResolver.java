@@ -1,5 +1,6 @@
 package qwerty.chaekit.global.security.resolver;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
@@ -23,8 +24,8 @@ public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
     }
 
     @Override
-    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-                                  NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+    public Object resolveArgument(@NonNull MethodParameter parameter, ModelAndViewContainer mavContainer,
+                                  @NonNull NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) {
             throw new ForbiddenException(ErrorCode.NO_VALID_TOKEN);
