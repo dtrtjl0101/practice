@@ -51,7 +51,7 @@ public class UserJoinService {
 
         return UserJoinResponse.builder()
                 .id(member.getId())
-                .accessToken(token)
+                .accessToken("Bearer " + token)
                 .username(member.getUsername())
                 .nickname(request.nickname())
                 .role(member.getRole().name())
