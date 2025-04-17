@@ -55,7 +55,6 @@ public class UserJoinService {
                 .accessToken("Bearer " + token)
                 .username(member.getUsername())
                 .nickname(request.nickname())
-                .role(member.getRole().name())
                 .build();
     }
 }

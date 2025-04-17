@@ -25,7 +25,6 @@ public class PublisherService {
                 .publisherId(publisher.getId())
                 .publisherName(publisher.getPublisherName())
                 .email(token.email())
-                .role(token.role())
                 .isAccepted(publisher.isAccepted())
                 .build();
     }

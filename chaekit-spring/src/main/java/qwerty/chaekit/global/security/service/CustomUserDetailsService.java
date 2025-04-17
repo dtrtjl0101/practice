@@ -25,27 +25,28 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Member userData = memberRepository.findByUsername(username)
+        Member memberData = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 사용자입니다."));
         Long userId = null, publisherId = null;
-        if (Objects.requireNonNull(userData.getRole()) == Role.ROLE_USER) {
-            userId = userRepository.findByMember_Id(userData.getId())
+        Role role = Objects.requireNonNull(memberData.getRole());
+        if (role == Role.ROLE_USER || role == Role.ROLE_ADMIN) {
+            userId = userRepository.findByMember_Id(memberData.getId())
                     .map(UserProfile::getId)
                     .orElseThrow(() -> new UsernameNotFoundException("사용자 프로필 데이터를 찾을 수 없습니다."));
         }
-        if(Objects.requireNonNull(userData.getRole()) == Role.ROLE_PUBLISHER) {
-            publisherId = publisherRepository.findByMember_Id(userData.getId())
+        if(role == Role.ROLE_PUBLISHER || role == Role.ROLE_ADMIN) {
+            publisherId = publisherRepository.findByMember_Id(memberData.getId())
                     .map(PublisherProfile::getId)
                     .orElseThrow(() -> new UsernameNotFoundException("출판사 프로필 데이터를 찾을 수 없습니다."));
         }
 
         return new CustomUserDetails(
-                userData.getId(),
+                memberData.getId(),
                 userId,
                 publisherId,
-                userData.getUsername(),
-                userData.getPassword(),
-                userData.getRole().name()
+                memberData.getUsername(),
+                memberData.getPassword(),
+                memberData.getRole().name()
         );
     }
 }

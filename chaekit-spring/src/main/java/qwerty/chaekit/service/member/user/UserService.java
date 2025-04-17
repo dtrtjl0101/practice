@@ -24,7 +24,6 @@ public class UserService {
                 .userId(userToken.userId())
                 .username(userToken.email())
                 .nickname(nickname)
-                .role(userToken.role())
                 .build();
     }
 }

@@ -7,6 +7,5 @@ public record UserMemberResponse(
         Long id,
         Long userId,
         String username,
-        String nickname,
-        String role
+        String nickname
 ){ }

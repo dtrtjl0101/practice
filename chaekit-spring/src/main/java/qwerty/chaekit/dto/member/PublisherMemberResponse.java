@@ -8,6 +8,5 @@ public record PublisherMemberResponse(
         Long publisherId,
         String publisherName,
         String email,
-        String role,
         Boolean isAccepted
 ){ }

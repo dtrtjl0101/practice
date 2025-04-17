@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -16,8 +15,6 @@ import qwerty.chaekit.domain.member.enums.Role;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.security.model.CustomUserDetails;
-
-import java.util.Collection;
 
 @Slf4j
 @Component
@@ -58,31 +55,23 @@ public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
             }
         }
 
-        Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
-        if (authorities == null || authorities.isEmpty()) {
-            throw new IllegalStateException("사용자 권한이 존재하지 않습니다.");
-        }
-        String loginRole = authorities.iterator().next().getAuthority();
-
         if (requiredRole == Role.ROLE_USER) {
-            if (!loginRole.equals(Role.ROLE_USER.name()) && !loginRole.equals(Role.ROLE_ADMIN.name())) {
+            if (userDetails.getUserId() == null) {
                 throw new ForbiddenException(ErrorCode.ONLY_USER);
             }
             return UserToken.builder()
                     .memberId(userDetails.getMemberId())
                     .userId(userDetails.getUserId())
                     .email(userDetails.getEmail())
-                    .role(loginRole)
                     .build();
         } else { // if (requiredRole == Role.ROLE_PUBLISHER)
-            if (!loginRole.equals(Role.ROLE_PUBLISHER.name()) && !loginRole.equals(Role.ROLE_ADMIN.name())) {
+            if (userDetails.getPublisherId() == null) {
                 throw new ForbiddenException(ErrorCode.ONLY_PUBLISHER);
             }
             return PublisherToken.builder()
                     .memberId(userDetails.getMemberId())
                     .publisherId(userDetails.getPublisherId())
                     .email(userDetails.getEmail())
-                    .role(loginRole)
                     .build();
         }
     }

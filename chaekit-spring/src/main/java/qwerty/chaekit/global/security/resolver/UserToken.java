@@ -6,7 +6,6 @@ import lombok.Builder;
 public record UserToken(
         Long memberId,
         Long userId,
-        String email,
-        String role
+        String email
 ) {
 }

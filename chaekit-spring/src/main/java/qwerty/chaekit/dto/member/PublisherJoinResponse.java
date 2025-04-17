@@ -9,6 +9,5 @@ public record PublisherJoinResponse(
         String accessToken,
         String publisherName,
         String username,
-        String role,
         Boolean isAccepted
 ){ }

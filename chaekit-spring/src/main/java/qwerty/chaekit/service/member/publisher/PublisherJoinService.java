@@ -55,7 +55,6 @@ public class PublisherJoinService {
                 .accessToken("Bearer " + token)
                 .username(member.getUsername())
                 .publisherName(request.publisherName())
-                .role(member.getRole().name())
                 .isAccepted(false)
                 .build();
     }

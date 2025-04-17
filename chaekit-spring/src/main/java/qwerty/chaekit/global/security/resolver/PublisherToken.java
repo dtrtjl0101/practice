@@ -6,7 +6,6 @@ import lombok.Builder;
 public record PublisherToken(
         Long memberId,
         Long publisherId,
-        String email,
-        String role
+        String email
 ) {
 }
