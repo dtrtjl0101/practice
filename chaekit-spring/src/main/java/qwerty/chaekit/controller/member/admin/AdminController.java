@@ -43,9 +43,4 @@ public class AdminController {
     public ApiSuccessResponse<EbookDownloadResponse> downloadFile(@PathVariable Long ebookId) {
         return ApiSuccessResponse.of(ebookFileService.getPresignedEbookUrl(ebookId));
     }
-
-    @GetMapping("/books")
-    public ApiSuccessResponse<PageResponse<EbookFetchResponse>> getBooks(@ParameterObject Pageable pageable) {
-        return ApiSuccessResponse.of(ebookService.fetchEbookList(pageable));
-    }
 }

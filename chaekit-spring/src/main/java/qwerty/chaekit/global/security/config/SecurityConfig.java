@@ -100,7 +100,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**", "/webjars/**")
                         .permitAll()
-                        .requestMatchers("/api", "/api/users/join").permitAll()
+                        .requestMatchers("/api", "/api/users/join","api/books").permitAll()
                         .requestMatchers("/api/users/**").hasAuthority(Role.ROLE_USER.name())
 
                         .requestMatchers("/api/publishers/join").permitAll()
