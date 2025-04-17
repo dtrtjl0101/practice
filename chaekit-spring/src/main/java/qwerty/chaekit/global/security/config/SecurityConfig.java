@@ -100,14 +100,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**", "/webjars/**")
                         .permitAll()
-                        .requestMatchers("/api", "/api/users/join").permitAll()
-                        .requestMatchers("/api/users/**").hasAuthority(Role.ROLE_USER.name())
-
-                        .requestMatchers("/api/publishers/join").permitAll()
-                        .requestMatchers("/api/publishers/**").hasAuthority(Role.ROLE_PUBLISHER.name())
-
                         .requestMatchers("/api/admin/**").hasAuthority(Role.ROLE_ADMIN.name())
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
         );
 
         http

@@ -36,7 +36,12 @@ public enum ErrorCode {
     GROUP_NOT_FOUND("GROUP_NOT_FOUND", "해당 독서모임이 존재하지 않습니다"),
     HIGHLIGHT_NOT_FOUND("HIGHLIGHT_NOT_FOUND", "해당 하이라이트가 존재하지 않습니다"),
     ACTIVITY_NOT_FOUND("ACTIVITY_NOT_FOUND", "해당 활동이 존재하지 않습니다"),
-    ;
+
+    // Exception Handler
+    INVALID_INPUT("INVALID_INPUT", "입력값이 유효하지 않습니다"),
+
+    METHOD_NOT_ALLOWED("METHOD_NOT_ALLOWED", "지원하지 않는 HTTP 메서드입니다."),
+    NO_RESOURCE_FOUND("NO_RESOURCE_FOUND", "존재하지 않는 경로입니다."),;
 
     private final String code;
     private final String message;

@@ -9,11 +9,13 @@
 3. Docker 컨테이너 실행
    ```bash
    # 백그라운드 실행
-   docker compose up -d
+   docker compose up -d --build
    # 정상 작동 확인
    docker compose ps
    # 정지
    docker compose down
+   # 기존 db와 충돌되는 경우
+   docker-compose down -v
    ```
 
 ## 🐬 MySQL 설정
