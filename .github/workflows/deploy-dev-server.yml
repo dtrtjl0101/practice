@@ -72,6 +72,6 @@ jobs:
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
-          cluster: chaekit-spring-cluster # 여러분의 ECS 클러스터 이름
+          cluster: chaekit-spring-dev-cluster # 여러분의 ECS 클러스터 이름
           service: chaekit-spring-dev-cluster-service # 여러분의 ECS 서비스 이름
           wait-for-service-stability: true
