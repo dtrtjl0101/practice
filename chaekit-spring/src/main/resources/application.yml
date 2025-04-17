@@ -13,6 +13,7 @@ spring:
       hibernate:
         dialect: ${JPA_DIALECT}
     show-sql: true
+    open-in-view: false
 
   flyway:
     enabled: true
