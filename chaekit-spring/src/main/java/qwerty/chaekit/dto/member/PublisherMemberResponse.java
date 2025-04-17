@@ -7,7 +7,7 @@ public record PublisherMemberResponse(
         Long id,
         Long profileId,
         String publisherName,
-        String username,
+        String email,
         String role,
         Boolean isAccepted
 ){ }

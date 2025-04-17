@@ -29,9 +29,9 @@ public class AdminController {
         return ApiSuccessResponse.of(adminService.getNotAcceptedPublishers(pageable));
     }
 
-    @PostMapping("/publishers/{id}/accept")
-    public ApiSuccessResponse<Boolean> acceptPublisher(@PathVariable Long id) {
-        return ApiSuccessResponse.of(adminService.acceptPublisher(id));
+    @PostMapping("/publishers/{publisherId}/accept")
+    public ApiSuccessResponse<Boolean> acceptPublisher(@PathVariable Long publisherId) {
+        return ApiSuccessResponse.of(adminService.acceptPublisher(publisherId));
     }
 
     @PostMapping("/books/upload")

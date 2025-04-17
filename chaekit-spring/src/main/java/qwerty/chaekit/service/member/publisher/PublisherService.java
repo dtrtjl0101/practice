@@ -8,7 +8,7 @@ import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
 import qwerty.chaekit.dto.member.PublisherMemberResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.NotFoundException;
-import qwerty.chaekit.global.security.resolver.UserToken;
+import qwerty.chaekit.global.security.resolver.PublisherToken;
 
 @Slf4j
 @Service
@@ -16,16 +16,16 @@ import qwerty.chaekit.global.security.resolver.UserToken;
 public class PublisherService {
     private final PublisherProfileRepository profileRepository;
 
-    public PublisherMemberResponse getPublisherProfile(UserToken userToken) {
-        PublisherProfile profile = profileRepository.findByMember_Id(userToken.memberId())
+    public PublisherMemberResponse getPublisherProfile(PublisherToken token) {
+        PublisherProfile profile = profileRepository.findById(token.publisherId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));
 
         return PublisherMemberResponse.builder()
-                .id(userToken.memberId())
+                .id(token.memberId())
                 .profileId(profile.getId())
                 .publisherName(profile.getPublisherName())
-                .username(userToken.email())
-                .role(userToken.role())
+                .email(token.email())
+                .role(token.role())
                 .isAccepted(profile.isAccepted())
                 .build();
     }

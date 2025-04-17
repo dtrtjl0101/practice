@@ -32,7 +32,7 @@ public class AdminService {
 
     @Transactional
     public boolean acceptPublisher(Long publisherId) {
-        Optional<PublisherProfile> profile = publisherProfileRepository.findByMember_Id(publisherId);
+        Optional<PublisherProfile> profile = publisherProfileRepository.findById(publisherId);
         if (profile.isPresent()) {
             if(profile.get().isAccepted()) {
                 return false;

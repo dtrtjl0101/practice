@@ -32,7 +32,7 @@ class AdminServiceTest {
         Long publisherId = 1L;
         PublisherProfile profile = mock(PublisherProfile.class);
         given(profile.isAccepted()).willReturn(false);
-        given(publisherProfileRepository.findByMember_Id(publisherId))
+        given(publisherProfileRepository.findById(publisherId))
                 .willReturn(Optional.of(profile));
         // when
         boolean result = adminService.acceptPublisher(publisherId);
@@ -48,7 +48,7 @@ class AdminServiceTest {
         Long publisherId = 2L;
         PublisherProfile profile = mock(PublisherProfile.class);
         given(profile.isAccepted()).willReturn(true);
-        given(publisherProfileRepository.findByMember_Id(publisherId))
+        given(publisherProfileRepository.findById(publisherId))
                 .willReturn(Optional.of(profile));
         // when
         boolean result = adminService.acceptPublisher(publisherId);
@@ -62,7 +62,7 @@ class AdminServiceTest {
     void test3() {
         // given
         Long publisherId = 3L;
-        given(publisherProfileRepository.findByMember_Id(publisherId))
+        given(publisherProfileRepository.findById(publisherId))
                 .willReturn(Optional.empty());
         // when
         NotFoundException e = assertThrows(NotFoundException.class, () ->
