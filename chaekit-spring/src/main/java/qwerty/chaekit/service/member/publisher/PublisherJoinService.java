@@ -51,7 +51,7 @@ public class PublisherJoinService {
 
         return PublisherJoinResponse.builder()
                 .id(member.getId())
-                .accessToken(token)
+                .accessToken("Bearer " + token)
                 .username(member.getUsername())
                 .publisherName(request.publisherName())
                 .role(member.getRole().name())
