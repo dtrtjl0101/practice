@@ -8,25 +8,38 @@ import {
   Grid2,
   Icon,
   Paper,
+  Skeleton,
   Stack,
   Typography,
 } from "@mui/material";
 import { People } from "@mui/icons-material";
+import { useQuery } from "@tanstack/react-query";
+import API_CLIENT, { wrapApiResponse } from "../../../api/api";
 
 export const Route = createFileRoute("/_pathlessLayout/groups/$groupId")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  // const { groupId } = Route.useParams();
+  const { groupId } = Route.useParams();
 
-  // TODO: Fetch group data using groupId
-  const group: GroupInfo = {
-    name: "Group A",
-    description: "Description A",
-    tags: ["tag1", "tag2"],
-    memberCount: 10,
-  };
+  const { data: group } = useQuery({
+    queryKey: ["group", groupId],
+    queryFn: async () => {
+      const groupIdNumber = parseInt(groupId);
+      if (isNaN(groupIdNumber)) {
+        throw new Error("Invalid group ID");
+      }
+      const response = await wrapApiResponse(
+        API_CLIENT.groupController.getGroup(groupIdNumber)
+      );
+      if (!response.isSuccessful) {
+        throw new Error(response.errorMessage);
+      }
+
+      return response.data as GroupInfo;
+    },
+  });
 
   return (
     <Container sx={{ mt: 4 }}>
@@ -34,7 +47,9 @@ function RouteComponent() {
         <Paper sx={{ p: 2 }}>
           <Stack spacing={2}>
             <Box sx={{ display: "flex", flexDirection: "column" }}>
-              <Typography variant="h3">{group.name}</Typography>
+              <Typography variant="h3">
+                {group ? group.name : <Skeleton variant="text" />}
+              </Typography>
               <Box
                 sx={{
                   justifySelf: "flex-end",
@@ -54,28 +69,32 @@ function RouteComponent() {
                   <Icon>
                     <People />
                   </Icon>
-                  {group.memberCount}
+                  {group ? group.memberCount : <Skeleton />}
                 </Typography>
               </Box>
             </Box>
 
             <Divider />
             <Typography variant="body1" sx={{ mt: 2 }}>
-              {group.description}
+              {group ? group.description : <Skeleton />}
             </Typography>
             <Divider />
             <Grid2 container spacing={1}>
-              {group.tags.map((tag) => {
-                return (
-                  <Chip
-                    key={tag}
-                    label={tag}
-                    onClick={() => {
-                      // TODO: move to search page with tag
-                    }}
-                  />
-                );
-              })}
+              {group ? (
+                group.tags.map((tag) => {
+                  return (
+                    <Chip
+                      key={tag}
+                      label={tag}
+                      onClick={() => {
+                        // TODO: move to search page with tag
+                      }}
+                    />
+                  );
+                })
+              ) : (
+                <Skeleton width={128} />
+              )}
             </Grid2>
           </Stack>
         </Paper>
