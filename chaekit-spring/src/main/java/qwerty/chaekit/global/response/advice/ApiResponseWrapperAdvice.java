@@ -22,7 +22,7 @@ import qwerty.chaekit.global.response.ApiSuccessResponse;
  * {
  *   "isSuccessful": true,
  *   "data": {
- *     "username": "testuser",
+ *     "email": "testuser",
  *     "nickname": "테스트 유저"
  *   }
  * }

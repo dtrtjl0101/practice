@@ -22,8 +22,9 @@ public class PublisherService {
 
         return PublisherMemberResponse.builder()
                 .id(loginMember.memberId())
+                .profileId(profile.getId())
                 .publisherName(profile.getPublisherName())
-                .username(loginMember.username())
+                .username(loginMember.email())
                 .role(loginMember.role())
                 .isAccepted(profile.isAccepted())
                 .build();

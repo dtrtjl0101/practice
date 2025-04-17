@@ -23,14 +23,14 @@ public class UserJoinService {
 
     @Transactional
     public UserJoinResponse join(UserJoinRequest request) {
-        String username = request.username();
+        String email = request.username();
         String password = request.password();
 
         validateNickname(request.username());
-        Member member = memberJoinHelper.saveMember(username, password, Role.ROLE_USER);
-        saveProfile(request, member);
+        Member member = memberJoinHelper.saveMember(email, password, Role.ROLE_USER);
+        UserProfile profile = saveProfile(request, member);
 
-        return toResponse(request, member);
+        return toResponse(request, member, profile);
     }
 
     private void validateNickname(String nickname) {
@@ -39,18 +39,19 @@ public class UserJoinService {
         }
     }
 
-    private void saveProfile(UserJoinRequest request, Member member) {
-        userProfileRepository.save(UserProfile.builder()
+    private UserProfile saveProfile(UserJoinRequest request, Member member) {
+        return userProfileRepository.save(UserProfile.builder()
                 .member(member)
                 .nickname(request.nickname())
                 .build());
     }
 
-    private UserJoinResponse toResponse(UserJoinRequest request, Member member) {
-        String token = jwtUtil.createJwt(member.getId(), member.getUsername(), member.getRole().name());
+    private UserJoinResponse toResponse(UserJoinRequest request, Member member, UserProfile userProfile) {
+        String token = jwtUtil.createJwt(member.getId(), userProfile.getId(), member.getUsername(), member.getRole().name());
 
         return UserJoinResponse.builder()
                 .id(member.getId())
+                .profileId(userProfile.getId())
                 .accessToken("Bearer " + token)
                 .username(member.getUsername())
                 .nickname(request.nickname())

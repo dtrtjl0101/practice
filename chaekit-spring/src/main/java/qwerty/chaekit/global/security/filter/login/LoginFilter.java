@@ -57,21 +57,23 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
         Long memberId = customUserDetails.getMemberId();
-        String username = customUserDetails.getUsername();
+        Long profileId = customUserDetails.getProfileId();
+        String email = customUserDetails.getEmail();
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         authorities.stream().findFirst().map(GrantedAuthority::getAuthority).ifPresentOrElse(
                 (role)-> {
-                    String token = jwtUtil.createJwt(memberId, username, role);
-                    sendSuccessResponse(response, token, memberId, role);
+                    String token = jwtUtil.createJwt(memberId, profileId, email, role);
+                    sendSuccessResponse(response, token, memberId, profileId, role);
                 }, ()-> responseSender.sendError(response, 500, "INVALID_ROLE", "권한 정보가 존재하지 않습니다.")
         );
     }
 
-    private void sendSuccessResponse(HttpServletResponse response, String token, Long memberId, String role) {
+    private void sendSuccessResponse(HttpServletResponse response, String token, Long memberId, Long profileId, String role) {
         LoginResponse loginResponse = LoginResponse.builder()
                 .accessToken("Bearer " + token)
                 .id(memberId)
+                .profileId(profileId)
                 .role(role)
                 .build();
         responseSender.sendSuccess(response, loginResponse);

@@ -16,13 +16,14 @@ public class UserService {
     private final UserProfileRepository profileRepository;
 
     public UserMemberResponse getUserProfile(LoginMember loginMember) {
-        String nickname = profileRepository.findByMember_Id(loginMember.memberId())
+        String nickname = profileRepository.findById(loginMember.profileId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND)).getNickname();
 
         return UserMemberResponse.builder()
                 .id(loginMember.memberId())
+                .profileId(loginMember.profileId())
+                .username(loginMember.email())
                 .nickname(nickname)
-                .username(loginMember.username())
                 .role(loginMember.role())
                 .build();
     }

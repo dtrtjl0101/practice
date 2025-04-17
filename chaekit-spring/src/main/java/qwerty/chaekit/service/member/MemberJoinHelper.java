@@ -15,10 +15,10 @@ public class MemberJoinHelper {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public Member saveMember(String username, String password, Role role) {
-        validateUsername(username);
+    public Member saveMember(String email, String password, Role role) {
+        validateUsername(email);
         return memberRepository.save(Member.builder()
-                .username(username)
+                .username(email)
                 .password(bCryptPasswordEncoder.encode(password))
                 .role(role)
                 .build());

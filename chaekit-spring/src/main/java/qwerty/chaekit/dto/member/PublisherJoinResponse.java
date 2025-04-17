@@ -5,6 +5,7 @@ import lombok.Builder;
 @Builder
 public record PublisherJoinResponse(
         Long id,
+        Long profileId,
         String accessToken,
         String publisherName,
         String username,

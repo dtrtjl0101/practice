@@ -42,10 +42,11 @@ public class JwtFilter extends OncePerRequestFilter {
 
         Claims parsedJwt = jwtUtil.parseJwt(token);
         Long memberId = jwtUtil.getMemberId(parsedJwt);
-        String username = jwtUtil.getUsername(parsedJwt);
+        Long profileId = jwtUtil.getProfileId(parsedJwt);
+        String email = jwtUtil.getEmail(parsedJwt);
         String role = jwtUtil.getRole(parsedJwt);
 
-        CustomUserDetails customUserDetails = new CustomUserDetails(memberId, username, role);
+        CustomUserDetails customUserDetails = new CustomUserDetails(memberId, profileId, email, role);
 
         Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
 

@@ -23,14 +23,14 @@ public class PublisherJoinService {
 
     @Transactional
     public PublisherJoinResponse join(PublisherJoinRequest request) {
-        String username = request.username();
+        String email = request.username();
         String password = request.password();
 
         validatePublisherName(request.publisherName());
-        Member member = memberJoinHelper.saveMember(username, password, Role.ROLE_PUBLISHER);
-        saveProfile(request, member);
+        Member member = memberJoinHelper.saveMember(email, password, Role.ROLE_PUBLISHER);
+        PublisherProfile profile = saveProfile(request, member);
 
-        return toResponse(request, member);
+        return toResponse(request, member, profile);
     }
 
     private void validatePublisherName(String name) {
@@ -39,18 +39,19 @@ public class PublisherJoinService {
         }
     }
 
-    private void saveProfile(PublisherJoinRequest request, Member member) {
-        profileRepository.save(PublisherProfile.builder()
+    private PublisherProfile saveProfile(PublisherJoinRequest request, Member member) {
+        return profileRepository.save(PublisherProfile.builder()
                 .member(member)
                 .publisherName(request.publisherName())
                 .build());
     }
 
-    private PublisherJoinResponse toResponse(PublisherJoinRequest request, Member member) {
-        String token = jwtUtil.createJwt(member.getId(), member.getUsername(), Role.ROLE_PUBLISHER.name());
+    private PublisherJoinResponse toResponse(PublisherJoinRequest request, Member member, PublisherProfile profile) {
+        String token = jwtUtil.createJwt(member.getId(), profile.getId(), member.getUsername(), Role.ROLE_PUBLISHER.name());
 
         return PublisherJoinResponse.builder()
                 .id(member.getId())
+                .profileId(profile.getId())
                 .accessToken("Bearer " + token)
                 .username(member.getUsername())
                 .publisherName(request.publisherName())
