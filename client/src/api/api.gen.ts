@@ -42,18 +42,12 @@ export interface ApiSuccessResponseGroupPostResponse {
   data?: GroupPostResponse;
 }
 
-export interface GroupFetchResponse {
+export interface GroupPostResponse {
   /** @format int64 */
   groupId?: number;
   name?: string;
   description?: string;
   tags?: string[];
-  /** @format int32 */
-  memberCount?: number;
-}
-
-export interface GroupPostResponse {
-  group?: GroupFetchResponse;
 }
 
 export interface UserJoinRequest {
@@ -133,6 +127,34 @@ export interface GroupPostRequest {
   tags?: string[];
 }
 
+export interface ActivityPostRequest {
+  /** @format int64 */
+  bookId: number;
+  /** @format date */
+  startTime: string;
+  /** @format date */
+  endTime: string;
+  description?: string;
+}
+
+export interface ActivityPostResponse {
+  /** @format int64 */
+  activityId?: number;
+  /** @format int64 */
+  bookId?: number;
+  /** @format date */
+  startTime?: string;
+  /** @format date */
+  endTime?: string;
+  description?: string;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseActivityPostResponse {
+  isSuccessful?: boolean;
+  data?: ActivityPostResponse;
+}
+
 /** API 에러 응답을 감싸는 클래스 */
 export interface ApiSuccessResponseBoolean {
   isSuccessful?: boolean;
@@ -163,6 +185,16 @@ export interface EbookUploadRequest {
 export interface ApiSuccessResponseString {
   isSuccessful?: boolean;
   data?: string;
+}
+
+export interface ActivityPatchRequest {
+  /** @format int64 */
+  activityId: number;
+  /** @format date */
+  startTime?: string;
+  /** @format date */
+  endTime?: string;
+  description?: string;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -228,6 +260,16 @@ export interface ApiSuccessResponsePageResponseGroupFetchResponse {
   data?: PageResponseGroupFetchResponse;
 }
 
+export interface GroupFetchResponse {
+  /** @format int64 */
+  groupId?: number;
+  name?: string;
+  description?: string;
+  tags?: string[];
+  /** @format int32 */
+  memberCount?: number;
+}
+
 export interface PageResponseGroupFetchResponse {
   content?: GroupFetchResponse[];
   /** @format int32 */
@@ -242,6 +284,34 @@ export interface PageResponseGroupFetchResponse {
 export interface ApiSuccessResponseGroupFetchResponse {
   isSuccessful?: boolean;
   data?: GroupFetchResponse;
+}
+
+export interface ActivityFetchResponse {
+  /** @format int64 */
+  activityId?: number;
+  /** @format int64 */
+  bookId?: number;
+  /** @format date */
+  startTime?: string;
+  /** @format date */
+  endTime?: string;
+  description?: string;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponsePageResponseActivityFetchResponse {
+  isSuccessful?: boolean;
+  data?: PageResponseActivityFetchResponse;
+}
+
+export interface PageResponseActivityFetchResponse {
+  content?: ActivityFetchResponse[];
+  /** @format int32 */
+  currentPage?: number;
+  /** @format int64 */
+  totalItems?: number;
+  /** @format int32 */
+  totalPages?: number;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -326,16 +396,22 @@ export interface FullRequestParams extends Omit<RequestInit, "body"> {
   cancelToken?: CancelToken;
 }
 
-export type RequestParams = Omit<FullRequestParams, "body" | "method" | "query" | "path">;
+export type RequestParams = Omit<
+  FullRequestParams,
+  "body" | "method" | "query" | "path"
+>;
 
 export interface ApiConfig<SecurityDataType = unknown> {
   baseUrl?: string;
   baseApiParams?: Omit<RequestParams, "baseUrl" | "cancelToken" | "signal">;
-  securityWorker?: (securityData: SecurityDataType | null) => Promise<RequestParams | void> | RequestParams | void;
+  securityWorker?: (
+    securityData: SecurityDataType | null,
+  ) => Promise<RequestParams | void> | RequestParams | void;
   customFetch?: typeof fetch;
 }
 
-export interface HttpResponse<D extends unknown, E extends unknown = unknown> extends Response {
+export interface HttpResponse<D extends unknown, E extends unknown = unknown>
+  extends Response {
   data: D;
   error: E;
 }
@@ -354,7 +430,8 @@ export class HttpClient<SecurityDataType = unknown> {
   private securityData: SecurityDataType | null = null;
   private securityWorker?: ApiConfig<SecurityDataType>["securityWorker"];
   private abortControllers = new Map<CancelToken, AbortController>();
-  private customFetch = (...fetchParams: Parameters<typeof fetch>) => fetch(...fetchParams);
+  private customFetch = (...fetchParams: Parameters<typeof fetch>) =>
+    fetch(...fetchParams);
 
   private baseApiParams: RequestParams = {
     credentials: "same-origin",
@@ -387,9 +464,15 @@ export class HttpClient<SecurityDataType = unknown> {
 
   protected toQueryString(rawQuery?: QueryParamsType): string {
     const query = rawQuery || {};
-    const keys = Object.keys(query).filter((key) => "undefined" !== typeof query[key]);
+    const keys = Object.keys(query).filter(
+      (key) => "undefined" !== typeof query[key],
+    );
     return keys
-      .map((key) => (Array.isArray(query[key]) ? this.addArrayQueryParam(query, key) : this.addQueryParam(query, key)))
+      .map((key) =>
+        Array.isArray(query[key])
+          ? this.addArrayQueryParam(query, key)
+          : this.addQueryParam(query, key),
+      )
       .join("&");
   }
 
@@ -400,8 +483,13 @@ export class HttpClient<SecurityDataType = unknown> {
 
   private contentFormatters: Record<ContentType, (input: any) => any> = {
     [ContentType.Json]: (input: any) =>
-      input !== null && (typeof input === "object" || typeof input === "string") ? JSON.stringify(input) : input,
-    [ContentType.Text]: (input: any) => (input !== null && typeof input !== "string" ? JSON.stringify(input) : input),
+      input !== null && (typeof input === "object" || typeof input === "string")
+        ? JSON.stringify(input)
+        : input,
+    [ContentType.Text]: (input: any) =>
+      input !== null && typeof input !== "string"
+        ? JSON.stringify(input)
+        : input,
     [ContentType.FormData]: (input: any) =>
       Object.keys(input || {}).reduce((formData, key) => {
         const property = input[key];
@@ -418,7 +506,10 @@ export class HttpClient<SecurityDataType = unknown> {
     [ContentType.UrlEncoded]: (input: any) => this.toQueryString(input),
   };
 
-  protected mergeRequestParams(params1: RequestParams, params2?: RequestParams): RequestParams {
+  protected mergeRequestParams(
+    params1: RequestParams,
+    params2?: RequestParams,
+  ): RequestParams {
     return {
       ...this.baseApiParams,
       ...params1,
@@ -431,7 +522,9 @@ export class HttpClient<SecurityDataType = unknown> {
     };
   }
 
-  protected createAbortSignal = (cancelToken: CancelToken): AbortSignal | undefined => {
+  protected createAbortSignal = (
+    cancelToken: CancelToken,
+  ): AbortSignal | undefined => {
     if (this.abortControllers.has(cancelToken)) {
       const abortController = this.abortControllers.get(cancelToken);
       if (abortController) {
@@ -475,15 +568,26 @@ export class HttpClient<SecurityDataType = unknown> {
     const payloadFormatter = this.contentFormatters[type || ContentType.Json];
     const responseFormat = format || requestParams.format;
 
-    return this.customFetch(`${baseUrl || this.baseUrl || ""}${path}${queryString ? `?${queryString}` : ""}`, {
-      ...requestParams,
-      headers: {
-        ...(requestParams.headers || {}),
-        ...(type && type !== ContentType.FormData ? { "Content-Type": type } : {}),
+    return this.customFetch(
+      `${baseUrl || this.baseUrl || ""}${path}${queryString ? `?${queryString}` : ""}`,
+      {
+        ...requestParams,
+        headers: {
+          ...(requestParams.headers || {}),
+          ...(type && type !== ContentType.FormData
+            ? { "Content-Type": type }
+            : {}),
+        },
+        signal:
+          (cancelToken
+            ? this.createAbortSignal(cancelToken)
+            : requestParams.signal) || null,
+        body:
+          typeof body === "undefined" || body === null
+            ? null
+            : payloadFormatter(body),
       },
-      signal: (cancelToken ? this.createAbortSignal(cancelToken) : requestParams.signal) || null,
-      body: typeof body === "undefined" || body === null ? null : payloadFormatter(body),
-    }).then(async (response) => {
+    ).then(async (response) => {
       const r = response.clone() as HttpResponse<T, E>;
       r.data = null as unknown as T;
       r.error = null as unknown as E;
@@ -520,7 +624,9 @@ export class HttpClient<SecurityDataType = unknown> {
  *
  * 책잇 API 명세서
  */
-export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
+export class Api<
+  SecurityDataType extends unknown,
+> extends HttpClient<SecurityDataType> {
   highlightController = {
     /**
      * No description
@@ -529,7 +635,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name UpdateHighlight
      * @request PUT:/api/highlights/{id}
      */
-    updateHighlight: (id: number, data: HighlightPutRequest, params: RequestParams = {}) =>
+    updateHighlight: (
+      id: number,
+      data: HighlightPutRequest,
+      params: RequestParams = {},
+    ) =>
       this.request<ApiSuccessResponseHighlightPostResponse, any>({
         path: `/api/highlights/${id}`,
         method: "PUT",
@@ -601,7 +711,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name UpdateGroup
      * @request PUT:/api/groups/{groupId}
      */
-    updateGroup: (groupId: number, data: GroupPutRequest, params: RequestParams = {}) =>
+    updateGroup: (
+      groupId: number,
+      data: GroupPutRequest,
+      params: RequestParams = {},
+    ) =>
       this.request<ApiSuccessResponseGroupPostResponse, any>({
         path: `/api/groups/${groupId}`,
         method: "PUT",
@@ -748,6 +862,81 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<ApiSuccessResponseLoginResponse, any>({
         path: `/api/login`,
         method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+  };
+  activityController = {
+    /**
+     * No description
+     *
+     * @tags activity-controller
+     * @name GetAllActivities
+     * @request GET:/api/groups/{groupId}/activities
+     */
+    getAllActivities: (
+      groupId: number,
+      query?: {
+        /**
+         * Zero-based page index (0..N)
+         * @min 0
+         * @default 0
+         */
+        page?: number;
+        /**
+         * The size of the page to be returned
+         * @min 1
+         * @default 20
+         */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponsePageResponseActivityFetchResponse, any>({
+        path: `/api/groups/${groupId}/activities`,
+        method: "GET",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags activity-controller
+     * @name CreateActivity
+     * @request POST:/api/groups/{groupId}/activities
+     */
+    createActivity: (
+      groupId: number,
+      data: ActivityPostRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponseActivityPostResponse, any>({
+        path: `/api/groups/${groupId}/activities`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags activity-controller
+     * @name UpdateActivity
+     * @request PATCH:/api/groups/{groupId}/activities
+     */
+    updateActivity: (
+      groupId: number,
+      data: ActivityPatchRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponseActivityPostResponse, any>({
+        path: `/api/groups/${groupId}/activities`,
+        method: "PATCH",
         body: data,
         type: ContentType.Json,
         ...params,
