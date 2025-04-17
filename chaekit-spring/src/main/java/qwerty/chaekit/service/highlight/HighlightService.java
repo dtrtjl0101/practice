@@ -20,7 +20,7 @@ import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
-import qwerty.chaekit.global.security.resolver.LoginMember;
+import qwerty.chaekit.global.security.resolver.UserToken;
 
 import java.util.Objects;
 
@@ -33,8 +33,8 @@ public class HighlightService {
     private final EbookRepository ebookRepository;
     private final UserProfileRepository userProfileRepository;
 
-    public HighlightPostResponse createHighlight(LoginMember loginMember, HighlightPostRequest request) {
-        UserProfile userProfile = userProfileRepository.findByMember_Id(loginMember.memberId())
+    public HighlightPostResponse createHighlight(UserToken userToken, HighlightPostRequest request) {
+        UserProfile userProfile = userProfileRepository.findByMember_Id(userToken.memberId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
         Ebook ebook = ebookRepository.findById(request.bookId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.EBOOK_NOT_FOUND));
@@ -52,15 +52,15 @@ public class HighlightService {
         return HighlightPostResponse.of(savedHighlight);
     }
 
-    public PageResponse<HighlightFetchResponse> fetchHighlights(LoginMember loginMember, Pageable pageable, Long activityId, Long bookId, String spine, Boolean me) {
-        Page<Highlight> highlights = highlightRepository.findHighlights(pageable, loginMember.memberId(), activityId, bookId, spine, me);
+    public PageResponse<HighlightFetchResponse> fetchHighlights(UserToken userToken, Pageable pageable, Long activityId, Long bookId, String spine, Boolean me) {
+        Page<Highlight> highlights = highlightRepository.findHighlights(pageable, userToken.memberId(), activityId, bookId, spine, me);
         return PageResponse.of(highlights.map(HighlightFetchResponse::of));
     }
 
-    public HighlightPostResponse updateHighlight(LoginMember loginMember, Long id, HighlightPutRequest request) {
+    public HighlightPostResponse updateHighlight(UserToken userToken, Long id, HighlightPutRequest request) {
         Highlight highlight = highlightRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));
-        if(!Objects.equals(loginMember.memberId(), highlight.getAuthor().getMember().getId())) {
+        if(!Objects.equals(userToken.memberId(), highlight.getAuthor().getMember().getId())) {
             throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_YOURS);
         }
         highlight.updateMemo(request.memo());

@@ -7,7 +7,7 @@ import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.dto.member.UserMemberResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.NotFoundException;
-import qwerty.chaekit.global.security.resolver.LoginMember;
+import qwerty.chaekit.global.security.resolver.UserToken;
 
 @Slf4j
 @Service
@@ -15,16 +15,16 @@ import qwerty.chaekit.global.security.resolver.LoginMember;
 public class UserService {
     private final UserProfileRepository profileRepository;
 
-    public UserMemberResponse getUserProfile(LoginMember loginMember) {
-        String nickname = profileRepository.findById(loginMember.profileId())
+    public UserMemberResponse getUserProfile(UserToken userToken) {
+        String nickname = profileRepository.findById(userToken.userId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND)).getNickname();
 
         return UserMemberResponse.builder()
-                .id(loginMember.memberId())
-                .profileId(loginMember.profileId())
-                .username(loginMember.email())
+                .id(userToken.memberId())
+                .profileId(userToken.userId())
+                .username(userToken.email())
                 .nickname(nickname)
-                .role(loginMember.role())
+                .role(userToken.role())
                 .build();
     }
 }

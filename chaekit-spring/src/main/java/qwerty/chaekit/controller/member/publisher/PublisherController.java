@@ -8,7 +8,7 @@ import qwerty.chaekit.dto.member.PublisherJoinResponse;
 import qwerty.chaekit.dto.member.PublisherMemberResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
-import qwerty.chaekit.global.security.resolver.LoginMember;
+import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.member.publisher.PublisherJoinService;
 import qwerty.chaekit.service.member.publisher.PublisherService;
 
@@ -20,8 +20,8 @@ public class PublisherController {
     private final PublisherService publisherService;
 
     @GetMapping("/me")
-    public ApiSuccessResponse<PublisherMemberResponse> publisherInfo(@Login LoginMember loginMember) {
-        return ApiSuccessResponse.of(publisherService.getPublisherProfile(loginMember));
+    public ApiSuccessResponse<PublisherMemberResponse> publisherInfo(@Login UserToken userToken) {
+        return ApiSuccessResponse.of(publisherService.getPublisherProfile(userToken));
     }
 
     @PostMapping("/join")

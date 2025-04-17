@@ -10,6 +10,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import qwerty.chaekit.domain.member.enums.Role;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.security.model.CustomUserDetails;
@@ -20,7 +21,10 @@ public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.hasParameterAnnotation(Login.class) && parameter.getParameterType().equals(LoginMember.class);
+        return parameter.hasParameterAnnotation(Login.class)
+                && (
+                        parameter.getParameterType().equals(UserToken.class)
+                        || parameter.getParameterType().equals(PublisherToken.class));
     }
 
     @Override
@@ -30,15 +34,33 @@ public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
         if (auth == null || !auth.isAuthenticated()) {
             throw new ForbiddenException(ErrorCode.NO_VALID_TOKEN);
         }
-        if(!(auth.getPrincipal() instanceof CustomUserDetails userDetails)){
+        if (!(auth.getPrincipal() instanceof CustomUserDetails userDetails)) {
             throw new IllegalStateException("Invalid authentication principal");
         }
 
-        return LoginMember.builder()
-                .memberId(userDetails.getMemberId())
-                .profileId(userDetails.getProfileId())
-                .email(userDetails.getEmail())
-                .role(userDetails.getAuthorities().iterator().next().getAuthority())
-                .build();
+        String role = userDetails.getAuthorities().iterator().next().getAuthority();
+        if (parameter.getParameterType().equals(UserToken.class)) {
+            if (!role.equals(Role.ROLE_USER.name()) && !role.equals(Role.ROLE_ADMIN.name())) {
+                throw new ForbiddenException(ErrorCode.ONLY_USER);
+            }
+            return UserToken.builder()
+                    .memberId(userDetails.getMemberId())
+                    .userId(userDetails.getProfileId())
+                    .email(userDetails.getEmail())
+                    .role(role)
+                    .build();
+        } else if (parameter.getParameterType().equals(PublisherToken.class)) {
+            if (!role.equals(Role.ROLE_PUBLISHER.name()) && !role.equals(Role.ROLE_ADMIN.name())) {
+                throw new ForbiddenException(ErrorCode.ONLY_PUBLISHER);
+            }
+            return PublisherToken.builder()
+                    .memberId(userDetails.getMemberId())
+                    .publisherId(userDetails.getProfileId())
+                    .email(userDetails.getEmail())
+                    .role(role)
+                    .build();
+        }
+
+        throw new IllegalArgumentException("Unsupported parameter type: " + parameter.getParameterType());
     }
 }

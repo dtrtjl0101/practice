@@ -12,7 +12,7 @@ import qwerty.chaekit.dto.group.activity.ActivityPostResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
-import qwerty.chaekit.global.security.resolver.LoginMember;
+import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.group.ActivityService;
 
 @RestController
@@ -22,10 +22,10 @@ public class ActivityController {
     private final ActivityService activityService;
 
     @PostMapping
-    public ApiSuccessResponse<ActivityPostResponse> createActivity(@Login LoginMember loginMember,
+    public ApiSuccessResponse<ActivityPostResponse> createActivity(@Login UserToken userToken,
                                                                    @PathVariable long groupId,
                                                                    @RequestBody @Valid ActivityPostRequest activityPostRequest) {
-        return ApiSuccessResponse.of(activityService.createActivity(loginMember, groupId, activityPostRequest));
+        return ApiSuccessResponse.of(activityService.createActivity(userToken, groupId, activityPostRequest));
     }
 
     @GetMapping
@@ -35,10 +35,10 @@ public class ActivityController {
     }
 
     @PatchMapping
-    public ApiSuccessResponse<ActivityPostResponse> updateActivity(@Login LoginMember loginMember,
+    public ApiSuccessResponse<ActivityPostResponse> updateActivity(@Login UserToken userToken,
                                          @PathVariable long groupId,
                                          @RequestBody @Valid ActivityPatchRequest request) {
-        return ApiSuccessResponse.of(activityService.updateActivity(loginMember, groupId, request));
+        return ApiSuccessResponse.of(activityService.updateActivity(userToken, groupId, request));
     }
 
 

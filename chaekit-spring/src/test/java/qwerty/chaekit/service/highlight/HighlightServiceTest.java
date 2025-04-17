@@ -19,7 +19,7 @@ import qwerty.chaekit.dto.highlight.HighlightPostRequest;
 import qwerty.chaekit.dto.highlight.HighlightPostResponse;
 import qwerty.chaekit.dto.highlight.HighlightPutRequest;
 import qwerty.chaekit.dto.page.PageResponse;
-import qwerty.chaekit.global.security.resolver.LoginMember;
+import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.util.TestFixtureFactory;
 
 import java.util.Optional;
@@ -41,14 +41,14 @@ class HighlightServiceTest {
 
     private UserProfile dummyUserProfile;
     private Ebook dummyEbook;
-    private LoginMember dummyLoginMember;
+    private UserToken dummyUserToken;
 
     @BeforeEach
     void setUp() {
         dummyUserProfile = testFixtureFactory.createUser("user_username", "user_nickname");
         PublisherProfile dummyPublisherProfile = testFixtureFactory.createPublisher("publisher_username", "publisher_name");
         dummyEbook = testFixtureFactory.createEbook("dummy_ebook", dummyPublisherProfile, "book_author", "book_description", "book_file_key");
-        dummyLoginMember = testFixtureFactory.createLoginMember(dummyUserProfile.getMember(), Role.ROLE_USER);
+        dummyUserToken = testFixtureFactory.createLoginMember(dummyUserProfile.getMember(), Role.ROLE_USER);
 
     }
 
@@ -64,7 +64,7 @@ class HighlightServiceTest {
                 .build();
 
         // When
-        HighlightPostResponse response = highlightService.createHighlight(dummyLoginMember, request);
+        HighlightPostResponse response = highlightService.createHighlight(dummyUserToken, request);
 
         // Then
         assertThat(response).isNotNull();
@@ -90,7 +90,7 @@ class HighlightServiceTest {
 
         // When
         PageResponse<HighlightFetchResponse> response = highlightService.fetchHighlights(
-                dummyLoginMember,
+                dummyUserToken,
                 pageable,
                 null,
                 dummyEbook.getId(),
@@ -122,7 +122,7 @@ class HighlightServiceTest {
                 .build();
 
         // When
-        HighlightPostResponse response = highlightService.updateHighlight(dummyLoginMember, highlight.getId(), request);
+        HighlightPostResponse response = highlightService.updateHighlight(dummyUserToken, highlight.getId(), request);
 
         // Then
         assertThat(response).isNotNull();
@@ -146,12 +146,12 @@ class HighlightServiceTest {
                 .build());
 
         UserProfile anotherUserProfile = testFixtureFactory.createUser("another_user", "another_nickname");
-        LoginMember anotherLoginMember = testFixtureFactory.createLoginMember(anotherUserProfile.getMember(), Role.ROLE_USER);
+        UserToken anotherUserToken = testFixtureFactory.createLoginMember(anotherUserProfile.getMember(), Role.ROLE_USER);
         HighlightPutRequest request = HighlightPutRequest.builder()
                 .memo("Updated Memo")
                 .build();
 
         // When & Then
-        assertThrows(Exception.class, () -> highlightService.updateHighlight(anotherLoginMember, highlight.getId(), request));
+        assertThrows(Exception.class, () -> highlightService.updateHighlight(anotherUserToken, highlight.getId(), request));
     }
 }

@@ -22,7 +22,7 @@ import qwerty.chaekit.dto.group.activity.ActivityPostResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.ForbiddenException;
-import qwerty.chaekit.global.security.resolver.LoginMember;
+import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.util.TestFixtureFactory;
 
 import java.time.LocalDate;
@@ -43,8 +43,8 @@ class ActivityServiceTest {
     @Autowired
     private TestFixtureFactory testFixtureFactory;
 
-    private LoginMember groupLeaderLogin;
-    private LoginMember anotherLogin;
+    private UserToken groupLeaderLogin;
+    private UserToken anotherLogin;
     private ReadingGroup dummyGroup;
     private Ebook dummyEbook;
 

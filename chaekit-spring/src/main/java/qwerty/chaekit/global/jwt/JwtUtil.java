@@ -33,7 +33,7 @@ public class JwtUtil {
     }
 
     public Long getProfileId(Claims claims) {
-        return claims.get("profileId", Long.class);
+        return claims.get("userId", Long.class);
     }
 
     public String getEmail(Claims claims) {
@@ -65,7 +65,7 @@ public class JwtUtil {
 
         return Jwts.builder()
                 .claim("memberId", memberId)
-                .claim("profileId", profileId)
+                .claim("userId", profileId)
                 .claim("email", email)
                 .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))

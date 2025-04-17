@@ -14,7 +14,7 @@ import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
-import qwerty.chaekit.global.security.resolver.LoginMember;
+import qwerty.chaekit.global.security.resolver.UserToken;
 
 @Service
 @RequiredArgsConstructor
@@ -23,8 +23,8 @@ public class GroupService {
     private final GroupRepository groupRepository;
 
     @Transactional
-    public GroupPostResponse createGroup(LoginMember loginMember, GroupPostRequest request) {
-        UserProfile userProfile = userProfileRepository.findByMember_Id(loginMember.memberId())
+    public GroupPostResponse createGroup(UserToken userToken, GroupPostRequest request) {
+        UserProfile userProfile = userProfileRepository.findByMember_Id(userToken.memberId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         ReadingGroup groupEntity = ReadingGroup.builder()
@@ -51,8 +51,8 @@ public class GroupService {
     }
 
     @Transactional
-    public GroupPostResponse updateGroup(LoginMember loginMember, long groupId, GroupPutRequest request) {
-        UserProfile userProfile = userProfileRepository.findByMember_Id(loginMember.memberId())
+    public GroupPostResponse updateGroup(UserToken userToken, long groupId, GroupPutRequest request) {
+        UserProfile userProfile = userProfileRepository.findByMember_Id(userToken.memberId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         ReadingGroup group = groupRepository.findById(groupId)

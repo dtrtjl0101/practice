@@ -21,7 +21,7 @@ import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
-import qwerty.chaekit.global.security.resolver.LoginMember;
+import qwerty.chaekit.global.security.resolver.UserToken;
 
 import java.time.LocalDate;
 
@@ -34,9 +34,9 @@ public class ActivityService {
     private final ActivityRepository activityRepository;
     private final EbookRepository ebookRepository;
 
-    public ActivityPostResponse createActivity(LoginMember loginMember, long groupId, ActivityPostRequest request) {
+    public ActivityPostResponse createActivity(UserToken userToken, long groupId, ActivityPostRequest request) {
         // 1. 로그인한 사용자의 프로필을 가져온다.
-        UserProfile userProfile = userRepository.findByMember_Id(loginMember.memberId())
+        UserProfile userProfile = userRepository.findByMember_Id(userToken.memberId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         // 2. 모임을 가져온다.
@@ -76,9 +76,9 @@ public class ActivityService {
         return ActivityPostResponse.of(saved);
     }
 
-    public ActivityPostResponse updateActivity(LoginMember loginMember, long groupId, ActivityPatchRequest request) {
+    public ActivityPostResponse updateActivity(UserToken userToken, long groupId, ActivityPatchRequest request) {
         // 1. 사용자 프로필 조회
-        UserProfile userProfile = userRepository.findByMember_Id(loginMember.memberId())
+        UserProfile userProfile = userRepository.findByMember_Id(userToken.memberId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         // 2. 그룹 조회

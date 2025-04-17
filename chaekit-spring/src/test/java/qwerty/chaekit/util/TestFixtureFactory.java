@@ -13,7 +13,7 @@ import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
-import qwerty.chaekit.global.security.resolver.LoginMember;
+import qwerty.chaekit.global.security.resolver.UserToken;
 
 @Component
 public class TestFixtureFactory {
@@ -45,8 +45,8 @@ public class TestFixtureFactory {
         );
     }
 
-    public LoginMember createLoginMember(Member member, Role role) {
-        return LoginMember.builder()
+    public UserToken createLoginMember(Member member, Role role) {
+        return UserToken.builder()
                 .memberId(member.getId())
                 .username(member.getUsername())
                 .role(role.name())

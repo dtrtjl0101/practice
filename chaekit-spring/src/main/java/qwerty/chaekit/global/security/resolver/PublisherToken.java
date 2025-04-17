@@ -3,9 +3,9 @@ package qwerty.chaekit.global.security.resolver;
 import lombok.Builder;
 
 @Builder
-public record LoginMember(
+public record PublisherToken(
         Long memberId,
-        Long profileId,
+        Long publisherId,
         String email,
         String role
 ) {

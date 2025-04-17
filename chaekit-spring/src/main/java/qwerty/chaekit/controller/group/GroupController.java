@@ -8,7 +8,7 @@ import qwerty.chaekit.dto.group.*;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
-import qwerty.chaekit.global.security.resolver.LoginMember;
+import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.group.GroupService;
 
 @RestController
@@ -18,9 +18,9 @@ public class GroupController {
     private final GroupService groupService;
 
     @PostMapping
-    public ApiSuccessResponse<GroupPostResponse> createGroup(@Login LoginMember loginMember,
+    public ApiSuccessResponse<GroupPostResponse> createGroup(@Login UserToken userToken,
                                          @RequestBody GroupPostRequest groupPostRequest) {
-        return ApiSuccessResponse.of(groupService.createGroup(loginMember, groupPostRequest));
+        return ApiSuccessResponse.of(groupService.createGroup(userToken, groupPostRequest));
     }
 
     @GetMapping
@@ -34,10 +34,10 @@ public class GroupController {
     }
 
     @PutMapping("/{groupId}")
-    public ApiSuccessResponse<GroupPostResponse> updateGroup(@Login LoginMember loginMember,
+    public ApiSuccessResponse<GroupPostResponse> updateGroup(@Login UserToken userToken,
                                          @PathVariable long groupId,
                                          @RequestBody GroupPutRequest request) {
-        return ApiSuccessResponse.of(groupService.updateGroup(loginMember, groupId, request));
+        return ApiSuccessResponse.of(groupService.updateGroup(userToken, groupId, request));
     }
 
 
