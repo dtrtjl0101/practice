@@ -35,7 +35,6 @@ function RouteComponent() {
 
     if (!response.isSuccessful) {
       // TODO: Handle error
-      console.error("Test invalidation");
       return;
     }
 
