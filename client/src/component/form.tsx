@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouterState, useRouter } from "@tanstack/react-router";
 import {
   Container,
   Card,
   CardContent,
   OutlinedInput,
-  Divider,
   Button,
   useTheme,
   CardHeader,
@@ -16,63 +15,111 @@ import {
   InputLabel,
   Typography,
   Checkbox,
-  CardActionArea,
   Stack,
   FormControlLabel,
   Box,
 } from "@mui/material";
-import { initialPosts, PostManager, Post } from "../types/post";
+import { initialPosts, Post } from "../types/post";
 
 type PostFormProps = {
   onAddPost: (
     id: number,
     title: string,
     content: string,
-    author: string
+    author: string,
+    isDebate: boolean
   ) => void;
   post?: Post;
 };
 
 export default function Form({ onAddPost, post }: PostFormProps) {
   const router = useRouter();
-  const state = useRouterState();
-  const pathname = state.location.pathname;
-  let postID: string | undefined;
-  if (pathname.includes("/posts/") && pathname.includes("/edit")) {
-    const params = useParams({ from: "/_pathlessLayout/posts/$postID/edit" });
-    postID = params.postID;
-  }
-  const isEdit = !!postID;
-  // const post = initialPosts.find((p) => p.id === Number(postID));
+  const theme = useTheme();
 
+  const params = useParams({ strict: false });
+  const postID = params.postID;
+  const isEdit = !!postID;
+
+  post = initialPosts.find((p) => p.id === Number(postID));
+
+  const [title, setTitle] = useState(post?.title || "");
+  const [content, setContent] = useState(post?.content || "");
   const [book, setBook] = useState("");
+  const [debate, setDebate] = useState<boolean>(post?.isDebate || false);
+
+  onAddPost = (
+    id: number,
+    title: string,
+    content: string,
+    author: string,
+    isDebate: boolean
+  ) => {
+    const existingPostIndex = initialPosts.findIndex((p) => p.id === id);
+
+    if (existingPostIndex !== -1) {
+      // 수정 모드
+      initialPosts[existingPostIndex] = {
+        ...initialPosts[existingPostIndex],
+        title,
+        content,
+        author,
+        createdDate: new Date(),
+        isDebate,
+      };
+    } else {
+      // 작성 모드
+      const newPost = {
+        id,
+        title,
+        content,
+        author,
+        createdDate: new Date(),
+        isDebate: debate,
+      };
+      initialPosts.push(newPost);
+    }
+  };
+
   const handleBook = (event: SelectChangeEvent) => {
     setBook(event.target.value);
+  };
+
+  const handlePost = () => {
+    if (!title.trim() || !content.trim()) {
+      alert("제목과 내용을 입력해주세요.");
+      return;
+    }
+
+    if (isEdit && post) {
+      // 수정 모드: 기존 게시글 수정
+      onAddPost(post.id, title, content, post.author, debate);
+      alert("게시글이 수정되었습니다!");
+    } else {
+      // 작성 모드: 새 게시글 추가
+      const newId = Date.now(); // 새로운 ID 생성 (현재 시간 기반)
+      onAddPost(newId, title, content, "작성자", debate);
+      alert("게시글이 작성되었습니다!");
+    }
+    router.history.back();
   };
 
   const handleBack = () => {
     router.history.back();
   };
 
-  const handlePost = () => {
-    onAddPost;
-  };
-
-  const [debate, setDebate] = useState({
-    debate: false,
-  });
   const handleCheckbox = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setDebate({
-      ...debate,
-      [event.target.name]: event.target.checked,
-    });
+    setDebate(event.target.checked);
     if (event.target.checked) {
       alert("토론이 체크되었습니다.");
     }
   };
 
-  const [title, setTitle] = useState(post?.title);
-  const [content, setContent] = useState(post?.content);
+  useEffect(() => {
+    if (post) {
+      setTitle(post.title || "");
+      setContent(post.content || "");
+    }
+  }, [post]);
 
   // const handlePost = () => {
   //   if (PostManager.editPostId === null) {
@@ -93,7 +140,6 @@ export default function Form({ onAddPost, post }: PostFormProps) {
   //   alert("게시글이 수정되었습니다!");
   // };
 
-  const theme = useTheme();
   return (
     <Container
       maxWidth="md"
@@ -132,7 +178,6 @@ export default function Form({ onAddPost, post }: PostFormProps) {
             <MenuItem value={30}>책3</MenuItem>
           </Select>
         </FormControl>
-
         {/* 본문 content */}
         <OutlinedInput
           placeholder="내용을 입력하세요"
@@ -150,7 +195,13 @@ export default function Form({ onAddPost, post }: PostFormProps) {
           <FormControlLabel
             sx={{ justifySelf: "flex-end" }}
             label="토론"
-            control={<Checkbox onChange={handleCheckbox} />}
+            control={
+              <Checkbox
+                name="isDebate"
+                checked={debate}
+                onChange={handleCheckbox}
+              />
+            }
           />
         </Stack>
       </Card>

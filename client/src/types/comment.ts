@@ -3,4 +3,9 @@ export type Comment = {
   author: string;
   content: string;
   createdDate: Date;
+  updatedDate?: Date;
+  edited?: boolean;
+  stance?: "agree" | "disagree";
+  parentId?: number;
+  replied?: Comment[];
 };

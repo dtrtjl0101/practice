@@ -9,7 +9,6 @@ import {
   Paper,
   Stack,
 } from "@mui/material";
-import DeleteButton from "../../../component/deleteButton"; // 삭제 버튼 컴포넌트 import
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Post, formattedDate, initialPosts } from "../../../types/post";
 
@@ -20,10 +19,6 @@ export const Route = createFileRoute("/_pathlessLayout/posts/")({
 function List() {
   const navigate = useNavigate();
   const [posts, setPosts] = useState<Post[]>(initialPosts);
-
-  const handleDelete = (id: number) => {
-    setPosts((prev) => prev.filter((post) => post.id !== id));
-  };
 
   return (
     <Container maxWidth="md">
@@ -49,16 +44,26 @@ function List() {
             elevation={2}
             sx={{ mb: 2, borderRadius: 2, overflow: "hidden" }}
           >
-            <Card
-              sx={{ cursor: "pointer" }}
-              onClick={() => navigate({ to: `/posts/${post.id}` })}
-            >
+            <Card>
               <CardContent>
                 {/* 제목 */}
-                <Typography variant="h6" fontWeight="bold" gutterBottom>
-                  {post.title}
-                </Typography>
-
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography
+                    variant="h6"
+                    fontWeight="bold"
+                    gutterBottom
+                    sx={{
+                      cursor: "pointer",
+                      transition: "color 0.2s",
+                      "&:hover": {
+                        color: "primary.main",
+                      },
+                    }}
+                    onClick={() => navigate({ to: `/posts/${post.id}` })}
+                  >
+                    {post.title}
+                  </Typography>
+                </Stack>
                 {/* 본문 일부 미리보기 2줄 넘으면 ... */}
                 <Typography
                   variant="body2"
@@ -79,6 +84,9 @@ function List() {
                 <Stack direction="row" justifyContent="space-between">
                   <Typography variant="caption" color="text.secondary">
                     작성자: {post.author}
+                  </Typography>
+                  <Typography variant="subtitle2" color="text.secondary">
+                    {post.isDebate ? "찬반" : ""}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
                     {formattedDate(post.createdDate)}

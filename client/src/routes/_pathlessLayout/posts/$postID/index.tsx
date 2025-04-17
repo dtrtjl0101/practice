@@ -1,9 +1,4 @@
-import {
-  createFileRoute,
-  useParams,
-  Link,
-  useNavigate,
-} from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   Typography,
   Container,
@@ -12,7 +7,7 @@ import {
   Divider,
   Stack,
 } from "@mui/material";
-import { initialPosts } from "../../../../types/post";
+import { initialPosts, Post } from "../../../../types/post";
 import { useState } from "react";
 import CommentSection from "../../../../component/CommentSection";
 import { Comment } from "../../../../types/comment";
@@ -34,22 +29,55 @@ function PostID() {
       author: "사용자1",
       content: "좋은 글이네요!",
       createdDate: new Date(),
+      stance: "agree",
     },
   ]);
-  const handleAddComment = (newComment: string) => {
-    setComments([
-      ...comments,
+  const handleAddComment = (
+    content: string,
+    stance?: "agree" | "disagree",
+    parentId?: number
+  ) => {
+    setComments((prev) => [
+      ...prev,
       {
         id: Date.now(), // 임시 id
         author: "익명", // 또는 로그인 사용자 이름
-        content: newComment,
+        content: content,
         createdDate: new Date(),
+        stance,
+        parentId,
       },
     ]);
   };
+
   const handleDeleteComment = (id: number) => {
     alert("정말 삭제하시겠습니까?");
     setComments((prev) => prev.filter((comment) => comment.id !== id));
+  };
+
+  const handleEditComment = (id: number, newContent: string) => {
+    setComments((prev) =>
+      prev.map((comment) =>
+        comment.id === id
+          ? {
+              ...comment,
+              content: newContent,
+              updatedDate: new Date(),
+              edited: true,
+            }
+          : comment
+      )
+    );
+  };
+
+  const [posts, setPosts] = useState<Post[]>(initialPosts);
+
+  const onDeletePost = (id: number) => {
+    const updatedPosts = posts.filter((post) => post.id !== id);
+    setPosts(updatedPosts);
+    initialPosts.length = 0;
+    initialPosts.push(...updatedPosts);
+    navigate({ to: "/posts" });
   };
 
   return (
@@ -69,6 +97,9 @@ function PostID() {
         >
           <Typography variant="subtitle2" color="text.secondary">
             작성자: {post.author}
+          </Typography>
+          <Typography variant="subtitle2" color="text.secondary">
+            {post.isDebate ? "토론" : ""}
           </Typography>
           <Typography variant="subtitle2" color="text.secondary">
             작성일: {new Date(post.createdDate).toLocaleDateString()}
@@ -99,12 +130,23 @@ function PostID() {
           <Button variant="outlined" onClick={() => navigate({ to: "/posts" })}>
             뒤로 가기
           </Button>
+          <Button
+            variant="text"
+            color="error"
+            size="small"
+            sx={{ justifySelf: "flex-end" }}
+            onClick={() => onDeletePost(post.id)}
+          >
+            삭제
+          </Button>
         </Stack>
       </Paper>
       <CommentSection
+        isDebate={post?.isDebate}
         comments={comments}
         onAddComment={handleAddComment}
         onDeleteComment={handleDeleteComment}
+        onEditComment={handleEditComment}
       />
     </Container>
   );
