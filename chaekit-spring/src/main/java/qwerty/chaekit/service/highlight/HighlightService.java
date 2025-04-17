@@ -20,8 +20,6 @@ import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.UserToken;
 
-import java.util.Objects;
-
 @Slf4j
 @Service
 @Transactional
@@ -54,14 +52,14 @@ public class HighlightService {
     }
 
     public PageResponse<HighlightFetchResponse> fetchHighlights(UserToken userToken, Pageable pageable, Long activityId, Long bookId, String spine, Boolean me) {
-        Page<Highlight> highlights = highlightRepository.findHighlights(pageable, userToken.memberId(), activityId, bookId, spine, me);
+        Page<Highlight> highlights = highlightRepository.findHighlights(pageable, userToken.userId(), activityId, bookId, spine, me);
         return PageResponse.of(highlights.map(HighlightFetchResponse::of));
     }
 
     public HighlightPostResponse updateHighlight(UserToken userToken, Long id, HighlightPutRequest request) {
         Highlight highlight = highlightRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));
-        if(!Objects.equals(userToken.memberId(), highlight.getAuthor().getMember().getId())) {
+        if(!userToken.userId().equals(highlight.getAuthor().getId())) {
             throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_YOURS);
         }
         highlight.updateMemo(request.memo());

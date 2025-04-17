@@ -9,5 +9,5 @@ import java.util.Optional;
 public interface HighlightRepository {
     Optional<Highlight> findById(Long id);
     Highlight save(Highlight highlight);
-    Page<Highlight> findHighlights(Pageable pageable, Long memberId, Long activityId, Long bookId, String spine, Boolean me);
+    Page<Highlight> findHighlights(Pageable pageable, Long userId, Long activityId, Long bookId, String spine, Boolean me);
 }

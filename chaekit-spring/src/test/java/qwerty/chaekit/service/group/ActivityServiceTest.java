@@ -54,8 +54,8 @@ class ActivityServiceTest {
     void setUp() {
         UserProfile groupLeader = testFixtureFactory.createUser("leader_username", "leader_nickname");
         UserProfile anotherUser = testFixtureFactory.createUser("user_username", "user_nickname");
-        groupLeaderLogin = testFixtureFactory.createUserToken(groupLeader.getMember(), groupLeader, Role.ROLE_USER);
-        anotherLogin = testFixtureFactory.createUserToken(anotherUser.getMember(), anotherUser, Role.ROLE_USER);
+        groupLeaderLogin = testFixtureFactory.createUserToken(groupLeader.getMember(), groupLeader);
+        anotherLogin = testFixtureFactory.createUserToken(anotherUser.getMember(), anotherUser);
 
         PublisherProfile publisher = testFixtureFactory.createPublisher("publisher_username", "publisher_name");
         dummyEbook = testFixtureFactory.createEbook("dummy_ebook", publisher, "author", "description", "file_key");
