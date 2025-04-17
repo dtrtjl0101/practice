@@ -48,7 +48,7 @@ class HighlightServiceTest {
         dummyUserProfile = testFixtureFactory.createUser("user_username", "user_nickname");
         PublisherProfile dummyPublisherProfile = testFixtureFactory.createPublisher("publisher_username", "publisher_name");
         dummyEbook = testFixtureFactory.createEbook("dummy_ebook", dummyPublisherProfile, "book_author", "book_description", "book_file_key");
-        dummyUserToken = testFixtureFactory.createLoginMember(dummyUserProfile.getMember(), Role.ROLE_USER);
+        dummyUserToken = testFixtureFactory.createUserToken(dummyUserProfile.getMember(), dummyUserProfile, Role.ROLE_USER);
 
     }
 
@@ -146,7 +146,7 @@ class HighlightServiceTest {
                 .build());
 
         UserProfile anotherUserProfile = testFixtureFactory.createUser("another_user", "another_nickname");
-        UserToken anotherUserToken = testFixtureFactory.createLoginMember(anotherUserProfile.getMember(), Role.ROLE_USER);
+        UserToken anotherUserToken = testFixtureFactory.createUserToken(anotherUserProfile.getMember(), anotherUserProfile, Role.ROLE_USER);
         HighlightPutRequest request = HighlightPutRequest.builder()
                 .memo("Updated Memo")
                 .build();
