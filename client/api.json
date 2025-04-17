@@ -312,6 +312,117 @@
         }
       }
     },
+    "/api/groups/{groupId}/activities": {
+      "get": {
+        "tags": ["activity-controller"],
+        "operationId": "getAllActivities",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "required": false,
+            "schema": { "minimum": 0, "type": "integer", "default": 0 }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "The size of the page to be returned",
+            "required": false,
+            "schema": { "minimum": 1, "type": "integer", "default": 20 }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+            "required": false,
+            "schema": { "type": "array", "items": { "type": "string" } }
+          },
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponsePageResponseActivityFetchResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["activity-controller"],
+        "operationId": "createActivity",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ActivityPostRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponseActivityPostResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["activity-controller"],
+        "operationId": "updateActivity",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ActivityPatchRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponseActivityPostResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/publishers/{id}/accept": {
       "post": {
         "tags": ["admin-controller"],
@@ -612,20 +723,13 @@
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
-      "GroupFetchResponse": {
+      "GroupPostResponse": {
         "type": "object",
         "properties": {
           "groupId": { "type": "integer", "format": "int64" },
           "name": { "type": "string" },
           "description": { "type": "string" },
-          "tags": { "type": "array", "items": { "type": "string" } },
-          "memberCount": { "type": "integer", "format": "int32" }
-        }
-      },
-      "GroupPostResponse": {
-        "type": "object",
-        "properties": {
-          "group": { "$ref": "#/components/schemas/GroupFetchResponse" }
+          "tags": { "type": "array", "items": { "type": "string" } }
         }
       },
       "UserJoinRequest": {
@@ -725,6 +829,34 @@
           "tags": { "type": "array", "items": { "type": "string" } }
         }
       },
+      "ActivityPostRequest": {
+        "required": ["bookId", "endTime", "startTime"],
+        "type": "object",
+        "properties": {
+          "bookId": { "type": "integer", "format": "int64" },
+          "startTime": { "type": "string", "format": "date" },
+          "endTime": { "type": "string", "format": "date" },
+          "description": { "type": "string" }
+        }
+      },
+      "ActivityPostResponse": {
+        "type": "object",
+        "properties": {
+          "activityId": { "type": "integer", "format": "int64" },
+          "bookId": { "type": "integer", "format": "int64" },
+          "startTime": { "type": "string", "format": "date" },
+          "endTime": { "type": "string", "format": "date" },
+          "description": { "type": "string" }
+        }
+      },
+      "ApiSuccessResponseActivityPostResponse": {
+        "type": "object",
+        "properties": {
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/ActivityPostResponse" }
+        },
+        "description": "API 에러 응답을 감싸는 클래스"
+      },
       "ApiSuccessResponseBoolean": {
         "type": "object",
         "properties": {
@@ -761,6 +893,16 @@
           "data": { "type": "string" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
+      },
+      "ActivityPatchRequest": {
+        "required": ["activityId"],
+        "type": "object",
+        "properties": {
+          "activityId": { "type": "integer", "format": "int64" },
+          "startTime": { "type": "string", "format": "date" },
+          "endTime": { "type": "string", "format": "date" },
+          "description": { "type": "string" }
+        }
       },
       "ApiSuccessResponseUserMemberResponse": {
         "type": "object",
@@ -840,6 +982,16 @@
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
+      "GroupFetchResponse": {
+        "type": "object",
+        "properties": {
+          "groupId": { "type": "integer", "format": "int64" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "memberCount": { "type": "integer", "format": "int32" }
+        }
+      },
       "PageResponseGroupFetchResponse": {
         "type": "object",
         "properties": {
@@ -859,6 +1011,38 @@
           "data": { "$ref": "#/components/schemas/GroupFetchResponse" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
+      },
+      "ActivityFetchResponse": {
+        "type": "object",
+        "properties": {
+          "activityId": { "type": "integer", "format": "int64" },
+          "bookId": { "type": "integer", "format": "int64" },
+          "startTime": { "type": "string", "format": "date" },
+          "endTime": { "type": "string", "format": "date" },
+          "description": { "type": "string" }
+        }
+      },
+      "ApiSuccessResponsePageResponseActivityFetchResponse": {
+        "type": "object",
+        "properties": {
+          "isSuccessful": { "type": "boolean" },
+          "data": {
+            "$ref": "#/components/schemas/PageResponseActivityFetchResponse"
+          }
+        },
+        "description": "API 에러 응답을 감싸는 클래스"
+      },
+      "PageResponseActivityFetchResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ActivityFetchResponse" }
+          },
+          "currentPage": { "type": "integer", "format": "int32" },
+          "totalItems": { "type": "integer", "format": "int64" },
+          "totalPages": { "type": "integer", "format": "int32" }
+        }
       },
       "ApiSuccessResponsePageResponsePublisherInfoResponse": {
         "type": "object",
