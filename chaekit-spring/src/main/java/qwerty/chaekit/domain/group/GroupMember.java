@@ -22,11 +22,11 @@ public class GroupMember {
 
     @ManyToOne
     @JoinColumn(name ="user_id", nullable = false)
-    private UserProfile userProfile;
+    private UserProfile user;
 
     @Builder
-    public GroupMember(ReadingGroup readingGroup, UserProfile userProfile) {
+    public GroupMember(ReadingGroup readingGroup, UserProfile user) {
         this.readingGroup = readingGroup;
-        this.userProfile = userProfile;
+        this.user = user;
     }
 }

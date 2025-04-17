@@ -8,16 +8,16 @@ import java.time.LocalDateTime;
 @Builder
 public record PublisherInfoResponse(
         Long id,
-        Long profileId,
+        Long publisherId,
         String publisherName,
         LocalDateTime createdAt
 ) {
-    public static PublisherInfoResponse of(PublisherProfile profile) {
+    public static PublisherInfoResponse of(PublisherProfile publisher) {
         return PublisherInfoResponse.builder()
-                .id(profile.getMember().getId())
-                .profileId(profile.getId())
-                .publisherName(profile.getPublisherName())
-                .createdAt(profile.getCreatedAt())
+                .id(publisher.getMember().getId())
+                .publisherId(publisher.getId())
+                .publisherName(publisher.getPublisherName())
+                .createdAt(publisher.getCreatedAt())
                 .build();
     }
 }

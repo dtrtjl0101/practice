@@ -46,19 +46,19 @@ public class TestFixtureFactory {
         );
     }
 
-    public UserToken createUserToken(Member member, UserProfile profile, Role role) {
+    public UserToken createUserToken(Member member, UserProfile user, Role role) {
         return UserToken.builder()
                 .memberId(member.getId())
-                .userId(profile.getId())
+                .userId(user.getId())
                 .email(member.getUsername())
                 .role(role.name())
                 .build();
     }
 
-    public PublisherToken createPublisherToken(Member member, PublisherProfile profile, Role role) {
+    public PublisherToken createPublisherToken(Member member, PublisherProfile publisher, Role role) {
         return PublisherToken.builder()
                 .memberId(member.getId())
-                .publisherId(profile.getId())
+                .publisherId(publisher.getId())
                 .email(member.getUsername())
                 .role(role.name())
                 .build();

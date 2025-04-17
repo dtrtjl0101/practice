@@ -5,7 +5,7 @@ import lombok.Builder;
 @Builder
 public record PublisherMemberResponse(
         Long id,
-        Long profileId,
+        Long publisherId,
         String publisherName,
         String email,
         String role,

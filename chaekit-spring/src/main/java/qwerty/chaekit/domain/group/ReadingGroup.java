@@ -47,16 +47,16 @@ public class ReadingGroup extends BaseEntity {
     }
 
     public List<UserProfile> getMembers() {
-        return groupMembers.stream().map(GroupMember::getUserProfile).toList();
+        return groupMembers.stream().map(GroupMember::getUser).toList();
     }
 
-    public void addMember(UserProfile userProfile) {
-        GroupMember groupMember = new GroupMember(this, userProfile);
+    public void addMember(UserProfile user) {
+        GroupMember groupMember = new GroupMember(this, user);
         groupMembers.add(groupMember);
     }
 
-    public void removeMember(UserProfile userProfile) {
-        groupMembers.removeIf(member -> member.getUserProfile().equals(userProfile));
+    public void removeMember(UserProfile user) {
+        groupMembers.removeIf(member -> member.getUser().equals(user));
     }
 
     public void updateDescription(String description) {

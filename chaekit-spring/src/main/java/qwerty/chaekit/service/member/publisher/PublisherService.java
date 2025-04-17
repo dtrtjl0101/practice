@@ -17,16 +17,16 @@ public class PublisherService {
     private final PublisherProfileRepository publisherRepository;
 
     public PublisherMemberResponse getPublisherProfile(PublisherToken token) {
-        PublisherProfile profile = publisherRepository.findById(token.publisherId())
+        PublisherProfile publisher = publisherRepository.findById(token.publisherId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));
 
         return PublisherMemberResponse.builder()
                 .id(token.memberId())
-                .profileId(profile.getId())
-                .publisherName(profile.getPublisherName())
+                .publisherId(publisher.getId())
+                .publisherName(publisher.getPublisherName())
                 .email(token.email())
                 .role(token.role())
-                .isAccepted(profile.isAccepted())
+                .isAccepted(publisher.isAccepted())
                 .build();
     }
 }

@@ -24,6 +24,10 @@ public class AdminService {
     @Setter
     private Long adminPublisherId;
 
+    @Getter
+    @Setter
+    private Long adminUserId;
+
     @Transactional(readOnly = true)
     public PageResponse<PublisherInfoResponse> getNotAcceptedPublishers(Pageable pageable) {
         Page<PublisherProfile> page = publisherRepository.findAllByAcceptedFalseOrderByCreatedAtDesc(pageable);
@@ -32,12 +36,12 @@ public class AdminService {
 
     @Transactional
     public boolean acceptPublisher(Long publisherId) {
-        Optional<PublisherProfile> profile = publisherRepository.findById(publisherId);
-        if (profile.isPresent()) {
-            if(profile.get().isAccepted()) {
+        Optional<PublisherProfile> publisher = publisherRepository.findById(publisherId);
+        if (publisher.isPresent()) {
+            if(publisher.get().isAccepted()) {
                 return false;
             }
-            profile.get().acceptPublisher();
+            publisher.get().acceptPublisher();
             return true;
         } else {
             throw new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND);

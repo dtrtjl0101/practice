@@ -30,15 +30,15 @@ class AdminServiceTest {
     void test1() {
         // given
         Long publisherId = 1L;
-        PublisherProfile profile = mock(PublisherProfile.class);
-        given(profile.isAccepted()).willReturn(false);
+        PublisherProfile publisher = mock(PublisherProfile.class);
+        given(publisher.isAccepted()).willReturn(false);
         given(publisherProfileRepository.findById(publisherId))
-                .willReturn(Optional.of(profile));
+                .willReturn(Optional.of(publisher));
         // when
         boolean result = adminService.acceptPublisher(publisherId);
         // then
         assertTrue(result);
-        verify(profile).acceptPublisher();
+        verify(publisher).acceptPublisher();
     }
 
     @Test
@@ -46,15 +46,15 @@ class AdminServiceTest {
     void test2() {
         // given
         Long publisherId = 2L;
-        PublisherProfile profile = mock(PublisherProfile.class);
-        given(profile.isAccepted()).willReturn(true);
+        PublisherProfile publisher = mock(PublisherProfile.class);
+        given(publisher.isAccepted()).willReturn(true);
         given(publisherProfileRepository.findById(publisherId))
-                .willReturn(Optional.of(profile));
+                .willReturn(Optional.of(publisher));
         // when
         boolean result = adminService.acceptPublisher(publisherId);
         // then
         assertFalse(result);
-        verify(profile, never()).acceptPublisher();
+        verify(publisher, never()).acceptPublisher();
     }
 
     @Test

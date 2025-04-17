@@ -70,7 +70,7 @@ public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
             }
             return UserToken.builder()
                     .memberId(userDetails.getMemberId())
-                    .userId(userDetails.getProfileId())
+                    .userId(userDetails.getUserId())
                     .email(userDetails.getEmail())
                     .role(loginRole)
                     .build();
@@ -80,7 +80,7 @@ public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
             }
             return PublisherToken.builder()
                     .memberId(userDetails.getMemberId())
-                    .publisherId(userDetails.getProfileId())
+                    .publisherId(userDetails.getPublisherId())
                     .email(userDetails.getEmail())
                     .role(loginRole)
                     .build();

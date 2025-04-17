@@ -13,23 +13,18 @@ public class CustomUserDetails implements UserDetails {
     @Getter
     private final Long memberId;
     @Getter
-    private final Long profileId;
+    private final Long userId;
+    @Getter
+    private final Long publisherId;
     @Getter
     private final String email;
     private final String password;
     private final String role;
 
-    public CustomUserDetails(Long memberId, Long profileId, String username, String role) {
+    public CustomUserDetails(Long memberId, Long userId, Long publisherId, String username, String password, String role) {
         this.memberId = memberId;
-        this.profileId = profileId;
-        this.email = username;
-        this.password = null;
-        this.role = role;
-    }
-
-    public CustomUserDetails(Long memberId, Long profileId, String username, String password, String role) {
-        this.memberId = memberId;
-        this.profileId = profileId;
+        this.userId = userId;
+        this.publisherId = publisherId;
         this.email = username;
         this.password = password;
         this.role = role;

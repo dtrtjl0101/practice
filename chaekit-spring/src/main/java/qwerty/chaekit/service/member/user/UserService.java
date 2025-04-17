@@ -21,7 +21,7 @@ public class UserService {
 
         return UserMemberResponse.builder()
                 .id(userToken.memberId())
-                .profileId(userToken.userId())
+                .userId(userToken.userId())
                 .username(userToken.email())
                 .nickname(nickname)
                 .role(userToken.role())

@@ -28,9 +28,9 @@ public class PublisherJoinService {
 
         validatePublisherName(request.publisherName());
         Member member = memberJoinHelper.saveMember(email, password, Role.ROLE_PUBLISHER);
-        PublisherProfile profile = saveProfile(request, member);
+        PublisherProfile publisher = savePublisher(request, member);
 
-        return toResponse(request, member, profile);
+        return toResponse(request, member, publisher);
     }
 
     private void validatePublisherName(String name) {
@@ -39,19 +39,19 @@ public class PublisherJoinService {
         }
     }
 
-    private PublisherProfile saveProfile(PublisherJoinRequest request, Member member) {
+    private PublisherProfile savePublisher(PublisherJoinRequest request, Member member) {
         return publisherRepository.save(PublisherProfile.builder()
                 .member(member)
                 .publisherName(request.publisherName())
                 .build());
     }
 
-    private PublisherJoinResponse toResponse(PublisherJoinRequest request, Member member, PublisherProfile profile) {
-        String token = jwtUtil.createJwt(member.getId(), profile.getId(), member.getUsername(), Role.ROLE_PUBLISHER.name());
+    private PublisherJoinResponse toResponse(PublisherJoinRequest request, Member member, PublisherProfile publisher) {
+        String token = jwtUtil.createJwt(member.getId(), null, publisher.getId(), member.getUsername(), Role.ROLE_PUBLISHER.name());
 
         return PublisherJoinResponse.builder()
                 .id(member.getId())
-                .profileId(profile.getId())
+                .publisherId(publisher.getId())
                 .accessToken("Bearer " + token)
                 .username(member.getUsername())
                 .publisherName(request.publisherName())

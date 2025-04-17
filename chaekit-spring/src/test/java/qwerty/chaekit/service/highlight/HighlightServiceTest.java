@@ -41,16 +41,16 @@ class HighlightServiceTest {
     @Autowired
     private TestFixtureFactory testFixtureFactory;
 
-    private UserProfile dummyUserProfile;
+    private UserProfile dummyUser;
     private Ebook dummyEbook;
     private UserToken dummyUserToken;
 
     @BeforeEach
     void setUp() {
-        dummyUserProfile = testFixtureFactory.createUser("user_username", "user_nickname");
+        dummyUser = testFixtureFactory.createUser("user_username", "user_nickname");
         PublisherProfile dummyPublisherProfile = testFixtureFactory.createPublisher("publisher_username", "publisher_name");
         dummyEbook = testFixtureFactory.createEbook("dummy_ebook", dummyPublisherProfile, "book_author", "book_description", "book_file_key");
-        dummyUserToken = testFixtureFactory.createUserToken(dummyUserProfile.getMember(), dummyUserProfile, Role.ROLE_USER);
+        dummyUserToken = testFixtureFactory.createUserToken(dummyUser.getMember(), dummyUser, Role.ROLE_USER);
 
     }
 
@@ -81,7 +81,7 @@ class HighlightServiceTest {
     void fetchHighlightsTest() {
         // Given
         Highlight highlight = highlightRepository.save(Highlight.builder()
-                .author(dummyUserProfile)
+                .author(dummyUser)
                 .book(dummyEbook)
                 .spine("spine1")
                 .cfi("cfi1")
@@ -113,7 +113,7 @@ class HighlightServiceTest {
     void updateHighlightTest() {
         // Given
         Highlight highlight = highlightRepository.save(Highlight.builder()
-                .author(dummyUserProfile)
+                .author(dummyUser)
                 .book(dummyEbook)
                 .spine("spine1")
                 .cfi("cfi1")
@@ -140,7 +140,7 @@ class HighlightServiceTest {
     void updateHighlightForbiddenTest() {
         // Given
         Highlight highlight = highlightRepository.save(Highlight.builder()
-                .author(dummyUserProfile)
+                .author(dummyUser)
                 .book(dummyEbook)
                 .spine("spine1")
                 .cfi("cfi1")

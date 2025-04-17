@@ -28,9 +28,9 @@ public class UserJoinService {
 
         validateNickname(request.username());
         Member member = memberJoinHelper.saveMember(email, password, Role.ROLE_USER);
-        UserProfile profile = saveProfile(request, member);
+        UserProfile user = saveUser(request, member);
 
-        return toResponse(request, member, profile);
+        return toResponse(request, member, user);
     }
 
     private void validateNickname(String nickname) {
@@ -39,19 +39,19 @@ public class UserJoinService {
         }
     }
 
-    private UserProfile saveProfile(UserJoinRequest request, Member member) {
+    private UserProfile saveUser(UserJoinRequest request, Member member) {
         return userRepository.save(UserProfile.builder()
                 .member(member)
                 .nickname(request.nickname())
                 .build());
     }
 
-    private UserJoinResponse toResponse(UserJoinRequest request, Member member, UserProfile userProfile) {
-        String token = jwtUtil.createJwt(member.getId(), userProfile.getId(), member.getUsername(), member.getRole().name());
+    private UserJoinResponse toResponse(UserJoinRequest request, Member member, UserProfile user) {
+        String token = jwtUtil.createJwt(member.getId(), user.getId(), null, member.getUsername(), member.getRole().name());
 
         return UserJoinResponse.builder()
                 .id(member.getId())
-                .profileId(userProfile.getId())
+                .userId(user.getId())
                 .accessToken("Bearer " + token)
                 .username(member.getUsername())
                 .nickname(request.nickname())
