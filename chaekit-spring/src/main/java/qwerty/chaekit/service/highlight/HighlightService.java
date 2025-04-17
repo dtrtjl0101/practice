@@ -6,11 +6,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.ebook.EbookRepository;
 import qwerty.chaekit.domain.highlight.entity.Highlight;
 import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
-import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.dto.highlight.HighlightFetchResponse;
 import qwerty.chaekit.dto.highlight.HighlightPostRequest;
@@ -31,21 +29,24 @@ import java.util.Objects;
 public class HighlightService {
     private final HighlightRepository highlightRepository;
     private final EbookRepository ebookRepository;
-    private final UserProfileRepository userProfileRepository;
+    private final UserProfileRepository userRepository;
 
     public HighlightPostResponse createHighlight(UserToken userToken, HighlightPostRequest request) {
-        UserProfile userProfile = userProfileRepository.findByMember_Id(userToken.memberId())
-                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
-        Ebook ebook = ebookRepository.findById(request.bookId())
-                .orElseThrow(() -> new NotFoundException(ErrorCode.EBOOK_NOT_FOUND));
+        Long userId = userToken.userId();
+        if(!userRepository.existsById(userId)) {
+            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
+        }
+        if(!ebookRepository.existsById(request.bookId())) {
+            throw new NotFoundException(ErrorCode.EBOOK_NOT_FOUND);
+        }
 
         // Activity를 추가하는 경우 권한 체크 필요
 
         Highlight highlight = Highlight.builder()
-                .book(ebook)
+                .book(ebookRepository.getReferenceById(request.bookId()))
                 .spine(request.spine())
                 .cfi(request.cfi())
-                .author(userProfile)
+                .author(userRepository.getReferenceById(userId))
                 .memo(request.memo())
                 .build();
         Highlight savedHighlight = highlightRepository.save(highlight);

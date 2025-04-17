@@ -14,10 +14,10 @@ import qwerty.chaekit.global.security.resolver.PublisherToken;
 @Service
 @RequiredArgsConstructor
 public class PublisherService {
-    private final PublisherProfileRepository profileRepository;
+    private final PublisherProfileRepository publisherRepository;
 
     public PublisherMemberResponse getPublisherProfile(PublisherToken token) {
-        PublisherProfile profile = profileRepository.findById(token.publisherId())
+        PublisherProfile profile = publisherRepository.findById(token.publisherId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));
 
         return PublisherMemberResponse.builder()

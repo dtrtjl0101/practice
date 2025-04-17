@@ -18,7 +18,7 @@ import qwerty.chaekit.service.member.MemberJoinHelper;
 @RequiredArgsConstructor
 public class PublisherJoinService {
     private final MemberJoinHelper memberJoinHelper;
-    private final PublisherProfileRepository profileRepository;
+    private final PublisherProfileRepository publisherRepository;
     private final JwtUtil jwtUtil;
 
     @Transactional
@@ -34,13 +34,13 @@ public class PublisherJoinService {
     }
 
     private void validatePublisherName(String name) {
-        if (profileRepository.existsByPublisherName(name)) {
+        if (publisherRepository.existsByPublisherName(name)) {
             throw new BadRequestException(ErrorCode.PUBLISHER_ALREADY_EXISTS);
         }
     }
 
     private PublisherProfile saveProfile(PublisherJoinRequest request, Member member) {
-        return profileRepository.save(PublisherProfile.builder()
+        return publisherRepository.save(PublisherProfile.builder()
                 .member(member)
                 .publisherName(request.publisherName())
                 .build());

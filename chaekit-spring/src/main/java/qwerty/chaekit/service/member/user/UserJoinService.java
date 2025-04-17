@@ -18,7 +18,7 @@ import qwerty.chaekit.service.member.MemberJoinHelper;
 @RequiredArgsConstructor
 public class UserJoinService {
     private final MemberJoinHelper memberJoinHelper;
-    private final UserProfileRepository userProfileRepository;
+    private final UserProfileRepository userRepository;
     private final JwtUtil jwtUtil;
 
     @Transactional
@@ -34,13 +34,13 @@ public class UserJoinService {
     }
 
     private void validateNickname(String nickname) {
-        if (userProfileRepository.existsByNickname(nickname)) {
+        if (userRepository.existsByNickname(nickname)) {
             throw new BadRequestException(ErrorCode.NICKNAME_ALREADY_EXISTS);
         }
     }
 
     private UserProfile saveProfile(UserJoinRequest request, Member member) {
-        return userProfileRepository.save(UserProfile.builder()
+        return userRepository.save(UserProfile.builder()
                 .member(member)
                 .nickname(request.nickname())
                 .build());

@@ -13,10 +13,10 @@ import qwerty.chaekit.global.security.resolver.UserToken;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    private final UserProfileRepository profileRepository;
+    private final UserProfileRepository userRepository;
 
     public UserMemberResponse getUserProfile(UserToken userToken) {
-        String nickname = profileRepository.findById(userToken.userId())
+        String nickname = userRepository.findById(userToken.userId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND)).getNickname();
 
         return UserMemberResponse.builder()

@@ -7,11 +7,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.group.GroupRepository;
 import qwerty.chaekit.domain.group.ReadingGroup;
-import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
-import qwerty.chaekit.dto.group.*;
-import qwerty.chaekit.global.enums.ErrorCode;
+import qwerty.chaekit.dto.group.GroupFetchResponse;
+import qwerty.chaekit.dto.group.GroupPostRequest;
+import qwerty.chaekit.dto.group.GroupPostResponse;
+import qwerty.chaekit.dto.group.GroupPutRequest;
 import qwerty.chaekit.dto.page.PageResponse;
+import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.UserToken;
@@ -19,17 +21,19 @@ import qwerty.chaekit.global.security.resolver.UserToken;
 @Service
 @RequiredArgsConstructor
 public class GroupService {
-    private final UserProfileRepository userProfileRepository;
+    private final UserProfileRepository userRepository;
     private final GroupRepository groupRepository;
 
     @Transactional
     public GroupPostResponse createGroup(UserToken userToken, GroupPostRequest request) {
-        UserProfile userProfile = userProfileRepository.findByMember_Id(userToken.memberId())
-                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        Long userId = userToken.userId();
+        if(!userRepository.existsById(userId)) {
+            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
+        }
 
         ReadingGroup groupEntity = ReadingGroup.builder()
                 .name(request.name())
-                .groupLeader(userProfile)
+                .groupLeader(userRepository.getReferenceById(userId))
                 .description(request.description())
                 .build();
         ReadingGroup savedGroup = groupRepository.save(groupEntity);
@@ -52,13 +56,15 @@ public class GroupService {
 
     @Transactional
     public GroupPostResponse updateGroup(UserToken userToken, long groupId, GroupPutRequest request) {
-        UserProfile userProfile = userProfileRepository.findByMember_Id(userToken.memberId())
-                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        Long userId = userToken.userId();
+        if(!userRepository.existsById(userId)) {
+            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
+        }
 
         ReadingGroup group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.GROUP_NOT_FOUND));
 
-        if (!group.getGroupLeader().getId().equals(userProfile.getId())) {
+        if (!group.getGroupLeader().getId().equals(userId)) {
             throw new ForbiddenException(ErrorCode.GROUP_UPDATE_FORBIDDEN);
         }
         if(request.description() != null) {

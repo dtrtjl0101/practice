@@ -19,20 +19,20 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class AdminService {
-    private final PublisherProfileRepository publisherProfileRepository;
+    private final PublisherProfileRepository publisherRepository;
     @Getter
     @Setter
     private Long adminPublisherId;
 
     @Transactional(readOnly = true)
     public PageResponse<PublisherInfoResponse> getNotAcceptedPublishers(Pageable pageable) {
-        Page<PublisherProfile> page = publisherProfileRepository.findAllByAcceptedFalseOrderByCreatedAtDesc(pageable);
+        Page<PublisherProfile> page = publisherRepository.findAllByAcceptedFalseOrderByCreatedAtDesc(pageable);
         return PageResponse.of(page.map(PublisherInfoResponse::of));
     }
 
     @Transactional
     public boolean acceptPublisher(Long publisherId) {
-        Optional<PublisherProfile> profile = publisherProfileRepository.findById(publisherId);
+        Optional<PublisherProfile> profile = publisherRepository.findById(publisherId);
         if (profile.isPresent()) {
             if(profile.get().isAccepted()) {
                 return false;
