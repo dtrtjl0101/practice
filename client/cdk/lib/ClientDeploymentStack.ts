@@ -30,12 +30,6 @@ export class ClientDeploymentStack extends cdk.Stack {
     });
 
     // ==============================================================
-    new cdk.aws_s3_deployment.BucketDeployment(this, "DeployClient", {
-      sources: [cdk.aws_s3_deployment.Source.asset("../dist")],
-      destinationBucket: bucket,
-    });
-
-    // ==============================================================
     const zone = cdk.aws_route53.HostedZone.fromHostedZoneAttributes(
       this,
       "Zone",
@@ -83,6 +77,14 @@ export class ClientDeploymentStack extends cdk.Stack {
         domainNames: [clientDomainName],
       }
     );
+
+    // ==============================================================
+    new cdk.aws_s3_deployment.BucketDeployment(this, "DeployClient", {
+      sources: [cdk.aws_s3_deployment.Source.asset("../dist")],
+      destinationBucket: bucket,
+      distribution: cloudFront,
+      distributionPaths: ["/*"],
+    });
 
     // ==============================================================
     new cdk.aws_route53.ARecord(this, "ClientRecord", {
