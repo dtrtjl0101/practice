@@ -2,13 +2,16 @@ package qwerty.chaekit.domain.group.activity.discussion;
 
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.member.user.UserProfile;
 
 @Entity
 @Getter
 @Table(name = "discussion_comment")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class DiscussionComment extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
