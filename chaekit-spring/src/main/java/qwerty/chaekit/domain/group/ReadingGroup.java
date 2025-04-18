@@ -50,9 +50,18 @@ public class ReadingGroup extends BaseEntity {
         return groupMembers.stream().map(GroupMember::getUser).toList();
     }
 
-    public void addMember(UserProfile user) {
+    public GroupMember addMember(UserProfile user) {
         GroupMember groupMember = new GroupMember(this, user);
         groupMembers.add(groupMember);
+        return groupMember;
+    }
+
+    public GroupMember approveMember(UserProfile user){
+        return groupMembers.stream()
+                .filter(groupMember -> groupMember.getMember().equals(user))
+                .findFirst()
+                .map(groupMember -> {groupMember.approve(); return groupMember;})
+                .orElse(null);
     }
 
     public void removeMember(UserProfile user) {

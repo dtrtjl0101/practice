@@ -1,6 +1,7 @@
 package qwerty.chaekit.controller.group;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.User;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
@@ -42,17 +43,17 @@ public class GroupController {
 
     @PostMapping("/{groupId}/join")
     public ApiSuccessResponse<GroupJoinResponse> requestJoinGroup(
-            @Login LoginMember loginMember,
+            @Login UserToken userToken,
             @PathVariable long groupId) {
-        return ApiSuccessResponse.of(groupService.requestJoinGroup(loginMember, groupId));
+        return ApiSuccessResponse.of(groupService.requestJoinGroup(userToken, groupId));
     }
 
-    @PutMapping("/{groupId}/members/{memberId}/approve")
+    @PatchMapping("/{groupId}/members/{userId}/approve")
     public ApiSuccessResponse<GroupJoinResponse> approveJoinRequest(
-            @Login LoginMember loginMember,
+            @Login UserToken userToken,
             @PathVariable long groupId,
-            @PathVariable long memberId) {
-        return ApiSuccessResponse.of(groupService.approveJoinRequest(loginMember, groupId, memberId));
+            @PathVariable long userId) {
+        return ApiSuccessResponse.of(groupService.approveJoinRequest(userToken, groupId, userId));
     }
 
 

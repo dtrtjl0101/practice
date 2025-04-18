@@ -25,7 +25,7 @@ public class GroupMember {
     private UserProfile user;
 
     @Column(nullable = false)
-    private boolean isAccepted = false;  // 가입 승인 상태
+    private boolean isAccepted = false;
 
     @Builder
     public GroupMember(ReadingGroup readingGroup, UserProfile user) {
@@ -34,22 +34,18 @@ public class GroupMember {
         this.isAccepted = false;  // 초기에는 미승인 상태
     }
 
-    // 그룹 조회
     public ReadingGroup getGroup() {
         return this.readingGroup;
     }
 
-    // 멤버 조회
     public UserProfile getMember() {
         return this.user;
     }
 
-    // 가입 승인
     public void approve() {
         this.isAccepted = true;
     }
 
-    // 가입 거절 또는 취소
     public void reject() {
         this.isAccepted = false;
     }
