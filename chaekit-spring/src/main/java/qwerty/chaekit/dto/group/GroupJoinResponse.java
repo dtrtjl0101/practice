@@ -14,7 +14,7 @@ public record GroupJoinResponse(
             return GroupJoinResponse.builder()
                     .groupId(groupMember.getGroup().getId())
                     .memberId(groupMember.getMember().getId())
-                    .memberName(groupMember.getMember().getUsername())
+                    .memberName(groupMember.getMember().getNickname())
                     .isAccepted(groupMember.isAccepted())
                     .build();
         }

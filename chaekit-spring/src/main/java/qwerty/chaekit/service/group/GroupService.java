@@ -8,11 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.group.GroupMember;
 import qwerty.chaekit.domain.group.GroupRepository;
 import qwerty.chaekit.domain.group.ReadingGroup;
+import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
-import qwerty.chaekit.dto.group.GroupFetchResponse;
-import qwerty.chaekit.dto.group.GroupPostRequest;
-import qwerty.chaekit.dto.group.GroupPostResponse;
-import qwerty.chaekit.dto.group.GroupPutRequest;
+import qwerty.chaekit.dto.group.*;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.ForbiddenException;
@@ -75,8 +73,8 @@ public class GroupService {
     }
 
     @Transactional
-    public GroupJoinResponse requestJoinGroup(LoginMember loginMember, long groupId) {
-        UserProfile userProfile = userProfileRepository.findByMember_Id(loginMember.memberId())
+    public GroupJoinResponse requestJoinGroup(UserToken userToken, long groupId) {
+        UserProfile userProfile = userRepository.findByMember_Id(userToken.memberId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         ReadingGroup group = groupRepository.findById(groupId)
@@ -87,19 +85,18 @@ public class GroupService {
     }
 
     @Transactional
-    public GroupJoinResponse approveJoinRequest(LoginMember loginMember, long groupId, long memberId) {
-        UserProfile leaderProfile = userProfileRepository.findByMember_Id(loginMember.memberId())
+    public GroupJoinResponse approveJoinRequest(UserToken userToken, long groupId, long userId) {
+        UserProfile leaderProfile = userRepository.findByMember_Id(userToken.memberId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         ReadingGroup group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.GROUP_NOT_FOUND));
 
-        // 그룹장 권한 확인
         if (!group.getGroupLeader().getId().equals(leaderProfile.getId())) {
             throw new ForbiddenException(ErrorCode.GROUP_UPDATE_FORBIDDEN);
         }
 
-        UserProfile memberProfile = userProfileRepository.findByMember_Id(memberId)
+        UserProfile memberProfile = userRepository.findByMember_Id(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         GroupMember groupMember = group.approveMember(memberProfile);
