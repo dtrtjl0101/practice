@@ -40,5 +40,20 @@ public class GroupController {
         return ApiSuccessResponse.of(groupService.updateGroup(loginMember, groupId, request));
     }
 
+    @PostMapping("/{groupId}/join")
+    public ApiSuccessResponse<GroupJoinResponse> requestJoinGroup(
+            @Login LoginMember loginMember,
+            @PathVariable long groupId) {
+        return ApiSuccessResponse.of(groupService.requestJoinGroup(loginMember, groupId));
+    }
+
+    @PutMapping("/{groupId}/members/{memberId}/approve")
+    public ApiSuccessResponse<GroupJoinResponse> approveJoinRequest(
+            @Login LoginMember loginMember,
+            @PathVariable long groupId,
+            @PathVariable long memberId) {
+        return ApiSuccessResponse.of(groupService.approveJoinRequest(loginMember, groupId, memberId));
+    }
+
 
 }

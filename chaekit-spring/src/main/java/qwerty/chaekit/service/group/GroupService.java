@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import qwerty.chaekit.domain.group.GroupMember;
 import qwerty.chaekit.domain.group.GroupRepository;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.member.user.UserProfile;
@@ -65,5 +66,37 @@ public class GroupService {
             group.updateDescription(request.description());
         }
         return GroupPostResponse.of(group);
+    }
+
+    @Transactional
+    public GroupJoinResponse requestJoinGroup(LoginMember loginMember, long groupId) {
+        UserProfile userProfile = userProfileRepository.findByMember_Id(loginMember.memberId())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
+        ReadingGroup group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.GROUP_NOT_FOUND));
+
+        GroupMember groupMember = group.addMember(userProfile);
+        return GroupJoinResponse.of(groupMember);
+    }
+
+    @Transactional
+    public GroupJoinResponse approveJoinRequest(LoginMember loginMember, long groupId, long memberId) {
+        UserProfile leaderProfile = userProfileRepository.findByMember_Id(loginMember.memberId())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
+        ReadingGroup group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.GROUP_NOT_FOUND));
+
+        // 그룹장 권한 확인
+        if (!group.getGroupLeader().getId().equals(leaderProfile.getId())) {
+            throw new ForbiddenException(ErrorCode.GROUP_UPDATE_FORBIDDEN);
+        }
+
+        UserProfile memberProfile = userProfileRepository.findByMember_Id(memberId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
+        GroupMember groupMember = group.approveMember(memberProfile);
+        return GroupJoinResponse.of(groupMember);
     }
 }
