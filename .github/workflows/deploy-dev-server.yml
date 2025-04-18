@@ -31,13 +31,14 @@ jobs:
       - name: Run tests with coverage
         run: ./gradlew test jacocoTestReport jacocoTestCoverageVerification
 
-      # HTML 커버리지 리포트 아카이빙
-      - name: Upload coverage report
-        if: always()
-        uses: actions/upload-artifact@v3
+      # HTML 커버리지 리포트 게시
+      - name: Deploy coverage to GitHub Pages
+        if: github.ref == 'refs/heads/dev' && success()
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          name: jacoco-html-report
-          path: chaekit-spring/build/reports/jacoco/test/html/
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: chaekit-spring/build/reports/jacoco/test/html
+          destination_dir: dev-server-test-coverage
 
       # AWS 로그인
       - name: Configure AWS Credentials
