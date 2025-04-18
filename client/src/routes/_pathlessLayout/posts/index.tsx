@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_pathlessLayout/posts/")({
 
 function List() {
   const navigate = useNavigate();
-  const [posts, setPosts] = useState<Post[]>(initialPosts);
+  const [posts, _setPosts] = useState<Post[]>(initialPosts);
 
   return (
     <Container maxWidth="md">

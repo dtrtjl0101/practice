@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useRouterState, useRouter } from "@tanstack/react-router";
+import { useParams, useRouter } from "@tanstack/react-router";
 import {
   Container,
   Card,
@@ -13,7 +13,6 @@ import {
   Select,
   SelectChangeEvent,
   InputLabel,
-  Typography,
   Checkbox,
   Stack,
   FormControlLabel,

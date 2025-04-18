@@ -247,7 +247,6 @@ function CommentItem({
   onSave,
   onCancel,
   onDelete,
-  setEditingId,
   replyTo,
   setReplyTo,
   replyInput,
