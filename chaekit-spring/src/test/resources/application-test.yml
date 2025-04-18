@@ -15,3 +15,20 @@ spring:
       enabled: true
   flyway:
     enabled: false
+
+jwt:
+  secret: dummy_secret
+  expirationMs: 3600000
+
+admin:
+  username: admin
+  password: dummy_password
+aws:
+  ebook-bucket-name: dummy-bucket
+  access-key-id: dummy-access_key-id
+  secret-access-key: dummy-secret-key
+  ebook-max-file-size: 10485760 # 10MB
+  s3-region: dummy-region
+  presigned-url-expiration-time: 3600 # 1 hour
+cors:
+  allowed-origins: cors-allowed-origin

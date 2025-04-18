@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.4'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'jacoco'
 }
 
 group = 'com.qwerty'
@@ -11,6 +12,37 @@ java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(17)
 	}
+}
+
+jacoco {
+	toolVersion = '0.8.10'
+}
+
+jacocoTestReport {
+	dependsOn test
+	reports {
+		html.required = true
+		xml.required = true
+		csv.required = false
+	}
+	classDirectories.setFrom(
+			files([
+					fileTree(dir: layout.buildDirectory.dir("classes/java/main").get().asFile, exclude: [
+							'**/*Controller.class',
+							'**/*Dto.class',
+							'**/*Request.class',
+							'**/*Response.class',
+							'**/exception/**',
+							'**/config/**',
+							'**/properties/**',
+							'**/*Application.class',
+							'**/*Advice.class',
+							'**/*Handler.class',
+							'**/*Filter.class',
+							'**/resolver/**',
+							'**/model/**'])
+			])
+	)
 }
 
 configurations {
@@ -54,7 +86,7 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-tasks.named('test') {
+tasks.named('test', Test) {
 	useJUnitPlatform()
+	finalizedBy jacocoTestReport
 }
-
