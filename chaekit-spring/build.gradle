@@ -22,9 +22,27 @@ jacocoTestReport {
 	dependsOn test
 	reports {
 		html.required = true
-		xml.required = false
+		xml.required = true
 		csv.required = false
 	}
+	classDirectories.setFrom(
+			files([
+					fileTree(dir: layout.buildDirectory.dir("classes/java/main").get().asFile, exclude: [
+							'**/*Controller.class',
+							'**/*Dto.class',
+							'**/*Request.class',
+							'**/*Response.class',
+							'**/exception/**',
+							'**/config/**',
+							'**/properties/**',
+							'**/*Application.class',
+							'**/*Advice.class',
+							'**/*Handler.class',
+							'**/*Filter.class',
+							'**/resolver/**',
+							'**/model/**'])
+			])
+	)
 }
 
 configurations {
