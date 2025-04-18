@@ -9,7 +9,11 @@ import {
   Paper,
   Stack,
 } from "@mui/material";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  createLink,
+  useNavigate,
+} from "@tanstack/react-router";
 import { Post, formattedDate, initialPosts } from "../../../types/post";
 
 export const Route = createFileRoute("/_pathlessLayout/posts/")({
@@ -31,9 +35,9 @@ function List() {
 
       {/* 게시글 생성 버튼 */}
       <Box sx={{ textAlign: "right", mb: 4 }}>
-        <Button variant="contained" component={Link} to="/posts/new">
+        <LinkButton variant="contained" to="/posts/new">
           새 게시글 추가
-        </Button>
+        </LinkButton>
       </Box>
 
       {/* 게시글 목록 */}
@@ -100,3 +104,5 @@ function List() {
     </Container>
   );
 }
+
+const LinkButton = createLink(Button);
