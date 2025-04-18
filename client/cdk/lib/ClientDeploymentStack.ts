@@ -79,12 +79,26 @@ export class ClientDeploymentStack extends cdk.Stack {
     );
 
     // ==============================================================
-    new cdk.aws_s3_deployment.BucketDeployment(this, "DeployClient", {
-      sources: [cdk.aws_s3_deployment.Source.asset("../dist")],
-      destinationBucket: bucket,
-      distribution: cloudFront,
-      distributionPaths: ["/*"],
-    });
+    const deployment = new cdk.aws_s3_deployment.BucketDeployment(
+      this,
+      "DeployClient",
+      {
+        sources: [cdk.aws_s3_deployment.Source.asset("../dist")],
+        destinationBucket: bucket,
+        distribution: cloudFront,
+        distributionPaths: ["/*"],
+      }
+    );
+    deployment.handlerRole.addToPrincipalPolicy(
+      new cdk.aws_iam.PolicyStatement({
+        effect: cdk.aws_iam.Effect.ALLOW,
+        actions: [
+          "cloudFront:GetInvalidation",
+          "cloudFront:CreateInvalidation",
+        ],
+        resources: ["*"],
+      })
+    );
 
     // ==============================================================
     new cdk.aws_route53.ARecord(this, "ClientRecord", {
