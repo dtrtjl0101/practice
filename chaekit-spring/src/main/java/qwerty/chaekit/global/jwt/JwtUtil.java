@@ -32,8 +32,16 @@ public class JwtUtil {
         return claims.get("memberId", Long.class);
     }
 
-    public String getUsername(Claims claims) {
-        return claims.get("username", String.class);
+    public Long getUserId(Claims claims) {
+        return claims.get("userId", Long.class);
+    }
+
+    public Long getPublisherId(Claims claims) {
+        return claims.get("publisherId", Long.class);
+    }
+
+    public String getEmail(Claims claims) {
+        return claims.get("email", String.class);
     }
 
     public String getRole(Claims claims) {
@@ -57,11 +65,13 @@ public class JwtUtil {
         }
     }
 
-    public String createJwt(Long memberId, String username, String role) {
+    public String createJwt(Long memberId, Long userId, Long publisherId, String email, String role) {
 
         return Jwts.builder()
                 .claim("memberId", memberId)
-                .claim("username", username)
+                .claim("userId", userId)
+                .claim("publisherId", publisherId)
+                .claim("email", email)
                 .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + jwtProperties.expirationMs()))

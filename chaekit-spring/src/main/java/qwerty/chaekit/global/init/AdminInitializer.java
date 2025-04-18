@@ -11,6 +11,8 @@ import qwerty.chaekit.domain.member.MemberRepository;
 import qwerty.chaekit.domain.member.enums.Role;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
+import qwerty.chaekit.domain.member.user.UserProfile;
+import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.global.properties.AdminProperties;
 import qwerty.chaekit.service.member.admin.AdminService;
 import qwerty.chaekit.service.member.MemberJoinHelper;
@@ -26,6 +28,7 @@ public class AdminInitializer implements ApplicationRunner {
     private final PublisherProfileRepository publisherProfileRepository;
     private final AdminService adminService;
     private final MemberRepository memberRepository;
+    private final UserProfileRepository userProfileRepository;
 
 
     @Override
@@ -47,15 +50,24 @@ public class AdminInitializer implements ApplicationRunner {
         } else {
             // 이미 관리자가 존재할 때
             Member admin = existingAdmin.get();
-            Optional<PublisherProfile> existingProfile = publisherProfileRepository.findByMember_Username(adminUsername);
+            Optional<PublisherProfile> publisher = publisherProfileRepository.findByMember_Username(adminUsername);
 
-            PublisherProfile adminPublisher = existingProfile.orElseGet(() -> {
+            PublisherProfile adminPublisher = publisher.orElseGet(() -> {
                 PublisherProfile newProfile = publisherProfileRepository.save(new PublisherProfile(admin, adminUsername));
                 log.info("관리자 출판사 프로필이 존재하지 않아 추가되었습니다.");
                 return newProfile;
             });
 
+            Optional<UserProfile> user = userProfileRepository.findByMember_Username(adminUsername);
+
+            UserProfile adminUser = user.orElseGet(() -> {
+                UserProfile newProfile = userProfileRepository.save(new UserProfile(admin, adminUsername));
+                log.info("관리자 사용자 프로필이 존재하지 않아 추가되었습니다.");
+                return newProfile;
+            });
+
             adminService.setAdminPublisherId(adminPublisher.getId());
+            adminService.setAdminUserId(adminUser.getId());
             log.info("관리자가 이미 존재합니다. memberId = {}", admin.getId());
         }
     }

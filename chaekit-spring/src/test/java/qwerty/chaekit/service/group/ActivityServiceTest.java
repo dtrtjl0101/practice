@@ -7,12 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.group.activity.ActivityRepository;
-import qwerty.chaekit.domain.member.enums.Role;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.dto.group.activity.ActivityFetchResponse;
@@ -22,7 +22,7 @@ import qwerty.chaekit.dto.group.activity.ActivityPostResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.ForbiddenException;
-import qwerty.chaekit.global.security.resolver.LoginMember;
+import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.util.TestFixtureFactory;
 
 import java.time.LocalDate;
@@ -30,6 +30,7 @@ import java.time.LocalDate;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@ActiveProfiles("test")
 @SpringBootTest
 @Transactional
 class ActivityServiceTest {
@@ -43,8 +44,8 @@ class ActivityServiceTest {
     @Autowired
     private TestFixtureFactory testFixtureFactory;
 
-    private LoginMember groupLeaderLogin;
-    private LoginMember anotherLogin;
+    private UserToken groupLeaderLogin;
+    private UserToken anotherLogin;
     private ReadingGroup dummyGroup;
     private Ebook dummyEbook;
 
@@ -52,8 +53,8 @@ class ActivityServiceTest {
     void setUp() {
         UserProfile groupLeader = testFixtureFactory.createUser("leader_username", "leader_nickname");
         UserProfile anotherUser = testFixtureFactory.createUser("user_username", "user_nickname");
-        groupLeaderLogin = testFixtureFactory.createLoginMember(groupLeader.getMember(), Role.ROLE_USER);
-        anotherLogin = testFixtureFactory.createLoginMember(anotherUser.getMember(), Role.ROLE_USER);
+        groupLeaderLogin = testFixtureFactory.createUserToken(groupLeader.getMember(), groupLeader);
+        anotherLogin = testFixtureFactory.createUserToken(anotherUser.getMember(), anotherUser);
 
         PublisherProfile publisher = testFixtureFactory.createPublisher("publisher_username", "publisher_name");
         dummyEbook = testFixtureFactory.createEbook("dummy_ebook", publisher, "author", "description", "file_key");

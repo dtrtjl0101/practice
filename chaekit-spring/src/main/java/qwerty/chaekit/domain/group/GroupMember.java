@@ -22,15 +22,15 @@ public class GroupMember {
 
     @ManyToOne
     @JoinColumn(name ="user_id", nullable = false)
-    private UserProfile userProfile;
+    private UserProfile user;
 
     @Column(nullable = false)
     private boolean isAccepted = false;  // 가입 승인 상태
 
     @Builder
-    public GroupMember(ReadingGroup readingGroup, UserProfile userProfile) {
+    public GroupMember(ReadingGroup readingGroup, UserProfile user) {
         this.readingGroup = readingGroup;
-        this.userProfile = userProfile;
+        this.user = user;
         this.isAccepted = false;  // 초기에는 미승인 상태
     }
 
@@ -41,7 +41,7 @@ public class GroupMember {
 
     // 멤버 조회
     public UserProfile getMember() {
-        return this.userProfile;
+        return this.user;
     }
 
     // 가입 승인

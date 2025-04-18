@@ -30,15 +30,15 @@ class AdminServiceTest {
     void test1() {
         // given
         Long publisherId = 1L;
-        PublisherProfile profile = mock(PublisherProfile.class);
-        given(profile.isAccepted()).willReturn(false);
-        given(publisherProfileRepository.findByMember_Id(publisherId))
-                .willReturn(Optional.of(profile));
+        PublisherProfile publisher = mock(PublisherProfile.class);
+        given(publisher.isAccepted()).willReturn(false);
+        given(publisherProfileRepository.findById(publisherId))
+                .willReturn(Optional.of(publisher));
         // when
         boolean result = adminService.acceptPublisher(publisherId);
         // then
         assertTrue(result);
-        verify(profile).acceptPublisher();
+        verify(publisher).acceptPublisher();
     }
 
     @Test
@@ -46,15 +46,15 @@ class AdminServiceTest {
     void test2() {
         // given
         Long publisherId = 2L;
-        PublisherProfile profile = mock(PublisherProfile.class);
-        given(profile.isAccepted()).willReturn(true);
-        given(publisherProfileRepository.findByMember_Id(publisherId))
-                .willReturn(Optional.of(profile));
+        PublisherProfile publisher = mock(PublisherProfile.class);
+        given(publisher.isAccepted()).willReturn(true);
+        given(publisherProfileRepository.findById(publisherId))
+                .willReturn(Optional.of(publisher));
         // when
         boolean result = adminService.acceptPublisher(publisherId);
         // then
         assertFalse(result);
-        verify(profile, never()).acceptPublisher();
+        verify(publisher, never()).acceptPublisher();
     }
 
     @Test
@@ -62,7 +62,7 @@ class AdminServiceTest {
     void test3() {
         // given
         Long publisherId = 3L;
-        given(publisherProfileRepository.findByMember_Id(publisherId))
+        given(publisherProfileRepository.findById(publisherId))
                 .willReturn(Optional.empty());
         // when
         NotFoundException e = assertThrows(NotFoundException.class, () ->

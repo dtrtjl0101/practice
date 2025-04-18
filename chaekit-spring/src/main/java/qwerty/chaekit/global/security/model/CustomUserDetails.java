@@ -7,23 +7,25 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.ArrayList;
 import java.util.Collection;
 
+// 1. JWT를 읽을 때 사용
+// 2. AuthenticationManager에서 로그인할 때 사용
 public class CustomUserDetails implements UserDetails {
     @Getter
     private final Long memberId;
-    private final String username;
+    @Getter
+    private final Long userId;
+    @Getter
+    private final Long publisherId;
+    @Getter
+    private final String email;
     private final String password;
     private final String role;
 
-    public CustomUserDetails(Long memberId, String username, String role) {
+    public CustomUserDetails(Long memberId, Long userId, Long publisherId, String username, String password, String role) {
         this.memberId = memberId;
-        this.username = username;
-        this.password = null;
-        this.role = role;
-    }
-
-    public CustomUserDetails(Long memberId, String username, String password, String role) {
-        this.memberId = memberId;
-        this.username = username;
+        this.userId = userId;
+        this.publisherId = publisherId;
+        this.email = username;
         this.password = password;
         this.role = role;
     }
@@ -42,7 +44,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return email;
     }
 
     @Override

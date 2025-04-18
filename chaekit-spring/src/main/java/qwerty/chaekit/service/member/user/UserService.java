@@ -7,23 +7,23 @@ import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.dto.member.UserMemberResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.NotFoundException;
-import qwerty.chaekit.global.security.resolver.LoginMember;
+import qwerty.chaekit.global.security.resolver.UserToken;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    private final UserProfileRepository profileRepository;
+    private final UserProfileRepository userRepository;
 
-    public UserMemberResponse getUserProfile(LoginMember loginMember) {
-        String nickname = profileRepository.findByMember_Id(loginMember.memberId())
+    public UserMemberResponse getUserProfile(UserToken userToken) {
+        String nickname = userRepository.findById(userToken.userId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND)).getNickname();
 
         return UserMemberResponse.builder()
-                .id(loginMember.memberId())
+                .id(userToken.memberId())
+                .userId(userToken.userId())
+                .username(userToken.email())
                 .nickname(nickname)
-                .username(loginMember.username())
-                .role(loginMember.role())
                 .build();
     }
 }

@@ -7,11 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.highlight.entity.Highlight;
 import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
-import qwerty.chaekit.domain.member.enums.Role;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.dto.highlight.HighlightFetchResponse;
@@ -19,7 +19,7 @@ import qwerty.chaekit.dto.highlight.HighlightPostRequest;
 import qwerty.chaekit.dto.highlight.HighlightPostResponse;
 import qwerty.chaekit.dto.highlight.HighlightPutRequest;
 import qwerty.chaekit.dto.page.PageResponse;
-import qwerty.chaekit.global.security.resolver.LoginMember;
+import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.util.TestFixtureFactory;
 
 import java.util.Optional;
@@ -27,6 +27,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@ActiveProfiles("test")
 @SpringBootTest
 @Transactional
 class HighlightServiceTest {
@@ -39,16 +40,16 @@ class HighlightServiceTest {
     @Autowired
     private TestFixtureFactory testFixtureFactory;
 
-    private UserProfile dummyUserProfile;
+    private UserProfile dummyUser;
     private Ebook dummyEbook;
-    private LoginMember dummyLoginMember;
+    private UserToken dummyUserToken;
 
     @BeforeEach
     void setUp() {
-        dummyUserProfile = testFixtureFactory.createUser("user_username", "user_nickname");
+        dummyUser = testFixtureFactory.createUser("user_username", "user_nickname");
         PublisherProfile dummyPublisherProfile = testFixtureFactory.createPublisher("publisher_username", "publisher_name");
         dummyEbook = testFixtureFactory.createEbook("dummy_ebook", dummyPublisherProfile, "book_author", "book_description", "book_file_key");
-        dummyLoginMember = testFixtureFactory.createLoginMember(dummyUserProfile.getMember(), Role.ROLE_USER);
+        dummyUserToken = testFixtureFactory.createUserToken(dummyUser.getMember(), dummyUser);
 
     }
 
@@ -64,7 +65,7 @@ class HighlightServiceTest {
                 .build();
 
         // When
-        HighlightPostResponse response = highlightService.createHighlight(dummyLoginMember, request);
+        HighlightPostResponse response = highlightService.createHighlight(dummyUserToken, request);
 
         // Then
         assertThat(response).isNotNull();
@@ -79,7 +80,7 @@ class HighlightServiceTest {
     void fetchHighlightsTest() {
         // Given
         Highlight highlight = highlightRepository.save(Highlight.builder()
-                .author(dummyUserProfile)
+                .author(dummyUser)
                 .book(dummyEbook)
                 .spine("spine1")
                 .cfi("cfi1")
@@ -90,7 +91,7 @@ class HighlightServiceTest {
 
         // When
         PageResponse<HighlightFetchResponse> response = highlightService.fetchHighlights(
-                dummyLoginMember,
+                dummyUserToken,
                 pageable,
                 null,
                 dummyEbook.getId(),
@@ -111,7 +112,7 @@ class HighlightServiceTest {
     void updateHighlightTest() {
         // Given
         Highlight highlight = highlightRepository.save(Highlight.builder()
-                .author(dummyUserProfile)
+                .author(dummyUser)
                 .book(dummyEbook)
                 .spine("spine1")
                 .cfi("cfi1")
@@ -122,7 +123,7 @@ class HighlightServiceTest {
                 .build();
 
         // When
-        HighlightPostResponse response = highlightService.updateHighlight(dummyLoginMember, highlight.getId(), request);
+        HighlightPostResponse response = highlightService.updateHighlight(dummyUserToken, highlight.getId(), request);
 
         // Then
         assertThat(response).isNotNull();
@@ -138,7 +139,7 @@ class HighlightServiceTest {
     void updateHighlightForbiddenTest() {
         // Given
         Highlight highlight = highlightRepository.save(Highlight.builder()
-                .author(dummyUserProfile)
+                .author(dummyUser)
                 .book(dummyEbook)
                 .spine("spine1")
                 .cfi("cfi1")
@@ -146,12 +147,12 @@ class HighlightServiceTest {
                 .build());
 
         UserProfile anotherUserProfile = testFixtureFactory.createUser("another_user", "another_nickname");
-        LoginMember anotherLoginMember = testFixtureFactory.createLoginMember(anotherUserProfile.getMember(), Role.ROLE_USER);
+        UserToken anotherUserToken = testFixtureFactory.createUserToken(anotherUserProfile.getMember(), anotherUserProfile);
         HighlightPutRequest request = HighlightPutRequest.builder()
                 .memo("Updated Memo")
                 .build();
 
         // When & Then
-        assertThrows(Exception.class, () -> highlightService.updateHighlight(anotherLoginMember, highlight.getId(), request));
+        assertThrows(Exception.class, () -> highlightService.updateHighlight(anotherUserToken, highlight.getId(), request));
     }
 }

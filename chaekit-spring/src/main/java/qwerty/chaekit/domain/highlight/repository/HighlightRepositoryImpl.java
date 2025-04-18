@@ -32,7 +32,7 @@ public class HighlightRepositoryImpl implements HighlightRepository {
     }
 
     @Override
-    public Page<Highlight> findHighlights(Pageable pageable, Long memberId, Long activityId, Long bookId, String spine, Boolean me) {
+    public Page<Highlight> findHighlights(Pageable pageable, Long userId, Long activityId, Long bookId, String spine, Boolean me) {
         QHighlight highlight = QHighlight.highlight;
         BooleanBuilder where = new BooleanBuilder();
 
@@ -49,7 +49,7 @@ public class HighlightRepositoryImpl implements HighlightRepository {
             where.and(highlight.spine.eq(spine));
         }
         if (me == null || me) {
-            where.and(highlight.author.member.id.eq(memberId));
+            where.and(highlight.author.id.eq(userId));
         } else {
             // TODO: activityId에 현재 자신이 속해 있는 경우만 가능
             throw new IllegalStateException("Not Implemented Yet");

@@ -9,7 +9,7 @@ import qwerty.chaekit.dto.member.UserJoinResponse;
 import qwerty.chaekit.dto.member.UserMemberResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
-import qwerty.chaekit.global.security.resolver.LoginMember;
+import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.member.user.UserJoinService;
 import qwerty.chaekit.service.member.user.UserService;
 
@@ -22,8 +22,8 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/me")
-    public ApiSuccessResponse<UserMemberResponse> userInfo(@Login LoginMember loginMember) {
-        return ApiSuccessResponse.of(userService.getUserProfile(loginMember));
+    public ApiSuccessResponse<UserMemberResponse> userInfo(@Login UserToken userToken) {
+        return ApiSuccessResponse.of(userService.getUserProfile(userToken));
     }
 
     @PostMapping("/join")

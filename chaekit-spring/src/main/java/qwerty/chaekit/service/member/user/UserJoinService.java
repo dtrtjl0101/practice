@@ -18,43 +18,43 @@ import qwerty.chaekit.service.member.MemberJoinHelper;
 @RequiredArgsConstructor
 public class UserJoinService {
     private final MemberJoinHelper memberJoinHelper;
-    private final UserProfileRepository userProfileRepository;
+    private final UserProfileRepository userRepository;
     private final JwtUtil jwtUtil;
 
     @Transactional
     public UserJoinResponse join(UserJoinRequest request) {
-        String username = request.username();
+        String email = request.username();
         String password = request.password();
 
         validateNickname(request.username());
-        Member member = memberJoinHelper.saveMember(username, password, Role.ROLE_USER);
-        saveProfile(request, member);
+        Member member = memberJoinHelper.saveMember(email, password, Role.ROLE_USER);
+        UserProfile user = saveUser(request, member);
 
-        return toResponse(request, member);
+        return toResponse(request, member, user);
     }
 
     private void validateNickname(String nickname) {
-        if (userProfileRepository.existsByNickname(nickname)) {
+        if (userRepository.existsByNickname(nickname)) {
             throw new BadRequestException(ErrorCode.NICKNAME_ALREADY_EXISTS);
         }
     }
 
-    private void saveProfile(UserJoinRequest request, Member member) {
-        userProfileRepository.save(UserProfile.builder()
+    private UserProfile saveUser(UserJoinRequest request, Member member) {
+        return userRepository.save(UserProfile.builder()
                 .member(member)
                 .nickname(request.nickname())
                 .build());
     }
 
-    private UserJoinResponse toResponse(UserJoinRequest request, Member member) {
-        String token = jwtUtil.createJwt(member.getId(), member.getUsername(), member.getRole().name());
+    private UserJoinResponse toResponse(UserJoinRequest request, Member member, UserProfile user) {
+        String token = jwtUtil.createJwt(member.getId(), user.getId(), null, member.getUsername(), member.getRole().name());
 
         return UserJoinResponse.builder()
                 .id(member.getId())
+                .userId(user.getId())
                 .accessToken("Bearer " + token)
                 .username(member.getUsername())
                 .nickname(request.nickname())
-                .role(member.getRole().name())
                 .build();
     }
 }

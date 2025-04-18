@@ -18,43 +18,43 @@ import qwerty.chaekit.service.member.MemberJoinHelper;
 @RequiredArgsConstructor
 public class PublisherJoinService {
     private final MemberJoinHelper memberJoinHelper;
-    private final PublisherProfileRepository profileRepository;
+    private final PublisherProfileRepository publisherRepository;
     private final JwtUtil jwtUtil;
 
     @Transactional
     public PublisherJoinResponse join(PublisherJoinRequest request) {
-        String username = request.username();
+        String email = request.username();
         String password = request.password();
 
         validatePublisherName(request.publisherName());
-        Member member = memberJoinHelper.saveMember(username, password, Role.ROLE_PUBLISHER);
-        saveProfile(request, member);
+        Member member = memberJoinHelper.saveMember(email, password, Role.ROLE_PUBLISHER);
+        PublisherProfile publisher = savePublisher(request, member);
 
-        return toResponse(request, member);
+        return toResponse(request, member, publisher);
     }
 
     private void validatePublisherName(String name) {
-        if (profileRepository.existsByPublisherName(name)) {
+        if (publisherRepository.existsByPublisherName(name)) {
             throw new BadRequestException(ErrorCode.PUBLISHER_ALREADY_EXISTS);
         }
     }
 
-    private void saveProfile(PublisherJoinRequest request, Member member) {
-        profileRepository.save(PublisherProfile.builder()
+    private PublisherProfile savePublisher(PublisherJoinRequest request, Member member) {
+        return publisherRepository.save(PublisherProfile.builder()
                 .member(member)
                 .publisherName(request.publisherName())
                 .build());
     }
 
-    private PublisherJoinResponse toResponse(PublisherJoinRequest request, Member member) {
-        String token = jwtUtil.createJwt(member.getId(), member.getUsername(), Role.ROLE_PUBLISHER.name());
+    private PublisherJoinResponse toResponse(PublisherJoinRequest request, Member member, PublisherProfile publisher) {
+        String token = jwtUtil.createJwt(member.getId(), null, publisher.getId(), member.getUsername(), Role.ROLE_PUBLISHER.name());
 
         return PublisherJoinResponse.builder()
                 .id(member.getId())
+                .publisherId(publisher.getId())
                 .accessToken("Bearer " + token)
                 .username(member.getUsername())
                 .publisherName(request.publisherName())
-                .role(member.getRole().name())
                 .isAccepted(false)
                 .build();
     }

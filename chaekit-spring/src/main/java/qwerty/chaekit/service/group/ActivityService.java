@@ -10,7 +10,6 @@ import qwerty.chaekit.domain.group.GroupRepository;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.group.activity.ActivityRepository;
-import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.dto.group.activity.ActivityFetchResponse;
 import qwerty.chaekit.dto.group.activity.ActivityPatchRequest;
@@ -21,7 +20,7 @@ import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
-import qwerty.chaekit.global.security.resolver.LoginMember;
+import qwerty.chaekit.global.security.resolver.UserToken;
 
 import java.time.LocalDate;
 
@@ -34,10 +33,12 @@ public class ActivityService {
     private final ActivityRepository activityRepository;
     private final EbookRepository ebookRepository;
 
-    public ActivityPostResponse createActivity(LoginMember loginMember, long groupId, ActivityPostRequest request) {
-        // 1. 로그인한 사용자의 프로필을 가져온다.
-        UserProfile userProfile = userRepository.findByMember_Id(loginMember.memberId())
-                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+    public ActivityPostResponse createActivity(UserToken userToken, long groupId, ActivityPostRequest request) {
+        Long userId = userToken.userId();
+        // 1. 로그인한 사용자의 프로필을 확인한다.
+        if(!userRepository.existsById(userId)){
+            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
+        }
 
         // 2. 모임을 가져온다.
         ReadingGroup group = groupRepository.findById(groupId)
@@ -62,7 +63,7 @@ public class ActivityService {
                     }
                 });
         // 5. 모임지기가 맞는지 확인한다.
-        if (!group.getGroupLeader().equals(userProfile)) {
+        if (!group.getGroupLeader().getId().equals(userId)) {
             throw new ForbiddenException(ErrorCode.GROUP_LEADER_ONLY);
         }
 
@@ -76,10 +77,12 @@ public class ActivityService {
         return ActivityPostResponse.of(saved);
     }
 
-    public ActivityPostResponse updateActivity(LoginMember loginMember, long groupId, ActivityPatchRequest request) {
-        // 1. 사용자 프로필 조회
-        UserProfile userProfile = userRepository.findByMember_Id(loginMember.memberId())
-                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+    public ActivityPostResponse updateActivity(UserToken userToken, long groupId, ActivityPatchRequest request) {
+        Long userId = userToken.userId();
+        // 1. 로그인한 사용자의 프로필을 확인한다.
+        if(!userRepository.existsById(userId)){
+            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
+        }
 
         // 2. 그룹 조회
         ReadingGroup group = groupRepository.findById(groupId)
@@ -94,7 +97,7 @@ public class ActivityService {
         }
 
         // 4. 모임장 권한 확인
-        if (!group.getGroupLeader().equals(userProfile)) {
+        if (!group.getGroupLeader().getId().equals(userId)) {
             throw new ForbiddenException(ErrorCode.GROUP_LEADER_ONLY);
         }
 

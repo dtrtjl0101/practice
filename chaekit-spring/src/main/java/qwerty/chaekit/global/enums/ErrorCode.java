@@ -26,6 +26,8 @@ public enum ErrorCode {
     HIGHLIGHT_NOT_YOURS("HIGHLIGHT_NOT_YOURS", "하이라이트는 본인만 수정할 수 있습니다"),
     GROUP_LEADER_ONLY("GROUP_LEADER_ONLY", "모임지기만 사용할 수 있는 기능입니다"),
     ACTIVITY_GROUP_MISMATCH("ACTIVITY_GROUP_MISMATCH", "해당 독서모임의 활동이 아닙니다"),
+    ONLY_USER("ONLY_USER", "일반 회원만 사용할 수 있는 기능입니다"),
+    ONLY_PUBLISHER("ONLY_PUBLISHER", "출판사 회원만 사용할 수 있는 기능입니다"),
 
     // NOT_FOUND
     EBOOK_NOT_FOUND("EBOOK_NOT_FOUND", "해당 전자책이 존재하지 않습니다"),
@@ -34,7 +36,12 @@ public enum ErrorCode {
     GROUP_NOT_FOUND("GROUP_NOT_FOUND", "해당 독서모임이 존재하지 않습니다"),
     HIGHLIGHT_NOT_FOUND("HIGHLIGHT_NOT_FOUND", "해당 하이라이트가 존재하지 않습니다"),
     ACTIVITY_NOT_FOUND("ACTIVITY_NOT_FOUND", "해당 활동이 존재하지 않습니다"),
-    ;
+
+    // Exception Handler
+    INVALID_INPUT("INVALID_INPUT", "입력값이 유효하지 않습니다"),
+
+    METHOD_NOT_ALLOWED("METHOD_NOT_ALLOWED", "지원하지 않는 HTTP 메서드입니다."),
+    NO_RESOURCE_FOUND("NO_RESOURCE_FOUND", "존재하지 않는 경로입니다."),;
 
     private final String code;
     private final String message;
