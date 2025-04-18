@@ -1,0 +1,21 @@
+package qwerty.chaekit.dto.group;
+
+import lombok.Builder;
+import qwerty.chaekit.domain.group.GroupMember;
+
+@Builder
+public record GroupJoinResponse(
+    Long groupId,
+    Long memberId,
+    String memberName,
+    boolean isAccepted
+) {
+        public static GroupJoinResponse of(GroupMember groupMember) {
+            return GroupJoinResponse.builder()
+                    .groupId(groupMember.getGroup().getId())
+                    .memberId(groupMember.getMember().getId())
+                    .memberName(groupMember.getMember().getUsername())
+                    .isAccepted(groupMember.isAccepted())
+                    .build();
+        }
+}
