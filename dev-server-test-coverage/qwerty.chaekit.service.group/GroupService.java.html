@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GroupService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chaekit</a> &gt; <a href="index.source.html" class="el_package">qwerty.chaekit.service.group</a> &gt; <span class="el_source">GroupService.java</span></div><h1>GroupService.java</h1><pre class="source lang-java linenums">package qwerty.chaekit.service.group;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import qwerty.chaekit.domain.group.GroupMember;
+import qwerty.chaekit.domain.group.GroupRepository;
+import qwerty.chaekit.domain.group.ReadingGroup;
+import qwerty.chaekit.domain.member.user.UserProfile;
+import qwerty.chaekit.domain.member.user.UserProfileRepository;
+import qwerty.chaekit.dto.group.*;
+import qwerty.chaekit.dto.page.PageResponse;
+import qwerty.chaekit.global.enums.ErrorCode;
+import qwerty.chaekit.global.exception.ForbiddenException;
+import qwerty.chaekit.global.exception.NotFoundException;
+import qwerty.chaekit.global.security.resolver.UserToken;
+
+@Service
+@RequiredArgsConstructor
+public class GroupService {
+    private final UserProfileRepository userRepository;
+    private final GroupRepository groupRepository;
+
+    @Transactional
+    public GroupPostResponse createGroup(UserToken userToken, GroupPostRequest request) {
+<span class="nc" id="L28">        Long userId = userToken.userId();</span>
+<span class="nc bnc" id="L29" title="All 2 branches missed.">        if(!userRepository.existsById(userId)) {</span>
+<span class="nc" id="L30">            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);</span>
+        }
+
+<span class="nc" id="L33">        ReadingGroup groupEntity = ReadingGroup.builder()</span>
+<span class="nc" id="L34">                .name(request.name())</span>
+<span class="nc" id="L35">                .groupLeader(userRepository.getReferenceById(userId))</span>
+<span class="nc" id="L36">                .description(request.description())</span>
+<span class="nc" id="L37">                .build();</span>
+<span class="nc" id="L38">        ReadingGroup savedGroup = groupRepository.save(groupEntity);</span>
+<span class="nc" id="L39">        request.tags().forEach(savedGroup::addTag);</span>
+<span class="nc" id="L40">        return GroupPostResponse.of(groupEntity);</span>
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse&lt;GroupFetchResponse&gt; fetchGroupList(Pageable pageable) {
+<span class="nc" id="L45">        Page&lt;GroupFetchResponse&gt; page = groupRepository.findAll(pageable).map(GroupFetchResponse::of);</span>
+<span class="nc" id="L46">        return PageResponse.of(page);</span>
+    }
+
+    @Transactional(readOnly = true)
+    public GroupFetchResponse fetchGroup(long groupId) {
+<span class="nc" id="L51">        ReadingGroup group = groupRepository.findById(groupId)</span>
+<span class="nc" id="L52">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.GROUP_NOT_FOUND));</span>
+<span class="nc" id="L53">        return GroupFetchResponse.of(group);</span>
+    }
+
+    @Transactional
+    public GroupPostResponse updateGroup(UserToken userToken, long groupId, GroupPutRequest request) {
+<span class="nc" id="L58">        Long userId = userToken.userId();</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">        if(!userRepository.existsById(userId)) {</span>
+<span class="nc" id="L60">            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);</span>
+        }
+
+<span class="nc" id="L63">        ReadingGroup group = groupRepository.findById(groupId)</span>
+<span class="nc" id="L64">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.GROUP_NOT_FOUND));</span>
+
+<span class="nc bnc" id="L66" title="All 2 branches missed.">        if (!group.getGroupLeader().getId().equals(userId)) {</span>
+<span class="nc" id="L67">            throw new ForbiddenException(ErrorCode.GROUP_UPDATE_FORBIDDEN);</span>
+        }
+<span class="nc bnc" id="L69" title="All 2 branches missed.">        if(request.description() != null) {</span>
+<span class="nc" id="L70">            group.updateDescription(request.description());</span>
+        }
+<span class="nc" id="L72">        return GroupPostResponse.of(group);</span>
+    }
+
+    @Transactional
+    public GroupJoinResponse requestJoinGroup(UserToken userToken, long groupId) {
+<span class="nc" id="L77">        UserProfile userProfile = userRepository.findByMember_Id(userToken.memberId())</span>
+<span class="nc" id="L78">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
+
+<span class="nc" id="L80">        ReadingGroup group = groupRepository.findById(groupId)</span>
+<span class="nc" id="L81">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.GROUP_NOT_FOUND));</span>
+
+<span class="nc" id="L83">        GroupMember groupMember = group.addMember(userProfile);</span>
+<span class="nc" id="L84">        return GroupJoinResponse.of(groupMember);</span>
+    }
+
+    @Transactional
+    public GroupJoinResponse approveJoinRequest(UserToken userToken, long groupId, long userId) {
+<span class="nc" id="L89">        UserProfile leaderProfile = userRepository.findByMember_Id(userToken.memberId())</span>
+<span class="nc" id="L90">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
+
+<span class="nc" id="L92">        ReadingGroup group = groupRepository.findById(groupId)</span>
+<span class="nc" id="L93">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.GROUP_NOT_FOUND));</span>
+
+<span class="nc bnc" id="L95" title="All 2 branches missed.">        if (!group.getGroupLeader().getId().equals(leaderProfile.getId())) {</span>
+<span class="nc" id="L96">            throw new ForbiddenException(ErrorCode.GROUP_UPDATE_FORBIDDEN);</span>
+        }
+
+<span class="nc" id="L99">        UserProfile memberProfile = userRepository.findByMember_Id(userId)</span>
+<span class="nc" id="L100">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
+
+<span class="nc" id="L102">        GroupMember groupMember = group.approveMember(memberProfile);</span>
+<span class="nc" id="L103">        return GroupJoinResponse.of(groupMember);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

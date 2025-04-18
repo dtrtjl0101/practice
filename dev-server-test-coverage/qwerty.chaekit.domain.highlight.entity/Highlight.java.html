@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Highlight.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chaekit</a> &gt; <a href="index.source.html" class="el_package">qwerty.chaekit.domain.highlight.entity</a> &gt; <span class="el_source">Highlight.java</span></div><h1>Highlight.java</h1><pre class="source lang-java linenums">package qwerty.chaekit.domain.highlight.entity;
+
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import qwerty.chaekit.domain.BaseEntity;
+import qwerty.chaekit.domain.ebook.Ebook;
+import qwerty.chaekit.domain.member.user.UserProfile;
+
+@Entity
+@Getter
+@Table(name = &quot;highlight&quot;)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Highlight extends BaseEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = &quot;author_id&quot;)
+    private UserProfile author;
+
+    @ManyToOne
+    @JoinColumn(name = &quot;book_id&quot;)
+    private Ebook book;
+
+    @Column(nullable = false)
+    private String cfi;
+
+    @Column(nullable = false)
+    private String spine;
+
+    private String memo;
+
+
+    // TODO: Activity(ManyToOne)
+
+    @Builder
+<span class="fc" id="L41">    public Highlight(UserProfile author, Ebook book, String cfi, String spine, String memo) {</span>
+<span class="fc" id="L42">        this.author = author;</span>
+<span class="fc" id="L43">        this.book = book;</span>
+<span class="fc" id="L44">        this.cfi = cfi;</span>
+<span class="fc" id="L45">        this.spine = spine;</span>
+<span class="fc" id="L46">        this.memo = memo;</span>
+<span class="fc" id="L47">    }</span>
+
+    public void updateMemo(String memo) {
+<span class="fc" id="L50">        this.memo = memo;</span>
+<span class="fc" id="L51">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReadingGroup.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chaekit</a> &gt; <a href="index.source.html" class="el_package">qwerty.chaekit.domain.group</a> &gt; <span class="el_source">ReadingGroup.java</span></div><h1>ReadingGroup.java</h1><pre class="source lang-java linenums">package qwerty.chaekit.domain.group;
+
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import qwerty.chaekit.domain.BaseEntity;
+import qwerty.chaekit.domain.group.tag.GroupTag;
+import qwerty.chaekit.domain.member.user.UserProfile;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Getter
+@Table(name = &quot;reading_group&quot;)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class ReadingGroup extends BaseEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String name;
+
+    @ManyToOne
+    @JoinColumn(name = &quot;group_leader_id&quot;, nullable = false)
+    private UserProfile groupLeader;
+
+<span class="fc" id="L31">    @OneToMany(mappedBy = &quot;readingGroup&quot;, cascade = CascadeType.ALL, orphanRemoval = true)</span>
+    private List&lt;GroupTag&gt; tags = new ArrayList&lt;&gt;();
+
+    @Column(nullable = false)
+    private String description;
+
+<span class="fc" id="L37">    @OneToMany(mappedBy = &quot;readingGroup&quot;, cascade = CascadeType.ALL, orphanRemoval = true)</span>
+    private final List&lt;GroupMember&gt; groupMembers = new ArrayList&lt;&gt;();
+
+    public void addTag(String tagName) {
+<span class="nc" id="L41">        GroupTag groupTag = new GroupTag(this, tagName);</span>
+<span class="nc" id="L42">        tags.add(groupTag);</span>
+<span class="nc" id="L43">    }</span>
+
+    public void removeTag(String tagName) {
+<span class="nc" id="L46">        tags.removeIf(tag -&gt; tag.getTagName().equals(tagName));</span>
+<span class="nc" id="L47">    }</span>
+
+    public List&lt;UserProfile&gt; getMembers() {
+<span class="nc" id="L50">        return groupMembers.stream().map(GroupMember::getUser).toList();</span>
+    }
+
+    public GroupMember addMember(UserProfile user) {
+<span class="nc" id="L54">        GroupMember groupMember = new GroupMember(this, user);</span>
+<span class="nc" id="L55">        groupMembers.add(groupMember);</span>
+<span class="nc" id="L56">        return groupMember;</span>
+    }
+
+    public GroupMember approveMember(UserProfile user){
+<span class="nc" id="L60">        return groupMembers.stream()</span>
+<span class="nc" id="L61">                .filter(groupMember -&gt; groupMember.getMember().equals(user))</span>
+<span class="nc" id="L62">                .findFirst()</span>
+<span class="nc" id="L63">                .map(groupMember -&gt; {groupMember.approve(); return groupMember;})</span>
+<span class="nc" id="L64">                .orElse(null);</span>
+    }
+
+    public void removeMember(UserProfile user) {
+<span class="nc" id="L68">        groupMembers.removeIf(member -&gt; member.getUser().equals(user));</span>
+<span class="nc" id="L69">    }</span>
+
+    public void updateDescription(String description) {
+<span class="nc" id="L72">        this.description = description;</span>
+<span class="nc" id="L73">    }</span>
+
+    @Builder
+<span class="fc" id="L76">    public ReadingGroup(String name, UserProfile groupLeader, List&lt;GroupTag&gt; tags, String description) {</span>
+<span class="fc" id="L77">        this.name = name;</span>
+<span class="fc" id="L78">        this.groupLeader = groupLeader;</span>
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">        this.tags = (tags != null) ? new ArrayList&lt;&gt;(tags) : new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L80">        this.description = description;</span>
+<span class="fc" id="L81">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

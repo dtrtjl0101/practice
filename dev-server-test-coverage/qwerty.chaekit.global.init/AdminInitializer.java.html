@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdminInitializer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chaekit</a> &gt; <a href="index.source.html" class="el_package">qwerty.chaekit.global.init</a> &gt; <span class="el_source">AdminInitializer.java</span></div><h1>AdminInitializer.java</h1><pre class="source lang-java linenums">package qwerty.chaekit.global.init;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import qwerty.chaekit.domain.member.Member;
+import qwerty.chaekit.domain.member.MemberRepository;
+import qwerty.chaekit.domain.member.enums.Role;
+import qwerty.chaekit.domain.member.publisher.PublisherProfile;
+import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
+import qwerty.chaekit.domain.member.user.UserProfile;
+import qwerty.chaekit.domain.member.user.UserProfileRepository;
+import qwerty.chaekit.global.properties.AdminProperties;
+import qwerty.chaekit.service.member.admin.AdminService;
+import qwerty.chaekit.service.member.MemberJoinHelper;
+
+import java.util.Optional;
+
+<span class="fc" id="L22">@Slf4j</span>
+@Component
+@RequiredArgsConstructor
+public class AdminInitializer implements ApplicationRunner {
+    private final AdminProperties adminProperties;
+    private final MemberJoinHelper memberJoinHelper;
+    private final PublisherProfileRepository publisherProfileRepository;
+    private final AdminService adminService;
+    private final MemberRepository memberRepository;
+    private final UserProfileRepository userProfileRepository;
+
+
+    @Override
+    @Transactional
+    public void run(ApplicationArguments args) {
+<span class="fc" id="L37">        String adminUsername = adminProperties.username();</span>
+<span class="fc" id="L38">        String adminPassword = adminProperties.password();</span>
+<span class="fc" id="L39">        Role adminRole = Role.ROLE_ADMIN;</span>
+
+<span class="fc" id="L41">        Optional&lt;Member&gt; existingAdmin = memberRepository.findByUsername(adminUsername);</span>
+
+<span class="pc bpc" id="L43" title="1 of 2 branches missed.">        if (existingAdmin.isEmpty()) {</span>
+            // 관리자가 없으면 생성
+<span class="fc" id="L45">            Member savedAdmin = memberJoinHelper.saveMember(adminUsername, adminPassword, adminRole);</span>
+<span class="fc" id="L46">            PublisherProfile adminPublisher = publisherProfileRepository.save(new PublisherProfile(savedAdmin, adminUsername));</span>
+<span class="fc" id="L47">            adminService.acceptPublisher(adminPublisher.getId());</span>
+<span class="fc" id="L48">            adminService.setAdminPublisherId(adminPublisher.getId());</span>
+<span class="fc" id="L49">            log.info(&quot;관리자가 생성되었습니다. memberId = {}&quot;, savedAdmin.getId());</span>
+<span class="fc" id="L50">        } else {</span>
+            // 이미 관리자가 존재할 때
+<span class="nc" id="L52">            Member admin = existingAdmin.get();</span>
+<span class="nc" id="L53">            Optional&lt;PublisherProfile&gt; publisher = publisherProfileRepository.findByMember_Username(adminUsername);</span>
+
+<span class="nc" id="L55">            PublisherProfile adminPublisher = publisher.orElseGet(() -&gt; {</span>
+<span class="nc" id="L56">                PublisherProfile newProfile = publisherProfileRepository.save(new PublisherProfile(admin, adminUsername));</span>
+<span class="nc" id="L57">                log.info(&quot;관리자 출판사 프로필이 존재하지 않아 추가되었습니다.&quot;);</span>
+<span class="nc" id="L58">                return newProfile;</span>
+            });
+
+<span class="nc" id="L61">            Optional&lt;UserProfile&gt; user = userProfileRepository.findByMember_Username(adminUsername);</span>
+
+<span class="nc" id="L63">            UserProfile adminUser = user.orElseGet(() -&gt; {</span>
+<span class="nc" id="L64">                UserProfile newProfile = userProfileRepository.save(new UserProfile(admin, adminUsername));</span>
+<span class="nc" id="L65">                log.info(&quot;관리자 사용자 프로필이 존재하지 않아 추가되었습니다.&quot;);</span>
+<span class="nc" id="L66">                return newProfile;</span>
+            });
+
+<span class="nc" id="L69">            adminService.setAdminPublisherId(adminPublisher.getId());</span>
+<span class="nc" id="L70">            adminService.setAdminUserId(adminUser.getId());</span>
+<span class="nc" id="L71">            log.info(&quot;관리자가 이미 존재합니다. memberId = {}&quot;, admin.getId());</span>
+        }
+<span class="fc" id="L73">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

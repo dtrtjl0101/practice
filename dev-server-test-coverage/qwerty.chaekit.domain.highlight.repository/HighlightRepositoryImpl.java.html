@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HighlightRepositoryImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chaekit</a> &gt; <a href="index.source.html" class="el_package">qwerty.chaekit.domain.highlight.repository</a> &gt; <span class="el_source">HighlightRepositoryImpl.java</span></div><h1>HighlightRepositoryImpl.java</h1><pre class="source lang-java linenums">package qwerty.chaekit.domain.highlight.repository;
+
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Repository;
+import qwerty.chaekit.domain.highlight.entity.Highlight;
+import qwerty.chaekit.domain.highlight.entity.QHighlight;
+import qwerty.chaekit.global.enums.ErrorCode;
+import qwerty.chaekit.global.exception.BadRequestException;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+@RequiredArgsConstructor
+public class HighlightRepositoryImpl implements HighlightRepository {
+    private final HighlightJpaRepository highlightJpaRepository;
+    private final JPAQueryFactory jpaQueryFactory;
+
+    @Override
+    public Optional&lt;Highlight&gt; findById(Long id) {
+<span class="fc" id="L26">        return highlightJpaRepository.findById(id);</span>
+    }
+
+    @Override
+    public Highlight save(Highlight highlight) {
+<span class="fc" id="L31">        return highlightJpaRepository.save(highlight);</span>
+    }
+
+    @Override
+    public Page&lt;Highlight&gt; findHighlights(Pageable pageable, Long userId, Long activityId, Long bookId, String spine, Boolean me) {
+<span class="fc" id="L36">        QHighlight highlight = QHighlight.highlight;</span>
+<span class="fc" id="L37">        BooleanBuilder where = new BooleanBuilder();</span>
+
+<span class="pc bpc" id="L39" title="1 of 2 branches missed.">        if (activityId != null) {</span>
+<span class="nc" id="L40">            throw new IllegalStateException(&quot;Not Implemented Yet&quot;);</span>
+        }
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">        if (bookId != null) {</span>
+<span class="fc" id="L43">            where.and(highlight.book.id.eq(bookId));</span>
+        }
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">        if (spine != null) {</span>
+<span class="pc bpc" id="L46" title="1 of 2 branches missed.">            if(bookId == null) {</span>
+<span class="nc" id="L47">                throw new BadRequestException(ErrorCode.BOOK_ID_REQUIRED);</span>
+            }
+<span class="fc" id="L49">            where.and(highlight.spine.eq(spine));</span>
+        }
+<span class="pc bpc" id="L51" title="2 of 4 branches missed.">        if (me == null || me) {</span>
+<span class="fc" id="L52">            where.and(highlight.author.id.eq(userId));</span>
+        } else {
+            // TODO: activityId에 현재 자신이 속해 있는 경우만 가능
+<span class="nc" id="L55">            throw new IllegalStateException(&quot;Not Implemented Yet&quot;);</span>
+        }
+
+<span class="fc" id="L58">        List&lt;Highlight&gt; result = jpaQueryFactory</span>
+<span class="fc" id="L59">                .selectFrom(highlight)</span>
+<span class="fc" id="L60">                .where(where)</span>
+<span class="fc" id="L61">                .offset(pageable.getOffset())</span>
+<span class="fc" id="L62">                .limit(pageable.getPageSize())</span>
+<span class="fc" id="L63">                .fetch();</span>
+
+<span class="fc" id="L65">        long total = Optional.ofNullable(jpaQueryFactory</span>
+<span class="fc" id="L66">                .select(highlight.count())</span>
+<span class="fc" id="L67">                .from(highlight)</span>
+<span class="fc" id="L68">                .where(where)</span>
+<span class="fc" id="L69">                .fetchOne()).orElse(0L);</span>
+
+<span class="fc" id="L71">        return new PageImpl&lt;&gt;(result, pageable, total);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

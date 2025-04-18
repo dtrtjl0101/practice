@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HighlightService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chaekit</a> &gt; <a href="index.source.html" class="el_package">qwerty.chaekit.service.highlight</a> &gt; <span class="el_source">HighlightService.java</span></div><h1>HighlightService.java</h1><pre class="source lang-java linenums">package qwerty.chaekit.service.highlight;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import qwerty.chaekit.domain.ebook.EbookRepository;
+import qwerty.chaekit.domain.highlight.entity.Highlight;
+import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
+import qwerty.chaekit.domain.member.user.UserProfileRepository;
+import qwerty.chaekit.dto.highlight.HighlightFetchResponse;
+import qwerty.chaekit.dto.highlight.HighlightPostRequest;
+import qwerty.chaekit.dto.highlight.HighlightPostResponse;
+import qwerty.chaekit.dto.highlight.HighlightPutRequest;
+import qwerty.chaekit.dto.page.PageResponse;
+import qwerty.chaekit.global.enums.ErrorCode;
+import qwerty.chaekit.global.exception.ForbiddenException;
+import qwerty.chaekit.global.exception.NotFoundException;
+import qwerty.chaekit.global.security.resolver.UserToken;
+
+<span class="fc" id="L23">@Slf4j</span>
+@Service
+@Transactional
+@RequiredArgsConstructor
+public class HighlightService {
+    private final HighlightRepository highlightRepository;
+    private final EbookRepository ebookRepository;
+    private final UserProfileRepository userRepository;
+
+    public HighlightPostResponse createHighlight(UserToken userToken, HighlightPostRequest request) {
+<span class="fc" id="L33">        Long userId = userToken.userId();</span>
+<span class="pc bpc" id="L34" title="1 of 2 branches missed.">        if(!userRepository.existsById(userId)) {</span>
+<span class="nc" id="L35">            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);</span>
+        }
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">        if(!ebookRepository.existsById(request.bookId())) {</span>
+<span class="nc" id="L38">            throw new NotFoundException(ErrorCode.EBOOK_NOT_FOUND);</span>
+        }
+
+        // Activity를 추가하는 경우 권한 체크 필요
+
+<span class="fc" id="L43">        Highlight highlight = Highlight.builder()</span>
+<span class="fc" id="L44">                .book(ebookRepository.getReferenceById(request.bookId()))</span>
+<span class="fc" id="L45">                .spine(request.spine())</span>
+<span class="fc" id="L46">                .cfi(request.cfi())</span>
+<span class="fc" id="L47">                .author(userRepository.getReferenceById(userId))</span>
+<span class="fc" id="L48">                .memo(request.memo())</span>
+<span class="fc" id="L49">                .build();</span>
+<span class="fc" id="L50">        Highlight savedHighlight = highlightRepository.save(highlight);</span>
+<span class="fc" id="L51">        return HighlightPostResponse.of(savedHighlight);</span>
+    }
+
+    public PageResponse&lt;HighlightFetchResponse&gt; fetchHighlights(UserToken userToken, Pageable pageable, Long activityId, Long bookId, String spine, Boolean me) {
+<span class="fc" id="L55">        Page&lt;Highlight&gt; highlights = highlightRepository.findHighlights(pageable, userToken.userId(), activityId, bookId, spine, me);</span>
+<span class="fc" id="L56">        return PageResponse.of(highlights.map(HighlightFetchResponse::of));</span>
+    }
+
+    public HighlightPostResponse updateHighlight(UserToken userToken, Long id, HighlightPutRequest request) {
+<span class="fc" id="L60">        Highlight highlight = highlightRepository.findById(id)</span>
+<span class="pc" id="L61">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));</span>
+<span class="fc bfc" id="L62" title="All 2 branches covered.">        if(!userToken.userId().equals(highlight.getAuthor().getId())) {</span>
+<span class="fc" id="L63">            throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_YOURS);</span>
+        }
+<span class="fc" id="L65">        highlight.updateMemo(request.memo());</span>
+
+        // TODO: activityId 업데이트 로직 추가(활동에 공개하기)
+        // 기존 activityId가 null일때만 activityId 변경 가능
+
+<span class="fc" id="L70">        return HighlightPostResponse.of(highlightRepository.save(highlight));</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
