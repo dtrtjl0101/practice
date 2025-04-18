@@ -12,7 +12,7 @@ import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.service.ebook.EbookService;
 
 @RestController
-@RequestMapping("api/books")
+@RequestMapping("/api/books")
 @RequiredArgsConstructor
 public class EbookController {
     public final EbookService ebookService;
