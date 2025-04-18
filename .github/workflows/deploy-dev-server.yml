@@ -11,13 +11,33 @@ permissions:
   contents: read
 
 jobs:
-  build-docker-image:
+  build-test-deploy:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: chaekit-spring
     steps:
       - uses: actions/checkout@v3
+      # Java 설정
+      - uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: "17"
 
-      - name: Change directory to chaekit-spring
-        run: cd chaekit-spring
+      - name: Grant execute permission to Gradle
+        run: chmod +x ./gradlew
+
+      # 테스트 + 커버리지 체크 (실패 시 중단됨)
+      - name: Run tests with coverage
+        run: ./gradlew test jacocoTestReport jacocoTestCoverageVerification
+
+      # HTML 커버리지 리포트 아카이빙
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: jacoco-html-report
+          path: chaekit-spring/build/reports/jacoco/test/html/
 
       # AWS 로그인
       - name: Configure AWS Credentials
