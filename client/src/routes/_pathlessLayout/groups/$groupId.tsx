@@ -8,17 +8,31 @@ import {
   Divider,
   Grid2,
   Icon,
+  IconButton,
+  InputAdornment,
+  Modal,
+  OutlinedInput,
   Pagination,
   Paper,
   Skeleton,
   Stack,
+  TextField,
   Typography,
 } from "@mui/material";
-import { People, Timelapse } from "@mui/icons-material";
+import {
+  AddTask,
+  Cancel,
+  Check,
+  People,
+  Search,
+  Timelapse,
+} from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
 import API_CLIENT, { wrapApiResponse } from "../../../api/api";
 import { useState } from "react";
 import { Activity } from "../../../types/activity";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs, { Dayjs } from "dayjs";
 
 export const Route = createFileRoute("/_pathlessLayout/groups/$groupId")({
   component: RouteComponent,
@@ -121,6 +135,7 @@ function ActivityCard(props: { groupId: string }) {
   const { groupId } = props;
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [activityCreateModalOpen, setActivityCreateModalOpen] = useState(false);
 
   const { data: activity, error } = useQuery({
     queryKey: ["activity", groupId, page],
@@ -155,81 +170,257 @@ function ActivityCard(props: { groupId: string }) {
   const noActivity = error && error.message === "NO_ACTIVITY";
 
   return (
-    <Paper sx={{ p: 2 }}>
-      <Stack spacing={2}>
-        <Typography variant="h4">활동</Typography>
-        <Divider />
-        {noActivity ? (
-          <Typography variant="body1" sx={{ mt: 2 }} color="textSecondary">
-            아직 활동이 없어요
-          </Typography>
-        ) : (
-          <Stack spacing={2} direction={"row"}>
-            <CardMedia
-              // TODO: Use book image
-              image="https://picsum.photos/256/256"
-              sx={{
-                width: 256,
-                height: 256,
-                borderRadius: 2,
-              }}
-            />
-            <Stack sx={{ flexGrow: 1 }}>
-              <Stack>
+    <>
+      <ActivityCreateModal
+        groupId={groupId}
+        open={activityCreateModalOpen}
+        onClose={() => setActivityCreateModalOpen(false)}
+        onCreate={(activity) => {
+          console.log(activity);
+        }}
+      />
+      <Paper sx={{ p: 2 }}>
+        <Stack spacing={2}>
+          <Box sx={{ display: "flex", flexDirection: "row" }}>
+            <Typography variant="h4" sx={{ mr: "auto" }}>
+              활동
+            </Typography>
+            <IconButton onClick={() => setActivityCreateModalOpen(true)}>
+              <AddTask />
+            </IconButton>
+          </Box>
+          <Divider />
+          {noActivity ? (
+            <Typography variant="body1" sx={{ mt: 2 }} color="textSecondary">
+              아직 활동이 없어요
+            </Typography>
+          ) : (
+            <Stack spacing={2} direction={"row"}>
+              <CardMedia
+                // TODO: Use book image
+                image="https://picsum.photos/256/256"
+                sx={{
+                  width: 256,
+                  height: 256,
+                  borderRadius: 2,
+                }}
+              />
+              <Stack sx={{ flexGrow: 1 }}>
+                <Stack>
+                  {activity ? (
+                    <Typography variant="h5">{activity.bookId}</Typography>
+                  ) : (
+                    <Skeleton height={48} />
+                  )}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "row",
+                      justifyContent: "flex-end",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Typography
+                      variant="body2"
+                      color="textSecondary"
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Icon>
+                        <Timelapse />
+                      </Icon>
+                      {activity ? (
+                        `${new Date(activity.startTime).toLocaleDateString()} ~
+                    ${new Date(activity.endTime).toLocaleDateString()}`
+                      ) : (
+                        <Skeleton width={256} />
+                      )}
+                    </Typography>
+                  </Box>
+                </Stack>
+                <Divider />
                 {activity ? (
-                  <Typography variant="h5">{activity.bookId}</Typography>
+                  <Typography variant="body1" sx={{ mt: 2 }}>
+                    {activity.description}
+                  </Typography>
                 ) : (
-                  <Skeleton height={48} />
+                  <Skeleton sx={{ mt: 2 }} />
                 )}
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "flex-end",
-                    alignItems: "center",
-                  }}
-                >
+              </Stack>
+            </Stack>
+          )}
+          <Divider />
+          <Pagination
+            page={page + 1}
+            count={totalPages}
+            onChange={(_, page) => {
+              setPage(page - 1);
+            }}
+            sx={{ width: "100%", justifyItems: "center" }}
+          />
+        </Stack>
+      </Paper>
+    </>
+  );
+}
+
+function ActivityCreateModal(props: {
+  open: boolean;
+  onClose: () => void;
+  groupId: string;
+  onCreate: (activity: Activity) => void;
+}) {
+  const { open, onClose, groupId, onCreate } = props;
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [startDate, setStartDate] = useState<Dayjs>(dayjs(new Date()));
+  const [endDate, setEndDate] = useState<Dayjs>(
+    dayjs(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000))
+  );
+
+  const handleCreateActivity = async () => {
+    if (!title || !description) {
+      alert("제목과 설명을 입력해주세요");
+      return;
+    }
+    const groupIdNumber = parseInt(groupId);
+    if (isNaN(groupIdNumber)) {
+      alert("Invalid group ID");
+      return;
+    }
+    const response = await wrapApiResponse(
+      API_CLIENT.activityController.createActivity(groupIdNumber, {
+        // TODO: 검색후 책 정보 가져오기
+        bookId: 0,
+        endTime: endDate.toISOString(),
+        startTime: startDate.toISOString(),
+        description,
+      })
+    );
+    if (!response.isSuccessful) {
+      alert(response.errorMessage);
+      return;
+    }
+    onCreate(response.data as Activity);
+    onClose();
+  };
+
+  const diffInDays = endDate.diff(startDate, "days");
+
+  return (
+    <Modal open={open} onClose={onClose}>
+      <Box
+        sx={{
+          width: "100vw",
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Container>
+          <Paper sx={{ width: "100%", height: "100%", padding: 2 }}>
+            <Stack spacing={2} sx={{ height: "100%", overflowY: "auto" }}>
+              <Stack direction={"row"} spacing={2}>
+                <CardMedia
+                  image="https://picsum.photos/256/256"
+                  sx={{ width: 256, height: 256 }}
+                />
+                <Stack spacing={2} sx={{ flexGrow: 1 }}>
+                  <OutlinedInput
+                    fullWidth
+                    onChange={(e) => {
+                      setTitle(e.target.value);
+                    }}
+                    value={title}
+                    placeholder="책 제목"
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <IconButton>
+                          <Search />
+                        </IconButton>
+                      </InputAdornment>
+                    }
+                  />
                   <Typography
                     variant="body2"
                     color="textSecondary"
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                    }}
+                    sx={{ flexGrow: 1 }}
+                  >
+                    책 설명
+                  </Typography>
+                  <Stack
+                    spacing={2}
+                    direction={"row"}
+                    alignItems={"center"}
+                    justifyContent={"space-between"}
                   >
                     <Icon>
                       <Timelapse />
                     </Icon>
-                    {activity ? (
-                      `${new Date(activity.startTime).toLocaleDateString()} ~
-                    ${new Date(activity.endTime).toLocaleDateString()}`
-                    ) : (
-                      <Skeleton width={256} />
-                    )}
-                  </Typography>
-                </Box>
+                    <Stack spacing={2} direction={"row"} alignItems={"center"}>
+                      <Typography variant="body2" color="textSecondary">
+                        총 {diffInDays}일
+                      </Typography>
+                      <DatePicker
+                        value={startDate}
+                        onChange={(newValue) => {
+                          if (!newValue) {
+                            return;
+                          }
+                          if (newValue.isAfter(endDate)) {
+                            return;
+                          }
+                          setStartDate(newValue);
+                        }}
+                      />
+                      <Typography variant="body2" color="textSecondary">
+                        ~
+                      </Typography>
+                      <DatePicker
+                        value={endDate}
+                        onChange={(newValue) => {
+                          if (!newValue) {
+                            return;
+                          }
+                          if (newValue.isBefore(startDate)) {
+                            return;
+                          }
+                          setEndDate(newValue);
+                        }}
+                      />
+                    </Stack>
+                  </Stack>
+                </Stack>
               </Stack>
+
+              <TextField
+                variant="outlined"
+                multiline
+                fullWidth
+                label="활동 설명"
+                onChange={(e) => {
+                  setDescription(e.target.value);
+                }}
+                value={description}
+                minRows={4}
+                maxRows={4}
+              />
               <Divider />
-              {activity ? (
-                <Typography variant="body1" sx={{ mt: 2 }}>
-                  {activity.description}
-                </Typography>
-              ) : (
-                <Skeleton sx={{ mt: 2 }} />
-              )}
+              <Stack direction={"row"} spacing={2} justifyContent={"flex-end"}>
+                <IconButton onClick={handleCreateActivity} color="primary">
+                  <Check />
+                </IconButton>
+                <IconButton onClick={onClose} color="secondary">
+                  <Cancel />
+                </IconButton>
+              </Stack>
             </Stack>
-          </Stack>
-        )}
-        <Divider />
-        <Pagination
-          page={page + 1}
-          count={totalPages}
-          onChange={(_, page) => {
-            setPage(page - 1);
-          }}
-          sx={{ width: "100%", justifyItems: "center" }}
-        />
-      </Stack>
-    </Paper>
+          </Paper>
+        </Container>
+      </Box>
+    </Modal>
   );
 }
