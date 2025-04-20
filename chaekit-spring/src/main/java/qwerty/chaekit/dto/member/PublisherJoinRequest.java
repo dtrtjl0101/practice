@@ -7,7 +7,7 @@ public record PublisherJoinRequest(
         @NotBlank
         String publisherName,
         @NotBlank
-        String username,
+        String email,
         @NotBlank
         String password
 ){ }

@@ -25,24 +25,24 @@ public class TestFixtureFactory {
     @Autowired
     private GroupRepository groupRepository;
 
-    public UserProfile createUser(String username, String nickname) {
-        Member member = createMember(username, Role.ROLE_USER);
+    public UserProfile createUser(String email, String nickname) {
+        Member member = createMember(email, Role.ROLE_USER);
         return userProfileRepository.save(
                 UserProfile.builder().member(member).nickname(nickname).build()
         );
     }
 
-    public PublisherProfile createPublisher(String username, String publisherName) {
-        Member member = createMember(username, Role.ROLE_PUBLISHER);
+    public PublisherProfile createPublisher(String email, String publisherName) {
+        Member member = createMember(email, Role.ROLE_PUBLISHER);
         return publisherProfileRepository.save(
                 PublisherProfile.builder().member(member).publisherName(publisherName).build()
         );
     }
 
-    private Member createMember(String username, Role role) {
+    private Member createMember(String email, Role role) {
         String DEFAULT_PASSWORD = "pw";
         return memberRepository.save(
-                Member.builder().username(username).password(DEFAULT_PASSWORD).role(role).build()
+                Member.builder().email(email).password(DEFAULT_PASSWORD).role(role).build()
         );
     }
 
@@ -50,7 +50,7 @@ public class TestFixtureFactory {
         return UserToken.builder()
                 .memberId(member.getId())
                 .userId(user.getId())
-                .email(member.getUsername())
+                .email(member.getEmail())
                 .build();
     }
 
@@ -58,7 +58,7 @@ public class TestFixtureFactory {
         return PublisherToken.builder()
                 .memberId(member.getId())
                 .publisherId(publisher.getId())
-                .email(member.getUsername())
+                .email(member.getEmail())
                 .build();
     }
 

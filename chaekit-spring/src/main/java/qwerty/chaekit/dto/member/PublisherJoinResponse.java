@@ -8,6 +8,6 @@ public record PublisherJoinResponse(
         Long publisherId,
         String accessToken,
         String publisherName,
-        String username,
+        String email,
         Boolean isAccepted
 ){ }

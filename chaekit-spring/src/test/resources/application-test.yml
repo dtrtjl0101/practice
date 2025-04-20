@@ -21,7 +21,7 @@ jwt:
   expirationMs: 3600000
 
 admin:
-  username: admin
+  email: admin@example.com
   password: dummy_password
 aws:
   ebook-bucket-name: dummy-bucket

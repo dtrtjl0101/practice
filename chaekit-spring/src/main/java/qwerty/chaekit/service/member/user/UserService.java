@@ -22,7 +22,7 @@ public class UserService {
         return UserMemberResponse.builder()
                 .id(userToken.memberId())
                 .userId(userToken.userId())
-                .username(userToken.email())
+                .email(userToken.email())
                 .nickname(nickname)
                 .build();
     }

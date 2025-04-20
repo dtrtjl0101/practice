@@ -16,16 +16,16 @@ public class MemberJoinHelper {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public Member saveMember(String email, String password, Role role) {
-        validateUsername(email);
+        validateEmail(email);
         return memberRepository.save(Member.builder()
-                .username(email)
+                .email(email)
                 .password(bCryptPasswordEncoder.encode(password))
                 .role(role)
                 .build());
     }
 
-    private void validateUsername(String username) {
-        if (memberRepository.existsByUsername(username)) {
+    private void validateEmail(String email) {
+        if (memberRepository.existsByEmail(email)) {
             throw new BadRequestException(ErrorCode.MEMBER_ALREADY_EXISTS);
         }
     }

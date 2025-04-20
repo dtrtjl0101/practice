@@ -8,5 +8,5 @@ public record UserJoinResponse(
         Long userId,
         String accessToken,
         String nickname,
-        String username
+        String email
 ){ }

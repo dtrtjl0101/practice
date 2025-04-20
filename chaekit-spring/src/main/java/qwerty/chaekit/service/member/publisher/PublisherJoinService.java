@@ -23,7 +23,7 @@ public class PublisherJoinService {
 
     @Transactional
     public PublisherJoinResponse join(PublisherJoinRequest request) {
-        String email = request.username();
+        String email = request.email();
         String password = request.password();
 
         validatePublisherName(request.publisherName());
@@ -47,13 +47,13 @@ public class PublisherJoinService {
     }
 
     private PublisherJoinResponse toResponse(PublisherJoinRequest request, Member member, PublisherProfile publisher) {
-        String token = jwtUtil.createJwt(member.getId(), null, publisher.getId(), member.getUsername(), Role.ROLE_PUBLISHER.name());
+        String token = jwtUtil.createJwt(member.getId(), null, publisher.getId(), member.getEmail(), Role.ROLE_PUBLISHER.name());
 
         return PublisherJoinResponse.builder()
                 .id(member.getId())
                 .publisherId(publisher.getId())
                 .accessToken("Bearer " + token)
-                .username(member.getUsername())
+                .email(member.getEmail())
                 .publisherName(request.publisherName())
                 .isAccepted(false)
                 .build();

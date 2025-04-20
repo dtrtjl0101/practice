@@ -22,8 +22,8 @@
           "value": "3600000"
         },
         {
-          "name": "ADMIN_USERNAME",
-          "value": "admin"
+          "name": "ADMIN_EMAIL",
+          "value": "admin@example.com"
         },
         {
           "name": "SPRING_PROFILES_ACTIVE",

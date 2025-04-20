@@ -55,7 +55,7 @@ JWT_SECRET={your_secret_key}
 JWT_EXPIRATION_MS=3600000
 
 # Admin
-ADMIN_USERNAME=admin
+ADMIN_EMAIL=admin@example.com
 ADMIN_PASSWORD=0000
 
 # Spring

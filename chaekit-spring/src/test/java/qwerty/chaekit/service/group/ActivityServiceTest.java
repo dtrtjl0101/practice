@@ -51,12 +51,12 @@ class ActivityServiceTest {
 
     @BeforeEach
     void setUp() {
-        UserProfile groupLeader = testFixtureFactory.createUser("leader_username", "leader_nickname");
-        UserProfile anotherUser = testFixtureFactory.createUser("user_username", "user_nickname");
+        UserProfile groupLeader = testFixtureFactory.createUser("leader_email", "leader_nickname");
+        UserProfile anotherUser = testFixtureFactory.createUser("user_email", "user_nickname");
         groupLeaderLogin = testFixtureFactory.createUserToken(groupLeader.getMember(), groupLeader);
         anotherLogin = testFixtureFactory.createUserToken(anotherUser.getMember(), anotherUser);
 
-        PublisherProfile publisher = testFixtureFactory.createPublisher("publisher_username", "publisher_name");
+        PublisherProfile publisher = testFixtureFactory.createPublisher("publisher_email", "publisher_name");
         dummyEbook = testFixtureFactory.createEbook("dummy_ebook", publisher, "author", "description", "file_key");
         dummyGroup = testFixtureFactory.createGroup("dummy_group", groupLeader);
     }

@@ -21,11 +21,11 @@ public class CustomUserDetails implements UserDetails {
     private final String password;
     private final String role;
 
-    public CustomUserDetails(Long memberId, Long userId, Long publisherId, String username, String password, String role) {
+    public CustomUserDetails(Long memberId, Long userId, Long publisherId, String email, String password, String role) {
         this.memberId = memberId;
         this.userId = userId;
         this.publisherId = publisherId;
-        this.email = username;
+        this.email = email;
         this.password = password;
         this.role = role;
     }

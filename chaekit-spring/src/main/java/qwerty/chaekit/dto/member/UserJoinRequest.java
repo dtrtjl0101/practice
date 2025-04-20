@@ -6,7 +6,7 @@ public record UserJoinRequest(
         @NotBlank
         String nickname,
         @NotBlank
-        String username,
+        String email,
         @NotBlank
         String password
 ){ }

@@ -29,7 +29,7 @@ jwt:
   expirationMs: ${JWT_EXPIRATION_MS}
 
 admin:
-  username: ${ADMIN_USERNAME}
+  email: ${ADMIN_EMAIL}
   password: ${ADMIN_PASSWORD}
 aws:
   ebook-bucket-name: ${EBOOK_BUCKET_NAME}

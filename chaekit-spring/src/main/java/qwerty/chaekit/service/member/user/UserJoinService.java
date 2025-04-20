@@ -23,10 +23,10 @@ public class UserJoinService {
 
     @Transactional
     public UserJoinResponse join(UserJoinRequest request) {
-        String email = request.username();
+        String email = request.email();
         String password = request.password();
 
-        validateNickname(request.username());
+        validateNickname(request.email());
         Member member = memberJoinHelper.saveMember(email, password, Role.ROLE_USER);
         UserProfile user = saveUser(request, member);
 
@@ -47,13 +47,13 @@ public class UserJoinService {
     }
 
     private UserJoinResponse toResponse(UserJoinRequest request, Member member, UserProfile user) {
-        String token = jwtUtil.createJwt(member.getId(), user.getId(), null, member.getUsername(), member.getRole().name());
+        String token = jwtUtil.createJwt(member.getId(), user.getId(), null, member.getEmail(), member.getRole().name());
 
         return UserJoinResponse.builder()
                 .id(member.getId())
                 .userId(user.getId())
                 .accessToken("Bearer " + token)
-                .username(member.getUsername())
+                .email(member.getEmail())
                 .nickname(request.nickname())
                 .build();
     }

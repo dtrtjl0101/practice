@@ -34,11 +34,11 @@ public class AdminInitializer implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
-        String adminUsername = adminProperties.username();
+        String adminUsername = adminProperties.email();
         String adminPassword = adminProperties.password();
         Role adminRole = Role.ROLE_ADMIN;
 
-        Optional<Member> existingAdmin = memberRepository.findByUsername(adminUsername);
+        Optional<Member> existingAdmin = memberRepository.findByEmail(adminUsername);
 
         if (existingAdmin.isEmpty()) {
             // 관리자가 없으면 생성
@@ -50,7 +50,7 @@ public class AdminInitializer implements ApplicationRunner {
         } else {
             // 이미 관리자가 존재할 때
             Member admin = existingAdmin.get();
-            Optional<PublisherProfile> publisher = publisherProfileRepository.findByMember_Username(adminUsername);
+            Optional<PublisherProfile> publisher = publisherProfileRepository.findByMember_Email(adminUsername);
 
             PublisherProfile adminPublisher = publisher.orElseGet(() -> {
                 PublisherProfile newProfile = publisherProfileRepository.save(new PublisherProfile(admin, adminUsername));
@@ -58,7 +58,7 @@ public class AdminInitializer implements ApplicationRunner {
                 return newProfile;
             });
 
-            Optional<UserProfile> user = userProfileRepository.findByMember_Username(adminUsername);
+            Optional<UserProfile> user = userProfileRepository.findByMember_Email(adminUsername);
 
             UserProfile adminUser = user.orElseGet(() -> {
                 UserProfile newProfile = userProfileRepository.save(new UserProfile(admin, adminUsername));
