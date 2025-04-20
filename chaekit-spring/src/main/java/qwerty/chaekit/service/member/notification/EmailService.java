@@ -5,6 +5,7 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -13,10 +14,12 @@ public class EmailService {
     private final JavaMailSender javaMailSender;
 
     // 본인 인증 이메일 전송
+    @Async
     public void sendVerificationEmail(String toEmail, String verificationLink) throws MessagingException {
         String subject = "이메일 본인 인증";
         String text = "<h3>본인 인증을 위해 아래 링크를 클릭하세요.</h3>" +
-                "<a href=\"" + verificationLink + "\">본인 인증하기</a>";
+//                "<a href=\"" + verificationLink + "\">본인 인증하기</a>" +
+                "<p>인증 코드: " + verificationLink + "</p>";
 
         sendEmail(toEmail, subject, text);
     }

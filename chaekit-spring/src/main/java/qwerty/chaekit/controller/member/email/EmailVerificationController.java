@@ -2,6 +2,7 @@ package qwerty.chaekit.controller.member.email;
 
 import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
@@ -9,6 +10,7 @@ import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.service.member.email.EmailVerificationService;
 import qwerty.chaekit.service.member.notification.EmailService;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/email-verification")
 @RequiredArgsConstructor
@@ -27,7 +29,12 @@ public class EmailVerificationController {
         emailVerificationService.saveVerificationCode(email, verificationCode);
 
         // 이메일로 인증 코드 발송 (여기서는 코드만 반환, TODO: 링크 만들어서 보내는 로직 필요)
-//        emailService.sendVerificationEmail(email, verificationCode);
+        try {
+            emailService.sendVerificationEmail(email, verificationCode);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw new BadRequestException(ErrorCode.EMAIL_SEND_FAILED);
+        }
         return ApiSuccessResponse.of("[테스트] 이메일: " + email + ". 다음과 같은 코드가 왔다고 가정: " + verificationCode);
     }
 
