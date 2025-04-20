@@ -64,6 +64,18 @@
           "name": "DB_USERNAME"
         },
         {
+          "name": "REDIS_URL"
+        },
+        {
+          "name": "REDIS_PASSWORD"
+        },
+        {
+          "name": "GMAIL_ADDRESS"
+        },
+        {
+          "name": "GMAIL_PASSWORD"
+        },
+        {
           "name": "DB_PASSWORD"
         },
         {

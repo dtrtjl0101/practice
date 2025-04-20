@@ -6,7 +6,11 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @EnableJpaAuditing
-@SpringBootApplication
+@SpringBootApplication(
+		exclude = {
+				org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration.class
+		}
+)
 @ConfigurationPropertiesScan
 public class ChaekitApplication {
 
