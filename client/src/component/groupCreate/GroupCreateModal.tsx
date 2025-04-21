@@ -14,16 +14,11 @@ export default function GroupCreateModal(props: {
   const handleEditDone = async (data: GroupEditData) => {
     const { name, description, tags } = data;
     const response = await wrapApiResponse(
-      API_CLIENT.groupController.createGroup(
-        {
-          userToken: {},
-        },
-        {
-          name,
-          description,
-          tags,
-        }
-      )
+      API_CLIENT.groupController.createGroup({
+        name,
+        description,
+        tags,
+      })
     );
 
     if (!response.isSuccessful) {

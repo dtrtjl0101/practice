@@ -14,12 +14,6 @@
         "operationId": "updateHighlight",
         "parameters": [
           {
-            "name": "userToken",
-            "in": "query",
-            "required": true,
-            "schema": { "$ref": "#/components/schemas/UserToken" }
-          },
-          {
             "name": "id",
             "in": "path",
             "required": true,
@@ -53,12 +47,6 @@
         "tags": ["group-controller"],
         "operationId": "updateGroup",
         "parameters": [
-          {
-            "name": "userToken",
-            "in": "query",
-            "required": true,
-            "schema": { "$ref": "#/components/schemas/UserToken" }
-          },
           {
             "name": "groupId",
             "in": "path",
@@ -174,12 +162,6 @@
         "operationId": "getHighlights",
         "parameters": [
           {
-            "name": "userToken",
-            "in": "query",
-            "required": true,
-            "schema": { "$ref": "#/components/schemas/UserToken" }
-          },
-          {
             "name": "page",
             "in": "query",
             "description": "Zero-based page index (0..N)",
@@ -241,14 +223,7 @@
       "post": {
         "tags": ["highlight-controller"],
         "operationId": "createHighlight",
-        "parameters": [
-          {
-            "name": "userToken",
-            "in": "query",
-            "required": true,
-            "schema": { "$ref": "#/components/schemas/UserToken" }
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "content": {
             "application/json": {
@@ -314,14 +289,7 @@
       "post": {
         "tags": ["group-controller"],
         "operationId": "createGroup",
-        "parameters": [
-          {
-            "name": "userToken",
-            "in": "query",
-            "required": true,
-            "schema": { "$ref": "#/components/schemas/UserToken" }
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "content": {
             "application/json": {
@@ -349,12 +317,6 @@
         "tags": ["group-controller"],
         "operationId": "requestJoinGroup",
         "parameters": [
-          {
-            "name": "userToken",
-            "in": "query",
-            "required": true,
-            "schema": { "$ref": "#/components/schemas/UserToken" }
-          },
           {
             "name": "groupId",
             "in": "path",
@@ -427,12 +389,6 @@
         "operationId": "createActivity",
         "parameters": [
           {
-            "name": "userToken",
-            "in": "query",
-            "required": true,
-            "schema": { "$ref": "#/components/schemas/UserToken" }
-          },
-          {
             "name": "groupId",
             "in": "path",
             "required": true,
@@ -464,12 +420,6 @@
         "tags": ["activity-controller"],
         "operationId": "updateActivity",
         "parameters": [
-          {
-            "name": "userToken",
-            "in": "query",
-            "required": true,
-            "schema": { "$ref": "#/components/schemas/UserToken" }
-          },
           {
             "name": "groupId",
             "in": "path",
@@ -557,12 +507,6 @@
         "operationId": "approveJoinRequest",
         "parameters": [
           {
-            "name": "userToken",
-            "in": "query",
-            "required": true,
-            "schema": { "$ref": "#/components/schemas/UserToken" }
-          },
-          {
             "name": "groupId",
             "in": "path",
             "required": true,
@@ -611,14 +555,7 @@
       "get": {
         "tags": ["user-controller"],
         "operationId": "userInfo",
-        "parameters": [
-          {
-            "name": "userToken",
-            "in": "query",
-            "required": true,
-            "schema": { "$ref": "#/components/schemas/UserToken" }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "OK",
@@ -637,14 +574,7 @@
       "get": {
         "tags": ["publisher-controller"],
         "operationId": "userInfo_1",
-        "parameters": [
-          {
-            "name": "token",
-            "in": "query",
-            "required": true,
-            "schema": { "$ref": "#/components/schemas/PublisherToken" }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "OK",
@@ -796,14 +726,6 @@
   },
   "components": {
     "schemas": {
-      "UserToken": {
-        "type": "object",
-        "properties": {
-          "memberId": { "type": "integer", "format": "int64" },
-          "userId": { "type": "integer", "format": "int64" },
-          "email": { "type": "string" }
-        }
-      },
       "HighlightPutRequest": {
         "type": "object",
         "properties": {
@@ -1056,14 +978,6 @@
           "userId": { "type": "integer", "format": "int64" },
           "username": { "type": "string" },
           "nickname": { "type": "string" }
-        }
-      },
-      "PublisherToken": {
-        "type": "object",
-        "properties": {
-          "memberId": { "type": "integer", "format": "int64" },
-          "publisherId": { "type": "integer", "format": "int64" },
-          "email": { "type": "string" }
         }
       },
       "ApiSuccessResponsePublisherMemberResponse": {
