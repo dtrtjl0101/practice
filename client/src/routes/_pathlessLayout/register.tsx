@@ -46,11 +46,11 @@ function RouteComponent() {
 
     if (response.isSuccessful) {
       alert("회원가입이 완료되었습니다.");
-      const { id, accessToken, role, nickname, username } = response.data;
+      const { id, accessToken, nickname, username } = response.data;
       login({
         id: id!,
         accessToken: accessToken!,
-        role: role as Role,
+        role: Role.ROLE_USER as Role,
         nickname: nickname!,
         username: username!,
       });
