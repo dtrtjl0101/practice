@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { GroupInfo } from "../../../types/groups";
 import {
   Box,
+  Button,
   CardMedia,
   Chip,
   Container,
@@ -40,6 +41,7 @@ export const Route = createFileRoute("/_pathlessLayout/groups/$groupId")({
 
 function RouteComponent() {
   const { groupId } = Route.useParams();
+  const [joinGroupRequested, setJoinGroupRequested] = useState(false);
 
   const { data: group } = useQuery({
     queryKey: ["group", groupId],
@@ -58,6 +60,23 @@ function RouteComponent() {
       return response.data as GroupInfo;
     },
   });
+
+  const handleJoinGroup = async () => {
+    const groupIdNumber = parseInt(groupId);
+    if (isNaN(groupIdNumber)) {
+      alert("Invalid group ID");
+      return;
+    }
+    const response = await wrapApiResponse(
+      API_CLIENT.groupController.requestJoinGroup(groupIdNumber)
+    );
+    if (!response.isSuccessful) {
+      alert(response.errorMessage);
+      return;
+    }
+    setJoinGroupRequested(true);
+    alert("모임 가입 요청이 완료되었습니다.");
+  };
 
   return (
     <Container sx={{ mt: 4 }}>
@@ -91,7 +110,18 @@ function RouteComponent() {
                 </Typography>
               </Box>
             </Box>
-
+            <Button
+              onClick={handleJoinGroup}
+              variant="contained"
+              disabled={joinGroupRequested}
+              sx={{
+                justifySelf: "flex-end",
+                alignSelf: "flex-end",
+                width: "fit-content",
+              }}
+            >
+              {joinGroupRequested ? "가입 대기중" : "가입하기"}
+            </Button>
             <Divider />
             <Typography variant="body1" sx={{ mt: 2 }}>
               {group ? group.description : <Skeleton />}
