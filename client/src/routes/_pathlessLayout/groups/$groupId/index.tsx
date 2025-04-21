@@ -1,7 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { GroupInfo } from "../../../types/groups";
+import { createFileRoute, createLink } from "@tanstack/react-router";
+import { GroupInfo } from "../../../../types/groups";
 import {
   Box,
+  Button,
   CardMedia,
   Chip,
   Container,
@@ -25,21 +26,23 @@ import {
   Check,
   People,
   Search,
+  Settings,
   Timelapse,
 } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
-import API_CLIENT, { wrapApiResponse } from "../../../api/api";
+import API_CLIENT, { wrapApiResponse } from "../../../../api/api";
 import { useState } from "react";
-import { Activity } from "../../../types/activity";
+import { Activity } from "../../../../types/activity";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { Dayjs } from "dayjs";
 
-export const Route = createFileRoute("/_pathlessLayout/groups/$groupId")({
+export const Route = createFileRoute("/_pathlessLayout/groups/$groupId/")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
   const { groupId } = Route.useParams();
+  const [joinGroupRequested, setJoinGroupRequested] = useState(false);
 
   const { data: group } = useQuery({
     queryKey: ["group", groupId],
@@ -59,15 +62,49 @@ function RouteComponent() {
     },
   });
 
+  const handleJoinGroup = async () => {
+    const groupIdNumber = parseInt(groupId);
+    if (isNaN(groupIdNumber)) {
+      alert("Invalid group ID");
+      return;
+    }
+    const response = await wrapApiResponse(
+      API_CLIENT.groupController.requestJoinGroup(groupIdNumber)
+    );
+    if (!response.isSuccessful) {
+      alert(response.errorMessage);
+      return;
+    }
+    setJoinGroupRequested(true);
+    alert("모임 가입 요청이 완료되었습니다.");
+  };
+
   return (
     <Container sx={{ mt: 4 }}>
       <Stack spacing={4} sx={{ mb: 2 }}>
         <Paper sx={{ p: 2 }}>
           <Stack spacing={2}>
-            <Box sx={{ display: "flex", flexDirection: "column" }}>
-              <Typography variant="h3">
-                {group ? group.name : <Skeleton variant="text" />}
-              </Typography>
+            <Stack>
+              <Stack
+                direction={"row"}
+                spacing={2}
+                justifyContent={"space-between"}
+              >
+                <Typography variant="h3">
+                  {group ? group.name : <Skeleton variant="text" />}
+                </Typography>
+                <LinkIconButton
+                  to={"/groups/$groupId/manage"}
+                  params={{ groupId }}
+                  size="large"
+                  sx={{
+                    alignSelf: "center",
+                    justifySelf: "flex-end",
+                  }}
+                >
+                  <Settings />
+                </LinkIconButton>
+              </Stack>
               <Box
                 sx={{
                   justifySelf: "flex-end",
@@ -90,8 +127,19 @@ function RouteComponent() {
                   {group ? group.memberCount : <Skeleton />}
                 </Typography>
               </Box>
-            </Box>
-
+            </Stack>
+            <Button
+              onClick={handleJoinGroup}
+              variant="contained"
+              disabled={joinGroupRequested}
+              sx={{
+                justifySelf: "flex-end",
+                alignSelf: "flex-end",
+                width: "fit-content",
+              }}
+            >
+              {joinGroupRequested ? "가입 대기중" : "가입하기"}
+            </Button>
             <Divider />
             <Typography variant="body1" sx={{ mt: 2 }}>
               {group ? group.description : <Skeleton />}
@@ -424,3 +472,5 @@ function ActivityCreateModal(props: {
     </Modal>
   );
 }
+
+const LinkIconButton = createLink(IconButton);
