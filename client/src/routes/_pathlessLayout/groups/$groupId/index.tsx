@@ -7,7 +7,7 @@ import {
   Chip,
   Container,
   Divider,
-  Grid2,
+  Grid,
   Icon,
   IconButton,
   InputAdornment,
@@ -145,7 +145,7 @@ function RouteComponent() {
               {group ? group.description : <Skeleton />}
             </Typography>
             <Divider />
-            <Grid2 container spacing={1}>
+            <Grid container spacing={1}>
               {group ? (
                 group.tags.map((tag) => {
                   return (
@@ -161,7 +161,7 @@ function RouteComponent() {
               ) : (
                 <Skeleton width={128} />
               )}
-            </Grid2>
+            </Grid>
           </Stack>
         </Paper>
         <ActivityCard groupId={groupId} />

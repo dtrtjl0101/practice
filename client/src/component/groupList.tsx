@@ -4,7 +4,7 @@ import {
   CardContent,
   CardHeader,
   CardMedia,
-  Grid2,
+  Grid,
   Skeleton,
   Stack,
   Typography,
@@ -67,7 +67,7 @@ export default function GroupList(props: {
           setPage={setPage}
           totalPages={totalPages}
         />
-        <Grid2 container spacing={2}>
+        <Grid container spacing={2}>
           {data?.map((group, index) =>
             group ? (
               <ItemContainer key={group.groupId}>
@@ -119,7 +119,7 @@ export default function GroupList(props: {
               </ItemContainer>
             )
           )}
-        </Grid2>
+        </Grid>
         <PageNavigation
           pageZeroBased={page}
           setPage={setPage}
@@ -134,7 +134,7 @@ function ItemContainer(props: PropsWithChildren) {
   const { children } = props;
 
   return (
-    <Grid2
+    <Grid
       size={{
         xs: 12,
         sm: 6,
@@ -144,6 +144,6 @@ function ItemContainer(props: PropsWithChildren) {
       }}
     >
       {children}
-    </Grid2>
+    </Grid>
   );
 }
