@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { GroupInfo } from "../../../types/groups";
+import { createFileRoute, createLink } from "@tanstack/react-router";
+import { GroupInfo } from "../../../../types/groups";
 import {
   Box,
   Button,
@@ -26,16 +26,17 @@ import {
   Check,
   People,
   Search,
+  Settings,
   Timelapse,
 } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
-import API_CLIENT, { wrapApiResponse } from "../../../api/api";
+import API_CLIENT, { wrapApiResponse } from "../../../../api/api";
 import { useState } from "react";
-import { Activity } from "../../../types/activity";
+import { Activity } from "../../../../types/activity";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { Dayjs } from "dayjs";
 
-export const Route = createFileRoute("/_pathlessLayout/groups/$groupId")({
+export const Route = createFileRoute("/_pathlessLayout/groups/$groupId/")({
   component: RouteComponent,
 });
 
@@ -83,10 +84,27 @@ function RouteComponent() {
       <Stack spacing={4} sx={{ mb: 2 }}>
         <Paper sx={{ p: 2 }}>
           <Stack spacing={2}>
-            <Box sx={{ display: "flex", flexDirection: "column" }}>
-              <Typography variant="h3">
-                {group ? group.name : <Skeleton variant="text" />}
-              </Typography>
+            <Stack>
+              <Stack
+                direction={"row"}
+                spacing={2}
+                justifyContent={"space-between"}
+              >
+                <Typography variant="h3">
+                  {group ? group.name : <Skeleton variant="text" />}
+                </Typography>
+                <LinkIconButton
+                  to={"/groups/$groupId/manage"}
+                  params={{ groupId }}
+                  size="large"
+                  sx={{
+                    alignSelf: "center",
+                    justifySelf: "flex-end",
+                  }}
+                >
+                  <Settings />
+                </LinkIconButton>
+              </Stack>
               <Box
                 sx={{
                   justifySelf: "flex-end",
@@ -109,7 +127,7 @@ function RouteComponent() {
                   {group ? group.memberCount : <Skeleton />}
                 </Typography>
               </Box>
-            </Box>
+            </Stack>
             <Button
               onClick={handleJoinGroup}
               variant="contained"
@@ -454,3 +472,5 @@ function ActivityCreateModal(props: {
     </Modal>
   );
 }
+
+const LinkIconButton = createLink(IconButton);
