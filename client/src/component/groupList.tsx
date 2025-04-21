@@ -5,7 +5,6 @@ import {
   CardHeader,
   CardMedia,
   Grid2,
-  Pagination,
   Skeleton,
   Stack,
   Typography,
@@ -14,6 +13,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import API_CLIENT, { wrapApiResponse } from "../api/api";
 import { JSX, PropsWithChildren, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import PageNavigation from "./PageNavigation";
 const ITEM_HEIGHT = 384 - 20;
 
 export default function GroupList(props: {
@@ -145,25 +145,5 @@ function ItemContainer(props: PropsWithChildren) {
     >
       {children}
     </Grid2>
-  );
-}
-
-function PageNavigation(props: {
-  pageZeroBased: number;
-  setPage: (page: number) => void;
-  totalPages?: number;
-}) {
-  const { pageZeroBased, setPage, totalPages } = props;
-  const page = pageZeroBased + 1;
-
-  return (
-    <Pagination
-      count={totalPages}
-      page={page}
-      onChange={(_, page) => {
-        setPage(page - 1);
-      }}
-      sx={{ width: "100%", display: "flex", justifyContent: "center" }}
-    />
   );
 }
