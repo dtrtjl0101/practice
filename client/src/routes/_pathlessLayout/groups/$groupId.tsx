@@ -291,13 +291,17 @@ function ActivityCreateModal(props: {
       return;
     }
     const response = await wrapApiResponse(
-      API_CLIENT.activityController.createActivity(groupIdNumber, {
-        // TODO: 검색후 책 정보 가져오기
-        bookId: 0,
-        endTime: endDate.toISOString(),
-        startTime: startDate.toISOString(),
-        description,
-      })
+      API_CLIENT.activityController.createActivity(
+        groupIdNumber,
+        { userToken: {} },
+        {
+          // TODO: 검색후 책 정보 가져오기
+          bookId: 0,
+          endTime: endDate.toISOString(),
+          startTime: startDate.toISOString(),
+          description,
+        }
+      )
     );
     if (!response.isSuccessful) {
       alert(response.errorMessage);
