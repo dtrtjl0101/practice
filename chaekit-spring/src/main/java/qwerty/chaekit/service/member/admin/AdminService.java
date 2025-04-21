@@ -10,9 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
 import qwerty.chaekit.dto.member.PublisherInfoResponse;
-import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.dto.page.PageResponse;
+import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.NotFoundException;
+import qwerty.chaekit.service.member.notification.EmailService;
 
 import java.util.Optional;
 
@@ -20,6 +21,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AdminService {
     private final PublisherProfileRepository publisherRepository;
+    private final EmailService emailService;
+
     @Getter
     @Setter
     private Long adminPublisherId;
@@ -36,12 +39,13 @@ public class AdminService {
 
     @Transactional
     public boolean acceptPublisher(Long publisherId) {
-        Optional<PublisherProfile> publisher = publisherRepository.findById(publisherId);
+        Optional<PublisherProfile> publisher = publisherRepository.findByIdWithMember(publisherId);
         if (publisher.isPresent()) {
             if(publisher.get().isAccepted()) {
                 return false;
             }
             publisher.get().acceptPublisher();
+            emailService.sendPublisherApprovalEmail(publisher.get().getMember().getEmail());
             return true;
         } else {
             throw new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND);

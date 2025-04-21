@@ -13,7 +13,7 @@ public class EmailVerificationService {
 
     public void saveVerificationCode(String email, String verificationCode) {
         // 이메일과 인증 코드를 Redis에 저장
-        redisTemplate.opsForValue().set(email, verificationCode, 10, TimeUnit.MINUTES);  // 10분 후 만료
+        redisTemplate.opsForValue().set(email, verificationCode, 30, TimeUnit.MINUTES);  // 10분 후 만료
     }
 
     public boolean verifyCode(String email, String code) {
