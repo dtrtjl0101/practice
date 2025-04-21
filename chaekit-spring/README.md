@@ -36,6 +36,16 @@
    SHOW DATABASES;
    ```
 
+## 🐳 Redis 설정
+1. Redis 설치
+   - macOS: `brew install redis`
+   - Ubuntu: `sudo apt install redis-server`
+   - Windows: [Redis 다운로드](https://redis.io/download)
+2. Redis 실행
+   - macOS: `brew services start redis`
+   - Ubuntu: `sudo service redis-server start`
+   - Windows: `C:\Program Files\Redis\redis-server.exe` 실행
+
 ## 🔐 개발용 .env 설정
 
 프로젝트 루트에 `.env` 파일을 생성하고 아래 내용을 채워주세요:
@@ -49,6 +59,10 @@ DB_USERNAME=root
 DB_PASSWORD={your_password}
 DB_DRIVER_CLASS=com.mysql.cj.jdbc.Driver
 JPA_DIALECT=org.hibernate.dialect.MySQL8Dialect
+
+# Redis
+REDIS_URL=localhost
+REDIS_PASSWORD=
 
 # JWT
 JWT_SECRET={your_secret_key}
