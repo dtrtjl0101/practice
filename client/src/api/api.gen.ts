@@ -10,14 +10,6 @@
  * ---------------------------------------------------------------
  */
 
-export interface UserToken {
-  /** @format int64 */
-  memberId?: number;
-  /** @format int64 */
-  userId?: number;
-  email?: string;
-}
-
 export interface HighlightPutRequest {
   /** @format int64 */
   activityId?: number;
@@ -239,14 +231,6 @@ export interface UserMemberResponse {
   userId?: number;
   username?: string;
   nickname?: string;
-}
-
-export interface PublisherToken {
-  /** @format int64 */
-  memberId?: number;
-  /** @format int64 */
-  publisherId?: number;
-  email?: string;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -678,16 +662,12 @@ export class Api<
      */
     updateHighlight: (
       id: number,
-      query: {
-        userToken: UserToken;
-      },
       data: HighlightPutRequest,
       params: RequestParams = {},
     ) =>
       this.request<ApiSuccessResponseHighlightPostResponse, any>({
         path: `/api/highlights/${id}`,
         method: "PUT",
-        query: query,
         body: data,
         type: ContentType.Json,
         ...params,
@@ -701,8 +681,7 @@ export class Api<
      * @request GET:/api/highlights
      */
     getHighlights: (
-      query: {
-        userToken: UserToken;
+      query?: {
         /**
          * Zero-based page index (0..N)
          * @min 0
@@ -740,17 +719,10 @@ export class Api<
      * @name CreateHighlight
      * @request POST:/api/highlights
      */
-    createHighlight: (
-      query: {
-        userToken: UserToken;
-      },
-      data: HighlightPostRequest,
-      params: RequestParams = {},
-    ) =>
+    createHighlight: (data: HighlightPostRequest, params: RequestParams = {}) =>
       this.request<ApiSuccessResponseHighlightPostResponse, any>({
         path: `/api/highlights`,
         method: "POST",
-        query: query,
         body: data,
         type: ContentType.Json,
         ...params,
@@ -766,16 +738,12 @@ export class Api<
      */
     updateGroup: (
       groupId: number,
-      query: {
-        userToken: UserToken;
-      },
       data: GroupPutRequest,
       params: RequestParams = {},
     ) =>
       this.request<ApiSuccessResponseGroupPostResponse, any>({
         path: `/api/groups/${groupId}`,
         method: "PUT",
-        query: query,
         body: data,
         type: ContentType.Json,
         ...params,
@@ -821,17 +789,10 @@ export class Api<
      * @name CreateGroup
      * @request POST:/api/groups
      */
-    createGroup: (
-      query: {
-        userToken: UserToken;
-      },
-      data: GroupPostRequest,
-      params: RequestParams = {},
-    ) =>
+    createGroup: (data: GroupPostRequest, params: RequestParams = {}) =>
       this.request<ApiSuccessResponseGroupPostResponse, any>({
         path: `/api/groups`,
         method: "POST",
-        query: query,
         body: data,
         type: ContentType.Json,
         ...params,
@@ -844,17 +805,10 @@ export class Api<
      * @name RequestJoinGroup
      * @request POST:/api/groups/{groupId}/join
      */
-    requestJoinGroup: (
-      groupId: number,
-      query: {
-        userToken: UserToken;
-      },
-      params: RequestParams = {},
-    ) =>
+    requestJoinGroup: (groupId: number, params: RequestParams = {}) =>
       this.request<ApiSuccessResponseGroupJoinResponse, any>({
         path: `/api/groups/${groupId}/join`,
         method: "POST",
-        query: query,
         ...params,
       }),
 
@@ -868,15 +822,11 @@ export class Api<
     approveJoinRequest: (
       groupId: number,
       userId: number,
-      query: {
-        userToken: UserToken;
-      },
       params: RequestParams = {},
     ) =>
       this.request<ApiSuccessResponseGroupJoinResponse, any>({
         path: `/api/groups/${groupId}/members/${userId}/approve`,
         method: "PATCH",
-        query: query,
         ...params,
       }),
 
@@ -918,16 +868,10 @@ export class Api<
      * @name UserInfo
      * @request GET:/api/users/me
      */
-    userInfo: (
-      query: {
-        userToken: UserToken;
-      },
-      params: RequestParams = {},
-    ) =>
+    userInfo: (params: RequestParams = {}) =>
       this.request<ApiSuccessResponseUserMemberResponse, any>({
         path: `/api/users/me`,
         method: "GET",
-        query: query,
         ...params,
       }),
   };
@@ -955,16 +899,10 @@ export class Api<
      * @name UserInfo1
      * @request GET:/api/publishers/me
      */
-    userInfo1: (
-      query: {
-        token: PublisherToken;
-      },
-      params: RequestParams = {},
-    ) =>
+    userInfo1: (params: RequestParams = {}) =>
       this.request<ApiSuccessResponsePublisherMemberResponse, any>({
         path: `/api/publishers/me`,
         method: "GET",
-        query: query,
         ...params,
       }),
   };
@@ -1030,16 +968,12 @@ export class Api<
      */
     createActivity: (
       groupId: number,
-      query: {
-        userToken: UserToken;
-      },
       data: ActivityPostRequest,
       params: RequestParams = {},
     ) =>
       this.request<ApiSuccessResponseActivityPostResponse, any>({
         path: `/api/groups/${groupId}/activities`,
         method: "POST",
-        query: query,
         body: data,
         type: ContentType.Json,
         ...params,
@@ -1054,16 +988,12 @@ export class Api<
      */
     updateActivity: (
       groupId: number,
-      query: {
-        userToken: UserToken;
-      },
       data: ActivityPatchRequest,
       params: RequestParams = {},
     ) =>
       this.request<ApiSuccessResponseActivityPostResponse, any>({
         path: `/api/groups/${groupId}/activities`,
         method: "PATCH",
-        query: query,
         body: data,
         type: ContentType.Json,
         ...params,

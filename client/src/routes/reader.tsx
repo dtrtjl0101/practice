@@ -82,7 +82,6 @@ function RouteComponent() {
     queryFn: async () => {
       const response = await wrapApiResponse(
         API_CLIENT.highlightController.getHighlights({
-          userToken: {},
           page: 0,
           size: 100,
           spine,
@@ -225,19 +224,14 @@ function RouteComponent() {
         selection={selection}
         addHighlight={async ({ cfi, memo }) => {
           const response = await wrapApiResponse(
-            API_CLIENT.highlightController.createHighlight(
-              {
-                userToken: {},
-              },
-              {
-                memo,
-                cfi,
-                spine,
-                // TODO: use BookId and ActivityId
-                bookId: 1,
-                activityId: 1,
-              }
-            )
+            API_CLIENT.highlightController.createHighlight({
+              memo,
+              cfi,
+              spine,
+              // TODO: use BookId and ActivityId
+              bookId: 1,
+              activityId: 1,
+            })
           );
 
           if (!response.isSuccessful) {
