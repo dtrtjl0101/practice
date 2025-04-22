@@ -24,8 +24,9 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final PublisherProfileRepository publisherRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Member memberData = memberRepository.findByUsername(username)
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        // 로그인 성공 시 토큰 발행을 위한 CustomUserDetails 객체 생성
+        Member memberData = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 사용자입니다."));
         Long userId = null, publisherId = null;
         Role role = Objects.requireNonNull(memberData.getRole());
@@ -44,7 +45,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 memberData.getId(),
                 userId,
                 publisherId,
-                memberData.getUsername(),
+                memberData.getEmail(),
                 memberData.getPassword(),
                 memberData.getRole().name()
         );

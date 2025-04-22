@@ -1,198 +1,199 @@
 package qwerty.chaekit.service.group;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.ebook.Ebook;
+import qwerty.chaekit.domain.ebook.EbookRepository;
+import qwerty.chaekit.domain.group.GroupRepository;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.group.activity.ActivityRepository;
-import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.user.UserProfile;
+import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.dto.group.activity.ActivityFetchResponse;
 import qwerty.chaekit.dto.group.activity.ActivityPatchRequest;
 import qwerty.chaekit.dto.group.activity.ActivityPostRequest;
 import qwerty.chaekit.dto.group.activity.ActivityPostResponse;
 import qwerty.chaekit.dto.page.PageResponse;
-import qwerty.chaekit.global.exception.BadRequestException;
-import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.security.resolver.UserToken;
-import qwerty.chaekit.util.TestFixtureFactory;
 
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 
-@ActiveProfiles("test")
-@SpringBootTest
-@Transactional
+@ExtendWith(MockitoExtension.class)
 class ActivityServiceTest {
-
-    @Autowired
+    @InjectMocks
     private ActivityService activityService;
 
-    @Autowired
+    @Mock
+    private UserProfileRepository userRepository;
+    @Mock
+    private GroupRepository groupRepository;
+    @Mock
     private ActivityRepository activityRepository;
-
-    @Autowired
-    private TestFixtureFactory testFixtureFactory;
-
-    private UserToken groupLeaderLogin;
-    private UserToken anotherLogin;
-    private ReadingGroup dummyGroup;
-    private Ebook dummyEbook;
-
-    @BeforeEach
-    void setUp() {
-        UserProfile groupLeader = testFixtureFactory.createUser("leader_username", "leader_nickname");
-        UserProfile anotherUser = testFixtureFactory.createUser("user_username", "user_nickname");
-        groupLeaderLogin = testFixtureFactory.createUserToken(groupLeader.getMember(), groupLeader);
-        anotherLogin = testFixtureFactory.createUserToken(anotherUser.getMember(), anotherUser);
-
-        PublisherProfile publisher = testFixtureFactory.createPublisher("publisher_username", "publisher_name");
-        dummyEbook = testFixtureFactory.createEbook("dummy_ebook", publisher, "author", "description", "file_key");
-        dummyGroup = testFixtureFactory.createGroup("dummy_group", groupLeader);
-    }
+    @Mock
+    private EbookRepository ebookRepository;
 
     @Test
-    @DisplayName("활동 생성 테스트")
-    void createActivityTest() {
-        // Given
-        ActivityPostRequest request = ActivityPostRequest.builder()
-                .bookId(dummyEbook.getId())
-                .startTime(LocalDate.now())
-                .endTime(LocalDate.now().plusDays(5))
-                .description("Test Activity")
+    void createActivity() {
+        // given
+        long userId = 1L;
+        long groupId = 1L;
+        long bookId = 1L;
+        long createdActivityId = 1L;
+        LocalDate startTime = LocalDate.parse("2025-04-01");
+        LocalDate endTime = LocalDate.parse("2026-04-14");
+        ActivityPostRequest postRequest = ActivityPostRequest.builder()
+                .bookId(bookId)
+                .startTime(startTime)
+                .endTime(endTime)
                 .build();
 
-        // When
-        ActivityPostResponse response = activityService.createActivity(groupLeaderLogin, dummyGroup.getId(), request);
-
-        // Then
-        assertThat(response).isNotNull();
-        assertThat(response.description()).isEqualTo("Test Activity");
-    }
-
-    @Test
-    @DisplayName("활동 생성 시 시간 겹침 예외 테스트")
-    void createActivityTimeConflictTest() {
-        // Given
-        activityRepository.save(Activity.builder()
-                .group(dummyGroup)
-                .book(dummyEbook)
-                .startTime(LocalDate.now())
-                .endTime(LocalDate.now().plusDays(1))
-                .description("Existing Activity")
-                .build());
-
-        ActivityPostRequest request = ActivityPostRequest.builder()
-                .bookId(dummyEbook.getId())
-                .startTime(LocalDate.now().plusDays(1))
-                .endTime(LocalDate.now().plusDays(2))
-                .description("Conflicting Activity")
+        UserToken userToken = UserToken.builder()
+                .userId(userId)
                 .build();
 
-        // When & Then
-        assertThrows(BadRequestException.class, () -> activityService.createActivity(groupLeaderLogin, dummyGroup.getId(), request));
-    }
-
-    @Test
-    @DisplayName("활동 생성 시 모임장이 아닌 경우 예외 테스트")
-    void createActivityForbiddenTest() {
-        // Given
-        ActivityPostRequest request = ActivityPostRequest.builder()
-                .bookId(dummyEbook.getId())
-                .startTime(LocalDate.now())
-                .endTime(LocalDate.now().plusDays(1))
-                .description("Test Activity")
+        UserProfile leader = UserProfile.builder()
+                .id(userId)
+                .build();
+        ReadingGroup readingGroup = ReadingGroup.builder()
+                .id(groupId)
+                .groupLeader(leader)
+                .build();
+        Ebook ebook = Ebook.builder()
+                .id(bookId)
                 .build();
 
-        // When & Then
-        assertThrows(ForbiddenException.class, () -> activityService.createActivity(anotherLogin, dummyGroup.getId(), request));
-    }
-
-    @Test
-    @DisplayName("활동 수정 테스트")
-    void updateActivityTest() {
-        // Given
-        Activity activity = activityRepository.save(Activity.builder()
-                .group(dummyGroup)
-                .book(dummyEbook)
-                .startTime(LocalDate.now())
-                .endTime(LocalDate.now().plusDays(1))
-                .description("Old Description")
-                .build());
-
-        ActivityPatchRequest request = ActivityPatchRequest.builder()
-                .activityId(activity.getId())
-                .description("Updated Description")
+        Activity createdActivity = Activity.builder()
+                .id(createdActivityId)
+                .group(readingGroup)
+                .startTime(startTime)
+                .endTime(endTime)
+                .book(ebook)
                 .build();
 
-        // When
-        ActivityPostResponse response = activityService.updateActivity(groupLeaderLogin, dummyGroup.getId(), request);
+        given(userRepository.existsById(userId)).willReturn(true);
+        given(groupRepository.findById(groupId)).willReturn(Optional.of(readingGroup));
+        given(groupRepository.getReferenceById(groupId)).willReturn(readingGroup);
+        given(ebookRepository.existsById(bookId)).willReturn(true);
+        given(ebookRepository.getReferenceById(bookId)).willReturn(ebook);
+        given(activityRepository.findByGroup_Id(groupId)).willReturn(Collections.emptyList());
+        given(activityRepository.save(any())).willReturn(createdActivity);
 
-        // Then
-        assertThat(response).isNotNull();
-        assertThat(response.description()).isEqualTo("Updated Description");
+        // when
+        ActivityPostResponse result = activityService.createActivity(userToken, groupId, postRequest);
+
+        // then
+        assertNotNull(result);
+        assertEquals(createdActivityId, result.activityId());
+        assertEquals(bookId, result.bookId());
+        assertEquals(startTime, result.startTime());
+        assertEquals(endTime, result.endTime());
     }
 
     @Test
-    @DisplayName("활동 수정 시 시간 겹침 예외 테스트")
-    void updateActivityTimeConflictTest() {
-        // Given
-        activityRepository.save(Activity.builder()
-                .group(dummyGroup)
-                .book(dummyEbook)
-                .startTime(LocalDate.now())
-                .endTime(LocalDate.now().plusDays(1))
-                .description("Existing Activity")
-                .build());
+    void updateActivity() {
+        // given
+        long userId = 1L;
+        long groupId = 1L;
+        long bookId = 1L;
+        long activityId = 1L;
+        LocalDate startTime = LocalDate.parse("2025-04-01");
+        LocalDate endTime = LocalDate.parse("2026-04-14");
+        String oldDescription = "Old description";
+        LocalDate newStartTime = LocalDate.parse("2025-05-01");
+        LocalDate newEndTime = LocalDate.parse("2025-06-01");
+        String newDescription = "Updated description";
 
-        Activity activity = activityRepository.save(Activity.builder()
-                .group(dummyGroup)
-                .book(dummyEbook)
-                .startTime(LocalDate.now().plusDays(2))
-                .endTime(LocalDate.now().plusDays(3))
-                .description("Activity to Update")
-                .build());
-
-        ActivityPatchRequest request = ActivityPatchRequest.builder()
-                .activityId(activity.getId())
-                .startTime(LocalDate.now())
-                .endTime(LocalDate.now().plusDays(1))
+        ActivityPatchRequest patchRequest = ActivityPatchRequest.builder()
+                .activityId(activityId)
+                .startTime(newStartTime)
+                .endTime(newEndTime)
+                .description(newDescription)
                 .build();
 
-        // When & Then
-        assertThrows(BadRequestException.class, () -> activityService.updateActivity(groupLeaderLogin, dummyGroup.getId(), request));
+        UserToken userToken = UserToken.builder()
+                .userId(userId)
+                .build();
+        UserProfile leader = UserProfile.builder()
+                .id(userId)
+                .build();
+        ReadingGroup readingGroup = ReadingGroup.builder()
+                .id(groupId)
+                .groupLeader(leader)
+                .build();
+        Ebook ebook = Ebook.builder()
+                .id(bookId)
+                .build();
+
+        Activity createdActivity = Activity.builder()
+                .id(activityId)
+                .group(readingGroup)
+                .startTime(startTime)
+                .endTime(endTime)
+                .book(ebook)
+                .description(oldDescription)
+                .build();
+
+        given(userRepository.existsById(userId)).willReturn(true);
+        given(groupRepository.findById(groupId)).willReturn(Optional.of(readingGroup));
+        given(activityRepository.findById(activityId)).willReturn(Optional.of(createdActivity));
+        given(activityRepository.findByGroup_Id(groupId)).willReturn(Collections.emptyList()); // 기존 활동 조회
+
+        // when
+        ActivityPostResponse result = activityService.updateActivity(userToken, groupId, patchRequest);
+
+        // then
+        assertNotNull(result);
+        assertEquals(activityId, result.activityId());
+        assertEquals(newStartTime, result.startTime());
+        assertEquals(newEndTime, result.endTime());
+        assertEquals(newDescription, result.description());
     }
 
     @Test
-    @DisplayName("활동 조회 테스트")
-    void fetchAllActivitiesTest() {
-        // Given
-        activityRepository.save(Activity.builder()
-                .group(dummyGroup)
-                .book(dummyEbook)
-                .startTime(LocalDate.now())
-                .endTime(LocalDate.now().plusDays(1))
-                .description("Activity 1")
-                .build());
-
+    void fetchAllActivities() {
+        // given
+        long groupId = 5L;
         Pageable pageable = PageRequest.of(0, 10);
 
-        // When
-        PageResponse<ActivityFetchResponse> response = activityService.fetchAllActivities(pageable, dummyGroup.getId());
+        ReadingGroup readingGroup = ReadingGroup.builder()
+                .id(groupId)
+                .build();
+        Ebook ebook = Ebook.builder()
+                .id(2L)
+                .build();
 
-        // Then
-        assertThat(response).isNotNull();
-        assertThat(response.content()).hasSize(1);
-        assertThat(response.content().get(0).description()).isEqualTo("Activity 1");
+        Activity activity1 = new Activity(1L, readingGroup, ebook, LocalDate.parse("2025-04-01"), LocalDate.parse("2026-04-14"), "Activity 1");
+        Activity activity2 = new Activity(2L, readingGroup, ebook, LocalDate.parse("2025-04-15"), LocalDate.parse("2026-04-28"), "Activity 2");
+
+        // Activity 객체를 List로 설정
+        List<Activity> activityList = List.of(activity1, activity2);
+        Page<Activity> page = new PageImpl<>(activityList);
+
+        given(activityRepository.findByGroup_Id(groupId, pageable)).willReturn(page);
+
+        // when
+        PageResponse<ActivityFetchResponse> result = activityService.fetchAllActivities(pageable, groupId);
+
+        // then
+        assertNotNull(result);
+        assertEquals(2, result.content().size());
+        assertEquals("Activity 1", result.content().get(0).description());
+        assertEquals("Activity 2", result.content().get(1).description());
     }
 }

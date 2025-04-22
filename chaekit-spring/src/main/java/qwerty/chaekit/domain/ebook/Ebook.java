@@ -35,7 +35,8 @@ public class Ebook extends BaseEntity {
     private PublisherProfile publisher;
 
     @Builder
-    public Ebook(String title, String author, String description, long size, String fileKey, PublisherProfile publisher) {
+    public Ebook(Long id, String title, String author, String description, long size, String fileKey, PublisherProfile publisher) {
+        this.id = id;
         this.title = title;
         this.author = author;
         this.description = description;

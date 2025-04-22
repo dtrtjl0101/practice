@@ -10,16 +10,17 @@ import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
 import qwerty.chaekit.dto.member.PublisherInfoResponse;
-import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.dto.page.PageResponse;
+import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.NotFoundException;
-
-import java.util.Optional;
+import qwerty.chaekit.service.member.notification.EmailService;
 
 @Service
 @RequiredArgsConstructor
 public class AdminService {
     private final PublisherProfileRepository publisherRepository;
+    private final EmailService emailService;
+
     @Getter
     @Setter
     private Long adminPublisherId;
@@ -36,15 +37,17 @@ public class AdminService {
 
     @Transactional
     public boolean acceptPublisher(Long publisherId) {
-        Optional<PublisherProfile> publisher = publisherRepository.findById(publisherId);
-        if (publisher.isPresent()) {
-            if(publisher.get().isAccepted()) {
-                return false;
-            }
-            publisher.get().acceptPublisher();
-            return true;
-        } else {
-            throw new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND);
+        PublisherProfile publisher = publisherRepository.findByIdWithMember(publisherId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));
+
+        // 이미 승인된 경우
+        if (publisher.isAccepted()) {
+            return false;
         }
+
+        // 승인 처리
+        publisher.acceptPublisher();
+        emailService.sendPublisherApprovalEmail(publisher.getMember().getEmail());
+        return true;
     }
 }

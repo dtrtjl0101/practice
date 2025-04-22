@@ -6,10 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import qwerty.chaekit.domain.BaseEntity;
-import qwerty.chaekit.domain.group.GroupMember;
 import qwerty.chaekit.domain.member.Member;
-
-import java.util.List;
 
 @Entity
 @Getter
@@ -27,11 +24,9 @@ public class UserProfile extends BaseEntity {
     @Column(nullable = false)
     private String nickname;
 
-    @OneToMany(mappedBy = "user")
-    private List<GroupMember> groups;
-
     @Builder
-    public UserProfile(Member member, String nickname) {
+    public UserProfile(Long id, Member member, String nickname) {
+        this.id = id;
         this.member = member;
         this.nickname = nickname;
     }

@@ -22,8 +22,8 @@
           "value": "3600000"
         },
         {
-          "name": "ADMIN_USERNAME",
-          "value": "admin"
+          "name": "ADMIN_EMAIL",
+          "value": "admin@example.com"
         },
         {
           "name": "SPRING_PROFILES_ACTIVE",
@@ -62,6 +62,15 @@
         },
         {
           "name": "DB_USERNAME"
+        },
+        {
+          "name": "REDIS_URL"
+        },
+        {
+          "name": "GMAIL_ADDRESS"
+        },
+        {
+          "name": "GMAIL_PASSWORD"
         },
         {
           "name": "DB_PASSWORD"

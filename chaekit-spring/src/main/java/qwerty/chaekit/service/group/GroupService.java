@@ -16,6 +16,7 @@ import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.UserToken;
+import qwerty.chaekit.service.member.notification.EmailService;
 
 import java.util.List;
 
@@ -24,6 +25,7 @@ import java.util.List;
 public class GroupService {
     private final UserProfileRepository userRepository;
     private final GroupRepository groupRepository;
+    private final EmailService emailService;
 
     @Transactional
     public GroupPostResponse createGroup(UserToken userToken, GroupPostRequest request) {
@@ -76,7 +78,7 @@ public class GroupService {
 
     @Transactional
     public GroupJoinResponse requestJoinGroup(UserToken userToken, long groupId) {
-        UserProfile userProfile = userRepository.findByMember_Id(userToken.memberId())
+        UserProfile userProfile = userRepository.findByIdWithMember(userToken.userId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         ReadingGroup group = groupRepository.findById(groupId)
@@ -92,7 +94,7 @@ public class GroupService {
 
     @Transactional
     public GroupJoinResponse approveJoinRequest(UserToken userToken, long groupId, long userId) {
-        UserProfile leaderProfile = userRepository.findByMember_Id(userToken.memberId())
+        UserProfile leaderProfile = userRepository.findByIdWithMember(userToken.userId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         ReadingGroup group = groupRepository.findById(groupId)
@@ -102,10 +104,12 @@ public class GroupService {
             throw new ForbiddenException(ErrorCode.GROUP_UPDATE_FORBIDDEN);
         }
 
-        UserProfile memberProfile = userRepository.findByMember_Id(userId)
+        UserProfile memberProfile = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         GroupMember groupMember = group.approveMember(memberProfile);
+
+        emailService.sendReadingGroupApprovalEmail(memberProfile.getMember().getEmail());
         return GroupJoinResponse.of(groupMember);
     }
 

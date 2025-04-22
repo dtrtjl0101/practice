@@ -18,9 +18,31 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: false
     baseline-version: 1
-
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${GMAIL_ADDRESS}
+    password: ${GMAIL_PASSWORD}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+  data:
+    redis:
+      port: 6379
+      host: ${REDIS_URL}
+      ssl:
+        enabled: true
   config:
     import: optional:file:.env[.properties]
+---
+spring:
+  profiles:
+    active: local
+  data:
+    redis:
+      ssl:
+        enabled: false
+
 springdoc:
   swagger-ui:
     disable-swagger-default-url: true
@@ -29,8 +51,9 @@ jwt:
   expirationMs: ${JWT_EXPIRATION_MS}
 
 admin:
-  username: ${ADMIN_USERNAME}
+  email: ${ADMIN_EMAIL}
   password: ${ADMIN_PASSWORD}
+  name: ${ADMIN_NAME}
 aws:
   ebook-bucket-name: ${EBOOK_BUCKET_NAME}
   access-key-id: ${AWS_ACCESS_KEY_ID}
@@ -39,4 +62,4 @@ aws:
   s3-region: ${AWS_S3_REGION}
   presigned-url-expiration-time: ${PRESIGNED_URL_EXPIRATION_TIME}
 cors:
-    allowed-origins: ${CORS_ALLOWED_ORIGINS}
+  allowed-origins: ${CORS_ALLOWED_ORIGINS}

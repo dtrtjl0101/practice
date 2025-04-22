@@ -6,6 +6,6 @@ import lombok.Builder;
 public record UserMemberResponse(
         Long id,
         Long userId,
-        String username,
+        String email,
         String nickname
 ){ }

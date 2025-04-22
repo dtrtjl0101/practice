@@ -1,5 +1,6 @@
 package qwerty.chaekit.controller.member.publisher;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +27,7 @@ public class PublisherController {
     }
 
     @PostMapping("/join")
-    public ApiSuccessResponse<PublisherJoinResponse> publisherJoin(@RequestBody PublisherJoinRequest joinRequest) {
+    public ApiSuccessResponse<PublisherJoinResponse> publisherJoin(@RequestBody @Valid PublisherJoinRequest joinRequest) {
         return ApiSuccessResponse.of(joinService.join(joinRequest));
     }
 }

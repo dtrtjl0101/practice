@@ -34,41 +34,48 @@ public class AdminInitializer implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
-        String adminUsername = adminProperties.username();
+        String adminName = adminProperties.name();
+        String adminEmail = adminProperties.email();
         String adminPassword = adminProperties.password();
         Role adminRole = Role.ROLE_ADMIN;
 
-        Optional<Member> existingAdmin = memberRepository.findByUsername(adminUsername);
+        Member adminMember = memberRepository.findByEmail(adminEmail).orElseGet(
+                () -> {
+                    // 관리자가 없으면 생성
+                    Member newMember = memberJoinHelper.saveMember(adminEmail, adminPassword, adminRole);
+                    log.info("관리자가 생성되었습니다. memberId = {}", newMember.getId());
+                    return newMember;
+                }
+        );
 
-        if (existingAdmin.isEmpty()) {
-            // 관리자가 없으면 생성
-            Member savedAdmin = memberJoinHelper.saveMember(adminUsername, adminPassword, adminRole);
-            PublisherProfile adminPublisher = publisherProfileRepository.save(new PublisherProfile(savedAdmin, adminUsername));
-            adminService.acceptPublisher(adminPublisher.getId());
-            adminService.setAdminPublisherId(adminPublisher.getId());
-            log.info("관리자가 생성되었습니다. memberId = {}", savedAdmin.getId());
-        } else {
-            // 이미 관리자가 존재할 때
-            Member admin = existingAdmin.get();
-            Optional<PublisherProfile> publisher = publisherProfileRepository.findByMember_Username(adminUsername);
+        Optional<PublisherProfile> publisher = publisherProfileRepository.findByMember_Email(adminEmail);
+        PublisherProfile adminPublisher = publisher.orElseGet(() -> {
+            PublisherProfile newProfile = publisherProfileRepository.save(
+                    PublisherProfile.builder()
+                            .member(adminMember)
+                            .publisherName(adminName)
+                            .build()
+            );
+            log.info("관리자 출판사 프로필이 추가되었습니다.");
+            return newProfile;
+        });
 
-            PublisherProfile adminPublisher = publisher.orElseGet(() -> {
-                PublisherProfile newProfile = publisherProfileRepository.save(new PublisherProfile(admin, adminUsername));
-                log.info("관리자 출판사 프로필이 존재하지 않아 추가되었습니다.");
-                return newProfile;
-            });
+        Optional<UserProfile> user = userProfileRepository.findByMember_Email(adminEmail);
+        UserProfile adminUser = user.orElseGet(() -> {
+            UserProfile newProfile = userProfileRepository.save(
+                    UserProfile.builder()
+                            .member(adminMember)
+                            .nickname(adminName)
+                            .build()
+            );
+            log.info("관리자 사용자 프로필이 추가되었습니다.");
+            return newProfile;
+        });
 
-            Optional<UserProfile> user = userProfileRepository.findByMember_Username(adminUsername);
-
-            UserProfile adminUser = user.orElseGet(() -> {
-                UserProfile newProfile = userProfileRepository.save(new UserProfile(admin, adminUsername));
-                log.info("관리자 사용자 프로필이 존재하지 않아 추가되었습니다.");
-                return newProfile;
-            });
-
-            adminService.setAdminPublisherId(adminPublisher.getId());
-            adminService.setAdminUserId(adminUser.getId());
-            log.info("관리자가 이미 존재합니다. memberId = {}", admin.getId());
-        }
+        adminService.setAdminPublisherId(adminPublisher.getId());
+        adminService.setAdminUserId(adminUser.getId());
+        log.info("관리자 설정이 완료되었습니다. email = {}, memberId = {}, publisherId = {}, userId = {}",
+                adminEmail, adminMember.getId(), adminPublisher.getId(), adminUser.getId()
+        );
     }
 }

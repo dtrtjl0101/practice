@@ -1,13 +1,16 @@
 package qwerty.chaekit.dto.member;
 
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 public record PublisherJoinRequest(
         @NotBlank
         String publisherName,
+        @Email
+        String email,
         @NotBlank
-        String username,
+        String password,
         @NotBlank
-        String password
+        String verificationCode
 ){ }
