@@ -2,7 +2,7 @@ import { Add, Delete } from "@mui/icons-material";
 import {
   Button,
   Chip,
-  Grid2,
+  Grid,
   IconButton,
   InputAdornment,
   OutlinedInput,
@@ -88,7 +88,7 @@ export default function GroupEditForm(props: {
             </InputAdornment>
           }
         />
-        <Grid2
+        <Grid
           container
           direction={"row"}
           spacing={1}
@@ -103,7 +103,7 @@ export default function GroupEditForm(props: {
               />
             );
           })}
-        </Grid2>
+        </Grid>
         <Stack direction="row" spacing={2} sx={{ justifyContent: "flex-end" }}>
           <Button color="secondary" onClick={onCancel}>
             취소

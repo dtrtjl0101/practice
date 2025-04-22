@@ -4,8 +4,7 @@ import {
   CardContent,
   CardHeader,
   CardMedia,
-  Grid2,
-  Pagination,
+  Grid,
   Skeleton,
   Stack,
   Typography,
@@ -14,6 +13,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import API_CLIENT, { wrapApiResponse } from "../api/api";
 import { JSX, PropsWithChildren, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import PageNavigation from "./PageNavigation";
 const ITEM_HEIGHT = 384 - 20;
 
 export default function GroupList(props: {
@@ -67,7 +67,7 @@ export default function GroupList(props: {
           setPage={setPage}
           totalPages={totalPages}
         />
-        <Grid2 container spacing={2}>
+        <Grid container spacing={2}>
           {data?.map((group, index) =>
             group ? (
               <ItemContainer key={group.groupId}>
@@ -119,7 +119,7 @@ export default function GroupList(props: {
               </ItemContainer>
             )
           )}
-        </Grid2>
+        </Grid>
         <PageNavigation
           pageZeroBased={page}
           setPage={setPage}
@@ -134,7 +134,7 @@ function ItemContainer(props: PropsWithChildren) {
   const { children } = props;
 
   return (
-    <Grid2
+    <Grid
       size={{
         xs: 12,
         sm: 6,
@@ -144,26 +144,6 @@ function ItemContainer(props: PropsWithChildren) {
       }}
     >
       {children}
-    </Grid2>
-  );
-}
-
-function PageNavigation(props: {
-  pageZeroBased: number;
-  setPage: (page: number) => void;
-  totalPages?: number;
-}) {
-  const { pageZeroBased, setPage, totalPages } = props;
-  const page = pageZeroBased + 1;
-
-  return (
-    <Pagination
-      count={totalPages}
-      page={page}
-      onChange={(_, page) => {
-        setPage(page - 1);
-      }}
-      sx={{ width: "100%", display: "flex", justifyContent: "center" }}
-    />
+    </Grid>
   );
 }

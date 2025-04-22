@@ -5,7 +5,7 @@ import {
   Container,
   Dialog,
   Divider,
-  Grid2,
+  Grid,
   IconButton,
   List,
   ListItemButton,
@@ -134,8 +134,8 @@ export default function HighlightBrowserModal(props: {
         >
           <Container sx={{ height: "65vh" }}>
             <Paper sx={{ width: "100%", height: "100%", padding: 2 }}>
-              <Grid2 container spacing={1} height={"100%"}>
-                <Grid2 size={4} sx={{ height: "100%" }}>
+              <Grid container spacing={1} height={"100%"}>
+                <Grid size={4} sx={{ height: "100%" }}>
                   <Paper
                     elevation={2}
                     sx={{
@@ -165,7 +165,7 @@ export default function HighlightBrowserModal(props: {
                       </List>
                     </Stack>
                   </Paper>
-                </Grid2>
+                </Grid>
                 {selectedHighlight ? (
                   <HighlightViewer
                     highlight={selectedHighlight}
@@ -175,7 +175,7 @@ export default function HighlightBrowserModal(props: {
                 ) : (
                   <HighlightViewerPlaceholder />
                 )}
-              </Grid2>
+              </Grid>
             </Paper>
           </Container>
         </Box>
@@ -219,7 +219,7 @@ function HighlightListItem(props: {
 
 function HighlightViewerPlaceholder() {
   return (
-    <Grid2 size={8} sx={{ height: "100%" }}>
+    <Grid size={8} sx={{ height: "100%" }}>
       <Paper
         elevation={2}
         sx={{
@@ -233,7 +233,7 @@ function HighlightViewerPlaceholder() {
           하이라이트를 선택하세요
         </Typography>
       </Paper>
-    </Grid2>
+    </Grid>
   );
 }
 
@@ -245,7 +245,7 @@ function HighlightViewer(props: {
   const { highlight, onClose, onHighlightUseButtonClick } = props;
 
   return (
-    <Grid2 size={8} sx={{ height: "100%" }}>
+    <Grid size={8} sx={{ height: "100%" }}>
       <Paper
         elevation={2}
         sx={{
@@ -297,6 +297,6 @@ function HighlightViewer(props: {
           </CardActions>
         </Stack>
       </Paper>
-    </Grid2>
+    </Grid>
   );
 }
