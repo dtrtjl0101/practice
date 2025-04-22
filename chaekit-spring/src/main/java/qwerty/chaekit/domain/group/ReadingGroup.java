@@ -47,7 +47,7 @@ public class ReadingGroup extends BaseEntity {
     }
 
     public List<UserProfile> getMembers() {
-        return groupMembers.stream().map(GroupMember::getUser).toList();
+        return groupMembers.stream().map(GroupMember::getMember).toList();
     }
 
     public GroupMember addMember(UserProfile user) {
@@ -65,11 +65,23 @@ public class ReadingGroup extends BaseEntity {
     }
 
     public void removeMember(UserProfile user) {
-        groupMembers.removeIf(member -> member.getUser().equals(user));
+        groupMembers.removeIf(member -> member.getMember().getId().equals(user.getId()));
+    }
+
+    public void rejectMember(UserProfile user) {
+        groupMembers.stream()
+                .filter(member -> member.getMember().getId().equals(user.getId()))
+                .findFirst()
+                .ifPresent(GroupMember::reject);
     }
 
     public void updateDescription(String description) {
         this.description = description;
+    }
+
+    public boolean isMember(UserProfile userProfile) {
+        return groupMembers.stream()
+                .anyMatch(member -> member.getMember().getId().equals(userProfile.getId()));
     }
 
     @Builder

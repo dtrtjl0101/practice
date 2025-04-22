@@ -56,5 +56,29 @@ public class GroupController {
         return ApiSuccessResponse.of(groupService.approveJoinRequest(userToken, groupId, userId));
     }
 
+    @PatchMapping("/{groupId}/members/{userId}/reject")
+    public ApiSuccessResponse<Void> rejectJoinRequest(
+            @Login UserToken userToken,
+            @PathVariable long groupId,
+            @PathVariable long userId) {
+        groupService.rejectJoinRequest(userToken, groupId, userId);
+        return ApiSuccessResponse.of(null);
+    }
 
+    @DeleteMapping("/{groupId}/members/leave")
+    public ApiSuccessResponse<Void> leaveGroup(
+            @Login UserToken userToken,
+            @PathVariable long groupId) {
+        groupService.leaveGroup(userToken, groupId);
+        return ApiSuccessResponse.of(null);
+    }
+
+    @GetMapping("/{groupId}/members/pending")
+    public ApiSuccessResponse<PageResponse<GroupPendingMemberResponse>> getPendingList(
+            @Login UserToken userToken,
+            @ParameterObject Pageable pageable,
+            @PathVariable long groupId
+    ) {
+        return ApiSuccessResponse.of(groupService.fetchPendingList(pageable, userToken, groupId));
+    }
 }
