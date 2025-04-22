@@ -48,11 +48,10 @@ public enum ErrorCode {
 
     ALREADY_JOINED_GROUP("ALREADY_JOINED_GROUP", "이미 가입한 그룹입니다"),
     GROUP_LEADER_CANNOT_LEAVE("GROUP_LEADER_CANNOT_LEAVE", "그룹장은 그룹을 탈퇴할 수 없습니다");
-    ;
 
     private final String code;
     private final String message;
-2
+
     ErrorCode(String code, String message) {
         this.code = code;
         this.message = message;
