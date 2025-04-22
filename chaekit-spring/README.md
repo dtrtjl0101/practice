@@ -56,7 +56,7 @@
 # DB
 DB_URL=jdbc:mysql://localhost:3306/chaekit
 DB_USERNAME=root
-DB_PASSWORD={your_password}
+DB_PASSWORD={Db 비밀번호}
 DB_DRIVER_CLASS=com.mysql.cj.jdbc.Driver
 JPA_DIALECT=org.hibernate.dialect.MySQL8Dialect
 
@@ -70,6 +70,10 @@ JWT_EXPIRATION_MS=3600000
 # Admin
 ADMIN_EMAIL=admin@example.com
 ADMIN_PASSWORD=0000
+
+# GMAIL
+GMAIL_ADDRESS={gmail 주소}
+GMAIL_PASSWORD={gmail 비밀번호}
 
 # Spring
 SPRING_PROFILES_ACTIVE=local
