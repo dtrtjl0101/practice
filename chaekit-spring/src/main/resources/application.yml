@@ -26,23 +26,8 @@ spring:
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
-  data:
-    redis:
-      host: ${REDIS_URL}
-      port: 6379
-      ssl:
-        enabled: true
   config:
     import: optional:file:.env[.properties]
-#---
-#spring:
-#  profiles:
-#    active: local
-#  data:
-#    redis:
-#      host: localhost
-#      ssl:
-#        enabled: false
 
 springdoc:
   swagger-ui:

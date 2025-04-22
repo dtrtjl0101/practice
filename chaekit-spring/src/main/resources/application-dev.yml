@@ -1,0 +1,9 @@
+spring:
+  profiles:
+    active: dev
+  data:
+    redis:
+      host: ${REDIS_URL}
+      port: 6379
+      ssl:
+        enabled: true
