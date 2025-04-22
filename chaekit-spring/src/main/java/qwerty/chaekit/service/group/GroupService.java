@@ -17,6 +17,8 @@ import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.UserToken;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class GroupService {
@@ -80,6 +82,10 @@ public class GroupService {
         ReadingGroup group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.GROUP_NOT_FOUND));
 
+        if (group.isMember(userProfile)) {
+            throw new ForbiddenException(ErrorCode.ALREADY_JOINED_GROUP);
+        }
+
         GroupMember groupMember = group.addMember(userProfile);
         return GroupJoinResponse.of(groupMember);
     }
@@ -101,5 +107,51 @@ public class GroupService {
 
         GroupMember groupMember = group.approveMember(memberProfile);
         return GroupJoinResponse.of(groupMember);
+    }
+
+    @Transactional
+    public void leaveGroup(UserToken userToken, long groupId) {
+        UserProfile userProfile = userRepository.findByMember_Id(userToken.memberId())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
+        ReadingGroup group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.GROUP_NOT_FOUND));
+
+        if (group.getGroupLeader().getId().equals(userProfile.getId())) {
+            throw new ForbiddenException(ErrorCode.GROUP_LEADER_CANNOT_LEAVE);
+        }
+
+        group.removeMember(userProfile);
+    }
+
+    @Transactional
+    public void rejectJoinRequest(UserToken userToken, long groupId, long userId) {
+        UserProfile leaderProfile = userRepository.findByMember_Id(userToken.memberId())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
+        ReadingGroup group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.GROUP_NOT_FOUND));
+
+        if (!group.getGroupLeader().getId().equals(leaderProfile.getId())) {
+            throw new ForbiddenException(ErrorCode.GROUP_UPDATE_FORBIDDEN);
+        }
+
+        UserProfile memberProfile = userRepository.findByMember_Id(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
+        group.rejectMember(memberProfile);
+    }
+
+    public PageResponse<GroupPendingMemberResponse> fetchPendingList(Pageable pageable, UserToken userToken, long groupId) {
+        ReadingGroup group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.GROUP_NOT_FOUND));
+
+        if (!group.getGroupLeader().getId().equals(userToken.userId())) {
+            throw new ForbiddenException(ErrorCode.GROUP_LEADER_ONLY);
+        }
+
+        List<GroupMember> groupMembers = group.getGroupMembers().stream().filter((groupMember)-> !groupMember.isAccepted()).toList();
+
+        return null;
     }
 }
