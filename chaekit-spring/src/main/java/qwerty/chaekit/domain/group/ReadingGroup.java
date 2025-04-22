@@ -85,7 +85,8 @@ public class ReadingGroup extends BaseEntity {
     }
 
     @Builder
-    public ReadingGroup(String name, UserProfile groupLeader, List<GroupTag> tags, String description) {
+    public ReadingGroup(Long id, String name, UserProfile groupLeader, List<GroupTag> tags, String description) {
+        this.id = id;
         this.name = name;
         this.groupLeader = groupLeader;
         this.tags = (tags != null) ? new ArrayList<>(tags) : new ArrayList<>();

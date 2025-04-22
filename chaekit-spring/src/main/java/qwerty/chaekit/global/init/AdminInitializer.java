@@ -50,14 +50,24 @@ public class AdminInitializer implements ApplicationRunner {
 
         Optional<PublisherProfile> publisher = publisherProfileRepository.findByMember_Email(adminEmail);
         PublisherProfile adminPublisher = publisher.orElseGet(() -> {
-            PublisherProfile newProfile = publisherProfileRepository.save(new PublisherProfile(adminMember, adminName));
+            PublisherProfile newProfile = publisherProfileRepository.save(
+                    PublisherProfile.builder()
+                            .member(adminMember)
+                            .publisherName(adminName)
+                            .build()
+            );
             log.info("관리자 출판사 프로필이 추가되었습니다.");
             return newProfile;
         });
 
         Optional<UserProfile> user = userProfileRepository.findByMember_Email(adminEmail);
         UserProfile adminUser = user.orElseGet(() -> {
-            UserProfile newProfile = userProfileRepository.save(new UserProfile(adminMember, adminName));
+            UserProfile newProfile = userProfileRepository.save(
+                    UserProfile.builder()
+                            .member(adminMember)
+                            .nickname(adminName)
+                            .build()
+            );
             log.info("관리자 사용자 프로필이 추가되었습니다.");
             return newProfile;
         });

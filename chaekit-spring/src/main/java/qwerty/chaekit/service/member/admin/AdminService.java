@@ -15,8 +15,6 @@ import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.service.member.notification.EmailService;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 public class AdminService {
@@ -39,16 +37,17 @@ public class AdminService {
 
     @Transactional
     public boolean acceptPublisher(Long publisherId) {
-        Optional<PublisherProfile> publisher = publisherRepository.findByIdWithMember(publisherId);
-        if (publisher.isPresent()) {
-            if(publisher.get().isAccepted()) {
-                return false;
-            }
-            publisher.get().acceptPublisher();
-            emailService.sendPublisherApprovalEmail(publisher.get().getMember().getEmail());
-            return true;
-        } else {
-            throw new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND);
+        PublisherProfile publisher = publisherRepository.findByIdWithMember(publisherId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));
+
+        // 이미 승인된 경우
+        if (publisher.isAccepted()) {
+            return false;
         }
+
+        // 승인 처리
+        publisher.acceptPublisher();
+        emailService.sendPublisherApprovalEmail(publisher.getMember().getEmail());
+        return true;
     }
 }

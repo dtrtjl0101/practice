@@ -23,6 +23,7 @@ jwt:
 admin:
   email: admin@example.com
   password: dummy_password
+  name: admin
 aws:
   ebook-bucket-name: dummy-bucket
   access-key-id: dummy-access_key-id

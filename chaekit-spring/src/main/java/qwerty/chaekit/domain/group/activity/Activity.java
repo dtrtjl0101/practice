@@ -37,7 +37,8 @@ public class Activity extends BaseEntity {
     private String description;
 
     @Builder
-    public Activity(ReadingGroup group, Ebook book, LocalDate startTime, LocalDate endTime, String description) {
+    public Activity(Long id, ReadingGroup group, Ebook book, LocalDate startTime, LocalDate endTime, String description) {
+        this.id = id;
         this.group = group;
         this.book = book;
         this.startTime = startTime;

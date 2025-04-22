@@ -1,4 +1,4 @@
-package qwerty.chaekit.service.highlight;
+package qwerty.chaekit.integration;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,6 +20,7 @@ import qwerty.chaekit.dto.highlight.HighlightPostResponse;
 import qwerty.chaekit.dto.highlight.HighlightPutRequest;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.security.resolver.UserToken;
+import qwerty.chaekit.service.highlight.HighlightService;
 import qwerty.chaekit.util.TestFixtureFactory;
 
 import java.util.Optional;
