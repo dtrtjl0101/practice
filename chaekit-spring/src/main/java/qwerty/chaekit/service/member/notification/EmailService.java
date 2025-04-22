@@ -16,11 +16,10 @@ public class EmailService {
 
     // 본인 인증 이메일 전송
     @Async
-    public void sendVerificationEmail(String toEmail, String verificationLink) {
-        String subject = "이메일 본인 인증";
-        String text = "<h3>본인 인증을 위해 아래 링크를 클릭하세요.</h3>" +
-//                "<a href=\"" + verificationLink + "\">본인 인증하기</a>" +
-                "<p>(임시) 인증 코드: " + verificationLink + "</p>";
+    public void sendVerificationEmail(String toEmail, String verificationCode) {
+        String subject = "책잇 이메일 본인 인증";
+        String text = "<h3>본인 인증을 위해 아래 인증코드를 입력하세요.</h3>" +
+                "<p>인증 코드: " + verificationCode + "</p>";
 
         sendEmail(toEmail, subject, text);
     }

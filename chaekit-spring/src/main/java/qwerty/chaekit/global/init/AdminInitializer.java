@@ -64,8 +64,8 @@ public class AdminInitializer implements ApplicationRunner {
 
         adminService.setAdminPublisherId(adminPublisher.getId());
         adminService.setAdminUserId(adminUser.getId());
-        log.info("관리자 설정이 완료되었습니다. email = {}, publisherId = {}, userId = {}",
-                adminEmail, adminPublisher.getId(), adminUser.getId()
+        log.info("관리자 설정이 완료되었습니다. email = {}, memberId = {}, publisherId = {}, userId = {}",
+                adminEmail, adminMember.getId(), adminPublisher.getId(), adminUser.getId()
         );
     }
 }

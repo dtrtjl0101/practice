@@ -25,9 +25,10 @@ public class PublisherJoinService {
     public PublisherJoinResponse join(PublisherJoinRequest request) {
         String email = request.email();
         String password = request.password();
+        String verificationCode = request.verificationCode();
 
         validatePublisherName(request.publisherName());
-        Member member = memberJoinHelper.saveMember(email, password, Role.ROLE_PUBLISHER);
+        Member member = memberJoinHelper.saveMemberWithVerificationCode(email, password, Role.ROLE_PUBLISHER, verificationCode);
         PublisherProfile publisher = savePublisher(request, member);
 
         return toResponse(request, member, publisher);

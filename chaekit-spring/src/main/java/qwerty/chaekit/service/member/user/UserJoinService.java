@@ -25,9 +25,10 @@ public class UserJoinService {
     public UserJoinResponse join(UserJoinRequest request) {
         String email = request.email();
         String password = request.password();
+        String verificationCode = request.verificationCode();
 
         validateNickname(request.email());
-        Member member = memberJoinHelper.saveMember(email, password, Role.ROLE_USER);
+        Member member = memberJoinHelper.saveMemberWithVerificationCode(email, password, Role.ROLE_USER, verificationCode);
         UserProfile user = saveUser(request, member);
 
         return toResponse(request, member, user);
