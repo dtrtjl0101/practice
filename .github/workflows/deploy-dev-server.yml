@@ -5,6 +5,7 @@ on:
       - "chaekit-spring/**"
     branches:
       - dev
+      - chore/test-deploy
 
 permissions:
   id-token: write
