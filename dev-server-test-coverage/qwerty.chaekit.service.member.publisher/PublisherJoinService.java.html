@@ -23,40 +23,41 @@ public class PublisherJoinService {
 
     @Transactional
     public PublisherJoinResponse join(PublisherJoinRequest request) {
-<span class="nc" id="L26">        String email = request.username();</span>
+<span class="nc" id="L26">        String email = request.email();</span>
 <span class="nc" id="L27">        String password = request.password();</span>
+<span class="nc" id="L28">        String verificationCode = request.verificationCode();</span>
 
-<span class="nc" id="L29">        validatePublisherName(request.publisherName());</span>
-<span class="nc" id="L30">        Member member = memberJoinHelper.saveMember(email, password, Role.ROLE_PUBLISHER);</span>
-<span class="nc" id="L31">        PublisherProfile publisher = savePublisher(request, member);</span>
+<span class="nc" id="L30">        validatePublisherName(request.publisherName());</span>
+<span class="nc" id="L31">        Member member = memberJoinHelper.saveMemberWithVerificationCode(email, password, Role.ROLE_PUBLISHER, verificationCode);</span>
+<span class="nc" id="L32">        PublisherProfile publisher = savePublisher(request, member);</span>
 
-<span class="nc" id="L33">        return toResponse(request, member, publisher);</span>
+<span class="nc" id="L34">        return toResponse(request, member, publisher);</span>
     }
 
     private void validatePublisherName(String name) {
-<span class="nc bnc" id="L37" title="All 2 branches missed.">        if (publisherRepository.existsByPublisherName(name)) {</span>
-<span class="nc" id="L38">            throw new BadRequestException(ErrorCode.PUBLISHER_ALREADY_EXISTS);</span>
+<span class="nc bnc" id="L38" title="All 2 branches missed.">        if (publisherRepository.existsByPublisherName(name)) {</span>
+<span class="nc" id="L39">            throw new BadRequestException(ErrorCode.PUBLISHER_ALREADY_EXISTS);</span>
         }
-<span class="nc" id="L40">    }</span>
+<span class="nc" id="L41">    }</span>
 
     private PublisherProfile savePublisher(PublisherJoinRequest request, Member member) {
-<span class="nc" id="L43">        return publisherRepository.save(PublisherProfile.builder()</span>
-<span class="nc" id="L44">                .member(member)</span>
-<span class="nc" id="L45">                .publisherName(request.publisherName())</span>
-<span class="nc" id="L46">                .build());</span>
+<span class="nc" id="L44">        return publisherRepository.save(PublisherProfile.builder()</span>
+<span class="nc" id="L45">                .member(member)</span>
+<span class="nc" id="L46">                .publisherName(request.publisherName())</span>
+<span class="nc" id="L47">                .build());</span>
     }
 
     private PublisherJoinResponse toResponse(PublisherJoinRequest request, Member member, PublisherProfile publisher) {
-<span class="nc" id="L50">        String token = jwtUtil.createJwt(member.getId(), null, publisher.getId(), member.getUsername(), Role.ROLE_PUBLISHER.name());</span>
+<span class="nc" id="L51">        String token = jwtUtil.createJwt(member.getId(), null, publisher.getId(), member.getEmail(), Role.ROLE_PUBLISHER.name());</span>
 
-<span class="nc" id="L52">        return PublisherJoinResponse.builder()</span>
-<span class="nc" id="L53">                .id(member.getId())</span>
-<span class="nc" id="L54">                .publisherId(publisher.getId())</span>
-<span class="nc" id="L55">                .accessToken(&quot;Bearer &quot; + token)</span>
-<span class="nc" id="L56">                .username(member.getUsername())</span>
-<span class="nc" id="L57">                .publisherName(request.publisherName())</span>
-<span class="nc" id="L58">                .isAccepted(false)</span>
-<span class="nc" id="L59">                .build();</span>
+<span class="nc" id="L53">        return PublisherJoinResponse.builder()</span>
+<span class="nc" id="L54">                .id(member.getId())</span>
+<span class="nc" id="L55">                .publisherId(publisher.getId())</span>
+<span class="nc" id="L56">                .accessToken(&quot;Bearer &quot; + token)</span>
+<span class="nc" id="L57">                .email(member.getEmail())</span>
+<span class="nc" id="L58">                .publisherName(request.publisherName())</span>
+<span class="nc" id="L59">                .isAccepted(false)</span>
+<span class="nc" id="L60">                .build();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

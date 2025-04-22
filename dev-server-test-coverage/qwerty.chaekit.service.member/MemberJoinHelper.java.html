@@ -8,26 +8,40 @@ import qwerty.chaekit.domain.member.enums.Role;
 import qwerty.chaekit.domain.member.MemberRepository;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
+import qwerty.chaekit.service.member.email.EmailVerificationService;
 
 @Service
 @RequiredArgsConstructor
 public class MemberJoinHelper {
     private final MemberRepository memberRepository;
+    private final EmailVerificationService emailVerificationService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public Member saveMember(String email, String password, Role role) {
-<span class="fc" id="L19">        validateUsername(email);</span>
-<span class="fc" id="L20">        return memberRepository.save(Member.builder()</span>
-<span class="fc" id="L21">                .username(email)</span>
-<span class="fc" id="L22">                .password(bCryptPasswordEncoder.encode(password))</span>
-<span class="fc" id="L23">                .role(role)</span>
-<span class="fc" id="L24">                .build());</span>
+<span class="fc" id="L21">        validateEmail(email);</span>
+<span class="fc" id="L22">        return memberRepository.save(Member.builder()</span>
+<span class="fc" id="L23">                .email(email)</span>
+<span class="fc" id="L24">                .password(bCryptPasswordEncoder.encode(password))</span>
+<span class="fc" id="L25">                .role(role)</span>
+<span class="fc" id="L26">                .build());</span>
     }
 
-    private void validateUsername(String username) {
-<span class="pc bpc" id="L28" title="1 of 2 branches missed.">        if (memberRepository.existsByUsername(username)) {</span>
-<span class="nc" id="L29">            throw new BadRequestException(ErrorCode.MEMBER_ALREADY_EXISTS);</span>
+    public Member saveMemberWithVerificationCode(String email, String password, Role role, String verificationCode) {
+<span class="nc" id="L30">        validateVerificationCode(email, verificationCode);</span>
+<span class="nc" id="L31">        Member savedMember = saveMember(email, password, role);</span>
+<span class="nc" id="L32">        emailVerificationService.deleteVerificationCode(email);</span>
+<span class="nc" id="L33">        return savedMember;</span>
+    }
+
+    private void validateEmail(String email) {
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">        if (memberRepository.existsByEmail(email)) {</span>
+<span class="nc" id="L38">            throw new BadRequestException(ErrorCode.MEMBER_ALREADY_EXISTS);</span>
         }
-<span class="fc" id="L31">    }</span>
+<span class="fc" id="L40">    }</span>
+    private void validateVerificationCode(String email, String verificationCode) {
+<span class="nc bnc" id="L42" title="All 2 branches missed.">        if (!emailVerificationService.verifyCode(email, verificationCode)) {</span>
+<span class="nc" id="L43">            throw new BadRequestException(ErrorCode.EMAIL_VERIFICATION_FAILED);</span>
+        }
+<span class="nc" id="L45">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

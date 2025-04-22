@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmailVerificationService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chaekit</a> &gt; <a href="index.source.html" class="el_package">qwerty.chaekit.service.member.email</a> &gt; <span class="el_source">EmailVerificationService.java</span></div><h1>EmailVerificationService.java</h1><pre class="source lang-java linenums">package qwerty.chaekit.service.member.email;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
+import qwerty.chaekit.global.enums.ErrorCode;
+import qwerty.chaekit.global.exception.BadRequestException;
+import qwerty.chaekit.service.member.notification.EmailService;
+
+import java.util.concurrent.TimeUnit;
+
+@Service
+@RequiredArgsConstructor
+public class EmailVerificationService {
+    private final RedisTemplate&lt;String, String&gt; redisTemplate;
+    private final EmailService emailService;
+
+    public String sendVerificationCode(String email) {
+<span class="nc" id="L19">        String verificationCode = generateVerificationCode();</span>
+        // Redis에 인증 코드 저장 (30분 유효)
+<span class="nc" id="L21">        redisTemplate.opsForValue().set(email, verificationCode, 30, TimeUnit.MINUTES);  // 10분 후 만료</span>
+        // 이메일로 인증 코드 발송
+<span class="nc" id="L23">        emailService.sendVerificationEmail(email, verificationCode);</span>
+<span class="nc" id="L24">        return &quot;[테스트용 응답] 이메일: &quot; + email + &quot;, 코드: &quot; + verificationCode;</span>
+    }
+
+    public String processVerification(String email, String code) {
+<span class="nc bnc" id="L28" title="All 2 branches missed.">        if(verifyCode(email, code)) {</span>
+<span class="nc" id="L29">            return &quot;테스트: 인증 성공&quot;;</span>
+        } else {
+<span class="nc" id="L31">            throw new BadRequestException(ErrorCode.EMAIL_VERIFICATION_FAILED);</span>
+        }
+    }
+
+    public boolean verifyCode(String email, String code) {
+        // Redis에서 이메일 인증 코드 조회
+<span class="nc" id="L37">        String storedCode = redisTemplate.opsForValue().get(email);</span>
+<span class="nc bnc" id="L38" title="All 4 branches missed.">        return storedCode != null &amp;&amp; storedCode.equals(code);</span>
+    }
+    public void deleteVerificationCode(String email) {
+<span class="nc" id="L41">        redisTemplate.delete(email);</span>
+<span class="nc" id="L42">    }</span>
+
+    // 임의의 6자리 인증 코드 생성
+    private String generateVerificationCode() {
+<span class="nc" id="L46">        int code = (int) (Math.random() * 900000) + 100000;  // 6자리*</span>
+<span class="nc" id="L47">        return String.valueOf(code);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -34,42 +34,49 @@ public class AdminInitializer implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
-<span class="fc" id="L37">        String adminUsername = adminProperties.username();</span>
-<span class="fc" id="L38">        String adminPassword = adminProperties.password();</span>
-<span class="fc" id="L39">        Role adminRole = Role.ROLE_ADMIN;</span>
+<span class="fc" id="L37">        String adminName = adminProperties.name();</span>
+<span class="fc" id="L38">        String adminEmail = adminProperties.email();</span>
+<span class="fc" id="L39">        String adminPassword = adminProperties.password();</span>
+<span class="fc" id="L40">        Role adminRole = Role.ROLE_ADMIN;</span>
 
-<span class="fc" id="L41">        Optional&lt;Member&gt; existingAdmin = memberRepository.findByUsername(adminUsername);</span>
+<span class="fc" id="L42">        Member adminMember = memberRepository.findByEmail(adminEmail).orElseGet(</span>
+                () -&gt; {
+                    // 관리자가 없으면 생성
+<span class="fc" id="L45">                    Member newMember = memberJoinHelper.saveMember(adminEmail, adminPassword, adminRole);</span>
+<span class="fc" id="L46">                    log.info(&quot;관리자가 생성되었습니다. memberId = {}&quot;, newMember.getId());</span>
+<span class="fc" id="L47">                    return newMember;</span>
+                }
+        );
 
-<span class="pc bpc" id="L43" title="1 of 2 branches missed.">        if (existingAdmin.isEmpty()) {</span>
-            // 관리자가 없으면 생성
-<span class="fc" id="L45">            Member savedAdmin = memberJoinHelper.saveMember(adminUsername, adminPassword, adminRole);</span>
-<span class="fc" id="L46">            PublisherProfile adminPublisher = publisherProfileRepository.save(new PublisherProfile(savedAdmin, adminUsername));</span>
-<span class="fc" id="L47">            adminService.acceptPublisher(adminPublisher.getId());</span>
-<span class="fc" id="L48">            adminService.setAdminPublisherId(adminPublisher.getId());</span>
-<span class="fc" id="L49">            log.info(&quot;관리자가 생성되었습니다. memberId = {}&quot;, savedAdmin.getId());</span>
-<span class="fc" id="L50">        } else {</span>
-            // 이미 관리자가 존재할 때
-<span class="nc" id="L52">            Member admin = existingAdmin.get();</span>
-<span class="nc" id="L53">            Optional&lt;PublisherProfile&gt; publisher = publisherProfileRepository.findByMember_Username(adminUsername);</span>
+<span class="fc" id="L51">        Optional&lt;PublisherProfile&gt; publisher = publisherProfileRepository.findByMember_Email(adminEmail);</span>
+<span class="fc" id="L52">        PublisherProfile adminPublisher = publisher.orElseGet(() -&gt; {</span>
+<span class="fc" id="L53">            PublisherProfile newProfile = publisherProfileRepository.save(</span>
+<span class="fc" id="L54">                    PublisherProfile.builder()</span>
+<span class="fc" id="L55">                            .member(adminMember)</span>
+<span class="fc" id="L56">                            .publisherName(adminName)</span>
+<span class="fc" id="L57">                            .build()</span>
+            );
+<span class="fc" id="L59">            log.info(&quot;관리자 출판사 프로필이 추가되었습니다.&quot;);</span>
+<span class="fc" id="L60">            return newProfile;</span>
+        });
 
-<span class="nc" id="L55">            PublisherProfile adminPublisher = publisher.orElseGet(() -&gt; {</span>
-<span class="nc" id="L56">                PublisherProfile newProfile = publisherProfileRepository.save(new PublisherProfile(admin, adminUsername));</span>
-<span class="nc" id="L57">                log.info(&quot;관리자 출판사 프로필이 존재하지 않아 추가되었습니다.&quot;);</span>
-<span class="nc" id="L58">                return newProfile;</span>
-            });
+<span class="fc" id="L63">        Optional&lt;UserProfile&gt; user = userProfileRepository.findByMember_Email(adminEmail);</span>
+<span class="fc" id="L64">        UserProfile adminUser = user.orElseGet(() -&gt; {</span>
+<span class="fc" id="L65">            UserProfile newProfile = userProfileRepository.save(</span>
+<span class="fc" id="L66">                    UserProfile.builder()</span>
+<span class="fc" id="L67">                            .member(adminMember)</span>
+<span class="fc" id="L68">                            .nickname(adminName)</span>
+<span class="fc" id="L69">                            .build()</span>
+            );
+<span class="fc" id="L71">            log.info(&quot;관리자 사용자 프로필이 추가되었습니다.&quot;);</span>
+<span class="fc" id="L72">            return newProfile;</span>
+        });
 
-<span class="nc" id="L61">            Optional&lt;UserProfile&gt; user = userProfileRepository.findByMember_Username(adminUsername);</span>
-
-<span class="nc" id="L63">            UserProfile adminUser = user.orElseGet(() -&gt; {</span>
-<span class="nc" id="L64">                UserProfile newProfile = userProfileRepository.save(new UserProfile(admin, adminUsername));</span>
-<span class="nc" id="L65">                log.info(&quot;관리자 사용자 프로필이 존재하지 않아 추가되었습니다.&quot;);</span>
-<span class="nc" id="L66">                return newProfile;</span>
-            });
-
-<span class="nc" id="L69">            adminService.setAdminPublisherId(adminPublisher.getId());</span>
-<span class="nc" id="L70">            adminService.setAdminUserId(adminUser.getId());</span>
-<span class="nc" id="L71">            log.info(&quot;관리자가 이미 존재합니다. memberId = {}&quot;, admin.getId());</span>
-        }
-<span class="fc" id="L73">    }</span>
+<span class="fc" id="L75">        adminService.setAdminPublisherId(adminPublisher.getId());</span>
+<span class="fc" id="L76">        adminService.setAdminUserId(adminUser.getId());</span>
+<span class="fc" id="L77">        log.info(&quot;관리자 설정이 완료되었습니다. email = {}, memberId = {}, publisherId = {}, userId = {}&quot;,</span>
+<span class="fc" id="L78">                adminEmail, adminMember.getId(), adminPublisher.getId(), adminUser.getId()</span>
+        );
+<span class="fc" id="L80">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
