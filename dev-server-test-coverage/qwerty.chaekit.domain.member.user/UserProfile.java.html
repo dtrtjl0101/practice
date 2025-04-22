@@ -6,7 +6,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import qwerty.chaekit.domain.BaseEntity;
+import qwerty.chaekit.domain.group.GroupMember;
 import qwerty.chaekit.domain.member.Member;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -24,10 +27,13 @@ public class UserProfile extends BaseEntity {
     @Column(nullable = false)
     private String nickname;
 
+    @OneToMany(mappedBy = &quot;user&quot;)
+    private List&lt;GroupMember&gt; groups;
+
     @Builder
-<span class="fc" id="L28">    public UserProfile(Member member, String nickname) {</span>
-<span class="fc" id="L29">        this.member = member;</span>
-<span class="fc" id="L30">        this.nickname = nickname;</span>
-<span class="fc" id="L31">    }</span>
+<span class="fc" id="L34">    public UserProfile(Member member, String nickname) {</span>
+<span class="fc" id="L35">        this.member = member;</span>
+<span class="fc" id="L36">        this.nickname = nickname;</span>
+<span class="fc" id="L37">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

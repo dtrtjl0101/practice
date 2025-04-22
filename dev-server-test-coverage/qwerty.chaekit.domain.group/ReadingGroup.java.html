@@ -47,7 +47,7 @@ public class ReadingGroup extends BaseEntity {
 <span class="nc" id="L47">    }</span>
 
     public List&lt;UserProfile&gt; getMembers() {
-<span class="nc" id="L50">        return groupMembers.stream().map(GroupMember::getUser).toList();</span>
+<span class="nc" id="L50">        return groupMembers.stream().map(GroupMember::getMember).toList();</span>
     }
 
     public GroupMember addMember(UserProfile user) {
@@ -65,19 +65,31 @@ public class ReadingGroup extends BaseEntity {
     }
 
     public void removeMember(UserProfile user) {
-<span class="nc" id="L68">        groupMembers.removeIf(member -&gt; member.getUser().equals(user));</span>
+<span class="nc" id="L68">        groupMembers.removeIf(member -&gt; member.getMember().getId().equals(user.getId()));</span>
 <span class="nc" id="L69">    }</span>
 
+    public void rejectMember(UserProfile user) {
+<span class="nc" id="L72">        groupMembers.stream()</span>
+<span class="nc" id="L73">                .filter(member -&gt; member.getMember().getId().equals(user.getId()))</span>
+<span class="nc" id="L74">                .findFirst()</span>
+<span class="nc" id="L75">                .ifPresent(GroupMember::reject);</span>
+<span class="nc" id="L76">    }</span>
+
     public void updateDescription(String description) {
-<span class="nc" id="L72">        this.description = description;</span>
-<span class="nc" id="L73">    }</span>
+<span class="nc" id="L79">        this.description = description;</span>
+<span class="nc" id="L80">    }</span>
+
+    public boolean isMember(UserProfile userProfile) {
+<span class="nc" id="L83">        return groupMembers.stream()</span>
+<span class="nc" id="L84">                .anyMatch(member -&gt; member.getMember().getId().equals(userProfile.getId()));</span>
+    }
 
     @Builder
-<span class="fc" id="L76">    public ReadingGroup(String name, UserProfile groupLeader, List&lt;GroupTag&gt; tags, String description) {</span>
-<span class="fc" id="L77">        this.name = name;</span>
-<span class="fc" id="L78">        this.groupLeader = groupLeader;</span>
-<span class="pc bpc" id="L79" title="1 of 2 branches missed.">        this.tags = (tags != null) ? new ArrayList&lt;&gt;(tags) : new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L80">        this.description = description;</span>
-<span class="fc" id="L81">    }</span>
+<span class="fc" id="L88">    public ReadingGroup(String name, UserProfile groupLeader, List&lt;GroupTag&gt; tags, String description) {</span>
+<span class="fc" id="L89">        this.name = name;</span>
+<span class="fc" id="L90">        this.groupLeader = groupLeader;</span>
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">        this.tags = (tags != null) ? new ArrayList&lt;&gt;(tags) : new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L92">        this.description = description;</span>
+<span class="fc" id="L93">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
