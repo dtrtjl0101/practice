@@ -85,7 +85,6 @@ jobs:
             DB_USERNAME=${{ secrets.DB_USERNAME }}
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             REDIS_URL=${{ secrets.REDIS_URL }}
-            REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
             GMAIL_ADDRESS=${{ secrets.GMAIL_ADDRESS }}
             GMAIL_PASSWORD=${{ secrets.GMAIL_PASSWORD }}
             JWT_SECRET=${{ secrets.JWT_SECRET }}

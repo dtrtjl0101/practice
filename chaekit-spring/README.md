@@ -62,7 +62,6 @@ JPA_DIALECT=org.hibernate.dialect.MySQL8Dialect
 
 # Redis
 REDIS_URL=localhost
-REDIS_PASSWORD=
 
 # JWT
 JWT_SECRET={your_secret_key}
@@ -73,7 +72,7 @@ ADMIN_EMAIL=admin@example.com
 ADMIN_PASSWORD=0000
 
 # Spring
-SPRING_PROFILES_ACTIVE=dev
+SPRING_PROFILES_ACTIVE=local
 
 # AWS
 EBOOK_BUCKET_NAME=chaekit

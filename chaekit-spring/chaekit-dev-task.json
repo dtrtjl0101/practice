@@ -67,9 +67,6 @@
           "name": "REDIS_URL"
         },
         {
-          "name": "REDIS_PASSWORD"
-        },
-        {
           "name": "GMAIL_ADDRESS"
         },
         {

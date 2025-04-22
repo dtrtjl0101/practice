@@ -30,10 +30,19 @@ spring:
     redis:
       port: 6379
       host: ${REDIS_URL}
-      password: ${REDIS_PASSWORD}
-
+      ssl:
+        enabled: true
   config:
     import: optional:file:.env[.properties]
+---
+spring:
+  profiles:
+    active: local
+  data:
+    redis:
+      ssl:
+        enabled: false
+
 springdoc:
   swagger-ui:
     disable-swagger-default-url: true
@@ -44,6 +53,7 @@ jwt:
 admin:
   email: ${ADMIN_EMAIL}
   password: ${ADMIN_PASSWORD}
+  name: ${ADMIN_NAME}
 aws:
   ebook-bucket-name: ${EBOOK_BUCKET_NAME}
   access-key-id: ${AWS_ACCESS_KEY_ID}
