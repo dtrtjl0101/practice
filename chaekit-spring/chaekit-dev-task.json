@@ -22,6 +22,10 @@
           "value": "3600000"
         },
         {
+          "name": "ADMIN_NAME",
+          "value": "admin"
+        },
+        {
           "name": "ADMIN_EMAIL",
           "value": "admin@example.com"
         },
