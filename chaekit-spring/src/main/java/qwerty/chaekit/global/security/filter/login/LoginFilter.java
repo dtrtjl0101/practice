@@ -73,7 +73,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private void sendSuccessResponse(HttpServletResponse response, String token, Long memberId, Long userId, Long publisherId, String role) {
         LoginResponse loginResponse = LoginResponse.builder()
                 .accessToken("Bearer " + token)
-                .id(memberId)
+                .memberId(memberId)
                 .userId(userId)
                 .publisherId(publisherId)
                 .role(role)

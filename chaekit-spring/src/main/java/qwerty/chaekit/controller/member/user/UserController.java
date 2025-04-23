@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.dto.member.UserJoinRequest;
 import qwerty.chaekit.dto.member.UserJoinResponse;
-import qwerty.chaekit.dto.member.UserMemberResponse;
+import qwerty.chaekit.dto.member.UserInfoResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
 import qwerty.chaekit.global.security.resolver.UserToken;
@@ -22,12 +22,12 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/me")
-    public ApiSuccessResponse<UserMemberResponse> userInfo(@Login UserToken userToken) {
+    public ApiSuccessResponse<UserInfoResponse> userInfo(@Login UserToken userToken) {
         return ApiSuccessResponse.of(userService.getUserProfile(userToken));
     }
 
     @PostMapping("/join")
-    public ApiSuccessResponse<UserJoinResponse> userJoin(@RequestBody @Valid UserJoinRequest joinRequest) {
+    public ApiSuccessResponse<UserJoinResponse> userJoin(@ModelAttribute @Valid UserJoinRequest joinRequest) {
         return ApiSuccessResponse.of(joinService.join(joinRequest));
     }
 }

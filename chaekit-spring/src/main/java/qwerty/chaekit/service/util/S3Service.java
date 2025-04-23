@@ -1,84 +1,88 @@
 package qwerty.chaekit.service.util;
 
 import org.springframework.stereotype.Service;
-import qwerty.chaekit.dto.upload.UploadUrlResponse;
-import qwerty.chaekit.global.enums.ErrorCode;
+import org.springframework.web.multipart.MultipartFile;
 import qwerty.chaekit.global.enums.S3Directory;
-import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.properties.AwsProperties;
+import qwerty.chaekit.service.util.exceptions.FileInvalidExtensionException;
+import qwerty.chaekit.service.util.exceptions.FileMissingException;
+import qwerty.chaekit.service.util.exceptions.FileSizeExceededException;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
-import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.Duration;
 import java.util.UUID;
 
 @Service
 public class S3Service {
     private final S3Presigner s3Presigner;
+    private final S3Client s3Client;
     private final Long expirationTime;
+    private final String ebookBucket;
+    private final String imageBucket;
 
-    public S3Service(S3Presigner s3Presigner, AwsProperties awsProperties) {
+    public S3Service(S3Presigner s3Presigner, S3Client s3Client, AwsProperties awsProperties) {
         this.s3Presigner = s3Presigner;
+        this.s3Client = s3Client;
         this.expirationTime = awsProperties.presignedUrlExpirationTime();
+        this.ebookBucket = awsProperties.ebookBucketName();
+        this.imageBucket = awsProperties.imageBucketName();
     }
 
     // Download URL
     public String getDownloadUrl(String bucket, S3Directory s3Directory, String fileName) {
         String fileKey = s3Directory.getPath() + fileName;
-        return generatePresignedUrl(bucket, fileKey, false);
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                .bucket(bucket)
+                .key(fileKey)
+                .build();
+
+        PresignedGetObjectRequest presignedRequest = s3Presigner.presignGetObject(builder -> builder
+                .getObjectRequest(getObjectRequest)
+                .signatureDuration(Duration.ofSeconds(expirationTime))
+        );
+        return presignedRequest.url().toString();
     }
 
-    // Upload URL
-    public UploadUrlResponse getUploadUrl(String bucket, S3Directory directory, String extension, long size) {
-        if(!directory.getAllowedExtensions().contains(extension)) {
-            throw new BadRequestException(ErrorCode.INVALID_EXTENSION);
+    // Public URL
+    public String convertToPublicImageUrl(String fileKey) {
+        return "https://" + imageBucket + ".s3.amazonaws.com/" + fileKey;
+    }
+
+    // Upload
+    public String uploadFile(String bucket, S3Directory directory, MultipartFile file) {
+        String fileKey = getFileKeyWithValidation(directory, file);
+        try (InputStream inputStream = file.getInputStream()) {
+            s3Client.putObject(
+                    PutObjectRequest.builder()
+                            .bucket(bucket)
+                            .key(fileKey)
+                            .build(),
+                    RequestBody.fromInputStream(inputStream, file.getSize()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        if(size > directory.getMaxSize()) {
-            throw new BadRequestException(ErrorCode.FILE_SIZE_EXCEEDED);
+        return fileKey;
+    }
+
+    private String getFileKeyWithValidation(S3Directory directory, MultipartFile file) {
+        if (file == null || file.getOriginalFilename() == null) {
+            throw new FileMissingException();
         }
-
-        String fileKey = generateFileKey(directory, extension);
-        String presignedUrl = generatePresignedUrl(bucket, fileKey, true);
-        return UploadUrlResponse.of(presignedUrl, fileKey);
-    }
-
-    private String generateFileKey(S3Directory directory, String extension) {
-        return directory.getPath() + generateUUID() + extension;
-    }
-
-    private String generateUUID() {
-        return UUID.randomUUID().toString();
-    }
-
-    private String generatePresignedUrl(String bucket, String fileKey, boolean isUpload) {
-        if (isUpload) {
-            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                    .bucket(bucket)
-                    .key(fileKey)
-                    .build();
-
-            PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(builder -> builder
-                    .putObjectRequest(putObjectRequest)
-                    .signatureDuration(Duration.ofSeconds(expirationTime))
-
-            );
-
-            return presignedRequest.url().toString();
-        } else {
-            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
-                    .bucket(bucket)
-                    .key(fileKey)
-                    .build();
-
-            PresignedGetObjectRequest presignedRequest = s3Presigner.presignGetObject(builder -> builder
-                    .getObjectRequest(getObjectRequest)
-                    .signatureDuration(Duration.ofSeconds(expirationTime))
-            );
-
-            return presignedRequest.url().toString();
+        if (file.getSize() > directory.getMaxSize()) {
+            throw new FileSizeExceededException();
         }
+        String fileName = file.getOriginalFilename();
+        String extension = fileName.substring(fileName.lastIndexOf("."));
+        if (!directory.getAllowedExtensions().contains(extension)) {
+            throw new FileInvalidExtensionException();
+        }
+        return directory.getPath() + UUID.randomUUID() + extension;
     }
 }

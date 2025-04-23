@@ -7,16 +7,18 @@ import java.time.LocalDateTime;
 
 @Builder
 public record PublisherInfoResponse(
-        Long id,
         Long publisherId,
         String publisherName,
+        String profileImageURL,
+        Boolean isAccepted,
         LocalDateTime createdAt
 ) {
-    public static PublisherInfoResponse of(PublisherProfile publisher) {
+    public static PublisherInfoResponse of(PublisherProfile publisher, String profileImageURL) {
         return PublisherInfoResponse.builder()
-                .id(publisher.getMember().getId())
                 .publisherId(publisher.getId())
                 .publisherName(publisher.getPublisherName())
+                .profileImageURL(profileImageURL)
+                .isAccepted(publisher.isAccepted())
                 .createdAt(publisher.getCreatedAt())
                 .build();
     }

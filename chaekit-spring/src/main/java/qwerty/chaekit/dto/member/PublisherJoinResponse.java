@@ -4,10 +4,11 @@ import lombok.Builder;
 
 @Builder
 public record PublisherJoinResponse(
-        Long id,
+        Long memberId,
         Long publisherId,
         String accessToken,
         String publisherName,
         String email,
+        String profileImageURL,
         Boolean isAccepted
 ){ }

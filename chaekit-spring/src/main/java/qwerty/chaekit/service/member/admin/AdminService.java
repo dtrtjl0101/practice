@@ -14,12 +14,14 @@ import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.service.member.notification.EmailService;
+import qwerty.chaekit.service.util.S3Service;
 
 @Service
 @RequiredArgsConstructor
 public class AdminService {
     private final PublisherProfileRepository publisherRepository;
     private final EmailService emailService;
+    private final S3Service s3Service;
 
     @Getter
     @Setter
@@ -32,7 +34,10 @@ public class AdminService {
     @Transactional(readOnly = true)
     public PageResponse<PublisherInfoResponse> getNotAcceptedPublishers(Pageable pageable) {
         Page<PublisherProfile> page = publisherRepository.findAllByAcceptedFalseOrderByCreatedAtDesc(pageable);
-        return PageResponse.of(page.map(PublisherInfoResponse::of));
+        return PageResponse.of(page.map(publisher -> PublisherInfoResponse.of(
+                        publisher,
+                        s3Service.convertToPublicImageUrl(publisher.getProfileImageKey())
+                )));
     }
 
     @Transactional

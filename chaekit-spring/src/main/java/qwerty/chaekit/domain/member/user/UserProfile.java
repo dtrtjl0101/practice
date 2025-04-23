@@ -24,10 +24,13 @@ public class UserProfile extends BaseEntity {
     @Column(nullable = false)
     private String nickname;
 
+    private String profileImageKey;
+
     @Builder
-    public UserProfile(Long id, Member member, String nickname) {
+    public UserProfile(Long id, Member member, String nickname, String profileImageKey) {
         this.id = id;
         this.member = member;
         this.nickname = nickname;
+        this.profileImageKey = profileImageKey;
     }
 }

@@ -4,9 +4,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import qwerty.chaekit.dto.member.PublisherInfoResponse;
 import qwerty.chaekit.dto.member.PublisherJoinRequest;
 import qwerty.chaekit.dto.member.PublisherJoinResponse;
-import qwerty.chaekit.dto.member.PublisherMemberResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
 import qwerty.chaekit.global.security.resolver.PublisherToken;
@@ -22,12 +22,12 @@ public class PublisherController {
     private final PublisherService publisherService;
 
     @GetMapping("/me")
-    public ApiSuccessResponse<PublisherMemberResponse> userInfo(@Login PublisherToken token) {
+    public ApiSuccessResponse<PublisherInfoResponse> publisherInfo(@Login PublisherToken token) {
         return ApiSuccessResponse.of(publisherService.getPublisherProfile(token));
     }
 
     @PostMapping("/join")
-    public ApiSuccessResponse<PublisherJoinResponse> publisherJoin(@RequestBody @Valid PublisherJoinRequest joinRequest) {
+    public ApiSuccessResponse<PublisherJoinResponse> publisherJoin(@ModelAttribute @Valid PublisherJoinRequest joinRequest) {
         return ApiSuccessResponse.of(joinService.join(joinRequest));
     }
 }

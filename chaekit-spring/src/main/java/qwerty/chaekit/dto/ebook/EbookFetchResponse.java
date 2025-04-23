@@ -7,14 +7,16 @@ import qwerty.chaekit.domain.ebook.Ebook;
 public record EbookFetchResponse(
         Long id,
         String title,
+        String bookCoverImageURL,
         String author,
         String description,
         Long size
 ) {
-    public static EbookFetchResponse of(Ebook ebook) {
+    public static EbookFetchResponse of(Ebook ebook, String bookCoverImageURL) {
         return EbookFetchResponse.builder()
                 .id(ebook.getId())
                 .title(ebook.getTitle())
+                .bookCoverImageURL(bookCoverImageURL)
                 .author(ebook.getAuthor())
                 .description(ebook.getDescription())
                 .size(ebook.getSize())

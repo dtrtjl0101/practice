@@ -37,6 +37,8 @@ public class ReadingGroup extends BaseEntity {
     @OneToMany(mappedBy = "readingGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<GroupMember> groupMembers = new ArrayList<>();
 
+    private String groupImageKey;
+
     public void addTag(String tagName) {
         GroupTag groupTag = new GroupTag(this, tagName);
         tags.add(groupTag);
@@ -85,11 +87,12 @@ public class ReadingGroup extends BaseEntity {
     }
 
     @Builder
-    public ReadingGroup(Long id, String name, UserProfile groupLeader, List<GroupTag> tags, String description) {
+    public ReadingGroup(Long id, String name, UserProfile groupLeader, List<GroupTag> tags, String description, String groupImageKey) {
         this.id = id;
         this.name = name;
         this.groupLeader = groupLeader;
         this.tags = (tags != null) ? new ArrayList<>(tags) : new ArrayList<>();
         this.description = description;
+        this.groupImageKey = groupImageKey;
     }
 }

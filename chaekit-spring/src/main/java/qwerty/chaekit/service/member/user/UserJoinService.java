@@ -51,7 +51,7 @@ public class UserJoinService {
         String token = jwtUtil.createJwt(member.getId(), user.getId(), null, member.getEmail(), member.getRole().name());
 
         return UserJoinResponse.builder()
-                .id(member.getId())
+                .memberId(member.getId())
                 .userId(user.getId())
                 .accessToken("Bearer " + token)
                 .email(member.getEmail())
