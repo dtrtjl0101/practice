@@ -68,6 +68,7 @@ JWT_SECRET={your_secret_key}
 JWT_EXPIRATION_MS=3600000
 
 # Admin
+ADMIN_NAME=admin
 ADMIN_EMAIL=admin@example.com
 ADMIN_PASSWORD=0000
 
@@ -80,6 +81,7 @@ SPRING_PROFILES_ACTIVE=local
 
 # AWS
 EBOOK_BUCKET_NAME=chaekit
+IMAGE_BUCKET_NAME=chaekit-image
 AWS_S3_REGION=ap-northeast-2
 AWS_ACCESS_KEY_ID={S3 버킷 access key}
 SECRET_ACCESS_KEY={S3 버킷 secret key}

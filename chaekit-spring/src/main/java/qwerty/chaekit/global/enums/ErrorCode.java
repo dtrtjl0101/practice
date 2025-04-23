@@ -22,6 +22,9 @@ public enum ErrorCode {
     // email
     EMAIL_VERIFICATION_FAILED("EMAIL_VERIFICATION_FAILED", "이메일 인증에 실패했습니다."),
     EMAIL_SEND_FAILED("EMAIL_SEND_FAILED", "이메일 전송에 실패했습니다."),
+    // file
+    INVALID_EXTENSION("INVALID_EXTENSION", "허용되지 않는 확장자입니다"),
+    FILE_SIZE_EXCEEDED("FILE_SIZE_EXCEED", "파일 크기가 초과되었습니다"),
 
     // FORBIDDEN
     NO_VALID_TOKEN("NO_VALID_TOKEN", "유효한 토큰이 없습니다"),
