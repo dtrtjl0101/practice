@@ -56,6 +56,7 @@ public class AdminInitializer implements ApplicationRunner {
                             .publisherName(adminName)
                             .build()
             );
+            newProfile.acceptPublisher();
             log.info("관리자 출판사 프로필이 추가되었습니다.");
             return newProfile;
         });
