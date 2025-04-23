@@ -24,14 +24,12 @@ public class S3Service {
     private final S3Presigner s3Presigner;
     private final S3Client s3Client;
     private final Long expirationTime;
-    private final String ebookBucket;
     private final String imageBucket;
 
     public S3Service(S3Presigner s3Presigner, S3Client s3Client, AwsProperties awsProperties) {
         this.s3Presigner = s3Presigner;
         this.s3Client = s3Client;
         this.expirationTime = awsProperties.presignedUrlExpirationTime();
-        this.ebookBucket = awsProperties.ebookBucketName();
         this.imageBucket = awsProperties.imageBucketName();
     }
 

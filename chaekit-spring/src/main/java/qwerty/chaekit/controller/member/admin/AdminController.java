@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.dto.member.PublisherInfoResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
-import qwerty.chaekit.service.ebook.EbookFileService;
 import qwerty.chaekit.service.member.admin.AdminService;
 
 @RestController
@@ -15,7 +14,6 @@ import qwerty.chaekit.service.member.admin.AdminService;
 @RequiredArgsConstructor
 public class AdminController {
     private final AdminService adminService;
-    private final EbookFileService ebookFileService;
 
     @GetMapping("/publishers/pending")
     public ApiSuccessResponse<PageResponse<PublisherInfoResponse>> fetchPendingList(@ParameterObject Pageable pageable) {
