@@ -56,8 +56,24 @@ public class S3Service {
     }
 
     // Upload
+    public String uploadFile(String bucket, S3Directory directory, MultipartFile file, boolean required) {
+        try {
+            return uploadFile(bucket, directory, file);
+        } catch (BadRequestException e) {
+            if (ErrorCode.FILE_MISSING.getCode().equals(e.getErrorCode()) && !required) {
+                return null; // 파일이 필수가 아니면 null 반환
+            }
+            throw e; // 다른 경우 예외 재발생
+        }
+    }
+
     public String uploadFile(String bucket, S3Directory directory, MultipartFile file) {
-        String fileKey = getFileKeyWithValidation(directory, file);
+        String fileKey = validateAndGenerateFileKey(directory, file);
+        uploadToS3(bucket, fileKey, file);
+        return fileKey;
+    }
+
+    private void uploadToS3(String bucket, String fileKey, MultipartFile file) {
         try (InputStream inputStream = file.getInputStream()) {
             s3Client.putObject(
                     PutObjectRequest.builder()
@@ -66,12 +82,11 @@ public class S3Service {
                             .build(),
                     RequestBody.fromInputStream(inputStream, file.getSize()));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to upload file to S3", e);
         }
-        return fileKey;
     }
 
-    private String getFileKeyWithValidation(S3Directory directory, MultipartFile file) {
+    private String validateAndGenerateFileKey(S3Directory directory, MultipartFile file) {
         if (file == null || file.getOriginalFilename() == null) {
             throw new BadRequestException(ErrorCode.FILE_MISSING);
         }

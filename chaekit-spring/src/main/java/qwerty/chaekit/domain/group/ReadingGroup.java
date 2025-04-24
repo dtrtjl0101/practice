@@ -81,6 +81,10 @@ public class ReadingGroup extends BaseEntity {
         this.description = description;
     }
 
+    public void updateGroupImageKey(String groupImageKey) {
+        this.groupImageKey = groupImageKey;
+    }
+
     public boolean isMember(UserProfile userProfile) {
         return groupMembers.stream()
                 .anyMatch(member -> member.getMember().getId().equals(userProfile.getId()));

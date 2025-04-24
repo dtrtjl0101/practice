@@ -19,8 +19,6 @@ import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.member.admin.AdminService;
 import qwerty.chaekit.service.util.S3Service;
 
-import java.util.Objects;
-
 @Service
 @RequiredArgsConstructor
 public class EbookFileService {
@@ -37,14 +35,12 @@ public class EbookFileService {
         String imageBucket = awsProperties.imageBucketName();
 
         String fileKey = s3Service.uploadFile(ebookBucket, S3Directory.EBOOK, request.file());
-        String coverImageKey = null;
-        try {
-            coverImageKey = s3Service.uploadFile(imageBucket, S3Directory.EBOOK_COVER_IMAGE, request.coverImageFile());
-        } catch (BadRequestException e) {
-            if(!Objects.equals(e.getErrorCode(), ErrorCode.FILE_MISSING.getCode())) {
-                throw e;
-            }
-        }
+        String coverImageKey = s3Service.uploadFile(
+                imageBucket,
+                S3Directory.EBOOK_COVER_IMAGE,
+                request.coverImageFile(),
+                false
+        );
         String coverImageURL = s3Service.convertToPublicImageURL(coverImageKey);
 
         Ebook ebook = Ebook.builder()

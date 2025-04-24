@@ -44,7 +44,7 @@ public class GlobalExceptionHandler {
         // @RequestParam, @PathVariable, @ModelAttribute 처리
         String messages = Arrays.stream(ex.getDetailMessageArguments())
                 .map(Object::toString)
-                .collect(Collectors.joining("\n"));
+                .collect(Collectors.joining(", "));
         return ApiErrorResponse.of(ErrorCode.INVALID_INPUT.getCode(), messages);
     }
 
@@ -54,7 +54,7 @@ public class GlobalExceptionHandler {
         // @RequestBody @Valid 처리
         String message = ex.getBindingResult().getFieldErrors().stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .collect(Collectors.joining("\n"));
+                .collect(Collectors.joining(", "));
         return ApiErrorResponse.of(ErrorCode.INVALID_INPUT.getCode(), message);
     }
 

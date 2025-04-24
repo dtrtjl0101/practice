@@ -1,5 +1,6 @@
 package qwerty.chaekit.controller.group;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +21,7 @@ public class GroupController {
     @PostMapping
     public ApiSuccessResponse<GroupPostResponse> createGroup(
             @Login UserToken userToken,
-            @ModelAttribute GroupPostRequest groupPostRequest
+            @ModelAttribute @Valid GroupPostRequest groupPostRequest
     ) {
         return ApiSuccessResponse.of(groupService.createGroup(userToken, groupPostRequest));
     }
@@ -39,11 +40,11 @@ public class GroupController {
         return ApiSuccessResponse.of(groupService.fetchGroup(groupId));
     }
 
-    @PutMapping("/{groupId}")
+    @PatchMapping("/{groupId}")
     public ApiSuccessResponse<GroupPostResponse> updateGroup(
             @Login UserToken userToken,
             @PathVariable long groupId,
-            @ModelAttribute GroupPutRequest request
+            @ModelAttribute @Valid GroupPutRequest request
     ) {
         return ApiSuccessResponse.of(groupService.updateGroup(userToken, groupId, request));
     }

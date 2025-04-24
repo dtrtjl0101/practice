@@ -40,13 +40,7 @@ public class MemberJoinHelper {
     }
 
     public String uploadProfileImage(MultipartFile profileImage) {
-        try{
-            return s3Service.uploadFile(awsProperties.imageBucketName(), S3Directory.PROFILE_IMAGE, profileImage);
-        } catch (BadRequestException e) {
-            if(!e.getErrorCode().equals(ErrorCode.FILE_MISSING.getCode()))
-                throw e;
-            return null;
-        }
+        return s3Service.uploadFile(awsProperties.imageBucketName(), S3Directory.PROFILE_IMAGE, profileImage, false);
     }
 
     public String convertToPublicImageURL(String fileKey) {

@@ -13,8 +13,10 @@ import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.dto.group.*;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
+import qwerty.chaekit.global.enums.S3Directory;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
+import qwerty.chaekit.global.properties.AwsProperties;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.member.notification.EmailService;
 import qwerty.chaekit.service.util.S3Service;
@@ -28,6 +30,7 @@ public class GroupService {
     private final GroupRepository groupRepository;
     private final EmailService emailService;
     private final S3Service s3Service;
+    private final AwsProperties awsProperties;
 
     @Transactional
     public GroupPostResponse createGroup(UserToken userToken, GroupPostRequest request) {
@@ -36,10 +39,18 @@ public class GroupService {
             throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
         }
 
+        String groupImageKey = s3Service.uploadFile(
+                awsProperties.imageBucketName(),
+                S3Directory.GROUP_IMAGE,
+                request.groupImage(),
+                false
+        );
+
         ReadingGroup groupEntity = ReadingGroup.builder()
                 .name(request.name())
                 .groupLeader(userRepository.getReferenceById(userId))
                 .description(request.description())
+                .groupImageKey(groupImageKey)
                 .build();
         ReadingGroup savedGroup = groupRepository.save(groupEntity);
         request.tags().forEach(savedGroup::addTag);
@@ -76,6 +87,17 @@ public class GroupService {
         }
         if(request.description() != null) {
             group.updateDescription(request.description());
+        }
+
+        String imageKey = s3Service.uploadFile(
+                awsProperties.imageBucketName(),
+                S3Directory.GROUP_IMAGE,
+                request.groupImage(),
+                false
+        );
+
+        if(imageKey != null) {
+            group.updateGroupImageKey(imageKey);
         }
         return GroupPostResponse.of(group, getGroupImageURL(group));
     }

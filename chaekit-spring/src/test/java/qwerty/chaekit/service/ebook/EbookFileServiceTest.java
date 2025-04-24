@@ -15,7 +15,6 @@ import qwerty.chaekit.dto.ebook.upload.EbookPostRequest;
 import qwerty.chaekit.dto.ebook.upload.EbookPostResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.enums.S3Directory;
-import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.properties.AwsProperties;
 import qwerty.chaekit.global.security.resolver.PublisherToken;
@@ -71,7 +70,7 @@ class EbookFileServiceTest {
         when(request.description()).thenReturn("Test Description");
         when(request.file().getSize()).thenReturn(12345L);
         when(s3Service.uploadFile(ebookBucket, S3Directory.EBOOK, request.file())).thenReturn("file-key");
-        when(s3Service.uploadFile(imageBucket, S3Directory.EBOOK_COVER_IMAGE, request.coverImageFile())).thenReturn("cover-image-key");
+        when(s3Service.uploadFile(imageBucket, S3Directory.EBOOK_COVER_IMAGE, request.coverImageFile(), false)).thenReturn("cover-image-key");
         when(s3Service.convertToPublicImageURL("cover-image-key")).thenReturn("http://image-url");
         when(publisherRepository.getReferenceById(publisherId)).thenReturn(publisherProfile);
 
@@ -110,9 +109,13 @@ class EbookFileServiceTest {
         PublisherProfile publisherProfile = mock(PublisherProfile.class);
 
         when(awsProperties.ebookBucketName()).thenReturn(ebookBucket);
+        when(awsProperties.imageBucketName()).thenReturn(imageBucket);
         when(request.file()).thenReturn(mock(MultipartFile.class));
-        when(request.coverImageFile()).thenThrow(new BadRequestException(ErrorCode.FILE_MISSING));
-        when(s3Service.uploadFile(ebookBucket, S3Directory.EBOOK, request.file())).thenReturn("file-key");
+        when(request.coverImageFile()).thenReturn(null); // coverImageFile이 null인 경우
+        when(s3Service.uploadFile(eq(ebookBucket), eq(S3Directory.EBOOK), any()))
+                .thenReturn("file-key");
+        when(s3Service.uploadFile(eq(imageBucket), eq(S3Directory.EBOOK_COVER_IMAGE), isNull(), eq(false)))
+                .thenReturn(null); // coverImageKey가 null 반환
         when(publisherRepository.getReferenceById(publisherId)).thenReturn(publisherProfile);
 
         Ebook ebook = Ebook.builder()
@@ -122,6 +125,7 @@ class EbookFileServiceTest {
                 .description("Test Description")
                 .size(12345L)
                 .fileKey("file-key")
+                .coverImageKey(null) // coverImageKey가 null
                 .publisher(publisherProfile)
                 .build();
         when(ebookRepository.save(any(Ebook.class))).thenReturn(ebook);
@@ -131,7 +135,9 @@ class EbookFileServiceTest {
 
         // Assert
         assertNotNull(response);
-        assertNull(response.coverImageURL());
+        assertNull(response.coverImageURL()); // coverImageURL이 null인지 확인
+        verify(s3Service, times(1)).uploadFile(eq(ebookBucket), eq(S3Directory.EBOOK), any());
+        verify(s3Service, times(1)).uploadFile(eq(imageBucket), eq(S3Directory.EBOOK_COVER_IMAGE), isNull(), eq(false));
     }
 
     @Test
