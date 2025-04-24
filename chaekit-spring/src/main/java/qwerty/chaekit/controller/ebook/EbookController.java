@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.dto.ebook.EbookFetchResponse;
 import qwerty.chaekit.dto.ebook.upload.EbookDownloadResponse;
 import qwerty.chaekit.dto.ebook.upload.EbookPostRequest;
+import qwerty.chaekit.dto.ebook.upload.EbookPostResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
@@ -35,7 +36,7 @@ public class EbookController {
 
     @PostMapping
     @Operation(summary = "전자책 업로드", description = "출판사가 전자책 파일과 정보를 업로드합니다.")
-    public ApiSuccessResponse<String> uploadFile(
+    public ApiSuccessResponse<EbookPostResponse> uploadFile(
             @Parameter(description = "로그인된 출판사 정보") @Login PublisherToken publisherToken,
             @Parameter(description = "전자책 업로드 요청 데이터") @ModelAttribute EbookPostRequest request) {
         return ApiSuccessResponse.of(ebookFileService.uploadEbook(publisherToken, request));
