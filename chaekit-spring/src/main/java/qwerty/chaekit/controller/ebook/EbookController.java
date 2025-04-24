@@ -3,10 +3,10 @@ package qwerty.chaekit.controller.ebook;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.dto.ebook.EbookFetchResponse;
+import qwerty.chaekit.dto.ebook.EbookSearchRequest;
+import qwerty.chaekit.dto.ebook.EbookSearchResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.service.ebook.EbookService;
@@ -15,10 +15,17 @@ import qwerty.chaekit.service.ebook.EbookService;
 @RequestMapping("/api/books")
 @RequiredArgsConstructor
 public class EbookController {
-    public final EbookService ebookService;
+    private final EbookService ebookService;
 
     @GetMapping
-    public ApiSuccessResponse<PageResponse<EbookFetchResponse>>getBooks(@ParameterObject Pageable pageable) {
+    public ApiSuccessResponse<PageResponse<EbookFetchResponse>>getbooks(@ParameterObject Pageable pageable) {
         return ApiSuccessResponse.of(ebookService.fetchEbookList(pageable));
+    }
+
+    @GetMapping("/search")
+    public ApiSuccessResponse<PageResponse<EbookSearchResponse>> searchEbooks(
+            @ParameterObject Pageable pageable,
+            @ModelAttribute EbookSearchRequest request) {
+        return ApiSuccessResponse.of(ebookService.searchEbooks(request, pageable));
     }
 }
