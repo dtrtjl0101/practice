@@ -164,6 +164,6 @@ public class GroupService {
     }
 
     private String getGroupImageURL(ReadingGroup group) {
-        return s3Service.convertToPublicImageUrl(group.getGroupImageKey());
+        return s3Service.convertToPublicImageURL(group.getGroupImageKey());
     }
 }

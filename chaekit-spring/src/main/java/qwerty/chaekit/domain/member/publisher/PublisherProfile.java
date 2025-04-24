@@ -30,7 +30,8 @@ public class PublisherProfile extends BaseEntity {
     private boolean accepted = false;
 
     @Builder
-    public PublisherProfile(Member member, String publisherName, String profileImageKey) {
+    public PublisherProfile(Long id, Member member, String publisherName, String profileImageKey) {
+        this.id = id;
         this.member = member;
         this.publisherName = publisherName;
         this.profileImageKey = profileImageKey;

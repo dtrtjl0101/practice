@@ -17,9 +17,6 @@ import qwerty.chaekit.global.security.resolver.PublisherToken;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.member.admin.AdminService;
 import qwerty.chaekit.service.util.S3Service;
-import qwerty.chaekit.service.util.exceptions.FileInvalidExtensionException;
-import qwerty.chaekit.service.util.exceptions.FileMissingException;
-import qwerty.chaekit.service.util.exceptions.FileSizeExceededException;
 
 @Service
 public class EbookFileService {
@@ -45,15 +42,7 @@ public class EbookFileService {
         MultipartFile file = request.file();
 
         final String fileKey;
-        try {
-            fileKey = s3Service.uploadFile(ebookBucket, S3Directory.EBOOK, file);
-        } catch (FileMissingException e) {
-            throw new BadRequestException(ErrorCode.EBOOK_FILE_MISSING);
-        } catch (FileSizeExceededException e) {
-            throw new BadRequestException(ErrorCode.EBOOK_FILE_SIZE_EXCEEDED);
-        } catch (FileInvalidExtensionException e) {
-            throw new BadRequestException(ErrorCode.INVALID_EBOOK_FILE);
-        }
+        fileKey = s3Service.uploadFile(ebookBucket, S3Directory.EBOOK, file);
 
         Ebook ebook = Ebook.builder()
                 .title(title)

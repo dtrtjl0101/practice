@@ -21,7 +21,7 @@ public class UserService {
     public UserInfoResponse getUserProfile(UserToken userToken) {
         UserProfile user = userRepository.findById(userToken.userId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
-        String imageURL = s3Service.convertToPublicImageUrl(user.getProfileImageKey());
+        String imageURL = s3Service.convertToPublicImageURL(user.getProfileImageKey());
 
         return UserInfoResponse.of(user, imageURL);
     }

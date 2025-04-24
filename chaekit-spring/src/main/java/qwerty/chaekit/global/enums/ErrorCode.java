@@ -23,6 +23,7 @@ public enum ErrorCode {
     EMAIL_VERIFICATION_FAILED("EMAIL_VERIFICATION_FAILED", "이메일 인증에 실패했습니다."),
     EMAIL_SEND_FAILED("EMAIL_SEND_FAILED", "이메일 전송에 실패했습니다."),
     // file
+    FILE_MISSING("FILE_MISSING", "파일이 누락되었습니다"),
     INVALID_EXTENSION("INVALID_EXTENSION", "허용되지 않는 확장자입니다"),
     FILE_SIZE_EXCEEDED("FILE_SIZE_EXCEED", "파일 크기가 초과되었습니다"),
 
@@ -51,7 +52,8 @@ public enum ErrorCode {
     NO_RESOURCE_FOUND("NO_RESOURCE_FOUND", "존재하지 않는 경로입니다"),
 
     ALREADY_JOINED_GROUP("ALREADY_JOINED_GROUP", "이미 가입한 그룹입니다"),
-    GROUP_LEADER_CANNOT_LEAVE("GROUP_LEADER_CANNOT_LEAVE", "그룹장은 그룹을 탈퇴할 수 없습니다");
+    GROUP_LEADER_CANNOT_LEAVE("GROUP_LEADER_CANNOT_LEAVE", "그룹장은 그룹을 탈퇴할 수 없습니다"),
+    ;
 
     private final String code;
     private final String message;

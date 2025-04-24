@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 public record PublisherJoinRequest(
         @NotBlank
         String publisherName,
+        @NotBlank
         @Email
         String email,
         @NotBlank

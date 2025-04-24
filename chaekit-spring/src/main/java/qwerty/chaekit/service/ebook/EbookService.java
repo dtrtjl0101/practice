@@ -18,7 +18,7 @@ public class EbookService {
     public PageResponse<EbookFetchResponse> fetchEbookList(Pageable pageable) {
         Page<EbookFetchResponse> page = ebookRepository.findAll(pageable)
                 .map( ebook -> EbookFetchResponse.of(
-                        ebook, s3Service.convertToPublicImageUrl(ebook.getFileKey())
+                        ebook, s3Service.convertToPublicImageURL(ebook.getFileKey())
                         ));
         return PageResponse.of(page);
     }

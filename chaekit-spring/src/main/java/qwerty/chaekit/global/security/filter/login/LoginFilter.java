@@ -11,12 +11,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import qwerty.chaekit.dto.member.LoginResponse;
-import qwerty.chaekit.global.security.model.CustomUserDetails;
 import qwerty.chaekit.dto.member.LoginRequest;
+import qwerty.chaekit.dto.member.LoginResponse;
 import qwerty.chaekit.global.jwt.JwtUtil;
+import qwerty.chaekit.global.security.model.CustomUserDetails;
 import qwerty.chaekit.global.util.SecurityRequestReader;
 import qwerty.chaekit.global.util.SecurityResponseSender;
+import qwerty.chaekit.service.util.S3Service;
 
 import java.util.Collection;
 
@@ -26,23 +27,31 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final SecurityRequestReader requestReader;
     private final SecurityResponseSender responseSender;
+    private final S3Service s3Service;
 
     public LoginFilter(String loginUrl,
                        JwtUtil jwtUtil,
                        AuthenticationManager authManager,
                        SecurityRequestReader reader,
-                       SecurityResponseSender sender) {
+                       SecurityResponseSender sender,
+                       S3Service s3Service
+    ) {
         this.jwtUtil = jwtUtil;
         this.authenticationManager = authManager;
         this.requestReader = reader;
         this.responseSender = sender;
+        this.s3Service = s3Service;
 
         setAuthenticationManager(authManager);
         setFilterProcessesUrl(loginUrl);
     }
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+    public Authentication attemptAuthentication(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws AuthenticationException {
+
         LoginRequest loginRequest = requestReader.read(request, LoginRequest.class);
         String email = loginRequest.email();
         String password = loginRequest.password();
@@ -52,30 +61,59 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     }
 
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
-                                            FilterChain chain, Authentication authentication) {
+    protected void successfulAuthentication(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain chain, Authentication authentication
+    ) {
 
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
-        Long memberId = customUserDetails.getMemberId();
-        Long userId = customUserDetails.getUserId();
-        Long publisherId = customUserDetails.getPublisherId();
-        String email = customUserDetails.getEmail();
+        Long memberId = customUserDetails.member().getId();
+        String email = customUserDetails.member().getEmail();
+        Long userId;
+        Long publisherId;
+        String profileImageKey = null;
+        if(customUserDetails.user() != null) {
+            userId = customUserDetails.user().getId();
+            profileImageKey = customUserDetails.user().getProfileImageKey();
+        } else {
+            userId = null;
+        }
+        if(customUserDetails.publisher() != null) {
+            publisherId = customUserDetails.publisher().getId();
+            profileImageKey = customUserDetails.publisher().getProfileImageKey();
+        } else {
+            publisherId = null;
+        }
+
+        String profileImageURL = s3Service.convertToPublicImageURL(profileImageKey);
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         authorities.stream().findFirst().map(GrantedAuthority::getAuthority).ifPresentOrElse(
                 (role)-> {
                     String token = jwtUtil.createJwt(memberId, userId, publisherId, email, role);
-                    sendSuccessResponse(response, token, memberId, userId, publisherId, role);
+                    sendSuccessResponse(response, token, memberId, email, userId, publisherId, profileImageURL, role);
                 }, ()-> responseSender.sendError(response, 500, "INVALID_ROLE", "권한 정보가 존재하지 않습니다.")
         );
     }
 
-    private void sendSuccessResponse(HttpServletResponse response, String token, Long memberId, Long userId, Long publisherId, String role) {
+    private void sendSuccessResponse(
+            HttpServletResponse response,
+            String token,
+            Long memberId,
+            String email,
+            Long userId,
+            Long publisherId,
+            String profileImageURL,
+            String role
+    ) {
         LoginResponse loginResponse = LoginResponse.builder()
                 .accessToken("Bearer " + token)
                 .memberId(memberId)
+                .email(email)
                 .userId(userId)
                 .publisherId(publisherId)
+                .profileImageURL(profileImageURL)
                 .role(role)
                 .build();
         responseSender.sendSuccess(response, loginResponse);

@@ -21,7 +21,7 @@ public class PublisherService {
     public PublisherInfoResponse getPublisherProfile(PublisherToken token) {
         PublisherProfile publisher = publisherRepository.findById(token.publisherId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));
-        String imageURL = s3Service.convertToPublicImageUrl(publisher.getProfileImageKey());
+        String imageURL = s3Service.convertToPublicImageURL(publisher.getProfileImageKey());
 
         return PublisherInfoResponse.of(publisher, imageURL);
     }

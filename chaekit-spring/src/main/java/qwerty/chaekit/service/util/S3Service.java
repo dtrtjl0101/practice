@@ -2,11 +2,10 @@ package qwerty.chaekit.service.util;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.enums.S3Directory;
+import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.properties.AwsProperties;
-import qwerty.chaekit.service.util.exceptions.FileInvalidExtensionException;
-import qwerty.chaekit.service.util.exceptions.FileMissingException;
-import qwerty.chaekit.service.util.exceptions.FileSizeExceededException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
@@ -49,7 +48,10 @@ public class S3Service {
     }
 
     // Public URL
-    public String convertToPublicImageUrl(String fileKey) {
+    public String convertToPublicImageURL(String fileKey) {
+        if (fileKey == null) {
+            return null;
+        }
         return "https://" + imageBucket + ".s3.amazonaws.com/" + fileKey;
     }
 
@@ -71,15 +73,15 @@ public class S3Service {
 
     private String getFileKeyWithValidation(S3Directory directory, MultipartFile file) {
         if (file == null || file.getOriginalFilename() == null) {
-            throw new FileMissingException();
+            throw new BadRequestException(ErrorCode.FILE_MISSING);
         }
         if (file.getSize() > directory.getMaxSize()) {
-            throw new FileSizeExceededException();
+            throw new BadRequestException(ErrorCode.FILE_SIZE_EXCEEDED);
         }
         String fileName = file.getOriginalFilename();
         String extension = fileName.substring(fileName.lastIndexOf("."));
         if (!directory.getAllowedExtensions().contains(extension)) {
-            throw new FileInvalidExtensionException();
+            throw new BadRequestException(ErrorCode.INVALID_EXTENSION);
         }
         return directory.getPath() + UUID.randomUUID() + extension;
     }

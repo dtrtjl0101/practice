@@ -36,7 +36,7 @@ public class AdminService {
         Page<PublisherProfile> page = publisherRepository.findAllByAcceptedFalseOrderByCreatedAtDesc(pageable);
         return PageResponse.of(page.map(publisher -> PublisherInfoResponse.of(
                         publisher,
-                        s3Service.convertToPublicImageUrl(publisher.getProfileImageKey())
+                        s3Service.convertToPublicImageURL(publisher.getProfileImageKey())
                 )));
     }
 
