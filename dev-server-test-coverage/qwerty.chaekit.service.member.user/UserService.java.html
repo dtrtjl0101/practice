@@ -3,28 +3,27 @@
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
-import qwerty.chaekit.dto.member.UserMemberResponse;
+import qwerty.chaekit.dto.member.UserInfoResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.UserToken;
+import qwerty.chaekit.service.util.S3Service;
 
-<span class="fc" id="L12">@Slf4j</span>
+<span class="fc" id="L14">@Slf4j</span>
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserProfileRepository userRepository;
+    private final S3Service s3Service;
 
-    public UserMemberResponse getUserProfile(UserToken userToken) {
-<span class="nc" id="L19">        String nickname = userRepository.findById(userToken.userId())</span>
-<span class="nc" id="L20">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND)).getNickname();</span>
+    public UserInfoResponse getUserProfile(UserToken userToken) {
+<span class="nc" id="L22">        UserProfile user = userRepository.findById(userToken.userId())</span>
+<span class="nc" id="L23">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
+<span class="nc" id="L24">        String imageURL = s3Service.convertToPublicImageURL(user.getProfileImageKey());</span>
 
-<span class="nc" id="L22">        return UserMemberResponse.builder()</span>
-<span class="nc" id="L23">                .id(userToken.memberId())</span>
-<span class="nc" id="L24">                .userId(userToken.userId())</span>
-<span class="nc" id="L25">                .email(userToken.email())</span>
-<span class="nc" id="L26">                .nickname(nickname)</span>
-<span class="nc" id="L27">                .build();</span>
+<span class="nc" id="L26">        return UserInfoResponse.of(user, imageURL);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>S3Directory.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chaekit</a> &gt; <a href="index.source.html" class="el_package">qwerty.chaekit.global.enums</a> &gt; <span class="el_source">S3Directory.java</span></div><h1>S3Directory.java</h1><pre class="source lang-java linenums">package qwerty.chaekit.global.enums;
+
+import lombok.Getter;
+
+import java.util.List;
+
+<span class="fc" id="L7">@Getter</span>
+public enum S3Directory {
+<span class="fc" id="L9">    EBOOK(&quot;ebook/&quot;, List.of(&quot;.epub&quot;), megaByte(10)),</span>
+<span class="fc" id="L10">    EBOOK_COVER_IMAGE(&quot;ebook-cover-image/&quot;, defaultImageExtensions(), megaByte(5)),</span>
+<span class="fc" id="L11">    GROUP_IMAGE(&quot;group-image/&quot;, defaultImageExtensions(), megaByte(5)),</span>
+<span class="fc" id="L12">    PROFILE_IMAGE(&quot;profile-image/&quot;, defaultImageExtensions(), megaByte(5)),;</span>
+
+    private final String path;
+    private final List&lt;String&gt; allowedExtensions;
+    private final long maxSize;
+
+<span class="fc" id="L18">    S3Directory(String path, List&lt;String&gt; allowedExtensions, long maxSize) {</span>
+<span class="fc" id="L19">        this.path = path;</span>
+<span class="fc" id="L20">        this.allowedExtensions = allowedExtensions;</span>
+<span class="fc" id="L21">        this.maxSize = maxSize;</span>
+<span class="fc" id="L22">    }</span>
+
+    private static List&lt;String&gt; defaultImageExtensions() {
+<span class="fc" id="L25">        return List.of(&quot;.jpg&quot;, &quot;.jpeg&quot;, &quot;.png&quot;, &quot;.gif&quot;, &quot;.bmp&quot;, &quot;.tiff&quot;, &quot;.webp&quot;);</span>
+    }
+
+    private static long megaByte(int size) {
+<span class="fc" id="L29">        return 1024 * 1024L * size;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

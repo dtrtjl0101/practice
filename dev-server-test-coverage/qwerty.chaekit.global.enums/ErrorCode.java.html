@@ -22,40 +22,46 @@ public enum ErrorCode {
     // email
 <span class="fc" id="L23">    EMAIL_VERIFICATION_FAILED(&quot;EMAIL_VERIFICATION_FAILED&quot;, &quot;이메일 인증에 실패했습니다.&quot;),</span>
 <span class="fc" id="L24">    EMAIL_SEND_FAILED(&quot;EMAIL_SEND_FAILED&quot;, &quot;이메일 전송에 실패했습니다.&quot;),</span>
+    // file
+<span class="fc" id="L26">    FILE_MISSING(&quot;FILE_MISSING&quot;, &quot;파일이 누락되었습니다&quot;),</span>
+<span class="fc" id="L27">    INVALID_EXTENSION(&quot;INVALID_EXTENSION&quot;, &quot;허용되지 않는 확장자입니다&quot;),</span>
+<span class="fc" id="L28">    FILE_SIZE_EXCEEDED(&quot;FILE_SIZE_EXCEED&quot;, &quot;파일 크기가 초과되었습니다&quot;),</span>
 
     // FORBIDDEN
-<span class="fc" id="L27">    NO_VALID_TOKEN(&quot;NO_VALID_TOKEN&quot;, &quot;유효한 토큰이 없습니다&quot;),</span>
-<span class="fc" id="L28">    GROUP_UPDATE_FORBIDDEN(&quot;GROUP_UPDATE_FORBIDDEN&quot;, &quot;독서모임 수정 권한이 없습니다&quot;),</span>
-<span class="fc" id="L29">    HIGHLIGHT_NOT_YOURS(&quot;HIGHLIGHT_NOT_YOURS&quot;, &quot;하이라이트는 본인만 수정할 수 있습니다&quot;),</span>
-<span class="fc" id="L30">    GROUP_LEADER_ONLY(&quot;GROUP_LEADER_ONLY&quot;, &quot;모임지기만 사용할 수 있는 기능입니다&quot;),</span>
-<span class="fc" id="L31">    ACTIVITY_GROUP_MISMATCH(&quot;ACTIVITY_GROUP_MISMATCH&quot;, &quot;해당 독서모임의 활동이 아닙니다&quot;),</span>
-<span class="fc" id="L32">    ONLY_USER(&quot;ONLY_USER&quot;, &quot;일반 회원만 사용할 수 있는 기능입니다&quot;),</span>
-<span class="fc" id="L33">    ONLY_PUBLISHER(&quot;ONLY_PUBLISHER&quot;, &quot;출판사 회원만 사용할 수 있는 기능입니다&quot;),</span>
+<span class="fc" id="L31">    NO_VALID_TOKEN(&quot;NO_VALID_TOKEN&quot;, &quot;유효한 토큰이 없습니다&quot;),</span>
+<span class="fc" id="L32">    GROUP_UPDATE_FORBIDDEN(&quot;GROUP_UPDATE_FORBIDDEN&quot;, &quot;독서모임 수정 권한이 없습니다&quot;),</span>
+<span class="fc" id="L33">    HIGHLIGHT_NOT_YOURS(&quot;HIGHLIGHT_NOT_YOURS&quot;, &quot;하이라이트는 본인만 수정할 수 있습니다&quot;),</span>
+<span class="fc" id="L34">    GROUP_LEADER_ONLY(&quot;GROUP_LEADER_ONLY&quot;, &quot;모임지기만 사용할 수 있는 기능입니다&quot;),</span>
+<span class="fc" id="L35">    ACTIVITY_GROUP_MISMATCH(&quot;ACTIVITY_GROUP_MISMATCH&quot;, &quot;해당 독서모임의 활동이 아닙니다&quot;),</span>
+<span class="fc" id="L36">    ONLY_USER(&quot;ONLY_USER&quot;, &quot;일반 회원만 사용할 수 있는 기능입니다&quot;),</span>
+<span class="fc" id="L37">    ONLY_PUBLISHER(&quot;ONLY_PUBLISHER&quot;, &quot;출판사 회원만 사용할 수 있는 기능입니다&quot;),</span>
+<span class="fc" id="L38">    ONLY_ADMIN(&quot;ONLY_ADMIN&quot;, &quot;관리자만 사용할 수 있는 기능입니다&quot;),</span>
 
     // NOT_FOUND
-<span class="fc" id="L36">    EBOOK_NOT_FOUND(&quot;EBOOK_NOT_FOUND&quot;, &quot;해당 전자책이 존재하지 않습니다&quot;),</span>
-<span class="fc" id="L37">    PUBLISHER_NOT_FOUND(&quot;PUBLISHER_NOT_FOUND&quot;, &quot;해당 출판사가 존재하지 않습니다&quot;),</span>
-<span class="fc" id="L38">    USER_NOT_FOUND(&quot;USER_NOT_FOUND&quot;, &quot;일반 회원이 아니거나 존재하지 않습니다&quot;),</span>
-<span class="fc" id="L39">    GROUP_NOT_FOUND(&quot;GROUP_NOT_FOUND&quot;, &quot;해당 독서모임이 존재하지 않습니다&quot;),</span>
-<span class="fc" id="L40">    HIGHLIGHT_NOT_FOUND(&quot;HIGHLIGHT_NOT_FOUND&quot;, &quot;해당 하이라이트가 존재하지 않습니다&quot;),</span>
-<span class="fc" id="L41">    ACTIVITY_NOT_FOUND(&quot;ACTIVITY_NOT_FOUND&quot;, &quot;해당 활동이 존재하지 않습니다&quot;),</span>
+<span class="fc" id="L41">    EBOOK_NOT_FOUND(&quot;EBOOK_NOT_FOUND&quot;, &quot;해당 전자책이 존재하지 않습니다&quot;),</span>
+<span class="fc" id="L42">    PUBLISHER_NOT_FOUND(&quot;PUBLISHER_NOT_FOUND&quot;, &quot;해당 출판사가 존재하지 않습니다&quot;),</span>
+<span class="fc" id="L43">    USER_NOT_FOUND(&quot;USER_NOT_FOUND&quot;, &quot;일반 회원이 아니거나 존재하지 않습니다&quot;),</span>
+<span class="fc" id="L44">    GROUP_NOT_FOUND(&quot;GROUP_NOT_FOUND&quot;, &quot;해당 독서모임이 존재하지 않습니다&quot;),</span>
+<span class="fc" id="L45">    HIGHLIGHT_NOT_FOUND(&quot;HIGHLIGHT_NOT_FOUND&quot;, &quot;해당 하이라이트가 존재하지 않습니다&quot;),</span>
+<span class="fc" id="L46">    ACTIVITY_NOT_FOUND(&quot;ACTIVITY_NOT_FOUND&quot;, &quot;해당 활동이 존재하지 않습니다&quot;),</span>
 
     // Exception Handler
-<span class="fc" id="L44">    INVALID_INPUT(&quot;INVALID_INPUT&quot;, &quot;입력값이 유효하지 않습니다&quot;),</span>
+<span class="fc" id="L49">    INVALID_INPUT(&quot;INVALID_INPUT&quot;, &quot;입력값이 유효하지 않습니다&quot;),</span>
 
-<span class="fc" id="L46">    METHOD_NOT_ALLOWED(&quot;METHOD_NOT_ALLOWED&quot;, &quot;지원하지 않는 HTTP 메서드입니다&quot;),</span>
-<span class="fc" id="L47">    NO_RESOURCE_FOUND(&quot;NO_RESOURCE_FOUND&quot;, &quot;존재하지 않는 경로입니다&quot;),</span>
+<span class="fc" id="L51">    METHOD_NOT_ALLOWED(&quot;METHOD_NOT_ALLOWED&quot;, &quot;지원하지 않는 HTTP 메서드입니다&quot;),</span>
+<span class="fc" id="L52">    NO_RESOURCE_FOUND(&quot;NO_RESOURCE_FOUND&quot;, &quot;존재하지 않는 경로입니다&quot;),</span>
 
-<span class="fc" id="L49">    ALREADY_JOINED_GROUP(&quot;ALREADY_JOINED_GROUP&quot;, &quot;이미 가입한 그룹입니다&quot;),</span>
-<span class="fc" id="L50">    GROUP_LEADER_CANNOT_LEAVE(&quot;GROUP_LEADER_CANNOT_LEAVE&quot;, &quot;그룹장은 그룹을 탈퇴할 수 없습니다&quot;);</span>
+<span class="fc" id="L54">    ALREADY_JOINED_GROUP(&quot;ALREADY_JOINED_GROUP&quot;, &quot;이미 가입한 그룹입니다&quot;),</span>
+<span class="fc" id="L55">    GROUP_LEADER_CANNOT_LEAVE(&quot;GROUP_LEADER_CANNOT_LEAVE&quot;, &quot;그룹장은 그룹을 탈퇴할 수 없습니다&quot;),</span>
+    ;
 
     private final String code;
     private final String message;
 
-<span class="fc" id="L55">    ErrorCode(String code, String message) {</span>
-<span class="fc" id="L56">        this.code = code;</span>
-<span class="fc" id="L57">        this.message = message;</span>
-<span class="fc" id="L58">    }</span>
+<span class="fc" id="L61">    ErrorCode(String code, String message) {</span>
+<span class="fc" id="L62">        this.code = code;</span>
+<span class="fc" id="L63">        this.message = message;</span>
+<span class="fc" id="L64">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

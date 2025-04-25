@@ -5,28 +5,25 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
-import qwerty.chaekit.dto.member.PublisherMemberResponse;
+import qwerty.chaekit.dto.member.PublisherInfoResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.PublisherToken;
+import qwerty.chaekit.service.util.S3Service;
 
-<span class="fc" id="L13">@Slf4j</span>
+<span class="fc" id="L14">@Slf4j</span>
 @Service
 @RequiredArgsConstructor
 public class PublisherService {
     private final PublisherProfileRepository publisherRepository;
+    private final S3Service s3Service;
 
-    public PublisherMemberResponse getPublisherProfile(PublisherToken token) {
-<span class="nc" id="L20">        PublisherProfile publisher = publisherRepository.findById(token.publisherId())</span>
-<span class="nc" id="L21">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));</span>
+    public PublisherInfoResponse getPublisherProfile(PublisherToken token) {
+<span class="nc" id="L22">        PublisherProfile publisher = publisherRepository.findById(token.publisherId())</span>
+<span class="nc" id="L23">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));</span>
+<span class="nc" id="L24">        String imageURL = s3Service.convertToPublicImageURL(publisher.getProfileImageKey());</span>
 
-<span class="nc" id="L23">        return PublisherMemberResponse.builder()</span>
-<span class="nc" id="L24">                .id(token.memberId())</span>
-<span class="nc" id="L25">                .publisherId(publisher.getId())</span>
-<span class="nc" id="L26">                .publisherName(publisher.getPublisherName())</span>
-<span class="nc" id="L27">                .email(token.email())</span>
-<span class="nc" id="L28">                .isAccepted(publisher.isAccepted())</span>
-<span class="nc" id="L29">                .build();</span>
+<span class="nc" id="L26">        return PublisherInfoResponse.of(publisher, imageURL);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

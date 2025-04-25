@@ -14,12 +14,14 @@ import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.service.member.notification.EmailService;
+import qwerty.chaekit.service.util.S3Service;
 
 @Service
 @RequiredArgsConstructor
 public class AdminService {
     private final PublisherProfileRepository publisherRepository;
     private final EmailService emailService;
+    private final S3Service s3Service;
 
     @Getter
     @Setter
@@ -31,24 +33,27 @@ public class AdminService {
 
     @Transactional(readOnly = true)
     public PageResponse&lt;PublisherInfoResponse&gt; getNotAcceptedPublishers(Pageable pageable) {
-<span class="fc" id="L34">        Page&lt;PublisherProfile&gt; page = publisherRepository.findAllByAcceptedFalseOrderByCreatedAtDesc(pageable);</span>
-<span class="fc" id="L35">        return PageResponse.of(page.map(PublisherInfoResponse::of));</span>
+<span class="fc" id="L36">        Page&lt;PublisherProfile&gt; page = publisherRepository.findAllByAcceptedFalseOrderByCreatedAtDesc(pageable);</span>
+<span class="fc" id="L37">        return PageResponse.of(page.map(publisher -&gt; PublisherInfoResponse.of(</span>
+                        publisher,
+<span class="fc" id="L39">                        s3Service.convertToPublicImageURL(publisher.getProfileImageKey())</span>
+                )));
     }
 
     @Transactional
     public boolean acceptPublisher(Long publisherId) {
-<span class="fc" id="L40">        PublisherProfile publisher = publisherRepository.findByIdWithMember(publisherId)</span>
-<span class="fc" id="L41">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));</span>
+<span class="fc" id="L45">        PublisherProfile publisher = publisherRepository.findByIdWithMember(publisherId)</span>
+<span class="fc" id="L46">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));</span>
 
         // 이미 승인된 경우
-<span class="fc bfc" id="L44" title="All 2 branches covered.">        if (publisher.isAccepted()) {</span>
-<span class="fc" id="L45">            return false;</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        if (publisher.isAccepted()) {</span>
+<span class="fc" id="L50">            return false;</span>
         }
 
         // 승인 처리
-<span class="fc" id="L49">        publisher.acceptPublisher();</span>
-<span class="fc" id="L50">        emailService.sendPublisherApprovalEmail(publisher.getMember().getEmail());</span>
-<span class="fc" id="L51">        return true;</span>
+<span class="fc" id="L54">        publisher.acceptPublisher();</span>
+<span class="fc" id="L55">        emailService.sendPublisherApprovalEmail(publisher.getMember().getEmail());</span>
+<span class="fc" id="L56">        return true;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

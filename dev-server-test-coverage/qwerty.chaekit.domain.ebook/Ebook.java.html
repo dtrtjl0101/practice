@@ -30,19 +30,22 @@ public class Ebook extends BaseEntity {
     @Column(nullable = false)
     private String fileKey;
 
+    private String coverImageKey;
+
     @ManyToOne
     @JoinColumn(name = &quot;publisher_id&quot;)
     private PublisherProfile publisher;
 
     @Builder
-<span class="fc" id="L38">    public Ebook(Long id, String title, String author, String description, long size, String fileKey, PublisherProfile publisher) {</span>
-<span class="fc" id="L39">        this.id = id;</span>
-<span class="fc" id="L40">        this.title = title;</span>
-<span class="fc" id="L41">        this.author = author;</span>
-<span class="fc" id="L42">        this.description = description;</span>
-<span class="fc" id="L43">        this.size = size;</span>
-<span class="fc" id="L44">        this.fileKey = fileKey;</span>
-<span class="fc" id="L45">        this.publisher = publisher;</span>
-<span class="fc" id="L46">    }</span>
+<span class="fc" id="L40">    public Ebook(Long id, String title, String author, String description, long size, String fileKey, String coverImageKey, PublisherProfile publisher) {</span>
+<span class="fc" id="L41">        this.id = id;</span>
+<span class="fc" id="L42">        this.title = title;</span>
+<span class="fc" id="L43">        this.author = author;</span>
+<span class="fc" id="L44">        this.description = description;</span>
+<span class="fc" id="L45">        this.size = size;</span>
+<span class="fc" id="L46">        this.fileKey = fileKey;</span>
+<span class="fc" id="L47">        this.coverImageKey = coverImageKey;</span>
+<span class="fc" id="L48">        this.publisher = publisher;</span>
+<span class="fc" id="L49">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

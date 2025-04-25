@@ -25,10 +25,11 @@ public class Member extends BaseEntity {
     private Role role;
 
     @Builder
-<span class="fc" id="L28">    public Member(String email, String password, Role role) {</span>
-<span class="fc" id="L29">        this.email = email;</span>
-<span class="fc" id="L30">        this.password = password;</span>
-<span class="fc" id="L31">        this.role = role;</span>
-<span class="fc" id="L32">    }</span>
+<span class="fc" id="L28">    public Member(Long id, String email, String password, Role role) {</span>
+<span class="fc" id="L29">        this.id = id;</span>
+<span class="fc" id="L30">        this.email = email;</span>
+<span class="fc" id="L31">        this.password = password;</span>
+<span class="fc" id="L32">        this.role = role;</span>
+<span class="fc" id="L33">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

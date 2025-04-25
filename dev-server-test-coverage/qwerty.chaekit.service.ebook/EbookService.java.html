@@ -7,16 +7,20 @@ import org.springframework.stereotype.Service;
 import qwerty.chaekit.domain.ebook.EbookRepository;
 import qwerty.chaekit.dto.ebook.EbookFetchResponse;
 import qwerty.chaekit.dto.page.PageResponse;
+import qwerty.chaekit.service.util.S3Service;
 
 @Service
 @RequiredArgsConstructor
 public class EbookService {
     private final EbookRepository ebookRepository;
+    private final S3Service s3Service;
 
     public PageResponse&lt;EbookFetchResponse&gt; fetchEbookList(Pageable pageable) {
-<span class="nc" id="L17">        Page&lt;EbookFetchResponse&gt; page = ebookRepository.findAll(pageable)</span>
-<span class="nc" id="L18">                .map(EbookFetchResponse::of);</span>
-<span class="nc" id="L19">        return PageResponse.of(page);</span>
+<span class="nc" id="L19">        Page&lt;EbookFetchResponse&gt; page = ebookRepository.findAll(pageable)</span>
+<span class="nc" id="L20">                .map( ebook -&gt; EbookFetchResponse.of(</span>
+<span class="nc" id="L21">                        ebook, s3Service.convertToPublicImageURL(ebook.getCoverImageKey())</span>
+                        ));
+<span class="nc" id="L23">        return PageResponse.of(page);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
