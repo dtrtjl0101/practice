@@ -13,10 +13,13 @@ import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.dto.group.*;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
+import qwerty.chaekit.global.enums.S3Directory;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
+import qwerty.chaekit.global.properties.AwsProperties;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.member.notification.EmailService;
+import qwerty.chaekit.service.util.S3Service;
 
 import java.util.List;
 
@@ -26,6 +29,8 @@ public class GroupService {
     private final UserProfileRepository userRepository;
     private final GroupRepository groupRepository;
     private final EmailService emailService;
+    private final S3Service s3Service;
+    private final AwsProperties awsProperties;
 
     @Transactional
     public GroupPostResponse createGroup(UserToken userToken, GroupPostRequest request) {
@@ -34,19 +39,29 @@ public class GroupService {
             throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
         }
 
+        String groupImageKey = s3Service.uploadFile(
+                awsProperties.imageBucketName(),
+                S3Directory.GROUP_IMAGE,
+                request.groupImage(),
+                false
+        );
+
         ReadingGroup groupEntity = ReadingGroup.builder()
                 .name(request.name())
                 .groupLeader(userRepository.getReferenceById(userId))
                 .description(request.description())
+                .groupImageKey(groupImageKey)
                 .build();
         ReadingGroup savedGroup = groupRepository.save(groupEntity);
         request.tags().forEach(savedGroup::addTag);
-        return GroupPostResponse.of(groupEntity);
+        return GroupPostResponse.of(savedGroup, getGroupImageURL(savedGroup));
     }
 
     @Transactional(readOnly = true)
     public PageResponse<GroupFetchResponse> fetchGroupList(Pageable pageable) {
-        Page<GroupFetchResponse> page = groupRepository.findAll(pageable).map(GroupFetchResponse::of);
+        Page<GroupFetchResponse> page = groupRepository.findAll(pageable).map(
+                group -> GroupFetchResponse.of(group, getGroupImageURL(group))
+        );
         return PageResponse.of(page);
     }
 
@@ -54,7 +69,7 @@ public class GroupService {
     public GroupFetchResponse fetchGroup(long groupId) {
         ReadingGroup group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.GROUP_NOT_FOUND));
-        return GroupFetchResponse.of(group);
+        return GroupFetchResponse.of(group, getGroupImageURL(group));
     }
 
     @Transactional
@@ -73,7 +88,18 @@ public class GroupService {
         if(request.description() != null) {
             group.updateDescription(request.description());
         }
-        return GroupPostResponse.of(group);
+
+        String imageKey = s3Service.uploadFile(
+                awsProperties.imageBucketName(),
+                S3Directory.GROUP_IMAGE,
+                request.groupImage(),
+                false
+        );
+
+        if(imageKey != null) {
+            group.updateGroupImageKey(imageKey);
+        }
+        return GroupPostResponse.of(group, getGroupImageURL(group));
     }
 
     @Transactional
@@ -157,5 +183,9 @@ public class GroupService {
         List<GroupMember> groupMembers = group.getGroupMembers().stream().filter((groupMember)-> !groupMember.isAccepted()).toList();
 
         return null;
+    }
+
+    private String getGroupImageURL(ReadingGroup group) {
+        return s3Service.convertToPublicImageURL(group.getGroupImageKey());
     }
 }

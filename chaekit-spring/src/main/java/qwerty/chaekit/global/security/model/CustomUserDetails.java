@@ -1,50 +1,38 @@
 package qwerty.chaekit.global.security.model;
 
-import lombok.Getter;
+import jakarta.annotation.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import qwerty.chaekit.domain.member.Member;
+import qwerty.chaekit.domain.member.publisher.PublisherProfile;
+import qwerty.chaekit.domain.member.user.UserProfile;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
 // 1. JWT를 읽을 때 사용
 // 2. AuthenticationManager에서 로그인할 때 사용
-public class CustomUserDetails implements UserDetails {
-    @Getter
-    private final Long memberId;
-    @Getter
-    private final Long userId;
-    @Getter
-    private final Long publisherId;
-    @Getter
-    private final String email;
-    private final String password;
-    private final String role;
-
-    public CustomUserDetails(Long memberId, Long userId, Long publisherId, String email, String password, String role) {
-        this.memberId = memberId;
-        this.userId = userId;
-        this.publisherId = publisherId;
-        this.email = email;
-        this.password = password;
-        this.role = role;
-    }
+public record CustomUserDetails(
+        Member member,
+        @Nullable UserProfile user,
+        @Nullable PublisherProfile publisher
+) implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> collection = new ArrayList<>();
-        collection.add((GrantedAuthority) () -> role);
+        collection.add((GrantedAuthority) () -> member.getRole().name());
         return collection;
     }
 
     @Override
     public String getPassword() {
-        return password;
+        return member.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return email;
+        return member.getEmail();
     }
 
     @Override

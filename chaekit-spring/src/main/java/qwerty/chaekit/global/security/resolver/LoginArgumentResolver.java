@@ -47,7 +47,7 @@ public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
         if (auth == null || !auth.isAuthenticated()) {
             throw new IllegalStateException("SecurityContext에 인증 정보가 없습니다.");
         }
-        if (!(auth.getPrincipal() instanceof CustomUserDetails userDetails)) { // if annonymous user
+        if (!(auth.getPrincipal() instanceof CustomUserDetails details)) { // if annonymous user
             if(requiredRole == Role.ROLE_USER) {
                 throw new ForbiddenException(ErrorCode.ONLY_USER);
             } else { // if (requiredRole == Role.ROLE_PUBLISHER)
@@ -56,22 +56,22 @@ public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
         }
 
         if (requiredRole == Role.ROLE_USER) {
-            if (userDetails.getUserId() == null) {
+            if (details.user() == null) {
                 throw new ForbiddenException(ErrorCode.ONLY_USER);
             }
             return UserToken.builder()
-                    .memberId(userDetails.getMemberId())
-                    .userId(userDetails.getUserId())
-                    .email(userDetails.getEmail())
+                    .memberId(details.member().getId())
+                    .email(details.member().getEmail())
+                    .userId(details.user().getId())
                     .build();
         } else { // if (requiredRole == Role.ROLE_PUBLISHER)
-            if (userDetails.getPublisherId() == null) {
+            if (details.publisher() == null) {
                 throw new ForbiddenException(ErrorCode.ONLY_PUBLISHER);
             }
             return PublisherToken.builder()
-                    .memberId(userDetails.getMemberId())
-                    .publisherId(userDetails.getPublisherId())
-                    .email(userDetails.getEmail())
+                    .memberId(details.member().getId())
+                    .publisherId(details.publisher().getId())
+                    .email(details.member().getEmail())
                     .build();
         }
     }

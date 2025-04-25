@@ -12,6 +12,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
+import qwerty.chaekit.domain.member.Member;
+import qwerty.chaekit.domain.member.enums.Role;
+import qwerty.chaekit.domain.member.publisher.PublisherProfile;
+import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.global.jwt.JwtUtil;
 import qwerty.chaekit.global.security.model.CustomUserDetails;
 
@@ -47,7 +51,19 @@ public class JwtFilter extends OncePerRequestFilter {
         String email = jwtUtil.getEmail(parsedJwt);
         String role = jwtUtil.getRole(parsedJwt);
 
-        CustomUserDetails customUserDetails = new CustomUserDetails(memberId, userId, publisherId, email, null, role);
+        Member member = Member.builder()
+                .id(memberId)
+                .email(email)
+                .role(Role.from(role))
+                .build();
+        PublisherProfile publisher = PublisherProfile.builder()
+                .id(publisherId)
+                .build();
+        UserProfile user = UserProfile.builder()
+                .id(userId)
+                .build();
+
+        CustomUserDetails customUserDetails = new CustomUserDetails(member, user, publisher);
 
         Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
 

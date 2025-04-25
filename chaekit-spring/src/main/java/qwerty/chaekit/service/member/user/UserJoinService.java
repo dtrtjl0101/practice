@@ -27,11 +27,13 @@ public class UserJoinService {
         String password = request.password();
         String verificationCode = request.verificationCode();
 
-        validateNickname(request.email());
-        Member member = memberJoinHelper.saveMemberWithVerificationCode(email, password, Role.ROLE_USER, verificationCode);
-        UserProfile user = saveUser(request, member);
+        String imageFileKey = memberJoinHelper.uploadProfileImage(request.profileImage());
 
-        return toResponse(request, member, user);
+        validateNickname(request.nickname());
+        Member member = memberJoinHelper.saveMemberWithVerificationCode(email, password, Role.ROLE_USER, verificationCode);
+        UserProfile user = saveUser(request, member, imageFileKey);
+
+        return toResponse(member, user);
     }
 
     private void validateNickname(String nickname) {
@@ -40,22 +42,31 @@ public class UserJoinService {
         }
     }
 
-    private UserProfile saveUser(UserJoinRequest request, Member member) {
+    private UserProfile saveUser(UserJoinRequest request, Member member, String imageFileKey) {
         return userRepository.save(UserProfile.builder()
                 .member(member)
                 .nickname(request.nickname())
+                .profileImageKey(imageFileKey)
                 .build());
     }
 
-    private UserJoinResponse toResponse(UserJoinRequest request, Member member, UserProfile user) {
-        String token = jwtUtil.createJwt(member.getId(), user.getId(), null, member.getEmail(), member.getRole().name());
+    private UserJoinResponse toResponse(Member member, UserProfile user) {
+        String token = "Bearer " + jwtUtil.createJwt(
+                member.getId(),
+                user.getId(),
+                null,
+                member.getEmail(),
+                member.getRole().name()
+        );
+        String profileImageKey = memberJoinHelper.convertToPublicImageURL(user.getProfileImageKey());
 
         return UserJoinResponse.builder()
-                .id(member.getId())
+                .memberId(member.getId())
                 .userId(user.getId())
-                .accessToken("Bearer " + token)
+                .accessToken(token)
                 .email(member.getEmail())
-                .nickname(request.nickname())
+                .nickname(user.getNickname())
+                .profileImageURL(profileImageKey)
                 .build();
     }
 }

@@ -4,9 +4,10 @@ import lombok.Builder;
 
 @Builder
 public record UserJoinResponse(
-        Long id,
+        Long memberId,
+        String email,
         Long userId,
         String accessToken,
         String nickname,
-        String email
+        String profileImageURL
 ){ }

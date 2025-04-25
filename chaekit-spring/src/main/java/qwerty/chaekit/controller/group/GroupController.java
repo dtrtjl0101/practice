@@ -1,7 +1,7 @@
 package qwerty.chaekit.controller.group;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.User;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
@@ -19,25 +19,33 @@ public class GroupController {
     private final GroupService groupService;
 
     @PostMapping
-    public ApiSuccessResponse<GroupPostResponse> createGroup(@Login UserToken userToken,
-                                         @RequestBody GroupPostRequest groupPostRequest) {
+    public ApiSuccessResponse<GroupPostResponse> createGroup(
+            @Login UserToken userToken,
+            @ModelAttribute @Valid GroupPostRequest groupPostRequest
+    ) {
         return ApiSuccessResponse.of(groupService.createGroup(userToken, groupPostRequest));
     }
 
     @GetMapping
-    public ApiSuccessResponse<PageResponse<GroupFetchResponse>> getAllGroups(@ParameterObject Pageable pageable) {
+    public ApiSuccessResponse<PageResponse<GroupFetchResponse>> getAllGroups(
+            @ParameterObject Pageable pageable
+    ) {
         return ApiSuccessResponse.of(groupService.fetchGroupList(pageable));
     }
 
     @GetMapping("/{groupId}/info")
-    public ApiSuccessResponse<GroupFetchResponse> getGroup(@PathVariable long groupId) {
+    public ApiSuccessResponse<GroupFetchResponse> getGroup(
+            @PathVariable long groupId
+    ) {
         return ApiSuccessResponse.of(groupService.fetchGroup(groupId));
     }
 
-    @PutMapping("/{groupId}")
-    public ApiSuccessResponse<GroupPostResponse> updateGroup(@Login UserToken userToken,
-                                         @PathVariable long groupId,
-                                         @RequestBody GroupPutRequest request) {
+    @PatchMapping("/{groupId}")
+    public ApiSuccessResponse<GroupPostResponse> updateGroup(
+            @Login UserToken userToken,
+            @PathVariable long groupId,
+            @ModelAttribute @Valid GroupPutRequest request
+    ) {
         return ApiSuccessResponse.of(groupService.updateGroup(userToken, groupId, request));
     }
 
