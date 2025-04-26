@@ -27,7 +27,7 @@ import qwerty.chaekit.global.security.resolver.UserToken;
 @RequiredArgsConstructor
 public class HighlightService {
     private final HighlightRepository highlightRepository;
-    private final EbookJpaRepository ebookJpaRepository;
+    private final EbookRepository ebookRepository;
     private final UserProfileRepository userRepository;
 
     public HighlightPostResponse createHighlight(UserToken userToken, HighlightPostRequest request) {
@@ -35,14 +35,14 @@ public class HighlightService {
         if(!userRepository.existsById(userId)) {
             throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
         }
-        if(!ebookJpaRepository.existsById(request.bookId())) {
+        if(!ebookRepository.existsById(request.bookId())) {
             throw new NotFoundException(ErrorCode.EBOOK_NOT_FOUND);
         }
 
         // Activity를 추가하는 경우 권한 체크 필요
 
         Highlight highlight = Highlight.builder()
-                .book(ebookJpaRepository.getReferenceById(request.bookId()))
+                .book(ebookRepository.getReferenceById(request.bookId()))
                 .spine(request.spine())
                 .cfi(request.cfi())
                 .author(userRepository.getReferenceById(userId))

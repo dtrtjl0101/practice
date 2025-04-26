@@ -32,8 +32,8 @@ import java.util.zip.ZipInputStream;
 
 @Service
 public class EbookFileService {
-    //private final EbookRepository ebookRepository;
-    private final EbookJpaRepository ebookJpaRepository;
+    private final EbookRepository ebookRepository;
+    //private final EbookJpaRepository ebookJpaRepository;
     private final AdminService adminService;
 
     private final S3Client s3Client;
@@ -44,8 +44,8 @@ public class EbookFileService {
     private final Long presignedUrlExpirationTime;
     private final PublisherProfileRepository publisherRepository;
 
-    public EbookFileService(EbookJpaRepository ebookJpaRepository, AdminService adminService, S3Client s3Client, S3Presigner s3Presigner, AwsProperties awsProperties, PublisherProfileRepository publisherRepository) {
-        this.ebookJpaRepository = ebookJpaRepository;
+    public EbookFileService(EbookRepository ebookRepository, AdminService adminService, S3Client s3Client, S3Presigner s3Presigner, AwsProperties awsProperties, PublisherProfileRepository publisherRepository) {
+        this.ebookRepository = ebookRepository;
         this.adminService = adminService;
 
         this.s3Client = s3Client;
@@ -96,7 +96,7 @@ public class EbookFileService {
                 .fileKey(fileKey)
                 .publisher(publisherRepository.getReferenceById(adminService.getAdminPublisherId()))
                 .build();
-        ebookJpaRepository.save(ebook);
+        ebookRepository.save(ebook);
 
         return "File uploaded successfully: " + fileKey;
     }
@@ -138,7 +138,7 @@ public class EbookFileService {
 
     @Transactional
     public EbookDownloadResponse getPresignedEbookUrl(Long ebookId) {
-        Ebook ebook = ebookJpaRepository.findById(ebookId)
+        Ebook ebook = ebookRepository.findById(ebookId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.EBOOK_NOT_FOUND));
 
         String fileKey = ebook.getFileKey();

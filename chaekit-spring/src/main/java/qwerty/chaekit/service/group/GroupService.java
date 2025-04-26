@@ -7,6 +7,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.group.GroupMember;
+import qwerty.chaekit.domain.group.GroupMemberRepository;
 import qwerty.chaekit.domain.group.GroupRepository;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.member.user.UserProfile;
@@ -25,6 +26,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GroupService {
     private final UserProfileRepository userRepository;
+    private final GroupMemberRepository groupMemberRepository;
     private final GroupRepository groupRepository;
     private final EmailService emailService;
 
@@ -156,23 +158,11 @@ public class GroupService {
             throw new ForbiddenException(ErrorCode.GROUP_LEADER_ONLY);
         }
 
-        List<GroupMember> pendingMembers = group.getGroupMembers().stream()
-                .filter(groupMember -> !groupMember.isAccepted())
-                .toList();
+        // JPQL로 대기 멤버 페이징 조회
+        Page<GroupMember> pendingMembersPage = groupMemberRepository.findByReadingGroupAndIsAcceptedFalse(group, pageable);
 
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), pendingMembers.size());
-        List<GroupMember> pageContent = pendingMembers.subList(start, end);
-
-        List<GroupPendingMemberResponse> content = pageContent.stream()
-                .map(GroupPendingMemberResponse::of)
-                .toList();
-
-        Page<GroupPendingMemberResponse> page = new PageImpl<>(
-                content,
-                pageable,
-                pendingMembers.size()
-        );
+        // DTO 변환
+        Page<GroupPendingMemberResponse> page = pendingMembersPage.map(GroupPendingMemberResponse::of);
 
         return PageResponse.of(page);
     }

@@ -19,6 +19,26 @@ public class EbookRepositoryImpl implements EbookRepository {
     private final EbookJpaRepository ebookJpaRepository;
 
     @Override
+    public Optional<Ebook> findById(Long id) {
+        return ebookJpaRepository.findById(id);
+    }
+
+    @Override
+    public Ebook save(Ebook ebook) {
+        return ebookJpaRepository.save(ebook);
+    }
+
+    @Override
+    public boolean existsById(Long id) {
+        return ebookJpaRepository.existsById(id);
+    }
+
+    @Override
+    public Ebook getReferenceById(Long id) {
+        return ebookJpaRepository.getReferenceById(id);
+    }
+
+    @Override
     public Page<Ebook> searchEbooks(String authorName, String bookTitle, Pageable pageable) {
         QEbook ebook = QEbook.ebook;
         BooleanBuilder where = new BooleanBuilder();
