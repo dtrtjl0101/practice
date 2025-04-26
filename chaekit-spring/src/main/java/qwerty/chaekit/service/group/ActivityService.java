@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import qwerty.chaekit.domain.ebook.EbookJpaRepository;
 import qwerty.chaekit.domain.ebook.EbookRepository;
 import qwerty.chaekit.domain.group.GroupRepository;
 import qwerty.chaekit.domain.group.ReadingGroup;
@@ -31,7 +32,8 @@ public class ActivityService {
     private final UserProfileRepository userRepository;
     private final GroupRepository groupRepository;
     private final ActivityRepository activityRepository;
-    private final EbookRepository ebookRepository;
+    //private final EbookRepository ebookRepository;
+    private final EbookJpaRepository ebookJpaRepository;
 
     public ActivityPostResponse createActivity(UserToken userToken, long groupId, ActivityPostRequest request) {
         Long userId = userToken.userId();
@@ -45,7 +47,7 @@ public class ActivityService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.GROUP_NOT_FOUND));
 
         // 3. 전자책이 존재하는지 확인한다.
-        if(!ebookRepository.existsById(request.bookId())){
+        if(!ebookJpaRepository.existsById(request.bookId())){
             throw new NotFoundException(ErrorCode.EBOOK_NOT_FOUND);
         }
         // 4. 활동이 겹치지 않는 지 확인한다.
@@ -69,7 +71,7 @@ public class ActivityService {
 
         Activity saved = activityRepository.save(Activity.builder()
                 .group(groupRepository.getReferenceById(groupId))
-                .book(ebookRepository.getReferenceById(request.bookId()))
+                .book(ebookJpaRepository.getReferenceById(request.bookId()))
                 .startTime(request.startTime())
                 .endTime(request.endTime())
                 .description(request.description())

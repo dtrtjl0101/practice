@@ -3,6 +3,7 @@ package qwerty.chaekit.service.group;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.group.GroupMember;
@@ -146,6 +147,7 @@ public class GroupService {
         group.rejectMember(memberProfile);
     }
 
+    @Transactional
     public PageResponse<GroupPendingMemberResponse> fetchPendingList(Pageable pageable, UserToken userToken, long groupId) {
         ReadingGroup group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.GROUP_NOT_FOUND));
@@ -154,8 +156,24 @@ public class GroupService {
             throw new ForbiddenException(ErrorCode.GROUP_LEADER_ONLY);
         }
 
-        List<GroupMember> groupMembers = group.getGroupMembers().stream().filter((groupMember)-> !groupMember.isAccepted()).toList();
+        List<GroupMember> pendingMembers = group.getGroupMembers().stream()
+                .filter(groupMember -> !groupMember.isAccepted())
+                .toList();
 
-        return null;
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), pendingMembers.size());
+        List<GroupMember> pageContent = pendingMembers.subList(start, end);
+
+        List<GroupPendingMemberResponse> content = pageContent.stream()
+                .map(GroupPendingMemberResponse::of)
+                .toList();
+
+        Page<GroupPendingMemberResponse> page = new PageImpl<>(
+                content,
+                pageable,
+                pendingMembers.size()
+        );
+
+        return PageResponse.of(page);
     }
 }

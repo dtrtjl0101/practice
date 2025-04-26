@@ -12,6 +12,8 @@ import qwerty.chaekit.global.security.resolver.Login;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.group.GroupService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/groups")
 @RequiredArgsConstructor

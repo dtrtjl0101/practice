@@ -18,7 +18,7 @@ public class EbookController {
     private final EbookService ebookService;
 
     @GetMapping
-    public ApiSuccessResponse<PageResponse<EbookFetchResponse>>getbooks(@ParameterObject Pageable pageable) {
+    public ApiSuccessResponse<PageResponse<EbookFetchResponse>>listallbook(@ParameterObject Pageable pageable) {
         return ApiSuccessResponse.of(ebookService.fetchEbookList(pageable));
     }
 

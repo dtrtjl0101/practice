@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import qwerty.chaekit.domain.ebook.Ebook;
+import qwerty.chaekit.domain.ebook.EbookJpaRepository;
 import qwerty.chaekit.domain.ebook.EbookRepository;
 import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
 import qwerty.chaekit.dto.ebook.upload.EbookDownloadResponse;
@@ -31,7 +32,8 @@ import java.util.zip.ZipInputStream;
 
 @Service
 public class EbookFileService {
-    private final EbookRepository ebookRepository;
+    //private final EbookRepository ebookRepository;
+    private final EbookJpaRepository ebookJpaRepository;
     private final AdminService adminService;
 
     private final S3Client s3Client;
@@ -42,8 +44,8 @@ public class EbookFileService {
     private final Long presignedUrlExpirationTime;
     private final PublisherProfileRepository publisherRepository;
 
-    public EbookFileService(EbookRepository ebookRepository, AdminService adminService, S3Client s3Client, S3Presigner s3Presigner, AwsProperties awsProperties, PublisherProfileRepository publisherRepository) {
-        this.ebookRepository = ebookRepository;
+    public EbookFileService(EbookJpaRepository ebookJpaRepository, AdminService adminService, S3Client s3Client, S3Presigner s3Presigner, AwsProperties awsProperties, PublisherProfileRepository publisherRepository) {
+        this.ebookJpaRepository = ebookJpaRepository;
         this.adminService = adminService;
 
         this.s3Client = s3Client;
@@ -94,7 +96,7 @@ public class EbookFileService {
                 .fileKey(fileKey)
                 .publisher(publisherRepository.getReferenceById(adminService.getAdminPublisherId()))
                 .build();
-        ebookRepository.save(ebook);
+        ebookJpaRepository.save(ebook);
 
         return "File uploaded successfully: " + fileKey;
     }
@@ -136,7 +138,7 @@ public class EbookFileService {
 
     @Transactional
     public EbookDownloadResponse getPresignedEbookUrl(Long ebookId) {
-        Ebook ebook = ebookRepository.findById(ebookId)
+        Ebook ebook = ebookJpaRepository.findById(ebookId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.EBOOK_NOT_FOUND));
 
         String fileKey = ebook.getFileKey();

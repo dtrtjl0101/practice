@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import qwerty.chaekit.domain.ebook.EbookJpaRepository;
 import qwerty.chaekit.domain.ebook.EbookRepository;
 import qwerty.chaekit.domain.highlight.entity.Highlight;
 import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
@@ -26,7 +27,7 @@ import qwerty.chaekit.global.security.resolver.UserToken;
 @RequiredArgsConstructor
 public class HighlightService {
     private final HighlightRepository highlightRepository;
-    private final EbookRepository ebookRepository;
+    private final EbookJpaRepository ebookJpaRepository;
     private final UserProfileRepository userRepository;
 
     public HighlightPostResponse createHighlight(UserToken userToken, HighlightPostRequest request) {
@@ -34,14 +35,14 @@ public class HighlightService {
         if(!userRepository.existsById(userId)) {
             throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
         }
-        if(!ebookRepository.existsById(request.bookId())) {
+        if(!ebookJpaRepository.existsById(request.bookId())) {
             throw new NotFoundException(ErrorCode.EBOOK_NOT_FOUND);
         }
 
         // Activity를 추가하는 경우 권한 체크 필요
 
         Highlight highlight = Highlight.builder()
-                .book(ebookRepository.getReferenceById(request.bookId()))
+                .book(ebookJpaRepository.getReferenceById(request.bookId()))
                 .spine(request.spine())
                 .cfi(request.cfi())
                 .author(userRepository.getReferenceById(userId))
