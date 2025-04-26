@@ -19,11 +19,13 @@ import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.service.member.admin.AdminService;
 import qwerty.chaekit.service.member.notification.EmailService;
+import qwerty.chaekit.service.util.S3Service;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,6 +35,8 @@ class AdminServiceTest {
 
     @Mock
     private PublisherProfileRepository publisherRepository;
+    @Mock
+    private S3Service s3Service;
     @Mock
     private EmailService emailService;
 
@@ -100,10 +104,12 @@ class AdminServiceTest {
         PublisherProfile publisher = PublisherProfile.builder()
                 .member(member)
                 .publisherName("Test Publisher1")
+                .profileImageKey("profileImageKey1")
                 .build();
         PublisherProfile anotherPublisher = PublisherProfile.builder()
                 .member(anotherMember)
                 .publisherName("Test Publisher2")
+                .profileImageKey("profileImageKey2")
                 .build();
 
         // PublisherProfile 설정
@@ -114,6 +120,10 @@ class AdminServiceTest {
         given(publisherRepository.findAllByAcceptedFalseOrderByCreatedAtDesc(pageable))
                 .willReturn(pageResult);
 
+        // S3Service Mocking
+        given(s3Service.convertToPublicImageURL(anyString()))
+                .willReturn("https://dummy-url.com/image");
+
         // when
         PageResponse<PublisherInfoResponse> result = adminService.getNotAcceptedPublishers(pageable);
 
@@ -123,5 +133,7 @@ class AdminServiceTest {
         assertEquals(2, result.content().size());  // 반환된 페이지의 크기 검증
         assertEquals("Test Publisher1", result.content().get(0).publisherName());
         assertEquals("Test Publisher2", result.content().get(1).publisherName());
+        assertEquals("https://dummy-url.com/image", result.content().get(0).profileImageURL());
+        assertEquals("https://dummy-url.com/image", result.content().get(1).profileImageURL());
     }
 }

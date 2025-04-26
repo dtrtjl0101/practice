@@ -27,11 +27,13 @@ public class PublisherJoinService {
         String password = request.password();
         String verificationCode = request.verificationCode();
 
+        String imageFileKey = memberJoinHelper.uploadProfileImage(request.profileImage());
+
         validatePublisherName(request.publisherName());
         Member member = memberJoinHelper.saveMemberWithVerificationCode(email, password, Role.ROLE_PUBLISHER, verificationCode);
-        PublisherProfile publisher = savePublisher(request, member);
+        PublisherProfile publisher = savePublisher(request, member, imageFileKey);
 
-        return toResponse(request, member, publisher);
+        return toResponse(member, publisher);
     }
 
     private void validatePublisherName(String name) {
@@ -40,23 +42,32 @@ public class PublisherJoinService {
         }
     }
 
-    private PublisherProfile savePublisher(PublisherJoinRequest request, Member member) {
+    private PublisherProfile savePublisher(PublisherJoinRequest request, Member member, String imageFileKey) {
         return publisherRepository.save(PublisherProfile.builder()
                 .member(member)
                 .publisherName(request.publisherName())
+                .profileImageKey(imageFileKey)
                 .build());
     }
 
-    private PublisherJoinResponse toResponse(PublisherJoinRequest request, Member member, PublisherProfile publisher) {
-        String token = jwtUtil.createJwt(member.getId(), null, publisher.getId(), member.getEmail(), Role.ROLE_PUBLISHER.name());
+    private PublisherJoinResponse toResponse(Member member, PublisherProfile publisher) {
+        String token = "Bearer " + jwtUtil.createJwt(
+                member.getId(),
+                null,
+                publisher.getId(),
+                member.getEmail(),
+                Role.ROLE_PUBLISHER.name()
+        );
+        String profileImageUrl = memberJoinHelper.convertToPublicImageURL(publisher.getProfileImageKey());
 
         return PublisherJoinResponse.builder()
-                .id(member.getId())
+                .memberId(member.getId())
                 .publisherId(publisher.getId())
-                .accessToken("Bearer " + token)
+                .accessToken(token)
                 .email(member.getEmail())
-                .publisherName(request.publisherName())
-                .isAccepted(false)
+                .publisherName(publisher.getPublisherName())
+                .profileImageURL(profileImageUrl)
+                .isAccepted(publisher.isAccepted())
                 .build();
     }
 }

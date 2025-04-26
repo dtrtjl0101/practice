@@ -30,18 +30,21 @@ public class Ebook extends BaseEntity {
     @Column(nullable = false)
     private String fileKey;
 
+    private String coverImageKey;
+  
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "publisher_id")
     private PublisherProfile publisher;
 
     @Builder
-    public Ebook(Long id, String title, String author, String description, long size, String fileKey, PublisherProfile publisher) {
+    public Ebook(Long id, String title, String author, String description, long size, String fileKey, String coverImageKey, PublisherProfile publisher) {
         this.id = id;
         this.title = title;
         this.author = author;
         this.description = description;
         this.size = size;
         this.fileKey = fileKey;
+        this.coverImageKey = coverImageKey;
         this.publisher = publisher;
     }
 }

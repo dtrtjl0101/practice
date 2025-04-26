@@ -12,6 +12,7 @@ import qwerty.chaekit.dto.ebook.EbookFetchResponse;
 import qwerty.chaekit.dto.ebook.EbookSearchRequest;
 import qwerty.chaekit.dto.ebook.EbookSearchResponse;
 import qwerty.chaekit.dto.page.PageResponse;
+import qwerty.chaekit.service.util.S3Service;
 
 @Service
 @RequiredArgsConstructor
@@ -19,10 +20,13 @@ import qwerty.chaekit.dto.page.PageResponse;
 public class EbookService {
     private final EbookJpaRepository ebookJpaRepository;
     private final EbookRepository ebookRepository;
+    private final S3Service s3Service;
 
     public PageResponse<EbookFetchResponse> fetchEbookList(Pageable pageable) {
-        Page<EbookFetchResponse>page=ebookJpaRepository.findAll(pageable)
-                .map(EbookFetchResponse::of);
+        Page<EbookFetchResponse> page = ebookRepository.findAll(pageable)
+                .map( ebook -> EbookFetchResponse.of(
+                        ebook, s3Service.convertToPublicImageURL(ebook.getCoverImageKey())
+                        ));
         return PageResponse.of(page);
     }
 

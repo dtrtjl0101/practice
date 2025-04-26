@@ -3,7 +3,7 @@ package qwerty.chaekit.dto.ebook.upload;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.web.multipart.MultipartFile;
 
-public record EbookUploadRequest(
+public record EbookPostRequest(
         @Schema(description = "책 제목", example = "이상한 나라의 앨리스")
         String title,
 
@@ -14,6 +14,9 @@ public record EbookUploadRequest(
         String description,
 
         @Schema(description = "책 파일", example = "Alice.epub", type = "string", format = "binary")
-        MultipartFile file
+        MultipartFile file,
+
+        @Schema(description = "책 표지 이미지", example = "cover.jpg", type = "string", format = "binary")
+        MultipartFile coverImageFile
 ) {
 }

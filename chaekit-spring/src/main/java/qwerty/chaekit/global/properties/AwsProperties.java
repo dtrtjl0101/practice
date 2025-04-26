@@ -7,6 +7,7 @@ public record AwsProperties(
         String accessKeyId,
         String secretAccessKey,
         String ebookBucketName,
+        String imageBucketName,
         Long ebookMaxFileSize,
         String s3Region,
         Long presignedUrlExpirationTime

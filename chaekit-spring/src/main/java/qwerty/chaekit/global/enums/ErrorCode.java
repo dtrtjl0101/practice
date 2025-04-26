@@ -22,6 +22,10 @@ public enum ErrorCode {
     // email
     EMAIL_VERIFICATION_FAILED("EMAIL_VERIFICATION_FAILED", "이메일 인증에 실패했습니다."),
     EMAIL_SEND_FAILED("EMAIL_SEND_FAILED", "이메일 전송에 실패했습니다."),
+    // file
+    FILE_MISSING("FILE_MISSING", "파일이 누락되었습니다"),
+    INVALID_EXTENSION("INVALID_EXTENSION", "허용되지 않는 확장자입니다"),
+    FILE_SIZE_EXCEEDED("FILE_SIZE_EXCEED", "파일 크기가 초과되었습니다"),
 
     // FORBIDDEN
     NO_VALID_TOKEN("NO_VALID_TOKEN", "유효한 토큰이 없습니다"),
@@ -31,6 +35,7 @@ public enum ErrorCode {
     ACTIVITY_GROUP_MISMATCH("ACTIVITY_GROUP_MISMATCH", "해당 독서모임의 활동이 아닙니다"),
     ONLY_USER("ONLY_USER", "일반 회원만 사용할 수 있는 기능입니다"),
     ONLY_PUBLISHER("ONLY_PUBLISHER", "출판사 회원만 사용할 수 있는 기능입니다"),
+    ONLY_ADMIN("ONLY_ADMIN", "관리자만 사용할 수 있는 기능입니다"),
 
     // NOT_FOUND
     EBOOK_NOT_FOUND("EBOOK_NOT_FOUND", "해당 전자책이 존재하지 않습니다"),
@@ -47,7 +52,8 @@ public enum ErrorCode {
     NO_RESOURCE_FOUND("NO_RESOURCE_FOUND", "존재하지 않는 경로입니다"),
 
     ALREADY_JOINED_GROUP("ALREADY_JOINED_GROUP", "이미 가입한 그룹입니다"),
-    GROUP_LEADER_CANNOT_LEAVE("GROUP_LEADER_CANNOT_LEAVE", "그룹장은 그룹을 탈퇴할 수 없습니다");
+    GROUP_LEADER_CANNOT_LEAVE("GROUP_LEADER_CANNOT_LEAVE", "그룹장은 그룹을 탈퇴할 수 없습니다"),
+    ;
 
     private final String code;
     private final String message;

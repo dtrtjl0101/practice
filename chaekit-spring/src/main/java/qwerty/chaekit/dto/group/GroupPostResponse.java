@@ -11,13 +11,15 @@ public record GroupPostResponse(
         Long groupId,
         String name,
         String description,
+        String groupImageURL,
         List<String> tags
 ) {
-    public static GroupPostResponse of(ReadingGroup group) {
+    public static GroupPostResponse of(ReadingGroup group, String groupImageURL) {
         return GroupPostResponse.builder()
                 .groupId(group.getId())
                 .name(group.getName())
                 .description(group.getDescription())
+                .groupImageURL(groupImageURL)
                 .tags(group.getTags().stream()
                         .map(GroupTag::getTagName)
                         .toList())

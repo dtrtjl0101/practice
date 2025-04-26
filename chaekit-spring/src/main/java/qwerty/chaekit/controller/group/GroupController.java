@@ -22,7 +22,7 @@ public class GroupController {
 
     @PostMapping
     public ApiSuccessResponse<GroupPostResponse> createGroup(@Login UserToken userToken,
-                                         @RequestBody GroupPostRequest groupPostRequest) {
+                                         @ModelAttribute @Valid GroupPostRequest groupPostRequest) {
         return ApiSuccessResponse.of(groupService.createGroup(userToken, groupPostRequest));
     }
 
@@ -36,10 +36,10 @@ public class GroupController {
         return ApiSuccessResponse.of(groupService.fetchGroup(groupId));
     }
 
-    @PutMapping("/{groupId}")
+    @PatchMapping("/{groupId}")
     public ApiSuccessResponse<GroupPostResponse> updateGroup(@Login UserToken userToken,
                                          @PathVariable long groupId,
-                                         @RequestBody GroupPutRequest request) {
+                                         @ModelAttribute @Valid GroupPatchRequest request) {
         return ApiSuccessResponse.of(groupService.updateGroup(userToken, groupId, request));
     }
 
