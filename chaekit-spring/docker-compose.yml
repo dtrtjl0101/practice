@@ -5,7 +5,7 @@ services:
       - .env
     environment:
       DB_URL: jdbc:mysql://chaekit-mysql:3306/chaekit
-      REDIS_URL: redis://chaekit-redis:6379  # Redis URL 환경 변수 추가
+      REDIS_URL: chaekit-redis  # Redis URL 환경 변수 추가
     depends_on:
       - chaekit-mysql
       - chaekit-redis

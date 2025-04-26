@@ -30,7 +30,7 @@ public class Ebook extends BaseEntity {
     @Column(nullable = false)
     private String fileKey;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "publisher_id")
     private PublisherProfile publisher;
 
