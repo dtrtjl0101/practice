@@ -7,7 +7,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
-import qwerty.chaekit.domain.ebook.QEbook;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +16,11 @@ import java.util.Optional;
 public class EbookRepositoryImpl implements EbookRepository {
     private final JPAQueryFactory jpaQueryFactory;
     private final EbookJpaRepository ebookJpaRepository;
+
+    @Override
+    public Page<Ebook> findAll(Pageable pageable) {
+        return ebookJpaRepository.findAll(pageable);
+    }
 
     @Override
     public Optional<Ebook> findById(Long id) {

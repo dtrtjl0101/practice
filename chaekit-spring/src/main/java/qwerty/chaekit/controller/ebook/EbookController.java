@@ -51,9 +51,11 @@ public class EbookController {
             @Parameter(description = "다운로드할 전자책 ID") @PathVariable Long ebookId) {
         return ApiSuccessResponse.of(ebookFileService.getPresignedEbookUrl(userToken, ebookId));
     }
+
     @GetMapping("/search")
-      public ApiSuccessResponse<PageResponse<EbookSearchResponse>> searchEbooks(
-              @ParameterObject Pageable pageable,
-              @ModelAttribute EbookSearchRequest request) {
-          return ApiSuccessResponse.of(ebookService.searchEbooks(request, pageable));
+    public ApiSuccessResponse<PageResponse<EbookSearchResponse>> searchEbooks(
+            @ParameterObject Pageable pageable,
+            @ModelAttribute EbookSearchRequest request) {
+        return ApiSuccessResponse.of(ebookService.searchEbooks(request, pageable));
+    }
 }

@@ -6,7 +6,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.ebook.Ebook;
-import qwerty.chaekit.domain.ebook.EbookJpaRepository;
 import qwerty.chaekit.domain.ebook.EbookRepository;
 import qwerty.chaekit.dto.ebook.EbookFetchResponse;
 import qwerty.chaekit.dto.ebook.EbookSearchRequest;
@@ -18,7 +17,6 @@ import qwerty.chaekit.service.util.S3Service;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class EbookService {
-    private final EbookJpaRepository ebookJpaRepository;
     private final EbookRepository ebookRepository;
     private final S3Service s3Service;
 
@@ -26,7 +24,7 @@ public class EbookService {
         Page<EbookFetchResponse> page = ebookRepository.findAll(pageable)
                 .map( ebook -> EbookFetchResponse.of(
                         ebook, s3Service.convertToPublicImageURL(ebook.getCoverImageKey())
-                        ));
+                ));
         return PageResponse.of(page);
     }
 
