@@ -4,23 +4,37 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.ebook.EbookRepository;
 import qwerty.chaekit.dto.ebook.EbookFetchResponse;
+import qwerty.chaekit.dto.ebook.EbookSearchRequest;
+import qwerty.chaekit.dto.ebook.EbookSearchResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.service.util.S3Service;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class EbookService {
     private final EbookRepository ebookRepository;
     private final S3Service s3Service;
 
     public PageResponse&lt;EbookFetchResponse&gt; fetchEbookList(Pageable pageable) {
-<span class="nc" id="L19">        Page&lt;EbookFetchResponse&gt; page = ebookRepository.findAll(pageable)</span>
-<span class="nc" id="L20">                .map( ebook -&gt; EbookFetchResponse.of(</span>
-<span class="nc" id="L21">                        ebook, s3Service.convertToPublicImageURL(ebook.getCoverImageKey())</span>
-                        ));
-<span class="nc" id="L23">        return PageResponse.of(page);</span>
+<span class="nc" id="L24">        Page&lt;EbookFetchResponse&gt; page = ebookRepository.findAll(pageable)</span>
+<span class="nc" id="L25">                .map( ebook -&gt; EbookFetchResponse.of(</span>
+<span class="nc" id="L26">                        ebook, s3Service.convertToPublicImageURL(ebook.getCoverImageKey())</span>
+                ));
+<span class="nc" id="L28">        return PageResponse.of(page);</span>
+    }
+
+    public PageResponse&lt;EbookSearchResponse&gt; searchEbooks(EbookSearchRequest request, Pageable pageable) {
+<span class="nc" id="L32">        Page&lt;Ebook&gt; ebooks = ebookRepository.searchEbooks(</span>
+<span class="nc" id="L33">                request.getAuthorName(),</span>
+<span class="nc" id="L34">                request.getBookTitle(),</span>
+                pageable
+        );
+<span class="nc" id="L37">        return PageResponse.of(ebooks.map(EbookSearchResponse::of));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

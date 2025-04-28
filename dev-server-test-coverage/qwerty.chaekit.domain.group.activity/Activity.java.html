@@ -20,11 +20,11 @@ public class Activity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = &quot;group_id&quot;)
     private ReadingGroup group;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = &quot;book_id&quot;)
     private Ebook book;
 

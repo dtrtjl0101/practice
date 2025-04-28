@@ -24,7 +24,7 @@ public class ReadingGroup extends BaseEntity {
     @Column(nullable = false)
     private String name;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = &quot;group_leader_id&quot;, nullable = false)
     private UserProfile groupLeader;
 

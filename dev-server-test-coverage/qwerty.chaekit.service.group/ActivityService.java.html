@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import qwerty.chaekit.domain.ebook.EbookJpaRepository;
 import qwerty.chaekit.domain.ebook.EbookRepository;
 import qwerty.chaekit.domain.group.GroupRepository;
 import qwerty.chaekit.domain.group.ReadingGroup;
@@ -32,105 +33,106 @@ public class ActivityService {
     private final GroupRepository groupRepository;
     private final ActivityRepository activityRepository;
     private final EbookRepository ebookRepository;
+    //private final EbookJpaRepository ebookJpaRepository;
 
     public ActivityPostResponse createActivity(UserToken userToken, long groupId, ActivityPostRequest request) {
-<span class="fc" id="L37">        Long userId = userToken.userId();</span>
+<span class="fc" id="L39">        Long userId = userToken.userId();</span>
         // 1. 로그인한 사용자의 프로필을 확인한다.
-<span class="pc bpc" id="L39" title="1 of 2 branches missed.">        if(!userRepository.existsById(userId)){</span>
-<span class="nc" id="L40">            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);</span>
+<span class="pc bpc" id="L41" title="1 of 2 branches missed.">        if(!userRepository.existsById(userId)){</span>
+<span class="nc" id="L42">            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);</span>
         }
 
         // 2. 모임을 가져온다.
-<span class="fc" id="L44">        ReadingGroup group = groupRepository.findById(groupId)</span>
-<span class="pc" id="L45">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.GROUP_NOT_FOUND));</span>
+<span class="fc" id="L46">        ReadingGroup group = groupRepository.findById(groupId)</span>
+<span class="pc" id="L47">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.GROUP_NOT_FOUND));</span>
 
         // 3. 전자책이 존재하는지 확인한다.
-<span class="pc bpc" id="L48" title="1 of 2 branches missed.">        if(!ebookRepository.existsById(request.bookId())){</span>
-<span class="nc" id="L49">            throw new NotFoundException(ErrorCode.EBOOK_NOT_FOUND);</span>
+<span class="pc bpc" id="L50" title="1 of 2 branches missed.">        if(!ebookRepository.existsById(request.bookId())){</span>
+<span class="nc" id="L51">            throw new NotFoundException(ErrorCode.EBOOK_NOT_FOUND);</span>
         }
         // 4. 활동이 겹치지 않는 지 확인한다.
-<span class="pc bpc" id="L52" title="1 of 2 branches missed.">        if(request.startTime().isAfter(request.endTime())) {</span>
-<span class="nc" id="L53">            throw new BadRequestException(ErrorCode.ACTIVITY_TIME_INVALID);</span>
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">        if(request.startTime().isAfter(request.endTime())) {</span>
+<span class="nc" id="L55">            throw new BadRequestException(ErrorCode.ACTIVITY_TIME_INVALID);</span>
         }
 
-<span class="fc" id="L56">        activityRepository.findByGroup_Id(groupId)</span>
-<span class="fc" id="L57">                .forEach(activity -&gt; {</span>
-<span class="fc" id="L58">                    boolean isBefore = request.endTime().isBefore(activity.getStartTime());</span>
-<span class="fc" id="L59">                    boolean isAfter = request.startTime().isAfter(activity.getEndTime());</span>
+<span class="fc" id="L58">        activityRepository.findByGroup_Id(groupId)</span>
+<span class="fc" id="L59">                .forEach(activity -&gt; {</span>
+<span class="fc" id="L60">                    boolean isBefore = request.endTime().isBefore(activity.getStartTime());</span>
+<span class="fc" id="L61">                    boolean isAfter = request.startTime().isAfter(activity.getEndTime());</span>
 
-<span class="pc bpc" id="L61" title="2 of 4 branches missed.">                    if (!(isBefore || isAfter)) {</span>
-<span class="fc" id="L62">                        throw new BadRequestException(ErrorCode.ACTIVITY_TIME_CONFLICT);</span>
+<span class="pc bpc" id="L63" title="2 of 4 branches missed.">                    if (!(isBefore || isAfter)) {</span>
+<span class="fc" id="L64">                        throw new BadRequestException(ErrorCode.ACTIVITY_TIME_CONFLICT);</span>
                     }
-<span class="nc" id="L64">                });</span>
+<span class="nc" id="L66">                });</span>
         // 5. 모임지기가 맞는지 확인한다.
-<span class="fc bfc" id="L66" title="All 2 branches covered.">        if (!group.getGroupLeader().getId().equals(userId)) {</span>
-<span class="fc" id="L67">            throw new ForbiddenException(ErrorCode.GROUP_LEADER_ONLY);</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        if (!group.getGroupLeader().getId().equals(userId)) {</span>
+<span class="fc" id="L69">            throw new ForbiddenException(ErrorCode.GROUP_LEADER_ONLY);</span>
         }
 
-<span class="fc" id="L70">        Activity saved = activityRepository.save(Activity.builder()</span>
-<span class="fc" id="L71">                .group(groupRepository.getReferenceById(groupId))</span>
-<span class="fc" id="L72">                .book(ebookRepository.getReferenceById(request.bookId()))</span>
-<span class="fc" id="L73">                .startTime(request.startTime())</span>
-<span class="fc" id="L74">                .endTime(request.endTime())</span>
-<span class="fc" id="L75">                .description(request.description())</span>
-<span class="fc" id="L76">                .build());</span>
-<span class="fc" id="L77">        return ActivityPostResponse.of(saved);</span>
+<span class="fc" id="L72">        Activity saved = activityRepository.save(Activity.builder()</span>
+<span class="fc" id="L73">                .group(groupRepository.getReferenceById(groupId))</span>
+<span class="fc" id="L74">                .book(ebookRepository.getReferenceById(request.bookId()))</span>
+<span class="fc" id="L75">                .startTime(request.startTime())</span>
+<span class="fc" id="L76">                .endTime(request.endTime())</span>
+<span class="fc" id="L77">                .description(request.description())</span>
+<span class="fc" id="L78">                .build());</span>
+<span class="fc" id="L79">        return ActivityPostResponse.of(saved);</span>
     }
 
     public ActivityPostResponse updateActivity(UserToken userToken, long groupId, ActivityPatchRequest request) {
-<span class="fc" id="L81">        Long userId = userToken.userId();</span>
+<span class="fc" id="L83">        Long userId = userToken.userId();</span>
         // 1. 로그인한 사용자의 프로필을 확인한다.
-<span class="pc bpc" id="L83" title="1 of 2 branches missed.">        if(!userRepository.existsById(userId)){</span>
-<span class="nc" id="L84">            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);</span>
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">        if(!userRepository.existsById(userId)){</span>
+<span class="nc" id="L86">            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);</span>
         }
 
         // 2. 그룹 조회
-<span class="fc" id="L88">        ReadingGroup group = groupRepository.findById(groupId)</span>
-<span class="pc" id="L89">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.GROUP_NOT_FOUND));</span>
+<span class="fc" id="L90">        ReadingGroup group = groupRepository.findById(groupId)</span>
+<span class="pc" id="L91">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.GROUP_NOT_FOUND));</span>
 
         // 3. 활동 조회 및 그룹 일치 검증
-<span class="fc" id="L92">        Activity activity = activityRepository.findById(request.activityId())</span>
-<span class="pc" id="L93">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.ACTIVITY_NOT_FOUND));</span>
+<span class="fc" id="L94">        Activity activity = activityRepository.findById(request.activityId())</span>
+<span class="pc" id="L95">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.ACTIVITY_NOT_FOUND));</span>
 
-<span class="pc bpc" id="L95" title="1 of 2 branches missed.">        if (!activity.getGroup().getId().equals(groupId)) {</span>
-<span class="nc" id="L96">            throw new ForbiddenException(ErrorCode.ACTIVITY_GROUP_MISMATCH);</span>
+<span class="pc bpc" id="L97" title="1 of 2 branches missed.">        if (!activity.getGroup().getId().equals(groupId)) {</span>
+<span class="nc" id="L98">            throw new ForbiddenException(ErrorCode.ACTIVITY_GROUP_MISMATCH);</span>
         }
 
         // 4. 모임장 권한 확인
-<span class="pc bpc" id="L100" title="1 of 2 branches missed.">        if (!group.getGroupLeader().getId().equals(userId)) {</span>
-<span class="nc" id="L101">            throw new ForbiddenException(ErrorCode.GROUP_LEADER_ONLY);</span>
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">        if (!group.getGroupLeader().getId().equals(userId)) {</span>
+<span class="nc" id="L103">            throw new ForbiddenException(ErrorCode.GROUP_LEADER_ONLY);</span>
         }
 
         // 5. 시간 유효성 검증
-<span class="fc bfc" id="L105" title="All 2 branches covered.">        LocalDate startTime = request.startTime() != null ? request.startTime() : activity.getStartTime();</span>
-<span class="fc bfc" id="L106" title="All 2 branches covered.">        LocalDate endTime = request.endTime() != null ? request.endTime() : activity.getEndTime();</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        LocalDate startTime = request.startTime() != null ? request.startTime() : activity.getStartTime();</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">        LocalDate endTime = request.endTime() != null ? request.endTime() : activity.getEndTime();</span>
 
-<span class="pc bpc" id="L108" title="1 of 2 branches missed.">        if (startTime.isAfter(endTime)) {</span>
-<span class="nc" id="L109">            throw new BadRequestException(ErrorCode.ACTIVITY_TIME_INVALID);</span>
+<span class="pc bpc" id="L110" title="1 of 2 branches missed.">        if (startTime.isAfter(endTime)) {</span>
+<span class="nc" id="L111">            throw new BadRequestException(ErrorCode.ACTIVITY_TIME_INVALID);</span>
         }
 
         // 6. 중복 시간 체크 (자기 자신 제외)
-<span class="fc" id="L113">        activityRepository.findByGroup_Id(groupId).stream()</span>
-<span class="fc bfc" id="L114" title="All 2 branches covered.">                .filter(a -&gt; !a.getId().equals(activity.getId()))</span>
-<span class="fc" id="L115">                .forEach(a -&gt; {</span>
-<span class="fc" id="L116">                    boolean isBefore = endTime.isBefore(a.getStartTime());</span>
-<span class="fc" id="L117">                    boolean isAfter = startTime.isAfter(a.getEndTime());</span>
-<span class="pc bpc" id="L118" title="2 of 4 branches missed.">                    if (!(isBefore || isAfter)) {</span>
-<span class="fc" id="L119">                        throw new BadRequestException(ErrorCode.ACTIVITY_TIME_CONFLICT);</span>
+<span class="fc" id="L115">        activityRepository.findByGroup_Id(groupId).stream()</span>
+<span class="fc bfc" id="L116" title="All 2 branches covered.">                .filter(a -&gt; !a.getId().equals(activity.getId()))</span>
+<span class="fc" id="L117">                .forEach(a -&gt; {</span>
+<span class="fc" id="L118">                    boolean isBefore = endTime.isBefore(a.getStartTime());</span>
+<span class="fc" id="L119">                    boolean isAfter = startTime.isAfter(a.getEndTime());</span>
+<span class="pc bpc" id="L120" title="2 of 4 branches missed.">                    if (!(isBefore || isAfter)) {</span>
+<span class="fc" id="L121">                        throw new BadRequestException(ErrorCode.ACTIVITY_TIME_CONFLICT);</span>
                     }
-<span class="nc" id="L121">                });</span>
+<span class="nc" id="L123">                });</span>
 
         // 7. 수정 적용
-<span class="fc" id="L124">        activity.updateTime(startTime, endTime);</span>
-<span class="fc" id="L125">        activity.updateDescription(request.description());</span>
+<span class="fc" id="L126">        activity.updateTime(startTime, endTime);</span>
+<span class="fc" id="L127">        activity.updateDescription(request.description());</span>
 
-<span class="fc" id="L127">        return ActivityPostResponse.of(activity);</span>
+<span class="fc" id="L129">        return ActivityPostResponse.of(activity);</span>
     }
 
     public PageResponse&lt;ActivityFetchResponse&gt; fetchAllActivities(Pageable pageable, long groupId) {
-<span class="fc" id="L131">        Page&lt;ActivityFetchResponse&gt; page = activityRepository.findByGroup_Id(groupId, pageable)</span>
-<span class="fc" id="L132">                .map(ActivityFetchResponse::of);</span>
-<span class="fc" id="L133">        return PageResponse.of(page);</span>
+<span class="fc" id="L133">        Page&lt;ActivityFetchResponse&gt; page = activityRepository.findByGroup_Id(groupId, pageable)</span>
+<span class="fc" id="L134">                .map(ActivityFetchResponse::of);</span>
+<span class="fc" id="L135">        return PageResponse.of(page);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -18,11 +18,11 @@ public class Highlight extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = &quot;author_id&quot;)
     private UserProfile author;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = &quot;book_id&quot;)
     private Ebook book;
 
