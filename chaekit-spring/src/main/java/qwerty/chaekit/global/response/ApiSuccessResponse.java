@@ -10,4 +10,7 @@ public record ApiSuccessResponse<T>(
     public static <T> ApiSuccessResponse<T> of(T data) {
         return new ApiSuccessResponse<>(true, data);
     }
+    public static ApiSuccessResponse<Void> emptyResponse() {
+        return new ApiSuccessResponse<>(true, null);
+    }
 }

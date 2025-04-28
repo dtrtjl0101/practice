@@ -26,6 +26,8 @@ public enum ErrorCode {
     FILE_MISSING("FILE_MISSING", "파일이 누락되었습니다"),
     INVALID_EXTENSION("INVALID_EXTENSION", "허용되지 않는 확장자입니다"),
     FILE_SIZE_EXCEEDED("FILE_SIZE_EXCEED", "파일 크기가 초과되었습니다"),
+    // admin
+    PUBLISHER_ALREADY_ACCEPTED("PUBLISHER_ALREADY_ACCEPTED", "이미 승인된 출판사입니다"),
 
     // FORBIDDEN
     NO_VALID_TOKEN("NO_VALID_TOKEN", "유효한 토큰이 없습니다"),
@@ -47,6 +49,7 @@ public enum ErrorCode {
 
     // Exception Handler
     INVALID_INPUT("INVALID_INPUT", "입력값이 유효하지 않습니다"),
+    INVALID_HTTP_MESSAGE("INVALID_HTTP_MESSAGE", "HTTP 요청 본문이 잘못된 형식입니다."),
 
     METHOD_NOT_ALLOWED("METHOD_NOT_ALLOWED", "지원하지 않는 HTTP 메서드입니다"),
     NO_RESOURCE_FOUND("NO_RESOURCE_FOUND", "존재하지 않는 경로입니다"),

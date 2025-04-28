@@ -44,6 +44,16 @@ public class EmailService {
         sendEmail(toEmail, subject, text);
     }
 
+    @Async
+    public void sendPublisherRejectionEmail(String toEmail, String reason) {
+        String subject = "출판사 계정 거절 알림";
+        String text = "<h3>안녕하세요, 책잇입니다.</h3>" +
+                "<p>출판사 계정이 거절되었습니다. 다시 문의해주세요.</p>" +
+                "<p>거절 사유: " + reason + "</p>";
+
+        sendEmail(toEmail, subject, text);
+    }
+
     // 공통된 이메일 전송 메서드
     private void sendEmail(String toEmail, String subject, String text) {
         try {

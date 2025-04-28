@@ -62,7 +62,7 @@ public class GroupController {
             @PathVariable long groupId,
             @PathVariable long userId) {
         groupService.rejectJoinRequest(userToken, groupId, userId);
-        return ApiSuccessResponse.of(null);
+        return ApiSuccessResponse.emptyResponse();
     }
 
     @DeleteMapping("/{groupId}/members/leave")
@@ -70,7 +70,7 @@ public class GroupController {
             @Login UserToken userToken,
             @PathVariable long groupId) {
         groupService.leaveGroup(userToken, groupId);
-        return ApiSuccessResponse.of(null);
+        return ApiSuccessResponse.emptyResponse();
     }
 
     @GetMapping("/{groupId}/members/pending")
