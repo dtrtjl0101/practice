@@ -3,9 +3,11 @@ package qwerty.chaekit.service.group;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.group.GroupMember;
+import qwerty.chaekit.domain.group.GroupMemberRepository;
 import qwerty.chaekit.domain.group.GroupRepository;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.member.user.UserProfile;
@@ -27,6 +29,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GroupService {
     private final UserProfileRepository userRepository;
+    private final GroupMemberRepository groupMemberRepository;
     private final GroupRepository groupRepository;
     private final EmailService emailService;
     private final S3Service s3Service;
@@ -172,6 +175,7 @@ public class GroupService {
         group.rejectMember(memberProfile);
     }
 
+    @Transactional
     public PageResponse<GroupPendingMemberResponse> fetchPendingList(Pageable pageable, UserToken userToken, long groupId) {
         ReadingGroup group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.GROUP_NOT_FOUND));
@@ -180,9 +184,13 @@ public class GroupService {
             throw new ForbiddenException(ErrorCode.GROUP_LEADER_ONLY);
         }
 
-        List<GroupMember> groupMembers = group.getGroupMembers().stream().filter((groupMember)-> !groupMember.isAccepted()).toList();
+        // JPQL로 대기 멤버 페이징 조회
+        Page<GroupMember> pendingMembersPage = groupMemberRepository.findByReadingGroupAndIsAcceptedFalse(group, pageable);
 
-        return null;
+        // DTO 변환
+        Page<GroupPendingMemberResponse> page = pendingMembersPage.map(GroupPendingMemberResponse::of);
+
+        return PageResponse.of(page);
     }
 
     private String getGroupImageURL(ReadingGroup group) {

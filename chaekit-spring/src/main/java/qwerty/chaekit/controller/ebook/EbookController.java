@@ -8,6 +8,8 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.dto.ebook.EbookFetchResponse;
+import qwerty.chaekit.dto.ebook.EbookSearchRequest;
+import qwerty.chaekit.dto.ebook.EbookSearchResponse;
 import qwerty.chaekit.dto.ebook.upload.EbookDownloadResponse;
 import qwerty.chaekit.dto.ebook.upload.EbookPostRequest;
 import qwerty.chaekit.dto.ebook.upload.EbookPostResponse;
@@ -48,5 +50,12 @@ public class EbookController {
             @Parameter(description = "로그인된 사용자 정보") @Login UserToken userToken,
             @Parameter(description = "다운로드할 전자책 ID") @PathVariable Long ebookId) {
         return ApiSuccessResponse.of(ebookFileService.getPresignedEbookUrl(userToken, ebookId));
+    }
+
+    @GetMapping("/search")
+    public ApiSuccessResponse<PageResponse<EbookSearchResponse>> searchEbooks(
+            @ParameterObject Pageable pageable,
+            @ModelAttribute EbookSearchRequest request) {
+        return ApiSuccessResponse.of(ebookService.searchEbooks(request, pageable));
     }
 }

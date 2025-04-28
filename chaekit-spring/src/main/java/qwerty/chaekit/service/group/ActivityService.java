@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import qwerty.chaekit.domain.ebook.EbookJpaRepository;
 import qwerty.chaekit.domain.ebook.EbookRepository;
 import qwerty.chaekit.domain.group.GroupRepository;
 import qwerty.chaekit.domain.group.ReadingGroup;
@@ -32,6 +33,7 @@ public class ActivityService {
     private final GroupRepository groupRepository;
     private final ActivityRepository activityRepository;
     private final EbookRepository ebookRepository;
+    //private final EbookJpaRepository ebookJpaRepository;
 
     public ActivityPostResponse createActivity(UserToken userToken, long groupId, ActivityPostRequest request) {
         Long userId = userToken.userId();

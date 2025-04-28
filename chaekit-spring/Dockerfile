@@ -18,7 +18,7 @@ RUN chmod +x gradlew
 RUN ./gradlew --version
 
 #Build the application
-RUN ./gradlew clean build -x test
+RUN ./gradlew build -x test
 
 #Run the application#
 CMD ["java", "-jar", "build/libs/chaekit-0.0.1-SNAPSHOT.jar"]

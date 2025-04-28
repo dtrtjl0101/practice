@@ -19,33 +19,25 @@ public class GroupController {
     private final GroupService groupService;
 
     @PostMapping
-    public ApiSuccessResponse<GroupPostResponse> createGroup(
-            @Login UserToken userToken,
-            @ModelAttribute @Valid GroupPostRequest groupPostRequest
-    ) {
+    public ApiSuccessResponse<GroupPostResponse> createGroup(@Login UserToken userToken,
+                                         @ModelAttribute @Valid GroupPostRequest groupPostRequest) {
         return ApiSuccessResponse.of(groupService.createGroup(userToken, groupPostRequest));
     }
 
     @GetMapping
-    public ApiSuccessResponse<PageResponse<GroupFetchResponse>> getAllGroups(
-            @ParameterObject Pageable pageable
-    ) {
+    public ApiSuccessResponse<PageResponse<GroupFetchResponse>> getAllGroups(@ParameterObject Pageable pageable) {
         return ApiSuccessResponse.of(groupService.fetchGroupList(pageable));
     }
 
     @GetMapping("/{groupId}/info")
-    public ApiSuccessResponse<GroupFetchResponse> getGroup(
-            @PathVariable long groupId
-    ) {
+    public ApiSuccessResponse<GroupFetchResponse> getGroup(@PathVariable long groupId) {
         return ApiSuccessResponse.of(groupService.fetchGroup(groupId));
     }
 
     @PatchMapping("/{groupId}")
-    public ApiSuccessResponse<GroupPostResponse> updateGroup(
-            @Login UserToken userToken,
-            @PathVariable long groupId,
-            @ModelAttribute @Valid GroupPutRequest request
-    ) {
+    public ApiSuccessResponse<GroupPostResponse> updateGroup(@Login UserToken userToken,
+                                         @PathVariable long groupId,
+                                         @ModelAttribute @Valid GroupPutRequest request) {
         return ApiSuccessResponse.of(groupService.updateGroup(userToken, groupId, request));
     }
 
