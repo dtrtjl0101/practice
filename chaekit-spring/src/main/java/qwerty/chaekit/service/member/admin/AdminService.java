@@ -37,12 +37,18 @@ public class AdminService {
     private Long adminUserId;
 
     @Transactional(readOnly = true)
+    public PageResponse<PublisherInfoResponse> getPublishers(Pageable pageable) {
+        Pageable pageableWithSort = getPageableOrderedByCreatedAt(pageable);
+        Page<PublisherProfile> page = publisherRepository.findAll(pageableWithSort);
+        return PageResponse.of(page.map(publisher -> PublisherInfoResponse.of(
+                publisher,
+                s3Service.convertToPublicImageURL(publisher.getProfileImageKey())
+        )));
+    }
+
+    @Transactional(readOnly = true)
     public PageResponse<PublisherInfoResponse> getPendingPublishers(Pageable pageable) {
-        Pageable pageableWithSort = PageRequest.of(
-                pageable.getPageNumber(),
-                pageable.getPageSize(),
-                pageable.getSort().isEmpty() ? Sort.by(Sort.Order.desc("createdAt")) : pageable.getSort()
-        );
+        Pageable pageableWithSort = getPageableOrderedByCreatedAt(pageable);
         Page<PublisherProfile> page = publisherRepository.findByApprovalStatus(
                 PublisherApprovalStatus.PENDING,
                 pageableWithSort
@@ -81,6 +87,14 @@ public class AdminService {
         // 거절 처리
         publisher.rejectPublisher();
         emailService.sendPublisherRejectionEmail(publisher.getMember().getEmail(), request.reason());
+    }
+
+    private static Pageable getPageableOrderedByCreatedAt(Pageable pageable) {
+        return PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                pageable.getSort().isEmpty() ? Sort.by(Sort.Order.desc("createdAt")) : pageable.getSort()
+        );
     }
 
     private boolean isPublisherApproved(PublisherProfile publisher) {
