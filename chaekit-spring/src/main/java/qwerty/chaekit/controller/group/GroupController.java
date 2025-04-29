@@ -25,13 +25,17 @@ public class GroupController {
     }
 
     @GetMapping
-    public ApiSuccessResponse<PageResponse<GroupFetchResponse>> getAllGroups(@ParameterObject Pageable pageable) {
-        return ApiSuccessResponse.of(groupService.fetchGroupList(pageable));
+    public ApiSuccessResponse<PageResponse<GroupFetchResponse>> getAllGroups(
+            @Login(required = false) UserToken userToken,
+            @ParameterObject Pageable pageable) {
+        return ApiSuccessResponse.of(groupService.fetchAllGroupList(userToken, pageable));
     }
 
     @GetMapping("/{groupId}/info")
-    public ApiSuccessResponse<GroupFetchResponse> getGroup(@PathVariable long groupId) {
-        return ApiSuccessResponse.of(groupService.fetchGroup(groupId));
+    public ApiSuccessResponse<GroupFetchResponse> getGroup(
+            @Login(required = false) UserToken userToken,
+            @PathVariable long groupId) {
+        return ApiSuccessResponse.of(groupService.fetchGroup(userToken, groupId));
     }
 
     @PatchMapping("/{groupId}")

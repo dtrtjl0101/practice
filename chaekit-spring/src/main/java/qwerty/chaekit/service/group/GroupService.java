@@ -3,7 +3,6 @@ package qwerty.chaekit.service.group;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.group.GroupMember;
@@ -22,8 +21,6 @@ import qwerty.chaekit.global.properties.AwsProperties;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.member.notification.EmailService;
 import qwerty.chaekit.service.util.S3Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -61,18 +58,33 @@ public class GroupService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<GroupFetchResponse> fetchGroupList(Pageable pageable) {
-        Page<GroupFetchResponse> page = groupRepository.findAll(pageable).map(
-                group -> GroupFetchResponse.of(group, getGroupImageURL(group))
+    public PageResponse<GroupFetchResponse> fetchAllGroupList(UserToken userToken, Pageable pageable) {
+        boolean isAnonymous = userToken.isAnonymous();
+        Long userId = isAnonymous ? null : userToken.userId();
+
+        Page<GroupFetchResponse> page = groupRepository.findAllWithGroupMembers(pageable)
+                .map(
+                        group -> GroupFetchResponse.of(
+                                group,
+                                getGroupImageURL(group),
+                                isAnonymous ? MemberShipStatus.NONE : group.getMemberShipStatus(userId)
+                )
         );
         return PageResponse.of(page);
     }
 
     @Transactional(readOnly = true)
-    public GroupFetchResponse fetchGroup(long groupId) {
-        ReadingGroup group = groupRepository.findById(groupId)
+    public GroupFetchResponse fetchGroup(UserToken userToken, long groupId) {
+        boolean isAnonymous = userToken.isAnonymous();
+        Long userId = isAnonymous ? null : userToken.userId();
+
+        ReadingGroup group = groupRepository.findByIdWithGroupMembers(groupId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.GROUP_NOT_FOUND));
-        return GroupFetchResponse.of(group, getGroupImageURL(group));
+        return GroupFetchResponse.of(
+                group,
+                getGroupImageURL(group),
+                isAnonymous ? MemberShipStatus.NONE : group.getMemberShipStatus(userId)
+        );
     }
 
     @Transactional

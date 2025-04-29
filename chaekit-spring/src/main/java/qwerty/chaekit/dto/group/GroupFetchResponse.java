@@ -13,9 +13,10 @@ public record GroupFetchResponse(
         String description,
         List<String> tags,
         String groupImageURL,
+        MemberShipStatus memberShipStatus,
         int memberCount
 ) {
-    public static GroupFetchResponse of(ReadingGroup group, String groupImageURL) {
+    public static GroupFetchResponse of(ReadingGroup group, String groupImageURL, MemberShipStatus memberShipStatus) {
         return GroupFetchResponse.builder()
                 .groupId(group.getId())
                 .name(group.getName())
@@ -24,6 +25,7 @@ public record GroupFetchResponse(
                         .map(GroupTag::getTagName)
                         .toList())
                 .groupImageURL(groupImageURL)
+                .memberShipStatus(memberShipStatus)
                 .memberCount(group.getMembers().size())
                 .build();
     }
