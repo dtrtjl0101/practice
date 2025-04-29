@@ -9,7 +9,7 @@ import org.springframework.lang.Nullable;
 import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.group.tag.GroupTag;
 import qwerty.chaekit.domain.member.user.UserProfile;
-import qwerty.chaekit.dto.group.MemberShipStatus;
+import qwerty.chaekit.dto.group.enums.MyMemberShipStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,15 +92,15 @@ public class ReadingGroup extends BaseEntity {
                 .anyMatch(member -> member.getMember().getId().equals(userProfile.getId()));
     }
 
-    public MemberShipStatus getMemberShipStatus(@Nullable Long userId) {
+    public MyMemberShipStatus getMemberShipStatus(@Nullable Long userId) {
         if(userId == null) {
-            return MemberShipStatus.NONE;
+            return MyMemberShipStatus.NONE;
         }
         return groupMembers.stream()
                 .filter(member -> member.getMember().getId().equals(userId))
                 .findFirst()
-                .map(member -> member.isAccepted() ? MemberShipStatus.JOINED : MemberShipStatus.PENDING)
-                .orElse(MemberShipStatus.NONE);
+                .map(member -> member.isAccepted() ? MyMemberShipStatus.JOINED : MyMemberShipStatus.PENDING)
+                .orElse(MyMemberShipStatus.NONE);
     }
 
     @Builder

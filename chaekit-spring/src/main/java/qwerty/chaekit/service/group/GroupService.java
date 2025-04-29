@@ -12,6 +12,7 @@ import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.dto.group.*;
+import qwerty.chaekit.dto.group.enums.MyMemberShipStatus;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.enums.S3Directory;
@@ -69,9 +70,9 @@ public class GroupService {
                         group -> GroupFetchResponse.of(
                                 group,
                                 getGroupImageURL(group),
-                                isAnonymous ? MemberShipStatus.NONE : group.getMemberShipStatus(userId)
-                )
-        );
+                                isAnonymous ? MyMemberShipStatus.NONE : group.getMemberShipStatus(userId)
+                        )
+                );
         return PageResponse.of(page);
     }
 
@@ -85,7 +86,7 @@ public class GroupService {
         return GroupFetchResponse.of(
                 group,
                 getGroupImageURL(group),
-                isAnonymous ? MemberShipStatus.NONE : group.getMemberShipStatus(userId)
+                isAnonymous ? MyMemberShipStatus.NONE : group.getMemberShipStatus(userId)
         );
     }
 
