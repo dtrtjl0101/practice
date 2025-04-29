@@ -53,7 +53,9 @@ public class GroupService {
                 .groupImageKey(groupImageKey)
                 .build();
         ReadingGroup savedGroup = groupRepository.save(groupEntity);
-        request.tags().forEach(savedGroup::addTag);
+        if(request.tags() != null) {
+            request.tags().forEach(savedGroup::addTag);
+        }
         return GroupPostResponse.of(savedGroup, getGroupImageURL(savedGroup));
     }
 
@@ -88,7 +90,7 @@ public class GroupService {
     }
 
     @Transactional
-    public GroupPostResponse updateGroup(UserToken userToken, long groupId, GroupPutRequest request) {
+    public GroupPostResponse updateGroup(UserToken userToken, long groupId, GroupPatchRequest request) {
         Long userId = userToken.userId();
         if(!userRepository.existsById(userId)) {
             throw new NotFoundException(ErrorCode.USER_NOT_FOUND);

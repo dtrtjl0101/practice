@@ -41,7 +41,7 @@ public class GroupController {
     @PatchMapping("/{groupId}")
     public ApiSuccessResponse<GroupPostResponse> updateGroup(@Login UserToken userToken,
                                          @PathVariable long groupId,
-                                         @ModelAttribute @Valid GroupPutRequest request) {
+                                         @ModelAttribute @Valid GroupPatchRequest request) {
         return ApiSuccessResponse.of(groupService.updateGroup(userToken, groupId, request));
     }
 
