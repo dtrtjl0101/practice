@@ -1,5 +1,6 @@
 package qwerty.chaekit.domain.group;
 
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,4 +13,6 @@ public interface GroupRepository extends JpaRepository<ReadingGroup, Long> {
     Page<ReadingGroup> findAllWithGroupMembersAndTags(Pageable pageable);
     @Query("SELECT g FROM ReadingGroup g LEFT JOIN g.groupMembers gm LEFT JOIN g.tags WHERE g.id = :groupId")
     Optional<ReadingGroup> findByIdWithGroupMembersAndTags(Long groupId);
+
+    boolean existsReadingGroupByName(@NotBlank String name);
 }

@@ -40,6 +40,10 @@ public class GroupService {
             throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
         }
 
+        if(groupRepository.existsReadingGroupByName(request.name())) {
+            throw new ForbiddenException(ErrorCode.GROUP_NAME_DUPLICATED);
+        }
+
         String groupImageKey = s3Service.uploadFile(
                 awsProperties.imageBucketName(),
                 S3Directory.GROUP_IMAGE,

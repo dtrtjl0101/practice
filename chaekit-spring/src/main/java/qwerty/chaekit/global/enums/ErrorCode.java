@@ -17,6 +17,7 @@ public enum ErrorCode {
     PUBLISHER_ALREADY_EXISTS("PUBLISHER_ALREADY_EXISTS", "이미 존재하는 출판사 이름입니다"),
     NICKNAME_ALREADY_EXISTS("NICKNAME_ALREADY_EXISTS", "이미 존재하는 닉네임입니다"),
     // group
+    GROUP_NAME_DUPLICATED("GROUP_NAME_DUPLICATED", "독서모임 이름이 중복되었습니다"),
     ACTIVITY_TIME_CONFLICT("ACTIVITY_TIME_CONFLICT", "이미 등록된 독서모임 일정과 겹칩니다"),
     ACTIVITY_TIME_INVALID("ACTIVITY_TIME_INVALID", "시작일과 종료일이 올바르지 않습니다"),
     // email
