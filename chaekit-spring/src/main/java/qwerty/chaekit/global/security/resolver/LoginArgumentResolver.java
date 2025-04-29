@@ -35,7 +35,7 @@ public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
         boolean isRequired = loginAnnotation != null && loginAnnotation.required();
 
         Role requiredRole = determineRequiredRole(parameter.getParameterType());
-        CustomUserDetails userDetails = getAuthenticatedUserDetails(requiredRole);
+        CustomUserDetails userDetails = getAuthenticatedUserDetails();
 
         return resolveToken(requiredRole, userDetails, isRequired);
     }
@@ -50,7 +50,7 @@ public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
         }
     }
 
-    private CustomUserDetails getAuthenticatedUserDetails(Role requiredRole) {
+    private CustomUserDetails getAuthenticatedUserDetails() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) {
             throw new IllegalStateException("SecurityContext에 인증 정보가 없습니다.");
