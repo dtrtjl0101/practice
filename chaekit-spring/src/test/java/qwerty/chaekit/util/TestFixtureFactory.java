@@ -48,6 +48,7 @@ public class TestFixtureFactory {
 
     public UserToken createUserToken(Member member, UserProfile user) {
         return UserToken.builder()
+                .isAnonymous(false)
                 .memberId(member.getId())
                 .userId(user.getId())
                 .email(member.getEmail())
