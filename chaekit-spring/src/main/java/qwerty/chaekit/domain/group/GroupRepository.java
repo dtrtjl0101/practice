@@ -8,8 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.Optional;
 
 public interface GroupRepository extends JpaRepository<ReadingGroup, Long> {
-    @Query("SELECT g FROM ReadingGroup g JOIN FETCH g.groupMembers m")
-    Page<ReadingGroup> findAllWithGroupMembers(Pageable pageable);
-    @Query("SELECT g FROM ReadingGroup g JOIN FETCH g.groupMembers m WHERE g.id = :groupId")
-    Optional<ReadingGroup> findByIdWithGroupMembers(Long groupId);
+    @Query("SELECT DISTINCT g FROM ReadingGroup g LEFT JOIN g.groupMembers gm LEFT JOIN g.tags")
+    Page<ReadingGroup> findAllWithGroupMembersAndTags(Pageable pageable);
+    @Query("SELECT g FROM ReadingGroup g LEFT JOIN g.groupMembers gm LEFT JOIN g.tags WHERE g.id = :groupId")
+    Optional<ReadingGroup> findByIdWithGroupMembersAndTags(Long groupId);
 }

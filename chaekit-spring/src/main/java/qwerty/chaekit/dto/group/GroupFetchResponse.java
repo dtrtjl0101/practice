@@ -26,7 +26,7 @@ public record GroupFetchResponse(
                         .map(GroupTag::getTagName)
                         .toList())
                 .groupImageURL(groupImageURL)
-                .memberShipStatus(myMemberShipStatus)
+                .myMemberShipStatus(myMemberShipStatus)
                 .memberCount(group.getMembers().size())
                 .build();
     }

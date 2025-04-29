@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import org.springframework.lang.Nullable;
 import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.group.tag.GroupTag;
@@ -31,12 +32,14 @@ public class ReadingGroup extends BaseEntity {
     private UserProfile groupLeader;
 
     @OneToMany(mappedBy = "readingGroup", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 20)
     private List<GroupTag> tags = new ArrayList<>();
 
     @Column(nullable = false)
     private String description;
 
     @OneToMany(mappedBy = "readingGroup", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 20)
     private final List<GroupMember> groupMembers = new ArrayList<>();
 
     private String groupImageKey;

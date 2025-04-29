@@ -57,6 +57,8 @@ public class GroupService {
         if(request.tags() != null) {
             request.tags().forEach(savedGroup::addTag);
         }
+        savedGroup.addMember(userRepository.getReferenceById(userId)).approve();
+
         return GroupPostResponse.of(savedGroup, getGroupImageURL(savedGroup));
     }
 
@@ -65,7 +67,7 @@ public class GroupService {
         boolean isAnonymous = userToken.isAnonymous();
         Long userId = isAnonymous ? null : userToken.userId();
 
-        Page<GroupFetchResponse> page = groupRepository.findAllWithGroupMembers(pageable)
+        Page<GroupFetchResponse> page = groupRepository.findAllWithGroupMembersAndTags(pageable)
                 .map(
                         group -> GroupFetchResponse.of(
                                 group,
@@ -81,7 +83,7 @@ public class GroupService {
         boolean isAnonymous = userToken.isAnonymous();
         Long userId = isAnonymous ? null : userToken.userId();
 
-        ReadingGroup group = groupRepository.findByIdWithGroupMembers(groupId)
+        ReadingGroup group = groupRepository.findByIdWithGroupMembersAndTags(groupId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.GROUP_NOT_FOUND));
         return GroupFetchResponse.of(
                 group,
