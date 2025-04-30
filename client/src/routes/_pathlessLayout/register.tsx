@@ -24,7 +24,7 @@ function RouteComponent() {
   const { login } = useLogin();
   const navigate = Route.useNavigate();
   const [nickname, setNickname] = useState("");
-  const [username, setUsername] = useState("");
+  const [email, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -38,21 +38,24 @@ function RouteComponent() {
 
     const response = await wrapApiResponse(
       API_CLIENT.userController.userJoin({
-        nickname,
-        username,
-        password,
+        joinRequest: {
+          nickname,
+          email,
+          password,
+          verificationCode: "",
+        },
       })
     );
 
     if (response.isSuccessful) {
       alert("회원가입이 완료되었습니다.");
-      const { id, accessToken, nickname, username } = response.data;
+      const { userId, accessToken, nickname, email } = response.data;
       login({
-        id: id!,
+        id: userId!,
         accessToken: accessToken!,
         role: Role.ROLE_USER as Role,
         nickname: nickname!,
-        username: username!,
+        email: email!,
       });
       navigate({
         to: "/",
@@ -66,7 +69,7 @@ function RouteComponent() {
         break;
       }
     }
-  }, [login, navigate, username, password, confirmPassword]);
+  }, [login, navigate, email, password, confirmPassword]);
 
   return (
     <Container maxWidth="sm" sx={{ mt: theme.spacing(4) }}>
@@ -93,7 +96,7 @@ function RouteComponent() {
           <OutlinedInput
             placeholder="ID"
             fullWidth
-            value={username}
+            value={email}
             onChange={(e) => setUsername(e.target.value)}
           />
 
