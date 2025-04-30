@@ -5,7 +5,7 @@ export namespace AuthState {
   export type LoggedInUser = {
     id: number;
     nickname: string;
-    username: string;
+    email: string;
     role: Role;
     accessToken: string;
   };

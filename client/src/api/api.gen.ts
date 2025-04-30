@@ -32,28 +32,13 @@ export interface HighlightPostResponse {
   memo?: string;
 }
 
-export interface GroupPutRequest {
-  description?: string;
-}
-
-/** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponseGroupPostResponse {
-  isSuccessful?: boolean;
-  data?: GroupPostResponse;
-}
-
-export interface GroupPostResponse {
-  /** @format int64 */
-  groupId?: number;
-  name?: string;
-  description?: string;
-  tags?: string[];
-}
-
 export interface UserJoinRequest {
-  nickname: string;
-  username: string;
+  email: string;
   password: string;
+  nickname: string;
+  /** @format binary */
+  profileImage?: File;
+  verificationCode: string;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -64,18 +49,22 @@ export interface ApiSuccessResponseUserJoinResponse {
 
 export interface UserJoinResponse {
   /** @format int64 */
-  id?: number;
+  memberId?: number;
+  email?: string;
   /** @format int64 */
   userId?: number;
   accessToken?: string;
   nickname?: string;
-  username?: string;
+  profileImageURL?: string;
 }
 
 export interface PublisherJoinRequest {
   publisherName: string;
-  username: string;
+  email: string;
   password: string;
+  /** @format binary */
+  profileImage?: File;
+  verificationCode: string;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -86,17 +75,18 @@ export interface ApiSuccessResponsePublisherJoinResponse {
 
 export interface PublisherJoinResponse {
   /** @format int64 */
-  id?: number;
+  memberId?: number;
   /** @format int64 */
   publisherId?: number;
   accessToken?: string;
   publisherName?: string;
-  username?: string;
+  email?: string;
+  profileImageURL?: string;
   isAccepted?: boolean;
 }
 
 export interface LoginRequest {
-  username: string;
+  email: string;
   password: string;
 }
 
@@ -108,12 +98,14 @@ export interface ApiSuccessResponseLoginResponse {
 
 export interface LoginResponse {
   /** @format int64 */
-  id?: number;
+  memberId?: number;
+  email?: string;
   /** @format int64 */
   userId?: number;
   /** @format int64 */
   publisherId?: number;
   role?: string;
+  profileImageURL?: string;
   accessToken?: string;
 }
 
@@ -128,8 +120,25 @@ export interface HighlightPostRequest {
 }
 
 export interface GroupPostRequest {
+  name: string;
+  description: string;
+  tags?: string[];
+  /** @format binary */
+  groupImage?: File;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseGroupPostResponse {
+  isSuccessful?: boolean;
+  data?: GroupPostResponse;
+}
+
+export interface GroupPostResponse {
+  /** @format int64 */
+  groupId?: number;
   name?: string;
   description?: string;
+  groupImageURL?: string;
   tags?: string[];
 }
 
@@ -177,12 +186,12 @@ export interface ApiSuccessResponseActivityPostResponse {
 }
 
 /** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponseBoolean {
+export interface ApiSuccessResponseString {
   isSuccessful?: boolean;
-  data?: boolean;
+  data?: string;
 }
 
-export interface EbookUploadRequest {
+export interface EbookPostRequest {
   /**
    * 책 제목
    * @example "이상한 나라의 앨리스"
@@ -200,12 +209,41 @@ export interface EbookUploadRequest {
   description?: string;
   /** @format binary */
   file?: File;
+  /** @format binary */
+  coverImageFile?: File;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponseString {
+export interface ApiSuccessResponseEbookPostResponse {
   isSuccessful?: boolean;
-  data?: string;
+  data?: EbookPostResponse;
+}
+
+export interface EbookPostResponse {
+  /** @format int64 */
+  bookId?: number;
+  title?: string;
+  author?: string;
+  description?: string;
+  coverImageURL?: string;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseBoolean {
+  isSuccessful?: boolean;
+  data?: boolean;
+}
+
+export interface GroupPutRequest {
+  description?: string;
+  /** @format binary */
+  groupImage?: File;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseVoid {
+  isSuccessful?: boolean;
+  data?: object;
 }
 
 export interface ActivityPatchRequest {
@@ -219,34 +257,32 @@ export interface ActivityPatchRequest {
 }
 
 /** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponseUserMemberResponse {
+export interface ApiSuccessResponseUserInfoResponse {
   isSuccessful?: boolean;
-  data?: UserMemberResponse;
+  data?: UserInfoResponse;
 }
 
-export interface UserMemberResponse {
-  /** @format int64 */
-  id?: number;
+export interface UserInfoResponse {
   /** @format int64 */
   userId?: number;
-  username?: string;
   nickname?: string;
+  profileImageURL?: string;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponsePublisherMemberResponse {
+export interface ApiSuccessResponsePublisherInfoResponse {
   isSuccessful?: boolean;
-  data?: PublisherMemberResponse;
+  data?: PublisherInfoResponse;
 }
 
-export interface PublisherMemberResponse {
-  /** @format int64 */
-  id?: number;
+export interface PublisherInfoResponse {
   /** @format int64 */
   publisherId?: number;
   publisherName?: string;
-  email?: string;
+  profileImageURL?: string;
   isAccepted?: boolean;
+  /** @format date-time */
+  createdAt?: string;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -289,12 +325,35 @@ export interface GroupFetchResponse {
   name?: string;
   description?: string;
   tags?: string[];
+  groupImageURL?: string;
   /** @format int32 */
   memberCount?: number;
 }
 
 export interface PageResponseGroupFetchResponse {
   content?: GroupFetchResponse[];
+  /** @format int32 */
+  currentPage?: number;
+  /** @format int64 */
+  totalItems?: number;
+  /** @format int32 */
+  totalPages?: number;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponsePageResponseGroupPendingMemberResponse {
+  isSuccessful?: boolean;
+  data?: PageResponseGroupPendingMemberResponse;
+}
+
+export interface GroupPendingMemberResponse {
+  /** @format int64 */
+  userId?: number;
+  nickname?: string;
+}
+
+export interface PageResponseGroupPendingMemberResponse {
+  content?: GroupPendingMemberResponse[];
   /** @format int32 */
   currentPage?: number;
   /** @format int64 */
@@ -347,6 +406,7 @@ export interface EbookFetchResponse {
   /** @format int64 */
   id?: number;
   title?: string;
+  bookCoverImageURL?: string;
   author?: string;
   description?: string;
   /** @format int64 */
@@ -363,6 +423,45 @@ export interface PageResponseEbookFetchResponse {
   totalPages?: number;
 }
 
+export interface EbookSearchRequest {
+  authorName?: string;
+  bookTitle?: string;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponsePageResponseEbookSearchResponse {
+  isSuccessful?: boolean;
+  data?: PageResponseEbookSearchResponse;
+}
+
+export interface EbookSearchResponse {
+  /** @format int64 */
+  id?: number;
+  title?: string;
+  author?: string;
+  coverImageUrl?: string;
+}
+
+export interface PageResponseEbookSearchResponse {
+  content?: EbookSearchResponse[];
+  /** @format int32 */
+  currentPage?: number;
+  /** @format int64 */
+  totalItems?: number;
+  /** @format int32 */
+  totalPages?: number;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseEbookDownloadResponse {
+  isSuccessful?: boolean;
+  data?: EbookDownloadResponse;
+}
+
+export interface EbookDownloadResponse {
+  presignedUrl?: string;
+}
+
 /** API 에러 응답을 감싸는 클래스 */
 export interface ApiSuccessResponsePageResponsePublisherInfoResponse {
   isSuccessful?: boolean;
@@ -377,26 +476,6 @@ export interface PageResponsePublisherInfoResponse {
   totalItems?: number;
   /** @format int32 */
   totalPages?: number;
-}
-
-export interface PublisherInfoResponse {
-  /** @format int64 */
-  id?: number;
-  /** @format int64 */
-  publisherId?: number;
-  publisherName?: string;
-  /** @format date-time */
-  createdAt?: string;
-}
-
-/** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponseEbookDownloadResponse {
-  isSuccessful?: boolean;
-  data?: EbookDownloadResponse;
-}
-
-export interface EbookDownloadResponse {
-  presignedUrl?: string;
 }
 
 export type QueryParamsType = Record<string | number, any>;
@@ -728,27 +807,95 @@ export class Api<
         ...params,
       }),
   };
-  groupController = {
+  userController = {
     /**
      * No description
      *
-     * @tags group-controller
-     * @name UpdateGroup
-     * @request PUT:/api/groups/{groupId}
+     * @tags user-controller
+     * @name UserJoin
+     * @request POST:/api/users/join
      */
-    updateGroup: (
-      groupId: number,
-      data: GroupPutRequest,
+    userJoin: (
+      query: {
+        joinRequest: UserJoinRequest;
+      },
       params: RequestParams = {},
     ) =>
-      this.request<ApiSuccessResponseGroupPostResponse, any>({
-        path: `/api/groups/${groupId}`,
-        method: "PUT",
+      this.request<ApiSuccessResponseUserJoinResponse, any>({
+        path: `/api/users/join`,
+        method: "POST",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags user-controller
+     * @name UserInfo
+     * @request GET:/api/users/me
+     */
+    userInfo: (params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseUserInfoResponse, any>({
+        path: `/api/users/me`,
+        method: "GET",
+        ...params,
+      }),
+  };
+  publisherController = {
+    /**
+     * No description
+     *
+     * @tags publisher-controller
+     * @name PublisherJoin
+     * @request POST:/api/publishers/join
+     */
+    publisherJoin: (
+      query: {
+        joinRequest: PublisherJoinRequest;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponsePublisherJoinResponse, any>({
+        path: `/api/publishers/join`,
+        method: "POST",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags publisher-controller
+     * @name PublisherInfo
+     * @request GET:/api/publishers/me
+     */
+    publisherInfo: (params: RequestParams = {}) =>
+      this.request<ApiSuccessResponsePublisherInfoResponse, any>({
+        path: `/api/publishers/me`,
+        method: "GET",
+        ...params,
+      }),
+  };
+  loginFilter = {
+    /**
+     * @description Spring Security가 처리하는 로그인 API
+     *
+     * @tags login-filter
+     * @name Login
+     * @summary 로그인
+     * @request POST:/api/login
+     */
+    login: (data: LoginRequest, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseLoginResponse, any>({
+        path: `/api/login`,
+        method: "POST",
         body: data,
         type: ContentType.Json,
         ...params,
       }),
-
+  };
+  groupController = {
     /**
      * No description
      *
@@ -789,12 +936,16 @@ export class Api<
      * @name CreateGroup
      * @request POST:/api/groups
      */
-    createGroup: (data: GroupPostRequest, params: RequestParams = {}) =>
+    createGroup: (
+      query: {
+        groupPostRequest: GroupPostRequest;
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<ApiSuccessResponseGroupPostResponse, any>({
         path: `/api/groups`,
         method: "POST",
-        body: data,
-        type: ContentType.Json,
+        query: query,
         ...params,
       }),
 
@@ -809,6 +960,45 @@ export class Api<
       this.request<ApiSuccessResponseGroupJoinResponse, any>({
         path: `/api/groups/${groupId}/join`,
         method: "POST",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags group-controller
+     * @name UpdateGroup
+     * @request PATCH:/api/groups/{groupId}
+     */
+    updateGroup: (
+      groupId: number,
+      query: {
+        request: GroupPutRequest;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponseGroupPostResponse, any>({
+        path: `/api/groups/${groupId}`,
+        method: "PATCH",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags group-controller
+     * @name RejectJoinRequest
+     * @request PATCH:/api/groups/{groupId}/members/{userId}/reject
+     */
+    rejectJoinRequest: (
+      groupId: number,
+      userId: number,
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponseVoid, any>({
+        path: `/api/groups/${groupId}/members/${userId}/reject`,
+        method: "PATCH",
         ...params,
       }),
 
@@ -834,6 +1024,43 @@ export class Api<
      * No description
      *
      * @tags group-controller
+     * @name GetPendingList
+     * @request GET:/api/groups/{groupId}/members/pending
+     */
+    getPendingList: (
+      groupId: number,
+      query?: {
+        /**
+         * Zero-based page index (0..N)
+         * @min 0
+         * @default 0
+         */
+        page?: number;
+        /**
+         * The size of the page to be returned
+         * @min 1
+         * @default 20
+         */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<
+        ApiSuccessResponsePageResponseGroupPendingMemberResponse,
+        any
+      >({
+        path: `/api/groups/${groupId}/members/pending`,
+        method: "GET",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags group-controller
      * @name GetGroup
      * @request GET:/api/groups/{groupId}/info
      */
@@ -843,84 +1070,18 @@ export class Api<
         method: "GET",
         ...params,
       }),
-  };
-  userController = {
-    /**
-     * No description
-     *
-     * @tags user-controller
-     * @name UserJoin
-     * @request POST:/api/users/join
-     */
-    userJoin: (data: UserJoinRequest, params: RequestParams = {}) =>
-      this.request<ApiSuccessResponseUserJoinResponse, any>({
-        path: `/api/users/join`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
 
     /**
      * No description
      *
-     * @tags user-controller
-     * @name UserInfo
-     * @request GET:/api/users/me
+     * @tags group-controller
+     * @name LeaveGroup
+     * @request DELETE:/api/groups/{groupId}/members/leave
      */
-    userInfo: (params: RequestParams = {}) =>
-      this.request<ApiSuccessResponseUserMemberResponse, any>({
-        path: `/api/users/me`,
-        method: "GET",
-        ...params,
-      }),
-  };
-  publisherController = {
-    /**
-     * No description
-     *
-     * @tags publisher-controller
-     * @name PublisherJoin
-     * @request POST:/api/publishers/join
-     */
-    publisherJoin: (data: PublisherJoinRequest, params: RequestParams = {}) =>
-      this.request<ApiSuccessResponsePublisherJoinResponse, any>({
-        path: `/api/publishers/join`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags publisher-controller
-     * @name UserInfo1
-     * @request GET:/api/publishers/me
-     */
-    userInfo1: (params: RequestParams = {}) =>
-      this.request<ApiSuccessResponsePublisherMemberResponse, any>({
-        path: `/api/publishers/me`,
-        method: "GET",
-        ...params,
-      }),
-  };
-  loginFilter = {
-    /**
-     * @description Spring Security가 처리하는 로그인 API
-     *
-     * @tags login-filter
-     * @name Login
-     * @summary 로그인
-     * @request POST:/api/login
-     */
-    login: (data: LoginRequest, params: RequestParams = {}) =>
-      this.request<ApiSuccessResponseLoginResponse, any>({
-        path: `/api/login`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
+    leaveGroup: (groupId: number, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseVoid, any>({
+        path: `/api/groups/${groupId}/members/leave`,
+        method: "DELETE",
         ...params,
       }),
   };
@@ -999,6 +1160,156 @@ export class Api<
         ...params,
       }),
   };
+  emailVerificationController = {
+    /**
+     * @description 이메일로 인증 코드를 생성하여 발송하는 API입니다. 생성된 인증 코드는 Redis에 저장되며, 유효 기간은 30분입니다.
+     *
+     * @tags email-verification-controller
+     * @name SendVerificationCode
+     * @summary 인증 코드 발송
+     * @request POST:/api/email-verification/send-verification-code
+     */
+    sendVerificationCode: (
+      query: {
+        email: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponseString, any>({
+        path: `/api/email-verification/send-verification-code`,
+        method: "POST",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * @description 사용자가 입력한 인증 코드를 검증합니다. 올바른 코드일 경우 인증 성공 메시지를 반환하고, 실패하면 400 에러를 반환합니다.
+     *
+     * @tags email-verification-controller
+     * @name VerifyCode
+     * @summary 인증 코드 검증
+     * @request GET:/api/email-verification/verify-code
+     */
+    verifyCode: (
+      query: {
+        email: string;
+        verificationCode: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponseString, any>({
+        path: `/api/email-verification/verify-code`,
+        method: "GET",
+        query: query,
+        ...params,
+      }),
+  };
+  ebook = {
+    /**
+     * @description 전자책 목록을 페이지네이션하여 조회합니다.
+     *
+     * @tags Ebook
+     * @name GetBooks
+     * @summary 전자책 목록 조회
+     * @request GET:/api/books
+     */
+    getBooks: (
+      query?: {
+        /**
+         * Zero-based page index (0..N)
+         * @min 0
+         * @default 0
+         */
+        page?: number;
+        /**
+         * The size of the page to be returned
+         * @min 1
+         * @default 20
+         */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponsePageResponseEbookFetchResponse, any>({
+        path: `/api/books`,
+        method: "GET",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * @description 출판사가 전자책 파일과 정보를 업로드합니다.
+     *
+     * @tags Ebook
+     * @name UploadFile
+     * @summary 전자책 업로드
+     * @request POST:/api/books
+     */
+    uploadFile: (
+      query: {
+        /** 전자책 업로드 요청 데이터 */
+        request: EbookPostRequest;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponseEbookPostResponse, any>({
+        path: `/api/books`,
+        method: "POST",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Ebook
+     * @name SearchEbooks
+     * @request GET:/api/books/search
+     */
+    searchEbooks: (
+      query: {
+        /**
+         * Zero-based page index (0..N)
+         * @min 0
+         * @default 0
+         */
+        page?: number;
+        /**
+         * The size of the page to be returned
+         * @min 1
+         * @default 20
+         */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        request: EbookSearchRequest;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponsePageResponseEbookSearchResponse, any>({
+        path: `/api/books/search`,
+        method: "GET",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * @description 관리자가 전자책 다운로드를 위한 URL을 생성합니다.
+     *
+     * @tags Ebook
+     * @name DownloadFile
+     * @summary 전자책 다운로드 URL 생성
+     * @request GET:/api/books/download/{ebookId}
+     */
+    downloadFile: (ebookId: number, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseEbookDownloadResponse, any>({
+        path: `/api/books/download/${ebookId}`,
+        method: "GET",
+        ...params,
+      }),
+  };
   adminController = {
     /**
      * No description
@@ -1011,26 +1322,6 @@ export class Api<
       this.request<ApiSuccessResponseBoolean, any>({
         path: `/api/admin/publishers/${publisherId}/accept`,
         method: "POST",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags admin-controller
-     * @name UploadFile
-     * @request POST:/api/admin/books/upload
-     */
-    uploadFile: (
-      query: {
-        request: EbookUploadRequest;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<ApiSuccessResponseString, any>({
-        path: `/api/admin/books/upload`,
-        method: "POST",
-        query: query,
         ...params,
       }),
 
@@ -1066,20 +1357,6 @@ export class Api<
         query: query,
         ...params,
       }),
-
-    /**
-     * No description
-     *
-     * @tags admin-controller
-     * @name DownloadFile
-     * @request GET:/api/admin/books/{ebookId}
-     */
-    downloadFile: (ebookId: number, params: RequestParams = {}) =>
-      this.request<ApiSuccessResponseEbookDownloadResponse, any>({
-        path: `/api/admin/books/${ebookId}`,
-        method: "GET",
-        ...params,
-      }),
   };
   mainController = {
     /**
@@ -1093,40 +1370,6 @@ export class Api<
       this.request<ApiSuccessResponseString, any>({
         path: `/api`,
         method: "GET",
-        ...params,
-      }),
-  };
-  ebookController = {
-    /**
-     * No description
-     *
-     * @tags ebook-controller
-     * @name GetBooks
-     * @request GET:/api/books
-     */
-    getBooks: (
-      query?: {
-        /**
-         * Zero-based page index (0..N)
-         * @min 0
-         * @default 0
-         */
-        page?: number;
-        /**
-         * The size of the page to be returned
-         * @min 1
-         * @default 20
-         */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<ApiSuccessResponsePageResponseEbookFetchResponse, any>({
-        path: `/api/books`,
-        method: "GET",
-        query: query,
         ...params,
       }),
   };

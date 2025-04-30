@@ -22,13 +22,13 @@ function RouteComponent() {
   const theme = useTheme();
   const navigate = useNavigate();
   const { login } = useLogin();
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const onLoginButtonClick = useCallback(async () => {
     const response = await wrapApiResponse(
       API_CLIENT.loginFilter.login({
-        username,
+        email,
         password,
       })
     );
@@ -38,19 +38,19 @@ function RouteComponent() {
       return;
     }
 
-    const { id, accessToken, role } = response.data;
+    const { userId, accessToken, role } = response.data;
     login({
-      id: id!,
+      id: userId!,
       accessToken: accessToken!,
       role: role as Role,
       nickname: "닉네임",
-      username: username,
+      email,
     });
     navigate({
       to: "/",
       replace: true,
     });
-  }, [login, navigate, username, password]);
+  }, [login, navigate, email, password]);
 
   return (
     <Container maxWidth="sm" sx={{ mt: theme.spacing(4) }}>
@@ -64,10 +64,10 @@ function RouteComponent() {
           }}
         >
           <OutlinedInput
-            placeholder="ID"
+            placeholder="E-mail"
             fullWidth
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
           <OutlinedInput
             placeholder="Password"
