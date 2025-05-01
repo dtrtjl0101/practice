@@ -4,4 +4,4 @@ spring:
       host: ${REDIS_URL}
       port: 6379
       ssl:
-        enabled: true
+        enabled: false
