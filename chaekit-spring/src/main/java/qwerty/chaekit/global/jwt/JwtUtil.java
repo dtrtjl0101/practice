@@ -1,6 +1,9 @@
 package qwerty.chaekit.global.jwt;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtBuilder;
+import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import qwerty.chaekit.global.properties.JwtProperties;
@@ -9,6 +12,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.function.UnaryOperator;
 
 @Slf4j
 @Component
@@ -48,13 +52,22 @@ public class JwtUtil {
         return claims.get("role", String.class);
     }
 
-    public boolean isValidToken(String token) {
+    public boolean isValidAccessToken(String token) {
+        return isValidToken(token, "access");
+    }
+
+    public boolean isValidRefreshToken(String token) {
+        return isValidToken(token, "refresh");
+    }
+
+    private boolean isValidToken(String token, String type) {
         try {
-            Jwts.parser()
+            Claims claims = Jwts.parser()
                     .verifyWith(secretKey)
                     .build()
-                    .parseSignedClaims(token);
-            return true;
+                    .parseSignedClaims(token)
+                    .getPayload();
+            return claims.get("type", String.class).equals(type);
         } catch (ExpiredJwtException e) {
             log.info("token expired");
             return false;
@@ -65,16 +78,34 @@ public class JwtUtil {
         }
     }
 
-    public String createJwt(Long memberId, Long userId, Long publisherId, String email, String role) {
+    public String createAccessToken(Long memberId, Long userId, Long publisherId, String email, String role) {
+        return createToken(
+                builder -> builder
+                        .claim("type", "access")
+                        .claim("memberId", memberId)
+                        .claim("userId", userId)
+                        .claim("publisherId", publisherId)
+                        .claim("email", email)
+                        .claim("role", role),
+                jwtProperties.expirationMs()
+        );
+    }
 
-        return Jwts.builder()
-                .claim("memberId", memberId)
-                .claim("userId", userId)
-                .claim("publisherId", publisherId)
-                .claim("email", email)
-                .claim("role", role)
+    public String createRefreshToken(Long memberId) {
+        return createToken(
+                builder -> builder
+                        .claim("type", "refresh")
+                        .claim("memberId", memberId),
+                jwtProperties.refreshExpirationMs()
+        );
+    }
+
+    private String createToken(UnaryOperator<JwtBuilder> claimSetter, long expirationMs) {
+        JwtBuilder builder = Jwts.builder();
+        builder = claimSetter.apply(builder);
+        return builder
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + jwtProperties.expirationMs()))
+                .expiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(secretKey)
                 .compact();
     }

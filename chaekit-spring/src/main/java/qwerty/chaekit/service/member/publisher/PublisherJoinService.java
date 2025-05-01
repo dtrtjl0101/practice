@@ -51,7 +51,7 @@ public class PublisherJoinService {
     }
 
     private PublisherJoinResponse toResponse(Member member, PublisherProfile publisher) {
-        String token = "Bearer " + jwtUtil.createJwt(
+        String token = "Bearer " + jwtUtil.createAccessToken(
                 member.getId(),
                 null,
                 publisher.getId(),

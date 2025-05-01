@@ -51,7 +51,7 @@ public class UserJoinService {
     }
 
     private UserJoinResponse toResponse(Member member, UserProfile user) {
-        String token = "Bearer " + jwtUtil.createJwt(
+        String token = "Bearer " + jwtUtil.createAccessToken(
                 member.getId(),
                 user.getId(),
                 null,

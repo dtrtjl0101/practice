@@ -38,6 +38,7 @@ springdoc:
 jwt:
   secret: ${JWT_SECRET}
   expirationMs: ${JWT_EXPIRATION_MS}
+  refreshExpirationMs: ${JWT_REFRESH_EXPIRATION_MS}
 
 admin:
   email: ${ADMIN_EMAIL}

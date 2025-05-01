@@ -91,7 +91,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         authorities.stream().findFirst().map(GrantedAuthority::getAuthority).ifPresentOrElse(
                 (role)-> {
-                    String token = jwtUtil.createJwt(memberId, userId, publisherId, email, role);
+                    String token = jwtUtil.createAccessToken(memberId, userId, publisherId, email, role);
                     sendSuccessResponse(response, token, memberId, email, userId, publisherId, profileImageURL, role);
                 }, ()-> responseSender.sendError(response, 500, "INVALID_ROLE", "권한 정보가 존재하지 않습니다.")
         );
