@@ -4,7 +4,6 @@ import State from "../../states";
 import API_CLIENT from "../api";
 import { AuthState } from "../../states/auth";
 
-// TODO: Use swagger
 export default function useLogin() {
   const setLoggedInUser = useSetAtom(State.Auth.user);
 

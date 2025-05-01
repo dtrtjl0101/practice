@@ -15,12 +15,10 @@ export default function GroupCreateModal(props: {
     const { name, description, tags } = data;
     const response = await wrapApiResponse(
       API_CLIENT.groupController.createGroup({
-        groupPostRequest: {
-          // TODO: Add group image
-          name,
-          description,
-          tags,
-        },
+        // TODO: Add group image
+        name,
+        description,
+        tags,
       })
     );
 

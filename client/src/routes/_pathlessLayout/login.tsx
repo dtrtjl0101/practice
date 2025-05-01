@@ -12,7 +12,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import useLogin from "../../api/login/useLogin";
 import { useCallback, useState } from "react";
 import API_CLIENT, { wrapApiResponse } from "../../api/api";
-import { Role } from "../../types/role";
+import { AuthState } from "../../states/auth";
 
 export const Route = createFileRoute("/_pathlessLayout/login")({
   component: RouteComponent,
@@ -34,18 +34,13 @@ function RouteComponent() {
     );
 
     if (!response.isSuccessful) {
-      // TODO: Handle error
+      alert("로그인에 실패했습니다.");
+      console.error(response.errorCode);
       return;
     }
 
-    const { userId, accessToken, role } = response.data;
-    login({
-      id: userId!,
-      accessToken: accessToken!,
-      role: role as Role,
-      nickname: "닉네임",
-      email,
-    });
+    const loggedInUser = response.data as AuthState.LoggedInUser;
+    login(loggedInUser);
     navigate({
       to: "/",
       replace: true,
@@ -67,6 +62,7 @@ function RouteComponent() {
             placeholder="E-mail"
             fullWidth
             value={email}
+            type="email"
             onChange={(e) => setEmail(e.target.value)}
           />
           <OutlinedInput
@@ -75,6 +71,11 @@ function RouteComponent() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                onLoginButtonClick();
+              }
+            }}
           />
           <Divider />
           <Button fullWidth variant="contained" onClick={onLoginButtonClick}>
