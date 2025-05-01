@@ -12,6 +12,7 @@ import {
   IconButton,
   InputAdornment,
   Paper,
+  Skeleton,
   Stack,
   Typography,
 } from "@mui/material";
@@ -87,37 +88,9 @@ function RouteComponent() {
             />
             <Divider />
             <Stack spacing={1}>
-              {books.map((book) => {
-                return (
-                  <Card
-                    elevation={3}
-                    key={book?.id}
-                    sx={{
-                      padding: 2,
-                    }}
-                  >
-                    <Stack spacing={1} direction={"row"}>
-                      <CardActionArea sx={{ width: 128, height: 160 }}>
-                        <CardMedia
-                          image="https://picsum.photos/512/512"
-                          sx={{ width: 128, height: 160 }}
-                        />
-                      </CardActionArea>
-                      <Stack flexGrow={1} spacing={1}>
-                        <CardActionArea>
-                          <Typography variant="h5">{book?.title}</Typography>
-                        </CardActionArea>
-                        <CardActionArea>
-                          <Typography variant="body2">
-                            {book?.author}
-                          </Typography>
-                        </CardActionArea>
-                        <Typography variant="body2">{book?.size} KB</Typography>
-                      </Stack>
-                    </Stack>
-                  </Card>
-                );
-              })}
+              {books.map((book) => (
+                <BookCard book={book} />
+              ))}
             </Stack>
             <Divider />
 
@@ -130,5 +103,49 @@ function RouteComponent() {
         </Paper>
       </Stack>
     </Container>
+  );
+}
+function BookCard(props: { book?: BookMetadata }) {
+  const { book } = props;
+  if (!book) {
+    return (
+      <Card elevation={3} sx={{ padding: 2 }}>
+        <Stack spacing={1} direction={"row"}>
+          <Skeleton variant="rectangular" width={128} height={160} />
+          <Stack flexGrow={1} spacing={1}>
+            <Skeleton variant="text" width="60%" height={32} />
+            <Skeleton variant="text" width="40%" height={24} />
+            <Skeleton variant="text" width="30%" height={20} />
+          </Stack>
+        </Stack>
+      </Card>
+    );
+  }
+  return (
+    <Card
+      elevation={3}
+      key={book.id}
+      sx={{
+        padding: 2,
+      }}
+    >
+      <Stack spacing={1} direction={"row"}>
+        <CardActionArea sx={{ width: 128, height: 160 }}>
+          <CardMedia
+            image={book.bookCoverImageURL || "https://picsum.photos/128/160"}
+            sx={{ width: 128, height: 160 }}
+          />
+        </CardActionArea>
+        <Stack flexGrow={1} spacing={1}>
+          <CardActionArea>
+            <Typography variant="h5">{book.title}</Typography>
+          </CardActionArea>
+          <CardActionArea>
+            <Typography variant="body2">{book.author}</Typography>
+          </CardActionArea>
+          <Typography variant="body2">{book.size} KB</Typography>
+        </Stack>
+      </Stack>
+    </Card>
   );
 }
