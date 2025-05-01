@@ -14,7 +14,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useMemo, useState } from "react";
 import API_CLIENT, { wrapApiResponse } from "../../api/api";
 import useLogin from "../../api/login/useLogin";
-import { Role } from "../../types/role";
+import { AuthState } from "../../states/auth";
 
 export const Route = createFileRoute("/_pathlessLayout/register")({
   component: RouteComponent,
@@ -78,14 +78,8 @@ function RouteComponent() {
     );
     if (response.isSuccessful) {
       alert("회원가입이 완료되었습니다.");
-      const { userId, accessToken, nickname, email } = response.data;
-      login({
-        id: userId!,
-        accessToken: accessToken!,
-        role: Role.ROLE_USER as Role,
-        nickname: nickname!,
-        email: email!,
-      });
+      const loggedInUser = response.data as AuthState.LoggedInUser;
+      login(loggedInUser);
       navigate({
         to: "/",
         replace: true,
