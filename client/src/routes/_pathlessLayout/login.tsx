@@ -67,6 +67,7 @@ function RouteComponent() {
             placeholder="E-mail"
             fullWidth
             value={email}
+            type="email"
             onChange={(e) => setEmail(e.target.value)}
           />
           <OutlinedInput

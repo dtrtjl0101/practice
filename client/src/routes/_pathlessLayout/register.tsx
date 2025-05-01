@@ -1,16 +1,17 @@
 import {
+  Avatar,
   Button,
   Card,
   CardContent,
   CardHeader,
   Container,
-  Divider,
   InputLabel,
   OutlinedInput,
   useTheme,
 } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import API_CLIENT, { wrapApiResponse } from "../../api/api";
 import useLogin from "../../api/login/useLogin";
 import { Role } from "../../types/role";
@@ -27,26 +28,56 @@ function RouteComponent() {
   const [email, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
+  const [isCodeSent, setIsCodeSent] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
+  const [profileImage, setProfileImage] = useState<File | null>(null);
+
+  const onVerificationCodeButtonClick = useCallback(async () => {
+    const response = await wrapApiResponse(
+      API_CLIENT.emailVerificationController.sendVerificationCode({
+        email,
+      })
+    );
+    if (response.isSuccessful) {
+      alert("인증코드가 발송되었습니다.");
+      setIsCodeSent(true);
+      return;
+    }
+    alert("인증코드 발송에 실패했습니다.");
+  }, [email]);
+
+  const onVerifyCodeButtonClick = useCallback(async () => {
+    const response = await wrapApiResponse(
+      API_CLIENT.emailVerificationController.verifyCode({
+        email,
+        verificationCode,
+      })
+    );
+    if (response.isSuccessful) {
+      alert("이메일 인증이 완료되었습니다.");
+      setIsVerified(true);
+      return;
+    }
+    alert("인증코드가 올바르지 않습니다.");
+  }, [email, verificationCode]);
 
   const onRegisterButtonClick = useCallback(async () => {
-    // TODO: Test username and password constraints
-
     if (password !== confirmPassword) {
       alert("비밀번호가 일치하지 않습니다.");
       return;
     }
-
     const response = await wrapApiResponse(
       API_CLIENT.userController.userJoin({
         joinRequest: {
           nickname,
           email,
           password,
-          verificationCode: "",
+          verificationCode,
+          ...(profileImage ? { profileImage } : {}),
         },
       })
     );
-
     if (response.isSuccessful) {
       alert("회원가입이 완료되었습니다.");
       const { userId, accessToken, nickname, email } = response.data;
@@ -69,7 +100,22 @@ function RouteComponent() {
         break;
       }
     }
-  }, [login, navigate, email, password, confirmPassword]);
+  }, [
+    login,
+    navigate,
+    email,
+    password,
+    confirmPassword,
+    nickname,
+    verificationCode,
+  ]);
+
+  const profileImagePreviewUrl = useMemo(() => {
+    if (!profileImage) {
+      return "";
+    }
+    return URL.createObjectURL(profileImage);
+  }, [profileImage]);
 
   return (
     <Container maxWidth="sm" sx={{ mt: theme.spacing(4) }}>
@@ -82,47 +128,129 @@ function RouteComponent() {
             gap: theme.spacing(2),
           }}
         >
-          <InputLabel>Nickname</InputLabel>
-          <OutlinedInput
-            placeholder="Nickname"
-            fullWidth
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
-          />
+          {!isCodeSent && (
+            <>
+              <InputLabel>E-mail</InputLabel>
+              <OutlinedInput
+                placeholder="bigfood@ajou.ac.kr"
+                fullWidth
+                value={email}
+                onChange={(e) => setUsername(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && email) {
+                    onVerificationCodeButtonClick();
+                  }
+                }}
+              />
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={onVerificationCodeButtonClick}
+                disabled={!email}
+              >
+                이메일 인증
+              </Button>
+            </>
+          )}
 
-          <Divider />
+          {isCodeSent && !isVerified && (
+            <>
+              <InputLabel>인증코드</InputLabel>
+              <OutlinedInput
+                placeholder="인증코드 입력"
+                fullWidth
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && verificationCode) {
+                    onVerifyCodeButtonClick();
+                  }
+                }}
+              />
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={onVerifyCodeButtonClick}
+                disabled={!verificationCode}
+              >
+                인증코드 확인
+              </Button>
+              <Button fullWidth variant="outlined" disabled sx={{ mt: 1 }}>
+                인증코드 재발송은 잠시 후 가능합니다
+              </Button>
+            </>
+          )}
 
-          <InputLabel>ID</InputLabel>
-          <OutlinedInput
-            placeholder="ID"
-            fullWidth
-            value={email}
-            onChange={(e) => setUsername(e.target.value)}
-          />
+          {isVerified && (
+            <>
+              <InputLabel>프로필 이미지 (선택)</InputLabel>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  marginBottom: theme.spacing(2),
+                }}
+              >
+                <Avatar
+                  sx={{ width: 56, height: 56, cursor: "pointer" }}
+                  src={profileImagePreviewUrl}
+                  onClick={() => {
+                    const fileInput = document.createElement("input");
+                    fileInput.type = "file";
+                    fileInput.accept = "image/*";
+                    fileInput.onchange = (e) => {
+                      const target = e.target as HTMLInputElement;
+                      const file = target.files?.[0] || null;
+                      setProfileImage(file);
+                    };
+                    fileInput.click();
+                  }}
+                >
+                  {!profileImage && <AddIcon />}
+                </Avatar>
+              </div>
+              <InputLabel>Nickname</InputLabel>
+              <OutlinedInput
+                placeholder="Nickname"
+                fullWidth
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+              />
 
-          <Divider />
-
-          <InputLabel>Password</InputLabel>
-          <OutlinedInput
-            placeholder="Password"
-            fullWidth
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <OutlinedInput
-            placeholder="Confirm Password"
-            fullWidth
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          />
-
-          <Divider />
-
-          <Button fullWidth variant="contained" onClick={onRegisterButtonClick}>
-            가입하기
-          </Button>
+              <InputLabel>Password</InputLabel>
+              <OutlinedInput
+                placeholder="Password"
+                fullWidth
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <OutlinedInput
+                placeholder="Confirm Password"
+                fullWidth
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (
+                    e.key === "Enter" &&
+                    nickname &&
+                    password &&
+                    confirmPassword
+                  ) {
+                    onRegisterButtonClick();
+                  }
+                }}
+              />
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={onRegisterButtonClick}
+              >
+                가입하기
+              </Button>
+            </>
+          )}
         </CardContent>
       </Card>
     </Container>
