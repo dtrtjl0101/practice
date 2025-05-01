@@ -76,6 +76,11 @@ function RouteComponent() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                onLoginButtonClick();
+              }
+            }}
           />
           <Divider />
           <Button fullWidth variant="contained" onClick={onLoginButtonClick}>
