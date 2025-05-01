@@ -3,6 +3,7 @@ package qwerty.chaekit.controller.member.user;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.dto.member.UserJoinRequest;
 import qwerty.chaekit.dto.member.UserJoinResponse;
@@ -26,7 +27,7 @@ public class UserController {
         return ApiSuccessResponse.of(userService.getUserProfile(userToken));
     }
 
-    @PostMapping("/join")
+    @PostMapping(path = "/join", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiSuccessResponse<UserJoinResponse> userJoin(@ModelAttribute @Valid UserJoinRequest joinRequest) {
         return ApiSuccessResponse.of(joinService.join(joinRequest));
     }
