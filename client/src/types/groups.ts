@@ -3,5 +3,6 @@ export type GroupInfo = {
   name: string;
   description: string;
   tags: string[];
+  groupImageURL: string;
   memberCount: number;
 };
