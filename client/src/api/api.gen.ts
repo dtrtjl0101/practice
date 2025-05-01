@@ -191,24 +191,25 @@ export interface ApiSuccessResponseString {
   data?: string;
 }
 
+/** 전자책 업로드 요청 데이터 */
 export interface EbookPostRequest {
   /**
    * 책 제목
    * @example "이상한 나라의 앨리스"
    */
-  title?: string;
+  title: string;
   /**
    * 책 저자
    * @example "루이스 캐럴"
    */
-  author?: string;
+  author: string;
   /**
    * 책 설명
    * @example "《이상한 나라의 앨리스》는 영국의 수학자이자 작가인 찰스 루트위지 도지슨이 루이스 캐럴이라는 필명으로 1865년에 발표한 소설이다."
    */
   description?: string;
   /** @format binary */
-  file?: File;
+  file: File;
   /** @format binary */
   coverImageFile?: File;
 }
@@ -815,16 +816,12 @@ export class Api<
      * @name UserJoin
      * @request POST:/api/users/join
      */
-    userJoin: (
-      query: {
-        joinRequest: UserJoinRequest;
-      },
-      params: RequestParams = {},
-    ) =>
+    userJoin: (data: UserJoinRequest, params: RequestParams = {}) =>
       this.request<ApiSuccessResponseUserJoinResponse, any>({
         path: `/api/users/join`,
         method: "POST",
-        query: query,
+        body: data,
+        type: ContentType.FormData,
         ...params,
       }),
 
@@ -850,16 +847,12 @@ export class Api<
      * @name PublisherJoin
      * @request POST:/api/publishers/join
      */
-    publisherJoin: (
-      query: {
-        joinRequest: PublisherJoinRequest;
-      },
-      params: RequestParams = {},
-    ) =>
+    publisherJoin: (data: PublisherJoinRequest, params: RequestParams = {}) =>
       this.request<ApiSuccessResponsePublisherJoinResponse, any>({
         path: `/api/publishers/join`,
         method: "POST",
-        query: query,
+        body: data,
+        type: ContentType.FormData,
         ...params,
       }),
 
@@ -936,16 +929,12 @@ export class Api<
      * @name CreateGroup
      * @request POST:/api/groups
      */
-    createGroup: (
-      query: {
-        groupPostRequest: GroupPostRequest;
-      },
-      params: RequestParams = {},
-    ) =>
+    createGroup: (data: GroupPostRequest, params: RequestParams = {}) =>
       this.request<ApiSuccessResponseGroupPostResponse, any>({
         path: `/api/groups`,
         method: "POST",
-        query: query,
+        body: data,
+        type: ContentType.FormData,
         ...params,
       }),
 
@@ -1247,17 +1236,12 @@ export class Api<
      * @summary 전자책 업로드
      * @request POST:/api/books
      */
-    uploadFile: (
-      query: {
-        /** 전자책 업로드 요청 데이터 */
-        request: EbookPostRequest;
-      },
-      params: RequestParams = {},
-    ) =>
+    uploadFile: (data: EbookPostRequest, params: RequestParams = {}) =>
       this.request<ApiSuccessResponseEbookPostResponse, any>({
         path: `/api/books`,
         method: "POST",
-        query: query,
+        body: data,
+        type: ContentType.FormData,
         ...params,
       }),
 

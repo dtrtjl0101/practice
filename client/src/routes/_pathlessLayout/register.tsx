@@ -69,13 +69,11 @@ function RouteComponent() {
     }
     const response = await wrapApiResponse(
       API_CLIENT.userController.userJoin({
-        joinRequest: {
-          nickname,
-          email,
-          password,
-          verificationCode,
-          ...(profileImage ? { profileImage } : {}),
-        },
+        nickname,
+        email,
+        password,
+        verificationCode,
+        ...(profileImage ? { profileImage } : {}),
       })
     );
     if (response.isSuccessful) {

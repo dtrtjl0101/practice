@@ -34,12 +34,10 @@ function RouteComponent() {
       }
       const response = await wrapApiResponse(
         API_CLIENT.ebook.uploadFile({
-          request: {
-            title,
-            file,
-            description,
-            author,
-          },
+          title,
+          file,
+          description,
+          author,
         })
       );
       if (response.isSuccessful) {

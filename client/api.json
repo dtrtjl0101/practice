@@ -49,14 +49,13 @@
       "post": {
         "tags": ["user-controller"],
         "operationId": "userJoin",
-        "parameters": [
-          {
-            "name": "joinRequest",
-            "in": "query",
-            "required": true,
-            "schema": { "$ref": "#/components/schemas/UserJoinRequest" }
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": { "$ref": "#/components/schemas/UserJoinRequest" }
+            }
           }
-        ],
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -75,14 +74,13 @@
       "post": {
         "tags": ["publisher-controller"],
         "operationId": "publisherJoin",
-        "parameters": [
-          {
-            "name": "joinRequest",
-            "in": "query",
-            "required": true,
-            "schema": { "$ref": "#/components/schemas/PublisherJoinRequest" }
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": { "$ref": "#/components/schemas/PublisherJoinRequest" }
+            }
           }
-        ],
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -258,14 +256,13 @@
       "post": {
         "tags": ["group-controller"],
         "operationId": "createGroup",
-        "parameters": [
-          {
-            "name": "groupPostRequest",
-            "in": "query",
-            "required": true,
-            "schema": { "$ref": "#/components/schemas/GroupPostRequest" }
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": { "$ref": "#/components/schemas/GroupPostRequest" }
+            }
           }
-        ],
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -492,15 +489,13 @@
         "summary": "전자책 업로드",
         "description": "출판사가 전자책 파일과 정보를 업로드합니다.",
         "operationId": "uploadFile",
-        "parameters": [
-          {
-            "name": "request",
-            "in": "query",
-            "description": "전자책 업로드 요청 데이터",
-            "required": true,
-            "schema": { "$ref": "#/components/schemas/EbookPostRequest" }
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": { "$ref": "#/components/schemas/EbookPostRequest" }
+            }
           }
-        ],
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -1152,6 +1147,7 @@
         "description": "API 에러 응답을 감싸는 클래스"
       },
       "EbookPostRequest": {
+        "required": ["author", "file", "title"],
         "type": "object",
         "properties": {
           "title": {
@@ -1171,7 +1167,8 @@
           },
           "file": { "type": "string", "format": "binary" },
           "coverImageFile": { "type": "string", "format": "binary" }
-        }
+        },
+        "description": "전자책 업로드 요청 데이터"
       },
       "ApiSuccessResponseEbookPostResponse": {
         "type": "object",
