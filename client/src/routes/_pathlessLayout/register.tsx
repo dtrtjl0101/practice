@@ -93,7 +93,7 @@ function RouteComponent() {
       return;
     }
     switch (response.errorCode) {
-      case "NICKNAME_EXISTS": {
+      case "NICKNAME_ALREADY_EXISTS": {
         alert("이미 존재하는 닉네임입니다.");
         break;
       }
@@ -190,7 +190,12 @@ function RouteComponent() {
                 }}
               >
                 <Avatar
-                  sx={{ width: 56, height: 56, cursor: "pointer" }}
+                  sx={{
+                    width: 96,
+                    height: 96,
+                    cursor: "pointer",
+                    mx: "auto",
+                  }}
                   src={profileImagePreviewUrl}
                   onClick={() => {
                     const fileInput = document.createElement("input");
