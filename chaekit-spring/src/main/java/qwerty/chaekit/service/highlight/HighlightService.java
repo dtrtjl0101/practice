@@ -6,11 +6,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import qwerty.chaekit.domain.ebook.EbookJpaRepository;
 import qwerty.chaekit.domain.ebook.EbookRepository;
+import qwerty.chaekit.domain.group.GroupMemberRepository;
+import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.highlight.entity.Highlight;
 import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
+import qwerty.chaekit.domain.group.activity.ActivityRepository;
 import qwerty.chaekit.dto.highlight.HighlightFetchResponse;
 import qwerty.chaekit.dto.highlight.HighlightPostRequest;
 import qwerty.chaekit.dto.highlight.HighlightPostResponse;
@@ -29,6 +31,7 @@ public class HighlightService {
     private final HighlightRepository highlightRepository;
     private final EbookRepository ebookRepository;
     private final UserProfileRepository userRepository;
+    private final ActivityRepository activityRepository;
 
     public HighlightPostResponse createHighlight(UserToken userToken, HighlightPostRequest request) {
         Long userId = userToken.userId();
@@ -39,36 +42,63 @@ public class HighlightService {
             throw new NotFoundException(ErrorCode.EBOOK_NOT_FOUND);
         }
 
-        // Activity를 추가하는 경우 권한 체크 필요
-
         Highlight highlight = Highlight.builder()
                 .book(ebookRepository.getReferenceById(request.bookId()))
                 .spine(request.spine())
                 .cfi(request.cfi())
                 .author(userRepository.getReferenceById(userId))
                 .memo(request.memo())
+                .activity(request.activityId() != null ? activityRepository.getReferenceById(request.activityId()) : null)
                 .build();
         Highlight savedHighlight = highlightRepository.save(highlight);
         return HighlightPostResponse.of(savedHighlight);
     }
 
     public PageResponse<HighlightFetchResponse> fetchHighlights(UserToken userToken, Pageable pageable, Long activityId, Long bookId, String spine, Boolean me) {
+        /*
+        TODO: activityMemberRepository 구현 시 검증.
+        if(!activityMemberRepository.existsByActivityIdAndUserId(activityId, userToken.userId())){
+            throw new ForbiddenException(ErrorCode.ACTIVITY_MEMBER_ONLY);
+        }
+        */
         Page<Highlight> highlights = highlightRepository.findHighlights(pageable, userToken.userId(), activityId, bookId, spine, me);
         return PageResponse.of(highlights.map(HighlightFetchResponse::of));
     }
 
+    @Transactional
     public HighlightPostResponse updateHighlight(UserToken userToken, Long id, HighlightPutRequest request) {
         Highlight highlight = highlightRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));
+
         if(!userToken.userId().equals(highlight.getAuthor().getId())) {
             throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_YOURS);
         }
+
+        if (highlight.isPublic()) {
+            throw new ForbiddenException(ErrorCode.HIGHLIGHT_ALREADY_PUBLIC);
+        }
+
+        if (request.activityId() != null) {
+            highlight.setActivity(activityRepository.getReferenceById(request.activityId()));
+            highlight.makePublic();
+        }
+
         highlight.updateMemo(request.memo());
-
-        // TODO: activityId 업데이트 로직 추가(활동에 공개하기)
-        // 기존 activityId가 null일때만 activityId 변경 가능
-
         return HighlightPostResponse.of(highlightRepository.save(highlight));
     }
 
+    public void deleteHighlight(UserToken userToken, Long id) {
+        Highlight highlight = highlightRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));
+        
+        if(!userToken.userId().equals(highlight.getAuthor().getId())) {
+            throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_YOURS);
+        }
+
+        if (highlight.isPublic()) {
+            throw new ForbiddenException(ErrorCode.HIGHLIGHT_ALREADY_PUBLIC);
+        }
+
+        highlightRepository.delete(highlight);
+    }
 }

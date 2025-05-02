@@ -24,14 +24,14 @@ public class GroupMember {
     @JoinColumn(name ="user_id", nullable = false)
     private UserProfile user;
 
-    @Column(nullable = false)
-    private boolean isAccepted = false;
+    @Column(name = "is_accepted", nullable = false)
+    private boolean accepted = false;
 
     @Builder
     public GroupMember(ReadingGroup readingGroup, UserProfile user) {
         this.readingGroup = readingGroup;
         this.user = user;
-        this.isAccepted = false;  // 초기에는 미승인 상태
+        this.accepted = false;  // 초기에는 미승인 상태
     }
 
     public ReadingGroup getGroup() {
@@ -43,10 +43,11 @@ public class GroupMember {
     }
 
     public void approve() {
-        this.isAccepted = true;
+        this.accepted = true;
     }
 
     public void reject() {
-        this.isAccepted = false;
+        this.accepted = false;
     }
+
 }
