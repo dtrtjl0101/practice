@@ -205,10 +205,8 @@ public class GroupService {
             throw new ForbiddenException(ErrorCode.GROUP_LEADER_ONLY);
         }
 
-        // JPQL로 대기 멤버 페이징 조회
-        Page<GroupMember> pendingMembersPage = groupMemberRepository.findByReadingGroupAndIsAcceptedFalse(group, pageable);
+        Page<GroupMember> pendingMembersPage = groupMemberRepository.findByReadingGroupAndAcceptedFalse(group, pageable);
 
-        // DTO 변환
         Page<GroupPendingMemberResponse> page = pendingMembersPage.map(GroupPendingMemberResponse::of);
 
         return PageResponse.of(page);

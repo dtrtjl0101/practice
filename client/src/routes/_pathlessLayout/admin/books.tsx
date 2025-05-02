@@ -22,7 +22,7 @@ function RouteComponent() {
   const [books, setBooks] = useState<BookMetadata[]>([]);
 
   useEffect(() => {
-    wrapApiResponse(API_CLIENT.ebookController.getBooks()).then((response) => {
+    wrapApiResponse(API_CLIENT.ebook.getBooks()).then((response) => {
       if (response.isSuccessful) {
         const books =
           response.data.content?.map((book) => {

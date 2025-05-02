@@ -1,8 +1,8 @@
 package qwerty.chaekit.domain.group.activity;
 
-
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import qwerty.chaekit.domain.BaseEntity;
@@ -24,4 +24,10 @@ public class ActivityMember extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private UserProfile user;
+
+    @Builder
+    public ActivityMember(Activity activity, UserProfile user) {
+        this.activity = activity;
+        this.user = user;
+    }
 }

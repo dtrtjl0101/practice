@@ -33,7 +33,6 @@ public class ActivityService {
     private final GroupRepository groupRepository;
     private final ActivityRepository activityRepository;
     private final EbookRepository ebookRepository;
-    //private final EbookJpaRepository ebookJpaRepository;
 
     public ActivityPostResponse createActivity(UserToken userToken, long groupId, ActivityPostRequest request) {
         Long userId = userToken.userId();

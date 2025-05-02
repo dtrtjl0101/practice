@@ -36,9 +36,6 @@ public class HighlightRepositoryImpl implements HighlightRepository {
         QHighlight highlight = QHighlight.highlight;
         BooleanBuilder where = new BooleanBuilder();
 
-        if (activityId != null) {
-            throw new IllegalStateException("Not Implemented Yet");
-        }
         if (bookId != null) {
             where.and(highlight.book.id.eq(bookId));
         }
@@ -48,12 +45,32 @@ public class HighlightRepositoryImpl implements HighlightRepository {
             }
             where.and(highlight.spine.eq(spine));
         }
-        if (me == null || me) {
-            where.and(highlight.author.id.eq(userId));
-        } else {
-            // TODO: activityId에 현재 자신이 속해 있는 경우만 가능
-            throw new IllegalStateException("Not Implemented Yet");
+
+        if (activityId != null) {
+            where.and(highlight.activity.id.eq(activityId));
         }
+
+        if (me == null || me) { // 내 하이라이트
+            where.and(highlight.author.id.eq(userId));
+        } else { // 공개된 하이라이트
+            if(activityId == null) { // 활동명 필수
+                throw new BadRequestException(ErrorCode.ACTIVITY_ID_REQUIRED);
+            }
+            where.and(highlight.isPublic.eq(true));
+        }
+
+//        if (me == null || me) {
+//            where.and(
+//                highlight.author.id.eq(userId)
+//                .or(highlight.isPublic.eq(true).and(
+//                    activityId != null ?
+//                    highlight.activity.id.eq(activityId) :
+//                    highlight.activity.isNull()
+//                ))
+//            );
+//        } else {
+//            where.and(highlight.isPublic.eq(true));
+//        }
 
         List<Highlight> result = jpaQueryFactory
                 .selectFrom(highlight)
@@ -69,5 +86,10 @@ public class HighlightRepositoryImpl implements HighlightRepository {
                 .fetchOne()).orElse(0L);
 
         return new PageImpl<>(result, pageable, total);
+    }
+
+    @Override
+    public void delete(Highlight highlight) {
+        highlightJpaRepository.delete(highlight);
     }
 }
