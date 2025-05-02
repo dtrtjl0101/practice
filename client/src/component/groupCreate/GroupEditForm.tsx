@@ -1,8 +1,11 @@
 import { Add, Delete } from "@mui/icons-material";
 import {
   Button,
+  CardActionArea,
+  CardMedia,
   Chip,
   Grid,
+  Icon,
   IconButton,
   InputAdornment,
   OutlinedInput,
@@ -10,12 +13,13 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 export type GroupEditData = {
   name: string;
   description: string;
   tags: string[];
+  groupImage?: File;
 };
 
 export default function GroupEditForm(props: {
@@ -28,12 +32,14 @@ export default function GroupEditForm(props: {
   const [description, setDescription] = useState("");
   const [tag, setTag] = useState("");
   const [tags, setTags] = useState<string[]>([]);
+  const [groupImage, setGroupImage] = useState<File | undefined>(undefined);
 
   const handleEditDoneButtonClicked = () => {
     onEditDone({
       name,
       description,
       tags,
+      groupImage,
     });
   };
 
@@ -53,16 +59,58 @@ export default function GroupEditForm(props: {
     setTags((prev) => prev.filter((t) => t !== tag));
   };
 
+  const groupImagePreviewUrl = useMemo(() => {
+    if (!groupImage) {
+      return "";
+    }
+    return URL.createObjectURL(groupImage);
+  }, [groupImage]);
+
   return (
     <Paper sx={{ width: "100%", height: "100%", padding: 2 }}>
-      <Stack spacing={2} sx={{ height: "100%", overflowY: "auto" }}>
+      <Stack spacing={2} sx={{ height: "100%", overflowY: "auto", padding: 2 }}>
+        <CardActionArea
+          onClick={() => {
+            const fileInput = document.createElement("input");
+            fileInput.type = "file";
+            fileInput.accept = "image/*";
+            fileInput.onchange = (e) => {
+              const file = (e.target as HTMLInputElement).files?.[0];
+              if (file) {
+                setGroupImage(file);
+              }
+            };
+            fileInput.click();
+          }}
+          sx={{
+            display: "flex",
+            textAlign: "center",
+            justifyContent: "center",
+          }}
+        >
+          {groupImage ? (
+            <CardMedia
+              image={groupImagePreviewUrl}
+              sx={{
+                width: 256,
+                height: 256,
+              }}
+            />
+          ) : (
+            <Icon sx={{ width: 256, height: 256, lineHeight: "256px" }}>
+              <Add fontSize="large" />
+            </Icon>
+          )}
+        </CardActionArea>
         <TextField
+          placeholder="모임 이름"
           variant="outlined"
           fullWidth
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
         <TextField
+          placeholder="모임 설명"
           variant="outlined"
           multiline
           fullWidth
