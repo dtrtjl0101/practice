@@ -45,18 +45,32 @@ public class HighlightRepositoryImpl implements HighlightRepository {
             }
             where.and(highlight.spine.eq(spine));
         }
-        if (me == null || me) {
-            where.and(
-                highlight.author.id.eq(userId)
-                .or(highlight.isPublic.eq(true).and(
-                    activityId != null ? 
-                    highlight.activity.id.eq(activityId) : 
-                    highlight.activity.isNull()
-                ))
-            );
-        } else {
+
+        if (activityId != null) {
+            where.and(highlight.activity.id.eq(activityId));
+        }
+
+        if (me == null || me) { // 내 하이라이트
+            where.and(highlight.author.id.eq(userId));
+        } else { // 공개된 하이라이트
+            if(activityId == null) { // 활동명 필수
+                throw new BadRequestException(ErrorCode.ACTIVITY_ID_REQUIRED);
+            }
             where.and(highlight.isPublic.eq(true));
         }
+
+//        if (me == null || me) {
+//            where.and(
+//                highlight.author.id.eq(userId)
+//                .or(highlight.isPublic.eq(true).and(
+//                    activityId != null ?
+//                    highlight.activity.id.eq(activityId) :
+//                    highlight.activity.isNull()
+//                ))
+//            );
+//        } else {
+//            where.and(highlight.isPublic.eq(true));
+//        }
 
         List<Highlight> result = jpaQueryFactory
                 .selectFrom(highlight)

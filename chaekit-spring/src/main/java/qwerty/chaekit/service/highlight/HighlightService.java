@@ -7,6 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.ebook.EbookRepository;
+import qwerty.chaekit.domain.group.GroupMemberRepository;
+import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.highlight.entity.Highlight;
 import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
@@ -53,6 +55,12 @@ public class HighlightService {
     }
 
     public PageResponse<HighlightFetchResponse> fetchHighlights(UserToken userToken, Pageable pageable, Long activityId, Long bookId, String spine, Boolean me) {
+        /*
+        TODO: activityMemberRepository 구현 시 검증.
+        if(!activityMemberRepository.existsByActivityIdAndUserId(activityId, userToken.userId())){
+            throw new ForbiddenException(ErrorCode.ACTIVITY_MEMBER_ONLY);
+        }
+        */
         Page<Highlight> highlights = highlightRepository.findHighlights(pageable, userToken.userId(), activityId, bookId, spine, me);
         return PageResponse.of(highlights.map(HighlightFetchResponse::of));
     }
