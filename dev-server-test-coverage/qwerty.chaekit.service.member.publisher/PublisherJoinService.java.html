@@ -67,7 +67,7 @@ public class PublisherJoinService {
 <span class="nc" id="L67">                .email(member.getEmail())</span>
 <span class="nc" id="L68">                .publisherName(publisher.getPublisherName())</span>
 <span class="nc" id="L69">                .profileImageURL(profileImageUrl)</span>
-<span class="nc" id="L70">                .isAccepted(publisher.isAccepted())</span>
+<span class="nc" id="L70">                .status(publisher.getApprovalStatus().name())</span>
 <span class="nc" id="L71">                .build();</span>
     }
 }

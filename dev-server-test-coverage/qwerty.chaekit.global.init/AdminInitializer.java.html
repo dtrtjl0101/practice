@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.member.Member;
@@ -19,9 +20,10 @@ import qwerty.chaekit.service.member.MemberJoinHelper;
 
 import java.util.Optional;
 
-<span class="fc" id="L22">@Slf4j</span>
+<span class="fc" id="L23">@Slf4j</span>
 @Component
 @RequiredArgsConstructor
+@Order(1)
 public class AdminInitializer implements ApplicationRunner {
     private final AdminProperties adminProperties;
     private final MemberJoinHelper memberJoinHelper;
@@ -34,50 +36,50 @@ public class AdminInitializer implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
-<span class="fc" id="L37">        String adminName = adminProperties.name();</span>
-<span class="fc" id="L38">        String adminEmail = adminProperties.email();</span>
-<span class="fc" id="L39">        String adminPassword = adminProperties.password();</span>
-<span class="fc" id="L40">        Role adminRole = Role.ROLE_ADMIN;</span>
+<span class="fc" id="L39">        String adminName = adminProperties.name();</span>
+<span class="fc" id="L40">        String adminEmail = adminProperties.email();</span>
+<span class="fc" id="L41">        String adminPassword = adminProperties.password();</span>
+<span class="fc" id="L42">        Role adminRole = Role.ROLE_ADMIN;</span>
 
-<span class="fc" id="L42">        Member adminMember = memberRepository.findByEmail(adminEmail).orElseGet(</span>
+<span class="fc" id="L44">        Member adminMember = memberRepository.findByEmail(adminEmail).orElseGet(</span>
                 () -&gt; {
                     // 관리자가 없으면 생성
-<span class="fc" id="L45">                    Member newMember = memberJoinHelper.saveMember(adminEmail, adminPassword, adminRole);</span>
-<span class="fc" id="L46">                    log.info(&quot;관리자가 생성되었습니다. memberId = {}&quot;, newMember.getId());</span>
-<span class="fc" id="L47">                    return newMember;</span>
+<span class="fc" id="L47">                    Member newMember = memberJoinHelper.saveMember(adminEmail, adminPassword, adminRole);</span>
+<span class="fc" id="L48">                    log.info(&quot;관리자가 생성되었습니다. memberId = {}&quot;, newMember.getId());</span>
+<span class="fc" id="L49">                    return newMember;</span>
                 }
         );
 
-<span class="fc" id="L51">        Optional&lt;PublisherProfile&gt; publisher = publisherProfileRepository.findByMember_Email(adminEmail);</span>
-<span class="fc" id="L52">        PublisherProfile adminPublisher = publisher.orElseGet(() -&gt; {</span>
-<span class="fc" id="L53">            PublisherProfile newProfile = publisherProfileRepository.save(</span>
-<span class="fc" id="L54">                    PublisherProfile.builder()</span>
-<span class="fc" id="L55">                            .member(adminMember)</span>
-<span class="fc" id="L56">                            .publisherName(adminName)</span>
-<span class="fc" id="L57">                            .build()</span>
+<span class="fc" id="L53">        Optional&lt;PublisherProfile&gt; publisher = publisherProfileRepository.findByMember_Email(adminEmail);</span>
+<span class="fc" id="L54">        PublisherProfile adminPublisher = publisher.orElseGet(() -&gt; {</span>
+<span class="fc" id="L55">            PublisherProfile newProfile = publisherProfileRepository.save(</span>
+<span class="fc" id="L56">                    PublisherProfile.builder()</span>
+<span class="fc" id="L57">                            .member(adminMember)</span>
+<span class="fc" id="L58">                            .publisherName(adminName)</span>
+<span class="fc" id="L59">                            .build()</span>
             );
-<span class="fc" id="L59">            newProfile.acceptPublisher();</span>
-<span class="fc" id="L60">            log.info(&quot;관리자 출판사 프로필이 추가되었습니다.&quot;);</span>
-<span class="fc" id="L61">            return newProfile;</span>
+<span class="fc" id="L61">            newProfile.approvePublisher();</span>
+<span class="fc" id="L62">            log.info(&quot;관리자 출판사 프로필이 추가되었습니다.&quot;);</span>
+<span class="fc" id="L63">            return newProfile;</span>
         });
 
-<span class="fc" id="L64">        Optional&lt;UserProfile&gt; user = userProfileRepository.findByMember_Email(adminEmail);</span>
-<span class="fc" id="L65">        UserProfile adminUser = user.orElseGet(() -&gt; {</span>
-<span class="fc" id="L66">            UserProfile newProfile = userProfileRepository.save(</span>
-<span class="fc" id="L67">                    UserProfile.builder()</span>
-<span class="fc" id="L68">                            .member(adminMember)</span>
-<span class="fc" id="L69">                            .nickname(adminName)</span>
-<span class="fc" id="L70">                            .build()</span>
+<span class="fc" id="L66">        Optional&lt;UserProfile&gt; user = userProfileRepository.findByMember_Email(adminEmail);</span>
+<span class="fc" id="L67">        UserProfile adminUser = user.orElseGet(() -&gt; {</span>
+<span class="fc" id="L68">            UserProfile newProfile = userProfileRepository.save(</span>
+<span class="fc" id="L69">                    UserProfile.builder()</span>
+<span class="fc" id="L70">                            .member(adminMember)</span>
+<span class="fc" id="L71">                            .nickname(adminName)</span>
+<span class="fc" id="L72">                            .build()</span>
             );
-<span class="fc" id="L72">            log.info(&quot;관리자 사용자 프로필이 추가되었습니다.&quot;);</span>
-<span class="fc" id="L73">            return newProfile;</span>
+<span class="fc" id="L74">            log.info(&quot;관리자 사용자 프로필이 추가되었습니다.&quot;);</span>
+<span class="fc" id="L75">            return newProfile;</span>
         });
 
-<span class="fc" id="L76">        adminService.setAdminPublisherId(adminPublisher.getId());</span>
-<span class="fc" id="L77">        adminService.setAdminUserId(adminUser.getId());</span>
-<span class="fc" id="L78">        log.info(&quot;관리자 설정이 완료되었습니다. email = {}, memberId = {}, publisherId = {}, userId = {}&quot;,</span>
-<span class="fc" id="L79">                adminEmail, adminMember.getId(), adminPublisher.getId(), adminUser.getId()</span>
+<span class="fc" id="L78">        adminService.setAdminPublisherId(adminPublisher.getId());</span>
+<span class="fc" id="L79">        adminService.setAdminUserId(adminUser.getId());</span>
+<span class="fc" id="L80">        log.info(&quot;관리자 설정이 완료되었습니다. email = {}, memberId = {}, publisherId = {}, userId = {}&quot;,</span>
+<span class="fc" id="L81">                adminEmail, adminMember.getId(), adminPublisher.getId(), adminUser.getId()</span>
         );
-<span class="fc" id="L81">    }</span>
+<span class="fc" id="L83">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

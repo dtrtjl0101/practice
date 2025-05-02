@@ -44,20 +44,30 @@ public class EmailService {
 <span class="nc" id="L44">        sendEmail(toEmail, subject, text);</span>
 <span class="nc" id="L45">    }</span>
 
+    @Async
+    public void sendPublisherRejectionEmail(String toEmail, String reason) {
+<span class="nc" id="L49">        String subject = &quot;출판사 계정 거절 알림&quot;;</span>
+<span class="nc" id="L50">        String text = &quot;&lt;h3&gt;안녕하세요, 책잇입니다.&lt;/h3&gt;&quot; +</span>
+                &quot;&lt;p&gt;출판사 계정이 거절되었습니다. 다시 문의해주세요.&lt;/p&gt;&quot; +
+                &quot;&lt;p&gt;거절 사유: &quot; + reason + &quot;&lt;/p&gt;&quot;;
+
+<span class="nc" id="L54">        sendEmail(toEmail, subject, text);</span>
+<span class="nc" id="L55">    }</span>
+
     // 공통된 이메일 전송 메서드
     private void sendEmail(String toEmail, String subject, String text) {
         try {
-<span class="nc" id="L50">            MimeMessage message = javaMailSender.createMimeMessage();</span>
-<span class="nc" id="L51">            MimeMessageHelper helper = new MimeMessageHelper(message, true);</span>
+<span class="nc" id="L60">            MimeMessage message = javaMailSender.createMimeMessage();</span>
+<span class="nc" id="L61">            MimeMessageHelper helper = new MimeMessageHelper(message, true);</span>
 
-<span class="nc" id="L53">            helper.setTo(toEmail);</span>
-<span class="nc" id="L54">            helper.setSubject(subject);</span>
-<span class="nc" id="L55">            helper.setText(text, true); // true는 HTML 텍스트임을 의미</span>
+<span class="nc" id="L63">            helper.setTo(toEmail);</span>
+<span class="nc" id="L64">            helper.setSubject(subject);</span>
+<span class="nc" id="L65">            helper.setText(text, true); // true는 HTML 텍스트임을 의미</span>
 
-<span class="nc" id="L57">            javaMailSender.send(message);</span>
-<span class="nc" id="L58">        } catch (Exception e) {</span>
-<span class="nc" id="L59">            log.warn(&quot;Failed to send email&quot;, e);</span>
-<span class="nc" id="L60">        }</span>
-<span class="nc" id="L61">    }</span>
+<span class="nc" id="L67">            javaMailSender.send(message);</span>
+<span class="nc" id="L68">        } catch (Exception e) {</span>
+<span class="nc" id="L69">            log.warn(&quot;Failed to send email&quot;, e);</span>
+<span class="nc" id="L70">        }</span>
+<span class="nc" id="L71">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

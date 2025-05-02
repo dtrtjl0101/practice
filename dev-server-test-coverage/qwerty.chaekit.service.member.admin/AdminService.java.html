@@ -4,14 +4,19 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
+import qwerty.chaekit.domain.member.publisher.enums.PublisherApprovalStatus;
 import qwerty.chaekit.dto.member.PublisherInfoResponse;
+import qwerty.chaekit.dto.member.admin.RejectPublisherRequest;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
+import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.service.member.notification.EmailService;
 import qwerty.chaekit.service.util.S3Service;
@@ -32,28 +37,68 @@ public class AdminService {
     private Long adminUserId;
 
     @Transactional(readOnly = true)
-    public PageResponse&lt;PublisherInfoResponse&gt; getNotAcceptedPublishers(Pageable pageable) {
-<span class="fc" id="L36">        Page&lt;PublisherProfile&gt; page = publisherRepository.findAllByAcceptedFalseOrderByCreatedAtDesc(pageable);</span>
-<span class="fc" id="L37">        return PageResponse.of(page.map(publisher -&gt; PublisherInfoResponse.of(</span>
+    public PageResponse&lt;PublisherInfoResponse&gt; getPublishers(Pageable pageable) {
+<span class="nc" id="L41">        Pageable pageableWithSort = getPageableOrderedByCreatedAt(pageable);</span>
+<span class="nc" id="L42">        Page&lt;PublisherProfile&gt; page = publisherRepository.findAll(pageableWithSort);</span>
+<span class="nc" id="L43">        return PageResponse.of(page.map(publisher -&gt; PublisherInfoResponse.of(</span>
+                publisher,
+<span class="nc" id="L45">                s3Service.convertToPublicImageURL(publisher.getProfileImageKey())</span>
+        )));
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse&lt;PublisherInfoResponse&gt; getPendingPublishers(Pageable pageable) {
+<span class="fc" id="L51">        Pageable pageableWithSort = getPageableOrderedByCreatedAt(pageable);</span>
+<span class="fc" id="L52">        Page&lt;PublisherProfile&gt; page = publisherRepository.findByApprovalStatus(</span>
+                PublisherApprovalStatus.PENDING,
+                pageableWithSort
+        );
+<span class="fc" id="L56">        return PageResponse.of(page.map(publisher -&gt; PublisherInfoResponse.of(</span>
                         publisher,
-<span class="fc" id="L39">                        s3Service.convertToPublicImageURL(publisher.getProfileImageKey())</span>
+<span class="fc" id="L58">                        s3Service.convertToPublicImageURL(publisher.getProfileImageKey())</span>
                 )));
     }
 
     @Transactional
-    public boolean acceptPublisher(Long publisherId) {
-<span class="fc" id="L45">        PublisherProfile publisher = publisherRepository.findByIdWithMember(publisherId)</span>
-<span class="fc" id="L46">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));</span>
+    public void acceptPublisher(Long publisherId) {
+<span class="fc" id="L64">        PublisherProfile publisher = publisherRepository.findByIdWithMember(publisherId)</span>
+<span class="fc" id="L65">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));</span>
 
         // 이미 승인된 경우
-<span class="fc bfc" id="L49" title="All 2 branches covered.">        if (publisher.isAccepted()) {</span>
-<span class="fc" id="L50">            return false;</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        if (isPublisherApproved(publisher)) {</span>
+<span class="fc" id="L69">            throw new BadRequestException(ErrorCode.PUBLISHER_ALREADY_ACCEPTED);</span>
         }
 
         // 승인 처리
-<span class="fc" id="L54">        publisher.acceptPublisher();</span>
-<span class="fc" id="L55">        emailService.sendPublisherApprovalEmail(publisher.getMember().getEmail());</span>
-<span class="fc" id="L56">        return true;</span>
+<span class="fc" id="L73">        publisher.approvePublisher();</span>
+<span class="fc" id="L74">        emailService.sendPublisherApprovalEmail(publisher.getMember().getEmail());</span>
+<span class="fc" id="L75">    }</span>
+
+    @Transactional
+    public void rejectPublisher(Long publisherId, RejectPublisherRequest request) {
+<span class="nc" id="L79">        PublisherProfile publisher = publisherRepository.findByIdWithMember(publisherId)</span>
+<span class="nc" id="L80">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));</span>
+
+        // 이미 승인된 경우
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        if (isPublisherApproved(publisher)) {</span>
+<span class="nc" id="L84">            throw new BadRequestException(ErrorCode.PUBLISHER_ALREADY_ACCEPTED);</span>
+        }
+
+        // 거절 처리
+<span class="nc" id="L88">        publisher.rejectPublisher();</span>
+<span class="nc" id="L89">        emailService.sendPublisherRejectionEmail(publisher.getMember().getEmail(), request.reason());</span>
+<span class="nc" id="L90">    }</span>
+
+    private static Pageable getPageableOrderedByCreatedAt(Pageable pageable) {
+<span class="fc" id="L93">        return PageRequest.of(</span>
+<span class="fc" id="L94">                pageable.getPageNumber(),</span>
+<span class="fc" id="L95">                pageable.getPageSize(),</span>
+<span class="pc bpc" id="L96" title="1 of 2 branches missed.">                pageable.getSort().isEmpty() ? Sort.by(Sort.Order.desc(&quot;createdAt&quot;)) : pageable.getSort()</span>
+        );
+    }
+
+    private boolean isPublisherApproved(PublisherProfile publisher) {
+<span class="fc" id="L101">        return publisher.getApprovalStatus().equals(PublisherApprovalStatus.APPROVED);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

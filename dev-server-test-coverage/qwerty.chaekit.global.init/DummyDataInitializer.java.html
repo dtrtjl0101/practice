@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DummyDataInitializer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chaekit</a> &gt; <a href="index.source.html" class="el_package">qwerty.chaekit.global.init</a> &gt; <span class="el_source">DummyDataInitializer.java</span></div><h1>DummyDataInitializer.java</h1><pre class="source lang-java linenums">package qwerty.chaekit.global.init;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import qwerty.chaekit.domain.member.Member;
+import qwerty.chaekit.domain.member.MemberRepository;
+import qwerty.chaekit.domain.member.enums.Role;
+import qwerty.chaekit.domain.member.publisher.PublisherProfile;
+import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
+import qwerty.chaekit.domain.member.user.UserProfile;
+import qwerty.chaekit.domain.member.user.UserProfileRepository;
+import qwerty.chaekit.service.member.MemberJoinHelper;
+
+<span class="nc" id="L20">@Slf4j</span>
+@Component
+@RequiredArgsConstructor
+@Profile(&quot;local&quot;)
+@Order(2)
+public class DummyDataInitializer implements ApplicationRunner {
+    private final MemberJoinHelper memberJoinHelper;
+    private final PublisherProfileRepository publisherProfileRepository;
+    private final MemberRepository memberRepository;
+    private final UserProfileRepository userProfileRepository;
+
+    private final String defaultPassword = &quot;0000&quot;;
+
+    @Override
+    @Transactional
+    public void run(ApplicationArguments args) {
+<span class="nc" id="L36">        log.info(&quot;Try to create dummy data...&quot;);</span>
+<span class="nc" id="L37">        createDummyUsers();</span>
+<span class="nc" id="L38">        createDummyPublishers();</span>
+<span class="nc" id="L39">    }</span>
+
+    private void createDummyUsers() {
+<span class="nc bnc" id="L42" title="All 2 branches missed.">        for (int i = 1; i &lt;= 3; i++) {</span>
+<span class="nc" id="L43">            String userEmail = getDummyUserEmail(i);</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">            if (memberRepository.existsByEmail(userEmail)) {</span>
+<span class="nc" id="L45">                continue;</span>
+            }
+<span class="nc" id="L47">            Member userMember = memberJoinHelper.saveMember(userEmail, defaultPassword, Role.ROLE_USER);</span>
+<span class="nc" id="L48">            userProfileRepository.save(</span>
+<span class="nc" id="L49">                    UserProfile.builder()</span>
+<span class="nc" id="L50">                            .member(userMember)</span>
+<span class="nc" id="L51">                            .nickname(getDummyNickname(i))</span>
+<span class="nc" id="L52">                            .build()</span>
+            );
+<span class="nc" id="L54">            log.info(&quot;Created user profile: {}&quot;, userEmail);</span>
+        }
+<span class="nc" id="L56">    }</span>
+
+    private void createDummyPublishers() {
+<span class="nc bnc" id="L59" title="All 2 branches missed.">        for (int i = 1; i &lt;= 3; i++) {</span>
+<span class="nc" id="L60">            String publisherEmail = getDummyPublisherEmail(i);</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">            if (memberRepository.existsByEmail(publisherEmail)) {</span>
+<span class="nc" id="L62">                continue;</span>
+            }
+<span class="nc" id="L64">            Member publisherMember = memberJoinHelper.saveMember(publisherEmail, defaultPassword, Role.ROLE_PUBLISHER);</span>
+<span class="nc" id="L65">            publisherProfileRepository.save(</span>
+<span class="nc" id="L66">                    PublisherProfile.builder()</span>
+<span class="nc" id="L67">                            .member(publisherMember)</span>
+<span class="nc" id="L68">                            .publisherName(getDummyPublisherName(i))</span>
+<span class="nc" id="L69">                            .build()</span>
+            );
+<span class="nc" id="L71">            log.info(&quot;Created publisher profile: {}&quot;, publisherEmail);</span>
+        }
+<span class="nc" id="L73">    }</span>
+
+    private static String getDummyUserEmail(int index) {
+<span class="nc" id="L76">        return &quot;user&quot; + index + &quot;@example.com&quot;;</span>
+    }
+
+    private static String getDummyPublisherEmail(int index) {
+<span class="nc" id="L80">        return &quot;publisher&quot; + index + &quot;@example.com&quot;;</span>
+    }
+
+    private static String getDummyNickname(int index) {
+<span class="nc" id="L84">        return &quot;test_user&quot; + index;</span>
+    }
+
+    private static String getDummyPublisherName(int index) {
+<span class="nc" id="L88">        return &quot;test_publisher&quot; + index;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
