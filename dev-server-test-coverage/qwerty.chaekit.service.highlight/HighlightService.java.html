@@ -6,11 +6,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import qwerty.chaekit.domain.ebook.EbookJpaRepository;
 import qwerty.chaekit.domain.ebook.EbookRepository;
+import qwerty.chaekit.domain.group.GroupMemberRepository;
+import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.highlight.entity.Highlight;
 import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
+import qwerty.chaekit.domain.group.activity.ActivityRepository;
 import qwerty.chaekit.dto.highlight.HighlightFetchResponse;
 import qwerty.chaekit.dto.highlight.HighlightPostRequest;
 import qwerty.chaekit.dto.highlight.HighlightPostResponse;
@@ -21,7 +23,7 @@ import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.UserToken;
 
-<span class="fc" id="L24">@Slf4j</span>
+<span class="fc" id="L26">@Slf4j</span>
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -29,47 +31,75 @@ public class HighlightService {
     private final HighlightRepository highlightRepository;
     private final EbookRepository ebookRepository;
     private final UserProfileRepository userRepository;
+    private final ActivityRepository activityRepository;
 
     public HighlightPostResponse createHighlight(UserToken userToken, HighlightPostRequest request) {
-<span class="fc" id="L34">        Long userId = userToken.userId();</span>
-<span class="pc bpc" id="L35" title="1 of 2 branches missed.">        if(!userRepository.existsById(userId)) {</span>
-<span class="nc" id="L36">            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);</span>
+<span class="fc" id="L37">        Long userId = userToken.userId();</span>
+<span class="pc bpc" id="L38" title="1 of 2 branches missed.">        if(!userRepository.existsById(userId)) {</span>
+<span class="nc" id="L39">            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);</span>
         }
-<span class="pc bpc" id="L38" title="1 of 2 branches missed.">        if(!ebookRepository.existsById(request.bookId())) {</span>
-<span class="nc" id="L39">            throw new NotFoundException(ErrorCode.EBOOK_NOT_FOUND);</span>
+<span class="pc bpc" id="L41" title="1 of 2 branches missed.">        if(!ebookRepository.existsById(request.bookId())) {</span>
+<span class="nc" id="L42">            throw new NotFoundException(ErrorCode.EBOOK_NOT_FOUND);</span>
         }
 
-        // Activity를 추가하는 경우 권한 체크 필요
-
-<span class="fc" id="L44">        Highlight highlight = Highlight.builder()</span>
-<span class="fc" id="L45">                .book(ebookRepository.getReferenceById(request.bookId()))</span>
-<span class="fc" id="L46">                .spine(request.spine())</span>
-<span class="fc" id="L47">                .cfi(request.cfi())</span>
-<span class="fc" id="L48">                .author(userRepository.getReferenceById(userId))</span>
-<span class="fc" id="L49">                .memo(request.memo())</span>
-<span class="fc" id="L50">                .build();</span>
-<span class="fc" id="L51">        Highlight savedHighlight = highlightRepository.save(highlight);</span>
-<span class="fc" id="L52">        return HighlightPostResponse.of(savedHighlight);</span>
+<span class="fc" id="L45">        Highlight highlight = Highlight.builder()</span>
+<span class="fc" id="L46">                .book(ebookRepository.getReferenceById(request.bookId()))</span>
+<span class="fc" id="L47">                .spine(request.spine())</span>
+<span class="fc" id="L48">                .cfi(request.cfi())</span>
+<span class="fc" id="L49">                .author(userRepository.getReferenceById(userId))</span>
+<span class="fc" id="L50">                .memo(request.memo())</span>
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">                .activity(request.activityId() != null ? activityRepository.getReferenceById(request.activityId()) : null)</span>
+<span class="fc" id="L52">                .build();</span>
+<span class="fc" id="L53">        Highlight savedHighlight = highlightRepository.save(highlight);</span>
+<span class="fc" id="L54">        return HighlightPostResponse.of(savedHighlight);</span>
     }
 
     public PageResponse&lt;HighlightFetchResponse&gt; fetchHighlights(UserToken userToken, Pageable pageable, Long activityId, Long bookId, String spine, Boolean me) {
-<span class="fc" id="L56">        Page&lt;Highlight&gt; highlights = highlightRepository.findHighlights(pageable, userToken.userId(), activityId, bookId, spine, me);</span>
-<span class="fc" id="L57">        return PageResponse.of(highlights.map(HighlightFetchResponse::of));</span>
-    }
-
-    public HighlightPostResponse updateHighlight(UserToken userToken, Long id, HighlightPutRequest request) {
-<span class="fc" id="L61">        Highlight highlight = highlightRepository.findById(id)</span>
-<span class="pc" id="L62">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));</span>
-<span class="fc bfc" id="L63" title="All 2 branches covered.">        if(!userToken.userId().equals(highlight.getAuthor().getId())) {</span>
-<span class="fc" id="L64">            throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_YOURS);</span>
+        /*
+        TODO: activityMemberRepository 구현 시 검증.
+        if(!activityMemberRepository.existsByActivityIdAndUserId(activityId, userToken.userId())){
+            throw new ForbiddenException(ErrorCode.ACTIVITY_MEMBER_ONLY);
         }
-<span class="fc" id="L66">        highlight.updateMemo(request.memo());</span>
-
-        // TODO: activityId 업데이트 로직 추가(활동에 공개하기)
-        // 기존 activityId가 null일때만 activityId 변경 가능
-
-<span class="fc" id="L71">        return HighlightPostResponse.of(highlightRepository.save(highlight));</span>
+        */
+<span class="fc" id="L64">        Page&lt;Highlight&gt; highlights = highlightRepository.findHighlights(pageable, userToken.userId(), activityId, bookId, spine, me);</span>
+<span class="fc" id="L65">        return PageResponse.of(highlights.map(HighlightFetchResponse::of));</span>
     }
 
+    @Transactional
+    public HighlightPostResponse updateHighlight(UserToken userToken, Long id, HighlightPutRequest request) {
+<span class="fc" id="L70">        Highlight highlight = highlightRepository.findById(id)</span>
+<span class="pc" id="L71">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));</span>
+
+<span class="fc bfc" id="L73" title="All 2 branches covered.">        if(!userToken.userId().equals(highlight.getAuthor().getId())) {</span>
+<span class="fc" id="L74">            throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_YOURS);</span>
+        }
+
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">        if (highlight.isPublic()) {</span>
+<span class="nc" id="L78">            throw new ForbiddenException(ErrorCode.HIGHLIGHT_ALREADY_PUBLIC);</span>
+        }
+
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">        if (request.activityId() != null) {</span>
+<span class="nc" id="L82">            highlight.setActivity(activityRepository.getReferenceById(request.activityId()));</span>
+<span class="nc" id="L83">            highlight.makePublic();</span>
+        }
+
+<span class="fc" id="L86">        highlight.updateMemo(request.memo());</span>
+<span class="fc" id="L87">        return HighlightPostResponse.of(highlightRepository.save(highlight));</span>
+    }
+
+    public void deleteHighlight(UserToken userToken, Long id) {
+<span class="nc" id="L91">        Highlight highlight = highlightRepository.findById(id)</span>
+<span class="nc" id="L92">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));</span>
+        
+<span class="nc bnc" id="L94" title="All 2 branches missed.">        if(!userToken.userId().equals(highlight.getAuthor().getId())) {</span>
+<span class="nc" id="L95">            throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_YOURS);</span>
+        }
+
+<span class="nc bnc" id="L98" title="All 2 branches missed.">        if (highlight.isPublic()) {</span>
+<span class="nc" id="L99">            throw new ForbiddenException(ErrorCode.HIGHLIGHT_ALREADY_PUBLIC);</span>
+        }
+
+<span class="nc" id="L102">        highlightRepository.delete(highlight);</span>
+<span class="nc" id="L103">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

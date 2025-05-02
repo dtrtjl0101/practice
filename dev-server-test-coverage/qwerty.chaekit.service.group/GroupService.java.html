@@ -184,17 +184,15 @@ public class GroupService {
 <span class="nc" id="L184">            throw new ForbiddenException(ErrorCode.GROUP_LEADER_ONLY);</span>
         }
 
-        // JPQL로 대기 멤버 페이징 조회
-<span class="nc" id="L188">        Page&lt;GroupMember&gt; pendingMembersPage = groupMemberRepository.findByReadingGroupAndIsAcceptedFalse(group, pageable);</span>
+<span class="nc" id="L187">        Page&lt;GroupMember&gt; pendingMembersPage = groupMemberRepository.findByReadingGroupAndAcceptedFalse(group, pageable);</span>
 
-        // DTO 변환
-<span class="nc" id="L191">        Page&lt;GroupPendingMemberResponse&gt; page = pendingMembersPage.map(GroupPendingMemberResponse::of);</span>
+<span class="nc" id="L189">        Page&lt;GroupPendingMemberResponse&gt; page = pendingMembersPage.map(GroupPendingMemberResponse::of);</span>
 
-<span class="nc" id="L193">        return PageResponse.of(page);</span>
+<span class="nc" id="L191">        return PageResponse.of(page);</span>
     }
 
     private String getGroupImageURL(ReadingGroup group) {
-<span class="nc" id="L197">        return s3Service.convertToPublicImageURL(group.getGroupImageKey());</span>
+<span class="nc" id="L195">        return s3Service.convertToPublicImageURL(group.getGroupImageKey());</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,38 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ErrorCode.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chaekit</a> &gt; <a href="index.source.html" class="el_package">qwerty.chaekit.global.enums</a> &gt; <span class="el_source">ErrorCode.java</span></div><h1>ErrorCode.java</h1><pre class="source lang-java linenums">package qwerty.chaekit.global.enums;
 
-
 import lombok.Getter;
 
-<span class="fc" id="L6">@Getter</span>
+<span class="fc" id="L5">@Getter</span>
 public enum ErrorCode {
     // BAD_REQUEST
     // book
-<span class="fc" id="L10">    EBOOK_FILE_MISSING(&quot;EBOOK_FILE_MISSING&quot;, &quot;파일이 누락되었습니다&quot;),</span>
-<span class="fc" id="L11">    EBOOK_FILE_SIZE_EXCEEDED(&quot;EBOOK_FILE_SIZE_EXCEEDED&quot;, &quot;파일 크기가 초과되었습니다&quot;),</span>
-<span class="fc" id="L12">    INVALID_EBOOK_FILE(&quot;INVALID_EBOOK_FILE&quot;, &quot;유효하지 않은 전자책 파일입니다&quot;),</span>
+<span class="fc" id="L9">    EBOOK_FILE_MISSING(&quot;EBOOK_FILE_MISSING&quot;, &quot;파일이 누락되었습니다&quot;),</span>
+<span class="fc" id="L10">    EBOOK_FILE_SIZE_EXCEEDED(&quot;EBOOK_FILE_SIZE_EXCEEDED&quot;, &quot;파일 크기가 초과되었습니다&quot;),</span>
+<span class="fc" id="L11">    INVALID_EBOOK_FILE(&quot;INVALID_EBOOK_FILE&quot;, &quot;유효하지 않은 전자책 파일입니다&quot;),</span>
     // highlight
-<span class="fc" id="L14">    BOOK_ID_REQUIRED(&quot;BOOK_ID_REQUIRED&quot;, &quot;책 ID가 필요합니다&quot;),</span>
+<span class="fc" id="L13">    BOOK_ID_REQUIRED(&quot;BOOK_ID_REQUIRED&quot;, &quot;책 ID가 필요합니다&quot;),</span>
     // member
-<span class="fc" id="L16">    MEMBER_ALREADY_EXISTS(&quot;MEMBER_ALREADY_EXISTS&quot;, &quot;이미 존재하는 회원입니다&quot;),</span>
-<span class="fc" id="L17">    PUBLISHER_ALREADY_EXISTS(&quot;PUBLISHER_ALREADY_EXISTS&quot;, &quot;이미 존재하는 출판사 이름입니다&quot;),</span>
-<span class="fc" id="L18">    NICKNAME_ALREADY_EXISTS(&quot;NICKNAME_ALREADY_EXISTS&quot;, &quot;이미 존재하는 닉네임입니다&quot;),</span>
+<span class="fc" id="L15">    MEMBER_ALREADY_EXISTS(&quot;MEMBER_ALREADY_EXISTS&quot;, &quot;이미 존재하는 회원입니다&quot;),</span>
+<span class="fc" id="L16">    PUBLISHER_ALREADY_EXISTS(&quot;PUBLISHER_ALREADY_EXISTS&quot;, &quot;이미 존재하는 출판사 이름입니다&quot;),</span>
+<span class="fc" id="L17">    NICKNAME_ALREADY_EXISTS(&quot;NICKNAME_ALREADY_EXISTS&quot;, &quot;이미 존재하는 닉네임입니다&quot;),</span>
     // group
-<span class="fc" id="L20">    ACTIVITY_TIME_CONFLICT(&quot;ACTIVITY_TIME_CONFLICT&quot;, &quot;이미 등록된 독서모임 일정과 겹칩니다&quot;),</span>
-<span class="fc" id="L21">    ACTIVITY_TIME_INVALID(&quot;ACTIVITY_TIME_INVALID&quot;, &quot;시작일과 종료일이 올바르지 않습니다&quot;),</span>
+<span class="fc" id="L19">    ACTIVITY_TIME_CONFLICT(&quot;ACTIVITY_TIME_CONFLICT&quot;, &quot;이미 등록된 독서모임 일정과 겹칩니다&quot;),</span>
+<span class="fc" id="L20">    ACTIVITY_TIME_INVALID(&quot;ACTIVITY_TIME_INVALID&quot;, &quot;시작일과 종료일이 올바르지 않습니다&quot;),</span>
     // email
-<span class="fc" id="L23">    EMAIL_VERIFICATION_FAILED(&quot;EMAIL_VERIFICATION_FAILED&quot;, &quot;이메일 인증에 실패했습니다.&quot;),</span>
-<span class="fc" id="L24">    EMAIL_SEND_FAILED(&quot;EMAIL_SEND_FAILED&quot;, &quot;이메일 전송에 실패했습니다.&quot;),</span>
+<span class="fc" id="L22">    EMAIL_VERIFICATION_FAILED(&quot;EMAIL_VERIFICATION_FAILED&quot;, &quot;이메일 인증에 실패했습니다.&quot;),</span>
+<span class="fc" id="L23">    EMAIL_SEND_FAILED(&quot;EMAIL_SEND_FAILED&quot;, &quot;이메일 전송에 실패했습니다.&quot;),</span>
     // file
-<span class="fc" id="L26">    FILE_MISSING(&quot;FILE_MISSING&quot;, &quot;파일이 누락되었습니다&quot;),</span>
-<span class="fc" id="L27">    INVALID_EXTENSION(&quot;INVALID_EXTENSION&quot;, &quot;허용되지 않는 확장자입니다&quot;),</span>
-<span class="fc" id="L28">    FILE_SIZE_EXCEEDED(&quot;FILE_SIZE_EXCEED&quot;, &quot;파일 크기가 초과되었습니다&quot;),</span>
+<span class="fc" id="L25">    FILE_MISSING(&quot;FILE_MISSING&quot;, &quot;파일이 누락되었습니다&quot;),</span>
+<span class="fc" id="L26">    INVALID_EXTENSION(&quot;INVALID_EXTENSION&quot;, &quot;허용되지 않는 확장자입니다&quot;),</span>
+<span class="fc" id="L27">    FILE_SIZE_EXCEEDED(&quot;FILE_SIZE_EXCEED&quot;, &quot;파일 크기가 초과되었습니다&quot;),</span>
 
     // FORBIDDEN
-<span class="fc" id="L31">    NO_VALID_TOKEN(&quot;NO_VALID_TOKEN&quot;, &quot;유효한 토큰이 없습니다&quot;),</span>
-<span class="fc" id="L32">    GROUP_UPDATE_FORBIDDEN(&quot;GROUP_UPDATE_FORBIDDEN&quot;, &quot;독서모임 수정 권한이 없습니다&quot;),</span>
-<span class="fc" id="L33">    HIGHLIGHT_NOT_YOURS(&quot;HIGHLIGHT_NOT_YOURS&quot;, &quot;하이라이트는 본인만 수정할 수 있습니다&quot;),</span>
-<span class="fc" id="L34">    GROUP_LEADER_ONLY(&quot;GROUP_LEADER_ONLY&quot;, &quot;모임지기만 사용할 수 있는 기능입니다&quot;),</span>
-<span class="fc" id="L35">    ACTIVITY_GROUP_MISMATCH(&quot;ACTIVITY_GROUP_MISMATCH&quot;, &quot;해당 독서모임의 활동이 아닙니다&quot;),</span>
+<span class="fc" id="L30">    NO_VALID_TOKEN(&quot;NO_VALID_TOKEN&quot;, &quot;유효한 토큰이 없습니다&quot;),</span>
+<span class="fc" id="L31">    GROUP_UPDATE_FORBIDDEN(&quot;GROUP_UPDATE_FORBIDDEN&quot;, &quot;독서모임 수정 권한이 없습니다&quot;),</span>
+<span class="fc" id="L32">    HIGHLIGHT_NOT_YOURS(&quot;HIGHLIGHT_NOT_YOURS&quot;, &quot;하이라이트는 본인만 수정할 수 있습니다&quot;),</span>
+<span class="fc" id="L33">    GROUP_LEADER_ONLY(&quot;GROUP_LEADER_ONLY&quot;, &quot;모임지기만 사용할 수 있는 기능입니다&quot;),</span>
+<span class="fc" id="L34">    ACTIVITY_GROUP_MISMATCH(&quot;ACTIVITY_GROUP_MISMATCH&quot;, &quot;해당 독서모임의 활동이 아닙니다&quot;),</span>
+<span class="fc" id="L35">    ACTIVITY_MEMBER_ONLY(&quot;ACTIVITY_MEMBER_ONLY&quot;, &quot;해당 독서모임 활동에 가입한 경우에만 가능합니다&quot;),</span>
 <span class="fc" id="L36">    ONLY_USER(&quot;ONLY_USER&quot;, &quot;일반 회원만 사용할 수 있는 기능입니다&quot;),</span>
 <span class="fc" id="L37">    ONLY_PUBLISHER(&quot;ONLY_PUBLISHER&quot;, &quot;출판사 회원만 사용할 수 있는 기능입니다&quot;),</span>
 <span class="fc" id="L38">    ONLY_ADMIN(&quot;ONLY_ADMIN&quot;, &quot;관리자만 사용할 수 있는 기능입니다&quot;),</span>
@@ -53,15 +53,18 @@ public enum ErrorCode {
 
 <span class="fc" id="L54">    ALREADY_JOINED_GROUP(&quot;ALREADY_JOINED_GROUP&quot;, &quot;이미 가입한 그룹입니다&quot;),</span>
 <span class="fc" id="L55">    GROUP_LEADER_CANNOT_LEAVE(&quot;GROUP_LEADER_CANNOT_LEAVE&quot;, &quot;그룹장은 그룹을 탈퇴할 수 없습니다&quot;),</span>
+<span class="fc" id="L56">    ACTIVITY_ID_REQUIRED(&quot;ACTIVITY_ID_REQUIRED&quot;, &quot;활동 ID가 필요합니다&quot;),</span>
+<span class="fc" id="L57">    HIGHLIGHT_ALREADY_SHARED(&quot;HIGHLIGHT_ALREADY_SHARED&quot;, &quot;활동에 가입되면 하이라이트는 수정할 수 없습니다&quot;),</span>
+<span class="fc" id="L58">    HIGHLIGHT_ALREADY_PUBLIC(&quot;HIGHLIGHT_ALREADY_PUBLIC&quot;, &quot;공개된 하이라이트는 수정할 수 없습니다&quot;),</span>
     ;
 
     private final String code;
     private final String message;
 
-<span class="fc" id="L61">    ErrorCode(String code, String message) {</span>
-<span class="fc" id="L62">        this.code = code;</span>
-<span class="fc" id="L63">        this.message = message;</span>
-<span class="fc" id="L64">    }</span>
+<span class="fc" id="L64">    ErrorCode(String code, String message) {</span>
+<span class="fc" id="L65">        this.code = code;</span>
+<span class="fc" id="L66">        this.message = message;</span>
+<span class="fc" id="L67">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

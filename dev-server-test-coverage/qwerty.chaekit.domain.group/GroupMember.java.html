@@ -24,14 +24,14 @@ public class GroupMember {
     @JoinColumn(name =&quot;user_id&quot;, nullable = false)
     private UserProfile user;
 
-<span class="nc" id="L27">    @Column(nullable = false)</span>
-    private boolean isAccepted = false;
+<span class="nc" id="L27">    @Column(name = &quot;is_accepted&quot;, nullable = false)</span>
+    private boolean accepted = false;
 
     @Builder
 <span class="nc" id="L31">    public GroupMember(ReadingGroup readingGroup, UserProfile user) {</span>
 <span class="nc" id="L32">        this.readingGroup = readingGroup;</span>
 <span class="nc" id="L33">        this.user = user;</span>
-<span class="nc" id="L34">        this.isAccepted = false;  // 초기에는 미승인 상태</span>
+<span class="nc" id="L34">        this.accepted = false;  // 초기에는 미승인 상태</span>
 <span class="nc" id="L35">    }</span>
 
     public ReadingGroup getGroup() {
@@ -43,11 +43,12 @@ public class GroupMember {
     }
 
     public void approve() {
-<span class="nc" id="L46">        this.isAccepted = true;</span>
+<span class="nc" id="L46">        this.accepted = true;</span>
 <span class="nc" id="L47">    }</span>
 
     public void reject() {
-<span class="nc" id="L50">        this.isAccepted = false;</span>
+<span class="nc" id="L50">        this.accepted = false;</span>
 <span class="nc" id="L51">    }</span>
+
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
