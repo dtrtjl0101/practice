@@ -12,7 +12,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import useLogin from "../../api/login/useLogin";
 import { useCallback, useState } from "react";
 import API_CLIENT, { wrapApiResponse } from "../../api/api";
-import { Role } from "../../types/role";
+import { AuthState } from "../../states/auth";
 
 export const Route = createFileRoute("/_pathlessLayout/login")({
   component: RouteComponent,
@@ -22,35 +22,30 @@ function RouteComponent() {
   const theme = useTheme();
   const navigate = useNavigate();
   const { login } = useLogin();
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const onLoginButtonClick = useCallback(async () => {
     const response = await wrapApiResponse(
       API_CLIENT.loginFilter.login({
-        username,
+        email,
         password,
       })
     );
 
     if (!response.isSuccessful) {
-      // TODO: Handle error
+      alert("로그인에 실패했습니다.");
+      console.error(response.errorCode);
       return;
     }
 
-    const { id, accessToken, role } = response.data;
-    login({
-      id: id!,
-      accessToken: accessToken!,
-      role: role as Role,
-      nickname: "닉네임",
-      username: username,
-    });
+    const loggedInUser = response.data as AuthState.LoggedInUser;
+    login(loggedInUser);
     navigate({
       to: "/",
       replace: true,
     });
-  }, [login, navigate, username, password]);
+  }, [login, navigate, email, password]);
 
   return (
     <Container maxWidth="sm" sx={{ mt: theme.spacing(4) }}>
@@ -64,10 +59,11 @@ function RouteComponent() {
           }}
         >
           <OutlinedInput
-            placeholder="ID"
+            placeholder="E-mail"
             fullWidth
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={email}
+            type="email"
+            onChange={(e) => setEmail(e.target.value)}
           />
           <OutlinedInput
             placeholder="Password"
@@ -75,6 +71,11 @@ function RouteComponent() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                onLoginButtonClick();
+              }
+            }}
           />
           <Divider />
           <Button fullWidth variant="contained" onClick={onLoginButtonClick}>

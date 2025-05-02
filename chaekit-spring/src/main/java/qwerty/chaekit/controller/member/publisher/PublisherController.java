@@ -3,6 +3,7 @@ package qwerty.chaekit.controller.member.publisher;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.dto.member.PublisherInfoResponse;
 import qwerty.chaekit.dto.member.PublisherJoinRequest;
@@ -26,7 +27,7 @@ public class PublisherController {
         return ApiSuccessResponse.of(publisherService.getPublisherProfile(token));
     }
 
-    @PostMapping("/join")
+    @PostMapping(path = "/join", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiSuccessResponse<PublisherJoinResponse> publisherJoin(@ModelAttribute @Valid PublisherJoinRequest joinRequest) {
         return ApiSuccessResponse.of(joinService.join(joinRequest));
     }

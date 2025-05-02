@@ -1,9 +1,11 @@
 package qwerty.chaekit.controller.group;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.dto.group.*;
 import qwerty.chaekit.dto.page.PageResponse;
@@ -18,9 +20,11 @@ import qwerty.chaekit.service.group.GroupService;
 public class GroupController {
     private final GroupService groupService;
 
-    @PostMapping
-    public ApiSuccessResponse<GroupPostResponse> createGroup(@Login UserToken userToken,
-                                         @ModelAttribute @Valid GroupPostRequest groupPostRequest) {
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiSuccessResponse<GroupPostResponse> createGroup(
+            @Parameter(hidden = true) @Login UserToken userToken,
+            @ModelAttribute @Valid GroupPostRequest groupPostRequest
+    ) {
         return ApiSuccessResponse.of(groupService.createGroup(userToken, groupPostRequest));
     }
 

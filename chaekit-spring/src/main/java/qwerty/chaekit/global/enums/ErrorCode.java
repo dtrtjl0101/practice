@@ -1,6 +1,5 @@
 package qwerty.chaekit.global.enums;
 
-
 import lombok.Getter;
 
 @Getter
@@ -36,6 +35,7 @@ public enum ErrorCode {
     HIGHLIGHT_NOT_YOURS("HIGHLIGHT_NOT_YOURS", "하이라이트는 본인만 수정할 수 있습니다"),
     GROUP_LEADER_ONLY("GROUP_LEADER_ONLY", "모임지기만 사용할 수 있는 기능입니다"),
     ACTIVITY_GROUP_MISMATCH("ACTIVITY_GROUP_MISMATCH", "해당 독서모임의 활동이 아닙니다"),
+    ACTIVITY_MEMBER_ONLY("ACTIVITY_MEMBER_ONLY", "해당 독서모임 활동에 가입한 경우에만 가능합니다"),
     ONLY_USER("ONLY_USER", "일반 회원만 사용할 수 있는 기능입니다"),
     ONLY_PUBLISHER("ONLY_PUBLISHER", "출판사 회원만 사용할 수 있는 기능입니다"),
     ONLY_ADMIN("ONLY_ADMIN", "관리자만 사용할 수 있는 기능입니다"),
@@ -57,6 +57,9 @@ public enum ErrorCode {
 
     ALREADY_JOINED_GROUP("ALREADY_JOINED_GROUP", "이미 가입한 그룹입니다"),
     GROUP_LEADER_CANNOT_LEAVE("GROUP_LEADER_CANNOT_LEAVE", "그룹장은 그룹을 탈퇴할 수 없습니다"),
+    ACTIVITY_ID_REQUIRED("ACTIVITY_ID_REQUIRED", "활동 ID가 필요합니다"),
+    HIGHLIGHT_ALREADY_SHARED("HIGHLIGHT_ALREADY_SHARED", "활동에 가입되면 하이라이트는 수정할 수 없습니다"),
+    HIGHLIGHT_ALREADY_PUBLIC("HIGHLIGHT_ALREADY_PUBLIC", "공개된 하이라이트는 수정할 수 없습니다"),
     ;
 
     private final String code;

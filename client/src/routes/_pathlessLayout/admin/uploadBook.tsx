@@ -33,13 +33,11 @@ function RouteComponent() {
         return;
       }
       const response = await wrapApiResponse(
-        API_CLIENT.adminController.uploadFile({
-          request: {
-            title,
-            file,
-            description,
-            author,
-          },
+        API_CLIENT.ebook.uploadFile({
+          title,
+          file,
+          description,
+          author,
         })
       );
       if (response.isSuccessful) {

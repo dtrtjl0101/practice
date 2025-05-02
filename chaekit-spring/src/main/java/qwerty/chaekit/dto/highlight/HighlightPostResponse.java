@@ -9,15 +9,17 @@ public record HighlightPostResponse(
         Long bookId,
         String spine,
         String cfi,
-        String memo
+        String memo,
+        Long activityId
 ) {
     public static HighlightPostResponse of(Highlight highlight) {
-    return HighlightPostResponse.builder()
-            .id(highlight.getId())
-            .bookId(highlight.getBook().getId())
-            .spine(highlight.getSpine())
-            .cfi(highlight.getCfi())
-            .memo(highlight.getMemo())
-            .build();
+        return HighlightPostResponse.builder()
+                .id(highlight.getId())
+                .bookId(highlight.getBook().getId())
+                .spine(highlight.getSpine())
+                .cfi(highlight.getCfi())
+                .memo(highlight.getMemo())
+                .activityId(highlight.getActivity() != null ? highlight.getActivity().getId() : null)
+                .build();
     }
 }

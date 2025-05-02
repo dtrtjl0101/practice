@@ -41,5 +41,6 @@ public class ActivityController {
         return ApiSuccessResponse.of(activityService.updateActivity(userToken, groupId, request));
     }
 
+    //
 
 }
