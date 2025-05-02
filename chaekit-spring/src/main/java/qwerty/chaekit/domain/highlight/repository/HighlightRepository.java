@@ -10,4 +10,5 @@ public interface HighlightRepository {
     Optional<Highlight> findById(Long id);
     Highlight save(Highlight highlight);
     Page<Highlight> findHighlights(Pageable pageable, Long userId, Long activityId, Long bookId, String spine, Boolean me);
+    void delete(Highlight highlight);
 }

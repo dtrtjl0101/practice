@@ -1,6 +1,5 @@
 package qwerty.chaekit.global.enums;
 
-
 import lombok.Getter;
 
 @Getter
@@ -53,6 +52,9 @@ public enum ErrorCode {
 
     ALREADY_JOINED_GROUP("ALREADY_JOINED_GROUP", "이미 가입한 그룹입니다"),
     GROUP_LEADER_CANNOT_LEAVE("GROUP_LEADER_CANNOT_LEAVE", "그룹장은 그룹을 탈퇴할 수 없습니다"),
+    ACTIVITY_ID_REQUIRED("ACTIVITY_ID_REQUIRED", "활동에 가입이 필요합니다"),
+    HIGHLIGHT_ALREADY_SHARED("HIGHLIGHT_ALREADY_SHARED", "활동에 가입되면 하이라이트는 수정할 수 없습니다"),
+    HIGHLIGHT_ALREADY_PUBLIC("HIGHLIGHT_ALREADY_PUBLIC", "공개된 하이라이트는 수정할 수 없습니다"),
     ;
 
     private final String code;

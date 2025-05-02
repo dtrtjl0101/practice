@@ -33,8 +33,14 @@ public class HighlightController {
         return ApiSuccessResponse.of(highlightService.createHighlight(userToken, request));
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ApiSuccessResponse<HighlightPostResponse> updateHighlight(@Login UserToken userToken, @PathVariable Long id, @RequestBody HighlightPutRequest request) {
         return ApiSuccessResponse.of(highlightService.updateHighlight(userToken, id, request));
+    }
+
+    @DeleteMapping("/{id}")
+    public ApiSuccessResponse<String> deleteHighlight(@Login UserToken userToken, @PathVariable Long id) {
+        highlightService.deleteHighlight(userToken, id);
+        return ApiSuccessResponse.of("하이라이트가 성공적으로 삭제되었습니다.");
     }
 }
