@@ -29,19 +29,23 @@ public class GroupController {
     }
 
     @GetMapping
-    public ApiSuccessResponse<PageResponse<GroupFetchResponse>> getAllGroups(@ParameterObject Pageable pageable) {
-        return ApiSuccessResponse.of(groupService.fetchGroupList(pageable));
+    public ApiSuccessResponse<PageResponse<GroupFetchResponse>> getAllGroups(
+            @Login(required = false) UserToken userToken,
+            @ParameterObject Pageable pageable) {
+        return ApiSuccessResponse.of(groupService.fetchAllGroupList(userToken, pageable));
     }
 
     @GetMapping("/{groupId}/info")
-    public ApiSuccessResponse<GroupFetchResponse> getGroup(@PathVariable long groupId) {
-        return ApiSuccessResponse.of(groupService.fetchGroup(groupId));
+    public ApiSuccessResponse<GroupFetchResponse> getGroup(
+            @Login(required = false) UserToken userToken,
+            @PathVariable long groupId) {
+        return ApiSuccessResponse.of(groupService.fetchGroup(userToken, groupId));
     }
 
     @PatchMapping("/{groupId}")
     public ApiSuccessResponse<GroupPostResponse> updateGroup(@Login UserToken userToken,
                                          @PathVariable long groupId,
-                                         @ModelAttribute @Valid GroupPutRequest request) {
+                                         @ModelAttribute @Valid GroupPatchRequest request) {
         return ApiSuccessResponse.of(groupService.updateGroup(userToken, groupId, request));
     }
 
@@ -66,7 +70,7 @@ public class GroupController {
             @PathVariable long groupId,
             @PathVariable long userId) {
         groupService.rejectJoinRequest(userToken, groupId, userId);
-        return ApiSuccessResponse.of(null);
+        return ApiSuccessResponse.emptyResponse();
     }
 
     @DeleteMapping("/{groupId}/members/leave")
@@ -74,7 +78,7 @@ public class GroupController {
             @Login UserToken userToken,
             @PathVariable long groupId) {
         groupService.leaveGroup(userToken, groupId);
-        return ApiSuccessResponse.of(null);
+        return ApiSuccessResponse.emptyResponse();
     }
 
     @GetMapping("/{groupId}/members/pending")

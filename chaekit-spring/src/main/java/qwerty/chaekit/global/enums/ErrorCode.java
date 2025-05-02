@@ -16,6 +16,7 @@ public enum ErrorCode {
     PUBLISHER_ALREADY_EXISTS("PUBLISHER_ALREADY_EXISTS", "이미 존재하는 출판사 이름입니다"),
     NICKNAME_ALREADY_EXISTS("NICKNAME_ALREADY_EXISTS", "이미 존재하는 닉네임입니다"),
     // group
+    GROUP_NAME_DUPLICATED("GROUP_NAME_DUPLICATED", "독서모임 이름이 중복되었습니다"),
     ACTIVITY_TIME_CONFLICT("ACTIVITY_TIME_CONFLICT", "이미 등록된 독서모임 일정과 겹칩니다"),
     ACTIVITY_TIME_INVALID("ACTIVITY_TIME_INVALID", "시작일과 종료일이 올바르지 않습니다"),
     // email
@@ -25,6 +26,8 @@ public enum ErrorCode {
     FILE_MISSING("FILE_MISSING", "파일이 누락되었습니다"),
     INVALID_EXTENSION("INVALID_EXTENSION", "허용되지 않는 확장자입니다"),
     FILE_SIZE_EXCEEDED("FILE_SIZE_EXCEED", "파일 크기가 초과되었습니다"),
+    // admin
+    PUBLISHER_ALREADY_ACCEPTED("PUBLISHER_ALREADY_ACCEPTED", "이미 승인된 출판사입니다"),
 
     // FORBIDDEN
     NO_VALID_TOKEN("NO_VALID_TOKEN", "유효한 토큰이 없습니다"),
@@ -47,6 +50,7 @@ public enum ErrorCode {
 
     // Exception Handler
     INVALID_INPUT("INVALID_INPUT", "입력값이 유효하지 않습니다"),
+    INVALID_HTTP_MESSAGE("INVALID_HTTP_MESSAGE", "HTTP 요청 본문이 잘못된 형식입니다."),
 
     METHOD_NOT_ALLOWED("METHOD_NOT_ALLOWED", "지원하지 않는 HTTP 메서드입니다"),
     NO_RESOURCE_FOUND("NO_RESOURCE_FOUND", "존재하지 않는 경로입니다"),

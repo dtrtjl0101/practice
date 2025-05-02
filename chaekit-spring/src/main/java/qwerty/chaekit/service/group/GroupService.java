@@ -3,7 +3,6 @@ package qwerty.chaekit.service.group;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.group.GroupMember;
@@ -13,6 +12,7 @@ import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.dto.group.*;
+import qwerty.chaekit.dto.group.enums.MyMemberShipStatus;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.enums.S3Directory;
@@ -22,8 +22,6 @@ import qwerty.chaekit.global.properties.AwsProperties;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.member.notification.EmailService;
 import qwerty.chaekit.service.util.S3Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +40,10 @@ public class GroupService {
             throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
         }
 
+        if(groupRepository.existsReadingGroupByName(request.name())) {
+            throw new ForbiddenException(ErrorCode.GROUP_NAME_DUPLICATED);
+        }
+
         String groupImageKey = s3Service.uploadFile(
                 awsProperties.imageBucketName(),
                 S3Directory.GROUP_IMAGE,
@@ -56,27 +58,46 @@ public class GroupService {
                 .groupImageKey(groupImageKey)
                 .build();
         ReadingGroup savedGroup = groupRepository.save(groupEntity);
-        request.tags().forEach(savedGroup::addTag);
+        if(request.tags() != null) {
+            request.tags().forEach(savedGroup::addTag);
+        }
+        savedGroup.addMember(userRepository.getReferenceById(userId)).approve();
+
         return GroupPostResponse.of(savedGroup, getGroupImageURL(savedGroup));
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<GroupFetchResponse> fetchGroupList(Pageable pageable) {
-        Page<GroupFetchResponse> page = groupRepository.findAll(pageable).map(
-                group -> GroupFetchResponse.of(group, getGroupImageURL(group))
-        );
+    public PageResponse<GroupFetchResponse> fetchAllGroupList(UserToken userToken, Pageable pageable) {
+        boolean isAnonymous = userToken.isAnonymous();
+        Long userId = isAnonymous ? null : userToken.userId();
+
+        Page<GroupFetchResponse> page = groupRepository.findAllWithGroupMembersAndTags(pageable)
+                .map(
+                        group -> GroupFetchResponse.of(
+                                group,
+                                getGroupImageURL(group),
+                                isAnonymous ? MyMemberShipStatus.NONE : group.getMemberShipStatus(userId)
+                        )
+                );
         return PageResponse.of(page);
     }
 
     @Transactional(readOnly = true)
-    public GroupFetchResponse fetchGroup(long groupId) {
-        ReadingGroup group = groupRepository.findById(groupId)
+    public GroupFetchResponse fetchGroup(UserToken userToken, long groupId) {
+        boolean isAnonymous = userToken.isAnonymous();
+        Long userId = isAnonymous ? null : userToken.userId();
+
+        ReadingGroup group = groupRepository.findByIdWithGroupMembersAndTags(groupId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.GROUP_NOT_FOUND));
-        return GroupFetchResponse.of(group, getGroupImageURL(group));
+        return GroupFetchResponse.of(
+                group,
+                getGroupImageURL(group),
+                isAnonymous ? MyMemberShipStatus.NONE : group.getMemberShipStatus(userId)
+        );
     }
 
     @Transactional
-    public GroupPostResponse updateGroup(UserToken userToken, long groupId, GroupPutRequest request) {
+    public GroupPostResponse updateGroup(UserToken userToken, long groupId, GroupPatchRequest request) {
         Long userId = userToken.userId();
         if(!userRepository.existsById(userId)) {
             throw new NotFoundException(ErrorCode.USER_NOT_FOUND);

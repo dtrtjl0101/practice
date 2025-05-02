@@ -148,7 +148,7 @@ class EbookFileServiceTest {
         Long adminId = 1L;
         String fileKey = "file-key";
         // Arrange
-        UserToken userToken = new UserToken(memberId, userId, dummyEmail);
+        UserToken userToken = new UserToken(false, memberId, userId, dummyEmail);
         Ebook ebook = mock(Ebook.class);
 
         when(adminService.getAdminUserId()).thenReturn(adminId);
@@ -172,7 +172,7 @@ class EbookFileServiceTest {
         Long memberId = 1L;
         Long userId = 1L;
         Long adminId = 1L;
-        UserToken userToken = new UserToken(memberId, userId, dummyEmail);
+        UserToken userToken = new UserToken(false, memberId, userId, dummyEmail);
 
         when(adminService.getAdminUserId()).thenReturn(adminId);
         when(ebookRepository.findById(bookId)).thenReturn(Optional.empty());

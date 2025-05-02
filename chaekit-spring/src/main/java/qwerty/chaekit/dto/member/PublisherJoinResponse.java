@@ -10,5 +10,5 @@ public record PublisherJoinResponse(
         String publisherName,
         String email,
         String profileImageURL,
-        Boolean isAccepted
+        String status
 ){ }

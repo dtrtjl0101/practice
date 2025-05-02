@@ -67,7 +67,7 @@ public class PublisherJoinService {
                 .email(member.getEmail())
                 .publisherName(publisher.getPublisherName())
                 .profileImageURL(profileImageUrl)
-                .isAccepted(publisher.isAccepted())
+                .status(publisher.getApprovalStatus().name())
                 .build();
     }
 }

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.member.Member;
@@ -22,6 +23,7 @@ import java.util.Optional;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@Order(1)
 public class AdminInitializer implements ApplicationRunner {
     private final AdminProperties adminProperties;
     private final MemberJoinHelper memberJoinHelper;
@@ -56,7 +58,7 @@ public class AdminInitializer implements ApplicationRunner {
                             .publisherName(adminName)
                             .build()
             );
-            newProfile.acceptPublisher();
+            newProfile.approvePublisher();
             log.info("관리자 출판사 프로필이 추가되었습니다.");
             return newProfile;
         });
