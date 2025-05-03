@@ -2,11 +2,15 @@ package qwerty.chaekit.domain.highlight.entity.comment;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.highlight.entity.Highlight;
 import qwerty.chaekit.domain.member.user.UserProfile;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -27,5 +31,27 @@ public class HighlightComment extends BaseEntity {
 
     @Column(nullable = false)
     private String content;
-
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private HighlightComment parent;
+    
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<HighlightComment> replies = new ArrayList<>();
+    
+    @Builder
+    public HighlightComment(UserProfile author, Highlight highlight, String content, HighlightComment parent) {
+        this.author = author;
+        this.highlight = highlight;
+        this.content = content;
+        this.parent = parent;
+    }
+    
+    public void updateContent(String content) {
+        this.content = content;
+    }
+    
+    public void addReply(HighlightComment reply) {
+        this.replies.add(reply);
+    }
 }

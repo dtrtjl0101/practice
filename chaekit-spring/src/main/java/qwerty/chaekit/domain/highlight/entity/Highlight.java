@@ -5,7 +5,11 @@ import lombok.*;
 import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.group.activity.Activity;
+import qwerty.chaekit.domain.highlight.entity.comment.HighlightComment;
 import qwerty.chaekit.domain.member.user.UserProfile;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -39,6 +43,9 @@ public class Highlight extends BaseEntity {
 
     @Column(nullable = false)
     private boolean isPublic;
+    
+    @OneToMany(mappedBy = "highlight", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<HighlightComment> comments = new ArrayList<>();
 
     @Builder
     public Highlight(UserProfile author, Ebook book, String cfi, String spine, String memo, Activity activity) {

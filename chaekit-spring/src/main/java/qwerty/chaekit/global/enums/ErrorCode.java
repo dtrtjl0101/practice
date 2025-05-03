@@ -48,6 +48,12 @@ public enum ErrorCode {
     HIGHLIGHT_NOT_FOUND("HIGHLIGHT_NOT_FOUND", "해당 하이라이트가 존재하지 않습니다"),
     ACTIVITY_NOT_FOUND("ACTIVITY_NOT_FOUND", "해당 활동이 존재하지 않습니다"),
 
+    // Comment related
+    COMMENT_NOT_FOUND("COMMENT_NOT_FOUND", "해당 댓글이 존재하지 않습니다"),
+    COMMENT_NOT_YOURS("COMMENT_NOT_YOURS", "댓글은 본인만 수정/삭제할 수 있습니다"),
+    COMMENT_PARENT_MISMATCH("COMMENT_PARENT_MISMATCH", "부모 댓글이 하이라이트에 속하지 않습니다"),
+    HIGHLIGHT_NOT_PUBLIC("HIGHLIGHT_NOT_PUBLIC", "공개되지 않은 하이라이트에는 댓글을 작성할 수 없습니다"),
+
     // Exception Handler
     INVALID_INPUT("INVALID_INPUT", "입력값이 유효하지 않습니다"),
     INVALID_HTTP_MESSAGE("INVALID_HTTP_MESSAGE", "HTTP 요청 본문이 잘못된 형식입니다."),
