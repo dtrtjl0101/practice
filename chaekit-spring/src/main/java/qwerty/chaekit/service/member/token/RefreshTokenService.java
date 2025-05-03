@@ -46,7 +46,7 @@ public class RefreshTokenService {
             throw new UnauthorizedException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
-        if(!redisTemplate.hasKey("refresh:" + parsedToken.memberId())) {
+        if(!redisTemplate.hasKey("refresh:" + refreshToken)) {
             throw new UnauthorizedException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
