@@ -12,7 +12,10 @@ import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
 import qwerty.chaekit.domain.member.publisher.enums.PublisherApprovalStatus;
+import qwerty.chaekit.domain.member.user.UserProfile;
+import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.dto.member.PublisherInfoResponse;
+import qwerty.chaekit.dto.member.UserInfoResponse;
 import qwerty.chaekit.dto.member.admin.RejectPublisherRequest;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
@@ -27,6 +30,7 @@ public class AdminService {
     private final PublisherProfileRepository publisherRepository;
     private final EmailService emailService;
     private final S3Service s3Service;
+    private final UserProfileRepository userRepository;
 
     @Getter
     @Setter
@@ -43,6 +47,16 @@ public class AdminService {
         return PageResponse.of(page.map(publisher -> PublisherInfoResponse.of(
                 publisher,
                 s3Service.convertToPublicImageURL(publisher.getProfileImageKey())
+        )));
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<UserInfoResponse> getUsers(Pageable pageable) {
+        Pageable pageableWithSort = getPageableOrderedByCreatedAt(pageable);
+        Page<UserProfile> page = userRepository.findAll(pageableWithSort);
+        return PageResponse.of(page.map(user -> UserInfoResponse.of(
+                user,
+                s3Service.convertToPublicImageURL(user.getProfileImageKey())
         )));
     }
 

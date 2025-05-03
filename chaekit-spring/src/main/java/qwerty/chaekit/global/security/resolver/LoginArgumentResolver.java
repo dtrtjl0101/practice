@@ -9,11 +9,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import qwerty.chaekit.domain.member.enums.Role;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.ForbiddenException;
+import qwerty.chaekit.global.exception.UnauthorizedException;
+import qwerty.chaekit.global.jwt.TokenStatus;
 import qwerty.chaekit.global.security.model.CustomUserDetails;
 
 @Slf4j
@@ -34,10 +37,26 @@ public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
         Login loginAnnotation = parameter.getParameterAnnotation(Login.class);
         boolean isRequired = loginAnnotation != null && loginAnnotation.required();
 
+        if(isRequired) {
+            throwIfAccessTokenInvalid(webRequest);
+        }
+
         Role requiredRole = determineRequiredRole(parameter.getParameterType());
         CustomUserDetails userDetails = getAuthenticatedUserDetails();
 
         return resolveToken(requiredRole, userDetails, isRequired);
+    }
+
+    private void throwIfAccessTokenInvalid(NativeWebRequest webRequest) {
+        Object statusObj = webRequest.getAttribute("TOKEN_STATUS", RequestAttributes.SCOPE_REQUEST);
+        if(statusObj == null) {
+            throw new UnauthorizedException(ErrorCode.LOGIN_REQUIRED);
+        }
+        TokenStatus tokenStatus = TokenStatus.valueOf(statusObj.toString());
+        switch (tokenStatus) {
+            case EXPIRED -> throw new UnauthorizedException(ErrorCode.EXPIRED_ACCESS_TOKEN);
+            case INVALID -> throw new UnauthorizedException(ErrorCode.INVALID_ACCESS_TOKEN);
+        }
     }
 
     private Role determineRequiredRole(Class<?> parameterType) {

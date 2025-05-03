@@ -5,9 +5,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import qwerty.chaekit.dto.member.UserJoinRequest;
-import qwerty.chaekit.dto.member.UserJoinResponse;
+import qwerty.chaekit.dto.member.LoginResponse;
 import qwerty.chaekit.dto.member.UserInfoResponse;
+import qwerty.chaekit.dto.member.UserJoinRequest;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
 import qwerty.chaekit.global.security.resolver.UserToken;
@@ -28,7 +28,7 @@ public class UserController {
     }
 
     @PostMapping(path = "/join", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiSuccessResponse<UserJoinResponse> userJoin(@ModelAttribute @Valid UserJoinRequest joinRequest) {
+    public ApiSuccessResponse<LoginResponse> userJoin(@ModelAttribute @Valid UserJoinRequest joinRequest) {
         return ApiSuccessResponse.of(joinService.join(joinRequest));
     }
 }

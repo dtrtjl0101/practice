@@ -9,7 +9,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import qwerty.chaekit.dto.member.LoginRequest;
 import qwerty.chaekit.dto.member.LoginResponse;
@@ -17,9 +16,8 @@ import qwerty.chaekit.global.jwt.JwtUtil;
 import qwerty.chaekit.global.security.model.CustomUserDetails;
 import qwerty.chaekit.global.util.SecurityRequestReader;
 import qwerty.chaekit.global.util.SecurityResponseSender;
+import qwerty.chaekit.service.member.token.RefreshTokenService;
 import qwerty.chaekit.service.util.S3Service;
-
-import java.util.Collection;
 
 @Slf4j
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
@@ -28,19 +26,22 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final SecurityRequestReader requestReader;
     private final SecurityResponseSender responseSender;
     private final S3Service s3Service;
+    private final RefreshTokenService refreshTokenService;
 
     public LoginFilter(String loginUrl,
                        JwtUtil jwtUtil,
                        AuthenticationManager authManager,
                        SecurityRequestReader reader,
                        SecurityResponseSender sender,
-                       S3Service s3Service
+                       S3Service s3Service,
+                       RefreshTokenService refreshTokenService
     ) {
         this.jwtUtil = jwtUtil;
         this.authenticationManager = authManager;
         this.requestReader = reader;
         this.responseSender = sender;
         this.s3Service = s3Service;
+        this.refreshTokenService = refreshTokenService;
 
         setAuthenticationManager(authManager);
         setFilterProcessesUrl(loginUrl);
@@ -87,19 +88,17 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         }
 
         String profileImageURL = s3Service.convertToPublicImageURL(profileImageKey);
+        String role = customUserDetails.member().getRole().name();
 
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        authorities.stream().findFirst().map(GrantedAuthority::getAuthority).ifPresentOrElse(
-                (role)-> {
-                    String token = jwtUtil.createAccessToken(memberId, userId, publisherId, email, role);
-                    sendSuccessResponse(response, token, memberId, email, userId, publisherId, profileImageURL, role);
-                }, ()-> responseSender.sendError(response, 500, "INVALID_ROLE", "권한 정보가 존재하지 않습니다.")
-        );
+        String refreshToken = refreshTokenService.issueRefreshToken(memberId);
+        String accessToken = jwtUtil.createAccessToken(memberId, userId, publisherId, email, role);
+        sendSuccessResponse(response, refreshToken, accessToken, memberId, email, userId, publisherId, profileImageURL, role);
     }
 
     private void sendSuccessResponse(
             HttpServletResponse response,
-            String token,
+            String refreshToken,
+            String accessToken,
             Long memberId,
             String email,
             Long userId,
@@ -108,7 +107,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             String role
     ) {
         LoginResponse loginResponse = LoginResponse.builder()
-                .accessToken("Bearer " + token)
+                .refreshToken(refreshToken)
+                .accessToken(accessToken)
                 .memberId(memberId)
                 .email(email)
                 .userId(userId)
