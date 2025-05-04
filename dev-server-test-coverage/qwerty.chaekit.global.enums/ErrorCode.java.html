@@ -29,46 +29,53 @@ public enum ErrorCode {
     // admin
 <span class="fc" id="L30">    PUBLISHER_ALREADY_ACCEPTED(&quot;PUBLISHER_ALREADY_ACCEPTED&quot;, &quot;이미 승인된 출판사입니다&quot;),</span>
 
+    // UNAUTHORIZED
+<span class="fc" id="L33">    INVALID_ACCESS_TOKEN(&quot;INVALID_ACCESS_TOKEN&quot;, &quot;유효하지 않은 Access Token입니다&quot;),</span>
+<span class="fc" id="L34">    INVALID_REFRESH_TOKEN(&quot;INVALID_REFRESH_TOKEN&quot;, &quot;유효하지 않은 Refresh Token입니다&quot;),</span>
+<span class="fc" id="L35">    EXPIRED_ACCESS_TOKEN(&quot;EXPIRED_ACCESS_TOKEN&quot;, &quot;Access Token이 만료되었습니다&quot;),</span>
+<span class="fc" id="L36">    EXPIRED_REFRESH_TOKEN(&quot;EXPIRED_REFRESH_TOKEN&quot;, &quot;Refresh Token이 만료되었습니다&quot;),</span>
+
     // FORBIDDEN
-<span class="fc" id="L33">    NO_VALID_TOKEN(&quot;NO_VALID_TOKEN&quot;, &quot;유효한 토큰이 없습니다&quot;),</span>
-<span class="fc" id="L34">    GROUP_UPDATE_FORBIDDEN(&quot;GROUP_UPDATE_FORBIDDEN&quot;, &quot;독서모임 수정 권한이 없습니다&quot;),</span>
-<span class="fc" id="L35">    HIGHLIGHT_NOT_YOURS(&quot;HIGHLIGHT_NOT_YOURS&quot;, &quot;하이라이트는 본인만 수정할 수 있습니다&quot;),</span>
-<span class="fc" id="L36">    GROUP_LEADER_ONLY(&quot;GROUP_LEADER_ONLY&quot;, &quot;모임지기만 사용할 수 있는 기능입니다&quot;),</span>
-<span class="fc" id="L37">    ACTIVITY_GROUP_MISMATCH(&quot;ACTIVITY_GROUP_MISMATCH&quot;, &quot;해당 독서모임의 활동이 아닙니다&quot;),</span>
-<span class="fc" id="L38">    ACTIVITY_MEMBER_ONLY(&quot;ACTIVITY_MEMBER_ONLY&quot;, &quot;해당 독서모임 활동에 가입한 경우에만 가능합니다&quot;),</span>
-<span class="fc" id="L39">    ONLY_USER(&quot;ONLY_USER&quot;, &quot;일반 회원만 사용할 수 있는 기능입니다&quot;),</span>
-<span class="fc" id="L40">    ONLY_PUBLISHER(&quot;ONLY_PUBLISHER&quot;, &quot;출판사 회원만 사용할 수 있는 기능입니다&quot;),</span>
-<span class="fc" id="L41">    ONLY_ADMIN(&quot;ONLY_ADMIN&quot;, &quot;관리자만 사용할 수 있는 기능입니다&quot;),</span>
+<span class="fc" id="L39">    GROUP_UPDATE_FORBIDDEN(&quot;GROUP_UPDATE_FORBIDDEN&quot;, &quot;독서모임 수정 권한이 없습니다&quot;),</span>
+<span class="fc" id="L40">    HIGHLIGHT_NOT_YOURS(&quot;HIGHLIGHT_NOT_YOURS&quot;, &quot;하이라이트는 본인만 수정할 수 있습니다&quot;),</span>
+<span class="fc" id="L41">    GROUP_LEADER_ONLY(&quot;GROUP_LEADER_ONLY&quot;, &quot;모임지기만 사용할 수 있는 기능입니다&quot;),</span>
+<span class="fc" id="L42">    ACTIVITY_GROUP_MISMATCH(&quot;ACTIVITY_GROUP_MISMATCH&quot;, &quot;해당 독서모임의 활동이 아닙니다&quot;),</span>
+<span class="fc" id="L43">    ACTIVITY_MEMBER_ONLY(&quot;ACTIVITY_MEMBER_ONLY&quot;, &quot;해당 독서모임 활동에 가입한 경우에만 가능합니다&quot;),</span>
+<span class="fc" id="L44">    LOGIN_REQUIRED(&quot;LOGIN_REQUIRED&quot;, &quot;로그인이 필요합니다&quot;),</span>
+<span class="fc" id="L45">    ONLY_USER(&quot;ONLY_USER&quot;, &quot;일반 회원만 사용할 수 있는 기능입니다&quot;),</span>
+<span class="fc" id="L46">    ONLY_PUBLISHER(&quot;ONLY_PUBLISHER&quot;, &quot;출판사 회원만 사용할 수 있는 기능입니다&quot;),</span>
+<span class="fc" id="L47">    ONLY_ADMIN(&quot;ONLY_ADMIN&quot;, &quot;관리자만 사용할 수 있는 기능입니다&quot;),</span>
 
     // NOT_FOUND
-<span class="fc" id="L44">    EBOOK_NOT_FOUND(&quot;EBOOK_NOT_FOUND&quot;, &quot;해당 전자책이 존재하지 않습니다&quot;),</span>
-<span class="fc" id="L45">    PUBLISHER_NOT_FOUND(&quot;PUBLISHER_NOT_FOUND&quot;, &quot;해당 출판사가 존재하지 않습니다&quot;),</span>
-<span class="fc" id="L46">    USER_NOT_FOUND(&quot;USER_NOT_FOUND&quot;, &quot;일반 회원이 아니거나 존재하지 않습니다&quot;),</span>
-<span class="fc" id="L47">    GROUP_NOT_FOUND(&quot;GROUP_NOT_FOUND&quot;, &quot;해당 독서모임이 존재하지 않습니다&quot;),</span>
-<span class="fc" id="L48">    HIGHLIGHT_NOT_FOUND(&quot;HIGHLIGHT_NOT_FOUND&quot;, &quot;해당 하이라이트가 존재하지 않습니다&quot;),</span>
-<span class="fc" id="L49">    ACTIVITY_NOT_FOUND(&quot;ACTIVITY_NOT_FOUND&quot;, &quot;해당 활동이 존재하지 않습니다&quot;),</span>
+<span class="fc" id="L50">    MEMBER_NOT_FOUND(&quot;MEMBER_NOT_FOUND&quot;, &quot;해당 회원이 존재하지 않습니다&quot;),</span>
+<span class="fc" id="L51">    EBOOK_NOT_FOUND(&quot;EBOOK_NOT_FOUND&quot;, &quot;해당 전자책이 존재하지 않습니다&quot;),</span>
+<span class="fc" id="L52">    PUBLISHER_NOT_FOUND(&quot;PUBLISHER_NOT_FOUND&quot;, &quot;해당 출판사가 존재하지 않습니다&quot;),</span>
+<span class="fc" id="L53">    USER_NOT_FOUND(&quot;USER_NOT_FOUND&quot;, &quot;일반 회원이 아니거나 존재하지 않습니다&quot;),</span>
+<span class="fc" id="L54">    GROUP_NOT_FOUND(&quot;GROUP_NOT_FOUND&quot;, &quot;해당 독서모임이 존재하지 않습니다&quot;),</span>
+<span class="fc" id="L55">    HIGHLIGHT_NOT_FOUND(&quot;HIGHLIGHT_NOT_FOUND&quot;, &quot;해당 하이라이트가 존재하지 않습니다&quot;),</span>
+<span class="fc" id="L56">    ACTIVITY_NOT_FOUND(&quot;ACTIVITY_NOT_FOUND&quot;, &quot;해당 활동이 존재하지 않습니다&quot;),</span>
 
     // Exception Handler
-<span class="fc" id="L52">    INVALID_INPUT(&quot;INVALID_INPUT&quot;, &quot;입력값이 유효하지 않습니다&quot;),</span>
-<span class="fc" id="L53">    INVALID_HTTP_MESSAGE(&quot;INVALID_HTTP_MESSAGE&quot;, &quot;HTTP 요청 본문이 잘못된 형식입니다.&quot;),</span>
+<span class="fc" id="L59">    INVALID_INPUT(&quot;INVALID_INPUT&quot;, &quot;입력값이 유효하지 않습니다&quot;),</span>
+<span class="fc" id="L60">    INVALID_HTTP_MESSAGE(&quot;INVALID_HTTP_MESSAGE&quot;, &quot;HTTP 요청 본문이 잘못된 형식입니다.&quot;),</span>
 
-<span class="fc" id="L55">    METHOD_NOT_ALLOWED(&quot;METHOD_NOT_ALLOWED&quot;, &quot;지원하지 않는 HTTP 메서드입니다&quot;),</span>
-<span class="fc" id="L56">    NO_RESOURCE_FOUND(&quot;NO_RESOURCE_FOUND&quot;, &quot;존재하지 않는 경로입니다&quot;),</span>
+<span class="fc" id="L62">    METHOD_NOT_ALLOWED(&quot;METHOD_NOT_ALLOWED&quot;, &quot;지원하지 않는 HTTP 메서드입니다&quot;),</span>
+<span class="fc" id="L63">    NO_RESOURCE_FOUND(&quot;NO_RESOURCE_FOUND&quot;, &quot;존재하지 않는 경로입니다&quot;),</span>
 
-<span class="fc" id="L58">    ALREADY_JOINED_GROUP(&quot;ALREADY_JOINED_GROUP&quot;, &quot;이미 가입한 그룹입니다&quot;),</span>
-<span class="fc" id="L59">    GROUP_LEADER_CANNOT_LEAVE(&quot;GROUP_LEADER_CANNOT_LEAVE&quot;, &quot;그룹장은 그룹을 탈퇴할 수 없습니다&quot;),</span>
-<span class="fc" id="L60">    ACTIVITY_ID_REQUIRED(&quot;ACTIVITY_ID_REQUIRED&quot;, &quot;활동 ID가 필요합니다&quot;),</span>
-<span class="fc" id="L61">    HIGHLIGHT_ALREADY_SHARED(&quot;HIGHLIGHT_ALREADY_SHARED&quot;, &quot;활동에 가입되면 하이라이트는 수정할 수 없습니다&quot;),</span>
-<span class="fc" id="L62">    HIGHLIGHT_ALREADY_PUBLIC(&quot;HIGHLIGHT_ALREADY_PUBLIC&quot;, &quot;공개된 하이라이트는 수정할 수 없습니다&quot;),</span>
+<span class="fc" id="L65">    ALREADY_JOINED_GROUP(&quot;ALREADY_JOINED_GROUP&quot;, &quot;이미 가입한 그룹입니다&quot;),</span>
+<span class="fc" id="L66">    GROUP_LEADER_CANNOT_LEAVE(&quot;GROUP_LEADER_CANNOT_LEAVE&quot;, &quot;그룹장은 그룹을 탈퇴할 수 없습니다&quot;),</span>
+<span class="fc" id="L67">    ACTIVITY_ID_REQUIRED(&quot;ACTIVITY_ID_REQUIRED&quot;, &quot;활동 ID가 필요합니다&quot;),</span>
+<span class="fc" id="L68">    HIGHLIGHT_ALREADY_SHARED(&quot;HIGHLIGHT_ALREADY_SHARED&quot;, &quot;활동에 가입되면 하이라이트는 수정할 수 없습니다&quot;),</span>
+<span class="fc" id="L69">    HIGHLIGHT_ALREADY_PUBLIC(&quot;HIGHLIGHT_ALREADY_PUBLIC&quot;, &quot;공개된 하이라이트는 수정할 수 없습니다&quot;),</span>
     ;
 
     private final String code;
     private final String message;
 
-<span class="fc" id="L68">    ErrorCode(String code, String message) {</span>
-<span class="fc" id="L69">        this.code = code;</span>
-<span class="fc" id="L70">        this.message = message;</span>
-<span class="fc" id="L71">    }</span>
+<span class="fc" id="L75">    ErrorCode(String code, String message) {</span>
+<span class="fc" id="L76">        this.code = code;</span>
+<span class="fc" id="L77">        this.message = message;</span>
+<span class="fc" id="L78">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

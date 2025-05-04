@@ -1,82 +1,105 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JwtUtil.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chaekit</a> &gt; <a href="index.source.html" class="el_package">qwerty.chaekit.global.jwt</a> &gt; <span class="el_source">JwtUtil.java</span></div><h1>JwtUtil.java</h1><pre class="source lang-java linenums">package qwerty.chaekit.global.jwt;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtBuilder;
+import io.jsonwebtoken.Jwts;
+import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import qwerty.chaekit.domain.member.Member;
+import qwerty.chaekit.domain.member.publisher.PublisherProfile;
+import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.global.properties.JwtProperties;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.function.UnaryOperator;
 
-<span class="fc" id="L13">@Slf4j</span>
+<span class="fc" id="L21">@Slf4j</span>
 @Component
 public class JwtUtil {
     private final SecretKey secretKey;
     private final JwtProperties jwtProperties;
 
-<span class="fc" id="L19">    public JwtUtil(JwtProperties jwtProperties) {</span>
-<span class="fc" id="L20">        this.jwtProperties = jwtProperties;</span>
-<span class="fc" id="L21">        this.secretKey = new SecretKeySpec(</span>
-<span class="fc" id="L22">                jwtProperties.secret().getBytes(StandardCharsets.UTF_8),</span>
-<span class="fc" id="L23">                Jwts.SIG.HS256.key().build().getAlgorithm()</span>
+<span class="fc" id="L27">    public JwtUtil(JwtProperties jwtProperties) {</span>
+<span class="fc" id="L28">        this.jwtProperties = jwtProperties;</span>
+<span class="fc" id="L29">        this.secretKey = new SecretKeySpec(</span>
+<span class="fc" id="L30">                jwtProperties.secret().getBytes(StandardCharsets.UTF_8),</span>
+<span class="fc" id="L31">                Jwts.SIG.HS256.key().build().getAlgorithm()</span>
         );
-<span class="fc" id="L25">    }</span>
+<span class="fc" id="L33">    }</span>
 
-    public Claims parseJwt(String token) {
-<span class="nc" id="L28">        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload();</span>
+    public TokenParsingResult parseAccessToken(String token) {
+<span class="nc" id="L36">        return parseToken(token, &quot;access&quot;);</span>
     }
 
-    public Long getMemberId(Claims claims) {
-<span class="nc" id="L32">        return claims.get(&quot;memberId&quot;, Long.class);</span>
+    public TokenParsingResult parseRefreshToken(String token) {
+<span class="nc" id="L40">        return parseToken(token, &quot;refresh&quot;);</span>
     }
 
-    public Long getUserId(Claims claims) {
-<span class="nc" id="L36">        return claims.get(&quot;userId&quot;, Long.class);</span>
-    }
-
-    public Long getPublisherId(Claims claims) {
-<span class="nc" id="L40">        return claims.get(&quot;publisherId&quot;, Long.class);</span>
-    }
-
-    public String getEmail(Claims claims) {
-<span class="nc" id="L44">        return claims.get(&quot;email&quot;, String.class);</span>
-    }
-
-    public String getRole(Claims claims) {
-<span class="nc" id="L48">        return claims.get(&quot;role&quot;, String.class);</span>
-    }
-
-    public boolean isValidToken(String token) {
+    public TokenParsingResult parseToken(String token, String expectedType) {
         try {
-<span class="nc" id="L53">            Jwts.parser()</span>
-<span class="nc" id="L54">                    .verifyWith(secretKey)</span>
-<span class="nc" id="L55">                    .build()</span>
-<span class="nc" id="L56">                    .parseSignedClaims(token);</span>
-<span class="nc" id="L57">            return true;</span>
-<span class="nc" id="L58">        } catch (ExpiredJwtException e) {</span>
-<span class="nc" id="L59">            log.info(&quot;token expired&quot;);</span>
-<span class="nc" id="L60">            return false;</span>
-<span class="nc" id="L61">        } catch (Exception e) {</span>
-            // 서명 오류, 잘못된 형식, 지원하지 않는 토큰 등
-<span class="nc" id="L63">            log.info(&quot;token invalid&quot;);</span>
-<span class="nc" id="L64">            return false;</span>
+<span class="nc" id="L45">            Claims claims = Jwts.parser()</span>
+<span class="nc" id="L46">                    .verifyWith(secretKey)</span>
+<span class="nc" id="L47">                    .build()</span>
+<span class="nc" id="L48">                    .parseSignedClaims(token)</span>
+<span class="nc" id="L49">                    .getPayload();</span>
+
+<span class="nc bnc" id="L51" title="All 2 branches missed.">            if (!claims.get(&quot;type&quot;, String.class).equals(expectedType)) {</span>
+<span class="nc" id="L52">                return TokenParsingResult.of(TokenStatus.INVALID);</span>
+            }
+
+<span class="nc" id="L55">            return TokenParsingResult.of(TokenStatus.VALID, claims);</span>
+
+<span class="nc" id="L57">        } catch (ExpiredJwtException e) {</span>
+<span class="nc" id="L58">            return TokenParsingResult.of(TokenStatus.EXPIRED);</span>
+<span class="nc" id="L59">        } catch (Exception e) {</span>
+<span class="nc" id="L60">            return TokenParsingResult.of(TokenStatus.INVALID);</span>
         }
     }
+    public String createAccessToken(
+            Member member,
+            @Nullable UserProfile user,
+            @Nullable PublisherProfile publisher
+    ) {
+<span class="nc bnc" id="L68" title="All 2 branches missed.">        Long userId = user != null ? user.getId() : null;</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">        Long publisherId = publisher != null ? publisher.getId() : null;</span>
+<span class="nc" id="L70">        return createAccessToken(member.getId(), userId, publisherId, member.getEmail(), member.getRole().name());</span>
+    }
 
-    public String createJwt(Long memberId, Long userId, Long publisherId, String email, String role) {
+    public String createAccessToken(Long memberId, Long userId, Long publisherId, String email, String role) {
+<span class="nc" id="L74">        return createToken(</span>
+<span class="nc" id="L75">                builder -&gt; builder</span>
+<span class="nc" id="L76">                        .claim(&quot;type&quot;, &quot;access&quot;)</span>
+<span class="nc" id="L77">                        .claim(&quot;memberId&quot;, memberId)</span>
+<span class="nc" id="L78">                        .claim(&quot;userId&quot;, userId)</span>
+<span class="nc" id="L79">                        .claim(&quot;publisherId&quot;, publisherId)</span>
+<span class="nc" id="L80">                        .claim(&quot;email&quot;, email)</span>
+<span class="nc" id="L81">                        .claim(&quot;role&quot;, role),</span>
+<span class="nc" id="L82">                jwtProperties.expirationMs()</span>
+        );
+    }
 
-<span class="nc" id="L70">        return Jwts.builder()</span>
-<span class="nc" id="L71">                .claim(&quot;memberId&quot;, memberId)</span>
-<span class="nc" id="L72">                .claim(&quot;userId&quot;, userId)</span>
-<span class="nc" id="L73">                .claim(&quot;publisherId&quot;, publisherId)</span>
-<span class="nc" id="L74">                .claim(&quot;email&quot;, email)</span>
-<span class="nc" id="L75">                .claim(&quot;role&quot;, role)</span>
-<span class="nc" id="L76">                .issuedAt(new Date(System.currentTimeMillis()))</span>
-<span class="nc" id="L77">                .expiration(new Date(System.currentTimeMillis() + jwtProperties.expirationMs()))</span>
-<span class="nc" id="L78">                .signWith(secretKey)</span>
-<span class="nc" id="L79">                .compact();</span>
+    public String createRefreshToken(Long memberId) {
+<span class="nc" id="L87">        return createToken(</span>
+<span class="nc" id="L88">                builder -&gt; builder</span>
+<span class="nc" id="L89">                        .claim(&quot;type&quot;, &quot;refresh&quot;)</span>
+<span class="nc" id="L90">                        .claim(&quot;memberId&quot;, memberId),</span>
+<span class="nc" id="L91">                jwtProperties.refreshExpirationMs()</span>
+        );
+    }
+
+    private String createToken(UnaryOperator&lt;JwtBuilder&gt; claimSetter, long expirationMs) {
+<span class="nc" id="L96">        JwtBuilder builder = Jwts.builder();</span>
+<span class="nc" id="L97">        builder = claimSetter.apply(builder);</span>
+<span class="nc" id="L98">        return builder</span>
+<span class="nc" id="L99">                .issuedAt(new Date(System.currentTimeMillis()))</span>
+<span class="nc" id="L100">                .expiration(new Date(System.currentTimeMillis() + expirationMs))</span>
+<span class="nc" id="L101">                .signWith(secretKey)</span>
+<span class="nc" id="L102">                .compact();</span>
     }
 
 }
