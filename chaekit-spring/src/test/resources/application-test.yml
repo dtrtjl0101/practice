@@ -19,6 +19,7 @@ spring:
 jwt:
   secret: dummy_secret
   expirationMs: 3600000
+  refreshExpirationMs: 604800000
 
 admin:
   email: admin@example.com

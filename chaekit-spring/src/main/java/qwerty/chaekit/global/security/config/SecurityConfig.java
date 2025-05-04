@@ -19,13 +19,14 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import qwerty.chaekit.domain.member.enums.Role;
 import qwerty.chaekit.global.jwt.JwtUtil;
 import qwerty.chaekit.global.properties.CorsProperties;
+import qwerty.chaekit.global.security.filter.AccessTokenFilter;
 import qwerty.chaekit.global.security.filter.CustomExceptionHandlingFilter;
-import qwerty.chaekit.global.security.filter.JwtFilter;
 import qwerty.chaekit.global.security.filter.login.LoginFilter;
 import qwerty.chaekit.global.security.handler.CustomAccessDeniedHandler;
 import qwerty.chaekit.global.security.handler.CustomAuthenticationEntryPoint;
 import qwerty.chaekit.global.util.SecurityRequestReader;
 import qwerty.chaekit.global.util.SecurityResponseSender;
+import qwerty.chaekit.service.member.token.RefreshTokenService;
 import qwerty.chaekit.service.util.S3Service;
 
 import java.util.Collections;
@@ -60,19 +61,19 @@ public class SecurityConfig {
     }
 
     @Bean
-    public JwtFilter jwtFilter() {
-        return new JwtFilter(jwtUtil);
+    public AccessTokenFilter jwtFilter() {
+        return new AccessTokenFilter(jwtUtil);
     }
 
     @Bean
-    public LoginFilter loginFilter(AuthenticationManager authManager) {
-        return new LoginFilter("/api/login", jwtUtil, authManager, requestReader, responseSender, s3Service);
+    public LoginFilter loginFilter(AuthenticationManager authManager, RefreshTokenService refreshTokenService) {
+        return new LoginFilter("/api/login", jwtUtil, authManager, requestReader, responseSender, s3Service, refreshTokenService);
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http,
                                            LoginFilter loginFilter,
-                                           JwtFilter jwtFilter,
+                                           AccessTokenFilter accessTokenFilter,
                                            CustomExceptionHandlingFilter exceptionHandlingFilter) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable);
@@ -114,7 +115,7 @@ public class SecurityConfig {
 
         http
                 .addFilterBefore(exceptionHandlingFilter, SecurityContextHolderFilter.class)
-                .addFilterBefore(jwtFilter, LoginFilter.class)
+                .addFilterBefore(accessTokenFilter, LoginFilter.class)
                 .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class);
 
         http

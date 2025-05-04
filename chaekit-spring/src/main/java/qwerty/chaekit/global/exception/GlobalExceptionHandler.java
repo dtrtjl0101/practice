@@ -27,6 +27,12 @@ public class GlobalExceptionHandler {
         return ApiErrorResponse.of(ex.getErrorCode(), ex.getMessage());
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ApiErrorResponse handleUnauthorizedException(UnauthorizedException ex) {
+        return ApiErrorResponse.of(ex.getErrorCode(), ex.getMessage());
+    }
+
     @ExceptionHandler(ForbiddenException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ApiErrorResponse handleNoSuchElementException(ForbiddenException ex) {

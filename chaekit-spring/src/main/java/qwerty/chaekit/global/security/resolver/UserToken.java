@@ -12,9 +12,6 @@ public record UserToken(
     public static UserToken anonymous() {
         return UserToken.builder()
                 .isAnonymous(true)
-                .memberId(null)
-                .userId(null)
-                .email(null)
                 .build();
     }
 
