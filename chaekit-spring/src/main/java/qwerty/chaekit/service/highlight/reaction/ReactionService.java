@@ -57,8 +57,7 @@ public class ReactionService {
         if (!comment.getHighlight().getId().equals(highlightId)) {
             throw new ForbiddenException(ErrorCode.COMMENT_PARENT_MISMATCH);
         }
-        
-        // 같은 사용자가 같은 댓글에 같은 종류의 리액션을 이미 추가했는지 확인
+
         Optional<HighlightReaction> existingReaction = reactionRepository.findByAuthorIdAndCommentIdAndReactionType(
                 userId, comment.getId(), request.reactionType());
         
