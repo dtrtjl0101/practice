@@ -10,7 +10,6 @@ import qwerty.chaekit.global.response.ApiSuccessResponse;
 public class MainController {
     @GetMapping("/api")
     public ApiSuccessResponse<String> mainApi() {
-        log.info("Health check API called");
         return ApiSuccessResponse.of("Welcome to Chaekit");
     }
 }
