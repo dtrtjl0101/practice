@@ -8,6 +8,9 @@ import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.member.user.UserProfile;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Table(name = "discussion")
@@ -30,4 +33,10 @@ public class Discussion extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id")
     private UserProfile author;
+
+    @Column(nullable = false)
+    private boolean isDebate = false;
+
+    @OneToMany(mappedBy = "discussion")
+    private List<DiscussionComment> comments = new ArrayList<>();
 }
