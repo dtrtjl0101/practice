@@ -44,6 +44,6 @@ public class CommentController {
             @Login UserToken userToken,
             @PathVariable Long commentId) {
         commentService.deleteComment(userToken, commentId);
-        return ApiSuccessResponse.of("comment가 삭제되었습니다.");
+        return ApiSuccessResponse.of("댓글이 삭제되었습니다.");
     }
 } 

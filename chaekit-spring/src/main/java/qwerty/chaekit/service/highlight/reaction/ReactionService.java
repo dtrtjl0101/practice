@@ -16,9 +16,11 @@ import qwerty.chaekit.dto.highlight.reaction.ReactionResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
+import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.security.resolver.UserToken;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -33,52 +35,59 @@ public class ReactionService {
 
     public ReactionResponse addReaction(UserToken userToken, Long highlightId, ReactionRequest request) {
         Long userId = userToken.userId();
-        
+
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
         }
-        
+
         Highlight highlight = highlightRepository.findById(highlightId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));
-        
+
         if (!highlight.isPublic()) {
             throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_PUBLIC);
         }
-        
-        HighlightComment comment;
-        if (request.commentId() != null) {
-            comment = commentRepository.findById(request.commentId())
-                    .orElseThrow(() -> new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));
-                    
-            if (!comment.getHighlight().getId().equals(highlightId)) {
-                throw new ForbiddenException(ErrorCode.COMMENT_PARENT_MISMATCH);
-            }
-        }else{
-            comment=null;
+
+        if (request.commentId() == null) {
+            throw new BadRequestException(ErrorCode.COMMENT_ID_REQUIRED);
+        }
+
+        HighlightComment comment = commentRepository.findById(request.commentId())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));
+
+        if (!comment.getHighlight().getId().equals(highlightId)) {
+            throw new ForbiddenException(ErrorCode.COMMENT_PARENT_MISMATCH);
         }
         
+        // 같은 사용자가 같은 댓글에 같은 종류의 리액션을 이미 추가했는지 확인
+        Optional<HighlightReaction> existingReaction = reactionRepository.findByAuthorIdAndCommentIdAndReactionType(
+                userId, comment.getId(), request.reactionType());
+        
+        if (existingReaction.isPresent()) {
+            throw new BadRequestException(ErrorCode.REACTION_ALREADY_EXISTS);
+        }
+
         HighlightReaction reaction = HighlightReaction.builder()
                 .author(userRepository.getReferenceById(userId))
                 .highlight(highlight)
                 .comment(comment)
                 .reactionType(request.reactionType())
                 .build();
-        
+
         HighlightReaction savedReaction = reactionRepository.save(reaction);
-        
+
         return ReactionResponse.of(savedReaction);
     }
 
     public void deleteReaction(UserToken userToken, Long reactionId) {
         Long userId = userToken.userId();
-        
+
         HighlightReaction reaction = reactionRepository.findById(reactionId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.REACTION_NOT_FOUND));
-        
+
         if (!reaction.getAuthor().getId().equals(userId)) {
             throw new ForbiddenException(ErrorCode.NOT_REACTION_AUTHOR);
         }
-        
+
         reactionRepository.delete(reaction);
     }
-} 
+}

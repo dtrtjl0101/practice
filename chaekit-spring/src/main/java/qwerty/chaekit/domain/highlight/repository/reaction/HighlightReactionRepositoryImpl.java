@@ -3,6 +3,7 @@ package qwerty.chaekit.domain.highlight.repository.reaction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import qwerty.chaekit.domain.highlight.entity.reaction.HighlightReaction;
+import qwerty.chaekit.domain.highlight.entity.reaction.ReactionType;
 
 import java.util.List;
 import java.util.Optional;
@@ -45,5 +46,10 @@ public class HighlightReactionRepositoryImpl implements HighlightReactionReposit
     @Override
     public Optional<HighlightReaction> findByAuthorIdAndCommentId(Long authorId, Long commentId) {
         return reactionJpaRepository.findByAuthorIdAndCommentId(authorId, commentId);
+    }
+
+    @Override
+    public Optional<HighlightReaction> findByAuthorIdAndCommentIdAndReactionType(Long authorId, Long commentId, ReactionType reactionType) {
+        return reactionJpaRepository.findByAuthorIdAndCommentIdAndReactionType(authorId, commentId, reactionType);
     }
 } 

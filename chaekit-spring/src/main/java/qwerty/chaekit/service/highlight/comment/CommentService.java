@@ -135,14 +135,12 @@ public class CommentService {
         if (!comment.getAuthor().getId().equals(userId)) {
             throw new ForbiddenException(ErrorCode.COMMENT_NOT_YOURS);
         }
-        
-        // 댓글에 달린 모든 반응을 먼저 삭제
+
         List<HighlightReaction> reactions = reactionRepository.findByCommentId(commentId);
         for (HighlightReaction reaction : reactions) {
             reactionRepository.delete(reaction);
         }
-        
-        // 대댓글이 있는 경우 대댓글에 달린 반응도 삭제
+
         if (!comment.getReplies().isEmpty()) {
             List<Long> replyIds = comment.getReplies().stream()
                     .map(HighlightComment::getId)

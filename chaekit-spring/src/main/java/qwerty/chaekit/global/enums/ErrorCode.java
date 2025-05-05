@@ -51,12 +51,14 @@ public enum ErrorCode {
     // Comment related
     COMMENT_NOT_FOUND("COMMENT_NOT_FOUND", "해당 댓글이 존재하지 않습니다"),
     COMMENT_NOT_YOURS("COMMENT_NOT_YOURS", "댓글은 본인만 수정/삭제할 수 있습니다"),
-    COMMENT_PARENT_MISMATCH("COMMENT_PARENT_MISMATCH", "부모 댓글이 하이라이트에 속하지 않습니다"),
+    COMMENT_PARENT_MISMATCH("COMMENT_PARENT_MISMATCH", "답글달 댓글이 없습니다"),
     HIGHLIGHT_NOT_PUBLIC("HIGHLIGHT_NOT_PUBLIC", "공개되지 않은 하이라이트에는 댓글을 작성할 수 없습니다"),
+    COMMENT_ID_REQUIRED("COMMENT_ID_REQUIRED", "이모티콘 반응을 추가하려면 댓글 ID가 필요합니다"),
     
     // Reaction related
     REACTION_NOT_FOUND("REACTION_NOT_FOUND", "해당 이모티콘이 존재하지 않습니다"),
     NOT_REACTION_AUTHOR("NOT_REACTION_AUTHOR", "본인만 삭제할 수 있습니다"),
+    REACTION_ALREADY_EXISTS("REACTION_ALREADY_EXISTS", "이미 동일한 이모티콘 반응을 추가했습니다"),
 
     // Exception Handler
     INVALID_INPUT("INVALID_INPUT", "입력값이 유효하지 않습니다"),

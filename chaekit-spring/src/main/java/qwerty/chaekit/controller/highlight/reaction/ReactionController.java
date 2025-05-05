@@ -30,6 +30,6 @@ public class ReactionController {
             @Login UserToken userToken,
             @PathVariable Long reactionId) {
         reactionService.deleteReaction(userToken, reactionId);
-        return ApiSuccessResponse.of("이모티콘이 삭제되었습니다.");
+        return ApiSuccessResponse.of("이모티콘을 삭제했습니다.");
     }
 } 
