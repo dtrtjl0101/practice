@@ -6,8 +6,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.highlight.entity.Highlight;
 import qwerty.chaekit.domain.highlight.entity.comment.HighlightComment;
+import qwerty.chaekit.domain.highlight.entity.reaction.HighlightReaction;
 import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
 import qwerty.chaekit.domain.highlight.repository.comment.HighlightCommentRepository;
+import qwerty.chaekit.domain.highlight.repository.reaction.HighlightReactionRepository;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.dto.highlight.comment.CommentRequest;
 import qwerty.chaekit.dto.highlight.comment.CommentResponse;
@@ -16,7 +18,12 @@ import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.UserToken;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -26,6 +33,7 @@ import java.util.stream.Collectors;
 public class CommentService {
     private final HighlightRepository highlightRepository;
     private final HighlightCommentRepository commentRepository;
+    private final HighlightReactionRepository reactionRepository;
     private final UserProfileRepository userRepository;
 
     public CommentResponse createComment(UserToken userToken, Long highlightId, CommentRequest request) {
@@ -78,10 +86,29 @@ public class CommentService {
         if (!highlight.isPublic()) {
             throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_PUBLIC);
         }
-        
+
         List<HighlightComment> rootComments = commentRepository.findRootCommentsByHighlightId(highlightId);
+
+        Set<Long> allCommentIds = new HashSet<>();
+        for (HighlightComment rootComment : rootComments) {
+            allCommentIds.add(rootComment.getId());
+            for (HighlightComment reply : rootComment.getReplies()) {
+                allCommentIds.add(reply.getId());
+            }
+        }
+
+        final Map<Long, List<HighlightReaction>> reactionsByCommentId;
+        
+        if (!allCommentIds.isEmpty()) {
+            List<HighlightReaction> allReactions = reactionRepository.findByCommentIdIn(new ArrayList<>(allCommentIds));
+            reactionsByCommentId = allReactions.stream()
+                    .collect(Collectors.groupingBy(reaction -> reaction.getComment().getId()));
+        } else {
+            reactionsByCommentId = Collections.emptyMap();
+        }
+
         return rootComments.stream()
-                .map(CommentResponse::of)
+                .map(comment -> CommentResponse.of(comment, reactionsByCommentId))
                 .collect(Collectors.toList());
     }
     
@@ -107,6 +134,24 @@ public class CommentService {
         
         if (!comment.getAuthor().getId().equals(userId)) {
             throw new ForbiddenException(ErrorCode.COMMENT_NOT_YOURS);
+        }
+        
+        // 댓글에 달린 모든 반응을 먼저 삭제
+        List<HighlightReaction> reactions = reactionRepository.findByCommentId(commentId);
+        for (HighlightReaction reaction : reactions) {
+            reactionRepository.delete(reaction);
+        }
+        
+        // 대댓글이 있는 경우 대댓글에 달린 반응도 삭제
+        if (!comment.getReplies().isEmpty()) {
+            List<Long> replyIds = comment.getReplies().stream()
+                    .map(HighlightComment::getId)
+                    .collect(Collectors.toList());
+            
+            List<HighlightReaction> replyReactions = reactionRepository.findByCommentIdIn(replyIds);
+            for (HighlightReaction reaction : replyReactions) {
+                reactionRepository.delete(reaction);
+            }
         }
         
         commentRepository.delete(comment);

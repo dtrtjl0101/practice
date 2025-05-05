@@ -53,6 +53,10 @@ public enum ErrorCode {
     COMMENT_NOT_YOURS("COMMENT_NOT_YOURS", "댓글은 본인만 수정/삭제할 수 있습니다"),
     COMMENT_PARENT_MISMATCH("COMMENT_PARENT_MISMATCH", "부모 댓글이 하이라이트에 속하지 않습니다"),
     HIGHLIGHT_NOT_PUBLIC("HIGHLIGHT_NOT_PUBLIC", "공개되지 않은 하이라이트에는 댓글을 작성할 수 없습니다"),
+    
+    // Reaction related
+    REACTION_NOT_FOUND("REACTION_NOT_FOUND", "해당 이모티콘이 존재하지 않습니다"),
+    NOT_REACTION_AUTHOR("NOT_REACTION_AUTHOR", "본인만 삭제할 수 있습니다"),
 
     // Exception Handler
     INVALID_INPUT("INVALID_INPUT", "입력값이 유효하지 않습니다"),

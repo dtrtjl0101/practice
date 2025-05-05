@@ -47,8 +47,8 @@ public class HighlightComment extends BaseEntity {
         this.parent = parent;
     }
     
-    public void updateContent(String content) {
-        this.content = content;
+    public void updateContent(String comment) {
+        this.content = comment;
     }
     
     public void addReply(HighlightComment reply) {
