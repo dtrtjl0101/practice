@@ -2,6 +2,7 @@ package qwerty.chaekit.domain.group.activity.discussion;
 
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import qwerty.chaekit.domain.BaseEntity;
@@ -38,5 +39,27 @@ public class Discussion extends BaseEntity {
     private boolean isDebate = false;
 
     @OneToMany(mappedBy = "discussion")
-    private List<DiscussionComment> comments = new ArrayList<>();
+    private final List<DiscussionComment> comments = new ArrayList<>();
+
+    @Builder
+    public Discussion(Long id, Activity activity, String title, String content, UserProfile author, boolean isDebate) {
+        this.id = id;
+        this.activity = activity;
+        this.title = title;
+        this.content = content;
+        this.author = author;
+        this.isDebate = isDebate;
+    }
+
+    public void update(String title, String content, Boolean debate) {
+        if(title != null) {
+            this.title = title;
+        }
+        if(content != null) {
+            this.content = content;
+        }
+        if(debate != null) {
+            this.isDebate = debate;
+        }
+    }
 }

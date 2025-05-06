@@ -19,6 +19,8 @@ public enum ErrorCode {
     GROUP_NAME_DUPLICATED("GROUP_NAME_DUPLICATED", "독서모임 이름이 중복되었습니다"),
     ACTIVITY_TIME_CONFLICT("ACTIVITY_TIME_CONFLICT", "이미 등록된 독서모임 일정과 겹칩니다"),
     ACTIVITY_TIME_INVALID("ACTIVITY_TIME_INVALID", "시작일과 종료일이 올바르지 않습니다"),
+    // discussion
+    DISCUSSION_NOT_YOURS("DISCUSSION_NOT_YOURS", "해당 토론은 본인이 작성한 것이 아닙니다"),
     // email
     EMAIL_VERIFICATION_FAILED("EMAIL_VERIFICATION_FAILED", "이메일 인증에 실패했습니다."),
     EMAIL_SEND_FAILED("EMAIL_SEND_FAILED", "이메일 전송에 실패했습니다."),
@@ -36,6 +38,7 @@ public enum ErrorCode {
     EXPIRED_REFRESH_TOKEN("EXPIRED_REFRESH_TOKEN", "Refresh Token이 만료되었습니다"),
 
     // FORBIDDEN
+    GROUP_MEMBER_ONLY("GROUP_MEMBER_ONLY", "독서모임에 가입된 회원만 사용할 수 있는 기능입니다"),
     GROUP_UPDATE_FORBIDDEN("GROUP_UPDATE_FORBIDDEN", "독서모임 수정 권한이 없습니다"),
     HIGHLIGHT_NOT_YOURS("HIGHLIGHT_NOT_YOURS", "하이라이트는 본인만 수정할 수 있습니다"),
     GROUP_LEADER_ONLY("GROUP_LEADER_ONLY", "모임지기만 사용할 수 있는 기능입니다"),
@@ -54,6 +57,7 @@ public enum ErrorCode {
     GROUP_NOT_FOUND("GROUP_NOT_FOUND", "해당 독서모임이 존재하지 않습니다"),
     HIGHLIGHT_NOT_FOUND("HIGHLIGHT_NOT_FOUND", "해당 하이라이트가 존재하지 않습니다"),
     ACTIVITY_NOT_FOUND("ACTIVITY_NOT_FOUND", "해당 활동이 존재하지 않습니다"),
+    DISCUSSION_NOT_FOUND("DISCUSSION_NOT_FOUND", "해당 토론이 존재하지 않습니다"),
 
     // Exception Handler
     INVALID_INPUT("INVALID_INPUT", "입력값이 유효하지 않습니다"),

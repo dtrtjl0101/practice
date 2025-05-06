@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.member.Member;
 
@@ -12,6 +13,7 @@ import qwerty.chaekit.domain.member.Member;
 @Getter
 @Table(name = "user_profile")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@BatchSize(size = 50)
 public class UserProfile extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
