@@ -20,7 +20,9 @@ public enum ErrorCode {
     ACTIVITY_TIME_CONFLICT("ACTIVITY_TIME_CONFLICT", "이미 등록된 독서모임 일정과 겹칩니다"),
     ACTIVITY_TIME_INVALID("ACTIVITY_TIME_INVALID", "시작일과 종료일이 올바르지 않습니다"),
     // discussion
-    DISCUSSION_NOT_YOURS("DISCUSSION_NOT_YOURS", "해당 토론은 본인이 작성한 것이 아닙니다"),
+    DISCUSSION_NOT_YOURS("DISCUSSION_NOT_YOURS", "해당 토론은 본인이 생성한 것이 아닙니다"),
+    // discussion_comment
+    INVALID_COMMENT_PARENT("INVALID_COMMENT_PARENT", "답글에는 다시 답글을 달 수 없습니다."),
     // email
     EMAIL_VERIFICATION_FAILED("EMAIL_VERIFICATION_FAILED", "이메일 인증에 실패했습니다."),
     EMAIL_SEND_FAILED("EMAIL_SEND_FAILED", "이메일 전송에 실패했습니다."),
@@ -44,10 +46,13 @@ public enum ErrorCode {
     GROUP_LEADER_ONLY("GROUP_LEADER_ONLY", "모임지기만 사용할 수 있는 기능입니다"),
     ACTIVITY_GROUP_MISMATCH("ACTIVITY_GROUP_MISMATCH", "해당 독서모임의 활동이 아닙니다"),
     ACTIVITY_MEMBER_ONLY("ACTIVITY_MEMBER_ONLY", "해당 독서모임 활동에 가입한 경우에만 가능합니다"),
+    DISCUSSION_COMMENT_NOT_YOURS("DISCUSSION_COMMENT_NOT_YOURS", "해당 댓글은 본인이 작성한 것이 아닙니다"),
+
     LOGIN_REQUIRED("LOGIN_REQUIRED", "로그인이 필요합니다"),
     ONLY_USER("ONLY_USER", "일반 회원만 사용할 수 있는 기능입니다"),
     ONLY_PUBLISHER("ONLY_PUBLISHER", "출판사 회원만 사용할 수 있는 기능입니다"),
     ONLY_ADMIN("ONLY_ADMIN", "관리자만 사용할 수 있는 기능입니다"),
+
 
     // NOT_FOUND
     MEMBER_NOT_FOUND("MEMBER_NOT_FOUND", "해당 회원이 존재하지 않습니다"),
@@ -58,7 +63,7 @@ public enum ErrorCode {
     HIGHLIGHT_NOT_FOUND("HIGHLIGHT_NOT_FOUND", "해당 하이라이트가 존재하지 않습니다"),
     ACTIVITY_NOT_FOUND("ACTIVITY_NOT_FOUND", "해당 활동이 존재하지 않습니다"),
     DISCUSSION_NOT_FOUND("DISCUSSION_NOT_FOUND", "해당 토론이 존재하지 않습니다"),
-
+    DISCUSSION_COMMENT_NOT_FOUND("DISCUSSION_COMMENT_NOT_FOUND", "해당 댓글이 존재하지 않습니다"),
     // Exception Handler
     INVALID_INPUT("INVALID_INPUT", "입력값이 유효하지 않습니다"),
     INVALID_HTTP_MESSAGE("INVALID_HTTP_MESSAGE", "HTTP 요청 본문이 잘못된 형식입니다."),

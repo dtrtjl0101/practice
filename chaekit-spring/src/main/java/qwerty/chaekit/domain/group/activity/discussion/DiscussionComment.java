@@ -2,10 +2,7 @@ package qwerty.chaekit.domain.group.activity.discussion;
 
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.BatchSize;
 import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.member.user.UserProfile;
@@ -33,11 +30,11 @@ public class DiscussionComment extends BaseEntity {
     @Column(nullable = false)
     private String content;
 
-    @Column(nullable = false)
-    private boolean isDeleted = false;
+    @Column(name = "is_edited", nullable = false)
+    private boolean edited = false;
 
-    @Column(nullable = false)
-    private boolean isEdited = false;
+    @Column(name = "is_deleted", nullable = false)
+    private boolean deleted = false;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -50,13 +47,24 @@ public class DiscussionComment extends BaseEntity {
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     @BatchSize(size = 50)
-    private List<DiscussionComment> replies = new ArrayList<>();
+    private final List<DiscussionComment> replies = new ArrayList<>();
 
-    public void addReply(DiscussionComment reply) {
-        if (parent != null) {
-            throw new IllegalStateException("Cannot add a reply to a reply.");
-        }
-        replies.add(reply);
-        reply.setParent(this);
+    @Builder
+    public DiscussionComment(UserProfile author, Discussion discussion, String content, DiscussionStance stance, DiscussionComment parent) {
+        this.author = author;
+        this.discussion = discussion;
+        this.content = content;
+        this.stance = stance;
+        this.parent = parent;
+    }
+
+    public void updateContent(String content) {
+        this.content = content;
+        this.edited = true;
+    }
+
+    public void softDelete() {
+        this.content = "삭제된 댓글입니다.";
+        this.deleted = true;
     }
 }

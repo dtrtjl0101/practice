@@ -28,6 +28,17 @@ public class DiscussionMapper {
      *      - r.author (ManyToOne, batch fetch)
      */
     public DiscussionCommentFetchResponse toCommentFetchResponse(DiscussionComment comment) {
+        if(comment.isDeleted()) {
+            return DiscussionCommentFetchResponse.builder()
+                    .commentId(comment.getId())
+                    .replies(
+                            comment.getReplies().stream()
+                                    .map(this::toCommentFetchResponse)
+                                    .toList()
+                    )
+                    .isDeleted(true)
+                    .build();
+        }
         return DiscussionCommentFetchResponse.builder()
                 .commentId(comment.getId())
                 .authorId(comment.getAuthor().getId())
@@ -98,6 +109,7 @@ public class DiscussionMapper {
                 .isAuthor(discussion.getAuthor().getId().equals(memberId))
                 .comments(
                         discussion.getComments().stream()
+                                .filter(comment -> comment.getParent() == null)
                                 .map(this::toCommentFetchResponse)
                                 .toList()
                 )

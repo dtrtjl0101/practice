@@ -2,7 +2,6 @@ package qwerty.chaekit.dto.group.activity.discussion;
 
 import lombok.Builder;
 import qwerty.chaekit.domain.group.activity.discussion.DiscussionStance;
-import qwerty.chaekit.domain.group.activity.discussion.DiscussionComment;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,6 +16,7 @@ public record DiscussionCommentFetchResponse(
         LocalDateTime createdAt,
         LocalDateTime modifiedAt,
         boolean isEdited,
+        boolean isDeleted,
         DiscussionStance stance,
         Long parentId,
         List<DiscussionCommentFetchResponse> replies
