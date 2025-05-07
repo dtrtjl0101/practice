@@ -2,10 +2,12 @@ package qwerty.chaekit.domain.highlight.entity.reaction;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.highlight.entity.Highlight;
+import qwerty.chaekit.domain.highlight.entity.comment.HighlightComment;
 import qwerty.chaekit.domain.member.user.UserProfile;
 
 @Entity
@@ -24,8 +26,20 @@ public class HighlightReaction extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="highlight_id")
     private Highlight highlight;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="comment_id")
+    private HighlightComment comment;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String reactionType;
-
+    private ReactionType reactionType;
+    
+    @Builder
+    public HighlightReaction(UserProfile author, Highlight highlight, HighlightComment comment, ReactionType reactionType) {
+        this.author = author;
+        this.highlight = highlight;
+        this.comment = comment;
+        this.reactionType = reactionType;
+    }
 }
