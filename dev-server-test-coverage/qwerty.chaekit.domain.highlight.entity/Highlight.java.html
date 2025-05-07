@@ -5,7 +5,11 @@ import lombok.*;
 import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.group.activity.Activity;
+import qwerty.chaekit.domain.highlight.entity.comment.HighlightComment;
 import qwerty.chaekit.domain.member.user.UserProfile;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -39,28 +43,31 @@ public class Highlight extends BaseEntity {
 
     @Column(nullable = false)
     private boolean isPublic;
+    
+<span class="fc" id="L47">    @OneToMany(mappedBy = &quot;highlight&quot;, cascade = CascadeType.ALL, orphanRemoval = true)</span>
+    private List&lt;HighlightComment&gt; comments = new ArrayList&lt;&gt;();
 
     @Builder
-<span class="fc" id="L44">    public Highlight(UserProfile author, Ebook book, String cfi, String spine, String memo, Activity activity) {</span>
-<span class="fc" id="L45">        this.author = author;</span>
-<span class="fc" id="L46">        this.book = book;</span>
-<span class="fc" id="L47">        this.cfi = cfi;</span>
-<span class="fc" id="L48">        this.spine = spine;</span>
-<span class="fc" id="L49">        this.memo = memo;</span>
-<span class="fc" id="L50">        this.activity = activity;</span>
-<span class="fc" id="L51">        this.isPublic = false;</span>
-<span class="fc" id="L52">    }</span>
+<span class="fc" id="L51">    public Highlight(UserProfile author, Ebook book, String cfi, String spine, String memo, Activity activity) {</span>
+<span class="fc" id="L52">        this.author = author;</span>
+<span class="fc" id="L53">        this.book = book;</span>
+<span class="fc" id="L54">        this.cfi = cfi;</span>
+<span class="fc" id="L55">        this.spine = spine;</span>
+<span class="fc" id="L56">        this.memo = memo;</span>
+<span class="fc" id="L57">        this.activity = activity;</span>
+<span class="fc" id="L58">        this.isPublic = false;</span>
+<span class="fc" id="L59">    }</span>
 
     public void updateMemo(String memo) {
-<span class="fc" id="L55">        this.memo = memo;</span>
-<span class="fc" id="L56">    }</span>
+<span class="fc" id="L62">        this.memo = memo;</span>
+<span class="fc" id="L63">    }</span>
 
     public void makePublic() {
-<span class="nc" id="L59">        this.isPublic = true;</span>
-<span class="nc" id="L60">    }</span>
+<span class="nc" id="L66">        this.isPublic = true;</span>
+<span class="nc" id="L67">    }</span>
 
     public boolean isPublic() {
-<span class="fc" id="L63">        return isPublic;</span>
+<span class="fc" id="L70">        return isPublic;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

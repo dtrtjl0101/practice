@@ -55,27 +55,39 @@ public enum ErrorCode {
 <span class="fc" id="L55">    HIGHLIGHT_NOT_FOUND(&quot;HIGHLIGHT_NOT_FOUND&quot;, &quot;해당 하이라이트가 존재하지 않습니다&quot;),</span>
 <span class="fc" id="L56">    ACTIVITY_NOT_FOUND(&quot;ACTIVITY_NOT_FOUND&quot;, &quot;해당 활동이 존재하지 않습니다&quot;),</span>
 
+    // Comment related
+<span class="fc" id="L59">    COMMENT_NOT_FOUND(&quot;COMMENT_NOT_FOUND&quot;, &quot;해당 댓글이 존재하지 않습니다&quot;),</span>
+<span class="fc" id="L60">    COMMENT_NOT_YOURS(&quot;COMMENT_NOT_YOURS&quot;, &quot;댓글은 본인만 수정/삭제할 수 있습니다&quot;),</span>
+<span class="fc" id="L61">    COMMENT_PARENT_MISMATCH(&quot;COMMENT_PARENT_MISMATCH&quot;, &quot;답글달 댓글이 없습니다&quot;),</span>
+<span class="fc" id="L62">    HIGHLIGHT_NOT_PUBLIC(&quot;HIGHLIGHT_NOT_PUBLIC&quot;, &quot;공개되지 않은 하이라이트에는 댓글을 작성할 수 없습니다&quot;),</span>
+<span class="fc" id="L63">    COMMENT_ID_REQUIRED(&quot;COMMENT_ID_REQUIRED&quot;, &quot;이모티콘 반응을 추가하려면 댓글이 필요합니다&quot;),</span>
+    
+    // Reaction related
+<span class="fc" id="L66">    REACTION_NOT_FOUND(&quot;REACTION_NOT_FOUND&quot;, &quot;해당 이모티콘이 존재하지 않습니다&quot;),</span>
+<span class="fc" id="L67">    NOT_REACTION_AUTHOR(&quot;NOT_REACTION_AUTHOR&quot;, &quot;본인만 삭제할 수 있습니다&quot;),</span>
+<span class="fc" id="L68">    REACTION_ALREADY_EXISTS(&quot;REACTION_ALREADY_EXISTS&quot;, &quot;이미 동일한 이모티콘 반응을 추가했습니다&quot;),</span>
+
     // Exception Handler
-<span class="fc" id="L59">    INVALID_INPUT(&quot;INVALID_INPUT&quot;, &quot;입력값이 유효하지 않습니다&quot;),</span>
-<span class="fc" id="L60">    INVALID_HTTP_MESSAGE(&quot;INVALID_HTTP_MESSAGE&quot;, &quot;HTTP 요청 본문이 잘못된 형식입니다.&quot;),</span>
+<span class="fc" id="L71">    INVALID_INPUT(&quot;INVALID_INPUT&quot;, &quot;입력값이 유효하지 않습니다&quot;),</span>
+<span class="fc" id="L72">    INVALID_HTTP_MESSAGE(&quot;INVALID_HTTP_MESSAGE&quot;, &quot;HTTP 요청 본문이 잘못된 형식입니다.&quot;),</span>
 
-<span class="fc" id="L62">    METHOD_NOT_ALLOWED(&quot;METHOD_NOT_ALLOWED&quot;, &quot;지원하지 않는 HTTP 메서드입니다&quot;),</span>
-<span class="fc" id="L63">    NO_RESOURCE_FOUND(&quot;NO_RESOURCE_FOUND&quot;, &quot;존재하지 않는 경로입니다&quot;),</span>
+<span class="fc" id="L74">    METHOD_NOT_ALLOWED(&quot;METHOD_NOT_ALLOWED&quot;, &quot;지원하지 않는 HTTP 메서드입니다&quot;),</span>
+<span class="fc" id="L75">    NO_RESOURCE_FOUND(&quot;NO_RESOURCE_FOUND&quot;, &quot;존재하지 않는 경로입니다&quot;),</span>
 
-<span class="fc" id="L65">    ALREADY_JOINED_GROUP(&quot;ALREADY_JOINED_GROUP&quot;, &quot;이미 가입한 그룹입니다&quot;),</span>
-<span class="fc" id="L66">    GROUP_LEADER_CANNOT_LEAVE(&quot;GROUP_LEADER_CANNOT_LEAVE&quot;, &quot;그룹장은 그룹을 탈퇴할 수 없습니다&quot;),</span>
-<span class="fc" id="L67">    ACTIVITY_ID_REQUIRED(&quot;ACTIVITY_ID_REQUIRED&quot;, &quot;활동 ID가 필요합니다&quot;),</span>
-<span class="fc" id="L68">    HIGHLIGHT_ALREADY_SHARED(&quot;HIGHLIGHT_ALREADY_SHARED&quot;, &quot;활동에 가입되면 하이라이트는 수정할 수 없습니다&quot;),</span>
-<span class="fc" id="L69">    HIGHLIGHT_ALREADY_PUBLIC(&quot;HIGHLIGHT_ALREADY_PUBLIC&quot;, &quot;공개된 하이라이트는 수정할 수 없습니다&quot;),</span>
+<span class="fc" id="L77">    ALREADY_JOINED_GROUP(&quot;ALREADY_JOINED_GROUP&quot;, &quot;이미 가입한 그룹입니다&quot;),</span>
+<span class="fc" id="L78">    GROUP_LEADER_CANNOT_LEAVE(&quot;GROUP_LEADER_CANNOT_LEAVE&quot;, &quot;그룹장은 그룹을 탈퇴할 수 없습니다&quot;),</span>
+<span class="fc" id="L79">    ACTIVITY_ID_REQUIRED(&quot;ACTIVITY_ID_REQUIRED&quot;, &quot;활동 ID가 필요합니다&quot;),</span>
+<span class="fc" id="L80">    HIGHLIGHT_ALREADY_SHARED(&quot;HIGHLIGHT_ALREADY_SHARED&quot;, &quot;활동에 가입되면 하이라이트는 수정할 수 없습니다&quot;),</span>
+<span class="fc" id="L81">    HIGHLIGHT_ALREADY_PUBLIC(&quot;HIGHLIGHT_ALREADY_PUBLIC&quot;, &quot;공개된 하이라이트는 수정할 수 없습니다&quot;),</span>
     ;
 
     private final String code;
     private final String message;
 
-<span class="fc" id="L75">    ErrorCode(String code, String message) {</span>
-<span class="fc" id="L76">        this.code = code;</span>
-<span class="fc" id="L77">        this.message = message;</span>
-<span class="fc" id="L78">    }</span>
+<span class="fc" id="L87">    ErrorCode(String code, String message) {</span>
+<span class="fc" id="L88">        this.code = code;</span>
+<span class="fc" id="L89">        this.message = message;</span>
+<span class="fc" id="L90">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
