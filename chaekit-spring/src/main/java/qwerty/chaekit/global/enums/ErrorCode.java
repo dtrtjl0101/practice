@@ -23,6 +23,7 @@ public enum ErrorCode {
     DISCUSSION_NOT_YOURS("DISCUSSION_NOT_YOURS", "해당 토론은 본인이 생성한 것이 아닙니다"),
     // discussion_comment
     INVALID_COMMENT_PARENT("INVALID_COMMENT_PARENT", "답글에는 다시 답글을 달 수 없습니다."),
+    DISCUSSION_COMMENT_DELETED("DISCUSSION_COMMENT_DELETED", "이미 삭제된 댓글입니다."),
     // email
     EMAIL_VERIFICATION_FAILED("EMAIL_VERIFICATION_FAILED", "이메일 인증에 실패했습니다."),
     EMAIL_SEND_FAILED("EMAIL_SEND_FAILED", "이메일 전송에 실패했습니다."),

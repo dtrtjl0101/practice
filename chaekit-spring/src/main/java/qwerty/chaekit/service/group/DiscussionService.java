@@ -128,12 +128,15 @@ public class DiscussionService {
 
         DiscussionComment parentComment;
         if(request.parentId() != null){
-            DiscussionComment comment = discussionCommentRepository.findById(request.parentId())
+            parentComment = discussionCommentRepository.findById(request.parentId())
                     .orElseThrow(() -> new NotFoundException(ErrorCode.DISCUSSION_COMMENT_NOT_FOUND));
-            if(comment.getParent() != null){
+            if(parentComment.getParent() != null){
                 throw new BadRequestException(ErrorCode.INVALID_COMMENT_PARENT);
             }
-            parentComment = discussionCommentRepository.getReferenceById(request.parentId());
+            if(parentComment.isDeleted()){
+                throw new BadRequestException(ErrorCode.DISCUSSION_COMMENT_DELETED);
+            }
+
         } else {
             parentComment = null;
         }
@@ -152,6 +155,9 @@ public class DiscussionService {
     public DiscussionCommentFetchResponse updateComment(Long commentId, DiscussionCommentPatchRequest request, UserToken userToken) {
         DiscussionComment comment = discussionCommentRepository.findByIdWithAuthor(commentId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.DISCUSSION_COMMENT_NOT_FOUND));
+        if (comment.isDeleted()) {
+            throw new BadRequestException(ErrorCode.DISCUSSION_COMMENT_DELETED);
+        }
         if (!comment.getAuthor().getId().equals(userToken.userId())) {
             throw new BadRequestException(ErrorCode.DISCUSSION_COMMENT_NOT_YOURS);
         }
