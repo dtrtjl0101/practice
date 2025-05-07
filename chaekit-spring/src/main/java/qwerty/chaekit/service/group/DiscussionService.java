@@ -36,6 +36,7 @@ public class DiscussionService {
     private final DiscussionCommentRepository discussionCommentRepository;
 
 
+    @Transactional(readOnly = true)
     public PageResponse<DiscussionFetchResponse> getDiscussions(UserToken userToken, Pageable pageable, Long activityId) {
         Long userId = userToken.userId();
 
@@ -75,6 +76,7 @@ public class DiscussionService {
         return discussionMapper.toFetchResponse(discussion, 0L, user.getId());
     }
 
+    @Transactional(readOnly = true)
     public DiscussionDetailResponse getDiscussionDetail(UserToken userToken, Long discussionId) {
         Long userId = userToken.userId();
 

@@ -50,7 +50,8 @@ public class DiscussionComment extends BaseEntity {
     private final List<DiscussionComment> replies = new ArrayList<>();
 
     @Builder
-    public DiscussionComment(UserProfile author, Discussion discussion, String content, DiscussionStance stance, DiscussionComment parent) {
+    public DiscussionComment(Long id, UserProfile author, Discussion discussion, String content, DiscussionStance stance, DiscussionComment parent) {
+        this.id = id;
         this.author = author;
         this.discussion = discussion;
         this.content = content;
