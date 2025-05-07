@@ -10,6 +10,7 @@ import qwerty.chaekit.domain.ebook.EbookRepository;
 import qwerty.chaekit.domain.group.GroupMemberRepository;
 import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.highlight.entity.Highlight;
+import qwerty.chaekit.domain.highlight.entity.reaction.HighlightReaction;
 import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.domain.group.activity.ActivityRepository;
@@ -22,6 +23,10 @@ import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.UserToken;
+import qwerty.chaekit.domain.highlight.repository.reaction.HighlightReactionRepository;
+import qwerty.chaekit.dto.highlight.reaction.ReactionResponse;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -32,6 +37,7 @@ public class HighlightService {
     private final EbookRepository ebookRepository;
     private final UserProfileRepository userRepository;
     private final ActivityRepository activityRepository;
+    private final HighlightReactionRepository reactionRepository;
 
     public HighlightPostResponse createHighlight(UserToken userToken, HighlightPostRequest request) {
         Long userId = userToken.userId();
@@ -100,5 +106,16 @@ public class HighlightService {
         }
 
         highlightRepository.delete(highlight);
+    }
+
+    public List<ReactionResponse> getHighlightReactions(Long highlightId) {
+        Highlight highlight = highlightRepository.findById(highlightId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));
+
+        List<HighlightReaction> reactions = reactionRepository.findByHighlightIdAndCommentIdIsNull(highlightId);
+        
+        return reactions.stream()
+                .map(ReactionResponse::of)
+                .collect(Collectors.toList());
     }
 }
