@@ -47,21 +47,25 @@ public class ReactionService {
             throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_PUBLIC);
         }
 
-        if (request.commentId() == null) {
-            throw new BadRequestException(ErrorCode.COMMENT_ID_REQUIRED);
+        HighlightComment comment = null;
+        Optional<HighlightReaction> highlightReaction;
+
+        if (request.commentId() != null) {
+            comment = commentRepository.findById(request.commentId())
+                    .orElseThrow(() -> new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));
+
+            if (!comment.getHighlight().getId().equals(highlightId)) {
+                throw new ForbiddenException(ErrorCode.COMMENT_PARENT_MISMATCH);
+            }
+
+            highlightReaction = reactionRepository.findByAuthorIdAndCommentIdAndReactionType(
+                    userId, comment.getId(), request.reactionType());
+        } else {
+            highlightReaction = reactionRepository.findByAuthorIdAndHighlightIdAndReactionTypeAndCommentIdIsNull(
+                    userId, highlightId, request.reactionType());
         }
-
-        HighlightComment comment = commentRepository.findById(request.commentId())
-                .orElseThrow(() -> new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));
-
-        if (!comment.getHighlight().getId().equals(highlightId)) {
-            throw new ForbiddenException(ErrorCode.COMMENT_PARENT_MISMATCH);
-        }
-
-        Optional<HighlightReaction> existingReaction = reactionRepository.findByAuthorIdAndCommentIdAndReactionType(
-                userId, comment.getId(), request.reactionType());
         
-        if (existingReaction.isPresent()) {
+        if (highlightReaction.isPresent()) {
             throw new BadRequestException(ErrorCode.REACTION_ALREADY_EXISTS);
         }
 

@@ -15,4 +15,6 @@ public interface HighlightReactionRepository {
     List<HighlightReaction> findByHighlightId(Long highlightId);
     Optional<HighlightReaction> findByAuthorIdAndCommentId(Long authorId, Long commentId);
     Optional<HighlightReaction> findByAuthorIdAndCommentIdAndReactionType(Long authorId, Long commentId, ReactionType reactionType);
+    Optional<HighlightReaction> findByAuthorIdAndHighlightIdAndReactionTypeAndCommentIdIsNull(Long authorId, Long highlightId, ReactionType reactionType);
+    List<HighlightReaction> findByHighlightIdAndCommentIdIsNull(Long highlightId);
 } 

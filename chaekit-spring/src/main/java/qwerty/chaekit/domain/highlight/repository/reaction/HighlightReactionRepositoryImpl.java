@@ -52,4 +52,14 @@ public class HighlightReactionRepositoryImpl implements HighlightReactionReposit
     public Optional<HighlightReaction> findByAuthorIdAndCommentIdAndReactionType(Long authorId, Long commentId, ReactionType reactionType) {
         return reactionJpaRepository.findByAuthorIdAndCommentIdAndReactionType(authorId, commentId, reactionType);
     }
+    
+    @Override
+    public Optional<HighlightReaction> findByAuthorIdAndHighlightIdAndReactionTypeAndCommentIdIsNull(Long authorId, Long highlightId, ReactionType reactionType) {
+        return reactionJpaRepository.findByAuthorIdAndHighlightIdAndReactionTypeAndCommentIdIsNull(authorId, highlightId, reactionType);
+    }
+    
+    @Override
+    public List<HighlightReaction> findByHighlightIdAndCommentIdIsNull(Long highlightId) {
+        return reactionJpaRepository.findByHighlightIdAndCommentIdIsNull(highlightId);
+    }
 } 
