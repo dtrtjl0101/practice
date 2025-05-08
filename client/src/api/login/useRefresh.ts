@@ -26,12 +26,15 @@ export default function useRefresh() {
     }
 
     const { accessToken, refreshToken } = response.data;
+    API_CLIENT.setSecurityData(accessToken!);
     setLoggedInUser((prev) => {
-      return {
+      const next = {
         ...prev,
         accessToken: accessToken!,
         ...(refreshToken ? { refreshToken } : {}),
       } as AuthState.LoggedInUser;
+      localStorage.setItem("loggedInUser", JSON.stringify(next));
+      return next;
     });
   }, [user, setLoggedInUser, logout]);
 
