@@ -51,6 +51,7 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            cd ~/app/qwerty-sc25/chaekit-spring
             git fetch origin
             git checkout $BRANCH_NAME
             git pull origin $BRANCH_NAME
