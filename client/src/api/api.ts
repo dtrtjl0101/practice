@@ -52,6 +52,12 @@ export async function wrapApiResponse<
 
   if (typeof data.isSuccessful === "boolean") {
     if (!data.isSuccessful) {
+      if ((data as any).errorCode === "LOGIN_REQUIRED") {
+        alert(
+          "로그인 세션이 만료되었습니다. 새로고침, 로그인 후 시도해주세요."
+        );
+        localStorage.removeItem("loggedInUser");
+      }
       console.error(data);
     }
     return data as unknown as SafeBody;

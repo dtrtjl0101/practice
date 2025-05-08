@@ -38,6 +38,7 @@ import {
 } from "@tanstack/react-query";
 import { Highlight } from "../types/highlight";
 import useAutoLogin from "../api/login/useAutoLogin";
+import useAutoTokenRefresh from "../api/login/useAutoTokenRefresh";
 
 export const Route = createFileRoute("/reader")({
   component: RouteComponent,
@@ -66,6 +67,7 @@ function RouteComponent() {
     useState<boolean>(false);
   const queryClient = useQueryClient();
   useAutoLogin();
+  useAutoTokenRefresh();
 
   const spine = useMemo(() => {
     try {

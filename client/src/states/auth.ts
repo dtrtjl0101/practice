@@ -5,18 +5,19 @@ export namespace AuthState {
   export type LoggedInUser = {
     memberId: number;
     email: string;
-    userId?: number;
-    publisherId?: number;
     role: Role;
     profileImageURL: string;
+    refreshToken: string;
     accessToken: string;
   } & (
     | {
         userId: number;
+        nickname: string;
         role: Role.ROLE_USER;
       }
     | {
         publisherId: number;
+        publisherName: string;
         role: Role.ROLE_PUBLISHER;
       }
     | {
