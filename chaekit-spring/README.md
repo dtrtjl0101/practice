@@ -90,7 +90,7 @@ EBOOK_MAX_FILE_SIZE=20971520
 PRESIGNED_URL_EXPIRATION_TIME=3600
 
 # CORS
-CORS_ALLOWED_ORIGINS=http://localhost:5173
+CORS_ALLOWED_ORIGINS=http://localhost:5173,https://chaekit.com,https://*.chaekit.com
 
 # Local Server Port
 LOCAL_SERVER_PORT=8080
