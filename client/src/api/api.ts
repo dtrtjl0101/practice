@@ -79,7 +79,7 @@ const api = new Api<string>({
   securityWorker: async (accessToken) => {
     return {
       headers: {
-        ...(accessToken ? { Authorization: accessToken } : {}),
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       },
     };
   },
