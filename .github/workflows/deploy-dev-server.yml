@@ -51,10 +51,16 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            git fetch origin
+            git checkout $BRANCH_NAME
+            git pull origin $BRANCH_NAME
+            docker compose down
+            docker compose up --build -d
+
             echo "Waiting for chaekit-spring to become healthy..."
             CONTAINER_NAME="chaekit-spring-chaekit-spring-1"
             health=""
-            for i in {1..30}; do
+            for i in {1..20}; do
               health=$(docker inspect --format='{{.State.Health.Status}}' "$CONTAINER_NAME" 2>/dev/null || echo "notfound")
               echo "Current health: $health"
 
