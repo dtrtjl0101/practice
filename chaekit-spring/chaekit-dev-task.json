@@ -49,6 +49,10 @@
           "value": "3600000"
         },
         {
+          "name": "JWT_REFRESH_EXPIRATION_MS",
+            "value": "1209600000"
+        },
+        {
           "name": "ADMIN_NAME",
           "value": "admin"
         },

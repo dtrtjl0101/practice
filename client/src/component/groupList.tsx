@@ -14,6 +14,7 @@ import API_CLIENT, { wrapApiResponse } from "../api/api";
 import { JSX, PropsWithChildren, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import PageNavigation from "./PageNavigation";
+import { GroupInfo } from "../types/groups";
 const ITEM_HEIGHT = 384 - 20;
 
 export default function GroupList(props: {
@@ -29,7 +30,7 @@ export default function GroupList(props: {
 
   const pageSize = size === "small" ? 6 : 12;
 
-  const { data } = useQuery({
+  const { data: groups } = useQuery({
     queryKey: ["groupList", page, sort, pageSize],
     queryFn: async () => {
       const response = await wrapApiResponse(
@@ -42,12 +43,15 @@ export default function GroupList(props: {
 
       if (response.isSuccessful) {
         setTotalPages(response.data.totalPages!);
-        return response.data.content;
+        return response.data.content! as GroupInfo[];
       }
 
       throw new Error(response.errorMessage);
     },
-    initialData: new Array(pageSize).fill(undefined),
+    initialData: new Array(pageSize).fill(undefined) as (
+      | GroupInfo
+      | undefined
+    )[],
     placeholderData: keepPreviousData,
   });
 
@@ -68,7 +72,7 @@ export default function GroupList(props: {
           totalPages={totalPages}
         />
         <Grid container spacing={2}>
-          {data?.map((group, index) =>
+          {groups?.map((group, index) =>
             group ? (
               <ItemContainer key={group.groupId}>
                 <Card sx={{ height: ITEM_HEIGHT }} elevation={3}>
@@ -83,7 +87,7 @@ export default function GroupList(props: {
                     onClick={() => {
                       navigate({
                         to: "/groups/$groupId",
-                        params: { groupId: group.groupId.toString() },
+                        params: { groupId: group.groupId!.toString() },
                       });
                     }}
                   >
@@ -91,8 +95,9 @@ export default function GroupList(props: {
                     <CardMedia
                       height={192}
                       component={"img"}
-                      // TODO: Use group image
-                      image="https://picsum.photos/512/512"
+                      image={
+                        group.groupImageURL || "https://picsum.photos/192/192"
+                      }
                     />
                     <CardContent>
                       <Typography

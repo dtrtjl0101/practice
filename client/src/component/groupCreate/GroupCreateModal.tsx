@@ -1,4 +1,4 @@
-import { Box, Container, Modal } from "@mui/material";
+import { Container, Modal } from "@mui/material";
 import GroupEditForm, { GroupEditData } from "./GroupEditForm";
 import API_CLIENT, { wrapApiResponse } from "../../api/api";
 import { useNavigate } from "@tanstack/react-router";
@@ -12,15 +12,13 @@ export default function GroupCreateModal(props: {
   const navigate = useNavigate();
 
   const handleEditDone = async (data: GroupEditData) => {
-    const { name, description, tags } = data;
+    const { name, description, tags, groupImage } = data;
     const response = await wrapApiResponse(
       API_CLIENT.groupController.createGroup({
-        groupPostRequest: {
-          // TODO: Add group image
-          name,
-          description,
-          tags,
-        },
+        name,
+        description,
+        tags,
+        groupImage,
       })
     );
 
@@ -41,20 +39,20 @@ export default function GroupCreateModal(props: {
   };
 
   return (
-    <Modal open={open} onClose={onClose}>
-      <Box
-        sx={{
-          width: "100vw",
-          height: "100vh",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Container sx={{ height: "65vh" }}>
-          <GroupEditForm onEditDone={handleEditDone} onCancel={onClose} />
-        </Container>
-      </Box>
+    <Modal
+      open={open}
+      onClose={onClose}
+      sx={{
+        width: "100vw",
+        height: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <Container sx={{ height: "65vh" }}>
+        <GroupEditForm onEditDone={handleEditDone} onCancel={onClose} />
+      </Container>
     </Modal>
   );
 }

@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.member.Member;
+import qwerty.chaekit.domain.member.publisher.enums.PublisherApprovalStatus;
 
 @Entity
 @Getter
@@ -27,7 +28,8 @@ public class PublisherProfile extends BaseEntity {
     private String profileImageKey;
 
     @Column(nullable = false)
-    private boolean accepted = false;
+    @Enumerated(EnumType.STRING)
+    private PublisherApprovalStatus approvalStatus = PublisherApprovalStatus.PENDING;
 
     @Builder
     public PublisherProfile(Long id, Member member, String publisherName, String profileImageKey) {
@@ -37,7 +39,10 @@ public class PublisherProfile extends BaseEntity {
         this.profileImageKey = profileImageKey;
     }
 
-    public void acceptPublisher() {
-        accepted = true;
+    public void approvePublisher() {
+        approvalStatus = PublisherApprovalStatus.APPROVED;
+    }
+    public void rejectPublisher() {
+        approvalStatus = PublisherApprovalStatus.REJECTED;
     }
 }

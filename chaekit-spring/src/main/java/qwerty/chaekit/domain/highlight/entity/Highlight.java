@@ -1,13 +1,15 @@
 package qwerty.chaekit.domain.highlight.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.ebook.Ebook;
+import qwerty.chaekit.domain.group.activity.Activity;
+import qwerty.chaekit.domain.highlight.entity.comment.HighlightComment;
 import qwerty.chaekit.domain.member.user.UserProfile;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -34,19 +36,37 @@ public class Highlight extends BaseEntity {
 
     private String memo;
 
+    @Setter
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="activity_id")
+    private Activity activity;
 
-    // TODO: Activity(ManyToOne)
+    @Column(nullable = false)
+    private boolean isPublic;
+    
+    @OneToMany(mappedBy = "highlight", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<HighlightComment> comments = new ArrayList<>();
 
     @Builder
-    public Highlight(UserProfile author, Ebook book, String cfi, String spine, String memo) {
+    public Highlight(UserProfile author, Ebook book, String cfi, String spine, String memo, Activity activity) {
         this.author = author;
         this.book = book;
         this.cfi = cfi;
         this.spine = spine;
         this.memo = memo;
+        this.activity = activity;
+        this.isPublic = false;
     }
 
     public void updateMemo(String memo) {
         this.memo = memo;
+    }
+
+    public void makePublic() {
+        this.isPublic = true;
+    }
+
+    public boolean isPublic() {
+        return isPublic;
     }
 }

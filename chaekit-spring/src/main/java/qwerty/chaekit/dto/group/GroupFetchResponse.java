@@ -3,6 +3,7 @@ package qwerty.chaekit.dto.group;
 import lombok.Builder;
 import qwerty.chaekit.domain.group.tag.GroupTag;
 import qwerty.chaekit.domain.group.ReadingGroup;
+import qwerty.chaekit.dto.group.enums.MyMemberShipStatus;
 
 import java.util.List;
 
@@ -13,9 +14,10 @@ public record GroupFetchResponse(
         String description,
         List<String> tags,
         String groupImageURL,
+        MyMemberShipStatus myMemberShipStatus,
         int memberCount
 ) {
-    public static GroupFetchResponse of(ReadingGroup group, String groupImageURL) {
+    public static GroupFetchResponse of(ReadingGroup group, String groupImageURL, MyMemberShipStatus myMemberShipStatus) {
         return GroupFetchResponse.builder()
                 .groupId(group.getId())
                 .name(group.getName())
@@ -24,6 +26,7 @@ public record GroupFetchResponse(
                         .map(GroupTag::getTagName)
                         .toList())
                 .groupImageURL(groupImageURL)
+                .myMemberShipStatus(myMemberShipStatus)
                 .memberCount(group.getMembers().size())
                 .build();
     }

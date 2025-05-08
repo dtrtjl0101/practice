@@ -3,11 +3,26 @@ import { Role } from "../types/role";
 
 export namespace AuthState {
   export type LoggedInUser = {
-    id: number;
-    nickname: string;
+    memberId: number;
     email: string;
     role: Role;
+    profileImageURL: string;
+    refreshToken: string;
     accessToken: string;
-  };
+  } & (
+    | {
+        userId: number;
+        nickname: string;
+        role: Role.ROLE_USER;
+      }
+    | {
+        publisherId: number;
+        publisherName: string;
+        role: Role.ROLE_PUBLISHER;
+      }
+    | {
+        role: Role.ROLE_ADMIN;
+      }
+  );
   export const user = atom<LoggedInUser | undefined>();
 }

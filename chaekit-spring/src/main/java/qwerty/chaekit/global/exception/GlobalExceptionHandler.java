@@ -3,6 +3,7 @@ package qwerty.chaekit.global.exception;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,6 +24,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadRequestException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiErrorResponse handleBadRequestException(BadRequestException ex) {
+        return ApiErrorResponse.of(ex.getErrorCode(), ex.getMessage());
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ApiErrorResponse handleUnauthorizedException(UnauthorizedException ex) {
         return ApiErrorResponse.of(ex.getErrorCode(), ex.getMessage());
     }
 
@@ -69,6 +76,14 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiErrorResponse handleNoResourceFoundException() {
         ErrorCode errorCode = ErrorCode.NO_RESOURCE_FOUND;
+        return ApiErrorResponse.of(errorCode.getCode(), errorCode.getMessage());
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiErrorResponse handleHttpMessageNotReadableException() {
+        // 잘못된 요청 본문 처리
+        ErrorCode errorCode = ErrorCode.INVALID_HTTP_MESSAGE;
         return ApiErrorResponse.of(errorCode.getCode(), errorCode.getMessage());
     }
 

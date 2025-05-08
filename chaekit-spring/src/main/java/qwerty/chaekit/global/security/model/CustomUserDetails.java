@@ -17,6 +17,9 @@ public record CustomUserDetails(
         @Nullable UserProfile user,
         @Nullable PublisherProfile publisher
 ) implements UserDetails {
+    public static CustomUserDetails anonymous() {
+        return new CustomUserDetails(null, null, null);
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -19,6 +19,7 @@ public record HighlightFetchResponse(
                 .spine(highlight.getSpine())
                 .cfi(highlight.getCfi())
                 .memo(highlight.getMemo())
+                .activityId(highlight.getActivity() != null ? highlight.getActivity().getId() : null)
                 .build();
     }
 }

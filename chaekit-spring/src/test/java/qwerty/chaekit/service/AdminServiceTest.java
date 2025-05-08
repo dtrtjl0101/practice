@@ -13,9 +13,11 @@ import org.springframework.data.domain.Pageable;
 import qwerty.chaekit.domain.member.Member;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
+import qwerty.chaekit.domain.member.publisher.enums.PublisherApprovalStatus;
 import qwerty.chaekit.dto.member.PublisherInfoResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
+import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.service.member.admin.AdminService;
 import qwerty.chaekit.service.member.notification.EmailService;
@@ -25,8 +27,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class AdminServiceTest {
@@ -57,9 +60,11 @@ class AdminServiceTest {
         given(publisherRepository.findByIdWithMember(publisherId))
                 .willReturn(Optional.of(publisher));
         // when
-        boolean result = adminService.acceptPublisher(publisherId);
+       adminService.acceptPublisher(publisherId);
         // then
-        assertTrue(result);
+        verify(publisherRepository).findByIdWithMember(publisherId);
+        verify(emailService).sendPublisherApprovalEmail(publisher.getMember().getEmail());
+        assertEquals(PublisherApprovalStatus.APPROVED, publisher.getApprovalStatus());
     }
 
     @Test
@@ -71,13 +76,14 @@ class AdminServiceTest {
                 .member(member)
                 .publisherName("Test Publisher")
                 .build();
-        publisher.acceptPublisher();
+        publisher.approvePublisher();
         given(publisherRepository.findByIdWithMember(publisherId))
                 .willReturn(Optional.of(publisher));
-        // when
-        boolean result = adminService.acceptPublisher(publisherId);
-        // then
-        assertFalse(result);
+        // when & then
+        assertThrows(
+                BadRequestException.class,
+                () -> adminService.acceptPublisher(publisherId)
+        );
     }
 
     @Test
@@ -98,7 +104,7 @@ class AdminServiceTest {
 
     @Test
     @DisplayName("미승인 출판사 목록 조회 - 성공")
-    void testGetNotAcceptedPublishers() {
+    void testGetPendingPublishers() {
         // given
         Pageable pageable = PageRequest.of(0, 10);  // 페이지 요청
         PublisherProfile publisher = PublisherProfile.builder()
@@ -117,7 +123,7 @@ class AdminServiceTest {
         Page<PublisherProfile> pageResult = new PageImpl<>(publisherList);
 
         // Repository Mocking
-        given(publisherRepository.findAllByAcceptedFalseOrderByCreatedAtDesc(pageable))
+        given(publisherRepository.findByApprovalStatus(eq(PublisherApprovalStatus.PENDING), any()))
                 .willReturn(pageResult);
 
         // S3Service Mocking
@@ -125,7 +131,7 @@ class AdminServiceTest {
                 .willReturn("https://dummy-url.com/image");
 
         // when
-        PageResponse<PublisherInfoResponse> result = adminService.getNotAcceptedPublishers(pageable);
+        PageResponse<PublisherInfoResponse> result = adminService.getPendingPublishers(pageable);
 
         // then
         assertNotNull(result);
