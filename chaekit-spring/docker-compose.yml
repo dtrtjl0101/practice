@@ -61,6 +61,7 @@ services:
     environment:
       MYSQL_DATABASE: chaekit
       MYSQL_ROOT_PASSWORD: 0000
+      command: --innodb-buffer-pool-size=64M
     ports:
       - "3306:3306"
     volumes:

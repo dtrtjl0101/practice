@@ -21,4 +21,4 @@ RUN ./gradlew --version
 RUN ./gradlew build -x test
 
 #Run the application#
-CMD ["java", "-Xmx512m", "-jar", "build/libs/chaekit-0.0.1-SNAPSHOT.jar"]
+CMD ["java", "-Xms128m", "-Xmx256m", "-XX:+UseSerialGC", "-jar", "build/libs/chaekit-0.0.1-SNAPSHOT.jar"]
