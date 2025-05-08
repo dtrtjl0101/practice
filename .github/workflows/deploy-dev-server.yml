@@ -59,7 +59,7 @@ jobs:
             docker compose up --build -d
             echo "Waiting for chaekit-spring to become healthy..."
             for i in {1..30}; do
-              health=$(docker inspect --format='{{.State.Health.Status}}' chaekit-spring-chaekit-spring || echo "notfound")
+              health=$(docker inspect --format='{{.State.Health.Status}}' chaekit-spring-chaekit-spring-1 || echo "notfound")
               echo "Current health: $health"
               if [ "$health" = "healthy" ]; then
                 echo "chaekit-spring is healthy ✅"
