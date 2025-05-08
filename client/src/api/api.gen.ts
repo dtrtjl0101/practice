@@ -1047,11 +1047,11 @@ export class Api<
         ...params,
       }),
   };
-  loginFilter = {
+  loginFilterController = {
     /**
      * @description Spring Security가 처리하는 로그인 API
      *
-     * @tags login-filter
+     * @tags login-filter-controller
      * @name Login
      * @summary 로그인
      * @request POST:/api/login
@@ -1578,11 +1578,11 @@ export class Api<
         ...params,
       }),
   };
-  토론 = {
+  discussionController = {
     /**
      * @description 토론 게시글에 토론 댓글을 작성합니다.
      *
-     * @tags 토론
+     * @tags discussion-controller
      * @name AddComment
      * @summary 토론 댓글 작성
      * @request POST:/api/discussions/{discussionId}/comments
@@ -1603,7 +1603,7 @@ export class Api<
     /**
      * @description 특정 활동에 해당하는 토론 목록을 조회합니다.
      *
-     * @tags 토론
+     * @tags discussion-controller
      * @name GetDiscussions
      * @summary 토론 목록 조회
      * @request GET:/api/activities/{activityId}/discussions
@@ -1638,7 +1638,7 @@ export class Api<
     /**
      * @description 특정 활동에 새로운 토론을 생성합니다.
      *
-     * @tags 토론
+     * @tags discussion-controller
      * @name CreateDiscussion
      * @summary 토론 생성
      * @request POST:/api/activities/{activityId}/discussions
@@ -1659,7 +1659,7 @@ export class Api<
     /**
      * @description 특정 토론에 대해 댓글 등을 포함한 상세 정보를 조회합니다.
      *
-     * @tags 토론
+     * @tags discussion-controller
      * @name GetDiscussion
      * @summary 토론 상세 조회
      * @request GET:/api/discussions/{discussionId}
@@ -1674,7 +1674,7 @@ export class Api<
     /**
      * @description 토론을 삭제합니다.
      *
-     * @tags 토론
+     * @tags discussion-controller
      * @name DeleteDiscussion
      * @summary 토론 삭제
      * @request DELETE:/api/discussions/{discussionId}
@@ -1689,7 +1689,7 @@ export class Api<
     /**
      * @description 토론 제목, 내용, 찬반 여부를 수정합니다.
      *
-     * @tags 토론
+     * @tags discussion-controller
      * @name UpdateDiscussion
      * @summary 토론 수정
      * @request PATCH:/api/discussions/{discussionId}
@@ -1710,7 +1710,7 @@ export class Api<
     /**
      * @description 토론 댓글을 조회합니다.
      *
-     * @tags 토론
+     * @tags discussion-controller
      * @name GetComment
      * @summary 토론 댓글 단건 조회
      * @request GET:/api/discussions/comments/{commentId}
@@ -1725,7 +1725,7 @@ export class Api<
     /**
      * @description 토론 댓글을 삭제합니다.
      *
-     * @tags 토론
+     * @tags discussion-controller
      * @name DeleteComment1
      * @summary 토론 댓글 삭제
      * @request DELETE:/api/discussions/comments/{commentId}
@@ -1740,7 +1740,7 @@ export class Api<
     /**
      * @description 토론 댓글의 내용을 수정합니다.
      *
-     * @tags 토론
+     * @tags discussion-controller
      * @name UpdateComment1
      * @summary 토론 댓글 수정
      * @request PATCH:/api/discussions/comments/{commentId}
@@ -1758,11 +1758,11 @@ export class Api<
         ...params,
       }),
   };
-  ebook = {
+  ebookController = {
     /**
      * @description 전자책 목록을 페이지네이션하여 조회합니다.
      *
-     * @tags Ebook
+     * @tags ebook-controller
      * @name GetBooks
      * @summary 전자책 목록 조회
      * @request GET:/api/books
@@ -1796,7 +1796,7 @@ export class Api<
     /**
      * @description 출판사가 전자책 파일과 정보를 업로드합니다.
      *
-     * @tags Ebook
+     * @tags ebook-controller
      * @name UploadFile
      * @summary 전자책 업로드
      * @request POST:/api/books
@@ -1813,7 +1813,7 @@ export class Api<
     /**
      * No description
      *
-     * @tags Ebook
+     * @tags ebook-controller
      * @name SearchEbooks
      * @request GET:/api/books/search
      */
@@ -1847,7 +1847,7 @@ export class Api<
     /**
      * @description 관리자가 전자책 다운로드를 위한 URL을 생성합니다.
      *
-     * @tags Ebook
+     * @tags ebook-controller
      * @name DownloadFile
      * @summary 전자책 다운로드 URL 생성
      * @request GET:/api/books/download/{ebookId}
@@ -1859,11 +1859,11 @@ export class Api<
         ...params,
       }),
   };
-  admin = {
+  adminController = {
     /**
      * @description 사유를 제시하며 출판사를 거절합니다.
      *
-     * @tags Admin
+     * @tags admin-controller
      * @name RejectPublisher
      * @summary 출판사 거절
      * @request POST:/api/admin/publishers/{publisherId}/reject
@@ -1884,7 +1884,7 @@ export class Api<
     /**
      * @description 출판사를 승인합니다.
      *
-     * @tags Admin
+     * @tags admin-controller
      * @name AcceptPublisher
      * @summary 출판사 승인
      * @request POST:/api/admin/publishers/{publisherId}/accept
@@ -1899,7 +1899,7 @@ export class Api<
     /**
      * @description 모든 유저 목록을 확인할 수 있습니다.
      *
-     * @tags Admin
+     * @tags admin-controller
      * @name FetchUsers
      * @summary 유저 목록 조회
      * @request GET:/api/admin/users
@@ -1933,7 +1933,7 @@ export class Api<
     /**
      * @description 모든 출판사 목록을 확인할 수 있습니다.
      *
-     * @tags Admin
+     * @tags admin-controller
      * @name FetchPublishers
      * @summary 출판사 목록 조회
      * @request GET:/api/admin/publishers
@@ -1967,7 +1967,7 @@ export class Api<
     /**
      * @description 승인 대기 중인 출판사 목록을 확인할 수 있습니다.
      *
-     * @tags Admin
+     * @tags admin-controller
      * @name FetchPendingList
      * @summary 출판사 승인 대기 목록 조회
      * @request GET:/api/admin/publishers/pending
