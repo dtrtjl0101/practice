@@ -1,4 +1,6 @@
-export default function loadBook(bookId: string) {
+import API_CLIENT, { wrapApiResponse } from "../api/api";
+
+export default function loadBook(bookId: number) {
   const book = tryLoadBookFromIndexedDB(bookId);
   if (book) {
     return book;
@@ -17,7 +19,11 @@ export default function loadBook(bookId: string) {
   }
 }
 
-function tryLoadBookFromIndexedDB(bookId: string) {
+async function fetchBookFromServer(bookId: number) {
+  wrapApiResponse(API_CLIENT.ebookController.downloadFile(bookId));
+}
+
+function tryLoadBookFromIndexedDB(bookId: number) {
   if (!indexedDB) {
     return null;
   }
@@ -26,6 +32,13 @@ function tryLoadBookFromIndexedDB(bookId: string) {
   return JSON.parse(book);
 }
 
-function indexedDBBookKey(bookId: string) {
+function saveBookToIndexedDB(bookId: number, book: any) {
+  if (!indexedDB) {
+    return;
+  }
+  const bookKey = indexedDBBookKey(bookId);
+}
+
+function indexedDBBookKey(bookId: number) {
   return `book-${bookId}`;
 }

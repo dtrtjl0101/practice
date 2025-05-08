@@ -111,22 +111,6 @@ function RouteComponent() {
 
   const previousHighlightsInPage = useRef<Highlight[]>([]);
 
-  const uploadEpub = useCallback(() => {
-    let inputElement = document.createElement("input");
-    inputElement.type = "file";
-    inputElement.onchange = async (event) => {
-      const target = event.target as HTMLInputElement;
-      const file = target.files?.[0];
-      if (!file) {
-        return;
-      }
-
-      setEpubUrl(await file.arrayBuffer());
-    };
-
-    inputElement.click();
-  }, [setEpubUrl]);
-
   useEffect(() => {
     previousHighlightsInPage.current = highlightsInPage;
     if (!rendition || !rendition.location) {
