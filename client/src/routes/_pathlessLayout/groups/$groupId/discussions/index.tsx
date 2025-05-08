@@ -14,9 +14,9 @@ import {
   createLink,
   useNavigate,
 } from "@tanstack/react-router";
-import { Post, formattedDate, initialPosts } from "../../../types/post";
+import { Post, formattedDate, initialPosts } from "../../../../../types/post";
 
-export const Route = createFileRoute("/_pathlessLayout/posts/")({
+export const Route = createFileRoute("/_pathlessLayout/groups/$groupId/discussions/")({
   component: List,
 });
 

@@ -7,12 +7,12 @@ import {
   Divider,
   Stack,
 } from "@mui/material";
-import { initialPosts, Post } from "../../../../types/post";
+import { initialPosts, Post } from "../../../../../../types/post";
 import { useState } from "react";
-import CommentSection from "../../../../component/CommentSection";
-import { Comment } from "../../../../types/comment";
+import CommentSection from "../../../../../../component/CommentSection";
+import { Comment } from "../../../../../../types/comment";
 
-export const Route = createFileRoute("/_pathlessLayout/posts/$postID/")({
+export const Route = createFileRoute("/_pathlessLayout/groups/$groupId/discussions/$discussionId/")({
   component: PostID,
 });
 

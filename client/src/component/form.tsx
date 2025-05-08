@@ -18,7 +18,7 @@ import {
   FormControlLabel,
   Box,
 } from "@mui/material";
-import { initialPosts, Post } from "../types/post";
+import { Post } from "../types/post";
 
 type PostFormProps = {
   onAddPost: (
