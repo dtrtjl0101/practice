@@ -40,7 +40,7 @@ import { Highlight } from "../types/highlight";
 import useAutoLogin from "../api/login/useAutoLogin";
 import useAutoTokenRefresh from "../api/login/useAutoTokenRefresh";
 
-export const Route = createFileRoute("/reader")({
+export const Route = createFileRoute("/reader/$bookId")({
   component: RouteComponent,
 });
 
@@ -68,6 +68,7 @@ function RouteComponent() {
   const queryClient = useQueryClient();
   useAutoLogin();
   useAutoTokenRefresh();
+  const { bookId } = Route.useParams();
 
   const spine = useMemo(() => {
     try {
