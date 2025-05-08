@@ -2,7 +2,6 @@ package qwerty.chaekit.controller.group;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -17,7 +16,6 @@ import qwerty.chaekit.service.group.DiscussionService;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
-@Tag(name = "토론", description = "토론 관련 API")
 public class DiscussionController {
     private final DiscussionService discussionService;
 

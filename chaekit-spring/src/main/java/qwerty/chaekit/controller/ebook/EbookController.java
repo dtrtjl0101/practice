@@ -2,7 +2,6 @@ package qwerty.chaekit.controller.ebook;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
@@ -25,7 +24,6 @@ import qwerty.chaekit.service.ebook.EbookService;
 @RestController
 @RequestMapping("/api/books")
 @RequiredArgsConstructor
-@Tag(name = "Ebook", description = "전자책 관련 API")
 public class EbookController {
     public final EbookService ebookService;
     public final EbookFileService ebookFileService;
