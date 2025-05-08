@@ -1,7 +1,6 @@
 package qwerty.chaekit.controller.member.admin;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -17,7 +16,6 @@ import qwerty.chaekit.service.member.admin.AdminService;
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
-@Tag(name = "Admin", description = "관리자 관련 API")
 public class AdminController {
     private final AdminService adminService;
 
