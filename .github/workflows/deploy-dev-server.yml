@@ -6,6 +6,8 @@ on:
       - "chaekit-spring/**"
     branches:
       - dev
+permissions:
+  contents: write
 
 env:
   BRANCH_NAME: ${{ github.ref_name }}
