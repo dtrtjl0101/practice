@@ -27,7 +27,7 @@ function RouteComponent() {
 
   const onLoginButtonClick = useCallback(async () => {
     const response = await wrapApiResponse(
-      API_CLIENT.loginFilter.login({
+      API_CLIENT.loginFilterController.login({
         email,
         password,
       })

@@ -6,12 +6,6 @@
     "version": "1.0"
   },
   "servers": [],
-  "tags": [
-    { "name": "Ebook", "description": "전자책 관련 API" },
-    { "name": "토론", "description": "토론 관련 API" },
-    { "name": "login-filter", "description": "로그인 API" },
-    { "name": "Admin", "description": "관리자 관련 API" }
-  ],
   "paths": {
     "/api/users/join": {
       "post": {
@@ -121,7 +115,7 @@
     },
     "/api/login": {
       "post": {
-        "tags": ["login-filter"],
+        "tags": ["login-filter-controller"],
         "summary": "로그인",
         "description": "Spring Security가 처리하는 로그인 API",
         "operationId": "login",
@@ -584,7 +578,7 @@
     },
     "/api/discussions/{discussionId}/comments": {
       "post": {
-        "tags": ["토론"],
+        "tags": ["discussion-controller"],
         "summary": "토론 댓글 작성",
         "description": "토론 게시글에 토론 댓글을 작성합니다.",
         "operationId": "addComment",
@@ -622,7 +616,7 @@
     },
     "/api/books": {
       "get": {
-        "tags": ["Ebook"],
+        "tags": ["ebook-controller"],
         "summary": "전자책 목록 조회",
         "description": "전자책 목록을 페이지네이션하여 조회합니다.",
         "operationId": "getBooks",
@@ -663,7 +657,7 @@
         }
       },
       "post": {
-        "tags": ["Ebook"],
+        "tags": ["ebook-controller"],
         "summary": "전자책 업로드",
         "description": "출판사가 전자책 파일과 정보를 업로드합니다.",
         "operationId": "uploadFile",
@@ -690,7 +684,7 @@
     },
     "/api/admin/publishers/{publisherId}/reject": {
       "post": {
-        "tags": ["Admin"],
+        "tags": ["admin-controller"],
         "summary": "출판사 거절",
         "description": "사유를 제시하며 출판사를 거절합니다.",
         "operationId": "rejectPublisher",
@@ -728,7 +722,7 @@
     },
     "/api/admin/publishers/{publisherId}/accept": {
       "post": {
-        "tags": ["Admin"],
+        "tags": ["admin-controller"],
         "summary": "출판사 승인",
         "description": "출판사를 승인합니다.",
         "operationId": "acceptPublisher",
@@ -756,7 +750,7 @@
     },
     "/api/activities/{activityId}/discussions": {
       "get": {
-        "tags": ["토론"],
+        "tags": ["discussion-controller"],
         "summary": "토론 목록 조회",
         "description": "특정 활동에 해당하는 토론 목록을 조회합니다.",
         "operationId": "getDiscussions",
@@ -803,7 +797,7 @@
         }
       },
       "post": {
-        "tags": ["토론"],
+        "tags": ["discussion-controller"],
         "summary": "토론 생성",
         "description": "특정 활동에 새로운 토론을 생성합니다.",
         "operationId": "createDiscussion",
@@ -1051,7 +1045,7 @@
     },
     "/api/discussions/{discussionId}": {
       "get": {
-        "tags": ["토론"],
+        "tags": ["discussion-controller"],
         "summary": "토론 상세 조회",
         "description": "특정 토론에 대해 댓글 등을 포함한 상세 정보를 조회합니다.",
         "operationId": "getDiscussion",
@@ -1077,7 +1071,7 @@
         }
       },
       "delete": {
-        "tags": ["토론"],
+        "tags": ["discussion-controller"],
         "summary": "토론 삭제",
         "description": "토론을 삭제합니다.",
         "operationId": "deleteDiscussion",
@@ -1092,7 +1086,7 @@
         "responses": { "200": { "description": "OK" } }
       },
       "patch": {
-        "tags": ["토론"],
+        "tags": ["discussion-controller"],
         "summary": "토론 수정",
         "description": "토론 제목, 내용, 찬반 여부를 수정합니다.",
         "operationId": "updateDiscussion",
@@ -1130,7 +1124,7 @@
     },
     "/api/discussions/comments/{commentId}": {
       "get": {
-        "tags": ["토론"],
+        "tags": ["discussion-controller"],
         "summary": "토론 댓글 단건 조회",
         "description": "토론 댓글을 조회합니다.",
         "operationId": "getComment",
@@ -1156,7 +1150,7 @@
         }
       },
       "delete": {
-        "tags": ["토론"],
+        "tags": ["discussion-controller"],
         "summary": "토론 댓글 삭제",
         "description": "토론 댓글을 삭제합니다.",
         "operationId": "deleteComment_1",
@@ -1171,7 +1165,7 @@
         "responses": { "200": { "description": "OK" } }
       },
       "patch": {
-        "tags": ["토론"],
+        "tags": ["discussion-controller"],
         "summary": "토론 댓글 수정",
         "description": "토론 댓글의 내용을 수정합니다.",
         "operationId": "updateComment_1",
@@ -1372,7 +1366,7 @@
     },
     "/api/books/search": {
       "get": {
-        "tags": ["Ebook"],
+        "tags": ["ebook-controller"],
         "operationId": "searchEbooks",
         "parameters": [
           {
@@ -1419,7 +1413,7 @@
     },
     "/api/books/download/{ebookId}": {
       "get": {
-        "tags": ["Ebook"],
+        "tags": ["ebook-controller"],
         "summary": "전자책 다운로드 URL 생성",
         "description": "관리자가 전자책 다운로드를 위한 URL을 생성합니다.",
         "operationId": "downloadFile",
@@ -1448,7 +1442,7 @@
     },
     "/api/admin/users": {
       "get": {
-        "tags": ["Admin"],
+        "tags": ["admin-controller"],
         "summary": "유저 목록 조회",
         "description": "모든 유저 목록을 확인할 수 있습니다.",
         "operationId": "fetchUsers",
@@ -1491,7 +1485,7 @@
     },
     "/api/admin/publishers": {
       "get": {
-        "tags": ["Admin"],
+        "tags": ["admin-controller"],
         "summary": "출판사 목록 조회",
         "description": "모든 출판사 목록을 확인할 수 있습니다.",
         "operationId": "fetchPublishers",
@@ -1534,7 +1528,7 @@
     },
     "/api/admin/publishers/pending": {
       "get": {
-        "tags": ["Admin"],
+        "tags": ["admin-controller"],
         "summary": "출판사 승인 대기 목록 조회",
         "description": "승인 대기 중인 출판사 목록을 확인할 수 있습니다.",
         "operationId": "fetchPendingList",
