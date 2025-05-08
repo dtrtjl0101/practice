@@ -53,27 +53,25 @@ jobs:
           script: |
             cd ~/app/qwerty-sc25/chaekit-spring
             git fetch origin
-            git checkout $BRANCH_NAME
-            git pull origin $BRANCH_NAME
+            git checkout "$BRANCH_NAME"
+            git pull origin "$BRANCH_NAME"
             docker compose down
             docker compose up --build -d
 
-            echo "Waiting for chaekit-spring to become healthy..."
-            CONTAINER_NAME="chaekit-spring-chaekit-spring-1"
-            health=""
+            echo "Waiting for chaekit-spring to respond..."
+            responding=false
             for i in {1..20}; do
-              health=$(docker inspect --format='{{.State.Health.Status}}' "$CONTAINER_NAME" 2>/dev/null || echo "notfound")
-              echo "Current health: $health"
-
-              if [ "$health" = "healthy" ]; then
-                echo "chaekit-spring is healthy ✅"
+              if curl -fs http://localhost:8080/api > /dev/null; then
+                echo "chaekit-spring is responding ✅"
+                responding=true
                 break
               fi
-
+              echo "Still waiting... ($i/20)"
               sleep 5
             done
+
             # 최종 평가
-            if [ "$health" != "healthy" ]; then
-              echo "chaekit-spring did not become healthy in time ❌"
+            if [ "$responding" != "true" ]; then
+              echo "chaekit-spring did not respond in time ❌"
               exit 1
             fi
