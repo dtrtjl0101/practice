@@ -10,7 +10,117 @@
  * ---------------------------------------------------------------
  */
 
-export interface HighlightPutRequest {
+export interface UserJoinRequest {
+  email: string;
+  password: string;
+  nickname: string;
+  /** @format binary */
+  profileImage?: File;
+  verificationCode: string;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseLoginResponse {
+  isSuccessful?: boolean;
+  data?: LoginResponse;
+}
+
+export interface LoginResponse {
+  /**
+   * 회원 고유 ID
+   * @format int64
+   * @example 1
+   */
+  memberId: number;
+  /**
+   * 회원 이메일
+   * @example "user@example.com"
+   */
+  email: string;
+  /**
+   * 일반 사용자 ID
+   * @format int64
+   * @example 1
+   */
+  userId?: number;
+  /**
+   * 닉네임
+   * @example "booklover"
+   */
+  nickname?: string;
+  /**
+   * 출판사 ID
+   * @format int64
+   * @example 1
+   */
+  publisherId?: number;
+  /**
+   * 출판사 이름
+   * @example "문학과지성사"
+   */
+  publisherName?: string;
+  /**
+   * 프로필 이미지 URL
+   * @example "https://cdn.example.com/images/profile1.png"
+   */
+  profileImageURL?: string;
+  /**
+   * 회원 역할
+   * @example "ROLE_USER"
+   */
+  role: string;
+  /**
+   * Refresh Token (재발급용)
+   * @example "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+   */
+  refreshToken: string;
+  /**
+   * Access Token (API 인증용)
+   * @example "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+   */
+  accessToken: string;
+}
+
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseRefreshTokenResponse {
+  isSuccessful?: boolean;
+  data?: RefreshTokenResponse;
+}
+
+export interface RefreshTokenResponse {
+  refreshToken?: string;
+  accessToken?: string;
+}
+
+export interface PublisherJoinRequest {
+  publisherName: string;
+  email: string;
+  password: string;
+  /** @format binary */
+  profileImage?: File;
+  verificationCode: string;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseVoid {
+  isSuccessful?: boolean;
+  data?: object;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface HighlightPostRequest {
+  /** @format int64 */
+  bookId?: number;
+  spine?: string;
+  cfi?: string;
   /** @format int64 */
   activityId?: number;
   memo?: string;
@@ -30,93 +140,75 @@ export interface HighlightPostResponse {
   spine?: string;
   cfi?: string;
   memo?: string;
-}
-
-export interface UserJoinRequest {
-  email: string;
-  password: string;
-  nickname: string;
-  /** @format binary */
-  profileImage?: File;
-  verificationCode: string;
-}
-
-/** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponseUserJoinResponse {
-  isSuccessful?: boolean;
-  data?: UserJoinResponse;
-}
-
-export interface UserJoinResponse {
-  /** @format int64 */
-  memberId?: number;
-  email?: string;
-  /** @format int64 */
-  userId?: number;
-  accessToken?: string;
-  nickname?: string;
-  profileImageURL?: string;
-}
-
-export interface PublisherJoinRequest {
-  publisherName: string;
-  email: string;
-  password: string;
-  /** @format binary */
-  profileImage?: File;
-  verificationCode: string;
-}
-
-/** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponsePublisherJoinResponse {
-  isSuccessful?: boolean;
-  data?: PublisherJoinResponse;
-}
-
-export interface PublisherJoinResponse {
-  /** @format int64 */
-  memberId?: number;
-  /** @format int64 */
-  publisherId?: number;
-  accessToken?: string;
-  publisherName?: string;
-  email?: string;
-  profileImageURL?: string;
-  isAccepted?: boolean;
-}
-
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-/** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponseLoginResponse {
-  isSuccessful?: boolean;
-  data?: LoginResponse;
-}
-
-export interface LoginResponse {
-  /** @format int64 */
-  memberId?: number;
-  email?: string;
-  /** @format int64 */
-  userId?: number;
-  /** @format int64 */
-  publisherId?: number;
-  role?: string;
-  profileImageURL?: string;
-  accessToken?: string;
-}
-
-export interface HighlightPostRequest {
-  /** @format int64 */
-  bookId?: number;
-  spine?: string;
-  cfi?: string;
   /** @format int64 */
   activityId?: number;
-  memo?: string;
+}
+
+export interface ReactionRequest {
+  /** @format int64 */
+  commentId?: number;
+  reactionType?:
+    | "GREAT"
+    | "HEART"
+    | "SMILE"
+    | "CLAP"
+    | "SAD"
+    | "ANGRY"
+    | "SURPRISED";
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseReactionResponse {
+  isSuccessful?: boolean;
+  data?: ReactionResponse;
+}
+
+export interface ReactionResponse {
+  /** @format int64 */
+  id?: number;
+  /** @format int64 */
+  authorId?: number;
+  authorName?: string;
+  reactionType?:
+    | "GREAT"
+    | "HEART"
+    | "SMILE"
+    | "CLAP"
+    | "SAD"
+    | "ANGRY"
+    | "SURPRISED";
+  emoji?: string;
+  /** @format int64 */
+  commentId?: number;
+  /** @format date-time */
+  createdAt?: string;
+}
+
+export interface CommentRequest {
+  content?: string;
+  /** @format int64 */
+  parentId?: number;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseCommentResponse {
+  isSuccessful?: boolean;
+  data?: CommentResponse;
+}
+
+export interface CommentResponse {
+  /** @format int64 */
+  id?: number;
+  /** @format int64 */
+  authorId?: number;
+  authorName?: string;
+  content?: string;
+  /** @format date-time */
+  createdAt?: string;
+  /** @format date-time */
+  updatedAt?: string;
+  replies?: CommentResponse[];
+  reactions?: ReactionResponse[];
 }
 
 export interface GroupPostRequest {
@@ -191,6 +283,33 @@ export interface ApiSuccessResponseString {
   data?: string;
 }
 
+export interface DiscussionCommentPostRequest {
+  /** @format int64 */
+  parentId?: number;
+  content: string;
+  stance: "AGREE" | "DISAGREE" | "NEUTRAL";
+}
+
+export interface DiscussionCommentFetchResponse {
+  /** @format int64 */
+  commentId?: number;
+  /** @format int64 */
+  authorId?: number;
+  authorName?: string;
+  authorProfileImageURL?: string;
+  content?: string;
+  /** @format date-time */
+  createdAt?: string;
+  /** @format date-time */
+  modifiedAt?: string;
+  isEdited?: boolean;
+  isDeleted?: boolean;
+  stance?: "AGREE" | "DISAGREE" | "NEUTRAL";
+  /** @format int64 */
+  parentId?: number;
+  replies?: DiscussionCommentFetchResponse[];
+}
+
 /** 전자책 업로드 요청 데이터 */
 export interface EbookPostRequest {
   /**
@@ -229,22 +348,47 @@ export interface EbookPostResponse {
   coverImageURL?: string;
 }
 
-/** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponseBoolean {
-  isSuccessful?: boolean;
-  data?: boolean;
+export interface RejectPublisherRequest {
+  reason: string;
 }
 
-export interface GroupPutRequest {
+export interface DiscussionPostRequest {
+  title: string;
+  content: string;
+  isDebate: boolean;
+}
+
+export interface DiscussionFetchResponse {
+  /** @format int64 */
+  discussionId?: number;
+  /** @format int64 */
+  activityId?: number;
+  title?: string;
+  content?: string;
+  /** @format int64 */
+  authorId?: number;
+  authorName?: string;
+  authorProfileImage?: string;
+  /** @format date-time */
+  createdAt?: string;
+  /** @format date-time */
+  modifiedAt?: string;
+  /** @format int64 */
+  commentCount?: number;
+  isDebate?: boolean;
+  isAuthor?: boolean;
+}
+
+export interface HighlightPutRequest {
+  /** @format int64 */
+  activityId?: number;
+  memo?: string;
+}
+
+export interface GroupPatchRequest {
   description?: string;
   /** @format binary */
   groupImage?: File;
-}
-
-/** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponseVoid {
-  isSuccessful?: boolean;
-  data?: object;
 }
 
 export interface ActivityPatchRequest {
@@ -255,6 +399,16 @@ export interface ActivityPatchRequest {
   /** @format date */
   endTime?: string;
   description?: string;
+}
+
+export interface DiscussionPatchRequest {
+  title?: string;
+  content?: string;
+  isDebate?: boolean;
+}
+
+export interface DiscussionCommentPatchRequest {
+  content?: string;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -281,7 +435,7 @@ export interface PublisherInfoResponse {
   publisherId?: number;
   publisherName?: string;
   profileImageURL?: string;
-  isAccepted?: boolean;
+  status?: string;
   /** @format date-time */
   createdAt?: string;
 }
@@ -315,6 +469,18 @@ export interface PageResponseHighlightFetchResponse {
 }
 
 /** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseListReactionResponse {
+  isSuccessful?: boolean;
+  data?: ReactionResponse[];
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseListCommentResponse {
+  isSuccessful?: boolean;
+  data?: CommentResponse[];
+}
+
+/** API 에러 응답을 감싸는 클래스 */
 export interface ApiSuccessResponsePageResponseGroupFetchResponse {
   isSuccessful?: boolean;
   data?: PageResponseGroupFetchResponse;
@@ -327,6 +493,7 @@ export interface GroupFetchResponse {
   description?: string;
   tags?: string[];
   groupImageURL?: string;
+  myMemberShipStatus?: "PENDING" | "JOINED" | "NONE";
   /** @format int32 */
   memberCount?: number;
 }
@@ -397,6 +564,28 @@ export interface PageResponseActivityFetchResponse {
   totalPages?: number;
 }
 
+export interface DiscussionDetailResponse {
+  /** @format int64 */
+  discussionId?: number;
+  /** @format int64 */
+  activityId?: number;
+  title?: string;
+  content?: string;
+  /** @format int64 */
+  authorId?: number;
+  authorName?: string;
+  authorProfileImage?: string;
+  /** @format date-time */
+  createdAt?: string;
+  /** @format date-time */
+  modifiedAt?: string;
+  /** @format int64 */
+  commentCount?: number;
+  isDebate?: boolean;
+  isAuthor?: boolean;
+  comments?: DiscussionCommentFetchResponse[];
+}
+
 /** API 에러 응답을 감싸는 클래스 */
 export interface ApiSuccessResponsePageResponseEbookFetchResponse {
   isSuccessful?: boolean;
@@ -464,6 +653,22 @@ export interface EbookDownloadResponse {
 }
 
 /** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponsePageResponseUserInfoResponse {
+  isSuccessful?: boolean;
+  data?: PageResponseUserInfoResponse;
+}
+
+export interface PageResponseUserInfoResponse {
+  content?: UserInfoResponse[];
+  /** @format int32 */
+  currentPage?: number;
+  /** @format int64 */
+  totalItems?: number;
+  /** @format int32 */
+  totalPages?: number;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
 export interface ApiSuccessResponsePageResponsePublisherInfoResponse {
   isSuccessful?: boolean;
   data?: PageResponsePublisherInfoResponse;
@@ -471,6 +676,16 @@ export interface ApiSuccessResponsePageResponsePublisherInfoResponse {
 
 export interface PageResponsePublisherInfoResponse {
   content?: PublisherInfoResponse[];
+  /** @format int32 */
+  currentPage?: number;
+  /** @format int64 */
+  totalItems?: number;
+  /** @format int32 */
+  totalPages?: number;
+}
+
+export interface PageResponseDiscussionFetchResponse {
+  content?: DiscussionFetchResponse[];
   /** @format int32 */
   currentPage?: number;
   /** @format int64 */
@@ -732,27 +947,125 @@ export class HttpClient<SecurityDataType = unknown> {
 export class Api<
   SecurityDataType extends unknown,
 > extends HttpClient<SecurityDataType> {
-  highlightController = {
+  userController = {
     /**
      * No description
      *
-     * @tags highlight-controller
-     * @name UpdateHighlight
-     * @request PUT:/api/highlights/{id}
+     * @tags user-controller
+     * @name UserJoin
+     * @request POST:/api/users/join
      */
-    updateHighlight: (
-      id: number,
-      data: HighlightPutRequest,
+    userJoin: (data: UserJoinRequest, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseLoginResponse, any>({
+        path: `/api/users/join`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags user-controller
+     * @name UserInfo
+     * @request GET:/api/users/me
+     */
+    userInfo: (params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseUserInfoResponse, any>({
+        path: `/api/users/me`,
+        method: "GET",
+        ...params,
+      }),
+  };
+  tokenController = {
+    /**
+     * @description Access Token이 만료되었을 때, 유효한 Refresh Token을 통해 새로운 Access Token을 발급받는 API
+     *
+     * @tags token-controller
+     * @name RefreshAccessToken
+     * @summary Access Token 재발급
+     * @request POST:/api/token/refresh
+     */
+    refreshAccessToken: (
+      data: RefreshTokenRequest,
       params: RequestParams = {},
     ) =>
-      this.request<ApiSuccessResponseHighlightPostResponse, any>({
-        path: `/api/highlights/${id}`,
-        method: "PUT",
+      this.request<ApiSuccessResponseRefreshTokenResponse, any>({
+        path: `/api/token/refresh`,
+        method: "POST",
         body: data,
         type: ContentType.Json,
         ...params,
       }),
 
+    /**
+     * @description 로그아웃 요청 시 기존 Refresh Token을 무효화합니다.
+     *
+     * @tags token-controller
+     * @name Logout
+     * @summary 로그아웃
+     * @request POST:/api/logout
+     */
+    logout: (data: RefreshTokenRequest, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseVoid, any>({
+        path: `/api/logout`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+  };
+  publisherController = {
+    /**
+     * No description
+     *
+     * @tags publisher-controller
+     * @name PublisherJoin
+     * @request POST:/api/publishers/join
+     */
+    publisherJoin: (data: PublisherJoinRequest, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseLoginResponse, any>({
+        path: `/api/publishers/join`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags publisher-controller
+     * @name PublisherInfo
+     * @request GET:/api/publishers/me
+     */
+    publisherInfo: (params: RequestParams = {}) =>
+      this.request<ApiSuccessResponsePublisherInfoResponse, any>({
+        path: `/api/publishers/me`,
+        method: "GET",
+        ...params,
+      }),
+  };
+  loginFilter = {
+    /**
+     * @description Spring Security가 처리하는 로그인 API
+     *
+     * @tags login-filter
+     * @name Login
+     * @summary 로그인
+     * @request POST:/api/login
+     */
+    login: (data: LoginRequest, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseLoginResponse, any>({
+        path: `/api/login`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+  };
+  highlightController = {
     /**
      * No description
      *
@@ -807,82 +1120,154 @@ export class Api<
         type: ContentType.Json,
         ...params,
       }),
-  };
-  userController = {
+
     /**
      * No description
      *
-     * @tags user-controller
-     * @name UserJoin
-     * @request POST:/api/users/join
+     * @tags highlight-controller
+     * @name GetHighlightReactions
+     * @request GET:/api/highlights/{highlightId}/reactions
      */
-    userJoin: (data: UserJoinRequest, params: RequestParams = {}) =>
-      this.request<ApiSuccessResponseUserJoinResponse, any>({
-        path: `/api/users/join`,
-        method: "POST",
-        body: data,
-        type: ContentType.FormData,
+    getHighlightReactions: (highlightId: number, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseListReactionResponse, any>({
+        path: `/api/highlights/${highlightId}/reactions`,
+        method: "GET",
         ...params,
       }),
 
     /**
      * No description
      *
-     * @tags user-controller
-     * @name UserInfo
-     * @request GET:/api/users/me
+     * @tags highlight-controller
+     * @name DeleteHighlight
+     * @request DELETE:/api/highlights/{id}
      */
-    userInfo: (params: RequestParams = {}) =>
-      this.request<ApiSuccessResponseUserInfoResponse, any>({
-        path: `/api/users/me`,
-        method: "GET",
-        ...params,
-      }),
-  };
-  publisherController = {
-    /**
-     * No description
-     *
-     * @tags publisher-controller
-     * @name PublisherJoin
-     * @request POST:/api/publishers/join
-     */
-    publisherJoin: (data: PublisherJoinRequest, params: RequestParams = {}) =>
-      this.request<ApiSuccessResponsePublisherJoinResponse, any>({
-        path: `/api/publishers/join`,
-        method: "POST",
-        body: data,
-        type: ContentType.FormData,
+    deleteHighlight: (id: number, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseString, any>({
+        path: `/api/highlights/${id}`,
+        method: "DELETE",
         ...params,
       }),
 
     /**
      * No description
      *
-     * @tags publisher-controller
-     * @name PublisherInfo
-     * @request GET:/api/publishers/me
+     * @tags highlight-controller
+     * @name UpdateHighlight
+     * @request PATCH:/api/highlights/{id}
      */
-    publisherInfo: (params: RequestParams = {}) =>
-      this.request<ApiSuccessResponsePublisherInfoResponse, any>({
-        path: `/api/publishers/me`,
-        method: "GET",
+    updateHighlight: (
+      id: number,
+      data: HighlightPutRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponseHighlightPostResponse, any>({
+        path: `/api/highlights/${id}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
   };
-  loginFilter = {
+  reactionController = {
     /**
-     * @description Spring Security가 처리하는 로그인 API
+     * No description
      *
-     * @tags login-filter
-     * @name Login
-     * @summary 로그인
-     * @request POST:/api/login
+     * @tags reaction-controller
+     * @name AddReaction
+     * @request POST:/api/highlights/{highlightId}/reactions
      */
-    login: (data: LoginRequest, params: RequestParams = {}) =>
-      this.request<ApiSuccessResponseLoginResponse, any>({
-        path: `/api/login`,
+    addReaction: (
+      highlightId: number,
+      data: ReactionRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponseReactionResponse, any>({
+        path: `/api/highlights/${highlightId}/reactions`,
         method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags reaction-controller
+     * @name DeleteReaction
+     * @request DELETE:/api/highlights/reactions/{reactionId}
+     */
+    deleteReaction: (reactionId: number, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseString, any>({
+        path: `/api/highlights/reactions/${reactionId}`,
+        method: "DELETE",
+        ...params,
+      }),
+  };
+  commentController = {
+    /**
+     * No description
+     *
+     * @tags comment-controller
+     * @name GetComments
+     * @request GET:/api/highlights/{highlightId}/comments
+     */
+    getComments: (highlightId: number, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseListCommentResponse, any>({
+        path: `/api/highlights/${highlightId}/comments`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags comment-controller
+     * @name CreateComment
+     * @request POST:/api/highlights/{highlightId}/comments
+     */
+    createComment: (
+      highlightId: number,
+      data: CommentRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponseCommentResponse, any>({
+        path: `/api/highlights/${highlightId}/comments`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags comment-controller
+     * @name DeleteComment
+     * @request DELETE:/api/highlights/comments/{commentId}
+     */
+    deleteComment: (commentId: number, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseString, any>({
+        path: `/api/highlights/comments/${commentId}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags comment-controller
+     * @name UpdateComment
+     * @request PATCH:/api/highlights/comments/{commentId}
+     */
+    updateComment: (
+      commentId: number,
+      data: CommentRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponseCommentResponse, any>({
+        path: `/api/highlights/comments/${commentId}`,
+        method: "PATCH",
         body: data,
         type: ContentType.Json,
         ...params,
@@ -962,7 +1347,7 @@ export class Api<
     updateGroup: (
       groupId: number,
       query: {
-        request: GroupPutRequest;
+        request: GroupPatchRequest;
       },
       params: RequestParams = {},
     ) =>
@@ -1193,6 +1578,186 @@ export class Api<
         ...params,
       }),
   };
+  토론 = {
+    /**
+     * @description 토론 게시글에 토론 댓글을 작성합니다.
+     *
+     * @tags 토론
+     * @name AddComment
+     * @summary 토론 댓글 작성
+     * @request POST:/api/discussions/{discussionId}/comments
+     */
+    addComment: (
+      discussionId: number,
+      data: DiscussionCommentPostRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<DiscussionCommentFetchResponse, any>({
+        path: `/api/discussions/${discussionId}/comments`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description 특정 활동에 해당하는 토론 목록을 조회합니다.
+     *
+     * @tags 토론
+     * @name GetDiscussions
+     * @summary 토론 목록 조회
+     * @request GET:/api/activities/{activityId}/discussions
+     */
+    getDiscussions: (
+      activityId: number,
+      query?: {
+        /**
+         * Zero-based page index (0..N)
+         * @min 0
+         * @default 0
+         */
+        page?: number;
+        /**
+         * The size of the page to be returned
+         * @min 1
+         * @default 20
+         */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<PageResponseDiscussionFetchResponse, any>({
+        path: `/api/activities/${activityId}/discussions`,
+        method: "GET",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * @description 특정 활동에 새로운 토론을 생성합니다.
+     *
+     * @tags 토론
+     * @name CreateDiscussion
+     * @summary 토론 생성
+     * @request POST:/api/activities/{activityId}/discussions
+     */
+    createDiscussion: (
+      activityId: number,
+      data: DiscussionPostRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<DiscussionFetchResponse, any>({
+        path: `/api/activities/${activityId}/discussions`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description 특정 토론에 대해 댓글 등을 포함한 상세 정보를 조회합니다.
+     *
+     * @tags 토론
+     * @name GetDiscussion
+     * @summary 토론 상세 조회
+     * @request GET:/api/discussions/{discussionId}
+     */
+    getDiscussion: (discussionId: number, params: RequestParams = {}) =>
+      this.request<DiscussionDetailResponse, any>({
+        path: `/api/discussions/${discussionId}`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * @description 토론을 삭제합니다.
+     *
+     * @tags 토론
+     * @name DeleteDiscussion
+     * @summary 토론 삭제
+     * @request DELETE:/api/discussions/{discussionId}
+     */
+    deleteDiscussion: (discussionId: number, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/discussions/${discussionId}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * @description 토론 제목, 내용, 찬반 여부를 수정합니다.
+     *
+     * @tags 토론
+     * @name UpdateDiscussion
+     * @summary 토론 수정
+     * @request PATCH:/api/discussions/{discussionId}
+     */
+    updateDiscussion: (
+      discussionId: number,
+      data: DiscussionPatchRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<DiscussionFetchResponse, any>({
+        path: `/api/discussions/${discussionId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description 토론 댓글을 조회합니다.
+     *
+     * @tags 토론
+     * @name GetComment
+     * @summary 토론 댓글 단건 조회
+     * @request GET:/api/discussions/comments/{commentId}
+     */
+    getComment: (commentId: number, params: RequestParams = {}) =>
+      this.request<DiscussionCommentFetchResponse, any>({
+        path: `/api/discussions/comments/${commentId}`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * @description 토론 댓글을 삭제합니다.
+     *
+     * @tags 토론
+     * @name DeleteComment1
+     * @summary 토론 댓글 삭제
+     * @request DELETE:/api/discussions/comments/{commentId}
+     */
+    deleteComment1: (commentId: number, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/discussions/comments/${commentId}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * @description 토론 댓글의 내용을 수정합니다.
+     *
+     * @tags 토론
+     * @name UpdateComment1
+     * @summary 토론 댓글 수정
+     * @request PATCH:/api/discussions/comments/{commentId}
+     */
+    updateComment1: (
+      commentId: number,
+      data: DiscussionCommentPatchRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<DiscussionCommentFetchResponse, any>({
+        path: `/api/discussions/comments/${commentId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+  };
   ebook = {
     /**
      * @description 전자책 목록을 페이지네이션하여 조회합니다.
@@ -1294,26 +1859,117 @@ export class Api<
         ...params,
       }),
   };
-  adminController = {
+  admin = {
     /**
-     * No description
+     * @description 사유를 제시하며 출판사를 거절합니다.
      *
-     * @tags admin-controller
+     * @tags Admin
+     * @name RejectPublisher
+     * @summary 출판사 거절
+     * @request POST:/api/admin/publishers/{publisherId}/reject
+     */
+    rejectPublisher: (
+      publisherId: number,
+      data: RejectPublisherRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponseVoid, any>({
+        path: `/api/admin/publishers/${publisherId}/reject`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description 출판사를 승인합니다.
+     *
+     * @tags Admin
      * @name AcceptPublisher
+     * @summary 출판사 승인
      * @request POST:/api/admin/publishers/{publisherId}/accept
      */
     acceptPublisher: (publisherId: number, params: RequestParams = {}) =>
-      this.request<ApiSuccessResponseBoolean, any>({
+      this.request<ApiSuccessResponseVoid, any>({
         path: `/api/admin/publishers/${publisherId}/accept`,
         method: "POST",
         ...params,
       }),
 
     /**
-     * No description
+     * @description 모든 유저 목록을 확인할 수 있습니다.
      *
-     * @tags admin-controller
+     * @tags Admin
+     * @name FetchUsers
+     * @summary 유저 목록 조회
+     * @request GET:/api/admin/users
+     */
+    fetchUsers: (
+      query?: {
+        /**
+         * Zero-based page index (0..N)
+         * @min 0
+         * @default 0
+         */
+        page?: number;
+        /**
+         * The size of the page to be returned
+         * @min 1
+         * @default 20
+         */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponsePageResponseUserInfoResponse, any>({
+        path: `/api/admin/users`,
+        method: "GET",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * @description 모든 출판사 목록을 확인할 수 있습니다.
+     *
+     * @tags Admin
+     * @name FetchPublishers
+     * @summary 출판사 목록 조회
+     * @request GET:/api/admin/publishers
+     */
+    fetchPublishers: (
+      query?: {
+        /**
+         * Zero-based page index (0..N)
+         * @min 0
+         * @default 0
+         */
+        page?: number;
+        /**
+         * The size of the page to be returned
+         * @min 1
+         * @default 20
+         */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponsePageResponsePublisherInfoResponse, any>({
+        path: `/api/admin/publishers`,
+        method: "GET",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * @description 승인 대기 중인 출판사 목록을 확인할 수 있습니다.
+     *
+     * @tags Admin
      * @name FetchPendingList
+     * @summary 출판사 승인 대기 목록 조회
      * @request GET:/api/admin/publishers/pending
      */
     fetchPendingList: (
