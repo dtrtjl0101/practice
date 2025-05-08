@@ -15,7 +15,7 @@ services:
       # DB
       DB_URL: jdbc:mysql://chaekit-mysql:3306/chaekit
       DB_USERNAME: root
-      DB_PASSWORD: 0000
+      DB_PASSWORD: "0000"
       DB_DRIVER_CLASS: com.mysql.cj.jdbc.Driver
       JPA_DIALECT: org.hibernate.dialect.MySQL8Dialect
 
@@ -57,10 +57,10 @@ services:
     ports:
       - "${LOCAL_SERVER_PORT}:8080"
   chaekit-mysql:
-    image: mysql:8
+    image: mysql
     environment:
       MYSQL_DATABASE: chaekit
-      MYSQL_ROOT_PASSWORD: 0000
+      MYSQL_ROOT_PASSWORD: "0000"
       command: --innodb-buffer-pool-size=64M
     ports:
       - "3306:3306"
