@@ -18,20 +18,64 @@
       ],
       "environment": [
         {
-          "name": "JWT_EXPIRATION_MS",
-          "value": "3600000"
-        },
-        {
-          "name": "ADMIN_USERNAME",
-          "value": "admin"
-        },
-        {
           "name": "SPRING_PROFILES_ACTIVE",
           "value": "prod"
         },
         {
+          "name": "DB_URL"
+        },
+        {
+          "name": "DB_USERNAME"
+        },
+        {
+          "name": "DB_PASSWORD"
+        },
+        {
+          "name": "DB_DRIVER_CLASS",
+          "value": "com.mysql.cj.jdbc.Driver"
+        },
+        {
+          "name": "JPA_DIALECT",
+          "value": "org.hibernate.dialect.MySQLDialect"
+        },
+        {
+          "name": "REDIS_URL"
+        },
+        {
+          "name": "JWT_SECRET"
+        },
+        {
+          "name": "JWT_EXPIRATION_MS",
+          "value": "3600000"
+        },
+        {
+          "name": "JWT_REFRESH_EXPIRATION_MS",
+            "value": "1209600000"
+        },
+        {
+          "name": "ADMIN_NAME",
+          "value": "admin"
+        },
+        {
+          "name": "ADMIN_EMAIL",
+          "value": "admin@example.com"
+        },
+        {
+          "name": "ADMIN_PASSWORD"
+        },
+        {
+          "name": "GMAIL_ADDRESS"
+        },
+        {
+          "name": "GMAIL_PASSWORD"
+        },
+        {
           "name": "EBOOK_BUCKET_NAME",
           "value": "chaekit"
+        },
+        {
+          "name": "IMAGE_BUCKET_NAME",
+          "value": "chaekit-image"
         },
         {
           "name": "AWS_S3_REGION",
@@ -46,37 +90,14 @@
           "value": "3600"
         },
         {
-          "name": "CORS_ALLOWED_ORIGINS",
-          "value": "https://chaekit.com"
-        },
-        {
-          "name": "DB_DRIVER_CLASS",
-          "value": "com.mysql.cj.jdbc.Driver"
-        },
-        {
-          "name": "JPA_DIALECT",
-          "value": "org.hibernate.dialect.MySQLDialect"
-        },
-        {
-          "name": "DB_URL"
-        },
-        {
-          "name": "DB_USERNAME"
-        },
-        {
-          "name": "DB_PASSWORD"
-        },
-        {
-          "name": "JWT_SECRET"
-        },
-        {
-          "name": "ADMIN_PASSWORD"
-        },
-        {
           "name": "AWS_ACCESS_KEY_ID"
         },
         {
           "name": "SECRET_ACCESS_KEY"
+        },
+        {
+          "name": "CORS_ALLOWED_ORIGINS",
+          "value": "http://localhost:5173,https://chaekit.com,https://*.chaekit.com"
         }
       ],
       "logConfiguration": {

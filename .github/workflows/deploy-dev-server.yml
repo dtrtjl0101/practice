@@ -1,26 +1,27 @@
-name: Deploy dev server
+name: Deploy to EC2 via Docker Compose
+
 on:
   push:
     paths:
       - "chaekit-spring/**"
     branches:
       - dev
-      - chore/test-deploy
 
-permissions:
-  id-token: write
-  contents: write
+env:
+  BRANCH_NAME: ${{ github.ref_name }}
 
 jobs:
-  build-test-deploy:
+  test-build-deploy:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: chaekit-spring
     steps:
-      - uses: actions/checkout@v3
-      # Java 설정
-      - uses: actions/setup-java@v3
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
         with:
           distribution: "temurin"
           java-version: "17"
@@ -41,62 +42,34 @@ jobs:
           publish_dir: chaekit-spring/build/reports/jacoco/test/html
           destination_dir: dev-server-test-coverage
 
-      # AWS 로그인
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      # EC2에 SSH로 접속해 docker-compose로 배포
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.0
         with:
-          role-to-assume: arn:aws:iam::880996438467:role/allow
-          role-session-name: sampleSessionName
-          aws-region: ap-northeast-2
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/app/qwerty-sc25/chaekit-spring
+            git fetch origin
+            git checkout "$BRANCH_NAME"
+            git pull origin "$BRANCH_NAME"
+            docker compose down
+            docker compose up --build -d
 
-      #ECR에 로그인
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
+            echo "Waiting for chaekit-spring to respond..."
+            responding=false
+            for i in {1..20}; do
+              if curl -fs http://localhost:8080/api > /dev/null; then
+                echo "chaekit-spring is responding ✅"
+                responding=true
+                break
+              fi
+              echo "Still waiting... ($i/20)"
+              sleep 5
+            done
 
-      #이미지를 빌드하고 ECR에 push
-      - name: Build, tag, and push image to Amazon ECR
-        id: build-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: chaekit/chaekit_spirngbackend
-          IMAGE_TAG: latest
-        run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f Dockerfile .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
-      - name: Build Image Path
-        id: image-path
-        env:
-          ECR_REGISTRY: 880996438467.dkr.ecr.ap-northeast-2.amazonaws.com
-          ECR_REPOSITORY: chaekit/chaekit_spirngbackend
-          IMAGE_TAG: latest
-        run: |
-          echo "ecs-deploy-image=${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}" >> $GITHUB_OUTPUT
-
-      - name: Create ECS task definition
-        id: task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: chaekit-spring/chaekit-dev-task.json
-          container-name: ecs-dev-container
-          image: ${{ steps.image-path.outputs.ecs-deploy-image }}
-          environment-variables: |
-            DB_URL=${{ secrets.DB_URL }}
-            DB_USERNAME=${{ secrets.DB_USERNAME }}
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            REDIS_URL=${{ secrets.REDIS_URL }}
-            GMAIL_ADDRESS=${{ secrets.GMAIL_ADDRESS }}
-            GMAIL_PASSWORD=${{ secrets.GMAIL_PASSWORD }}
-            JWT_SECRET=${{ secrets.JWT_SECRET }}
-            ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
-            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
-            SECRET_ACCESS_KEY=${{ secrets.SECRET_ACCESS_KEY }}
-
-      - name: Deploy ECS task definition
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
-          cluster: chaekit-spring-dev-cluster # 여러분의 ECS 클러스터 이름
-          service: chaekit-spring-dev-cluster-service # 여러분의 ECS 서비스 이름
-          wait-for-service-stability: true
+            if [ "$responding" != "true" ]; then
+              echo "chaekit-spring did not respond in time ❌"
+              exit 1
+            fi
