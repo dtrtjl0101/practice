@@ -8,6 +8,9 @@ on:
       - dev
       - chore/be/deploy-new-dev
 
+env:
+  BRANCH_NAME: ${{ github.ref_name }}
+
 jobs:
   test-build-deploy:
     runs-on: ubuntu-latest
@@ -49,12 +52,14 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ~/app/qwerty-sc25/chaekit-spring
-            git pull origin chore/be/deploy-new-dev
+            git fetch origin
+            git checkout $BRANCH_NAME
+            git pull origin $BRANCH_NAME
             docker compose down
             docker compose up --build -d
             echo "Waiting for chaekit-spring to become healthy..."
             for i in {1..30}; do
-              health=$(docker inspect --format='{{.State.Health.Status}}' chaekit-spring || echo "notfound")
+              health=$(docker inspect --format='{{.State.Health.Status}}' chaekit-spring-chaekit-spring || echo "notfound")
               echo "Current health: $health"
               if [ "$health" = "healthy" ]; then
                 echo "chaekit-spring is healthy ✅"
