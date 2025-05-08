@@ -49,9 +49,9 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ~/app/qwerty-sc25/chaekit-spring
-            git pull origin dev
-            docker-compose down
-            docker-compose up --build -d
+            git pull origin chore/be/deploy-new-dev
+            docker compose down
+            docker compose up --build -d
             echo "Waiting for chaekit-spring to become healthy..."
             for i in {1..30}; do
               health=$(docker inspect --format='{{.State.Health.Status}}' chaekit-spring || echo "notfound")

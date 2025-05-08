@@ -37,6 +37,7 @@
    ```
 
 ## 🐳 Redis 설정
+
 1. Redis 설치
    - macOS: `brew install redis`
    - Ubuntu: `sudo apt install redis-server`
@@ -111,4 +112,4 @@ JPA_DIALECT=org.hibernate.dialect.H2Dialect
 (이하 동일)
 ```
 
-## Github Actions 테스트 15
+## Github Actions 테스트 16
