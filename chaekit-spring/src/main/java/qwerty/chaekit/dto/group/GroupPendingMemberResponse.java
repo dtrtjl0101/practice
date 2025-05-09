@@ -1,7 +1,7 @@
 package qwerty.chaekit.dto.group;
 
 import lombok.Builder;
-import qwerty.chaekit.domain.group.GroupMember;
+import qwerty.chaekit.domain.group.groupmember.GroupMember;
 
 @Builder
 public record GroupPendingMemberResponse(

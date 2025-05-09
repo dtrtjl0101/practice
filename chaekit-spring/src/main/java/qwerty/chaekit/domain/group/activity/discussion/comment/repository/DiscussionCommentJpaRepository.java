@@ -1,8 +1,8 @@
-package qwerty.chaekit.domain.group.activity.discussion.comment;
+package qwerty.chaekit.domain.group.activity.discussion.comment.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import qwerty.chaekit.domain.group.activity.discussion.DiscussionComment;
+import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment;
 
 import java.util.Optional;
 
