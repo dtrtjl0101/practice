@@ -11,6 +11,8 @@ services:
       - chaekit-spring
   chaekit-spring:
     build: .
+    volumes:
+      - gradle-cache:/root/.gradle
     environment:
       # DB
       DB_URL: jdbc:mysql://chaekit-mysql:3306/chaekit?serverTimezone=Asia/Seoul
@@ -93,3 +95,4 @@ services:
 
 volumes:
   chaekit-mysql-data:
+  gradle-cache:
