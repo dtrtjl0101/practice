@@ -9,8 +9,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import qwerty.chaekit.dto.ebook.credit.payment.CreditPaymentReadyRequest;
 import qwerty.chaekit.dto.external.kakaopay.KakaoPayApproveResponse;
@@ -25,6 +23,8 @@ import qwerty.chaekit.service.ebook.credit.exception.PaymentCancelFailedExceptio
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -49,7 +49,7 @@ public class KakaoPayService {
         CreditProduct product = findCreditProductById(creditProductId);
         String orderId = UUID.randomUUID().toString();
 
-        HttpEntity<MultiValueMap<String, String>> httpEntity = createKakaoPayRequest(userToken, product, orderId);
+        HttpEntity<Map<String, String>> httpEntity = createKakaoPayRequest(userToken, product, orderId);
         ResponseEntity<KakaoPayReadyResponse> response = restTemplate.postForEntity(
                 KAKAO_PAY_READY_URL, httpEntity, KakaoPayReadyResponse.class
         );
@@ -64,32 +64,32 @@ public class KakaoPayService {
                 .orElseThrow(() -> new BadRequestException(ErrorCode.INVALID_CREDIT_PRODUCT_ID));
     }
 
-    private HttpEntity<MultiValueMap<String, String>> createKakaoPayRequest(UserToken userToken, CreditProduct product,
+    private HttpEntity<Map<String, String>> createKakaoPayRequest(UserToken userToken, CreditProduct product,
                                                                             String orderId) {
         HttpHeaders headers = createKakaoPayHeaders();
-        MultiValueMap<String, String> body = createKakaoPayRequestBody(userToken, product, orderId);
+        Map<String, String> body = createKakaoPayRequestBody(userToken, product, orderId);
 
-        log.info("[KakaoPay Cancel Request] Headers: {}", headers);
-        log.info("[KakaoPay Cancel Request] Body: {}", body);
+        log.info("[KakaoPay Create Request] Headers: {}", headers);
+        log.info("[KakaoPay Create Request] Body: {}", body);
         return new HttpEntity<>(body, headers);
     }
 
-    private MultiValueMap<String, String> createKakaoPayRequestBody(UserToken userToken, CreditProduct product,
+    private Map<String, String> createKakaoPayRequestBody(UserToken userToken, CreditProduct product,
                                                                     String orderId) {
-        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("cid", kakaoPayProperties.cid());
-        body.add("partner_order_id", orderId);
-        body.add("partner_user_id", String.valueOf(userToken.userId()));
-        body.add("item_name", product.getName());
-        body.add("item_code", String.valueOf(product.id));
-        body.add("quantity", "1");
-        body.add("total_amount", String.valueOf(product.price));
-        body.add("tax_free_amount", "0");
+        Map<String, String> body = new HashMap<>();
+        body.put("cid", kakaoPayProperties.cid());
+        body.put("partner_order_id", orderId);
+        body.put("partner_user_id", String.valueOf(userToken.userId()));
+        body.put("item_name", product.getName());
+        body.put("item_code", String.valueOf(product.id));
+        body.put("quantity", "1");
+        body.put("total_amount", String.valueOf(product.price));
+        body.put("tax_free_amount", "0");
 
         String redirectBaseUrl = kakaoPayProperties.redirectBaseUrl();
-        body.add("approval_url", redirectBaseUrl + "/credits/payment/success");
-        body.add("cancel_url", redirectBaseUrl + "/credits/payment/cancel");
-        body.add("fail_url", redirectBaseUrl + "/credits/payment/fail");
+        body.put("approval_url", redirectBaseUrl + "/credits/payment/success");
+        body.put("cancel_url", redirectBaseUrl + "/credits/payment/cancel");
+        body.put("fail_url", redirectBaseUrl + "/credits/payment/fail");
 
         return body;
     }
@@ -111,9 +111,8 @@ public class KakaoPayService {
         throw new IllegalStateException("카카오페이 요청 실패");
     }
 
-    @Transactional
     public void cancelKakaoPayPayment(String tid, long amount) {
-        HttpEntity<MultiValueMap<String, String>> httpEntity = createKakaoPayCancelRequest(tid, amount);
+        HttpEntity<Map<String, String>> httpEntity = createKakaoPayCancelRequest(tid, amount);
 
         ResponseEntity<KakaoPayCancelResponse> response = restTemplate.postForEntity(
                 KAKAO_PAY_CANCEL_URL,
@@ -128,18 +127,18 @@ public class KakaoPayService {
         }
     }
 
-    private HttpEntity<MultiValueMap<String, String>> createKakaoPayCancelRequest(String tid, long amount) {
+    private HttpEntity<Map<String, String>> createKakaoPayCancelRequest(String tid, long amount) {
         HttpHeaders headers = createKakaoPayHeaders();
-        MultiValueMap<String, String> body = createKakaoPayCancelRequestBody(tid, amount);
+        Map<String, String> body = createKakaoPayCancelRequestBody(tid, amount);
         return new HttpEntity<>(body, headers);
     }
 
-    private MultiValueMap<String, String> createKakaoPayCancelRequestBody(String tid, long amount) {
-        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("cid", kakaoPayProperties.cid());
-        body.add("tid", tid);
-        body.add("cancel_amount", String.valueOf(amount));
-        body.add("cancel_tax_free_amount", "0");
+    private Map<String, String> createKakaoPayCancelRequestBody(String tid, long amount) {
+        Map<String, String> body = new HashMap<>();
+        body.put("cid", kakaoPayProperties.cid());
+        body.put("tid", tid);
+        body.put("cancel_amount", String.valueOf(amount));
+        body.put("cancel_tax_free_amount", "0");
 
         return body;
     }
@@ -168,7 +167,7 @@ public class KakaoPayService {
 
     @Transactional
     public KakaoPayApproveResponse approveKakaoPayPayment(Long userId, String tid, String orderId, String pgToken) {
-        HttpEntity<MultiValueMap<String, String>> httpEntity = createKakaoPayApproveRequest(userId, tid, orderId, pgToken);
+        HttpEntity<Map<String, String>> httpEntity = createKakaoPayApproveRequest(userId, tid, orderId, pgToken);
 
         ResponseEntity<KakaoPayApproveResponse> response = restTemplate.postForEntity(
                 KAKAO_PAY_APPROVE_URL,
@@ -183,15 +182,15 @@ public class KakaoPayService {
         throw new IllegalStateException("카카오페이 결제 승인 실패");
     }
 
-    private HttpEntity<MultiValueMap<String, String>> createKakaoPayApproveRequest(Long userId, String tid,
+    private HttpEntity<Map<String, String>> createKakaoPayApproveRequest(Long userId, String tid,
                                                                                    String orderId, String pgToken) {
         HttpHeaders headers = createKakaoPayHeaders();
-        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("cid", kakaoPayProperties.cid());
-        body.add("tid", tid);
-        body.add("partner_order_id", orderId);
-        body.add("partner_user_id", String.valueOf(userId));
-        body.add("pg_token", pgToken);
+        Map<String, String> body = new HashMap<>();
+        body.put("cid", kakaoPayProperties.cid());
+        body.put("tid", tid);
+        body.put("partner_order_id", orderId);
+        body.put("partner_user_id", String.valueOf(userId));
+        body.put("pg_token", pgToken);
 
         return new HttpEntity<>(body, headers);
     }
