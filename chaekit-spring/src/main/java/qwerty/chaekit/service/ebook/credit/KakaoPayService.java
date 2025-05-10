@@ -87,9 +87,9 @@ public class KakaoPayService {
         body.put("tax_free_amount", "0");
 
         String redirectBaseUrl = kakaoPayProperties.redirectBaseUrl();
-        body.put("approval_url", redirectBaseUrl + "/credits/payment/success");
-        body.put("cancel_url", redirectBaseUrl + "/credits/payment/cancel");
-        body.put("fail_url", redirectBaseUrl + "/credits/payment/fail");
+        body.put("approval_url", redirectBaseUrl + "/api/credits/payment/success");
+        body.put("cancel_url", redirectBaseUrl + "/api/credits/payment/cancel");
+        body.put("fail_url", redirectBaseUrl + "/api/credits/payment/fail");
 
         return body;
     }
