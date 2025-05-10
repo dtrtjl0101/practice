@@ -21,6 +21,7 @@ import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.properties.AwsProperties;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.member.notification.EmailService;
+import qwerty.chaekit.service.notification.NotificationService;
 import qwerty.chaekit.service.util.S3Service;
 
 @Service
@@ -32,6 +33,7 @@ public class GroupService {
     private final EmailService emailService;
     private final S3Service s3Service;
     private final AwsProperties awsProperties;
+    private final NotificationService notificationService;
 
     @Transactional
     public GroupPostResponse createGroup(UserToken userToken, GroupPostRequest request) {
@@ -139,6 +141,13 @@ public class GroupService {
         }
 
         GroupMember groupMember = group.addMember(userProfile);
+
+        notificationService.createGroupJoinRequestNotification(
+            group.getGroupLeader(),
+            userProfile,
+            group
+        );
+        
         return GroupJoinResponse.of(groupMember);
     }
 
@@ -160,6 +169,13 @@ public class GroupService {
         GroupMember groupMember = group.approveMember(memberProfile);
 
         emailService.sendReadingGroupApprovalEmail(memberProfile.getMember().getEmail());
+
+        notificationService.createGroupJoinApprovedNotification(
+            memberProfile,
+            leaderProfile,
+            group
+        );
+        
         return GroupJoinResponse.of(groupMember);
     }
 
@@ -194,6 +210,12 @@ public class GroupService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         group.rejectMember(memberProfile);
+
+        notificationService.createGroupJoinRejectedNotification(
+            memberProfile,
+            leaderProfile,
+            group
+        );
     }
 
     @Transactional

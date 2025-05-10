@@ -91,6 +91,10 @@ public enum ErrorCode {
     ACTIVITY_ID_REQUIRED("ACTIVITY_ID_REQUIRED", "활동 ID가 필요합니다"),
     HIGHLIGHT_ALREADY_SHARED("HIGHLIGHT_ALREADY_SHARED", "활동에 가입되면 하이라이트는 수정할 수 없습니다"),
     HIGHLIGHT_ALREADY_PUBLIC("HIGHLIGHT_ALREADY_PUBLIC", "공개된 하이라이트는 수정할 수 없습니다"),
+
+    // Notification related
+    NOTIFICATION_NOT_FOUND("NOTIFICATION_NOT_FOUND", "해당 알림이 존재하지 않습니다"),
+    NOTIFICATION_NOT_YOURS("NOTIFICATION_NOT_YOURS", "본인의 알림만 읽음 처리할 수 있습니다"),
     ;
 
     private final String code;
