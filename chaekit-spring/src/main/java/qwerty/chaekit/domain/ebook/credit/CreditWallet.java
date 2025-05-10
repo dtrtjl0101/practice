@@ -13,13 +13,17 @@ import qwerty.chaekit.domain.member.user.UserProfile;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CreditWallet extends BaseEntity {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     private UserProfile user;
 
     @Column(nullable = false)
     private long balance = 0;
+
+    public void addCredit(long amount) {
+        this.balance += amount;
+    }
 }

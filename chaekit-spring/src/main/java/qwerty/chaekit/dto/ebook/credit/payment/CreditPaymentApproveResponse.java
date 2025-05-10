@@ -6,8 +6,10 @@ import java.time.LocalDateTime;
 
 @Builder
 public record CreditPaymentApproveResponse(
-        String tid,
+        String orderId,
+        int creditProductId,
+        String creditProductName,
         String paymentMethod,
-        Integer amount,
+        int paymentAmount,
         LocalDateTime approvedAt
 ) { }

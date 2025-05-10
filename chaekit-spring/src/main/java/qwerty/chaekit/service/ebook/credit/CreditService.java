@@ -1,26 +1,39 @@
 package qwerty.chaekit.service.ebook.credit;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import qwerty.chaekit.domain.ebook.credit.*;
 import qwerty.chaekit.dto.ebook.credit.CreditProductInfoResponse;
 import qwerty.chaekit.dto.ebook.credit.CreditTransactionResponse;
 import qwerty.chaekit.dto.ebook.credit.CreditWalletResponse;
+import qwerty.chaekit.dto.ebook.credit.payment.CreditPaymentApproveResponse;
 import qwerty.chaekit.dto.ebook.credit.payment.CreditPaymentReadyRequest;
+import qwerty.chaekit.dto.external.kakaopay.KakaoPayApproveResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.constant.CreditProduct;
 import qwerty.chaekit.global.security.resolver.UserToken;
+import qwerty.chaekit.service.ebook.credit.exception.PaymentCancelFailedException;
 
 import java.util.Arrays;
 import java.util.List;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
 @Transactional
 public class CreditService {
+    private final KakaoPayService kakaoPayService;
+    private final CreditTransactionRepository creditTransactionRepository;
+    private final CreditWalletRepository creditWalletRepository;
+
+    @Transactional(readOnly = true)
     public List<CreditProductInfoResponse> getCreditProductList() {
         return Arrays.stream(CreditProduct.values())
-                .map(
-                creditProduct -> CreditProductInfoResponse.builder()
+                .map(creditProduct -> CreditProductInfoResponse.builder()
                         .id(creditProduct.getId())
                         .creditAmount(creditProduct.getCreditAmount())
                         .price(creditProduct.getPrice())
@@ -28,22 +41,93 @@ public class CreditService {
                 ).toList();
     }
 
-    public CreditWalletResponse getMyWallet(UserToken userToken) {
-        return null;
-    }
-
-    public PageResponse<CreditTransactionResponse> getMyWalletTransactions(UserToken userToken, Pageable pageable) {
-        return null;
-    }
-
+    @Transactional
     public String requestKakaoPay(UserToken userToken, CreditPaymentReadyRequest request) {
-        // TODO: 카카오페이 /v1/payment/ready 호출 후 redirect URL 반환
-        return null;
+        return kakaoPayService.requestKakaoPay(userToken, request);
     }
 
-    public String approveKakaoPayPayment(String pgToken) {
-        // TODO: KakaoPay /v1/payment/approve 호출
-        // TODO: 결제 내역 검증 후 크레딧 지급 처리
-        return null;
+    @Transactional
+    public CreditPaymentApproveResponse approveKakaoPayPayment(UserToken userToken, String pgToken) {
+        Long userId = userToken.userId();
+
+        // 결제 세션 조회 및 유효성 검사
+        String tid = kakaoPayService.loadKakaoPayTid(userId);
+        String orderId = kakaoPayService.loadKakaoPayOrderId(tid);
+
+        // 카카오페이 결제 승인
+        KakaoPayApproveResponse response = kakaoPayService.approveKakaoPayPayment(userId, tid, orderId, pgToken);
+
+        // 트랜잭션 내 처리
+        try {
+            finalizePayment(response, userId);
+        } catch (Exception ex) {
+            // 예외 발생 시 결제 취소 및 에러 처리
+            handlePaymentFailureAndCancel(ex, tid, response);
+        }
+
+        CreditProduct creditProduct = CreditProduct.getCreditProduct(Integer.parseInt(response.item_code()));
+
+        return CreditPaymentApproveResponse.builder()
+                .orderId(response.partner_order_id())
+                .creditProductId(creditProduct.getId())
+                .creditProductName(creditProduct.getName())
+                .paymentMethod(response.payment_method_type())
+                .paymentAmount(response.amount().total())
+                .approvedAt(response.approved_at())
+                .build();
+    }
+
+    private void handlePaymentFailureAndCancel(Exception ex, String tid, KakaoPayApproveResponse response) {
+        try {
+            kakaoPayService.cancelKakaoPayPayment(tid, response.amount().total());
+            log.info("카카오페이 결제 취소 완료: tid={} 이유={}", tid, ex.getMessage());
+            throw new RuntimeException("시스템 오류로 결제가 자동 환불되었습니다.");
+        } catch (PaymentCancelFailedException cancelEx) {
+            log.error("카카오페이 결제 취소 실패: tid={}, 이유={}", tid, cancelEx.getMessage());
+            throw new RuntimeException("결제 취소에 실패했습니다. 고객센터에 문의해주세요.");
+        }
+    }
+
+    private void finalizePayment(KakaoPayApproveResponse response, Long userId) {
+        CreditWallet wallet = creditWalletRepository.findByUser_Id(userId)
+                .orElseThrow(() -> new IllegalStateException("Credit Wallet not found"));
+        creditTransactionRepository.save(
+                CreditTransaction.builder()
+                        .tid(response.tid())
+                        .orderId(response.partner_order_id())
+                        .creditProductId(Integer.parseInt(response.item_code()))
+                        .creditProductName(response.item_name())
+                        .wallet(wallet)
+                        .transactionType(CreditTransactionType.CHARGE)
+                        .creditAmount(CreditProduct.getCreditProduct(Integer.parseInt(response.item_code())).getCreditAmount())
+                        .paymentAmount(response.amount().total())
+                        .approvedAt(response.approved_at())
+                        .build()
+        );
+        wallet.addCredit(response.amount().total());
+    }
+
+    @Transactional(readOnly = true)
+    public CreditWalletResponse getMyWallet(UserToken userToken) {
+        return creditWalletRepository.findByUser_Id(userToken.userId())
+                .map(wallet -> CreditWalletResponse.builder()
+                        .balance(wallet.getBalance())
+                        .build()
+                ).orElseThrow(() -> new IllegalStateException("Credit Wallet not found"));
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<CreditTransactionResponse> getMyWalletTransactions(UserToken userToken, Pageable pageable) {
+        Page<CreditTransactionResponse> result = creditTransactionRepository.getCreditTransactionsByWallet_User_Id(
+                userToken.userId(), pageable
+        ).map(transaction -> CreditTransactionResponse.builder()
+                .orderId(transaction.getOrderId())
+                .type(transaction.getTransactionType())
+                .creditAmount(transaction.getCreditAmount())
+                .approvedAt(transaction.getApprovedAt())
+                .build()
+        );
+
+        return PageResponse.of(result);
     }
 }

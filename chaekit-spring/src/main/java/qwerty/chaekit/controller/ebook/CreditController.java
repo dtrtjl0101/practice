@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.dto.ebook.credit.CreditProductInfoResponse;
 import qwerty.chaekit.dto.ebook.credit.CreditTransactionResponse;
 import qwerty.chaekit.dto.ebook.credit.CreditWalletResponse;
+import qwerty.chaekit.dto.ebook.credit.payment.CreditPaymentApproveResponse;
 import qwerty.chaekit.dto.ebook.credit.payment.CreditPaymentReadyRequest;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
@@ -44,8 +45,10 @@ public class CreditController {
      * - 이 요청을 받아 결제 승인 → 크레딧 지급 → 트랜잭션 기록
      */
     @GetMapping("/payment/success")
-    public ApiSuccessResponse<String> kakaoPaySuccess(@RequestParam String pgToken) {
-        return ApiSuccessResponse.of(creditService.approveKakaoPayPayment(pgToken));
+    public ApiSuccessResponse<CreditPaymentApproveResponse> kakaoPaySuccess(
+            @Parameter(hidden = true) @Login UserToken userToken,
+            @RequestParam String pgToken) {
+        return ApiSuccessResponse.of(creditService.approveKakaoPayPayment(userToken, pgToken));
     }
 
     @GetMapping("/payment/fail")
