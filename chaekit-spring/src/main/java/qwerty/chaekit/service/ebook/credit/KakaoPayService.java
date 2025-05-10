@@ -1,6 +1,7 @@
 package qwerty.chaekit.service.ebook.credit;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -29,6 +30,7 @@ import java.util.UUID;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class KakaoPayService {
     private static final String KAKAO_PAY_READY_URL = "https://open-api.kakaopay.com/online/v1/payment/ready";
     private static final String KAKAO_PAY_CANCEL_URL = "https://open-api.kakaopay.com/online/v1/payment/cancel";
@@ -66,6 +68,9 @@ public class KakaoPayService {
                                                                             String orderId) {
         HttpHeaders headers = createKakaoPayHeaders();
         MultiValueMap<String, String> body = createKakaoPayRequestBody(userToken, product, orderId);
+
+        log.info("[KakaoPay Cancel Request] Headers: {}", headers);
+        log.info("[KakaoPay Cancel Request] Body: {}", body);
         return new HttpEntity<>(body, headers);
     }
 
