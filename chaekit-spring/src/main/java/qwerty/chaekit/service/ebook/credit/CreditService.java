@@ -50,19 +50,15 @@ public class CreditService {
     public CreditPaymentApproveResponse approveKakaoPayPayment(UserToken userToken, String pgToken) {
         Long userId = userToken.userId();
 
-        // 결제 세션 조회 및 유효성 검사
-        String tid = kakaoPayService.loadKakaoPayTid(userId);
-        String orderId = kakaoPayService.loadKakaoPayOrderId(tid);
-
         // 카카오페이 결제 승인
-        KakaoPayApproveResponse response = kakaoPayService.approveKakaoPayPayment(userId, tid, orderId, pgToken);
+        KakaoPayApproveResponse response = kakaoPayService.approveKakaoPayPayment(userId, pgToken);
 
         // 트랜잭션 내 처리
         try {
             finalizePayment(response, userId);
         } catch (Exception ex) {
             // 예외 발생 시 결제 취소 및 에러 처리
-            handlePaymentFailureAndCancel(ex, tid, response);
+            handlePaymentFailureAndCancel(ex, response);
         }
 
         CreditProduct creditProduct = CreditProduct.getCreditProduct(Integer.parseInt(response.item_code()));
@@ -77,7 +73,8 @@ public class CreditService {
                 .build();
     }
 
-    private void handlePaymentFailureAndCancel(Exception ex, String tid, KakaoPayApproveResponse response) {
+    private void handlePaymentFailureAndCancel(Exception ex, KakaoPayApproveResponse response) {
+        String tid = response.tid();
         try {
             kakaoPayService.cancelKakaoPayPayment(tid, response.amount().total());
             log.info("카카오페이 결제 취소 완료: tid={} 이유={}", tid, ex.getMessage());
@@ -91,6 +88,7 @@ public class CreditService {
     private void finalizePayment(KakaoPayApproveResponse response, Long userId) {
         CreditWallet wallet = creditWalletRepository.findByUser_Id(userId)
                 .orElseThrow(() -> new IllegalStateException("Credit Wallet not found"));
+        wallet.addCredit(response.amount().total());
         creditTransactionRepository.save(
                 CreditTransaction.builder()
                         .tid(response.tid())
@@ -104,7 +102,6 @@ public class CreditService {
                         .approvedAt(response.approved_at())
                         .build()
         );
-        wallet.addCredit(response.amount().total());
     }
 
     @Transactional(readOnly = true)

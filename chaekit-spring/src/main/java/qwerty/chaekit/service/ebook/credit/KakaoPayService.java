@@ -87,9 +87,9 @@ public class KakaoPayService {
         body.put("tax_free_amount", "0");
 
         String redirectBaseUrl = kakaoPayProperties.redirectBaseUrl();
-        body.put("approval_url", redirectBaseUrl + "/api/credits/payment/success");
-        body.put("cancel_url", redirectBaseUrl + "/api/credits/payment/cancel");
-        body.put("fail_url", redirectBaseUrl + "/api/credits/payment/fail");
+        body.put("approval_url", redirectBaseUrl + "/credits/payment/success");
+        body.put("cancel_url", redirectBaseUrl + "/credits/payment/cancel");
+        body.put("fail_url", redirectBaseUrl + "/credits/payment/fail");
 
         return body;
     }
@@ -111,6 +111,7 @@ public class KakaoPayService {
         throw new IllegalStateException("카카오페이 요청 실패");
     }
 
+    @Transactional
     public void cancelKakaoPayPayment(String tid, long amount) {
         HttpEntity<Map<String, String>> httpEntity = createKakaoPayCancelRequest(tid, amount);
 
@@ -143,30 +144,10 @@ public class KakaoPayService {
         return body;
     }
 
-    @Transactional(readOnly = true)
-    public String loadKakaoPayTid(Long userId) {
-        String redisKey = REDIS_TID_KEY_PREFIX + userId;
-        String tid = redisTemplate.opsForValue().get(redisKey);
-        if (tid == null) {
-            throw new BadRequestException(ErrorCode.INVALID_PAYMENT_SESSION);
-        }
-        redisTemplate.delete(redisKey);
-        return tid;
-    }
-
-    @Transactional(readOnly = true)
-    public String loadKakaoPayOrderId(String tid) {
-        String orderIdKey = REDIS_ORDER_ID_KEY_PREFIX + tid;
-        String orderId = redisTemplate.opsForValue().get(orderIdKey);
-        if (orderId == null) {
-            throw new BadRequestException(ErrorCode.INVALID_PAYMENT_SESSION);
-        }
-        redisTemplate.delete(orderId);
-        return orderId;
-    }
-
     @Transactional
-    public KakaoPayApproveResponse approveKakaoPayPayment(Long userId, String tid, String orderId, String pgToken) {
+    public KakaoPayApproveResponse approveKakaoPayPayment(Long userId, String pgToken) {
+        String tid = loadTidFromRedis(userId);
+        String orderId = loadOrderIdFromRedis(tid);
         HttpEntity<Map<String, String>> httpEntity = createKakaoPayApproveRequest(userId, tid, orderId, pgToken);
 
         ResponseEntity<KakaoPayApproveResponse> response = restTemplate.postForEntity(
@@ -180,6 +161,26 @@ public class KakaoPayService {
         }
 
         throw new IllegalStateException("카카오페이 결제 승인 실패");
+    }
+
+    private String loadTidFromRedis(Long userId) {
+        String redisKey = REDIS_TID_KEY_PREFIX + userId;
+        String tid = redisTemplate.opsForValue().get(redisKey);
+        if (tid == null) {
+            throw new BadRequestException(ErrorCode.INVALID_PAYMENT_SESSION);
+        }
+        redisTemplate.delete(redisKey);
+        return tid;
+    }
+
+    private String loadOrderIdFromRedis(String tid) {
+        String orderIdKey = REDIS_ORDER_ID_KEY_PREFIX + tid;
+        String orderId = redisTemplate.opsForValue().get(orderIdKey);
+        if (orderId == null) {
+            throw new BadRequestException(ErrorCode.INVALID_PAYMENT_SESSION);
+        }
+        redisTemplate.delete(orderId);
+        return orderId;
     }
 
     private HttpEntity<Map<String, String>> createKakaoPayApproveRequest(Long userId, String tid,

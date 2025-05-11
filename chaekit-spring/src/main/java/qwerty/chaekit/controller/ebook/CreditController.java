@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.dto.ebook.credit.CreditProductInfoResponse;
 import qwerty.chaekit.dto.ebook.credit.CreditTransactionResponse;
@@ -49,16 +48,6 @@ public class CreditController {
             @Parameter(hidden = true) @Login UserToken userToken,
             @RequestParam String pgToken) {
         return ApiSuccessResponse.of(creditService.approveKakaoPayPayment(userToken, pgToken));
-    }
-
-    @GetMapping("/payment/fail")
-    public ResponseEntity<String> kakaoPayFail() {
-        return ResponseEntity.ok("결제 실패. 다시 시도해주세요.");
-    }
-
-    @GetMapping("/payment/cancel")
-    public ResponseEntity<String> kakaoPayCancel() {
-        return ResponseEntity.ok("결제가 취소되었습니다.");
     }
 
     @GetMapping("/wallet")
