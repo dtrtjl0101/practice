@@ -1,5 +1,6 @@
 package qwerty.chaekit.controller.ebook;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -24,11 +25,19 @@ import java.util.List;
 public class CreditController {
     private final CreditService creditService;
 
+    @Operation(
+            summary = "크레딧 상품 목록 조회",
+            description = "크레딧 상품 목록을 조회합니다. (구매 가능 상품만 조회)"
+    )
     @GetMapping
     public ApiSuccessResponse<List<CreditProductInfoResponse>> getCreditProductList() {
         return ApiSuccessResponse.of(creditService.getCreditProductList());
     }
 
+    @Operation(
+            summary = "카카오페이 결제 redirect URL 요청",
+            description = "특정 크레딧 상품에 대해 카카오페이 결제를 요청합니다. (결제 준비)"
+    )
     @PostMapping("/payment/ready")
     public ApiSuccessResponse<String> requestKakaoPay(
             @Parameter(hidden = true) @Login UserToken userToken,
@@ -38,11 +47,10 @@ public class CreditController {
         return ApiSuccessResponse.of(redirectUrl);
     }
 
-    /**
-     * 카카오페이 결제 성공 콜백
-     * - 카카오페이가 pg_token과 함께 redirect
-     * - 이 요청을 받아 결제 승인 → 크레딧 지급 → 트랜잭션 기록
-     */
+    @Operation(
+            summary = "카카오페이 결제 승인",
+            description = "카카오페이 결제 승인 후, 결제 정보를 저장합니다. (결제 승인)"
+    )
     @GetMapping("/payment/success")
     public ApiSuccessResponse<CreditPaymentApproveResponse> kakaoPaySuccess(
             @Parameter(hidden = true) @Login UserToken userToken,
@@ -50,6 +58,10 @@ public class CreditController {
         return ApiSuccessResponse.of(creditService.approveKakaoPayPayment(userToken, pgToken));
     }
 
+    @Operation(
+            summary = "내 크레딧 지갑 조회",
+            description = "내 크레딧 지갑 정보를 조회합니다."
+    )
     @GetMapping("/wallet")
     public ApiSuccessResponse<CreditWalletResponse> getMyWallet(
             @Parameter(hidden = true) @Login UserToken userToken
@@ -57,6 +69,10 @@ public class CreditController {
         return ApiSuccessResponse.of(creditService.getMyWallet(userToken));
     }
 
+    @Operation(
+            summary = "내 크레딧 거래 내역 조회",
+            description = "내 크레딧 거래 내역을 조회합니다. (구매, 사용 내역 포함)"
+    )
     @GetMapping("/wallet/transactions")
     public ApiSuccessResponse<PageResponse<CreditTransactionResponse>> getMyWalletTransactions(
             @Parameter(hidden = true) @Login UserToken userToken,
