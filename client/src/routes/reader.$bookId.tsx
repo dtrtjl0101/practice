@@ -28,7 +28,7 @@ import {
 } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
 import { EpubCFI, Rendition } from "epubjs";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ReactReader } from "react-reader";
 import API_CLIENT, { wrapApiResponse } from "../api/api";
 import {
@@ -39,6 +39,7 @@ import {
 import { Highlight } from "../types/highlight";
 import useAutoLogin from "../api/login/useAutoLogin";
 import useAutoTokenRefresh from "../api/login/useAutoTokenRefresh";
+import loadBook from "../util/loadBook";
 
 export const Route = createFileRoute("/reader/$bookId")({
   component: RouteComponent,
@@ -56,10 +57,10 @@ type Selection = {
 };
 
 function RouteComponent() {
+  const { bookId } = Route.useParams();
   const theme = useTheme();
   const [location, setLocation] = useState<string | number>(10);
   const [highlightsInPage, setHighlightsInPage] = useState<Highlight[]>([]);
-  const [epubUrl, setEpubUrl] = useState<ArrayBuffer>(new ArrayBuffer());
   const [rendition, setRendition] = useState<Rendition | undefined>(undefined);
   const [openHighlightDrawer, setOpenHighlightDrawer] = useState(false);
   const [selection, setSelection] = useState<Selection | null>(null);
@@ -68,7 +69,7 @@ function RouteComponent() {
   const queryClient = useQueryClient();
   useAutoLogin();
   useAutoTokenRefresh();
-  const { bookId } = Route.useParams();
+  const [bookBlobUrl, setBookBlobUrl] = useState<string>("");
 
   const spine = useMemo(() => {
     try {
@@ -156,6 +157,22 @@ function RouteComponent() {
     });
   }, [rendition, highlightsInPage]);
 
+  useEffect(() => {
+    const bookIdNumber = parseInt(bookId, 10);
+    if (isNaN(bookIdNumber)) {
+      console.error("Invalid bookId:", bookId);
+      return;
+    }
+    loadBook(bookIdNumber).then((book) => {
+      if (!book) {
+        console.error("Book not found in IndexedDB");
+        return;
+      }
+      const blobUrl = URL.createObjectURL(book);
+      setBookBlobUrl(blobUrl);
+    });
+  }, [bookId]);
+
   return (
     <Box
       sx={{
@@ -172,7 +189,6 @@ function RouteComponent() {
           zIndex: theme.zIndex.fab,
         }}
       >
-        <Button onClick={uploadEpub}>Upload EPUB</Button>
         <Fab
           size="small"
           sx={{
@@ -242,7 +258,7 @@ function RouteComponent() {
         </Stack>
       </Drawer>
       <ReactReader
-        url={epubUrl}
+        url={bookBlobUrl}
         epubOptions={{
           spread: "none",
         }}
