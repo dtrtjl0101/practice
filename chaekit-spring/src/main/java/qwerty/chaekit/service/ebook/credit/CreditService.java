@@ -108,6 +108,7 @@ public class CreditService {
     public CreditWalletResponse getMyWallet(UserToken userToken) {
         return creditWalletRepository.findByUser_Id(userToken.userId())
                 .map(wallet -> CreditWalletResponse.builder()
+                        .walletId(wallet.getId())
                         .balance(wallet.getBalance())
                         .build()
                 ).orElseThrow(() -> new IllegalStateException("Credit Wallet not found"));
@@ -123,6 +124,7 @@ public class CreditService {
                 .productName(transaction.getCreditProductName())
                 .type(transaction.getTransactionType())
                 .creditAmount(transaction.getCreditAmount())
+                .paymentAmount(transaction.getPaymentAmount())
                 .approvedAt(transaction.getApprovedAt())
                 .build()
         );
