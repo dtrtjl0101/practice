@@ -51,10 +51,10 @@ public class CreditController {
             summary = "카카오페이 결제 승인",
             description = "카카오페이 결제 승인 후, 결제 정보를 저장합니다. (결제 승인)"
     )
-    @GetMapping("/payment/success")
+    @PostMapping("/payment/success")
     public ApiSuccessResponse<CreditPaymentApproveResponse> kakaoPaySuccess(
             @Parameter(hidden = true) @Login UserToken userToken,
-            @RequestParam String pgToken) {
+            @RequestParam(name = "pg_token") String pgToken) {
         return ApiSuccessResponse.of(creditService.approveKakaoPayPayment(userToken, pgToken));
     }
 
