@@ -73,7 +73,6 @@ export default function HighlightBrowserModal(props: {
     <Modal
       open={open}
       onClose={() => {
-        console.log("모달 닫기");
         onClose();
       }}
     >
@@ -132,11 +131,10 @@ export default function HighlightBrowserModal(props: {
         </Dialog>
         <Box
           sx={{
-            width: "100vw",
-            height: "100vh",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
           }}
         >
           <Paper
