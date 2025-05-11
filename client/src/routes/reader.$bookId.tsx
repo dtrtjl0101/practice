@@ -1,6 +1,7 @@
 import {
   Comment,
   CommentOutlined,
+  MoreVert,
   Note,
   NoteAdd,
   Send,
@@ -25,6 +26,8 @@ import {
   Stack,
   Typography,
   useTheme,
+  MenuItem,
+  Menu,
 } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
 import { EpubCFI, Rendition } from "epubjs";
@@ -323,10 +326,36 @@ function HighlightCard({ highlight }: { highlight: Highlight }) {
   const [openComments, setOpenComments] = useState(false);
   const [commentContent, setCommentContent] = useState("");
   const liked = false; // TODO
+  const isAuthor = true; // TODO
+  // const user = useAtomValue(State.Auth.user);
+  // const isAuthor =
+  //   highlight.memberId && user && highlight.memberId === user.memberId;
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   return (
     <Card>
-      <CardHeader title="NicknameNickname" avatar="N" sx={{ pb: 0 }} />
+      <CardHeader
+        title="NicknameNickname"
+        avatar="N"
+        sx={{ pb: 0 }}
+        action={
+          isAuthor && (
+            <IconButton
+              onClick={(e) => {
+                setAnchorEl(e.currentTarget);
+              }}
+            >
+              <MoreVert />
+            </IconButton>
+          )
+        }
+      />
+      <Menu anchorEl={anchorEl} open={!!anchorEl}>
+        {/* TODO: handle click */}
+        <MenuItem value="public">전체 공개</MenuItem>
+        <MenuItem value="private">나만 보기</MenuItem>
+        <MenuItem value="group">그룹 공개</MenuItem>
+      </Menu>
       <CardContent sx={{ pt: 1 }}>
         <Typography variant="body1">{highlight.memo}</Typography>
       </CardContent>
