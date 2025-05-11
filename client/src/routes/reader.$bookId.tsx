@@ -1,6 +1,7 @@
 import {
   Comment,
   CommentOutlined,
+  MoreVert,
   Note,
   NoteAdd,
   Send,
@@ -25,10 +26,12 @@ import {
   Stack,
   Typography,
   useTheme,
+  MenuItem,
+  Menu,
 } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
 import { EpubCFI, Rendition } from "epubjs";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ReactReader } from "react-reader";
 import API_CLIENT, { wrapApiResponse } from "../api/api";
 import {
@@ -39,8 +42,9 @@ import {
 import { Highlight } from "../types/highlight";
 import useAutoLogin from "../api/login/useAutoLogin";
 import useAutoTokenRefresh from "../api/login/useAutoTokenRefresh";
+import loadBook from "../util/loadBook";
 
-export const Route = createFileRoute("/reader")({
+export const Route = createFileRoute("/reader/$bookId")({
   component: RouteComponent,
 });
 
@@ -56,10 +60,10 @@ type Selection = {
 };
 
 function RouteComponent() {
+  const { bookId } = Route.useParams();
   const theme = useTheme();
   const [location, setLocation] = useState<string | number>(10);
   const [highlightsInPage, setHighlightsInPage] = useState<Highlight[]>([]);
-  const [epubUrl, setEpubUrl] = useState<ArrayBuffer>(new ArrayBuffer());
   const [rendition, setRendition] = useState<Rendition | undefined>(undefined);
   const [openHighlightDrawer, setOpenHighlightDrawer] = useState(false);
   const [selection, setSelection] = useState<Selection | null>(null);
@@ -68,6 +72,7 @@ function RouteComponent() {
   const queryClient = useQueryClient();
   useAutoLogin();
   useAutoTokenRefresh();
+  const [book, setBook] = useState<ArrayBuffer>(new ArrayBuffer(0));
 
   const spine = useMemo(() => {
     try {
@@ -109,22 +114,6 @@ function RouteComponent() {
   });
 
   const previousHighlightsInPage = useRef<Highlight[]>([]);
-
-  const uploadEpub = useCallback(() => {
-    let inputElement = document.createElement("input");
-    inputElement.type = "file";
-    inputElement.onchange = async (event) => {
-      const target = event.target as HTMLInputElement;
-      const file = target.files?.[0];
-      if (!file) {
-        return;
-      }
-
-      setEpubUrl(await file.arrayBuffer());
-    };
-
-    inputElement.click();
-  }, [setEpubUrl]);
 
   useEffect(() => {
     previousHighlightsInPage.current = highlightsInPage;
@@ -171,6 +160,21 @@ function RouteComponent() {
     });
   }, [rendition, highlightsInPage]);
 
+  useEffect(() => {
+    const bookIdNumber = parseInt(bookId, 10);
+    if (isNaN(bookIdNumber)) {
+      console.error("Invalid bookId:", bookId);
+      return;
+    }
+    loadBook(bookIdNumber).then((book) => {
+      if (!book) {
+        console.error("Book not found in IndexedDB");
+        return;
+      }
+      setBook(book);
+    });
+  }, [bookId]);
+
   return (
     <Box
       sx={{
@@ -187,7 +191,6 @@ function RouteComponent() {
           zIndex: theme.zIndex.fab,
         }}
       >
-        <Button onClick={uploadEpub}>Upload EPUB</Button>
         <Fab
           size="small"
           sx={{
@@ -257,7 +260,7 @@ function RouteComponent() {
         </Stack>
       </Drawer>
       <ReactReader
-        url={epubUrl}
+        url={book}
         epubOptions={{
           spread: "none",
         }}
@@ -323,10 +326,36 @@ function HighlightCard({ highlight }: { highlight: Highlight }) {
   const [openComments, setOpenComments] = useState(false);
   const [commentContent, setCommentContent] = useState("");
   const liked = false; // TODO
+  const isAuthor = true; // TODO
+  // const user = useAtomValue(State.Auth.user);
+  // const isAuthor =
+  //   highlight.memberId && user && highlight.memberId === user.memberId;
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   return (
     <Card>
-      <CardHeader title="NicknameNickname" avatar="N" sx={{ pb: 0 }} />
+      <CardHeader
+        title="NicknameNickname"
+        avatar="N"
+        sx={{ pb: 0 }}
+        action={
+          isAuthor && (
+            <IconButton
+              onClick={(e) => {
+                setAnchorEl(e.currentTarget);
+              }}
+            >
+              <MoreVert />
+            </IconButton>
+          )
+        }
+      />
+      <Menu anchorEl={anchorEl} open={!!anchorEl}>
+        {/* TODO: handle click */}
+        <MenuItem value="public">전체 공개</MenuItem>
+        <MenuItem value="private">나만 보기</MenuItem>
+        <MenuItem value="group">그룹 공개</MenuItem>
+      </Menu>
       <CardContent sx={{ pt: 1 }}>
         <Typography variant="body1">{highlight.memo}</Typography>
       </CardContent>
