@@ -22,7 +22,7 @@ class BookStorage {
     });
   }
 
-  public async getBook(bookId: number): Promise<Blob | null> {
+  public async getBook(bookId: number): Promise<ArrayBuffer | null> {
     return new Promise(async (resolve, reject) => {
       const db = await this.db;
       const request = db
@@ -44,7 +44,7 @@ class BookStorage {
     });
   }
 
-  public async setBook(bookId: number, book: Blob): Promise<void> {
+  public async setBook(bookId: number, book: ArrayBuffer): Promise<void> {
     return new Promise(async (resolve, reject) => {
       const db = await this.db;
       const request = db
@@ -74,7 +74,7 @@ export default async function loadBook(bookId: number) {
   });
 }
 
-async function fetchBookFromServer(bookId: number): Promise<Blob> {
+async function fetchBookFromServer(bookId: number): Promise<ArrayBuffer> {
   const downloadUrlResponse = await wrapApiResponse(
     API_CLIENT.ebookController.downloadFile(bookId)
   );
@@ -86,9 +86,9 @@ async function fetchBookFromServer(bookId: number): Promise<Blob> {
   if (!bookResponse.ok) {
     throw new Error("Failed to fetch book from server");
   }
-  const bookBlob = await bookResponse.blob();
+  const book = await bookResponse.arrayBuffer();
 
-  return bookBlob;
+  return book;
 }
 
 async function loadBookFromIndexedDB(bookId: number) {
@@ -103,7 +103,7 @@ async function loadBookFromIndexedDB(bookId: number) {
   return cachedBook;
 }
 
-async function saveBookToIndexedDB(bookId: number, book: Blob) {
+async function saveBookToIndexedDB(bookId: number, book: ArrayBuffer) {
   if (!indexedDB) {
     return;
   }

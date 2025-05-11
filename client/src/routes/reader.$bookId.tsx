@@ -69,7 +69,7 @@ function RouteComponent() {
   const queryClient = useQueryClient();
   useAutoLogin();
   useAutoTokenRefresh();
-  const [bookBlobUrl, setBookBlobUrl] = useState<string>("");
+  const [book, setBook] = useState<ArrayBuffer>(new ArrayBuffer(0));
 
   const spine = useMemo(() => {
     try {
@@ -168,8 +168,7 @@ function RouteComponent() {
         console.error("Book not found in IndexedDB");
         return;
       }
-      const blobUrl = URL.createObjectURL(book);
-      setBookBlobUrl(blobUrl);
+      setBook(book);
     });
   }, [bookId]);
 
@@ -258,7 +257,7 @@ function RouteComponent() {
         </Stack>
       </Drawer>
       <ReactReader
-        url={bookBlobUrl}
+        url={book}
         epubOptions={{
           spread: "none",
         }}
