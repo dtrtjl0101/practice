@@ -2,7 +2,6 @@ import {
   Box,
   Button,
   CardActions,
-  Container,
   Dialog,
   Divider,
   Grid,
@@ -14,6 +13,7 @@ import {
   Paper,
   Stack,
   Typography,
+  useTheme,
 } from "@mui/material";
 import { Highlight } from "../types/highlight";
 import { useState } from "react";
@@ -45,6 +45,7 @@ export default function HighlightBrowserModal(props: {
   onUseHighlight?: (highlight: Highlight) => void;
 }) {
   const { open, onClose, onSelectHighlight, onUseHighlight } = props;
+  const theme = useTheme();
 
   // TODO: query highlights from server
   const highlights = dummyHighlights;
@@ -69,7 +70,13 @@ export default function HighlightBrowserModal(props: {
   };
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal
+      open={open}
+      onClose={() => {
+        console.log("모달 닫기");
+        onClose();
+      }}
+    >
       <>
         {/* TODO: 용도 구체화 후 UI 개선, 쿼리에 사용용 */}
         <Dialog
@@ -132,52 +139,57 @@ export default function HighlightBrowserModal(props: {
             alignItems: "center",
           }}
         >
-          <Container sx={{ height: "65vh" }}>
-            <Paper sx={{ width: "100%", height: "100%", padding: 2 }}>
-              <Grid container spacing={1} height={"100%"}>
-                <Grid size={4} sx={{ height: "100%" }}>
-                  <Paper
-                    elevation={2}
-                    sx={{
-                      height: "100%",
-                      display: "flex",
-                      flexDirection: "column",
-                    }}
-                  >
-                    <Stack spacing={1} sx={{ flexGrow: 1, overflow: "hidden" }}>
-                      <Box
-                        padding={1}
-                        sx={{ display: "flex", justifyContent: "flex-end" }}
-                      >
-                        <IconButton onClick={() => setOpenFilterDialog(true)}>
-                          <Sort />
-                        </IconButton>
-                      </Box>
-                      <Divider />
-                      <List sx={{ flexGrow: 1, overflowY: "auto" }}>
-                        {highlights.map((highlight, index) => (
-                          <HighlightListItem
-                            key={index}
-                            highlight={highlight}
-                            onClick={onHighlightClick}
-                          />
-                        ))}
-                      </List>
-                    </Stack>
-                  </Paper>
-                </Grid>
-                {selectedHighlight ? (
-                  <HighlightViewer
-                    highlight={selectedHighlight}
-                    onClose={onClose}
-                    onHighlightUseButtonClick={onHighlightUseButtonClick}
-                  />
-                ) : (
-                  <HighlightViewerPlaceholder />
-                )}
+          <Paper
+            sx={{
+              width: "90vw",
+              height: "65vh",
+              padding: 2,
+              maxWidth: theme.breakpoints.values.lg,
+            }}
+          >
+            <Grid container spacing={1} height={"100%"}>
+              <Grid size={4} sx={{ height: "100%" }}>
+                <Paper
+                  elevation={2}
+                  sx={{
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <Stack spacing={1} sx={{ flexGrow: 1, overflow: "hidden" }}>
+                    <Box
+                      padding={1}
+                      sx={{ display: "flex", justifyContent: "flex-end" }}
+                    >
+                      <IconButton onClick={() => setOpenFilterDialog(true)}>
+                        <Sort />
+                      </IconButton>
+                    </Box>
+                    <Divider />
+                    <List sx={{ flexGrow: 1, overflowY: "auto" }}>
+                      {highlights.map((highlight, index) => (
+                        <HighlightListItem
+                          key={index}
+                          highlight={highlight}
+                          onClick={onHighlightClick}
+                        />
+                      ))}
+                    </List>
+                  </Stack>
+                </Paper>
               </Grid>
-            </Paper>
-          </Container>
+              {selectedHighlight ? (
+                <HighlightViewer
+                  highlight={selectedHighlight}
+                  onClose={onClose}
+                  onHighlightUseButtonClick={onHighlightUseButtonClick}
+                />
+              ) : (
+                <HighlightViewerPlaceholder />
+              )}
+            </Grid>
+          </Paper>
         </Box>
       </>
     </Modal>
@@ -200,14 +212,23 @@ function HighlightListItem(props: {
         }
         secondary={
           <>
-            <Typography variant="body2" color="textSecondary">
+            <Typography
+              variant="body2"
+              color="textSecondary"
+              component={"span"}
+            >
               {`${
                 highlight.memo.length > 20
                   ? highlight.memo.slice(0, 20) + "..."
                   : highlight.memo
               }`}
             </Typography>
-            <Typography variant="body2" color="textSecondary">
+            <Typography
+              variant="body2"
+              color="textSecondary"
+              component={"span"}
+              display={"block"}
+            >
               2025.04.06
             </Typography>
           </>
@@ -282,7 +303,7 @@ function HighlightViewer(props: {
             <Typography variant="body1">{`${highlight.memo}`}</Typography>
           </Stack>
           <CardActions sx={{ justifyContent: "flex-end" }}>
-            <Button variant="text" color="secondary" onClick={onClose}>
+            <Button variant="outlined" color="secondary" onClick={onClose}>
               취소
             </Button>
             <Button
