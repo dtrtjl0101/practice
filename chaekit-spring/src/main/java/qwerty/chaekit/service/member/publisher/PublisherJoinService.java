@@ -46,7 +46,7 @@ public class PublisherJoinService {
 
         UserProfile adminProfile = userProfileRepository.findById(adminService.getAdminUserId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
-        PublisherProfile publisherProfile = publisherRepository.findByMember_Id(publisher.getId())
+        UserProfile publisherProfile = publisherRepository.findByMember_Id(publisher.getId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
         notificationService.createPublisherJoinRequestNotification(adminProfile, publisherProfile);
 

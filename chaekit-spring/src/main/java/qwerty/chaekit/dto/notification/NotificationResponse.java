@@ -14,7 +14,9 @@ public record NotificationResponse(
         Long senderId,
         String senderNickname,
         Long groupId,
-        String groupName
+        String groupName,
+        Long highlightId,
+        String highlightComments
 ) {
     public static NotificationResponse of(Notification notification) {
         return new NotificationResponse(
@@ -23,10 +25,12 @@ public record NotificationResponse(
                 notification.getType(),
                 notification.isRead(),
                 notification.getCreatedAt(),
-                notification.getSender().getId(),
-                notification.getSender().getNickname(),
-                notification.getGroup().getId(),
-                notification.getGroup().getName()
+                notification.getSender() != null ? notification.getSender().getId() : null,
+                notification.getSender() != null ? notification.getSender().getNickname() : null,
+                notification.getGroup() != null ? notification.getGroup().getId() : null,
+                notification.getGroup() != null ? notification.getGroup().getName() : null,
+                notification.getHighlight() != null ? notification.getHighlight().getId() : null,
+                notification.getHighlight() != null ? notification.getHighlight().getMemo() : null
         );
     }
 } 

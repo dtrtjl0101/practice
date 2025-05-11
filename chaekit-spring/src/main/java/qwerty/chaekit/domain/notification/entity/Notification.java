@@ -9,6 +9,7 @@ import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.user.UserProfile;
+import qwerty.chaekit.domain.highlight.entity.Highlight;
 
 @Entity
 @Getter
@@ -26,13 +27,17 @@ public class Notification extends BaseEntity {
     @JoinColumn(name = "sender_id")
     private UserProfile sender;
 
-    @ManyToOne(fetch =FetchType.LAZY)
-    @JoinColumn(name="publisher_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "publisher_id")
     private PublisherProfile publisher;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
     private ReadingGroup group;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "highlight_id")
+    private Highlight highlight;
 
     @Enumerated(EnumType.STRING)
     private NotificationType type;
@@ -41,11 +46,12 @@ public class Notification extends BaseEntity {
 
     private boolean isRead;
 
-    public Notification(UserProfile receiver, UserProfile sender,PublisherProfile publisher, ReadingGroup group, NotificationType type, String message) {
+    public Notification(UserProfile receiver, UserProfile sender, PublisherProfile publisher, ReadingGroup group, Highlight highlight, NotificationType type, String message) {
         this.receiver = receiver;
         this.sender = sender;
         this.publisher = publisher;
         this.group = group;
+        this.highlight = highlight;
         this.type = type;
         this.message = message;
         this.isRead = false;
