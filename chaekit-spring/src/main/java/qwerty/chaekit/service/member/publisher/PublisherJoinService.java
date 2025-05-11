@@ -30,6 +30,7 @@ public class PublisherJoinService {
     private final NotificationService notificationService;
     private final UserProfileRepository userProfileRepository;
     private final AdminService adminService;
+    private final PublisherService publisherService;
 
     @Transactional
     public LoginResponse join(PublisherJoinRequest request) {
@@ -43,10 +44,9 @@ public class PublisherJoinService {
         Member member = memberJoinHelper.saveMemberWithVerificationCode(email, password, Role.ROLE_PUBLISHER, verificationCode);
         PublisherProfile publisher = savePublisher(request, member, imageFileKey);
 
-        // 관리자에게 알림 전송
         UserProfile adminProfile = userProfileRepository.findById(adminService.getAdminUserId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
-        UserProfile publisherProfile = userProfileRepository.findByMember_Id(member.getId())
+        PublisherProfile publisherProfile = publisherRepository.findByMember_Id(publisher.getId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
         notificationService.createPublisherJoinRequestNotification(adminProfile, publisherProfile);
 

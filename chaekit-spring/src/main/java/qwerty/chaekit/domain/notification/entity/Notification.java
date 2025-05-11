@@ -4,8 +4,10 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.reactivestreams.Publisher;
 import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.group.ReadingGroup;
+import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.user.UserProfile;
 
 @Entity
@@ -24,6 +26,10 @@ public class Notification extends BaseEntity {
     @JoinColumn(name = "sender_id")
     private UserProfile sender;
 
+    @ManyToOne(fetch =FetchType.LAZY)
+    @JoinColumn(name="publisher_id")
+    private PublisherProfile publisher;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
     private ReadingGroup group;
@@ -35,9 +41,10 @@ public class Notification extends BaseEntity {
 
     private boolean isRead;
 
-    public Notification(UserProfile receiver, UserProfile sender, ReadingGroup group, NotificationType type, String message) {
+    public Notification(UserProfile receiver, UserProfile sender,PublisherProfile publisher, ReadingGroup group, NotificationType type, String message) {
         this.receiver = receiver;
         this.sender = sender;
+        this.publisher = publisher;
         this.group = group;
         this.type = type;
         this.message = message;

@@ -91,7 +91,7 @@ public class AdminService {
 
         UserProfile adminProfile = userRepository.findById(adminUserId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
-        UserProfile publisherProfile = userRepository.findByMember_Id(publisher.getMember().getId())
+        PublisherProfile publisherProfile = publisherRepository.findByMember_Id(publisher.getMember().getId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
         notificationService.createPublisherApprovedNotification(publisherProfile, adminProfile);
     }
@@ -112,7 +112,7 @@ public class AdminService {
 
         UserProfile adminProfile = userRepository.findById(adminUserId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
-        UserProfile publisherProfile = userRepository.findByMember_Id(publisher.getMember().getId())
+        PublisherProfile publisherProfile = publisherRepository.findByMember_Id(publisher.getMember().getId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
         notificationService.createPublisherRejectedNotification(publisherProfile, adminProfile);
     }

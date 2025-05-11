@@ -19,6 +19,7 @@ import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.mapper.DiscussionMapper;
+import qwerty.chaekit.service.notification.NotificationService;
 
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,7 @@ public class DiscussionService {
     private final ActivityRepository activityRepository;
     private final UserProfileRepository userRepository;
     private final DiscussionCommentRepository discussionCommentRepository;
+    private final NotificationService notificationService;
 
 
     @Transactional(readOnly = true)
@@ -141,14 +143,32 @@ public class DiscussionService {
             parentComment = null;
         }
 
+        Discussion discussion = discussionRepository.findById(discussionId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.DISCUSSION_NOT_FOUND));
+        UserProfile commentAuthor = userRepository.findById(userToken.userId())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
         DiscussionComment comment = DiscussionComment.builder()
-                .author(userRepository.getReferenceById(userToken.userId()))
-                .discussion(discussionRepository.getReferenceById(discussionId))
+                .author(commentAuthor)
+                .discussion(discussion)
                 .content(request.content())
                 .parent(parentComment)
                 .stance(request.stance())
                 .build();
         discussionCommentRepository.save(comment);
+
+        if (parentComment != null) {
+            notificationService.createCommentReplyNotification(parentComment.getAuthor(), commentAuthor, parentComment);
+        } else {
+            if (!discussion.getAuthor().getId().equals(commentAuthor.getId())) {
+                notificationService.createDiscussionCommentNotification(discussion.getAuthor(), commentAuthor, discussion);
+            }
+
+            discussion.getComments().stream()
+                    .filter(c -> !c.isDeleted() && c.getParent() == null && !c.getAuthor().getId().equals(commentAuthor.getId()))
+                    .forEach(c -> notificationService.createDiscussionCommentNotification(c.getAuthor(), commentAuthor, discussion));
+        }
+
         return discussionMapper.toCommentFetchResponse(comment);
     }
 
