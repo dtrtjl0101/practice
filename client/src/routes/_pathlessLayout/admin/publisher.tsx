@@ -5,6 +5,7 @@ import {
   Box,
   Button,
   Card,
+  CardActions,
   CardContent,
   CardHeader,
   CircularProgress,
@@ -29,7 +30,109 @@ export const Route = createFileRoute("/_pathlessLayout/admin/publisher")({
 });
 
 function RouteComponent() {
-  const [error, setError] = useState<string | null>(null);
+  return (
+    <Stack spacing={4}>
+      <PendingPublisherCard />
+      <PublisherCard />
+    </Stack>
+  );
+}
+
+function PublisherCard() {
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const { data: publishers, isLoading } = useQuery({
+    queryKey: ["publishers", page],
+    queryFn: async () => {
+      const response = await wrapApiResponse(
+        API_CLIENT.adminController.fetchPublishers({
+          page,
+          size: 20,
+        })
+      );
+      if (!response.isSuccessful) {
+        throw new Error(response.errorMessage);
+      }
+      setTotalPages(response.data.totalPages!);
+      return response.data.content;
+    },
+    initialData: [],
+  });
+
+  if (isLoading)
+    return (
+      <Card>
+        <CircularProgress />
+      </Card>
+    );
+
+  return (
+    <Card>
+      <CardHeader title="출판사 목록" />
+      <CardContent>
+        <Stack spacing={2}>
+          <PageNavigation
+            pageZeroBased={page}
+            setPage={setPage}
+            totalPages={totalPages}
+          />
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>ID</TableCell>
+                  <TableCell>출판사명</TableCell>
+                  <TableCell>상태</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {publishers ? (
+                  publishers.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} align="center">
+                        출판사가 존재하지 않습니다
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    publishers.map((publisher) => (
+                      <TableRow key={publisher.publisherId}>
+                        <TableCell>{publisher.publisherId}</TableCell>
+                        <TableCell>
+                          <Stack
+                            direction={"row"}
+                            spacing={1}
+                            alignItems={"center"}
+                          >
+                            <Avatar src={publisher.profileImageURL} />
+                            <Typography>{publisher.publisherName}</Typography>
+                          </Stack>
+                        </TableCell>
+                        <TableCell>
+                          {publisher.status === "PENDING"
+                            ? "가입대기"
+                            : "가입됨"}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )
+                ) : (
+                  <Skeleton />
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <PageNavigation
+            pageZeroBased={page}
+            setPage={setPage}
+            totalPages={totalPages}
+          />
+        </Stack>
+      </CardContent>
+    </Card>
+  );
+}
+
+function PendingPublisherCard() {
   const [rejectingPublisherId, setRejectingPublisherId] = useState<
     number | null
   >(null);
@@ -49,7 +152,6 @@ function RouteComponent() {
         })
       );
       if (!response.isSuccessful) {
-        setError(response.errorMessage);
         throw new Error(response.errorMessage);
       }
       setTotalPages(response.data.totalPages!);
@@ -81,7 +183,6 @@ function RouteComponent() {
         <CircularProgress />
       </Card>
     );
-  if (error) return <Card>오류: {error}</Card>;
 
   return (
     <>
@@ -176,7 +277,7 @@ function RouteComponent() {
             />
           </Stack>
         </CardContent>
-      </Card>{" "}
+      </Card>
     </>
   );
 }
@@ -217,18 +318,25 @@ function RejectPublisherModal(props: {
           alignItems: "center",
         }}
       >
-        <Stack spacing={2}>
-          <Typography variant="h6">거절 사유</Typography>
-          <TextField
-            label="사유"
-            multiline
-            rows={4}
-            fullWidth
-            variant="outlined"
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-          />
-          <Stack direction={"row"} spacing={1}>
+        <Card>
+          <CardHeader title="거절 사유" />
+          <CardContent>
+            <Stack spacing={2}>
+              <Typography variant="body1">
+                출판사 가입 신청을 거절하는 이유를 입력해주세요.
+              </Typography>
+              <TextField
+                label="사유"
+                multiline
+                rows={4}
+                fullWidth
+                variant="outlined"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+              />
+            </Stack>
+          </CardContent>
+          <CardActions sx={{ justifyContent: "flex-end" }}>
             <Button
               variant="contained"
               color="primary"
@@ -239,8 +347,8 @@ function RejectPublisherModal(props: {
             <Button variant="outlined" color="secondary" onClick={onClose}>
               취소
             </Button>
-          </Stack>
-        </Stack>
+          </CardActions>
+        </Card>
       </Box>
     </Modal>
   );
