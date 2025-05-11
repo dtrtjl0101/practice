@@ -1,4 +1,4 @@
-package qwerty.chaekit.domain.notification;
+package qwerty.chaekit.domain.notification.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

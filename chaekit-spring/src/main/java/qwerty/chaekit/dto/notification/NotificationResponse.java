@@ -1,7 +1,7 @@
 package qwerty.chaekit.dto.notification;
 
-import qwerty.chaekit.domain.notification.Notification;
-import qwerty.chaekit.domain.notification.NotificationType;
+import qwerty.chaekit.domain.notification.entity.Notification;
+import qwerty.chaekit.domain.notification.entity.NotificationType;
 
 import java.time.LocalDateTime;
 

@@ -11,9 +11,14 @@ import qwerty.chaekit.dto.member.LoginResponse;
 import qwerty.chaekit.dto.member.PublisherJoinRequest;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
+import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.jwt.JwtUtil;
 import qwerty.chaekit.service.member.MemberJoinHelper;
 import qwerty.chaekit.service.member.token.RefreshTokenService;
+import qwerty.chaekit.service.notification.NotificationService;
+import qwerty.chaekit.domain.member.user.UserProfile;
+import qwerty.chaekit.domain.member.user.UserProfileRepository;
+import qwerty.chaekit.service.member.admin.AdminService;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +27,9 @@ public class PublisherJoinService {
     private final PublisherProfileRepository publisherRepository;
     private final JwtUtil jwtUtil;
     private final RefreshTokenService refreshTokenService;
+    private final NotificationService notificationService;
+    private final UserProfileRepository userProfileRepository;
+    private final AdminService adminService;
 
     @Transactional
     public LoginResponse join(PublisherJoinRequest request) {
@@ -34,6 +42,13 @@ public class PublisherJoinService {
         validatePublisherName(request.publisherName());
         Member member = memberJoinHelper.saveMemberWithVerificationCode(email, password, Role.ROLE_PUBLISHER, verificationCode);
         PublisherProfile publisher = savePublisher(request, member, imageFileKey);
+
+        // 관리자에게 알림 전송
+        UserProfile adminProfile = userProfileRepository.findById(adminService.getAdminUserId())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        UserProfile publisherProfile = userProfileRepository.findByMember_Id(member.getId())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        notificationService.createPublisherJoinRequestNotification(adminProfile, publisherProfile);
 
         return toResponse(member, publisher);
     }

@@ -23,6 +23,7 @@ import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.service.member.notification.EmailService;
 import qwerty.chaekit.service.util.S3Service;
+import qwerty.chaekit.service.notification.NotificationService;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +32,7 @@ public class AdminService {
     private final EmailService emailService;
     private final S3Service s3Service;
     private final UserProfileRepository userRepository;
+    private final NotificationService notificationService;
 
     @Getter
     @Setter
@@ -86,6 +88,12 @@ public class AdminService {
         // 승인 처리
         publisher.approvePublisher();
         emailService.sendPublisherApprovalEmail(publisher.getMember().getEmail());
+
+        UserProfile adminProfile = userRepository.findById(adminUserId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        UserProfile publisherProfile = userRepository.findByMember_Id(publisher.getMember().getId())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        notificationService.createPublisherApprovedNotification(publisherProfile, adminProfile);
     }
 
     @Transactional
@@ -101,6 +109,12 @@ public class AdminService {
         // 거절 처리
         publisher.rejectPublisher();
         emailService.sendPublisherRejectionEmail(publisher.getMember().getEmail(), request.reason());
+
+        UserProfile adminProfile = userRepository.findById(adminUserId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        UserProfile publisherProfile = userRepository.findByMember_Id(publisher.getMember().getId())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        notificationService.createPublisherRejectedNotification(publisherProfile, adminProfile);
     }
 
     private static Pageable getPageableOrderedByCreatedAt(Pageable pageable) {
