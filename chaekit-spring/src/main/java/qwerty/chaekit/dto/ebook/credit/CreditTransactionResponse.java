@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Builder
 public record CreditTransactionResponse(
         String orderId,
-        Long productId,
+        int productId,
         String productName,
         CreditTransactionType type,
         int creditAmount,

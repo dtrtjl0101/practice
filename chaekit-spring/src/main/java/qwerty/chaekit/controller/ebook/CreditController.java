@@ -62,7 +62,7 @@ public class CreditController {
             summary = "내 크레딧 지갑 조회",
             description = "내 크레딧 지갑 정보를 조회합니다."
     )
-    @GetMapping("/wallet")
+    @GetMapping("/wallets")
     public ApiSuccessResponse<CreditWalletResponse> getMyWallet(
             @Parameter(hidden = true) @Login UserToken userToken
     ) {
@@ -73,7 +73,7 @@ public class CreditController {
             summary = "내 크레딧 거래 내역 조회",
             description = "내 크레딧 거래 내역을 조회합니다. (구매, 사용 내역 포함)"
     )
-    @GetMapping("/wallet/transactions")
+    @GetMapping("/transactions")
     public ApiSuccessResponse<PageResponse<CreditTransactionResponse>> getMyWalletTransactions(
             @Parameter(hidden = true) @Login UserToken userToken,
             @ParameterObject Pageable pageable

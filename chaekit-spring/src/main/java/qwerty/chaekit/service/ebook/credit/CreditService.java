@@ -119,6 +119,8 @@ public class CreditService {
                 userToken.userId(), pageable
         ).map(transaction -> CreditTransactionResponse.builder()
                 .orderId(transaction.getOrderId())
+                .productId(transaction.getCreditProductId())
+                .productName(transaction.getCreditProductName())
                 .type(transaction.getTransactionType())
                 .creditAmount(transaction.getCreditAmount())
                 .approvedAt(transaction.getApprovedAt())
