@@ -16,7 +16,11 @@ public record NotificationResponse(
         Long groupId,
         String groupName,
         Long highlightId,
-        String highlightComments
+        String highlightComments,
+        Long discussionId,
+        String discussionContents,
+        Long discussionCommentsId,
+        String discussionCommentsContents
 ) {
     public static NotificationResponse of(Notification notification) {
         return new NotificationResponse(
@@ -30,7 +34,11 @@ public record NotificationResponse(
                 notification.getGroup() != null ? notification.getGroup().getId() : null,
                 notification.getGroup() != null ? notification.getGroup().getName() : null,
                 notification.getHighlight() != null ? notification.getHighlight().getId() : null,
-                notification.getHighlight() != null ? notification.getHighlight().getMemo() : null
+                notification.getHighlight() != null ? notification.getHighlight().getMemo() : null,
+                notification.getDiscussion() != null ? notification.getDiscussion().getId() : null,
+                notification.getDiscussion() != null ? notification.getDiscussion().getContent(): null,
+                notification.getDiscussionComment()!=null?notification.getDiscussionComment().getId():null,
+                notification.getDiscussionComment()!=null?notification.getDiscussionComment().getContent():null
         );
     }
 } 

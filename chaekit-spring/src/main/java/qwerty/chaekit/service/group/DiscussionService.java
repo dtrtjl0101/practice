@@ -157,8 +157,8 @@ public class DiscussionService {
                 .build();
         discussionCommentRepository.save(comment);
 
-        if (parentComment != null) {
-            notificationService.createCommentReplyNotification(parentComment.getAuthor(), commentAuthor, parentComment);
+        if (parentComment != null&&parentComment.getAuthor()!=commentAuthor) {
+            notificationService.createCommentReplyNotification(parentComment.getAuthor(), commentAuthor,parentComment);
         } else {
             if (!discussion.getAuthor().getId().equals(commentAuthor.getId())) {
                 notificationService.createDiscussionCommentNotification(discussion.getAuthor(), commentAuthor, discussion);

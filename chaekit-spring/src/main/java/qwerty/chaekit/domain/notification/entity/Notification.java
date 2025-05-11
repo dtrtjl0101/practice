@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import org.reactivestreams.Publisher;
 import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.group.ReadingGroup;
+import qwerty.chaekit.domain.group.activity.discussion.Discussion;
+import qwerty.chaekit.domain.group.activity.discussion.DiscussionComment;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.highlight.entity.Highlight;
@@ -39,6 +41,14 @@ public class Notification extends BaseEntity {
     @JoinColumn(name = "highlight_id")
     private Highlight highlight;
 
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="discussion_id")
+    private Discussion discussion;
+
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="discussion_comment_id")
+    private DiscussionComment discussionComment;
+
     @Enumerated(EnumType.STRING)
     private NotificationType type;
 
@@ -46,12 +56,14 @@ public class Notification extends BaseEntity {
 
     private boolean isRead;
 
-    public Notification(UserProfile receiver, UserProfile sender, PublisherProfile publisher, ReadingGroup group, Highlight highlight, NotificationType type, String message) {
+    public Notification(UserProfile receiver, UserProfile sender, PublisherProfile publisher, ReadingGroup group, Highlight highlight, Discussion discussion, DiscussionComment discussionComment, NotificationType type, String message) {
         this.receiver = receiver;
         this.sender = sender;
         this.publisher = publisher;
         this.group = group;
         this.highlight = highlight;
+        this.discussion = discussion;
+        this.discussionComment = discussionComment;
         this.type = type;
         this.message = message;
         this.isRead = false;
