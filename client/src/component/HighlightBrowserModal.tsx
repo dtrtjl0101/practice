@@ -231,7 +231,9 @@ export default function HighlightBrowserModal(props: {
                 <HighlightViewer
                   highlight={selectedHighlight}
                   onClose={onClose}
-                  onHighlightUseButtonClick={onHighlightUseButtonClick}
+                  onHighlightUseButtonClick={
+                    onUseHighlight && onHighlightUseButtonClick
+                  }
                 />
               ) : (
                 <HighlightViewerPlaceholder />
@@ -309,7 +311,7 @@ function HighlightViewerPlaceholder() {
 function HighlightViewer(props: {
   highlight: Highlight;
   onClose: () => void;
-  onHighlightUseButtonClick: (highlight: Highlight) => void;
+  onHighlightUseButtonClick?: (highlight: Highlight) => void;
 }) {
   const { highlight, onClose, onHighlightUseButtonClick } = props;
 
@@ -354,15 +356,14 @@ function HighlightViewer(props: {
             <Button variant="outlined" color="secondary" onClick={onClose}>
               취소
             </Button>
-            <Button
-              variant="contained"
-              onClick={() =>
-                onHighlightUseButtonClick &&
-                onHighlightUseButtonClick(highlight)
-              }
-            >
-              선택
-            </Button>
+            {onHighlightUseButtonClick && (
+              <Button
+                variant="contained"
+                onClick={() => onHighlightUseButtonClick(highlight)}
+              >
+                선택
+              </Button>
+            )}
           </CardActions>
         </Stack>
       </Paper>
