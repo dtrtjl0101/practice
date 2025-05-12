@@ -11,7 +11,7 @@ import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.enums.S3Directory;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.properties.AwsProperties;
-import qwerty.chaekit.service.member.email.EmailVerificationService;
+import qwerty.chaekit.service.member.verification.EmailVerificationService;
 import qwerty.chaekit.service.util.S3Service;
 
 @Service

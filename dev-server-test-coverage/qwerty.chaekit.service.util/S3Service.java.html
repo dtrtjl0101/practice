@@ -48,8 +48,8 @@ public class S3Service {
 
     // Public URL
     public String convertToPublicImageURL(String fileKey) {
-<span class="nc bnc" id="L51" title="All 2 branches missed.">        if (fileKey == null) {</span>
-<span class="nc" id="L52">            return null;</span>
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">        if (fileKey == null) {</span>
+<span class="fc" id="L52">            return null;</span>
         }
 <span class="nc" id="L54">        return &quot;https://&quot; + imageBucket + &quot;.s3.amazonaws.com/&quot; + fileKey;</span>
     }

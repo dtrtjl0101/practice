@@ -20,7 +20,7 @@ import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.properties.AwsProperties;
 import qwerty.chaekit.global.security.resolver.UserToken;
-import qwerty.chaekit.service.member.notification.EmailService;
+import qwerty.chaekit.service.util.EmailNotificationService;
 import qwerty.chaekit.service.util.S3Service;
 
 @Service
@@ -29,7 +29,7 @@ public class GroupService {
     private final UserProfileRepository userRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final GroupRepository groupRepository;
-    private final EmailService emailService;
+    private final EmailNotificationService emailNotificationService;
     private final S3Service s3Service;
     private final AwsProperties awsProperties;
 
@@ -159,7 +159,7 @@ public class GroupService {
 
 <span class="nc" id="L160">        GroupMember groupMember = group.approveMember(memberProfile);</span>
 
-<span class="nc" id="L162">        emailService.sendReadingGroupApprovalEmail(memberProfile.getMember().getEmail());</span>
+<span class="nc" id="L162">        emailNotificationService.sendReadingGroupApprovalEmail(memberProfile.getMember().getEmail());</span>
 <span class="nc" id="L163">        return GroupJoinResponse.of(groupMember);</span>
     }
 
