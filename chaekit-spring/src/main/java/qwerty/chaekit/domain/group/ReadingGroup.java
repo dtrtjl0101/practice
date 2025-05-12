@@ -8,7 +8,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.BatchSize;
 import org.springframework.lang.Nullable;
 import qwerty.chaekit.domain.BaseEntity;
-import qwerty.chaekit.domain.group.tag.GroupTag;
+import qwerty.chaekit.domain.group.groupmember.GroupMember;
+import qwerty.chaekit.domain.group.grouptag.GroupTag;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.dto.group.enums.MyMemberShipStatus;
 

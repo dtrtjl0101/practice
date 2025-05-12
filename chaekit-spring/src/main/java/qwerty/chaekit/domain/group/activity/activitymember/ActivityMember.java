@@ -1,4 +1,4 @@
-package qwerty.chaekit.domain.group.activity;
+package qwerty.chaekit.domain.group.activity.activitymember;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import qwerty.chaekit.domain.BaseEntity;
+import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.member.user.UserProfile;
 
 @Entity

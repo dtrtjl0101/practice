@@ -1,10 +1,10 @@
-package qwerty.chaekit.domain.group.activity.discussion.comment;
+package qwerty.chaekit.domain.group.activity.discussion.comment.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import qwerty.chaekit.domain.group.activity.discussion.DiscussionComment;
-import qwerty.chaekit.domain.group.activity.discussion.QDiscussionComment;
+import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment;
+import qwerty.chaekit.domain.group.activity.discussion.comment.QDiscussionComment;
 
 import java.util.List;
 import java.util.Map;
@@ -54,7 +54,7 @@ public class DiscussionCommentRepositoryImpl implements DiscussionCommentReposit
 
     @Override
     public Map<Long, Long> countCommentsByDiscussionIds(List<Long> discussionIds) {
-        QDiscussionComment comment = QDiscussionComment.discussionComment;
+        qwerty.chaekit.domain.group.activity.discussion.comment.QDiscussionComment comment = QDiscussionComment.discussionComment;
         return queryFactory
                 .select(comment.discussion.id, comment.count())
                 .from(comment)

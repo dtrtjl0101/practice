@@ -3,7 +3,7 @@ package qwerty.chaekit.mapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import qwerty.chaekit.domain.group.activity.discussion.Discussion;
-import qwerty.chaekit.domain.group.activity.discussion.DiscussionComment;
+import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment;
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionCommentFetchResponse;
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionDetailResponse;
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionFetchResponse;

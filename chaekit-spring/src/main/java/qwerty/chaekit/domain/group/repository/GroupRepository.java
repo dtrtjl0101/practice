@@ -1,10 +1,11 @@
-package qwerty.chaekit.domain.group;
+package qwerty.chaekit.domain.group.repository;
 
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import qwerty.chaekit.domain.group.ReadingGroup;
 
 import java.util.Optional;
 

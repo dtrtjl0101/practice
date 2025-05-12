@@ -7,7 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 import qwerty.chaekit.domain.ebook.Ebook;
-import qwerty.chaekit.domain.ebook.EbookRepository;
+import qwerty.chaekit.domain.ebook.repository.EbookRepository;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
 import qwerty.chaekit.dto.ebook.upload.EbookDownloadResponse;
@@ -155,7 +155,7 @@ class EbookFileServiceTest {
         when(ebookRepository.findById(bookId)).thenReturn(Optional.of(ebook));
         when(ebook.getFileKey()).thenReturn(fileKey);
         when(awsProperties.ebookBucketName()).thenReturn(ebookBucket);
-        when(s3Service.getDownloadUrl(ebookBucket, S3Directory.EBOOK, fileKey)).thenReturn("http://download-url");
+        when(s3Service.getDownloadUrl(ebookBucket, fileKey)).thenReturn("http://download-url");
 
         // Act
         EbookDownloadResponse response = ebookFileService.getPresignedEbookUrl(userToken, bookId);

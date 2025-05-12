@@ -1,6 +1,6 @@
-package qwerty.chaekit.domain.group.activity.discussion.comment;
+package qwerty.chaekit.domain.group.activity.discussion.comment.repository;
 
-import qwerty.chaekit.domain.group.activity.discussion.DiscussionComment;
+import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment;
 
 import java.util.List;
 import java.util.Map;

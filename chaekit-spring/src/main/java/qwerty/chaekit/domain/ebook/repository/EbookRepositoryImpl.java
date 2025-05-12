@@ -1,4 +1,4 @@
-package qwerty.chaekit.domain.ebook;
+package qwerty.chaekit.domain.ebook.repository;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -7,6 +7,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import qwerty.chaekit.domain.ebook.Ebook;
+import qwerty.chaekit.domain.ebook.QEbook;
 
 import java.util.List;
 import java.util.Optional;

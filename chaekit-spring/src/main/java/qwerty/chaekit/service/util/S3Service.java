@@ -33,8 +33,7 @@ public class S3Service {
     }
 
     // Download URL
-    public String getDownloadUrl(String bucket, S3Directory s3Directory, String fileName) {
-        String fileKey = s3Directory.getPath() + fileName;
+    public String getDownloadUrl(String bucket, String fileKey) {
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                 .bucket(bucket)
                 .key(fileKey)

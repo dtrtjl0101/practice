@@ -1,10 +1,11 @@
-package qwerty.chaekit.domain.group;
+package qwerty.chaekit.domain.group.groupmember;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.member.user.UserProfile;
 
 @Entity
