@@ -31,9 +31,9 @@ function Discussions() {
 
   const { groupId, activityId } = Route.useParams();
   const activityIdNumber = parseInt(activityId);
-  const [page, setPage] = useState(0);
-  const [sort, _setSort] = useState<string[]>([]);
-  const [totalPages, setTotalPages] = useState(1);
+  // const [page, setPage] = useState(0);
+  // const [sort, _setSort] = useState<string[]>([]);
+  // const [totalPages, setTotalPages] = useState(1);
   const [discussions, setDiscussions] = useState<Discussion[] | null>(null);
 
   useEffect(() => {
