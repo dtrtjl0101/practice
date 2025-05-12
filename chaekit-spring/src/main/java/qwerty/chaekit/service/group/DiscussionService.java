@@ -93,7 +93,7 @@ public class DiscussionService {
         Discussion discussion = getMyDiscussion(discussionId, userId);
         Long commentCount = discussionCommentRepository.countCommentsByDiscussionId(discussion.getId());
 
-        discussion.update(request.title(), request.content(), request.isDebate());
+        discussion.update(request.title(), request.content());
 
         return discussionMapper.toFetchResponse(discussion, commentCount, userId);
     }
