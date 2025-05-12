@@ -1,11 +1,11 @@
-package qwerty.chaekit.service.member.email;
+package qwerty.chaekit.service.member.verification;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
-import qwerty.chaekit.service.member.notification.EmailService;
+import qwerty.chaekit.service.util.EmailNotificationService;
 
 import java.util.concurrent.TimeUnit;
 
@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class EmailVerificationService {
     private final RedisTemplate<String, String> redisTemplate;
-    private final EmailService emailService;
+    private final EmailNotificationService emailService;
 
     public String sendVerificationCode(String email) {
         String verificationCode = generateVerificationCode();

@@ -1,4 +1,4 @@
-package qwerty.chaekit.controller.member.email;
+package qwerty.chaekit.controller.member.verification;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.Email;
@@ -6,8 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
-import qwerty.chaekit.service.member.email.EmailVerificationService;
-import qwerty.chaekit.service.member.notification.EmailService;
+import qwerty.chaekit.service.member.verification.EmailVerificationService;
 
 @Slf4j
 @RestController
@@ -15,7 +14,6 @@ import qwerty.chaekit.service.member.notification.EmailService;
 @RequiredArgsConstructor
 public class EmailVerificationController {
     private final EmailVerificationService emailVerificationService;
-    private final EmailService emailService;
 
     @Operation(
             summary = "인증 코드 발송",

@@ -20,7 +20,7 @@ import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.service.member.admin.AdminService;
-import qwerty.chaekit.service.member.notification.EmailService;
+import qwerty.chaekit.service.util.EmailNotificationService;
 import qwerty.chaekit.service.util.S3Service;
 
 import java.util.List;
@@ -41,7 +41,7 @@ class AdminServiceTest {
     @Mock
     private S3Service s3Service;
     @Mock
-    private EmailService emailService;
+    private EmailNotificationService emailNotificationService;
 
     @Mock
     private Member member;
@@ -63,7 +63,7 @@ class AdminServiceTest {
        adminService.acceptPublisher(publisherId);
         // then
         verify(publisherRepository).findByIdWithMember(publisherId);
-        verify(emailService).sendPublisherApprovalEmail(publisher.getMember().getEmail());
+        verify(emailNotificationService).sendPublisherApprovalEmail(publisher.getMember().getEmail());
         assertEquals(PublisherApprovalStatus.APPROVED, publisher.getApprovalStatus());
     }
 
