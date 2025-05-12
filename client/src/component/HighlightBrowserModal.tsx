@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   CardActions,
+  CircularProgress,
   Dialog,
   Divider,
   Grid,
@@ -16,27 +17,18 @@ import {
   useTheme,
 } from "@mui/material";
 import { Highlight } from "../types/highlight";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { Delete, Edit, Sort } from "@mui/icons-material";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import API_CLIENT, { wrapApiResponse } from "../api/api";
 
-const dummyHighlights: Highlight[] = [
-  {
-    id: 1,
-    bookId: 1,
-    spine: "chapter-1",
-    cfi: "epubcfi(/6!0;vnd.epub.chapter.section1!x,0:0-1)",
-    memo: "이 구절은 그저 하나의 구절일 뿐입니다.",
-    activityId: 1,
-  },
-  {
-    id: 2,
-    bookId: 1,
-    spine: "chapter-1",
-    cfi: "epubcfi(/6!0;vnd.epub.chapter.section1!x,0:0-1)",
-    memo: "이 구절은 그저 두개의 구절일 뿐입니다.",
-    activityId: 1,
-  },
-];
+type HighlightFilterKind = {
+  kind: "MyHighlights";
+};
+// | {
+//     kind: "ActivityHighlights";
+//     activityId: number;
+//   };
 
 export default function HighlightBrowserModal(props: {
   open: boolean;
@@ -46,13 +38,42 @@ export default function HighlightBrowserModal(props: {
 }) {
   const { open, onClose, onSelectHighlight, onUseHighlight } = props;
   const theme = useTheme();
-
-  // TODO: query highlights from server
-  const highlights = dummyHighlights;
   const [selectedHighlight, setSelectedHighlight] = useState<Highlight | null>(
     null
   );
   const [openFilterDialog, setOpenFilterDialog] = useState(false);
+  const [highlightFilterKind, setHighlightFilterKind] =
+    useState<HighlightFilterKind>({ kind: "MyHighlights" });
+
+  const {
+    data: highlightPages,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["highlights", highlightFilterKind],
+    queryFn: async ({ pageParam }) => {
+      const response = await wrapApiResponse(
+        API_CLIENT.highlightController.getHighlights({
+          page: pageParam,
+          size: 30,
+          ...getHighlightFilter(highlightFilterKind),
+        })
+      );
+      if (!response.isSuccessful) {
+        console.error(response.errorCode);
+        throw new Error(response.errorCode);
+      }
+      return response.data;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.currentPage! < lastPage.totalPages!) {
+        return lastPage.currentPage! + 1;
+      }
+      return undefined;
+    },
+  });
 
   const onHighlightClick = (highlight: Highlight) => {
     setSelectedHighlight(highlight);
@@ -77,7 +98,6 @@ export default function HighlightBrowserModal(props: {
       }}
     >
       <>
-        {/* TODO: 용도 구체화 후 UI 개선, 쿼리에 사용용 */}
         <Dialog
           open={openFilterDialog}
           onClose={() => setOpenFilterDialog(false)}
@@ -89,13 +109,13 @@ export default function HighlightBrowserModal(props: {
             <List>
               <ListItemButton
                 onClick={() => {
-                  console.log("내 모든 하이라이트");
+                  setHighlightFilterKind({ kind: "MyHighlights" });
                   setOpenFilterDialog(false);
                 }}
               >
                 <ListItemText primary="내 모든 하이라이트" />
               </ListItemButton>
-              <ListItemButton
+              {/* <ListItemButton
                 onClick={() => {
                   console.log("특정 책의 내 하이라이트 목록");
                   setOpenFilterDialog(false);
@@ -118,7 +138,7 @@ export default function HighlightBrowserModal(props: {
                 }}
               >
                 <ListItemText primary="특정 활동에서 공개된 모든 하이라이트 조회" />
-              </ListItemButton>
+              </ListItemButton> */}
             </List>
             <Box
               sx={{ display: "flex", justifyContent: "flex-end", marginTop: 2 }}
@@ -166,13 +186,43 @@ export default function HighlightBrowserModal(props: {
                     </Box>
                     <Divider />
                     <List sx={{ flexGrow: 1, overflowY: "auto" }}>
-                      {highlights.map((highlight, index) => (
-                        <HighlightListItem
-                          key={index}
-                          highlight={highlight}
-                          onClick={onHighlightClick}
-                        />
-                      ))}
+                      {highlightPages &&
+                        highlightPages.pages.map((highlightPage, index) => (
+                          <Fragment key={index}>
+                            {highlightPage.content!.map((highlight) => (
+                              <HighlightListItem
+                                key={highlight.id}
+                                highlight={highlight as Highlight}
+                                onClick={onHighlightClick}
+                              />
+                            ))}
+                          </Fragment>
+                        ))}
+                      {hasNextPage && (
+                        <ListItemButton
+                          onClick={() => fetchNextPage()}
+                          disabled={isFetchingNextPage}
+                        >
+                          <ListItemText
+                            sx={{
+                              display: "flex",
+                              justifyContent: "center",
+                            }}
+                            primary={
+                              isFetchingNextPage ? (
+                                <CircularProgress />
+                              ) : (
+                                <Typography
+                                  variant="body2"
+                                  color="textSecondary"
+                                >
+                                  더보기
+                                </Typography>
+                              )
+                            }
+                          />
+                        </ListItemButton>
+                      )}
                     </List>
                   </Stack>
                 </Paper>
@@ -318,4 +368,20 @@ function HighlightViewer(props: {
       </Paper>
     </Grid>
   );
+}
+
+type HighlightFilter = {
+  spine?: string;
+  bookId?: number;
+  activityId?: number;
+  me?: boolean;
+};
+
+function getHighlightFilter(kind: HighlightFilterKind): HighlightFilter {
+  switch (kind.kind) {
+    case "MyHighlights":
+      return { me: true };
+    default:
+      return {};
+  }
 }
