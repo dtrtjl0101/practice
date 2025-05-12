@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.ebook.Ebook;
-import qwerty.chaekit.domain.ebook.EbookRepository;
+import qwerty.chaekit.domain.ebook.repository.EbookRepository;
 import qwerty.chaekit.dto.ebook.EbookFetchResponse;
 import qwerty.chaekit.dto.ebook.EbookSearchRequest;
 import qwerty.chaekit.dto.ebook.EbookSearchResponse;

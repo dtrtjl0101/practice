@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>KakaoPayService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chaekit</a> &gt; <a href="index.source.html" class="el_package">qwerty.chaekit.service.ebook.credit</a> &gt; <span class="el_source">KakaoPayService.java</span></div><h1>KakaoPayService.java</h1><pre class="source lang-java linenums">package qwerty.chaekit.service.ebook.credit;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+import qwerty.chaekit.dto.ebook.credit.payment.CreditPaymentReadyRequest;
+import qwerty.chaekit.dto.external.kakaopay.KakaoPayApproveResponse;
+import qwerty.chaekit.dto.external.kakaopay.KakaoPayCancelResponse;
+import qwerty.chaekit.dto.external.kakaopay.KakaoPayReadyResponse;
+import qwerty.chaekit.global.constant.CreditProduct;
+import qwerty.chaekit.global.enums.ErrorCode;
+import qwerty.chaekit.global.exception.BadRequestException;
+import qwerty.chaekit.global.properties.KakaoPayProperties;
+import qwerty.chaekit.global.security.resolver.UserToken;
+import qwerty.chaekit.service.ebook.credit.exception.PaymentCancelFailedException;
+
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+@Service
+@Transactional
+@RequiredArgsConstructor
+<span class="fc" id="L33">@Slf4j</span>
+public class KakaoPayService {
+    private static final String KAKAO_PAY_READY_URL = &quot;https://open-api.kakaopay.com/online/v1/payment/ready&quot;;
+    private static final String KAKAO_PAY_CANCEL_URL = &quot;https://open-api.kakaopay.com/online/v1/payment/cancel&quot;;
+    private static final String KAKAO_PAY_APPROVE_URL = &quot;https://open-api.kakaopay.com/online/v1/payment/approve&quot;;
+    private static final String REDIS_TID_KEY_PREFIX = &quot;kakao:tid:&quot;;
+    private static final String REDIS_ORDER_ID_KEY_PREFIX = &quot;kakao:orderId:&quot;;
+<span class="fc" id="L40">    private static final Duration REDIS_KEY_EXPIRATION = Duration.ofMinutes(10);</span>
+
+    private final RestTemplate restTemplate;
+    private final KakaoPayProperties kakaoPayProperties;
+    private final RedisTemplate&lt;String, String&gt; redisTemplate;
+
+    @Transactional
+    public String requestKakaoPay(UserToken userToken, CreditPaymentReadyRequest request) {
+<span class="nc" id="L48">        Long creditProductId = request.creditProductId();</span>
+<span class="nc" id="L49">        CreditProduct product = findCreditProductById(creditProductId);</span>
+<span class="nc" id="L50">        String orderId = UUID.randomUUID().toString();</span>
+
+<span class="nc" id="L52">        HttpEntity&lt;Map&lt;String, String&gt;&gt; httpEntity = createKakaoPayRequest(userToken, product, orderId);</span>
+<span class="nc" id="L53">        ResponseEntity&lt;KakaoPayReadyResponse&gt; response = restTemplate.postForEntity(</span>
+                KAKAO_PAY_READY_URL, httpEntity, KakaoPayReadyResponse.class
+        );
+
+<span class="nc" id="L57">        return handleKakaoPayResponse(response, userToken.userId(), orderId);</span>
+    }
+
+    private CreditProduct findCreditProductById(Long creditProductId) {
+<span class="nc" id="L61">        return Arrays.stream(CreditProduct.values())</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">                .filter(p -&gt; p.id == creditProductId)</span>
+<span class="nc" id="L63">                .findFirst()</span>
+<span class="nc" id="L64">                .orElseThrow(() -&gt; new BadRequestException(ErrorCode.INVALID_CREDIT_PRODUCT_ID));</span>
+    }
+
+    private HttpEntity&lt;Map&lt;String, String&gt;&gt; createKakaoPayRequest(UserToken userToken, CreditProduct product,
+                                                                            String orderId) {
+<span class="nc" id="L69">        HttpHeaders headers = createKakaoPayHeaders();</span>
+<span class="nc" id="L70">        Map&lt;String, String&gt; body = createKakaoPayRequestBody(userToken, product, orderId);</span>
+
+<span class="nc" id="L72">        log.info(&quot;[KakaoPay Create Request] Headers: {}&quot;, headers);</span>
+<span class="nc" id="L73">        log.info(&quot;[KakaoPay Create Request] Body: {}&quot;, body);</span>
+<span class="nc" id="L74">        return new HttpEntity&lt;&gt;(body, headers);</span>
+    }
+
+    private Map&lt;String, String&gt; createKakaoPayRequestBody(UserToken userToken, CreditProduct product,
+                                                                    String orderId) {
+<span class="nc" id="L79">        Map&lt;String, String&gt; body = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L80">        body.put(&quot;cid&quot;, kakaoPayProperties.cid());</span>
+<span class="nc" id="L81">        body.put(&quot;partner_order_id&quot;, orderId);</span>
+<span class="nc" id="L82">        body.put(&quot;partner_user_id&quot;, String.valueOf(userToken.userId()));</span>
+<span class="nc" id="L83">        body.put(&quot;item_name&quot;, product.getName());</span>
+<span class="nc" id="L84">        body.put(&quot;item_code&quot;, String.valueOf(product.id));</span>
+<span class="nc" id="L85">        body.put(&quot;quantity&quot;, &quot;1&quot;);</span>
+<span class="nc" id="L86">        body.put(&quot;total_amount&quot;, String.valueOf(product.price));</span>
+<span class="nc" id="L87">        body.put(&quot;tax_free_amount&quot;, &quot;0&quot;);</span>
+
+<span class="nc" id="L89">        String redirectBaseUrl = kakaoPayProperties.redirectBaseUrl();</span>
+<span class="nc" id="L90">        body.put(&quot;approval_url&quot;, redirectBaseUrl + &quot;/credits/payment/success&quot;);</span>
+<span class="nc" id="L91">        body.put(&quot;cancel_url&quot;, redirectBaseUrl + &quot;/credits/payment/cancel&quot;);</span>
+<span class="nc" id="L92">        body.put(&quot;fail_url&quot;, redirectBaseUrl + &quot;/credits/payment/fail&quot;);</span>
+
+<span class="nc" id="L94">        return body;</span>
+    }
+
+    private String handleKakaoPayResponse(ResponseEntity&lt;KakaoPayReadyResponse&gt; response, Long userId,
+                                          String orderId) {
+<span class="nc bnc" id="L99" title="All 4 branches missed.">        if (response.getStatusCode().is2xxSuccessful() &amp;&amp; response.getBody() != null) {</span>
+<span class="nc" id="L100">            String tid = response.getBody().tid();</span>
+
+            // save tid, orderId to Redis
+<span class="nc" id="L103">            String tidKey = REDIS_TID_KEY_PREFIX + userId;</span>
+<span class="nc" id="L104">            redisTemplate.opsForValue().set(tidKey, tid, REDIS_KEY_EXPIRATION);</span>
+
+<span class="nc" id="L106">            String orderIdKey = REDIS_ORDER_ID_KEY_PREFIX + tid;</span>
+<span class="nc" id="L107">            redisTemplate.opsForValue().set(orderIdKey, orderId, REDIS_KEY_EXPIRATION);</span>
+
+<span class="nc" id="L109">            return response.getBody().next_redirect_pc_url(); // pc only</span>
+        }
+<span class="nc" id="L111">        throw new IllegalStateException(&quot;카카오페이 요청 실패&quot;);</span>
+    }
+
+    @Transactional
+    public void cancelKakaoPayPayment(String tid, long amount) {
+<span class="nc" id="L116">        HttpEntity&lt;Map&lt;String, String&gt;&gt; httpEntity = createKakaoPayCancelRequest(tid, amount);</span>
+
+<span class="nc" id="L118">        ResponseEntity&lt;KakaoPayCancelResponse&gt; response = restTemplate.postForEntity(</span>
+                KAKAO_PAY_CANCEL_URL,
+                httpEntity,
+                KakaoPayCancelResponse.class
+        );
+
+<span class="nc bnc" id="L124" title="All 2 branches missed.">        if (!response.getStatusCode().is2xxSuccessful()</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">                || response.getBody() == null</span>
+<span class="nc bnc" id="L126" title="All 2 branches missed.">                || !response.getBody().status().equals(&quot;CANCEL_PAYMENT&quot;)) {</span>
+<span class="nc" id="L127">            throw new PaymentCancelFailedException(&quot;카카오페이 환불 처리가 실패했습니다.&quot;);</span>
+        }
+<span class="nc" id="L129">    }</span>
+
+    private HttpEntity&lt;Map&lt;String, String&gt;&gt; createKakaoPayCancelRequest(String tid, long amount) {
+<span class="nc" id="L132">        HttpHeaders headers = createKakaoPayHeaders();</span>
+<span class="nc" id="L133">        Map&lt;String, String&gt; body = createKakaoPayCancelRequestBody(tid, amount);</span>
+<span class="nc" id="L134">        return new HttpEntity&lt;&gt;(body, headers);</span>
+    }
+
+    private Map&lt;String, String&gt; createKakaoPayCancelRequestBody(String tid, long amount) {
+<span class="nc" id="L138">        Map&lt;String, String&gt; body = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L139">        body.put(&quot;cid&quot;, kakaoPayProperties.cid());</span>
+<span class="nc" id="L140">        body.put(&quot;tid&quot;, tid);</span>
+<span class="nc" id="L141">        body.put(&quot;cancel_amount&quot;, String.valueOf(amount));</span>
+<span class="nc" id="L142">        body.put(&quot;cancel_tax_free_amount&quot;, &quot;0&quot;);</span>
+
+<span class="nc" id="L144">        return body;</span>
+    }
+
+    @Transactional
+    public KakaoPayApproveResponse approveKakaoPayPayment(Long userId, String pgToken) {
+<span class="nc" id="L149">        String tid = loadTidFromRedis(userId);</span>
+<span class="nc" id="L150">        String orderId = loadOrderIdFromRedis(tid);</span>
+<span class="nc" id="L151">        HttpEntity&lt;Map&lt;String, String&gt;&gt; httpEntity = createKakaoPayApproveRequest(userId, tid, orderId, pgToken);</span>
+
+<span class="nc" id="L153">        ResponseEntity&lt;KakaoPayApproveResponse&gt; response = restTemplate.postForEntity(</span>
+                KAKAO_PAY_APPROVE_URL,
+                httpEntity,
+                KakaoPayApproveResponse.class
+        );
+
+<span class="nc bnc" id="L159" title="All 4 branches missed.">        if (response.getStatusCode().is2xxSuccessful() &amp;&amp; response.getBody() != null) {</span>
+<span class="nc" id="L160">            return response.getBody();</span>
+        }
+
+<span class="nc" id="L163">        throw new IllegalStateException(&quot;카카오페이 결제 승인 실패&quot;);</span>
+    }
+
+    private String loadTidFromRedis(Long userId) {
+<span class="nc" id="L167">        String redisKey = REDIS_TID_KEY_PREFIX + userId;</span>
+<span class="nc" id="L168">        String tid = redisTemplate.opsForValue().get(redisKey);</span>
+<span class="nc bnc" id="L169" title="All 2 branches missed.">        if (tid == null) {</span>
+<span class="nc" id="L170">            throw new BadRequestException(ErrorCode.INVALID_PAYMENT_SESSION);</span>
+        }
+<span class="nc" id="L172">        redisTemplate.delete(redisKey);</span>
+<span class="nc" id="L173">        return tid;</span>
+    }
+
+    private String loadOrderIdFromRedis(String tid) {
+<span class="nc" id="L177">        String orderIdKey = REDIS_ORDER_ID_KEY_PREFIX + tid;</span>
+<span class="nc" id="L178">        String orderId = redisTemplate.opsForValue().get(orderIdKey);</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">        if (orderId == null) {</span>
+<span class="nc" id="L180">            throw new BadRequestException(ErrorCode.INVALID_PAYMENT_SESSION);</span>
+        }
+<span class="nc" id="L182">        redisTemplate.delete(orderId);</span>
+<span class="nc" id="L183">        return orderId;</span>
+    }
+
+    private HttpEntity&lt;Map&lt;String, String&gt;&gt; createKakaoPayApproveRequest(Long userId, String tid,
+                                                                                   String orderId, String pgToken) {
+<span class="nc" id="L188">        HttpHeaders headers = createKakaoPayHeaders();</span>
+<span class="nc" id="L189">        Map&lt;String, String&gt; body = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L190">        body.put(&quot;cid&quot;, kakaoPayProperties.cid());</span>
+<span class="nc" id="L191">        body.put(&quot;tid&quot;, tid);</span>
+<span class="nc" id="L192">        body.put(&quot;partner_order_id&quot;, orderId);</span>
+<span class="nc" id="L193">        body.put(&quot;partner_user_id&quot;, String.valueOf(userId));</span>
+<span class="nc" id="L194">        body.put(&quot;pg_token&quot;, pgToken);</span>
+
+<span class="nc" id="L196">        return new HttpEntity&lt;&gt;(body, headers);</span>
+    }
+
+    // ==== common methods ====
+    private HttpHeaders createKakaoPayHeaders() {
+<span class="nc" id="L201">        HttpHeaders headers = new HttpHeaders();</span>
+<span class="nc" id="L202">        headers.setContentType(MediaType.APPLICATION_JSON);</span>
+<span class="nc" id="L203">        headers.set(&quot;Authorization&quot;, &quot;SECRET_KEY &quot; + kakaoPayProperties.secretKey());</span>
+<span class="nc" id="L204">        return headers;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

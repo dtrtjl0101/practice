@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.group.activity.Activity;
+import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment;
 import qwerty.chaekit.domain.member.user.UserProfile;
 
 import java.util.ArrayList;
@@ -35,32 +36,32 @@ public class Discussion extends BaseEntity {
     @JoinColumn(name = &quot;author_id&quot;)
     private UserProfile author;
 
-<span class="fc" id="L38">    @Column(nullable = false)</span>
+<span class="fc" id="L39">    @Column(nullable = false)</span>
     private boolean isDebate = false;
 
-<span class="fc" id="L41">    @OneToMany(mappedBy = &quot;discussion&quot;)</span>
+<span class="fc" id="L42">    @OneToMany(mappedBy = &quot;discussion&quot;)</span>
     private final List&lt;DiscussionComment&gt; comments = new ArrayList&lt;&gt;();
 
     @Builder
-<span class="fc" id="L45">    public Discussion(Long id, Activity activity, String title, String content, UserProfile author, boolean isDebate) {</span>
-<span class="fc" id="L46">        this.id = id;</span>
-<span class="fc" id="L47">        this.activity = activity;</span>
-<span class="fc" id="L48">        this.title = title;</span>
-<span class="fc" id="L49">        this.content = content;</span>
-<span class="fc" id="L50">        this.author = author;</span>
-<span class="fc" id="L51">        this.isDebate = isDebate;</span>
-<span class="fc" id="L52">    }</span>
+<span class="fc" id="L46">    public Discussion(Long id, Activity activity, String title, String content, UserProfile author, boolean isDebate) {</span>
+<span class="fc" id="L47">        this.id = id;</span>
+<span class="fc" id="L48">        this.activity = activity;</span>
+<span class="fc" id="L49">        this.title = title;</span>
+<span class="fc" id="L50">        this.content = content;</span>
+<span class="fc" id="L51">        this.author = author;</span>
+<span class="fc" id="L52">        this.isDebate = isDebate;</span>
+<span class="fc" id="L53">    }</span>
 
     public void update(String title, String content, Boolean debate) {
-<span class="pc bpc" id="L55" title="1 of 2 branches missed.">        if(title != null) {</span>
-<span class="fc" id="L56">            this.title = title;</span>
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">        if(title != null) {</span>
+<span class="fc" id="L57">            this.title = title;</span>
         }
-<span class="pc bpc" id="L58" title="1 of 2 branches missed.">        if(content != null) {</span>
-<span class="fc" id="L59">            this.content = content;</span>
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">        if(content != null) {</span>
+<span class="fc" id="L60">            this.content = content;</span>
         }
-<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        if(debate != null) {</span>
-<span class="fc" id="L62">            this.isDebate = debate;</span>
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">        if(debate != null) {</span>
+<span class="fc" id="L63">            this.isDebate = debate;</span>
         }
-<span class="fc" id="L64">    }</span>
+<span class="fc" id="L65">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
