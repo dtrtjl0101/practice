@@ -90,13 +90,13 @@ public class CreditService {
                 .orElseThrow(() -> new IllegalStateException("Credit Wallet not found"));
         wallet.addCredit(response.amount().total());
         creditTransactionRepository.save(
-                CreditTransaction.builder()
+                CreditPaymentTransaction.builder()
                         .tid(response.tid())
                         .orderId(response.partner_order_id())
                         .creditProductId(Integer.parseInt(response.item_code()))
                         .creditProductName(response.item_name())
                         .wallet(wallet)
-                        .transactionType(CreditTransactionType.CHARGE)
+                        .transactionType(CreditPaymentTransactionType.CHARGE)
                         .creditAmount(CreditProduct.getCreditProduct(Integer.parseInt(response.item_code())).getCreditAmount())
                         .paymentAmount(response.amount().total())
                         .approvedAt(response.approved_at())

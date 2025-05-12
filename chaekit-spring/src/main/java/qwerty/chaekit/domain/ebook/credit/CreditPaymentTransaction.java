@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @Table(name = "credit_transaction")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class CreditTransaction extends BaseEntity {
+public class CreditPaymentTransaction extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -36,7 +36,7 @@ public class CreditTransaction extends BaseEntity {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private CreditTransactionType transactionType;
+    private CreditPaymentTransactionType transactionType;
 
     @Column(nullable = false)
     private int creditAmount;
@@ -48,9 +48,9 @@ public class CreditTransaction extends BaseEntity {
     private LocalDateTime approvedAt;
 
     @Builder
-    public CreditTransaction(String tid, String orderId, int creditProductId, String creditProductName,
-                           CreditWallet wallet, CreditTransactionType transactionType, int creditAmount,
-                           int paymentAmount, LocalDateTime approvedAt) {
+    public CreditPaymentTransaction(String tid, String orderId, int creditProductId, String creditProductName,
+                                    CreditWallet wallet, CreditPaymentTransactionType transactionType, int creditAmount,
+                                    int paymentAmount, LocalDateTime approvedAt) {
         this.tid = tid;
         this.orderId = orderId;
         this.creditProductId = creditProductId;
