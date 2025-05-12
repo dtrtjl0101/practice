@@ -52,16 +52,13 @@ public class Discussion extends BaseEntity {
 <span class="fc" id="L52">        this.isDebate = isDebate;</span>
 <span class="fc" id="L53">    }</span>
 
-    public void update(String title, String content, Boolean debate) {
+    public void update(String title, String content) {
 <span class="pc bpc" id="L56" title="1 of 2 branches missed.">        if(title != null) {</span>
 <span class="fc" id="L57">            this.title = title;</span>
         }
 <span class="pc bpc" id="L59" title="1 of 2 branches missed.">        if(content != null) {</span>
 <span class="fc" id="L60">            this.content = content;</span>
         }
-<span class="pc bpc" id="L62" title="1 of 2 branches missed.">        if(debate != null) {</span>
-<span class="fc" id="L63">            this.isDebate = debate;</span>
-        }
-<span class="fc" id="L65">    }</span>
+<span class="fc" id="L62">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

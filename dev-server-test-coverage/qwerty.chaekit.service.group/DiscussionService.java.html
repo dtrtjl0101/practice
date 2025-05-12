@@ -93,7 +93,7 @@ public class DiscussionService {
 <span class="fc" id="L93">        Discussion discussion = getMyDiscussion(discussionId, userId);</span>
 <span class="fc" id="L94">        Long commentCount = discussionCommentRepository.countCommentsByDiscussionId(discussion.getId());</span>
 
-<span class="fc" id="L96">        discussion.update(request.title(), request.content(), request.isDebate());</span>
+<span class="fc" id="L96">        discussion.update(request.title(), request.content());</span>
 
 <span class="fc" id="L98">        return discussionMapper.toFetchResponse(discussion, commentCount, userId);</span>
     }
