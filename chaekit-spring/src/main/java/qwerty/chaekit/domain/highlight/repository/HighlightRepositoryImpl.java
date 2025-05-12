@@ -59,21 +59,9 @@ public class HighlightRepositoryImpl implements HighlightRepository {
             where.and(highlight.isPublic.eq(true));
         }
 
-//        if (me == null || me) {
-//            where.and(
-//                highlight.author.id.eq(userId)
-//                .or(highlight.isPublic.eq(true).and(
-//                    activityId != null ?
-//                    highlight.activity.id.eq(activityId) :
-//                    highlight.activity.isNull()
-//                ))
-//            );
-//        } else {
-//            where.and(highlight.isPublic.eq(true));
-//        }
-
         List<Highlight> result = jpaQueryFactory
                 .selectFrom(highlight)
+                .leftJoin(highlight.author).fetchJoin()
                 .where(where)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())

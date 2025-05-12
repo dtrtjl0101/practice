@@ -1,4 +1,4 @@
-package qwerty.chaekit.service.member.notification;
+package qwerty.chaekit.service.util;
 
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class EmailService {
+public class EmailNotificationService {
     private final JavaMailSender javaMailSender;
 
     // 본인 인증 이메일 전송
