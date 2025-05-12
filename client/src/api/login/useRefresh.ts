@@ -9,6 +9,7 @@ export default function useRefresh() {
   const user = useAtomValue(AuthState.user);
   const setLoggedInUser = useSetAtom(State.Auth.user);
   const { logout } = useLogout();
+  const setRefreshState = useSetAtom(AuthState.refreshState);
 
   const refresh = useCallback(async () => {
     if (!user) return;
@@ -36,7 +37,8 @@ export default function useRefresh() {
       localStorage.setItem("loggedInUser", JSON.stringify(next));
       return next;
     });
-  }, [user, setLoggedInUser, logout]);
+    setRefreshState(AuthState.RefreshState.IDLE);
+  }, [user, setLoggedInUser, logout, setRefreshState]);
 
   return {
     refresh,
