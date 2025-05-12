@@ -155,7 +155,7 @@ class EbookFileServiceTest {
         when(ebookRepository.findById(bookId)).thenReturn(Optional.of(ebook));
         when(ebook.getFileKey()).thenReturn(fileKey);
         when(awsProperties.ebookBucketName()).thenReturn(ebookBucket);
-        when(s3Service.getDownloadUrl(ebookBucket, S3Directory.EBOOK, fileKey)).thenReturn("http://download-url");
+        when(s3Service.getDownloadUrl(ebookBucket, fileKey)).thenReturn("http://download-url");
 
         // Act
         EbookDownloadResponse response = ebookFileService.getPresignedEbookUrl(userToken, bookId);

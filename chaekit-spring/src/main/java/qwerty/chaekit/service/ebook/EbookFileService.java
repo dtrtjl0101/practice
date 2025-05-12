@@ -68,7 +68,7 @@ public class EbookFileService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.EBOOK_NOT_FOUND));
 
         String fileKey = ebook.getFileKey();
-        String downloadUrl = s3Service.getDownloadUrl(ebookBucket, S3Directory.EBOOK, fileKey);
+        String downloadUrl = s3Service.getDownloadUrl(ebookBucket, fileKey);
 
         return EbookDownloadResponse.of(downloadUrl);
     }
