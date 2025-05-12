@@ -1,7 +1,7 @@
 import { ENV } from "../env";
 import { Api, HttpResponse } from "./api.gen";
 
-type UnsafeApiResponseBody = {
+export type UnsafeApiResponseBody = {
   isSuccessful?: boolean;
   data?: unknown;
   error?: unknown;

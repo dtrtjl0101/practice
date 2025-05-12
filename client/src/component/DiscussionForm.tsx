@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import API_CLIENT from "../api/api";
+import { useState, useEffect, act } from "react";
 import { useParams, useRouter } from "@tanstack/react-router";
 import {
   Container,
@@ -18,9 +19,9 @@ import {
   FormControlLabel,
   Box,
 } from "@mui/material";
-import { Post } from "../types/post";
+import { Discussion } from "../types/discussion";
 
-type PostFormProps = {
+type DiscussionFormProps = {
   onAddPost: (
     id: number,
     title: string,
@@ -28,18 +29,16 @@ type PostFormProps = {
     author: string,
     isDebate: boolean
   ) => void;
-  post?: Post;
+  post?: Discussion;
 };
 
-export default function Form({ onAddPost, post }: PostFormProps) {
+export default function Form({ onAddPost, post }: DiscussionFormProps) {
   const router = useRouter();
   const theme = useTheme();
 
   const params = useParams({ strict: false });
-  const postID = params.postID;
+  const postID = params.discussionId;
   const isEdit = !!postID;
-
-  post = initialPosts.find((p) => p.id === Number(postID));
 
   const [title, setTitle] = useState(post?.title || "");
   const [content, setContent] = useState(post?.content || "");
@@ -206,4 +205,20 @@ export default function Form({ onAddPost, post }: PostFormProps) {
       </Card>
     </Container>
   );
+}
+
+async function fetchDiscussion(activityId: number, title: string, content: string){
+  const response = await API_CLIENT.discussionController.createDiscussion(
+    activityId: activityId,
+    data: {
+      title,
+    content,
+  isDebate}
+  );
+
+  if (response.isSuccessful) {
+    return response.data;
+  } else {
+    throw new Error(response.errorMessage);
+  }
 }

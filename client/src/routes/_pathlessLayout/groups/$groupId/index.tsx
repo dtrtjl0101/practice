@@ -1,4 +1,8 @@
-import { createFileRoute, createLink } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  createLink,
+  useNavigate,
+} from "@tanstack/react-router";
 import { GroupInfo } from "../../../../types/groups";
 import {
   Box,
@@ -24,6 +28,7 @@ import {
   AddTask,
   Cancel,
   Check,
+  Height,
   People,
   Search,
   Settings,
@@ -186,6 +191,8 @@ function RouteComponent() {
 }
 
 function ActivityCard(props: { groupId: string }) {
+  const navigate = useNavigate();
+
   const { groupId } = props;
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -259,7 +266,12 @@ function ActivityCard(props: { groupId: string }) {
                   borderRadius: 2,
                 }}
               />
-              <Stack sx={{ flexGrow: 1 }}>
+              <Stack
+                sx={{
+                  flexGrow: 1,
+                  display: "flex",
+                }}
+              >
                 <Stack>
                   {activity ? (
                     <Typography variant="h5">{activity.bookId}</Typography>
@@ -296,9 +308,35 @@ function ActivityCard(props: { groupId: string }) {
                 </Stack>
                 <Divider />
                 {activity ? (
-                  <Typography variant="body1" sx={{ mt: 2 }}>
-                    {activity.description}
-                  </Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      position: "relative",
+                      height: 1,
+                    }}
+                  >
+                    <Typography variant="body1" sx={{ mt: 2 }}>
+                      {activity.description}
+                    </Typography>
+                    <Box
+                      sx={{
+                        mt: "auto",
+                        textAlign: "end",
+                      }}
+                    >
+                      <Button
+                        onClick={() =>
+                          navigate({
+                            to: `/groups/${groupId}/activities/${activity.activityId}/discussions`,
+                          })
+                        }
+                        sx={{ mt: 2 }}
+                      >
+                        토론게시판
+                      </Button>
+                    </Box>
+                  </Box>
                 ) : (
                   <Skeleton sx={{ mt: 2 }} />
                 )}
@@ -347,7 +385,7 @@ function ActivityCreateModal(props: {
     const response = await wrapApiResponse(
       API_CLIENT.activityController.createActivity(groupIdNumber, {
         // TODO: 검색후 책 정보 가져오기
-        bookId: 0,
+        bookId: 1,
         endTime: endDate.toISOString(),
         startTime: startDate.toISOString(),
         description,

@@ -25,9 +25,6 @@ function Home() {
         <LinkButton variant="contained" color="primary" to="/about">
           Go to About Page
         </LinkButton>
-        <LinkButton variant="contained" color="primary" to="/posts">
-          Go to Post List Page
-        </LinkButton>
       </Stack>
     </Container>
   );

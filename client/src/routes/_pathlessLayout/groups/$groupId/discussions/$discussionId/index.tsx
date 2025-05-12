@@ -7,19 +7,23 @@ import {
   Divider,
   Stack,
 } from "@mui/material";
-import { initialPosts, Post } from "../../../../../../types/post";
+import { useQuery } from "@tanstack/react-query";
+import API_CLIENT, { wrapApiResponse } from "../../../../../../api/api";
+import { Discussion } from "../../../../../../types/discussion";
 import { useState } from "react";
 import CommentSection from "../../../../../../component/CommentSection";
 import { Comment } from "../../../../../../types/comment";
 
-export const Route = createFileRoute("/_pathlessLayout/groups/$groupId/discussions/$discussionId/")({
+export const Route = createFileRoute(
+  "/_pathlessLayout/groups/$groupId/discussions/$discussionId/"
+)({
   component: PostID,
 });
 
 function PostID() {
   const navigate = useNavigate();
-  const { postID } = Route.useParams();
-  const post = initialPosts.find((p) => p.id === Number(postID));
+  const { discussionId } = Route.useParams();
+  const post = initialPosts.find((p) => p.id === Number(discussionId));
 
   if (!post) return <Typography>게시글을 찾을 수 없습니다.</Typography>;
 
@@ -70,7 +74,7 @@ function PostID() {
     );
   };
 
-  const [posts, setPosts] = useState<Post[]>(initialPosts);
+  const [discussions, setDiscussions] = useState<Discussion[]>(initialPosts);
 
   const onDeletePost = (id: number) => {
     const updatedPosts = posts.filter((post) => post.id !== id);
