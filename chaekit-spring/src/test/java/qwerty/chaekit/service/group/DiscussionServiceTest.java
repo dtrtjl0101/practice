@@ -181,7 +181,7 @@ class DiscussionServiceTest {
         // given
         Long discussionId = 1L;
         UserToken userToken = UserToken.of(1L, 1L, "test@example.com");
-        DiscussionPatchRequest request = new DiscussionPatchRequest("Updated Title", "Updated Content", true);
+        DiscussionPatchRequest request = new DiscussionPatchRequest("Updated Title", "Updated Content");
         UserProfile author = UserProfile.builder().id(1L).build();
         Discussion discussion = Discussion.builder()
                 .id(discussionId)
@@ -204,7 +204,6 @@ class DiscussionServiceTest {
         assertNotNull(response);
         assertEquals("Updated Title", response.title());
         assertEquals("Updated Content", response.content());
-        assertTrue(response.isDebate());
         assertEquals(2L, response.commentCount());
     }
 
