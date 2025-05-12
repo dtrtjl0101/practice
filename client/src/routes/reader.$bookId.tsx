@@ -43,6 +43,7 @@ import { Highlight } from "../types/highlight";
 import useAutoLogin from "../api/login/useAutoLogin";
 import useAutoTokenRefresh from "../api/login/useAutoTokenRefresh";
 import loadBook from "../util/loadBook";
+import useInvalidateQueriesOnAuthChange from "../api/login/useInvalidateQueriesOnAuthChange";
 
 export const Route = createFileRoute("/reader/$bookId")({
   component: RouteComponent,
@@ -72,6 +73,7 @@ function RouteComponent() {
   const queryClient = useQueryClient();
   useAutoLogin();
   useAutoTokenRefresh();
+  useInvalidateQueriesOnAuthChange();
   const [book, setBook] = useState<ArrayBuffer>(new ArrayBuffer(0));
 
   const spine = useMemo(() => {
