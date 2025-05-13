@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Table(name = "credit_transaction")
+@Table(name = "credit_payment_transaction")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CreditPaymentTransaction extends BaseEntity {
     @Id

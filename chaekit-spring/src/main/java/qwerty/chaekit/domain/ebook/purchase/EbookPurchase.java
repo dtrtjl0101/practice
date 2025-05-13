@@ -1,4 +1,4 @@
-package qwerty.chaekit.domain.purchase;
+package qwerty.chaekit.domain.ebook.purchase;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -11,7 +11,7 @@ import qwerty.chaekit.domain.member.user.UserProfile;
 
 @Entity
 @Getter
-@Table(name = "purchase")
+@Table(name = "ebook_purchase")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class EbookPurchase extends BaseEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

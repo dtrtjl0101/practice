@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.BatchSize;
 import qwerty.chaekit.domain.BaseEntity;
+import qwerty.chaekit.domain.ebook.credit.CreditWallet;
 import qwerty.chaekit.domain.member.Member;
 
 @Entity
@@ -27,6 +28,9 @@ public class UserProfile extends BaseEntity {
     private String nickname;
 
     private String profileImageKey;
+
+    @OneToOne(mappedBy = "user_id")
+    private CreditWallet creditWallet;
 
     @Builder
     public UserProfile(Long id, Member member, String nickname, String profileImageKey) {
