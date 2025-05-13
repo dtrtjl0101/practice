@@ -14,12 +14,15 @@ import qwerty.chaekit.domain.member.Member;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
 import qwerty.chaekit.domain.member.publisher.enums.PublisherApprovalStatus;
+import qwerty.chaekit.domain.member.user.UserProfile;
+import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.dto.member.PublisherInfoResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.service.member.admin.AdminService;
+import qwerty.chaekit.service.notification.NotificationService;
 import qwerty.chaekit.service.util.EmailNotificationService;
 import qwerty.chaekit.service.util.S3Service;
 
@@ -39,6 +42,10 @@ class AdminServiceTest {
     @Mock
     private PublisherProfileRepository publisherRepository;
     @Mock
+    private UserProfileRepository userRepository;
+    @Mock
+    private NotificationService notificationService;
+    @Mock
     private S3Service s3Service;
     @Mock
     private EmailNotificationService emailNotificationService;
@@ -53,12 +60,19 @@ class AdminServiceTest {
     void testAcceptPublisher1() {
         // given
         Long publisherId = 1L;
+        Long adminUserId = 1L;
         PublisherProfile publisher = PublisherProfile.builder()
                 .member(member)
                 .publisherName("Test Publisher")
                 .build();
+        UserProfile admin = UserProfile.builder()
+                .id(adminUserId)
+                .nickname("admin")
+                .build();
         given(publisherRepository.findByIdWithMember(publisherId))
                 .willReturn(Optional.of(publisher));
+        given(userRepository.findById(any()))
+                .willReturn(Optional.of(admin));
         // when
        adminService.acceptPublisher(publisherId);
         // then
@@ -76,9 +90,15 @@ class AdminServiceTest {
                 .member(member)
                 .publisherName("Test Publisher")
                 .build();
+        UserProfile admin = UserProfile.builder()
+                .id(1L)
+                .nickname("admin")
+                .build();
         publisher.approvePublisher();
         given(publisherRepository.findByIdWithMember(publisherId))
                 .willReturn(Optional.of(publisher));
+        given(userRepository.findById(any()))
+                .willReturn(Optional.of(admin));
         // when & then
         assertThrows(
                 BadRequestException.class,
