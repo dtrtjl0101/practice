@@ -6,23 +6,23 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.group.ReadingGroup;
-import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionCommentRepository;
+import qwerty.chaekit.domain.group.activity.discussion.Discussion;
+import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment;
+import qwerty.chaekit.domain.group.activity.discussion.comment.repository.DiscussionCommentRepository;
+import qwerty.chaekit.domain.highlight.entity.Highlight;
+import qwerty.chaekit.domain.highlight.entity.comment.HighlightComment;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.domain.notification.entity.Notification;
 import qwerty.chaekit.domain.notification.entity.NotificationType;
+import qwerty.chaekit.domain.notification.repository.NotificationJpaRepository;
 import qwerty.chaekit.dto.notification.NotificationResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.UserToken;
-import qwerty.chaekit.domain.notification.repository.NotificationJpaRepository;
-import qwerty.chaekit.domain.group.activity.discussion.Discussion;
-import qwerty.chaekit.domain.group.activity.discussion.DiscussionComment;
-import qwerty.chaekit.domain.highlight.entity.Highlight;
-import qwerty.chaekit.domain.highlight.entity.comment.HighlightComment;
 
 @Service
 @RequiredArgsConstructor

@@ -4,15 +4,13 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.reactivestreams.Publisher;
-import org.springframework.lang.Nullable;
 import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.group.activity.discussion.Discussion;
-import qwerty.chaekit.domain.group.activity.discussion.DiscussionComment;
+import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment;
+import qwerty.chaekit.domain.highlight.entity.Highlight;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.user.UserProfile;
-import qwerty.chaekit.domain.highlight.entity.Highlight;
 
 @Entity
 @Getter
