@@ -43,16 +43,6 @@ function RouteComponent() {
 
   if (!post) return <Typography>게시글을 찾을 수 없습니다.</Typography>;
 
-  const [discussions, setDiscussions] = useState<Discussion[]>(initialPosts);
-
-  const onDeletePost = (id: number) => {
-    const updatedPosts = posts.filter((post) => post.id !== id);
-    setPosts(updatedPosts);
-    initialPosts.length = 0;
-    initialPosts.push(...updatedPosts);
-    navigate({ to: "/posts" });
-  };
-
   return (
     <Container maxWidth="md" sx={{ mt: 5 }}>
       <Paper elevation={3} sx={{ p: 4 }}>
