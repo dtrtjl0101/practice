@@ -79,6 +79,9 @@ public class AdminService {
     public void acceptPublisher(Long publisherId) {
         PublisherProfile publisher = publisherRepository.findByIdWithMember(publisherId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));
+        UserProfile admin = userRepository.findById(adminUserId).orElseThrow(
+                () -> new IllegalStateException("관리자 회원정보가 존재하지 않습니다")
+        );
 
         // 이미 승인된 경우
         if (isPublisherApproved(publisher)) {
@@ -87,9 +90,6 @@ public class AdminService {
 
         // 승인 처리
         publisher.approvePublisher();
-
-        UserProfile admin = userRepository.findById(adminUserId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
    
         notificationService.createPublisherApprovedNotification(publisher, admin);
         emailNotificationService.sendPublisherApprovalEmail(publisher.getMember().getEmail());

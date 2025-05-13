@@ -124,9 +124,10 @@ public class DiscussionService {
     }
 
     public DiscussionCommentFetchResponse addComment(Long discussionId, DiscussionCommentPostRequest request, UserToken userToken) {
-        if(!discussionRepository.existsById(discussionId)){
-            throw new NotFoundException(ErrorCode.DISCUSSION_NOT_FOUND);
-        }
+        Discussion discussion = discussionRepository.findById(discussionId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.DISCUSSION_NOT_FOUND));
+        UserProfile commentAuthor = userRepository.findById(userToken.userId())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         DiscussionComment parentComment;
         if(request.parentId() != null){
@@ -142,11 +143,6 @@ public class DiscussionService {
         } else {
             parentComment = null;
         }
-
-        Discussion discussion = discussionRepository.findById(discussionId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.DISCUSSION_NOT_FOUND));
-        UserProfile commentAuthor = userRepository.findById(userToken.userId())
-                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         DiscussionComment comment = DiscussionComment.builder()
                 .author(commentAuthor)
