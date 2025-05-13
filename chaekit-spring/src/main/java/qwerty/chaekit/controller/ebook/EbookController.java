@@ -8,8 +8,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.dto.ebook.EbookFetchResponse;
-import qwerty.chaekit.dto.ebook.EbookSearchRequest;
-import qwerty.chaekit.dto.ebook.EbookSearchResponse;
 import qwerty.chaekit.dto.ebook.upload.EbookDownloadResponse;
 import qwerty.chaekit.dto.ebook.upload.EbookPostRequest;
 import qwerty.chaekit.dto.ebook.upload.EbookPostResponse;
@@ -31,8 +29,20 @@ public class EbookController {
     @GetMapping
     @Operation(summary = "전자책 목록 조회", description = "전자책 목록을 페이지네이션하여 조회합니다.")
     public ApiSuccessResponse<PageResponse<EbookFetchResponse>> getBooks(
-            @Parameter(description = "페이지네이션 정보") @ParameterObject Pageable pageable) {
-        return ApiSuccessResponse.of(ebookService.fetchEbookList(pageable));
+            @Parameter(description = "페이지네이션 정보") @ParameterObject Pageable pageable,
+            @Parameter(description = "책 제목") @RequestParam(required = false) String title,
+            @Parameter(description = "작가명") @RequestParam(required = false) String author
+
+    ) {
+        return ApiSuccessResponse.of(ebookService.fetchBooksByQuery(pageable, title, author));
+    }
+
+    @GetMapping("/{ebookId}")
+    @Operation(summary = "전자책 상세 조회", description = "전자책의 상세 정보를 조회합니다.")
+    public ApiSuccessResponse<EbookFetchResponse> getBook(
+            @Parameter(description = "조회할 전자책 ID") @PathVariable Long ebookId
+    ) {
+        return ApiSuccessResponse.of(ebookService.fetchById(ebookId));
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -46,15 +56,9 @@ public class EbookController {
     @GetMapping("/download/{ebookId}")
     @Operation(summary = "전자책 다운로드 URL 생성", description = "관리자가 전자책 다운로드를 위한 URL을 생성합니다.")
     public ApiSuccessResponse<EbookDownloadResponse> downloadFile(
-            @Login UserToken userToken,
+            @Parameter(hidden = true) @Login UserToken userToken,
             @Parameter(description = "다운로드할 전자책 ID") @PathVariable Long ebookId) {
         return ApiSuccessResponse.of(ebookFileService.getPresignedEbookUrl(userToken, ebookId));
     }
 
-    @GetMapping("/search")
-    public ApiSuccessResponse<PageResponse<EbookSearchResponse>> searchEbooks(
-            @ParameterObject Pageable pageable,
-            @ModelAttribute EbookSearchRequest request) {
-        return ApiSuccessResponse.of(ebookService.searchEbooks(request, pageable));
-    }
 }

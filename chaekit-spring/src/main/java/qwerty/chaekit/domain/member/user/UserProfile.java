@@ -29,7 +29,7 @@ public class UserProfile extends BaseEntity {
 
     private String profileImageKey;
 
-    @OneToOne(mappedBy = "user_id")
+    @OneToOne(mappedBy = "user")
     private CreditWallet creditWallet;
 
     @Builder

@@ -25,6 +25,34 @@ public class EbookRepositoryImpl implements EbookRepository {
     }
 
     @Override
+    public Page<Ebook> findAllByTitleAndAuthor(String title, String author, Pageable pageable) {
+        QEbook ebook = QEbook.ebook;
+        BooleanBuilder where = new BooleanBuilder();
+
+        if (author != null && !author.isBlank()) {
+            where.and(ebook.author.startsWith(author));
+        }
+        if (title != null && !title.isBlank()) {
+            where.and(ebook.title.contains(title));
+        }
+
+        List<Ebook> result = jpaQueryFactory
+                .selectFrom(ebook)
+                .where(where)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        long total = Optional.ofNullable(jpaQueryFactory
+                .select(ebook.count())
+                .from(ebook)
+                .where(where)
+                .fetchOne()).orElse(0L);
+
+        return new PageImpl<>(result, pageable, total);
+    }
+
+    @Override
     public Optional<Ebook> findById(Long id) {
         return ebookJpaRepository.findById(id);
     }
@@ -42,33 +70,5 @@ public class EbookRepositoryImpl implements EbookRepository {
     @Override
     public Ebook getReferenceById(Long id) {
         return ebookJpaRepository.getReferenceById(id);
-    }
-
-    @Override
-    public Page<Ebook> searchEbooks(String authorName, String bookTitle, Pageable pageable) {
-        QEbook ebook = QEbook.ebook;
-        BooleanBuilder where = new BooleanBuilder();
-
-        if (authorName != null && !authorName.isEmpty()) {
-            where.and(ebook.author.contains(authorName));
-        }
-        if (bookTitle != null && !bookTitle.isEmpty()) {
-            where.and(ebook.title.contains(bookTitle));
-        }
-
-        List<Ebook> result = jpaQueryFactory
-                .selectFrom(ebook)
-                .where(where)
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
-
-        long total = Optional.ofNullable(jpaQueryFactory
-                .select(ebook.count())
-                .from(ebook)
-                .where(where)
-                .fetchOne()).orElse(0L);
-
-        return new PageImpl<>(result, pageable, total);
     }
 }

@@ -10,9 +10,9 @@ import java.util.Optional;
 @Repository
 public interface EbookRepository {
     Page<Ebook> findAll(Pageable pageable);
+    Page<Ebook> findAllByTitleAndAuthor(String title, String author, Pageable pageable);
     Optional<Ebook> findById(Long id);
     Ebook save(Ebook ebook);
     boolean existsById(Long id);
     Ebook getReferenceById(Long id);
-    Page<Ebook> searchEbooks(String authorName, String bookTitle, Pageable pageable);
 }
