@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import State from "../../states";
-import API_CLIENT, { wrapApiResponse } from "../api";
+import API_CLIENT from "../api";
 import { useAtom } from "jotai";
 
 export default function useLogout() {
@@ -13,11 +13,9 @@ export default function useLogout() {
 
     let refreshToken = loggedInUser?.refreshToken;
     if (refreshToken) {
-      await wrapApiResponse(
-        API_CLIENT.tokenController.logout({
-          refreshToken,
-        })
-      );
+      await API_CLIENT.tokenController.logout({
+        refreshToken,
+      });
     }
   }, [loggedInUser, setLoggedInUser]);
 

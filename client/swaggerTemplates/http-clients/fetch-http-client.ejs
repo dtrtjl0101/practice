@@ -32,6 +32,7 @@ export interface ApiConfig<SecurityDataType = unknown> {
     baseApiParams?: Omit<RequestParams, "baseUrl" | "cancelToken" | "signal">;
     securityWorker?: (securityData: SecurityDataType | null) => Promise<RequestParams | void> | RequestParams | void;
     customFetch?: typeof fetch;
+    onExpiredAccessToken?: () => void;
 }
 
 export interface HttpResponse<D extends unknown, E extends unknown = unknown> extends Response {
@@ -48,12 +49,31 @@ export enum ContentType {
     Text = "text/plain",
 }
 
+type UnsafeApiResponseBody = {
+    isSuccessful?: boolean;
+    data?: unknown;
+    error?: unknown;
+};
+
+export type ApiResponse<D, E> =
+    | {
+            isSuccessful: true;
+            data: D;
+      }
+    | {
+            isSuccessful: false;
+            error: E;
+            errorCode: string;
+            errorMessage: string;
+      };
+
 export class HttpClient<SecurityDataType = unknown> {
     public baseUrl: string = "<%~ apiConfig.baseUrl %>";
     private securityData: SecurityDataType | null = null;
     private securityWorker?: ApiConfig<SecurityDataType>["securityWorker"];
     private abortControllers = new Map<CancelToken, AbortController>();
     private customFetch = (...fetchParams: Parameters<typeof fetch>) => fetch(...fetchParams);
+    private onExpiredAccessToken?: ApiConfig<SecurityDataType>["onExpiredAccessToken"];
 
     private baseApiParams: RequestParams = {
         credentials: 'same-origin',
@@ -171,7 +191,11 @@ export class HttpClient<SecurityDataType = unknown> {
         }
     }
 
-    public request = async <T = any, E = any>({
+    public request = async <
+        T = any,
+        E = any,
+        R = ApiResponse<NonNullable<T["data"]>, E>,
+    >({
         body,
         secure,
         path,
@@ -184,7 +208,7 @@ export class HttpClient<SecurityDataType = unknown> {
 <% if (config.unwrapResponseData) { %>
     }: FullRequestParams): Promise<T> => {
 <% } else { %>
-    }: FullRequestParams): Promise<HttpResponse<T, E>> => {
+    }: FullRequestParams): Promise<R> => {
 <% } %>
         const secureParams = ((typeof secure === 'boolean' ? secure : this.baseApiParams.secure) && this.securityWorker && await this.securityWorker(this.securityData)) || {};
         const requestParams = this.mergeRequestParams(params, secureParams);
@@ -205,35 +229,33 @@ export class HttpClient<SecurityDataType = unknown> {
         }
         ).then(async (response) => {
             const r = response.clone() as HttpResponse<T, E>;
-            r.data = (null as unknown) as T;
-            r.error = (null as unknown) as E;
+            r.data = null as unknown as T;
+            r.error = null as unknown as E;
 
-            const data = !responseFormat ? r : await response[responseFormat]()
+            const data = await response[responseFormat || "json"]()
                 .then((data) => {
-                    if (r.ok) {
-                        r.data = data;
-                    } else {
-                        r.error = data;
-                    }
-                    return r;
+                    return data as R;
                 })
-                .catch((e) => {
-                    r.error = e;
-                    return r;
+                .catch((error) => {
+                    return {
+                        isSuccessful: false,
+                        error: error,
+                        errorCode: "UNKNOWN_ERROR",
+                        errorMessage: "Unknown error occurred",
+                    } as R;
                 });
+
+            if (!data.isSuccessful) {
+                if (data.errorCode === "EXPIRED_ACCESS_TOKEN") {
+                    this.onExpiredAccessToken();
+                }
+            }
 
             if (cancelToken) {
                 this.abortControllers.delete(cancelToken);
             }
 
-<% if (!config.disableThrowOnError) { %>
-            if (!response.ok) throw data;
-<% } %>
-<% if (config.unwrapResponseData) { %>
-            return data.data;
-<% } else { %>
             return data;
-<% } %>
         });
     };
 }

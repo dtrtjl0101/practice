@@ -20,7 +20,7 @@ import { Highlight } from "../types/highlight";
 import { Fragment, useState } from "react";
 import { Delete, Edit, Sort } from "@mui/icons-material";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import API_CLIENT, { wrapApiResponse } from "../api/api";
+import API_CLIENT from "../api/api";
 
 type HighlightFilterKind = {
   kind: "MyHighlights";
@@ -53,13 +53,11 @@ export default function HighlightBrowserModal(props: {
   } = useInfiniteQuery({
     queryKey: ["highlights", highlightFilterKind],
     queryFn: async ({ pageParam }) => {
-      const response = await wrapApiResponse(
-        API_CLIENT.highlightController.getHighlights({
-          page: pageParam,
-          size: 30,
-          ...getHighlightFilter(highlightFilterKind),
-        })
-      );
+      const response = await API_CLIENT.highlightController.getHighlights({
+        page: pageParam,
+        size: 30,
+        ...getHighlightFilter(highlightFilterKind),
+      });
       if (!response.isSuccessful) {
         console.error(response.errorCode);
         throw new Error(response.errorCode);

@@ -1,6 +1,6 @@
 import { Container, Modal } from "@mui/material";
 import GroupEditForm, { GroupEditData } from "./GroupEditForm";
-import API_CLIENT, { wrapApiResponse } from "../../api/api";
+import API_CLIENT from "../../api/api";
 import { useNavigate } from "@tanstack/react-router";
 
 export default function GroupCreateModal(props: {
@@ -13,14 +13,12 @@ export default function GroupCreateModal(props: {
 
   const handleEditDone = async (data: GroupEditData) => {
     const { name, description, tags, groupImage } = data;
-    const response = await wrapApiResponse(
-      API_CLIENT.groupController.createGroup({
-        name,
-        description,
-        tags,
-        groupImage,
-      })
-    );
+    const response = await API_CLIENT.groupController.createGroup({
+      name,
+      description,
+      tags,
+      groupImage,
+    });
 
     if (!response.isSuccessful) {
       console.error(response.errorMessage);

@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { AuthState } from "../../states/auth";
 import { useAtomValue, useSetAtom } from "jotai";
-import API_CLIENT, { wrapApiResponse } from "../api";
+import API_CLIENT from "../api";
 import useLogout from "./useLogout";
 import State from "../../states";
 
@@ -14,11 +14,9 @@ export default function useRefresh() {
   const refresh = useCallback(async () => {
     if (!user) return;
 
-    const response = await wrapApiResponse(
-      API_CLIENT.tokenController.refreshAccessToken({
-        refreshToken: user.refreshToken,
-      })
-    );
+    const response = await API_CLIENT.tokenController.refreshAccessToken({
+      refreshToken: user.refreshToken,
+    });
 
     if (!response.isSuccessful) {
       console.error("Failed to refresh token", response.errorCode);

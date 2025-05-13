@@ -837,6 +837,7 @@ export interface ApiConfig<SecurityDataType = unknown> {
     securityData: SecurityDataType | null,
   ) => Promise<RequestParams | void> | RequestParams | void;
   customFetch?: typeof fetch;
+  onExpiredAccessToken?: () => void;
 }
 
 export interface HttpResponse<D extends unknown, E extends unknown = unknown>
@@ -854,6 +855,24 @@ export enum ContentType {
   Text = "text/plain",
 }
 
+type UnsafeApiResponseBody = {
+  isSuccessful?: boolean;
+  data?: unknown;
+  error?: unknown;
+};
+
+export type ApiResponse<D, E> =
+  | {
+      isSuccessful: true;
+      data: D;
+    }
+  | {
+      isSuccessful: false;
+      error: E;
+      errorCode: string;
+      errorMessage: string;
+    };
+
 export class HttpClient<SecurityDataType = unknown> {
   public baseUrl: string = "";
   private securityData: SecurityDataType | null = null;
@@ -861,6 +880,7 @@ export class HttpClient<SecurityDataType = unknown> {
   private abortControllers = new Map<CancelToken, AbortController>();
   private customFetch = (...fetchParams: Parameters<typeof fetch>) =>
     fetch(...fetchParams);
+  private onExpiredAccessToken?: ApiConfig<SecurityDataType>["onExpiredAccessToken"];
 
   private baseApiParams: RequestParams = {
     credentials: "same-origin",
@@ -930,8 +950,8 @@ export class HttpClient<SecurityDataType = unknown> {
           return formData;
         }
         if (property instanceof Array) {
-          return property.reduce((property) => {
-            formData.append(key, property);
+          return property.reduce((formData, property) => {
+            formData.append(key, `${property}`);
             return formData;
           }, formData);
         }
@@ -939,8 +959,14 @@ export class HttpClient<SecurityDataType = unknown> {
           formData.append(key, JSON.stringify(property));
           return formData;
         }
-        return formData;
-      }, formData),
+        if (typeof property === "number" || typeof property === "string") {
+          formData.append(key, `${property}`);
+          return formData;
+        }
+        throw new Error(
+          `The request body property "${key}" is not a valid type.`,
+        );
+      }, new FormData()),
     [ContentType.UrlEncoded]: (input: any) => this.toQueryString(input),
   };
 
@@ -985,7 +1011,11 @@ export class HttpClient<SecurityDataType = unknown> {
     }
   };
 
-  public request = async <T = any, E = any>({
+  public request = async <
+    T = any,
+    E = any,
+    R = ApiResponse<NonNullable<T["data"]>, E>,
+  >({
     body,
     secure,
     path,
@@ -995,7 +1025,7 @@ export class HttpClient<SecurityDataType = unknown> {
     baseUrl,
     cancelToken,
     ...params
-  }: FullRequestParams): Promise<HttpResponse<T, E>> => {
+  }: FullRequestParams): Promise<R> => {
     const secureParams =
       ((typeof secure === "boolean" ? secure : this.baseApiParams.secure) &&
         this.securityWorker &&
@@ -1030,27 +1060,29 @@ export class HttpClient<SecurityDataType = unknown> {
       r.data = null as unknown as T;
       r.error = null as unknown as E;
 
-      const data = !responseFormat
-        ? r
-        : await response[responseFormat]()
-            .then((data) => {
-              if (r.ok) {
-                r.data = data;
-              } else {
-                r.error = data;
-              }
-              return r;
-            })
-            .catch((e) => {
-              r.error = e;
-              return r;
-            });
+      const data = await response[responseFormat || "json"]()
+        .then((data) => {
+          return data as R;
+        })
+        .catch((error) => {
+          return {
+            isSuccessful: false,
+            error: error,
+            errorCode: "UNKNOWN_ERROR",
+            errorMessage: "Unknown error occurred",
+          } as R;
+        });
+
+      if (!data.isSuccessful) {
+        if (data.errorCode === "EXPIRED_ACCESS_TOKEN") {
+          this.onExpiredAccessToken();
+        }
+      }
 
       if (cancelToken) {
         this.abortControllers.delete(cancelToken);
       }
 
-      if (!response.ok) throw data;
       return data;
     });
   };

@@ -10,7 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import API_CLIENT, { wrapApiResponse } from "../api/api";
+import API_CLIENT from "../api/api";
 import { JSX, PropsWithChildren, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import PageNavigation from "./PageNavigation";
@@ -33,13 +33,11 @@ export default function GroupList(props: {
   const { data: groups } = useQuery({
     queryKey: ["groupList", page, sort, pageSize],
     queryFn: async () => {
-      const response = await wrapApiResponse(
-        API_CLIENT.groupController.getAllGroups({
-          page,
-          size: pageSize,
-          sort,
-        })
-      );
+      const response = await API_CLIENT.groupController.getAllGroups({
+        page,
+        size: pageSize,
+        sort,
+      });
 
       if (response.isSuccessful) {
         setTotalPages(response.data.totalPages!);
