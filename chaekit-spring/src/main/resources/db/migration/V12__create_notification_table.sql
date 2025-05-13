@@ -14,8 +14,8 @@ CREATE TABLE `notification` (
     KEY `FK_notification_sender` (`sender_id`),
     KEY `FK_notification_publisher` (`publisher_id`),
     KEY `FK_notification_group` (`group_id`),
-    CONSTRAINT `FK_notification_receiver` FOREIGN KEY (`receiver_id`) REFERENCES `user_profile` (`id`),
-    CONSTRAINT `FK_notification_sender` FOREIGN KEY (`sender_id`) REFERENCES `user_profile` (`id`),
-    CONSTRAINT `FK_notification_publisher` FOREIGN KEY (`publisher_id`) REFERENCES `publisher_profile` (`id`),
-    CONSTRAINT `FK_notification_group` FOREIGN KEY (`group_id`) REFERENCES `reading_group` (`id`)
+    CONSTRAINT `FK_notification_receiver` FOREIGN KEY (`receiver_id`) REFERENCES `user_profile` (`id`) ON DELETE SET NULL,
+    CONSTRAINT `FK_notification_sender` FOREIGN KEY (`sender_id`) REFERENCES `user_profile` (`id`) ON DELETE SET NULL,
+    CONSTRAINT `FK_notification_publisher` FOREIGN KEY (`publisher_id`) REFERENCES `publisher_profile` (`id`) ON DELETE SET NULL,
+    CONSTRAINT `FK_notification_group` FOREIGN KEY (`group_id`) REFERENCES `reading_group` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; 

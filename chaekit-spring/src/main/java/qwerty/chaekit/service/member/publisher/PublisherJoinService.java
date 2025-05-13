@@ -44,12 +44,6 @@ public class PublisherJoinService {
         Member member = memberJoinHelper.saveMemberWithVerificationCode(email, password, Role.ROLE_PUBLISHER, verificationCode);
         PublisherProfile publisher = savePublisher(request, member, imageFileKey);
 
-        //UserProfile adminProfile = userProfileRepository.findById(adminService.getAdminUserId())
-        //        .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
-        //UserProfile publisherProfile = publisherRepository.findByMember_Id(publisher.getId())
-         //       .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
-        //notificationService.createPublisherJoinRequestNotification(adminProfile, publisherProfile);
-
         return toResponse(member, publisher);
     }
 

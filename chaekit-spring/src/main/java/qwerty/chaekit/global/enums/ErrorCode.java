@@ -95,6 +95,7 @@ public enum ErrorCode {
     // Notification related
     NOTIFICATION_NOT_FOUND("NOTIFICATION_NOT_FOUND", "해당 알림이 존재하지 않습니다"),
     NOTIFICATION_NOT_YOURS("NOTIFICATION_NOT_YOURS", "본인의 알림만 읽음 처리할 수 있습니다"),
+    NOTIFICATION_CONTENT_DELETED("NOTIFICATION_CONTENT_DELETED", "알림과 관련된 내용이 삭제되었습니다"),
     ;
 
     private final String code;
