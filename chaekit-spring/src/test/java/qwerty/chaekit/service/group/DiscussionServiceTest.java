@@ -9,10 +9,10 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import qwerty.chaekit.domain.group.activity.Activity;
-import qwerty.chaekit.domain.group.activity.ActivityRepository;
+import qwerty.chaekit.domain.group.activity.repository.ActivityRepository;
 import qwerty.chaekit.domain.group.activity.discussion.Discussion;
-import qwerty.chaekit.domain.group.activity.discussion.DiscussionComment;
-import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionCommentRepository;
+import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment;
+import qwerty.chaekit.domain.group.activity.discussion.comment.repository.DiscussionCommentRepository;
 import qwerty.chaekit.domain.group.activity.discussion.repository.DiscussionRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
@@ -181,7 +181,7 @@ class DiscussionServiceTest {
         // given
         Long discussionId = 1L;
         UserToken userToken = UserToken.of(1L, 1L, "test@example.com");
-        DiscussionPatchRequest request = new DiscussionPatchRequest("Updated Title", "Updated Content", true);
+        DiscussionPatchRequest request = new DiscussionPatchRequest("Updated Title", "Updated Content");
         UserProfile author = UserProfile.builder().id(1L).build();
         Discussion discussion = Discussion.builder()
                 .id(discussionId)
@@ -204,7 +204,6 @@ class DiscussionServiceTest {
         assertNotNull(response);
         assertEquals("Updated Title", response.title());
         assertEquals("Updated Content", response.content());
-        assertTrue(response.isDebate());
         assertEquals(2L, response.commentCount());
     }
 

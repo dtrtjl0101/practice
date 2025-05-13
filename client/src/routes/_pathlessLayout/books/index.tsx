@@ -36,7 +36,7 @@ function RouteComponent() {
     queryKey: ["bookList", page, sort, pageSize],
     queryFn: async () => {
       const response = await wrapApiResponse(
-        API_CLIENT.ebook.getBooks({
+        API_CLIENT.ebookController.getBooks({
           page,
           size: pageSize,
           sort,

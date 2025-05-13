@@ -5,9 +5,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import qwerty.chaekit.domain.group.GroupMember;
-import qwerty.chaekit.domain.group.GroupMemberRepository;
-import qwerty.chaekit.domain.group.GroupRepository;
+import qwerty.chaekit.domain.group.groupmember.GroupMember;
+import qwerty.chaekit.domain.group.groupmember.GroupMemberRepository;
+import qwerty.chaekit.domain.group.repository.GroupRepository;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
@@ -20,8 +20,8 @@ import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.properties.AwsProperties;
 import qwerty.chaekit.global.security.resolver.UserToken;
-import qwerty.chaekit.service.member.notification.EmailService;
 import qwerty.chaekit.service.notification.NotificationService;
+import qwerty.chaekit.service.util.EmailNotificationService;
 import qwerty.chaekit.service.util.S3Service;
 
 @Service
@@ -30,7 +30,7 @@ public class GroupService {
     private final UserProfileRepository userRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final GroupRepository groupRepository;
-    private final EmailService emailService;
+    private final EmailNotificationService emailNotificationService;
     private final S3Service s3Service;
     private final AwsProperties awsProperties;
     private final NotificationService notificationService;
@@ -168,7 +168,6 @@ public class GroupService {
 
         GroupMember groupMember = group.approveMember(memberProfile);
 
-        emailService.sendReadingGroupApprovalEmail(memberProfile.getMember().getEmail());
 
         notificationService.createGroupJoinApprovedNotification(
             memberProfile,
@@ -176,6 +175,7 @@ public class GroupService {
             group
         );
         
+        emailNotificationService.sendReadingGroupApprovalEmail(memberProfile.getMember().getEmail());
         return GroupJoinResponse.of(groupMember);
     }
 

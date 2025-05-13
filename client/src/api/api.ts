@@ -1,5 +1,7 @@
+import { getDefaultStore } from "jotai";
 import { ENV } from "../env";
 import { Api, HttpResponse } from "./api.gen";
+import State from "../states";
 
 type UnsafeApiResponseBody = {
   isSuccessful?: boolean;
@@ -52,6 +54,12 @@ export async function wrapApiResponse<
 
   if (typeof data.isSuccessful === "boolean") {
     if (!data.isSuccessful) {
+      if ((data as any).errorCode === "EXPIRED_ACCESS_TOKEN") {
+        getDefaultStore().set(
+          State.Auth.refreshState,
+          State.Auth.RefreshState.NEED_REFRESH
+        );
+      }
       console.error(data);
     }
     return data as unknown as SafeBody;
@@ -73,7 +81,7 @@ const api = new Api<string>({
   securityWorker: async (accessToken) => {
     return {
       headers: {
-        ...(accessToken ? { Authorization: accessToken } : {}),
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       },
     };
   },

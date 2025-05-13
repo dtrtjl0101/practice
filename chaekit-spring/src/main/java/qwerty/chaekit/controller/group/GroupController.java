@@ -42,10 +42,11 @@ public class GroupController {
         return ApiSuccessResponse.of(groupService.fetchGroup(userToken, groupId));
     }
 
-    @PatchMapping("/{groupId}")
-    public ApiSuccessResponse<GroupPostResponse> updateGroup(@Login UserToken userToken,
-                                         @PathVariable long groupId,
-                                         @ModelAttribute @Valid GroupPatchRequest request) {
+    @PatchMapping(value = "/{groupId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiSuccessResponse<GroupPostResponse> updateGroup(
+            @Parameter(hidden = true) @Login UserToken userToken,
+            @PathVariable long groupId,
+            @ModelAttribute @Valid GroupPatchRequest request) {
         return ApiSuccessResponse.of(groupService.updateGroup(userToken, groupId, request));
     }
 

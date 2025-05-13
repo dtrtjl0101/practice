@@ -40,7 +40,7 @@ function RouteComponent() {
         return;
       }
       const response = await wrapApiResponse(
-        API_CLIENT.ebook.uploadFile({
+        API_CLIENT.ebookController.uploadFile({
           title,
           file,
           description,

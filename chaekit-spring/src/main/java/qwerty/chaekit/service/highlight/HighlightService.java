@@ -6,25 +6,25 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import qwerty.chaekit.domain.ebook.EbookRepository;
-import qwerty.chaekit.domain.group.GroupMemberRepository;
-import qwerty.chaekit.domain.group.activity.Activity;
+import qwerty.chaekit.domain.ebook.repository.EbookRepository;
+import qwerty.chaekit.domain.group.activity.repository.ActivityRepository;
 import qwerty.chaekit.domain.highlight.entity.Highlight;
 import qwerty.chaekit.domain.highlight.entity.reaction.HighlightReaction;
 import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
+import qwerty.chaekit.domain.highlight.repository.reaction.HighlightReactionRepository;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
-import qwerty.chaekit.domain.group.activity.ActivityRepository;
 import qwerty.chaekit.dto.highlight.HighlightFetchResponse;
 import qwerty.chaekit.dto.highlight.HighlightPostRequest;
 import qwerty.chaekit.dto.highlight.HighlightPostResponse;
 import qwerty.chaekit.dto.highlight.HighlightPutRequest;
+import qwerty.chaekit.dto.highlight.reaction.ReactionResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.UserToken;
-import qwerty.chaekit.domain.highlight.repository.reaction.HighlightReactionRepository;
-import qwerty.chaekit.dto.highlight.reaction.ReactionResponse;
+import qwerty.chaekit.service.util.S3Service;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,6 +38,7 @@ public class HighlightService {
     private final UserProfileRepository userRepository;
     private final ActivityRepository activityRepository;
     private final HighlightReactionRepository reactionRepository;
+    private final S3Service s3Service;
 
     public HighlightPostResponse createHighlight(UserToken userToken, HighlightPostRequest request) {
         Long userId = userToken.userId();
@@ -47,7 +48,6 @@ public class HighlightService {
         if(!ebookRepository.existsById(request.bookId())) {
             throw new NotFoundException(ErrorCode.EBOOK_NOT_FOUND);
         }
-
         Highlight highlight = Highlight.builder()
                 .book(ebookRepository.getReferenceById(request.bookId()))
                 .spine(request.spine())
@@ -68,7 +68,12 @@ public class HighlightService {
         }
         */
         Page<Highlight> highlights = highlightRepository.findHighlights(pageable, userToken.userId(), activityId, bookId, spine, me);
-        return PageResponse.of(highlights.map(HighlightFetchResponse::of));
+        return PageResponse.of(highlights.map(
+                highlight -> HighlightFetchResponse.of(
+                        highlight,
+                        s3Service.convertToPublicImageURL(highlight.getAuthor().getProfileImageKey())
+                )
+        ));
     }
 
     @Transactional

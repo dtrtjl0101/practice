@@ -1,24 +1,23 @@
-#Use an official OpenJDK runtime as a parent image
 FROM openjdk:17-jdk-slim
 
-#Set the working directory in the container
 WORKDIR /app
 
-#Copy the Gradle wrapper and project files to the container
+# 1. Gradle 관련 메타파일만 먼저 복사 → 캐시 유지 목적
 COPY gradlew .
 COPY gradle/ gradle/
 COPY build.gradle .
 COPY settings.gradle .
-COPY src/ src/
-#COPY .env .
-#Make the Gradle wrapper executable
+
+# 2. Gradle wrapper 실행 권한
 RUN chmod +x gradlew
 
-#Download the Gradle distribution
-RUN ./gradlew --version
+# 3. 의존성만 먼저 받아 캐시 (변하지 않으면 매번 재사용)
+RUN ./gradlew dependencies || true
 
-#Build the application
-RUN ./gradlew build -x test
+# 4. 소스 코드 COPY (변경 잦으므로 최하단)
+COPY src/ src/
 
-#Run the application#
-CMD ["java", "-jar", "build/libs/chaekit-0.0.1-SNAPSHOT.jar"]
+# 5. 실제 빌드 (한 번만)
+RUN ./gradlew clean build -x test
+
+CMD ["java", "-Xms128m", "-Xmx256m", "-XX:+UseSerialGC", "-jar", "build/libs/chaekit-0.0.1-SNAPSHOT.jar"]

@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.group.activity.Activity;
+import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment;
 import qwerty.chaekit.domain.member.user.UserProfile;
 
 import java.util.ArrayList;
@@ -51,15 +52,12 @@ public class Discussion extends BaseEntity {
         this.isDebate = isDebate;
     }
 
-    public void update(String title, String content, Boolean debate) {
+    public void update(String title, String content) {
         if(title != null) {
             this.title = title;
         }
         if(content != null) {
             this.content = content;
-        }
-        if(debate != null) {
-            this.isDebate = debate;
         }
     }
 }
