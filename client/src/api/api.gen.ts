@@ -290,6 +290,12 @@ export interface DiscussionCommentPostRequest {
   stance: "AGREE" | "DISAGREE" | "NEUTRAL";
 }
 
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseDiscussionCommentFetchResponse {
+  isSuccessful?: boolean;
+  data?: DiscussionCommentFetchResponse;
+}
+
 export interface DiscussionCommentFetchResponse {
   /** @format int64 */
   commentId?: number;
@@ -308,6 +314,29 @@ export interface DiscussionCommentFetchResponse {
   /** @format int64 */
   parentId?: number;
   replies?: DiscussionCommentFetchResponse[];
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseCreditPaymentApproveResponse {
+  isSuccessful?: boolean;
+  data?: CreditPaymentApproveResponse;
+}
+
+export interface CreditPaymentApproveResponse {
+  orderId?: string;
+  /** @format int32 */
+  creditProductId?: number;
+  creditProductName?: string;
+  paymentMethod?: string;
+  /** @format int32 */
+  paymentAmount?: number;
+  /** @format date-time */
+  approvedAt?: string;
+}
+
+export interface CreditPaymentReadyRequest {
+  /** @format int64 */
+  creditProductId?: number;
 }
 
 /** 전자책 업로드 요청 데이터 */
@@ -358,6 +387,12 @@ export interface DiscussionPostRequest {
   isDebate: boolean;
 }
 
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseDiscussionFetchResponse {
+  isSuccessful?: boolean;
+  data?: DiscussionFetchResponse;
+}
+
 export interface DiscussionFetchResponse {
   /** @format int64 */
   discussionId?: number;
@@ -404,7 +439,6 @@ export interface ActivityPatchRequest {
 export interface DiscussionPatchRequest {
   title?: string;
   content?: string;
-  isDebate?: boolean;
 }
 
 export interface DiscussionCommentPatchRequest {
@@ -451,6 +485,10 @@ export interface HighlightFetchResponse {
   id?: number;
   /** @format int64 */
   bookId?: number;
+  /** @format int64 */
+  authorId?: number;
+  authorName?: string;
+  authorProfileImageURL?: string;
   spine?: string;
   cfi?: string;
   memo?: string;
@@ -564,6 +602,12 @@ export interface PageResponseActivityFetchResponse {
   totalPages?: number;
 }
 
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseDiscussionDetailResponse {
+  isSuccessful?: boolean;
+  data?: DiscussionDetailResponse;
+}
+
 export interface DiscussionDetailResponse {
   /** @format int64 */
   discussionId?: number;
@@ -584,6 +628,65 @@ export interface DiscussionDetailResponse {
   isDebate?: boolean;
   isAuthor?: boolean;
   comments?: DiscussionCommentFetchResponse[];
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseListCreditProductInfoResponse {
+  isSuccessful?: boolean;
+  data?: CreditProductInfoResponse[];
+}
+
+export interface CreditProductInfoResponse {
+  /** @format int32 */
+  id?: number;
+  /** @format int32 */
+  creditAmount?: number;
+  /** @format int32 */
+  price?: number;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseCreditWalletResponse {
+  isSuccessful?: boolean;
+  data?: CreditWalletResponse;
+}
+
+export interface CreditWalletResponse {
+  /** @format int64 */
+  walletId?: number;
+  /** @format int64 */
+  balance?: number;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponsePageResponseCreditTransactionResponse {
+  isSuccessful?: boolean;
+  data?: PageResponseCreditTransactionResponse;
+}
+
+export interface CreditTransactionResponse {
+  orderId?: string;
+  /** @format int32 */
+  productId?: number;
+  productName?: string;
+  type?: "CHARGE" | "USE" | "REFUND";
+  /** @format int32 */
+  creditAmount?: number;
+  /** @format int32 */
+  paymentAmount?: number;
+  description?: string;
+  /** @format date-time */
+  approvedAt?: string;
+}
+
+export interface PageResponseCreditTransactionResponse {
+  content?: CreditTransactionResponse[];
+  /** @format int32 */
+  currentPage?: number;
+  /** @format int64 */
+  totalItems?: number;
+  /** @format int32 */
+  totalPages?: number;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -682,6 +785,12 @@ export interface PageResponsePublisherInfoResponse {
   totalItems?: number;
   /** @format int32 */
   totalPages?: number;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponsePageResponseDiscussionFetchResponse {
+  isSuccessful?: boolean;
+  data?: PageResponseDiscussionFetchResponse;
 }
 
 export interface PageResponseDiscussionFetchResponse {
@@ -813,16 +922,25 @@ export class HttpClient<SecurityDataType = unknown> {
     [ContentType.FormData]: (input: any) =>
       Object.keys(input || {}).reduce((formData, key) => {
         const property = input[key];
-        formData.append(
-          key,
-          property instanceof Blob
-            ? property
-            : typeof property === "object" && property !== null
-              ? JSON.stringify(property)
-              : `${property}`,
-        );
+        if (property === undefined || property === null) {
+          return formData;
+        }
+        if (property instanceof Blob) {
+          formData.append(key, property);
+          return formData;
+        }
+        if (property instanceof Array) {
+          return property.reduce((property) => {
+            formData.append(key, property);
+            return formData;
+          }, formData);
+        }
+        if (typeof property === "object" && property !== null) {
+          formData.append(key, JSON.stringify(property));
+          return formData;
+        }
         return formData;
-      }, new FormData()),
+      }, formData),
     [ContentType.UrlEncoded]: (input: any) => this.toQueryString(input),
   };
 
@@ -1346,15 +1464,14 @@ export class Api<
      */
     updateGroup: (
       groupId: number,
-      query: {
-        request: GroupPatchRequest;
-      },
+      data: GroupPatchRequest,
       params: RequestParams = {},
     ) =>
       this.request<ApiSuccessResponseGroupPostResponse, any>({
         path: `/api/groups/${groupId}`,
         method: "PATCH",
-        query: query,
+        body: data,
+        type: ContentType.FormData,
         ...params,
       }),
 
@@ -1592,7 +1709,7 @@ export class Api<
       data: DiscussionCommentPostRequest,
       params: RequestParams = {},
     ) =>
-      this.request<DiscussionCommentFetchResponse, any>({
+      this.request<ApiSuccessResponseDiscussionCommentFetchResponse, any>({
         path: `/api/discussions/${discussionId}/comments`,
         method: "POST",
         body: data,
@@ -1628,7 +1745,7 @@ export class Api<
       },
       params: RequestParams = {},
     ) =>
-      this.request<PageResponseDiscussionFetchResponse, any>({
+      this.request<ApiSuccessResponsePageResponseDiscussionFetchResponse, any>({
         path: `/api/activities/${activityId}/discussions`,
         method: "GET",
         query: query,
@@ -1648,7 +1765,7 @@ export class Api<
       data: DiscussionPostRequest,
       params: RequestParams = {},
     ) =>
-      this.request<DiscussionFetchResponse, any>({
+      this.request<ApiSuccessResponseDiscussionFetchResponse, any>({
         path: `/api/activities/${activityId}/discussions`,
         method: "POST",
         body: data,
@@ -1665,7 +1782,7 @@ export class Api<
      * @request GET:/api/discussions/{discussionId}
      */
     getDiscussion: (discussionId: number, params: RequestParams = {}) =>
-      this.request<DiscussionDetailResponse, any>({
+      this.request<ApiSuccessResponseDiscussionDetailResponse, any>({
         path: `/api/discussions/${discussionId}`,
         method: "GET",
         ...params,
@@ -1680,7 +1797,7 @@ export class Api<
      * @request DELETE:/api/discussions/{discussionId}
      */
     deleteDiscussion: (discussionId: number, params: RequestParams = {}) =>
-      this.request<void, any>({
+      this.request<ApiSuccessResponseVoid, any>({
         path: `/api/discussions/${discussionId}`,
         method: "DELETE",
         ...params,
@@ -1699,7 +1816,7 @@ export class Api<
       data: DiscussionPatchRequest,
       params: RequestParams = {},
     ) =>
-      this.request<DiscussionFetchResponse, any>({
+      this.request<ApiSuccessResponseDiscussionFetchResponse, any>({
         path: `/api/discussions/${discussionId}`,
         method: "PATCH",
         body: data,
@@ -1716,7 +1833,7 @@ export class Api<
      * @request GET:/api/discussions/comments/{commentId}
      */
     getComment: (commentId: number, params: RequestParams = {}) =>
-      this.request<DiscussionCommentFetchResponse, any>({
+      this.request<ApiSuccessResponseDiscussionCommentFetchResponse, any>({
         path: `/api/discussions/comments/${commentId}`,
         method: "GET",
         ...params,
@@ -1731,7 +1848,7 @@ export class Api<
      * @request DELETE:/api/discussions/comments/{commentId}
      */
     deleteComment1: (commentId: number, params: RequestParams = {}) =>
-      this.request<void, any>({
+      this.request<ApiSuccessResponseVoid, any>({
         path: `/api/discussions/comments/${commentId}`,
         method: "DELETE",
         ...params,
@@ -1750,11 +1867,120 @@ export class Api<
       data: DiscussionCommentPatchRequest,
       params: RequestParams = {},
     ) =>
-      this.request<DiscussionCommentFetchResponse, any>({
+      this.request<ApiSuccessResponseDiscussionCommentFetchResponse, any>({
         path: `/api/discussions/comments/${commentId}`,
         method: "PATCH",
         body: data,
         type: ContentType.Json,
+        ...params,
+      }),
+  };
+  creditController = {
+    /**
+     * @description 카카오페이 결제 승인 후, 결제 정보를 저장합니다. (결제 승인)
+     *
+     * @tags credit-controller
+     * @name KakaoPaySuccess
+     * @summary 카카오페이 결제 승인
+     * @request POST:/api/credits/payment/success
+     */
+    kakaoPaySuccess: (
+      query: {
+        pg_token: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponseCreditPaymentApproveResponse, any>({
+        path: `/api/credits/payment/success`,
+        method: "POST",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * @description 특정 크레딧 상품에 대해 카카오페이 결제를 요청합니다. (결제 준비)
+     *
+     * @tags credit-controller
+     * @name RequestKakaoPay
+     * @summary 카카오페이 결제 redirect URL 요청
+     * @request POST:/api/credits/payment/ready
+     */
+    requestKakaoPay: (
+      data: CreditPaymentReadyRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponseString, any>({
+        path: `/api/credits/payment/ready`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description 크레딧 상품 목록을 조회합니다. (구매 가능 상품만 조회)
+     *
+     * @tags credit-controller
+     * @name GetCreditProductList
+     * @summary 크레딧 상품 목록 조회
+     * @request GET:/api/credits
+     */
+    getCreditProductList: (params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseListCreditProductInfoResponse, any>({
+        path: `/api/credits`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * @description 내 크레딧 지갑 정보를 조회합니다.
+     *
+     * @tags credit-controller
+     * @name GetMyWallet
+     * @summary 내 크레딧 지갑 조회
+     * @request GET:/api/credits/wallets
+     */
+    getMyWallet: (params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseCreditWalletResponse, any>({
+        path: `/api/credits/wallets`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * @description 내 크레딧 거래 내역을 조회합니다. (구매, 사용 내역 포함)
+     *
+     * @tags credit-controller
+     * @name GetMyWalletTransactions
+     * @summary 내 크레딧 거래 내역 조회
+     * @request GET:/api/credits/transactions
+     */
+    getMyWalletTransactions: (
+      query?: {
+        /**
+         * Zero-based page index (0..N)
+         * @min 0
+         * @default 0
+         */
+        page?: number;
+        /**
+         * The size of the page to be returned
+         * @min 1
+         * @default 20
+         */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<
+        ApiSuccessResponsePageResponseCreditTransactionResponse,
+        any
+      >({
+        path: `/api/credits/transactions`,
+        method: "GET",
+        query: query,
         ...params,
       }),
   };

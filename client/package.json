@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "api": "swagger-typescript-api generate -p ./api.json -o ./src/api/ --module-name-first-tag -n api.gen.ts",
+    "api": "swagger-typescript-api generate -p ./api.json -o ./src/api/ --module-name-first-tag -n api.gen.ts --templates ./swaggerTemplates",
     "dev": "vite",
     "build": "vite build && tsc -b",
     "lint": "eslint .",
