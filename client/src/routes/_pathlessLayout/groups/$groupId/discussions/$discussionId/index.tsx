@@ -17,62 +17,31 @@ import { Comment } from "../../../../../../types/comment";
 export const Route = createFileRoute(
   "/_pathlessLayout/groups/$groupId/discussions/$discussionId/"
 )({
-  component: PostID,
+  component: RouteComponent,
 });
 
-function PostID() {
+function RouteComponent() {
   const navigate = useNavigate();
   const { discussionId } = Route.useParams();
-  const post = initialPosts.find((p) => p.id === Number(discussionId));
+  const { data: discussion } = useQuery({
+    queryKey: ["discussion", discussionId],
+    queryFn: async () => {
+      const discussionIdNumber = parseInt(discussionId);
+      if (isNaN(discussionIdNumber)) {
+        throw new Error("Invalid discussion ID");
+      }
+      const response = await wrapApiResponse(
+        API_CLIENT.discussionController.getDiscussion(discussionIdNumber)
+      );
+      if (!response.isSuccessful) {
+        throw new Error(response.errorMessage);
+      }
+
+      return response.data as Discussion;
+    },
+  });
 
   if (!post) return <Typography>게시글을 찾을 수 없습니다.</Typography>;
-
-  const [comments, setComments] = useState<Comment[]>([
-    {
-      id: 1,
-      author: "사용자1",
-      content: "좋은 글이네요!",
-      createdDate: new Date(),
-      stance: "agree",
-    },
-  ]);
-  const handleAddComment = (
-    content: string,
-    stance?: "agree" | "disagree",
-    parentId?: number
-  ) => {
-    setComments((prev) => [
-      ...prev,
-      {
-        id: Date.now(), // 임시 id
-        author: "익명", // 또는 로그인 사용자 이름
-        content: content,
-        createdDate: new Date(),
-        stance,
-        parentId,
-      },
-    ]);
-  };
-
-  const handleDeleteComment = (id: number) => {
-    alert("정말 삭제하시겠습니까?");
-    setComments((prev) => prev.filter((comment) => comment.id !== id));
-  };
-
-  const handleEditComment = (id: number, newContent: string) => {
-    setComments((prev) =>
-      prev.map((comment) =>
-        comment.id === id
-          ? {
-              ...comment,
-              content: newContent,
-              updatedDate: new Date(),
-              edited: true,
-            }
-          : comment
-      )
-    );
-  };
 
   const [discussions, setDiscussions] = useState<Discussion[]>(initialPosts);
 
