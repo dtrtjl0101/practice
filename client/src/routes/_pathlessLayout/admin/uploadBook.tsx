@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import API_CLIENT, { wrapApiResponse } from "../../../api/api";
+import API_CLIENT from "../../../api/api";
 import { Add } from "@mui/icons-material";
 
 const MAX_DESCRIPTION_LENGTH = 255;
@@ -39,15 +39,13 @@ function RouteComponent() {
         alert("Please select a file to upload.");
         return;
       }
-      const response = await wrapApiResponse(
-        API_CLIENT.ebookController.uploadFile({
-          title,
-          file,
-          description,
-          author,
-          coverImageFile: coverImageFile ?? undefined,
-        })
-      );
+      const response = await API_CLIENT.ebookController.uploadFile({
+        title,
+        file,
+        description,
+        author,
+        coverImageFile: coverImageFile ?? undefined,
+      });
       if (response.isSuccessful) {
         setTitle("");
         setAuthor("");

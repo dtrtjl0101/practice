@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
 import { Cancel, Check } from "@mui/icons-material";
-import API_CLIENT, { wrapApiResponse } from "../../../../../api/api";
+import API_CLIENT from "../../../../../api/api";
 
 export const Route = createFileRoute(
   "/_pathlessLayout/groups/$groupId/manage/joinRequests"
@@ -48,11 +48,9 @@ function RouteComponent() {
   ];
 
   const handleAcceptRequest = async (request: Request) => {
-    const response = await wrapApiResponse(
-      API_CLIENT.groupController.approveJoinRequest(
-        request.groupId,
-        request.userId
-      )
+    const response = await API_CLIENT.groupController.approveJoinRequest(
+      request.groupId,
+      request.userId
     );
     if (!response.isSuccessful) {
       console.error("Failed to accept request:", response.errorMessage);

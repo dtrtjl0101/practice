@@ -12,7 +12,7 @@ import {
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { BookMetadata } from "../../../types/book";
-import API_CLIENT, { wrapApiResponse } from "../../../api/api";
+import API_CLIENT from "../../../api/api";
 
 export const Route = createFileRoute("/_pathlessLayout/admin/books")({
   component: RouteComponent,
@@ -22,7 +22,7 @@ function RouteComponent() {
   const [books, setBooks] = useState<BookMetadata[]>([]);
 
   useEffect(() => {
-    wrapApiResponse(API_CLIENT.ebookController.getBooks()).then((response) => {
+    API_CLIENT.ebookController.getBooks().then((response) => {
       if (response.isSuccessful) {
         const books =
           response.data.content?.map((book) => {

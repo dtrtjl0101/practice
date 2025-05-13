@@ -30,7 +30,7 @@ import {
   Timelapse,
 } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
-import API_CLIENT, { wrapApiResponse } from "../../../../api/api";
+import API_CLIENT from "../../../../api/api";
 import { useState } from "react";
 import { Activity } from "../../../../types/activity";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -51,9 +51,7 @@ function RouteComponent() {
       if (isNaN(groupIdNumber)) {
         throw new Error("Invalid group ID");
       }
-      const response = await wrapApiResponse(
-        API_CLIENT.groupController.getGroup(groupIdNumber)
-      );
+      const response = await API_CLIENT.groupController.getGroup(groupIdNumber);
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);
       }
@@ -68,9 +66,8 @@ function RouteComponent() {
       alert("Invalid group ID");
       return;
     }
-    const response = await wrapApiResponse(
-      API_CLIENT.groupController.requestJoinGroup(groupIdNumber)
-    );
+    const response =
+      await API_CLIENT.groupController.requestJoinGroup(groupIdNumber);
     if (!response.isSuccessful) {
       alert(response.errorMessage);
       return;
@@ -198,11 +195,12 @@ function ActivityCard(props: { groupId: string }) {
       if (isNaN(groupIdNumber)) {
         throw new Error("INVALID_GROUP_ID");
       }
-      const response = await wrapApiResponse(
-        API_CLIENT.activityController.getAllActivities(groupIdNumber, {
+      const response = await API_CLIENT.activityController.getAllActivities(
+        groupIdNumber,
+        {
           page,
           size: 1,
-        })
+        }
       );
 
       if (!response.isSuccessful) {
@@ -344,14 +342,15 @@ function ActivityCreateModal(props: {
       alert("Invalid group ID");
       return;
     }
-    const response = await wrapApiResponse(
-      API_CLIENT.activityController.createActivity(groupIdNumber, {
+    const response = await API_CLIENT.activityController.createActivity(
+      groupIdNumber,
+      {
         // TODO: 검색후 책 정보 가져오기
         bookId: 0,
         endTime: endDate.toISOString(),
         startTime: startDate.toISOString(),
         description,
-      })
+      }
     );
     if (!response.isSuccessful) {
       alert(response.errorMessage);

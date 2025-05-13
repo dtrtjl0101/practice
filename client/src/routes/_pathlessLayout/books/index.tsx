@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import API_CLIENT, { wrapApiResponse } from "../../../api/api";
+import API_CLIENT from "../../../api/api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
   Card,
@@ -35,19 +35,15 @@ function RouteComponent() {
   const { data: books } = useQuery({
     queryKey: ["bookList", page, sort, pageSize],
     queryFn: async () => {
-      const response = await wrapApiResponse(
-        API_CLIENT.ebookController.getBooks({
-          page,
-          size: pageSize,
-          sort,
-        })
-      );
-
+      const response = await API_CLIENT.ebookController.getBooks({
+        page,
+        size: pageSize,
+        sort,
+      });
       if (response.isSuccessful) {
         setTotalPages(response.data.totalPages!);
         return response.data.content! as (BookMetadata | undefined)[];
       }
-
       throw new Error(response.errorMessage);
     },
     initialData: new Array(pageSize).fill(undefined) as (
