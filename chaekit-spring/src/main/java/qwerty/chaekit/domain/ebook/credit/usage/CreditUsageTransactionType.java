@@ -1,4 +1,4 @@
-package qwerty.chaekit.domain.ebook.credit;
+package qwerty.chaekit.domain.ebook.credit.usage;
 
 public enum CreditUsageTransactionType {
     PURCHASE("구매"),

@@ -53,7 +53,7 @@ public class EbookController {
         return ApiSuccessResponse.of(ebookFileService.uploadEbook(publisherToken, request));
     }
 
-    @GetMapping("/download/{ebookId}")
+    @GetMapping("/{ebookId}/download")
     @Operation(summary = "전자책 다운로드 URL 생성", description = "관리자가 전자책 다운로드를 위한 URL을 생성합니다.")
     public ApiSuccessResponse<EbookDownloadResponse> downloadFile(
             @Parameter(hidden = true) @Login UserToken userToken,

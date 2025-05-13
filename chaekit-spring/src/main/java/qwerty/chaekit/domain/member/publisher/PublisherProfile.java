@@ -45,4 +45,7 @@ public class PublisherProfile extends BaseEntity {
     public void rejectPublisher() {
         approvalStatus = PublisherApprovalStatus.REJECTED;
     }
+    public boolean isApproved() {
+        return approvalStatus == PublisherApprovalStatus.APPROVED;
+    }
 }

@@ -6,7 +6,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import qwerty.chaekit.domain.ebook.credit.*;
+import qwerty.chaekit.domain.ebook.credit.payment.CreditPaymentTransaction;
+import qwerty.chaekit.domain.ebook.credit.payment.CreditPaymentTransactionRepository;
+import qwerty.chaekit.domain.ebook.credit.payment.CreditPaymentTransactionType;
+import qwerty.chaekit.domain.ebook.credit.wallet.CreditWallet;
+import qwerty.chaekit.domain.ebook.credit.wallet.CreditWalletRepository;
 import qwerty.chaekit.dto.ebook.credit.CreditProductInfoResponse;
 import qwerty.chaekit.dto.ebook.credit.CreditTransactionResponse;
 import qwerty.chaekit.dto.ebook.credit.CreditWalletResponse;
@@ -27,7 +31,7 @@ import java.util.List;
 @Transactional
 public class CreditService {
     private final KakaoPayService kakaoPayService;
-    private final CreditTransactionRepository creditTransactionRepository;
+    private final CreditPaymentTransactionRepository creditPaymentTransactionRepository;
     private final CreditWalletRepository creditWalletRepository;
 
     @Transactional(readOnly = true)
@@ -89,7 +93,7 @@ public class CreditService {
         CreditWallet wallet = creditWalletRepository.findByUser_Id(userId)
                 .orElseThrow(() -> new IllegalStateException("Credit Wallet not found"));
         wallet.addCredit(response.amount().total());
-        creditTransactionRepository.save(
+        creditPaymentTransactionRepository.save(
                 CreditPaymentTransaction.builder()
                         .tid(response.tid())
                         .orderId(response.partner_order_id())
@@ -116,7 +120,7 @@ public class CreditService {
 
     @Transactional(readOnly = true)
     public PageResponse<CreditTransactionResponse> getMyWalletTransactions(UserToken userToken, Pageable pageable) {
-        Page<CreditTransactionResponse> result = creditTransactionRepository.getCreditTransactionsByWallet_User_Id(
+        Page<CreditTransactionResponse> result = creditPaymentTransactionRepository.getCreditTransactionsByWallet_User_Id(
                 userToken.userId(), pageable
         ).map(transaction -> CreditTransactionResponse.builder()
                 .orderId(transaction.getOrderId())

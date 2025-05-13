@@ -1,4 +1,4 @@
-package qwerty.chaekit.domain.ebook.credit;
+package qwerty.chaekit.domain.ebook.credit.payment;
 
 import lombok.Getter;
 

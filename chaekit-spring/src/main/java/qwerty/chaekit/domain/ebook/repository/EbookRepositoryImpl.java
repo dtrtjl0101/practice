@@ -20,11 +20,6 @@ public class EbookRepositoryImpl implements EbookRepository {
     private final EbookJpaRepository ebookJpaRepository;
 
     @Override
-    public Page<Ebook> findAll(Pageable pageable) {
-        return ebookJpaRepository.findAll(pageable);
-    }
-
-    @Override
     public Page<Ebook> findAllByTitleAndAuthor(String title, String author, Pageable pageable) {
         QEbook ebook = QEbook.ebook;
         BooleanBuilder where = new BooleanBuilder();
@@ -55,6 +50,11 @@ public class EbookRepositoryImpl implements EbookRepository {
     @Override
     public Optional<Ebook> findById(Long id) {
         return ebookJpaRepository.findById(id);
+    }
+
+    @Override
+    public Optional<Ebook> findByIdWithPublisher(Long id) {
+        return ebookJpaRepository.findByIdWithPublisher(id);
     }
 
     @Override

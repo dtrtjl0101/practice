@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.4'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'org.flywaydb.flyway' version '10.20.1'
 	id 'jacoco'
 }
 
@@ -12,6 +13,13 @@ java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(17)
 	}
+}
+
+flyway {
+	url = 'jdbc:mysql://localhost:3306/chaekit'
+	user = 'root'
+	password = '0000'
+	locations = ['filesystem:src/main/resources/db/migration']
 }
 
 jacoco {
@@ -72,6 +80,7 @@ dependencies {
 	implementation 'software.amazon.awssdk:s3:2.21.5'
 
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+	implementation 'org.flywaydb:flyway-core'
 	implementation 'org.flywaydb:flyway-mysql' // MySQL용 flyway
 	annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
 	annotationProcessor "jakarta.annotation:jakarta.annotation-api"

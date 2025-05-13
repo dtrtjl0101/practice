@@ -21,6 +21,10 @@ public record EbookPostRequest(
         @NotNull
         MultipartFile file,
 
+        @Schema(description = "책 가격" , example = "10000")
+        @NotNull
+        int price,
+
         @Schema(description = "책 표지 이미지", example = "cover.jpg", type = "string", format = "binary")
         MultipartFile coverImageFile
 ) {

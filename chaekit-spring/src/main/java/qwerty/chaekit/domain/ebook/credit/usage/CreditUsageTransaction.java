@@ -1,4 +1,4 @@
-package qwerty.chaekit.domain.ebook.credit;
+package qwerty.chaekit.domain.ebook.credit.usage;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import qwerty.chaekit.domain.BaseEntity;
+import qwerty.chaekit.domain.ebook.credit.wallet.CreditWallet;
 
 @Entity
 @Getter
@@ -16,7 +17,7 @@ public class CreditUsageTransaction extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "wallet_id", nullable = false)
     private CreditWallet wallet;
 

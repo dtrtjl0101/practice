@@ -14,5 +14,9 @@ CREATE TABLE credit_usage_transaction (
 ALTER TABLE purchase RENAME TO ebook_purchase;
 ALTER TABLE ebook_purchase
     ADD COLUMN credit_usage_transaction_id BIGINT NOT NULL,
+    DROP COLUMN price,
     ADD KEY `FK_ebook_purchase_to_transaction` (`credit_usage_transaction_id`),
     ADD CONSTRAINT `FK_ebook_purchase_to_transaction` FOREIGN KEY (`credit_usage_transaction_id`) REFERENCES `credit_usage_transaction` (`id`);
+
+ALTER TABLE ebook
+    ADD COLUMN price INT NOT NULL;

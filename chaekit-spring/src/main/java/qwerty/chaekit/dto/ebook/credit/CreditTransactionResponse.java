@@ -1,7 +1,7 @@
 package qwerty.chaekit.dto.ebook.credit;
 
 import lombok.Builder;
-import qwerty.chaekit.domain.ebook.credit.CreditPaymentTransactionType;
+import qwerty.chaekit.domain.ebook.credit.payment.CreditPaymentTransactionType;
 
 import java.time.LocalDateTime;
 

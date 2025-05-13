@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.ebook.Ebook;
+import qwerty.chaekit.domain.ebook.purchase.repository.EbookPurchaseRepository;
 import qwerty.chaekit.domain.ebook.repository.EbookRepository;
+import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
 import qwerty.chaekit.dto.ebook.upload.EbookDownloadResponse;
 import qwerty.chaekit.dto.ebook.upload.EbookPostRequest;
@@ -12,6 +14,7 @@ import qwerty.chaekit.dto.ebook.upload.EbookPostResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.enums.S3Directory;
 import qwerty.chaekit.global.exception.BadRequestException;
+import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.properties.AwsProperties;
 import qwerty.chaekit.global.security.resolver.PublisherToken;
@@ -27,10 +30,16 @@ public class EbookFileService {
     private final AwsProperties awsProperties;
     private final PublisherProfileRepository publisherRepository;
     private final AdminService adminService;
-
+    private final EbookPurchaseRepository ebookPurchaseRepository;
 
     @Transactional
     public EbookPostResponse uploadEbook(PublisherToken publisherToken, EbookPostRequest request) {
+        PublisherProfile publisher = publisherRepository.findById(publisherToken.publisherId())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));
+        if(!publisher.isApproved()) {
+            throw new ForbiddenException(ErrorCode.PUBLISHER_NOT_APPROVED);
+        }
+
         String ebookBucket = awsProperties.ebookBucketName();
         String imageBucket = awsProperties.imageBucketName();
 
@@ -48,9 +57,10 @@ public class EbookFileService {
                 .author(request.author())
                 .description(request.description())
                 .size(request.file().getSize())
+                .price(request.price())
                 .fileKey(fileKey)
                 .coverImageKey(coverImageKey)
-                .publisher(publisherRepository.getReferenceById(publisherToken.publisherId()))
+                .publisher(publisher)
                 .build();
         Ebook saved = ebookRepository.save(ebook);
 
@@ -60,17 +70,22 @@ public class EbookFileService {
     @Transactional
     public EbookDownloadResponse getPresignedEbookUrl(UserToken userToken, Long ebookId) {
         String ebookBucket = awsProperties.ebookBucketName();
-        // 다운로드할 권한이 있는 경우
-        if (!userToken.userId().equals(adminService.getAdminUserId())) {
-            throw new BadRequestException(ErrorCode.ONLY_ADMIN);
-        }
         Ebook ebook = ebookRepository.findById(ebookId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.EBOOK_NOT_FOUND));
 
-        String fileKey = ebook.getFileKey();
-        String downloadUrl = s3Service.getDownloadUrl(ebookBucket, fileKey);
+        if (!canReadEbook(userToken, ebookId)) {
+            throw new BadRequestException(ErrorCode.EBOOK_NOT_PURCHASED);
+        }
+
+        String ebookFileKey = ebook.getFileKey();
+        String downloadUrl = s3Service.getPresignedDownloadUrl(ebookBucket, ebookFileKey);
 
         return EbookDownloadResponse.of(downloadUrl);
+    }
+    
+    private boolean canReadEbook(UserToken userToken, Long ebookId) {
+        return ebookPurchaseRepository.existsByUserIdAndEbookId(userToken.userId(), ebookId)
+                || userToken.userId().equals(adminService.getAdminUserId());
     }
 }
 

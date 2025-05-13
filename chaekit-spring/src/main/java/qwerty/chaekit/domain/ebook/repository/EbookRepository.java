@@ -9,9 +9,9 @@ import java.util.Optional;
 
 @Repository
 public interface EbookRepository {
-    Page<Ebook> findAll(Pageable pageable);
     Page<Ebook> findAllByTitleAndAuthor(String title, String author, Pageable pageable);
     Optional<Ebook> findById(Long id);
+    Optional<Ebook> findByIdWithPublisher(Long id);
     Ebook save(Ebook ebook);
     boolean existsById(Long id);
     Ebook getReferenceById(Long id);

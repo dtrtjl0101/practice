@@ -1,4 +1,4 @@
-package qwerty.chaekit.domain.ebook.credit;
+package qwerty.chaekit.domain.ebook.credit.payment;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import qwerty.chaekit.domain.BaseEntity;
+import qwerty.chaekit.domain.ebook.credit.wallet.CreditWallet;
 
 import java.time.LocalDateTime;
 
@@ -30,7 +31,7 @@ public class CreditPaymentTransaction extends BaseEntity {
     @Column(nullable = false)
     private String creditProductName;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "wallet_id", nullable = false)
     private CreditWallet wallet;
 
