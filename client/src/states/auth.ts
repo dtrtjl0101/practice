@@ -25,4 +25,11 @@ export namespace AuthState {
       }
   );
   export const user = atom<LoggedInUser | undefined>();
+
+  export enum RefreshState {
+    IDLE = "IDLE",
+    NEED_REFRESH = "NEED_REFRESH",
+    REFRESHING = "REFRESHING",
+  }
+  export const refreshState = atom<RefreshState>(RefreshState.IDLE);
 }

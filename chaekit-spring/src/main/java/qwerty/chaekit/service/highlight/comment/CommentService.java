@@ -10,6 +10,7 @@ import qwerty.chaekit.domain.highlight.entity.reaction.HighlightReaction;
 import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
 import qwerty.chaekit.domain.highlight.repository.comment.HighlightCommentRepository;
 import qwerty.chaekit.domain.highlight.repository.reaction.HighlightReactionRepository;
+import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.dto.highlight.comment.CommentRequest;
 import qwerty.chaekit.dto.highlight.comment.CommentResponse;
@@ -17,6 +18,7 @@ import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.UserToken;
+import qwerty.chaekit.service.notification.NotificationService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,6 +37,7 @@ public class CommentService {
     private final HighlightCommentRepository commentRepository;
     private final HighlightReactionRepository reactionRepository;
     private final UserProfileRepository userRepository;
+    private final NotificationService notificationService;
 
     public CommentResponse createComment(UserToken userToken, Long highlightId, CommentRequest request) {
         Long userId = userToken.userId();
@@ -58,12 +61,13 @@ public class CommentService {
             if (!parent.getHighlight().getId().equals(highlightId)) {
                 throw new ForbiddenException(ErrorCode.COMMENT_PARENT_MISMATCH);
             }
-        }else{
-            parent=null;
+        } else {
+            parent = null;
         }
         
+        UserProfile commentAuthor = userRepository.getReferenceById(userId);
         HighlightComment comment = HighlightComment.builder()
-                .author(userRepository.getReferenceById(userId))
+                .author(commentAuthor)
                 .highlight(highlight)
                 .content(request.content())
                 .parent(parent)
@@ -73,6 +77,19 @@ public class CommentService {
         
         if (parent != null) {
             parent.addReply(savedComment);
+        }
+
+        if (parent != null) {
+            if (!parent.getAuthor().getId().equals(userId)) {
+                notificationService.createHighlightCommentReplyNotification(parent.getAuthor(), commentAuthor, parent);
+            }
+            if (!highlight.getAuthor().getId().equals(userId) && !highlight.getAuthor().getId().equals(parent.getAuthor().getId())) {
+                notificationService.createHighlightCommentReplyNotification(highlight.getAuthor(), commentAuthor, parent);
+            }
+        } else {
+            if (!highlight.getAuthor().getId().equals(userId)) {
+                notificationService.createHighlightCommentNotification(highlight.getAuthor(), commentAuthor, highlight);
+            }
         }
         
         return CommentResponse.of(savedComment);

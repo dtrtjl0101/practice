@@ -21,16 +21,18 @@ import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.NotFoundException;
-import qwerty.chaekit.service.member.notification.EmailService;
+import qwerty.chaekit.service.util.EmailNotificationService;
 import qwerty.chaekit.service.util.S3Service;
+import qwerty.chaekit.service.notification.NotificationService;
 
 @Service
 @RequiredArgsConstructor
 public class AdminService {
     private final PublisherProfileRepository publisherRepository;
-    private final EmailService emailService;
+    private final EmailNotificationService emailNotificationService;
     private final S3Service s3Service;
     private final UserProfileRepository userRepository;
+    private final NotificationService notificationService;
 
     @Getter
     @Setter
@@ -77,6 +79,9 @@ public class AdminService {
     public void acceptPublisher(Long publisherId) {
         PublisherProfile publisher = publisherRepository.findByIdWithMember(publisherId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));
+        UserProfile admin = userRepository.findById(adminUserId).orElseThrow(
+                () -> new IllegalStateException("관리자 회원정보가 존재하지 않습니다")
+        );
 
         // 이미 승인된 경우
         if (isPublisherApproved(publisher)) {
@@ -85,7 +90,9 @@ public class AdminService {
 
         // 승인 처리
         publisher.approvePublisher();
-        emailService.sendPublisherApprovalEmail(publisher.getMember().getEmail());
+   
+        notificationService.createPublisherApprovedNotification(publisher, admin);
+        emailNotificationService.sendPublisherApprovalEmail(publisher.getMember().getEmail());
     }
 
     @Transactional
@@ -100,7 +107,11 @@ public class AdminService {
 
         // 거절 처리
         publisher.rejectPublisher();
-        emailService.sendPublisherRejectionEmail(publisher.getMember().getEmail(), request.reason());
+
+        UserProfile admin = userRepository.findById(adminUserId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+      
+        emailNotificationService.sendPublisherRejectionEmail(publisher.getMember().getEmail(), request.reason());
     }
 
     private static Pageable getPageableOrderedByCreatedAt(Pageable pageable) {

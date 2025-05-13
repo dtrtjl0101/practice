@@ -1,7 +1,13 @@
+# 리소스 사용 최소화 설정
+
+server:
+  tomcat:
+    threads:
+      max: 20
+      min-spare: 5
+
 spring:
-  data:
-    redis:
-      host: ${REDIS_URL}
-      port: 6379
-      ssl:
-        enabled: false
+  datasource:
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2

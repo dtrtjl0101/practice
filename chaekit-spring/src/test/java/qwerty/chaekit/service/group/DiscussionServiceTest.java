@@ -9,10 +9,10 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import qwerty.chaekit.domain.group.activity.Activity;
-import qwerty.chaekit.domain.group.activity.ActivityRepository;
+import qwerty.chaekit.domain.group.activity.repository.ActivityRepository;
 import qwerty.chaekit.domain.group.activity.discussion.Discussion;
-import qwerty.chaekit.domain.group.activity.discussion.DiscussionComment;
-import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionCommentRepository;
+import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment;
+import qwerty.chaekit.domain.group.activity.discussion.comment.repository.DiscussionCommentRepository;
 import qwerty.chaekit.domain.group.activity.discussion.repository.DiscussionRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
@@ -26,6 +26,7 @@ import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.mapper.DiscussionMapper;
+import qwerty.chaekit.service.notification.NotificationService;
 import qwerty.chaekit.service.util.S3Service;
 
 import java.util.List;
@@ -51,6 +52,9 @@ class DiscussionServiceTest {
 
     @Mock
     private UserProfileRepository userProfileRepository;
+    
+    @Mock
+    private NotificationService notificationService;
 
     @Mock
     private S3Service s3Service;
@@ -64,7 +68,8 @@ class DiscussionServiceTest {
                 discussionMapper,
                 activityRepository,
                 userProfileRepository,
-                discussionCommentRepository
+                discussionCommentRepository,
+                notificationService
         );
     }
 
@@ -181,7 +186,7 @@ class DiscussionServiceTest {
         // given
         Long discussionId = 1L;
         UserToken userToken = UserToken.of(1L, 1L, "test@example.com");
-        DiscussionPatchRequest request = new DiscussionPatchRequest("Updated Title", "Updated Content", true);
+        DiscussionPatchRequest request = new DiscussionPatchRequest("Updated Title", "Updated Content");
         UserProfile author = UserProfile.builder().id(1L).build();
         Discussion discussion = Discussion.builder()
                 .id(discussionId)
@@ -204,7 +209,6 @@ class DiscussionServiceTest {
         assertNotNull(response);
         assertEquals("Updated Title", response.title());
         assertEquals("Updated Content", response.content());
-        assertTrue(response.isDebate());
         assertEquals(2L, response.commentCount());
     }
 
@@ -254,10 +258,15 @@ class DiscussionServiceTest {
         // given
         Long discussionId = 1L;
         Long userId = 1L;
+        Long discussionAuthorId = 2L;
         UserToken userToken = UserToken.of(userId, 1L, "test@example.com");
         DiscussionCommentPostRequest request = new DiscussionCommentPostRequest(null, "Test Comment", null);
         UserProfile author = UserProfile.builder().id(userId).build();
-        Discussion discussion = Discussion.builder().id(discussionId).build();
+        UserProfile discussionAuthor = UserProfile.builder().id(discussionAuthorId).build();
+        Discussion discussion = Discussion.builder()
+                .id(discussionId)
+                .author(discussionAuthor)
+                .build();
         DiscussionComment comment = DiscussionComment.builder()
                 .id(1L)
                 .author(author)
@@ -265,10 +274,12 @@ class DiscussionServiceTest {
                 .content("Test Comment")
                 .build();
 
-        given(discussionRepository.existsById(discussionId)).willReturn(true);
-        given(userProfileRepository.getReferenceById(userId)).willReturn(author);
-        given(discussionRepository.getReferenceById(discussionId)).willReturn(discussion);
-        given(discussionCommentRepository.save(any(DiscussionComment.class))).willReturn(comment);
+        given(discussionRepository.findById(discussionId))
+                .willReturn(Optional.of(discussion));
+        given(userProfileRepository.findById(userId))
+                .willReturn(Optional.of(author));
+        given(discussionCommentRepository.save(any(DiscussionComment.class)))
+                .willReturn(comment);
 
         // when
         DiscussionCommentFetchResponse response = discussionService.addComment(discussionId, request, userToken);

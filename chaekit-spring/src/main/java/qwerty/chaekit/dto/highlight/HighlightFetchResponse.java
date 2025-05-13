@@ -7,15 +7,21 @@ import qwerty.chaekit.domain.highlight.entity.Highlight;
 public record HighlightFetchResponse(
         Long id,
         Long bookId,
+        Long authorId,
+        String authorName,
+        String authorProfileImageURL,
         String spine,
         String cfi,
         String memo,
         Long activityId
 ) {
-    public static HighlightFetchResponse of(Highlight highlight) {
+    public static HighlightFetchResponse of(Highlight highlight, String authorProfileImageURL) {
         return HighlightFetchResponse.builder()
                 .id(highlight.getId())
                 .bookId(highlight.getBook().getId())
+                .authorId(highlight.getAuthor().getId())
+                .authorName(highlight.getAuthor().getNickname())
+                .authorProfileImageURL(authorProfileImageURL)
                 .spine(highlight.getSpine())
                 .cfi(highlight.getCfi())
                 .memo(highlight.getMemo())

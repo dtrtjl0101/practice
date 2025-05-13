@@ -1,4 +1,4 @@
-import { Home, Book, Upload } from "@mui/icons-material";
+import { Home, Book, Upload, PersonAdd } from "@mui/icons-material";
 import { Box, Container } from "@mui/material";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import SideNavigationBar from "../../../component/SideNavigatorBar";
@@ -20,6 +20,11 @@ function RouteComponent() {
           },
           { to: "/admin/books", icon: <Book />, label: "Books" },
           { to: "/admin/uploadBook", icon: <Upload />, label: "Upload" },
+          {
+            to: "/admin/publisher",
+            icon: <PersonAdd />,
+            label: "Publisher",
+          },
         ]}
       />
       <Container sx={{ margin: 2, marginX: "auto" }}>

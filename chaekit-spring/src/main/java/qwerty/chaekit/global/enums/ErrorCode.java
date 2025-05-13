@@ -33,6 +33,9 @@ public enum ErrorCode {
     FILE_SIZE_EXCEEDED("FILE_SIZE_EXCEED", "파일 크기가 초과되었습니다"),
     // admin
     PUBLISHER_ALREADY_ACCEPTED("PUBLISHER_ALREADY_ACCEPTED", "이미 승인된 출판사입니다"),
+    // credit
+    INVALID_CREDIT_PRODUCT_ID("INVALID_CREDIT_PRODUCT_ID", "유효하지 않은 크레딧 상품 ID입니다"),
+    INVALID_PAYMENT_SESSION("INVALID_PAYMENT_SESSION", "결제 세션이 만료됐거나 유효하지 않습니다"),
 
     // UNAUTHORIZED
     INVALID_ACCESS_TOKEN("INVALID_ACCESS_TOKEN", "유효하지 않은 Access Token입니다"),
@@ -91,6 +94,11 @@ public enum ErrorCode {
     ACTIVITY_ID_REQUIRED("ACTIVITY_ID_REQUIRED", "활동 ID가 필요합니다"),
     HIGHLIGHT_ALREADY_SHARED("HIGHLIGHT_ALREADY_SHARED", "활동에 가입되면 하이라이트는 수정할 수 없습니다"),
     HIGHLIGHT_ALREADY_PUBLIC("HIGHLIGHT_ALREADY_PUBLIC", "공개된 하이라이트는 수정할 수 없습니다"),
+
+    // Notification related
+    NOTIFICATION_NOT_FOUND("NOTIFICATION_NOT_FOUND", "해당 알림이 존재하지 않습니다"),
+    NOTIFICATION_NOT_YOURS("NOTIFICATION_NOT_YOURS", "본인의 알림만 읽음 처리할 수 있습니다"),
+    NOTIFICATION_CONTENT_DELETED("NOTIFICATION_CONTENT_DELETED", "알림과 관련된 내용이 삭제되었습니다"),
     ;
 
     private final String code;

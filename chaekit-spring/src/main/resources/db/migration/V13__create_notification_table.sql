@@ -1,0 +1,21 @@
+CREATE TABLE `notification` (
+    `id` bigint NOT NULL AUTO_INCREMENT,
+    `created_at` datetime(6) DEFAULT NULL,
+    `modified_at` datetime(6) DEFAULT NULL,
+    `message` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+    `type` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+    `is_read` bit(1) NOT NULL DEFAULT b'0',
+    `receiver_id` bigint DEFAULT NULL,
+    `sender_id` bigint DEFAULT NULL,
+    `publisher_id` bigint DEFAULT NULL,
+    `group_id` bigint DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `FK_notification_receiver` (`receiver_id`),
+    KEY `FK_notification_sender` (`sender_id`),
+    KEY `FK_notification_publisher` (`publisher_id`),
+    KEY `FK_notification_group` (`group_id`),
+    CONSTRAINT `FK_notification_receiver` FOREIGN KEY (`receiver_id`) REFERENCES `user_profile` (`id`) ON DELETE SET NULL,
+    CONSTRAINT `FK_notification_sender` FOREIGN KEY (`sender_id`) REFERENCES `user_profile` (`id`) ON DELETE SET NULL,
+    CONSTRAINT `FK_notification_publisher` FOREIGN KEY (`publisher_id`) REFERENCES `publisher_profile` (`id`) ON DELETE SET NULL,
+    CONSTRAINT `FK_notification_group` FOREIGN KEY (`group_id`) REFERENCES `reading_group` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; 

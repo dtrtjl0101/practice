@@ -4,8 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.ebook.Ebook;
-import qwerty.chaekit.domain.ebook.EbookJpaRepository;
-import qwerty.chaekit.domain.ebook.EbookRepository;
+import qwerty.chaekit.domain.ebook.repository.EbookRepository;
 import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
 import qwerty.chaekit.dto.ebook.upload.EbookDownloadResponse;
 import qwerty.chaekit.dto.ebook.upload.EbookPostRequest;
@@ -69,7 +68,7 @@ public class EbookFileService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.EBOOK_NOT_FOUND));
 
         String fileKey = ebook.getFileKey();
-        String downloadUrl = s3Service.getDownloadUrl(ebookBucket, S3Directory.EBOOK, fileKey);
+        String downloadUrl = s3Service.getDownloadUrl(ebookBucket, fileKey);
 
         return EbookDownloadResponse.of(downloadUrl);
     }

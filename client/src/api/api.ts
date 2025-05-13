@@ -1,5 +1,7 @@
+import { getDefaultStore } from "jotai";
 import { ENV } from "../env";
 import { Api, HttpResponse } from "./api.gen";
+import State from "../states";
 
 export type UnsafeApiResponseBody = {
   isSuccessful?: boolean;
@@ -52,11 +54,11 @@ export async function wrapApiResponse<
 
   if (typeof data.isSuccessful === "boolean") {
     if (!data.isSuccessful) {
-      if ((data as any).errorCode === "LOGIN_REQUIRED") {
-        alert(
-          "로그인 세션이 만료되었습니다. 새로고침, 로그인 후 시도해주세요."
+      if ((data as any).errorCode === "EXPIRED_ACCESS_TOKEN") {
+        getDefaultStore().set(
+          State.Auth.refreshState,
+          State.Auth.RefreshState.NEED_REFRESH
         );
-        localStorage.removeItem("loggedInUser");
       }
       console.error(data);
     }
