@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Notification.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chaekit</a> &gt; <a href="index.source.html" class="el_package">qwerty.chaekit.domain.notification.entity</a> &gt; <span class="el_source">Notification.java</span></div><h1>Notification.java</h1><pre class="source lang-java linenums">package qwerty.chaekit.domain.notification.entity;
+
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import qwerty.chaekit.domain.BaseEntity;
+import qwerty.chaekit.domain.group.ReadingGroup;
+import qwerty.chaekit.domain.group.activity.discussion.Discussion;
+import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment;
+import qwerty.chaekit.domain.highlight.entity.Highlight;
+import qwerty.chaekit.domain.member.publisher.PublisherProfile;
+import qwerty.chaekit.domain.member.user.UserProfile;
+
+@Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Notification extends BaseEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = &quot;receiver_id&quot;)
+    private UserProfile receiver;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = &quot;sender_id&quot;)
+    private UserProfile sender;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = &quot;publisher_id&quot;)
+    private PublisherProfile publisher;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = &quot;group_id&quot;)
+    private ReadingGroup group;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = &quot;highlight_id&quot;)
+    private Highlight highlight;
+
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name=&quot;discussion_id&quot;)
+    private Discussion discussion;
+
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name=&quot;discussion_comment_id&quot;)
+    private DiscussionComment discussionComment;
+
+    @Enumerated(EnumType.STRING)
+    private NotificationType type;
+
+    private String message;
+
+    private boolean isRead;
+
+<span class="nc" id="L58">    public Notification(UserProfile receiver, UserProfile sender, PublisherProfile publisher, ReadingGroup group, Highlight highlight, Discussion discussion, DiscussionComment discussionComment, NotificationType type, String message) {</span>
+<span class="nc" id="L59">        this.receiver = receiver;</span>
+<span class="nc" id="L60">        this.sender = sender;</span>
+<span class="nc" id="L61">        this.publisher = publisher;</span>
+<span class="nc" id="L62">        this.group = group;</span>
+<span class="nc" id="L63">        this.highlight = highlight;</span>
+<span class="nc" id="L64">        this.discussion = discussion;</span>
+<span class="nc" id="L65">        this.discussionComment = discussionComment;</span>
+<span class="nc" id="L66">        this.type = type;</span>
+<span class="nc" id="L67">        this.message = message;</span>
+<span class="nc" id="L68">        this.isRead = false;</span>
+<span class="nc" id="L69">    }</span>
+
+    public void markAsRead() {
+<span class="nc" id="L72">        this.isRead = true;</span>
+<span class="nc" id="L73">    }</span>
+} 
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
