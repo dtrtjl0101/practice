@@ -6,8 +6,8 @@ export type Discussion = {
   authorId: number; // header에서 자동으로 기록
   authorName: string; // header에서 자동으로 기록
   authorProfileImage: string; // header에서 자동으로 기록
-  createdAt: Date; // 서버에서 자동으로 기록
-  modifiedAt?: Date; // 서버에서 자동으로 기록
+  createdAt: string; // 서버에서 자동으로 기록
+  modifiedAt?: string; // 서버에서 자동으로 기록
   commentCount: number; // 서버에서 자동으로 기록
   isDebate: boolean;
   comments: Comment[]; // 서버에서 자동으로 기록

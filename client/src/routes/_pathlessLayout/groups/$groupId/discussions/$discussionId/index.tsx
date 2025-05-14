@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import {
   Typography,
   Container,
@@ -8,9 +8,8 @@ import {
   Stack,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import API_CLIENT, { wrapApiResponse } from "../../../../../../api/api";
+import API_CLIENT from "../../../../../../api/api";
 import { Discussion } from "../../../../../../types/discussion";
-import { useState } from "react";
 import CommentSection from "../../../../../../component/CommentSection";
 import { Comment } from "../../../../../../types/comment";
 
@@ -21,34 +20,36 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { discussionId } = Route.useParams();
-  const { data: discussion } = useQuery({
+  const { data: discussion, isLoading } = useQuery({
     queryKey: ["discussion", discussionId],
     queryFn: async () => {
       const discussionIdNumber = parseInt(discussionId);
       if (isNaN(discussionIdNumber)) {
-        throw new Error("Invalid discussion ID");
+        alert("Invalid discussion ID");
+        return;
       }
-      const response = await wrapApiResponse(
-        API_CLIENT.discussionController.getDiscussion(discussionIdNumber)
-      );
+      const response =
+        await API_CLIENT.discussionController.getDiscussion(discussionIdNumber);
       if (!response.isSuccessful) {
-        throw new Error(response.errorMessage);
+        alert(response.errorMessage);
+        return;
       }
-
       return response.data as Discussion;
     },
   });
 
-  if (!post) return <Typography>게시글을 찾을 수 없습니다.</Typography>;
+  if (!discussion) return <Typography>게시글을 찾을 수 없습니다.</Typography>;
+
+  if (isLoading) return <Typography>게시글을 불러오는 중입니다...</Typography>;
 
   return (
     <Container maxWidth="md" sx={{ mt: 5 }}>
       <Paper elevation={3} sx={{ p: 4 }}>
         {/* 제목 */}
         <Typography variant="h4" fontWeight="bold" gutterBottom>
-          {post.title}
+          {discussion.title}
         </Typography>
 
         {/* 작성자 및 작성일 */}
@@ -59,13 +60,16 @@ function RouteComponent() {
           sx={{ mb: 2 }}
         >
           <Typography variant="subtitle2" color="text.secondary">
-            작성자: {post.author}
+            작성자: {discussion.authorName}
           </Typography>
           <Typography variant="subtitle2" color="text.secondary">
-            {post.isDebate ? "토론" : ""}
+            {discussion.isDebate ? "토론" : ""}
           </Typography>
           <Typography variant="subtitle2" color="text.secondary">
-            작성일: {new Date(post.createdDate).toLocaleDateString()}
+            작성일:{" "}
+            {discussion.modifiedAt == undefined
+              ? discussion.createdAt
+              : discussion.modifiedAt}
           </Typography>
         </Stack>
 
@@ -76,7 +80,7 @@ function RouteComponent() {
           variant="body1"
           sx={{ whiteSpace: "pre-line", minHeight: "200px" }}
         >
-          {post.content}
+          {discussion.content}
         </Typography>
 
         <Divider sx={{ my: 3 }} />
@@ -86,11 +90,18 @@ function RouteComponent() {
           <Button
             variant="contained"
             color="primary"
-            onClick={() => navigate({ to: `/posts/${post.id}/edit` })}
+            onClick={() =>
+              router.navigate({
+                to: `/discussions/${discussion.discussionId}/edit`,
+              })
+            }
           >
             수정
           </Button>
-          <Button variant="outlined" onClick={() => navigate({ to: "/posts" })}>
+          <Button
+            variant="outlined"
+            onClick={() => router.navigate({ to: `/discussions` })}
+          >
             뒤로 가기
           </Button>
           <Button

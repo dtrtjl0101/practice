@@ -1,6 +1,7 @@
 import API_CLIENT from "../api/api";
-import { useState, useEffect, act } from "react";
-import { useParams, useRouter } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import { useRouter } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import {
   Container,
   Card,
@@ -21,13 +22,32 @@ import {
 } from "@mui/material";
 import { Discussion } from "../types/discussion";
 
-export default function Form(discussionId: number) {
+export default function DiscussionForm({
+  discussionId,
+}: {
+  discussionId: number;
+}) {
   const router = useRouter();
   const theme = useTheme();
 
-  const discussion = getDiscussion(discussionId);
-  const isEdit = discussion == null ? false : true;
-  console.log("isEdit", isEdit);
+  const { data: discussion } = useQuery({
+    queryKey: ["discussion", discussionId],
+    queryFn: async () => {
+      if (isNaN(discussionId)) {
+        alert("Invalid discussion ID");
+        return;
+      }
+      const response =
+        await API_CLIENT.discussionController.getDiscussion(discussionId);
+      if (!response.isSuccessful) {
+        alert(response.errorMessage);
+        return;
+      }
+      return response.data as Discussion;
+    },
+  });
+
+  const isEdit = discussion?.modifiedAt !== undefined;
   const [book, setBook] = useState("");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -45,20 +65,34 @@ export default function Form(discussionId: number) {
 
     if (isEdit) {
       // 수정 모드: 기존 게시글 수정
-      updateDiscussion(discussionId, title, content, isDebate);
+      API_CLIENT.discussionController
+        .updateDiscussion(discussionId, {
+          title,
+          content,
+        })
+        .then((response) => {
+          if (response.isSuccessful) {
+            alert("게시글이 수정되었습니다.");
+          } else {
+            alert(response.errorMessage);
+          }
+        });
     } else {
       // 작성 모드: 새 게시글 추가
-      postDiscussion(discussionId, title, content, isDebate);
+      API_CLIENT.discussionController.createDiscussion(discussionId, {
+        title,
+        content,
+        isDebate,
+      });
     }
-    router.history.back();
+    // response를 통해 게시글로 이동
+    handleBack();
   };
 
-  function handleEdit(): void {
-    throw new Error("Function not implemented.");
-  }
-
   const handleBack = () => {
-    router.history.back();
+    router.navigate({
+      to: `/discussions/${discussionId}`,
+    });
   };
 
   const handleCheckbox = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,6 +101,13 @@ export default function Form(discussionId: number) {
       alert("토론이 체크되었습니다.");
     }
   };
+
+  useEffect(() => {
+    if (!discussion) return;
+    setTitle(discussion.title ?? "");
+    setContent(discussion.content ?? "");
+    setDebate(discussion.isDebate);
+  }, [discussion]);
 
   return (
     <Container
@@ -117,9 +158,7 @@ export default function Form(discussionId: number) {
         />
         <Stack direction="row" justifyContent="space-between" sx={{ m: 1 }}>
           <Box sx={{ justifySelf: "flex-start" }}>
-            <Button onClick={isEdit ? handleEdit : handlePost}>
-              {isEdit ? "수정" : "작성"}
-            </Button>
+            <Button onClick={handlePost}>{isEdit ? "수정" : "작성"}</Button>
             <Button onClick={handleBack}>취소</Button>
           </Box>
           <FormControlLabel
@@ -137,77 +176,4 @@ export default function Form(discussionId: number) {
       </Card>
     </Container>
   );
-}
-
-async function postDiscussion(
-  activityId: number,
-  title: string,
-  content: string,
-  isDebate: boolean
-) {
-  try {
-    const response = await API_CLIENT.discussionController.createDiscussion(
-      activityId,
-      {
-        title,
-        content,
-        isDebate,
-      }
-    );
-    if (response.status == 200) {
-      alert("게시글이 생성되었습니다!");
-      return response.data;
-    } else {
-      throw new Error(response.statusText);
-    }
-  } catch (error) {
-    console.error("Error creating discussion:", error);
-    alert("게시글 생성에 실패했습니다.");
-  }
-}
-
-async function getDiscussion(discussionId: number) {
-  // try {
-  const response =
-    await API_CLIENT.discussionController.getDiscussion(discussionId);
-  console.log("response", response.data);
-  console.log("response", response);
-  if (response.status == 200) {
-    return response;
-  } else {
-    return null;
-    throw new Error(response.statusText);
-    //   }
-    // } catch (error) {
-    //   console.error("Error fetching discussion:", error);
-    //   alert("게시글을 가져오는 데 실패했습니다.");
-    // }
-  }
-}
-
-async function updateDiscussion(
-  discussionId: number,
-  title: string,
-  content: string,
-  isDebate: boolean
-) {
-  try {
-    const response = await API_CLIENT.discussionController.updateDiscussion(
-      discussionId,
-      {
-        title,
-        content,
-        isDebate,
-      }
-    );
-    if (response.status == 200) {
-      alert("게시글이 수정되었습니다!");
-      return response.data;
-    } else {
-      throw new Error(response.statusText);
-    }
-  } catch (error) {
-    console.error("Error updating discussion:", error);
-    alert("게시글 수정에 실패했습니다.");
-  }
 }

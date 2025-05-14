@@ -4,19 +4,14 @@ import {
   Container,
   Button,
   Paper,
-  Divider,
   Stack,
-  CircularProgress,
   Box,
   Card,
   CardContent,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import API_CLIENT, {
-  wrapApiResponse,
-  UnsafeApiResponseBody,
-} from "../../../../../../../api/api";
+import API_CLIENT from "../../../../../../../api/api";
 import { Discussion } from "../../../../../../../types/discussion";
 import { HttpResponse } from "../../../../../../../api/api.gen";
 
@@ -30,43 +25,24 @@ function Discussions() {
   const navigate = useNavigate();
 
   const { groupId, activityId } = Route.useParams();
-  const activityIdNumber = parseInt(activityId);
+
+  const { data: discussions } = useQuery({
+    queryKey: ["discussions", activityId],
+    queryFn: async () => {
+      const response = await API_CLIENT.discussionController.getDiscussions(
+        parseInt(activityId)
+      );
+      if (!response.isSuccessful) {
+        alert(response.errorMessage);
+        return;
+      }
+      return response.data as Discussion[];
+    },
+  });
+
   // const [page, setPage] = useState(0);
   // const [sort, _setSort] = useState<string[]>([]);
   // const [totalPages, setTotalPages] = useState(1);
-  const [discussions, setDiscussions] = useState<Discussion[] | null>(null);
-
-  useEffect(() => {
-    async function loadDiscussions() {
-      const data = await fetchDiscussions(activityIdNumber);
-      setDiscussions(data);
-    }
-    async function fetchDiscussions(activityIdNumber: number) {
-      const discussionsResponse =
-        await API_CLIENT.discussionController.getDiscussions(activityIdNumber);
-
-      const transformedResponse: HttpResponse<UnsafeApiResponseBody, unknown> =
-        {
-          ...discussionsResponse,
-          data: {
-            isSuccessful: true,
-            data: discussionsResponse.data,
-          },
-        };
-
-      const response = await wrapApiResponse(
-        Promise.resolve(transformedResponse)
-      );
-
-      if (response.isSuccessful) {
-        // return response.data as Discussion[];
-        return discussionsResponse.data as Discussion[];
-      }
-      return [];
-    }
-    loadDiscussions();
-  }, [activityIdNumber]);
-
   return (
     <Container>
       <Box sx={{ textAlign: "center", my: 4 }}>
@@ -85,10 +61,10 @@ function Discussions() {
         </Button>
       </Box>
       <Box>
-        {discussions === null ? (
+        {discussions?.length == 0 ? (
           <Typography>등록된 글이 없습니다.</Typography>
         ) : (
-          discussions.map((discussion) => (
+          discussions?.map((discussion) => (
             <Paper
               key={discussion.discussionId}
               elevation={2}
@@ -143,7 +119,9 @@ function Discussions() {
                       {discussion.isDebate ? "찬반" : ""}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {discussion.createdAt.toLocaleDateString()}
+                      {discussion.modifiedAt == undefined
+                        ? discussion.createdAt
+                        : discussion.modifiedAt}
                     </Typography>
                   </Stack>
                 </CardContent>
