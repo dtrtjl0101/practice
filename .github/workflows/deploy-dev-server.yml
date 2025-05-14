@@ -73,5 +73,7 @@ jobs:
               echo "chaekit-spring did not respond in time ❌"
               exit 1
             fi
+            docker system prune -a -f
+            docker builder prune -a -f
         env:
           BRANCH_NAME: ${{ github.ref_name }}
