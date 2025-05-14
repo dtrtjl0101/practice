@@ -20,12 +20,15 @@ public class Ebook extends BaseEntity {
     @Column(nullable = false)
     private String title;
 
+    @Column(nullable = false)
     private String author;
 
     @Column
     private String description;
 
     private long size;
+
+    private int price;
 
     @Column(nullable = false)
     private String fileKey;
@@ -37,15 +40,16 @@ public class Ebook extends BaseEntity {
     private PublisherProfile publisher;
 
     @Builder
-<span class="fc" id="L40">    public Ebook(Long id, String title, String author, String description, long size, String fileKey, String coverImageKey, PublisherProfile publisher) {</span>
-<span class="fc" id="L41">        this.id = id;</span>
-<span class="fc" id="L42">        this.title = title;</span>
-<span class="fc" id="L43">        this.author = author;</span>
-<span class="fc" id="L44">        this.description = description;</span>
-<span class="fc" id="L45">        this.size = size;</span>
-<span class="fc" id="L46">        this.fileKey = fileKey;</span>
-<span class="fc" id="L47">        this.coverImageKey = coverImageKey;</span>
-<span class="fc" id="L48">        this.publisher = publisher;</span>
-<span class="fc" id="L49">    }</span>
+<span class="fc" id="L43">    public Ebook(Long id, String title, String author, String description, long size, int price, String fileKey, String coverImageKey, PublisherProfile publisher) {</span>
+<span class="fc" id="L44">        this.id = id;</span>
+<span class="fc" id="L45">        this.title = title;</span>
+<span class="fc" id="L46">        this.author = author;</span>
+<span class="fc" id="L47">        this.description = description;</span>
+<span class="fc" id="L48">        this.size = size;</span>
+<span class="fc" id="L49">        this.price = price;</span>
+<span class="fc" id="L50">        this.fileKey = fileKey;</span>
+<span class="fc" id="L51">        this.coverImageKey = coverImageKey;</span>
+<span class="fc" id="L52">        this.publisher = publisher;</span>
+<span class="fc" id="L53">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

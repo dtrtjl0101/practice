@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.ebook.Ebook;
+import qwerty.chaekit.domain.ebook.purchase.repository.EbookPurchaseRepository;
 import qwerty.chaekit.domain.ebook.repository.EbookRepository;
+import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
 import qwerty.chaekit.dto.ebook.upload.EbookDownloadResponse;
 import qwerty.chaekit.dto.ebook.upload.EbookPostRequest;
@@ -12,6 +14,7 @@ import qwerty.chaekit.dto.ebook.upload.EbookPostResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.enums.S3Directory;
 import qwerty.chaekit.global.exception.BadRequestException;
+import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.properties.AwsProperties;
 import qwerty.chaekit.global.security.resolver.PublisherToken;
@@ -27,50 +30,62 @@ public class EbookFileService {
     private final AwsProperties awsProperties;
     private final PublisherProfileRepository publisherRepository;
     private final AdminService adminService;
-
+    private final EbookPurchaseRepository ebookPurchaseRepository;
 
     @Transactional
     public EbookPostResponse uploadEbook(PublisherToken publisherToken, EbookPostRequest request) {
-<span class="fc" id="L34">        String ebookBucket = awsProperties.ebookBucketName();</span>
-<span class="fc" id="L35">        String imageBucket = awsProperties.imageBucketName();</span>
+<span class="nc" id="L37">        PublisherProfile publisher = publisherRepository.findById(publisherToken.publisherId())</span>
+<span class="nc" id="L38">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));</span>
+<span class="nc bnc" id="L39" title="All 2 branches missed.">        if(!publisher.isApproved()) {</span>
+<span class="nc" id="L40">            throw new ForbiddenException(ErrorCode.PUBLISHER_NOT_APPROVED);</span>
+        }
 
-<span class="fc" id="L37">        String fileKey = s3Service.uploadFile(ebookBucket, S3Directory.EBOOK, request.file());</span>
-<span class="fc" id="L38">        String coverImageKey = s3Service.uploadFile(</span>
+<span class="nc" id="L43">        String ebookBucket = awsProperties.ebookBucketName();</span>
+<span class="nc" id="L44">        String imageBucket = awsProperties.imageBucketName();</span>
+
+<span class="nc" id="L46">        String fileKey = s3Service.uploadFile(ebookBucket, S3Directory.EBOOK, request.file());</span>
+<span class="nc" id="L47">        String coverImageKey = s3Service.uploadFile(</span>
                 imageBucket,
                 S3Directory.EBOOK_COVER_IMAGE,
-<span class="fc" id="L41">                request.coverImageFile(),</span>
+<span class="nc" id="L50">                request.coverImageFile(),</span>
                 false
         );
-<span class="fc" id="L44">        String coverImageURL = s3Service.convertToPublicImageURL(coverImageKey);</span>
+<span class="nc" id="L53">        String coverImageURL = s3Service.convertToPublicImageURL(coverImageKey);</span>
 
-<span class="fc" id="L46">        Ebook ebook = Ebook.builder()</span>
-<span class="fc" id="L47">                .title(request.title())</span>
-<span class="fc" id="L48">                .author(request.author())</span>
-<span class="fc" id="L49">                .description(request.description())</span>
-<span class="fc" id="L50">                .size(request.file().getSize())</span>
-<span class="fc" id="L51">                .fileKey(fileKey)</span>
-<span class="fc" id="L52">                .coverImageKey(coverImageKey)</span>
-<span class="fc" id="L53">                .publisher(publisherRepository.getReferenceById(publisherToken.publisherId()))</span>
-<span class="fc" id="L54">                .build();</span>
-<span class="fc" id="L55">        Ebook saved = ebookRepository.save(ebook);</span>
+<span class="nc" id="L55">        Ebook ebook = Ebook.builder()</span>
+<span class="nc" id="L56">                .title(request.title())</span>
+<span class="nc" id="L57">                .author(request.author())</span>
+<span class="nc" id="L58">                .description(request.description())</span>
+<span class="nc" id="L59">                .size(request.file().getSize())</span>
+<span class="nc" id="L60">                .price(request.price())</span>
+<span class="nc" id="L61">                .fileKey(fileKey)</span>
+<span class="nc" id="L62">                .coverImageKey(coverImageKey)</span>
+<span class="nc" id="L63">                .publisher(publisher)</span>
+<span class="nc" id="L64">                .build();</span>
+<span class="nc" id="L65">        Ebook saved = ebookRepository.save(ebook);</span>
 
-<span class="fc" id="L57">        return EbookPostResponse.of(saved, coverImageURL);</span>
+<span class="nc" id="L67">        return EbookPostResponse.of(saved, coverImageURL);</span>
     }
 
     @Transactional
     public EbookDownloadResponse getPresignedEbookUrl(UserToken userToken, Long ebookId) {
-<span class="fc" id="L62">        String ebookBucket = awsProperties.ebookBucketName();</span>
-        // 다운로드할 권한이 있는 경우
-<span class="pc bpc" id="L64" title="1 of 2 branches missed.">        if (!userToken.userId().equals(adminService.getAdminUserId())) {</span>
-<span class="nc" id="L65">            throw new BadRequestException(ErrorCode.ONLY_ADMIN);</span>
+<span class="nc" id="L72">        String ebookBucket = awsProperties.ebookBucketName();</span>
+<span class="nc" id="L73">        Ebook ebook = ebookRepository.findById(ebookId)</span>
+<span class="nc" id="L74">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.EBOOK_NOT_FOUND));</span>
+
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        if (!canReadEbook(userToken, ebookId)) {</span>
+<span class="nc" id="L77">            throw new BadRequestException(ErrorCode.EBOOK_NOT_PURCHASED);</span>
         }
-<span class="fc" id="L67">        Ebook ebook = ebookRepository.findById(ebookId)</span>
-<span class="fc" id="L68">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.EBOOK_NOT_FOUND));</span>
 
-<span class="fc" id="L70">        String fileKey = ebook.getFileKey();</span>
-<span class="fc" id="L71">        String downloadUrl = s3Service.getDownloadUrl(ebookBucket, fileKey);</span>
+<span class="nc" id="L80">        String ebookFileKey = ebook.getFileKey();</span>
+<span class="nc" id="L81">        String downloadUrl = s3Service.getPresignedDownloadUrl(ebookBucket, ebookFileKey);</span>
 
-<span class="fc" id="L73">        return EbookDownloadResponse.of(downloadUrl);</span>
+<span class="nc" id="L83">        return EbookDownloadResponse.of(downloadUrl);</span>
+    }
+    
+    private boolean canReadEbook(UserToken userToken, Long ebookId) {
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        return ebookPurchaseRepository.existsByUserIdAndEbookId(userToken.userId(), ebookId)</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">                || userToken.userId().equals(adminService.getAdminUserId());</span>
     }
 }
 

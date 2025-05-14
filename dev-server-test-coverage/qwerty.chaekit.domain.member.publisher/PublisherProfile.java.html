@@ -45,5 +45,8 @@ public class PublisherProfile extends BaseEntity {
     public void rejectPublisher() {
 <span class="nc" id="L46">        approvalStatus = PublisherApprovalStatus.REJECTED;</span>
 <span class="nc" id="L47">    }</span>
+    public boolean isApproved() {
+<span class="nc bnc" id="L49" title="All 2 branches missed.">        return approvalStatus == PublisherApprovalStatus.APPROVED;</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -4,29 +4,29 @@ import lombok.Getter;
 
 import java.util.List;
 
-<span class="fc" id="L7">@Getter</span>
+<span class="nc" id="L7">@Getter</span>
 public enum S3Directory {
-<span class="fc" id="L9">    EBOOK(&quot;ebook/&quot;, List.of(&quot;.epub&quot;), megaByte(10)),</span>
-<span class="fc" id="L10">    EBOOK_COVER_IMAGE(&quot;ebook-cover-image/&quot;, defaultImageExtensions(), megaByte(5)),</span>
-<span class="fc" id="L11">    GROUP_IMAGE(&quot;group-image/&quot;, defaultImageExtensions(), megaByte(5)),</span>
-<span class="fc" id="L12">    PROFILE_IMAGE(&quot;profile-image/&quot;, defaultImageExtensions(), megaByte(5)),;</span>
+<span class="nc" id="L9">    EBOOK(&quot;ebook/&quot;, List.of(&quot;.epub&quot;), megaByte(10)),</span>
+<span class="nc" id="L10">    EBOOK_COVER_IMAGE(&quot;ebook-cover-image/&quot;, defaultImageExtensions(), megaByte(5)),</span>
+<span class="nc" id="L11">    GROUP_IMAGE(&quot;group-image/&quot;, defaultImageExtensions(), megaByte(5)),</span>
+<span class="nc" id="L12">    PROFILE_IMAGE(&quot;profile-image/&quot;, defaultImageExtensions(), megaByte(5)),;</span>
 
     private final String path;
     private final List&lt;String&gt; allowedExtensions;
     private final long maxSize;
 
-<span class="fc" id="L18">    S3Directory(String path, List&lt;String&gt; allowedExtensions, long maxSize) {</span>
-<span class="fc" id="L19">        this.path = path;</span>
-<span class="fc" id="L20">        this.allowedExtensions = allowedExtensions;</span>
-<span class="fc" id="L21">        this.maxSize = maxSize;</span>
-<span class="fc" id="L22">    }</span>
+<span class="nc" id="L18">    S3Directory(String path, List&lt;String&gt; allowedExtensions, long maxSize) {</span>
+<span class="nc" id="L19">        this.path = path;</span>
+<span class="nc" id="L20">        this.allowedExtensions = allowedExtensions;</span>
+<span class="nc" id="L21">        this.maxSize = maxSize;</span>
+<span class="nc" id="L22">    }</span>
 
     private static List&lt;String&gt; defaultImageExtensions() {
-<span class="fc" id="L25">        return List.of(&quot;.jpg&quot;, &quot;.jpeg&quot;, &quot;.png&quot;, &quot;.gif&quot;, &quot;.bmp&quot;, &quot;.tiff&quot;, &quot;.webp&quot;);</span>
+<span class="nc" id="L25">        return List.of(&quot;.jpg&quot;, &quot;.jpeg&quot;, &quot;.png&quot;, &quot;.gif&quot;, &quot;.bmp&quot;, &quot;.tiff&quot;, &quot;.webp&quot;);</span>
     }
 
     private static long megaByte(int size) {
-<span class="fc" id="L29">        return 1024 * 1024L * size;</span>
+<span class="nc" id="L29">        return 1024 * 1024L * size;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

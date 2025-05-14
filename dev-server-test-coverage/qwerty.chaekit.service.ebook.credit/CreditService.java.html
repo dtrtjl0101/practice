@@ -6,7 +6,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import qwerty.chaekit.domain.ebook.credit.*;
+import qwerty.chaekit.domain.ebook.credit.payment.CreditPaymentTransaction;
+import qwerty.chaekit.domain.ebook.credit.payment.CreditPaymentTransactionRepository;
+import qwerty.chaekit.domain.ebook.credit.payment.CreditPaymentTransactionType;
+import qwerty.chaekit.domain.ebook.credit.wallet.CreditWallet;
+import qwerty.chaekit.domain.ebook.credit.wallet.CreditWalletRepository;
 import qwerty.chaekit.dto.ebook.credit.CreditProductInfoResponse;
 import qwerty.chaekit.dto.ebook.credit.CreditTransactionResponse;
 import qwerty.chaekit.dto.ebook.credit.CreditWalletResponse;
@@ -21,115 +25,115 @@ import qwerty.chaekit.service.ebook.credit.exception.PaymentCancelFailedExceptio
 import java.util.Arrays;
 import java.util.List;
 
-<span class="fc" id="L24">@Slf4j</span>
+<span class="fc" id="L28">@Slf4j</span>
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class CreditService {
     private final KakaoPayService kakaoPayService;
-    private final CreditTransactionRepository creditTransactionRepository;
+    private final CreditPaymentTransactionRepository creditPaymentTransactionRepository;
     private final CreditWalletRepository creditWalletRepository;
 
     @Transactional(readOnly = true)
     public List&lt;CreditProductInfoResponse&gt; getCreditProductList() {
-<span class="nc" id="L35">        return Arrays.stream(CreditProduct.values())</span>
-<span class="nc" id="L36">                .map(creditProduct -&gt; CreditProductInfoResponse.builder()</span>
-<span class="nc" id="L37">                        .id(creditProduct.getId())</span>
-<span class="nc" id="L38">                        .creditAmount(creditProduct.getCreditAmount())</span>
-<span class="nc" id="L39">                        .price(creditProduct.getPrice())</span>
-<span class="nc" id="L40">                        .build()</span>
-<span class="nc" id="L41">                ).toList();</span>
+<span class="nc" id="L39">        return Arrays.stream(CreditProduct.values())</span>
+<span class="nc" id="L40">                .map(creditProduct -&gt; CreditProductInfoResponse.builder()</span>
+<span class="nc" id="L41">                        .id(creditProduct.getId())</span>
+<span class="nc" id="L42">                        .creditAmount(creditProduct.getCreditAmount())</span>
+<span class="nc" id="L43">                        .price(creditProduct.getPrice())</span>
+<span class="nc" id="L44">                        .build()</span>
+<span class="nc" id="L45">                ).toList();</span>
     }
 
     @Transactional
     public String requestKakaoPay(UserToken userToken, CreditPaymentReadyRequest request) {
-<span class="nc" id="L46">        return kakaoPayService.requestKakaoPay(userToken, request);</span>
+<span class="nc" id="L50">        return kakaoPayService.requestKakaoPay(userToken, request);</span>
     }
 
     @Transactional
     public CreditPaymentApproveResponse approveKakaoPayPayment(UserToken userToken, String pgToken) {
-<span class="nc" id="L51">        Long userId = userToken.userId();</span>
+<span class="nc" id="L55">        Long userId = userToken.userId();</span>
 
         // 카카오페이 결제 승인
-<span class="nc" id="L54">        KakaoPayApproveResponse response = kakaoPayService.approveKakaoPayPayment(userId, pgToken);</span>
+<span class="nc" id="L58">        KakaoPayApproveResponse response = kakaoPayService.approveKakaoPayPayment(userId, pgToken);</span>
 
         // 트랜잭션 내 처리
         try {
-<span class="nc" id="L58">            finalizePayment(response, userId);</span>
-<span class="nc" id="L59">        } catch (Exception ex) {</span>
+<span class="nc" id="L62">            finalizePayment(response, userId);</span>
+<span class="nc" id="L63">        } catch (Exception ex) {</span>
             // 예외 발생 시 결제 취소 및 에러 처리
-<span class="nc" id="L61">            handlePaymentFailureAndCancel(ex, response);</span>
-<span class="nc" id="L62">        }</span>
+<span class="nc" id="L65">            handlePaymentFailureAndCancel(ex, response);</span>
+<span class="nc" id="L66">        }</span>
 
-<span class="nc" id="L64">        CreditProduct creditProduct = CreditProduct.getCreditProduct(Integer.parseInt(response.item_code()));</span>
+<span class="nc" id="L68">        CreditProduct creditProduct = CreditProduct.getCreditProduct(Integer.parseInt(response.item_code()));</span>
 
-<span class="nc" id="L66">        return CreditPaymentApproveResponse.builder()</span>
-<span class="nc" id="L67">                .orderId(response.partner_order_id())</span>
-<span class="nc" id="L68">                .creditProductId(creditProduct.getId())</span>
-<span class="nc" id="L69">                .creditProductName(creditProduct.getName())</span>
-<span class="nc" id="L70">                .paymentMethod(response.payment_method_type())</span>
-<span class="nc" id="L71">                .paymentAmount(response.amount().total())</span>
-<span class="nc" id="L72">                .approvedAt(response.approved_at())</span>
-<span class="nc" id="L73">                .build();</span>
+<span class="nc" id="L70">        return CreditPaymentApproveResponse.builder()</span>
+<span class="nc" id="L71">                .orderId(response.partner_order_id())</span>
+<span class="nc" id="L72">                .creditProductId(creditProduct.getId())</span>
+<span class="nc" id="L73">                .creditProductName(creditProduct.getName())</span>
+<span class="nc" id="L74">                .paymentMethod(response.payment_method_type())</span>
+<span class="nc" id="L75">                .paymentAmount(response.amount().total())</span>
+<span class="nc" id="L76">                .approvedAt(response.approved_at())</span>
+<span class="nc" id="L77">                .build();</span>
     }
 
     private void handlePaymentFailureAndCancel(Exception ex, KakaoPayApproveResponse response) {
-<span class="nc" id="L77">        String tid = response.tid();</span>
+<span class="nc" id="L81">        String tid = response.tid();</span>
         try {
-<span class="nc" id="L79">            kakaoPayService.cancelKakaoPayPayment(tid, response.amount().total());</span>
-<span class="nc" id="L80">            log.info(&quot;카카오페이 결제 취소 완료: tid={} 이유={}&quot;, tid, ex.getMessage());</span>
-<span class="nc" id="L81">            throw new RuntimeException(&quot;시스템 오류로 결제가 자동 환불되었습니다.&quot;);</span>
-<span class="nc" id="L82">        } catch (PaymentCancelFailedException cancelEx) {</span>
-<span class="nc" id="L83">            log.error(&quot;카카오페이 결제 취소 실패: tid={}, 이유={}&quot;, tid, cancelEx.getMessage());</span>
-<span class="nc" id="L84">            throw new RuntimeException(&quot;결제 취소에 실패했습니다. 고객센터에 문의해주세요.&quot;);</span>
+<span class="nc" id="L83">            kakaoPayService.cancelKakaoPayPayment(tid, response.amount().total());</span>
+<span class="nc" id="L84">            log.info(&quot;카카오페이 결제 취소 완료: tid={} 이유={}&quot;, tid, ex.getMessage());</span>
+<span class="nc" id="L85">            throw new RuntimeException(&quot;시스템 오류로 결제가 자동 환불되었습니다.&quot;);</span>
+<span class="nc" id="L86">        } catch (PaymentCancelFailedException cancelEx) {</span>
+<span class="nc" id="L87">            log.error(&quot;카카오페이 결제 취소 실패: tid={}, 이유={}&quot;, tid, cancelEx.getMessage());</span>
+<span class="nc" id="L88">            throw new RuntimeException(&quot;결제 취소에 실패했습니다. 고객센터에 문의해주세요.&quot;);</span>
         }
     }
 
     private void finalizePayment(KakaoPayApproveResponse response, Long userId) {
-<span class="nc" id="L89">        CreditWallet wallet = creditWalletRepository.findByUser_Id(userId)</span>
-<span class="nc" id="L90">                .orElseThrow(() -&gt; new IllegalStateException(&quot;Credit Wallet not found&quot;));</span>
-<span class="nc" id="L91">        wallet.addCredit(response.amount().total());</span>
-<span class="nc" id="L92">        creditTransactionRepository.save(</span>
-<span class="nc" id="L93">                CreditTransaction.builder()</span>
-<span class="nc" id="L94">                        .tid(response.tid())</span>
-<span class="nc" id="L95">                        .orderId(response.partner_order_id())</span>
-<span class="nc" id="L96">                        .creditProductId(Integer.parseInt(response.item_code()))</span>
-<span class="nc" id="L97">                        .creditProductName(response.item_name())</span>
-<span class="nc" id="L98">                        .wallet(wallet)</span>
-<span class="nc" id="L99">                        .transactionType(CreditTransactionType.CHARGE)</span>
-<span class="nc" id="L100">                        .creditAmount(CreditProduct.getCreditProduct(Integer.parseInt(response.item_code())).getCreditAmount())</span>
-<span class="nc" id="L101">                        .paymentAmount(response.amount().total())</span>
-<span class="nc" id="L102">                        .approvedAt(response.approved_at())</span>
-<span class="nc" id="L103">                        .build()</span>
+<span class="nc" id="L93">        CreditWallet wallet = creditWalletRepository.findByUser_Id(userId)</span>
+<span class="nc" id="L94">                .orElseThrow(() -&gt; new IllegalStateException(&quot;Credit Wallet not found&quot;));</span>
+<span class="nc" id="L95">        wallet.addCredit(response.amount().total());</span>
+<span class="nc" id="L96">        creditPaymentTransactionRepository.save(</span>
+<span class="nc" id="L97">                CreditPaymentTransaction.builder()</span>
+<span class="nc" id="L98">                        .tid(response.tid())</span>
+<span class="nc" id="L99">                        .orderId(response.partner_order_id())</span>
+<span class="nc" id="L100">                        .creditProductId(Integer.parseInt(response.item_code()))</span>
+<span class="nc" id="L101">                        .creditProductName(response.item_name())</span>
+<span class="nc" id="L102">                        .wallet(wallet)</span>
+<span class="nc" id="L103">                        .transactionType(CreditPaymentTransactionType.CHARGE)</span>
+<span class="nc" id="L104">                        .creditAmount(CreditProduct.getCreditProduct(Integer.parseInt(response.item_code())).getCreditAmount())</span>
+<span class="nc" id="L105">                        .paymentAmount(response.amount().total())</span>
+<span class="nc" id="L106">                        .approvedAt(response.approved_at())</span>
+<span class="nc" id="L107">                        .build()</span>
         );
-<span class="nc" id="L105">    }</span>
+<span class="nc" id="L109">    }</span>
 
     @Transactional(readOnly = true)
     public CreditWalletResponse getMyWallet(UserToken userToken) {
-<span class="nc" id="L109">        return creditWalletRepository.findByUser_Id(userToken.userId())</span>
-<span class="nc" id="L110">                .map(wallet -&gt; CreditWalletResponse.builder()</span>
-<span class="nc" id="L111">                        .walletId(wallet.getId())</span>
-<span class="nc" id="L112">                        .balance(wallet.getBalance())</span>
-<span class="nc" id="L113">                        .build()</span>
-<span class="nc" id="L114">                ).orElseThrow(() -&gt; new IllegalStateException(&quot;Credit Wallet not found&quot;));</span>
+<span class="nc" id="L113">        return creditWalletRepository.findByUser_Id(userToken.userId())</span>
+<span class="nc" id="L114">                .map(wallet -&gt; CreditWalletResponse.builder()</span>
+<span class="nc" id="L115">                        .walletId(wallet.getId())</span>
+<span class="nc" id="L116">                        .balance(wallet.getBalance())</span>
+<span class="nc" id="L117">                        .build()</span>
+<span class="nc" id="L118">                ).orElseThrow(() -&gt; new IllegalStateException(&quot;Credit Wallet not found&quot;));</span>
     }
 
     @Transactional(readOnly = true)
     public PageResponse&lt;CreditTransactionResponse&gt; getMyWalletTransactions(UserToken userToken, Pageable pageable) {
-<span class="nc" id="L119">        Page&lt;CreditTransactionResponse&gt; result = creditTransactionRepository.getCreditTransactionsByWallet_User_Id(</span>
-<span class="nc" id="L120">                userToken.userId(), pageable</span>
-<span class="nc" id="L121">        ).map(transaction -&gt; CreditTransactionResponse.builder()</span>
-<span class="nc" id="L122">                .orderId(transaction.getOrderId())</span>
-<span class="nc" id="L123">                .productId(transaction.getCreditProductId())</span>
-<span class="nc" id="L124">                .productName(transaction.getCreditProductName())</span>
-<span class="nc" id="L125">                .type(transaction.getTransactionType())</span>
-<span class="nc" id="L126">                .creditAmount(transaction.getCreditAmount())</span>
-<span class="nc" id="L127">                .paymentAmount(transaction.getPaymentAmount())</span>
-<span class="nc" id="L128">                .approvedAt(transaction.getApprovedAt())</span>
-<span class="nc" id="L129">                .build()</span>
+<span class="nc" id="L123">        Page&lt;CreditTransactionResponse&gt; result = creditPaymentTransactionRepository.getCreditTransactionsByWallet_User_Id(</span>
+<span class="nc" id="L124">                userToken.userId(), pageable</span>
+<span class="nc" id="L125">        ).map(transaction -&gt; CreditTransactionResponse.builder()</span>
+<span class="nc" id="L126">                .orderId(transaction.getOrderId())</span>
+<span class="nc" id="L127">                .productId(transaction.getCreditProductId())</span>
+<span class="nc" id="L128">                .productName(transaction.getCreditProductName())</span>
+<span class="nc" id="L129">                .type(transaction.getTransactionType())</span>
+<span class="nc" id="L130">                .creditAmount(transaction.getCreditAmount())</span>
+<span class="nc" id="L131">                .paymentAmount(transaction.getPaymentAmount())</span>
+<span class="nc" id="L132">                .approvedAt(transaction.getApprovedAt())</span>
+<span class="nc" id="L133">                .build()</span>
         );
 
-<span class="nc" id="L132">        return PageResponse.of(result);</span>
+<span class="nc" id="L136">        return PageResponse.of(result);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

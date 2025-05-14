@@ -33,7 +33,7 @@ public class S3Service {
 <span class="fc" id="L33">    }</span>
 
     // Download URL
-    public String getDownloadUrl(String bucket, String fileKey) {
+    public String getPresignedDownloadUrl(String bucket, String fileKey) {
 <span class="nc" id="L37">        GetObjectRequest getObjectRequest = GetObjectRequest.builder()</span>
 <span class="nc" id="L38">                .bucket(bucket)</span>
 <span class="nc" id="L39">                .key(fileKey)</span>

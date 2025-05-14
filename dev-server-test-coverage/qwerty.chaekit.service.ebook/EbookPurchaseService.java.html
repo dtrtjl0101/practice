@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EbookPurchaseService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chaekit</a> &gt; <a href="index.source.html" class="el_package">qwerty.chaekit.service.ebook</a> &gt; <span class="el_source">EbookPurchaseService.java</span></div><h1>EbookPurchaseService.java</h1><pre class="source lang-java linenums">package qwerty.chaekit.service.ebook;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import qwerty.chaekit.domain.ebook.Ebook;
+import qwerty.chaekit.domain.ebook.credit.usage.CreditUsageTransaction;
+import qwerty.chaekit.domain.ebook.credit.usage.CreditUsageTransactionRepository;
+import qwerty.chaekit.domain.ebook.credit.usage.CreditUsageTransactionType;
+import qwerty.chaekit.domain.ebook.credit.wallet.CreditWallet;
+import qwerty.chaekit.domain.ebook.credit.wallet.CreditWalletRepository;
+import qwerty.chaekit.domain.ebook.purchase.EbookPurchase;
+import qwerty.chaekit.domain.ebook.purchase.repository.EbookPurchaseRepository;
+import qwerty.chaekit.domain.ebook.repository.EbookRepository;
+import qwerty.chaekit.domain.member.user.UserProfile;
+import qwerty.chaekit.domain.member.user.UserProfileRepository;
+import qwerty.chaekit.dto.ebook.EbookFetchResponse;
+import qwerty.chaekit.dto.ebook.purchase.EbookPurchaseResponse;
+import qwerty.chaekit.dto.page.PageResponse;
+import qwerty.chaekit.global.enums.ErrorCode;
+import qwerty.chaekit.global.exception.BadRequestException;
+import qwerty.chaekit.global.exception.NotFoundException;
+import qwerty.chaekit.global.properties.AwsProperties;
+import qwerty.chaekit.service.util.S3Service;
+
+@Service
+@RequiredArgsConstructor
+public class EbookPurchaseService {
+    private final CreditUsageTransactionRepository creditUsageTransactionRepository;
+    private final EbookPurchaseRepository ebookPurchaseRepository;
+
+    private final UserProfileRepository userRepository;
+    private final CreditWalletRepository creditWalletRepository;
+    private final EbookRepository ebookRepository;
+    private final S3Service s3Service;
+    private final AwsProperties awsProperties;
+
+    public EbookPurchaseResponse purchaseEbook(Long ebookId, Long userId) {
+<span class="nc" id="L40">        UserProfile buyer = userRepository.findById(userId)</span>
+<span class="nc" id="L41">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
+<span class="nc" id="L42">        CreditWallet wallet = creditWalletRepository.findByUser_Id(userId)</span>
+<span class="nc" id="L43">                .orElseThrow(() -&gt; new IllegalStateException(&quot;크레딧 지갑이 존재하지 않습니다.&quot;));</span>
+
+<span class="nc" id="L45">        Ebook ebook = ebookRepository.findByIdWithPublisher(ebookId)</span>
+<span class="nc" id="L46">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.EBOOK_NOT_FOUND));</span>
+
+<span class="nc bnc" id="L48" title="All 2 branches missed.">        if(ebookPurchaseRepository.existsByUserIdAndEbookId(userId, ebookId)) {</span>
+<span class="nc" id="L49">            throw new BadRequestException(ErrorCode.EBOOK_ALREADY_PURCHASED);</span>
+        }
+
+<span class="nc" id="L52">        int ebookPrice = ebook.getPrice();</span>
+        try {
+<span class="nc" id="L54">            wallet.useCredit(ebookPrice);</span>
+<span class="nc" id="L55">        } catch (Exception e) {</span>
+<span class="nc" id="L56">            throw new BadRequestException(ErrorCode.CREDIT_NOT_ENOUGH);</span>
+<span class="nc" id="L57">        }</span>
+
+<span class="nc" id="L59">        CreditUsageTransaction savedTransaction = creditUsageTransactionRepository.save(</span>
+<span class="nc" id="L60">                CreditUsageTransaction.builder()</span>
+<span class="nc" id="L61">                        .wallet(wallet)</span>
+<span class="nc" id="L62">                        .creditAmount(ebookPrice)</span>
+<span class="nc" id="L63">                        .transactionType(CreditUsageTransactionType.PURCHASE)</span>
+<span class="nc" id="L64">                        .build()</span>
+        );
+
+<span class="nc" id="L67">        ebookPurchaseRepository.save(</span>
+<span class="nc" id="L68">                EbookPurchase.builder()</span>
+<span class="nc" id="L69">                        .user(buyer)</span>
+<span class="nc" id="L70">                        .ebook(ebook)</span>
+<span class="nc" id="L71">                        .transaction(savedTransaction)</span>
+<span class="nc" id="L72">                        .build()</span>
+        );
+
+<span class="nc" id="L75">        return EbookPurchaseResponse.of(</span>
+                userId,
+                ebook,
+                savedTransaction,
+<span class="nc" id="L79">                s3Service.getPresignedDownloadUrl(awsProperties.ebookBucketName(), ebook.getFileKey())</span>
+        );
+    }
+
+    public PageResponse&lt;EbookFetchResponse&gt; getMyBooks(Long userId, Pageable pageable) {
+<span class="nc" id="L84">        Page&lt;EbookPurchase&gt; purchases = ebookPurchaseRepository.findByUserIdWithEbook(userId, pageable);</span>
+<span class="nc" id="L85">        return PageResponse.of(</span>
+<span class="nc" id="L86">                purchases.map(</span>
+<span class="nc" id="L87">                purchase -&gt; EbookFetchResponse.of(</span>
+<span class="nc" id="L88">                        purchase.getEbook(),</span>
+<span class="nc" id="L89">                        s3Service.convertToPublicImageURL(purchase.getEbook().getCoverImageKey())</span>
+                )));
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
