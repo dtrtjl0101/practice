@@ -34,6 +34,7 @@ public class Highlight extends BaseEntity {
     @Column(nullable = false)
     private String spine;
 
+    @Column(length = 2000)
     private String memo;
 
     @Setter
@@ -45,7 +46,7 @@ public class Highlight extends BaseEntity {
     private boolean isPublic;
     
     @OneToMany(mappedBy = "highlight", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<HighlightComment> comments = new ArrayList<>();
+    private final List<HighlightComment> comments = new ArrayList<>();
 
     @Builder
     public Highlight(UserProfile author, Ebook book, String cfi, String spine, String memo, Activity activity) {

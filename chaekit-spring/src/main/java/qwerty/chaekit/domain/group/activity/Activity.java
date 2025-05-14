@@ -34,7 +34,7 @@ public class Activity extends BaseEntity {
     @Column(nullable = false)
     private LocalDate endTime;
 
-    @Column(length = 3000)
+    @Column(length = 5000)
     private String description;
 
     @Builder

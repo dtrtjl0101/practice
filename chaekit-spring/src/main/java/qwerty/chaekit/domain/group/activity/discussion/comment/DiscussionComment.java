@@ -29,7 +29,7 @@ public class DiscussionComment extends BaseEntity {
     @JoinColumn(name = "discussion_id")
     private Discussion discussion;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 5000)
     private String content;
 
     @Column(name = "is_edited", nullable = false)
