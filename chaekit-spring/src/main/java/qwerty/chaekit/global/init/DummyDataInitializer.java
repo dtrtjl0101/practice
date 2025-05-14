@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import qwerty.chaekit.domain.ebook.credit.wallet.CreditWallet;
+import qwerty.chaekit.domain.ebook.credit.wallet.CreditWalletRepository;
 import qwerty.chaekit.domain.member.Member;
 import qwerty.chaekit.domain.member.MemberRepository;
 import qwerty.chaekit.domain.member.enums.Role;
@@ -29,6 +31,7 @@ public class DummyDataInitializer implements ApplicationRunner {
     private final UserProfileRepository userProfileRepository;
 
     private final String defaultPassword = "0000";
+    private final CreditWalletRepository creditWalletRepository;
 
     @Override
     @Transactional
@@ -45,10 +48,15 @@ public class DummyDataInitializer implements ApplicationRunner {
                 continue;
             }
             Member userMember = memberJoinHelper.saveMember(userEmail, defaultPassword, Role.ROLE_USER);
-            userProfileRepository.save(
+            UserProfile savedUser = userProfileRepository.save(
                     UserProfile.builder()
                             .member(userMember)
                             .nickname(getDummyNickname(i))
+                            .build()
+            );
+            creditWalletRepository.save(
+                    CreditWallet.builder()
+                            .user(savedUser)
                             .build()
             );
             log.info("Created user profile: {}", userEmail);

@@ -33,9 +33,15 @@ public enum ErrorCode {
     FILE_SIZE_EXCEEDED("FILE_SIZE_EXCEED", "파일 크기가 초과되었습니다"),
     // admin
     PUBLISHER_ALREADY_ACCEPTED("PUBLISHER_ALREADY_ACCEPTED", "이미 승인된 출판사입니다"),
-    // credit
+    // credit payment
     INVALID_CREDIT_PRODUCT_ID("INVALID_CREDIT_PRODUCT_ID", "유효하지 않은 크레딧 상품 ID입니다"),
     INVALID_PAYMENT_SESSION("INVALID_PAYMENT_SESSION", "결제 세션이 만료됐거나 유효하지 않습니다"),
+    // credit usage
+    CREDIT_NOT_ENOUGH("CREDIT_NOT_ENOUGH", "크레딧이 부족합니다"),
+    // credit wallet
+    CREDIT_WALLET_NOT_FOUND("CREDIT_WALLET_NOT_FOUND", "크레딧 지갑이 존재하지 않습니다"),
+    // ebook purcahse
+    EBOOK_ALREADY_PURCHASED("EBOOK_ALREADY_PURCHASED", "이미 구매한 전자책입니다"),
 
     // UNAUTHORIZED
     INVALID_ACCESS_TOKEN("INVALID_ACCESS_TOKEN", "유효하지 않은 Access Token입니다"),
@@ -51,6 +57,8 @@ public enum ErrorCode {
     ACTIVITY_GROUP_MISMATCH("ACTIVITY_GROUP_MISMATCH", "해당 독서모임의 활동이 아닙니다"),
     ACTIVITY_MEMBER_ONLY("ACTIVITY_MEMBER_ONLY", "해당 독서모임 활동에 가입한 경우에만 가능합니다"),
     DISCUSSION_COMMENT_NOT_YOURS("DISCUSSION_COMMENT_NOT_YOURS", "해당 댓글은 본인이 작성한 것이 아닙니다"),
+    EBOOK_NOT_PURCHASED("EBOOK_NOT_PURCHASED", "해당 전자책을 구매한 회원만 사용할 수 있는 기능입니다"),
+    PUBLISHER_NOT_APPROVED("PUBLISHER_NOT_APPROVED", "현재 출판사 계정이 승인되지 않았습니다"),
 
     LOGIN_REQUIRED("LOGIN_REQUIRED", "로그인이 필요합니다"),
     ONLY_USER("ONLY_USER", "일반 회원만 사용할 수 있는 기능입니다"),
