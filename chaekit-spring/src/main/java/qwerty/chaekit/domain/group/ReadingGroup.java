@@ -106,6 +106,10 @@ public class ReadingGroup extends BaseEntity {
                 .map(member -> member.isAccepted() ? MyMemberShipStatus.JOINED : MyMemberShipStatus.PENDING)
                 .orElse(MyMemberShipStatus.NONE);
     }
+    
+    public boolean isLeader(UserProfile userProfile) {
+        return groupLeader.getId().equals(userProfile.getId());
+    }
 
     @Builder
     public ReadingGroup(Long id, String name, UserProfile groupLeader, List<GroupTag> tags, String description, String groupImageKey) {

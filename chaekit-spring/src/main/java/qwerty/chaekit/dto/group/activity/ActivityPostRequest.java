@@ -1,5 +1,6 @@
 package qwerty.chaekit.dto.group.activity;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
@@ -13,5 +14,6 @@ public record ActivityPostRequest(
         LocalDate startTime,
         @NotNull
         LocalDate endTime,
+        @Nullable
         String description
 ) { }
