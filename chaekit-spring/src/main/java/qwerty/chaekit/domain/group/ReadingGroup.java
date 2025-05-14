@@ -35,8 +35,8 @@ public class ReadingGroup extends BaseEntity {
     @OneToMany(mappedBy = "readingGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 20)
     private List<GroupTag> tags = new ArrayList<>();
-
-    @Column(nullable = false)
+    
+    @Column(length = 3000)
     private String description;
 
     @OneToMany(mappedBy = "readingGroup", cascade = CascadeType.ALL, orphanRemoval = true)

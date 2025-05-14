@@ -1,0 +1,8 @@
+ALTER TABLE ebook
+    MODIFY description VARCHAR(3000) DEFAULT NULL;
+
+ALTER TABLE activity
+    MODIFY description VARCHAR(3000) DEFAULT NULL;
+
+ALTER TABLE reading_group
+    MODIFY description VARCHAR(3000) DEFAULT NULL;
