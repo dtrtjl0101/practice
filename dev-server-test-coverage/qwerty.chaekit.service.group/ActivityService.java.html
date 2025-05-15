@@ -127,10 +127,23 @@ public class ActivityService {
 <span class="fc" id="L127">        return ActivityPostResponse.of(activity);</span>
     }
 
+    @Transactional(readOnly = true)
     public PageResponse&lt;ActivityFetchResponse&gt; fetchAllActivities(Pageable pageable, long groupId) {
-<span class="fc" id="L131">        Page&lt;ActivityFetchResponse&gt; page = activityRepository.findByGroup_Id(groupId, pageable)</span>
-<span class="fc" id="L132">                .map(ActivityFetchResponse::of);</span>
-<span class="fc" id="L133">        return PageResponse.of(page);</span>
+<span class="fc" id="L132">        Page&lt;ActivityFetchResponse&gt; page = activityRepository.findByGroup_IdWithBook(groupId, pageable)</span>
+<span class="fc" id="L133">                .map(ActivityFetchResponse::of);</span>
+<span class="fc" id="L134">        return PageResponse.of(page);</span>
+    }
+
+    @Transactional(readOnly = true)
+    public ActivityFetchResponse fetchActivity(long groupId, long activityId) {
+<span class="nc" id="L139">        Activity activity = activityRepository.findByIdWithBook(activityId)</span>
+<span class="nc" id="L140">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.ACTIVITY_NOT_FOUND));</span>
+
+<span class="nc bnc" id="L142" title="All 2 branches missed.">        if (!activity.getGroup().getId().equals(groupId)) {</span>
+<span class="nc" id="L143">            throw new ForbiddenException(ErrorCode.ACTIVITY_GROUP_MISMATCH);</span>
+        }
+
+<span class="nc" id="L146">        return ActivityFetchResponse.of(activity);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

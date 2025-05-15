@@ -34,6 +34,9 @@ public class Highlight extends BaseEntity {
     @Column(nullable = false)
     private String spine;
 
+    @Column(nullable = false)
+    private String highlightcontent;
+
     private String memo;
 
     @Setter
@@ -44,30 +47,31 @@ public class Highlight extends BaseEntity {
     @Column(nullable = false)
     private boolean isPublic;
     
-<span class="fc" id="L47">    @OneToMany(mappedBy = &quot;highlight&quot;, cascade = CascadeType.ALL, orphanRemoval = true)</span>
+<span class="fc" id="L50">    @OneToMany(mappedBy = &quot;highlight&quot;, cascade = CascadeType.ALL, orphanRemoval = true)</span>
     private List&lt;HighlightComment&gt; comments = new ArrayList&lt;&gt;();
 
     @Builder
-<span class="fc" id="L51">    public Highlight(UserProfile author, Ebook book, String cfi, String spine, String memo, Activity activity) {</span>
-<span class="fc" id="L52">        this.author = author;</span>
-<span class="fc" id="L53">        this.book = book;</span>
-<span class="fc" id="L54">        this.cfi = cfi;</span>
-<span class="fc" id="L55">        this.spine = spine;</span>
-<span class="fc" id="L56">        this.memo = memo;</span>
-<span class="fc" id="L57">        this.activity = activity;</span>
-<span class="fc" id="L58">        this.isPublic = false;</span>
-<span class="fc" id="L59">    }</span>
-
-    public void updateMemo(String memo) {
-<span class="fc" id="L62">        this.memo = memo;</span>
+<span class="fc" id="L54">    public Highlight(UserProfile author, Ebook book, String cfi, String spine, String highlightcontent, String memo, Activity activity) {</span>
+<span class="fc" id="L55">        this.author = author;</span>
+<span class="fc" id="L56">        this.book = book;</span>
+<span class="fc" id="L57">        this.cfi = cfi;</span>
+<span class="fc" id="L58">        this.spine = spine;</span>
+<span class="fc" id="L59">        this.highlightcontent=highlightcontent;</span>
+<span class="fc" id="L60">        this.memo = memo;</span>
+<span class="fc" id="L61">        this.activity = activity;</span>
+<span class="fc" id="L62">        this.isPublic = false;</span>
 <span class="fc" id="L63">    }</span>
 
+    public void updateMemo(String memo) {
+<span class="fc" id="L66">        this.memo = memo;</span>
+<span class="fc" id="L67">    }</span>
+
     public void makePublic() {
-<span class="nc" id="L66">        this.isPublic = true;</span>
-<span class="nc" id="L67">    }</span>
+<span class="nc" id="L70">        this.isPublic = true;</span>
+<span class="nc" id="L71">    }</span>
 
     public boolean isPublic() {
-<span class="fc" id="L70">        return isPublic;</span>
+<span class="fc" id="L74">        return isPublic;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
