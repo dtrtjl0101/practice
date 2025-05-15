@@ -12,8 +12,8 @@ import qwerty.chaekit.domain.highlight.repository.comment.HighlightCommentReposi
 import qwerty.chaekit.domain.highlight.repository.reaction.HighlightReactionRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
-import qwerty.chaekit.dto.highlight.reaction.ReactionRequest;
-import qwerty.chaekit.dto.highlight.reaction.ReactionResponse;
+import qwerty.chaekit.dto.highlight.reaction.HighlightReactionRequest;
+import qwerty.chaekit.dto.highlight.reaction.HighlightReactionResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.ForbiddenException;
@@ -34,7 +34,7 @@ public class HighlightReactionService {
     private final UserProfileRepository userRepository;
     private final ActivityPolicy activityPolicy;
 
-    public ReactionResponse addReaction(UserToken userToken, Long highlightId, ReactionRequest request) {
+    public HighlightReactionResponse addReaction(UserToken userToken, Long highlightId, HighlightReactionRequest request) {
         Long userId = userToken.userId();
 
         UserProfile author = userRepository.findById(userId)
@@ -80,7 +80,7 @@ public class HighlightReactionService {
 
         HighlightReaction savedReaction = reactionRepository.save(reaction);
 
-        return ReactionResponse.of(savedReaction);
+        return HighlightReactionResponse.of(savedReaction);
     }
 
     public void deleteReaction(UserToken userToken, Long reactionId) {

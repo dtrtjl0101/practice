@@ -12,8 +12,8 @@ import qwerty.chaekit.domain.highlight.repository.comment.HighlightCommentReposi
 import qwerty.chaekit.domain.highlight.repository.reaction.HighlightReactionRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
-import qwerty.chaekit.dto.highlight.comment.CommentRequest;
-import qwerty.chaekit.dto.highlight.comment.CommentResponse;
+import qwerty.chaekit.dto.highlight.comment.HighlightCommentRequest;
+import qwerty.chaekit.dto.highlight.comment.HighlightCommentResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
@@ -36,7 +36,7 @@ public class HighlightCommentService {
     private final NotificationService notificationService;
     private final ActivityPolicy activityPolicy;
 
-    public CommentResponse createComment(UserToken userToken, Long highlightId, CommentRequest request) {
+    public HighlightCommentResponse createComment(UserToken userToken, Long highlightId, HighlightCommentRequest request) {
         Long userId = userToken.userId();
 
         UserProfile commentAuthor = userRepository.findById(userId)
@@ -89,11 +89,11 @@ public class HighlightCommentService {
             }
         }
         
-        return CommentResponse.of(savedComment);
+        return HighlightCommentResponse.of(savedComment);
     }
     
     @Transactional(readOnly = true)
-    public List<CommentResponse> getComments(UserToken userToken, Long highlightId) {
+    public List<HighlightCommentResponse> getComments(UserToken userToken, Long highlightId) {
         UserProfile author = userRepository.findById(userToken.userId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
         
@@ -127,11 +127,11 @@ public class HighlightCommentService {
         }
 
         return rootComments.stream()
-                .map(comment -> CommentResponse.of(comment, reactionsByCommentId))
+                .map(comment -> HighlightCommentResponse.of(comment, reactionsByCommentId))
                 .collect(Collectors.toList());
     }
     
-    public CommentResponse updateComment(UserToken userToken, Long commentId, CommentRequest request) {
+    public HighlightCommentResponse updateComment(UserToken userToken, Long commentId, HighlightCommentRequest request) {
         Long userId = userToken.userId();
         
         HighlightComment comment = commentRepository.findById(commentId)
@@ -142,7 +142,7 @@ public class HighlightCommentService {
         }
         
         comment.updateContent(request.content());
-        return CommentResponse.of(commentRepository.save(comment));
+        return HighlightCommentResponse.of(commentRepository.save(comment));
     }
     
     public void deleteComment(UserToken userToken, Long commentId) {

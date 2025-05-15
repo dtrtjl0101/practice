@@ -17,7 +17,7 @@ import qwerty.chaekit.dto.highlight.HighlightFetchResponse;
 import qwerty.chaekit.dto.highlight.HighlightPostRequest;
 import qwerty.chaekit.dto.highlight.HighlightPostResponse;
 import qwerty.chaekit.dto.highlight.HighlightPutRequest;
-import qwerty.chaekit.dto.highlight.reaction.ReactionResponse;
+import qwerty.chaekit.dto.highlight.reaction.HighlightReactionResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
@@ -125,7 +125,7 @@ public class HighlightService {
     }
 
     // TODO: move this method to HighlightReactionService 
-    public List<ReactionResponse> getHighlightReactions(UserToken userToken, Long highlightId) {
+    public List<HighlightReactionResponse> getHighlightReactions(UserToken userToken, Long highlightId) {
         Highlight highlight = entityFinder.findHighlight(highlightId);
         if(highlight.isPublic()) {
             activityPolicy.assertJoined(userToken.userId(), highlightId);
@@ -136,7 +136,7 @@ public class HighlightService {
         List<HighlightReaction> reactions = reactionRepository.findByHighlightIdAndCommentIdIsNull(highlightId);
         
         return reactions.stream()
-                .map(ReactionResponse::of)
+                .map(HighlightReactionResponse::of)
                 .collect(Collectors.toList());
     }
     

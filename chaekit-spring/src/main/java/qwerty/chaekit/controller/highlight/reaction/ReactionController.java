@@ -2,8 +2,8 @@ package qwerty.chaekit.controller.highlight.reaction;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import qwerty.chaekit.dto.highlight.reaction.ReactionRequest;
-import qwerty.chaekit.dto.highlight.reaction.ReactionResponse;
+import qwerty.chaekit.dto.highlight.reaction.HighlightReactionRequest;
+import qwerty.chaekit.dto.highlight.reaction.HighlightReactionResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
 import qwerty.chaekit.global.security.resolver.UserToken;
@@ -16,10 +16,10 @@ public class ReactionController {
     private final HighlightReactionService highlightReactionService;
     
     @PostMapping("/{highlightId}/reactions")
-    public ApiSuccessResponse<ReactionResponse> addReaction(
+    public ApiSuccessResponse<HighlightReactionResponse> addReaction(
             @Login UserToken userToken,
             @PathVariable Long highlightId,
-            @RequestBody ReactionRequest request) {
+            @RequestBody HighlightReactionRequest request) {
         return ApiSuccessResponse.of(highlightReactionService.addReaction(userToken, highlightId, request));
     }
 

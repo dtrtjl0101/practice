@@ -41,6 +41,8 @@ public class DiscussionCommentService {
         Discussion discussion = entityFinder.findDiscussion(discussionId);
         String content = request.content();
         DiscussionStance stance = request.stance();
+        
+        activityPolicy.assertJoined(user, discussion.getActivity());
 
         DiscussionComment parentComment;
         boolean isReply = request.parentId() != null;

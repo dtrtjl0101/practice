@@ -9,7 +9,7 @@ import qwerty.chaekit.dto.highlight.HighlightFetchResponse;
 import qwerty.chaekit.dto.highlight.HighlightPostRequest;
 import qwerty.chaekit.dto.highlight.HighlightPostResponse;
 import qwerty.chaekit.dto.highlight.HighlightPutRequest;
-import qwerty.chaekit.dto.highlight.reaction.ReactionResponse;
+import qwerty.chaekit.dto.highlight.reaction.HighlightReactionResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
@@ -46,7 +46,7 @@ public class HighlightController {
     }
 
     @GetMapping("/{highlightId}/reactions")
-    public ApiSuccessResponse<List<ReactionResponse>> getHighlightReactions(
+    public ApiSuccessResponse<List<HighlightReactionResponse>> getHighlightReactions(
             @Parameter(hidden = true) @Login UserToken userToken,
             @PathVariable Long highlightId
     ) {
