@@ -10,39 +10,41 @@ import qwerty.chaekit.domain.highlight.entity.reaction.HighlightReaction;
 import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
 import qwerty.chaekit.domain.highlight.repository.comment.HighlightCommentRepository;
 import qwerty.chaekit.domain.highlight.repository.reaction.HighlightReactionRepository;
+import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.dto.highlight.reaction.ReactionRequest;
 import qwerty.chaekit.dto.highlight.reaction.ReactionResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
+import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
-import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.security.resolver.UserToken;
+import qwerty.chaekit.service.group.ActivityPolicy;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class ReactionService {
+public class HighlightReactionService {
     private final HighlightRepository highlightRepository;
     private final HighlightCommentRepository commentRepository;
     private final HighlightReactionRepository reactionRepository;
     private final UserProfileRepository userRepository;
+    private final ActivityPolicy activityPolicy;
 
     public ReactionResponse addReaction(UserToken userToken, Long highlightId, ReactionRequest request) {
         Long userId = userToken.userId();
 
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
-        }
+        UserProfile author = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         Highlight highlight = highlightRepository.findById(highlightId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));
 
+        activityPolicy.assertJoined(author, highlight.getActivity());
+        
         if (!highlight.isPublic()) {
             throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_PUBLIC);
         }

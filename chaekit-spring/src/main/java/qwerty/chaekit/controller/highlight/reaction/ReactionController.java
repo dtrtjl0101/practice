@@ -7,29 +7,27 @@ import qwerty.chaekit.dto.highlight.reaction.ReactionResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
 import qwerty.chaekit.global.security.resolver.UserToken;
-import qwerty.chaekit.service.highlight.reaction.ReactionService;
-
-import java.util.List;
+import qwerty.chaekit.service.highlight.reaction.HighlightReactionService;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/highlights")
 public class ReactionController {
-    private final ReactionService reactionService;
+    private final HighlightReactionService highlightReactionService;
     
     @PostMapping("/{highlightId}/reactions")
     public ApiSuccessResponse<ReactionResponse> addReaction(
             @Login UserToken userToken,
             @PathVariable Long highlightId,
             @RequestBody ReactionRequest request) {
-        return ApiSuccessResponse.of(reactionService.addReaction(userToken, highlightId, request));
+        return ApiSuccessResponse.of(highlightReactionService.addReaction(userToken, highlightId, request));
     }
 
     @DeleteMapping("/reactions/{reactionId}")
     public ApiSuccessResponse<String> deleteReaction(
             @Login UserToken userToken,
             @PathVariable Long reactionId) {
-        reactionService.deleteReaction(userToken, reactionId);
+        highlightReactionService.deleteReaction(userToken, reactionId);
         return ApiSuccessResponse.of("이모티콘을 삭제했습니다.");
     }
 } 

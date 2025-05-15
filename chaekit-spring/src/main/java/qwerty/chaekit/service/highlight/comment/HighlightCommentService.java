@@ -18,36 +18,34 @@ import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.UserToken;
+import qwerty.chaekit.service.group.ActivityPolicy;
 import qwerty.chaekit.service.notification.NotificationService;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class CommentService {
+public class HighlightCommentService {
     private final HighlightRepository highlightRepository;
     private final HighlightCommentRepository commentRepository;
     private final HighlightReactionRepository reactionRepository;
     private final UserProfileRepository userRepository;
     private final NotificationService notificationService;
+    private final ActivityPolicy activityPolicy;
 
     public CommentResponse createComment(UserToken userToken, Long highlightId, CommentRequest request) {
         Long userId = userToken.userId();
-        
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
-        }
-        
+
+        UserProfile commentAuthor = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
         Highlight highlight = highlightRepository.findById(highlightId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));
+
+        activityPolicy.assertJoined(commentAuthor, highlight.getActivity());
         
         if (!highlight.isPublic()) {
             throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_PUBLIC);
@@ -65,7 +63,6 @@ public class CommentService {
             parent = null;
         }
         
-        UserProfile commentAuthor = userRepository.getReferenceById(userId);
         HighlightComment comment = HighlightComment.builder()
                 .author(commentAuthor)
                 .highlight(highlight)
@@ -96,9 +93,14 @@ public class CommentService {
     }
     
     @Transactional(readOnly = true)
-    public List<CommentResponse> getComments(Long highlightId) {
+    public List<CommentResponse> getComments(UserToken userToken, Long highlightId) {
+        UserProfile author = userRepository.findById(userToken.userId())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        
         Highlight highlight = highlightRepository.findById(highlightId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));
+
+        activityPolicy.assertJoined(author, highlight.getActivity());
         
         if (!highlight.isPublic()) {
             throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_PUBLIC);

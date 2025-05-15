@@ -25,8 +25,6 @@ import qwerty.chaekit.service.util.EntityFinder;
 import java.util.List;
 import java.util.Map;
 
-// TODO: 모든 메서드에서 activity 참여중인지 권한 확인 필요(특히, GET, POST 메서드)
-
 @Service
 @RequiredArgsConstructor
 @Transactional
