@@ -37,7 +37,7 @@ public class Highlight extends BaseEntity {
     @Column(nullable = false)
     private String highlightcontent;
   
-    @Column(length = 2000
+    @Column(length = 2000)
     private String memo;
     
     @ManyToOne(fetch = FetchType.LAZY)

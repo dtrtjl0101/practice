@@ -21,6 +21,7 @@ import qwerty.chaekit.dto.highlight.reaction.HighlightReactionResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
+import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.group.ActivityPolicy;
 import qwerty.chaekit.service.util.EntityFinder;
@@ -142,10 +143,10 @@ public class HighlightService {
     }
 
     public HighlightFetchResponse fetchHighlight(UserToken userToken, Long id) {
-        Highlight highlight = highlightRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));
+        UserProfile user = entityFinder.findUser(userToken.userId());
+        Highlight highlight = entityFinder.findHighlight(id);
 
-        if (!highlight.getAuthor().getId().equals(userToken.userId()) && !highlight.isPublic()) {
+        if (!highlight.isAuthor(user) && !highlight.isPublic()) {
             throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_SEE);
         }
 
