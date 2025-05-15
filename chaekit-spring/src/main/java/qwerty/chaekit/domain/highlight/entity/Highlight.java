@@ -34,7 +34,10 @@ public class Highlight extends BaseEntity {
     @Column(nullable = false)
     private String spine;
 
-    @Column(length = 2000)
+    @Column(nullable = false)
+    private String highlightcontent;
+  
+    @Column(length = 2000
     private String memo;
     
     @ManyToOne(fetch = FetchType.LAZY)
@@ -48,11 +51,12 @@ public class Highlight extends BaseEntity {
     private final List<HighlightComment> comments = new ArrayList<>();
 
     @Builder
-    public Highlight(UserProfile author, Ebook book, String cfi, String spine, String memo, Activity activity, boolean isPublic) {
+    public Highlight(UserProfile author, Ebook book, String cfi, String spine, String highlightcontent, String memo, Activity activity, boolean isPublic) {
         this.author = author;
         this.book = book;
         this.cfi = cfi;
         this.spine = spine;
+        this.highlightcontent=highlightcontent;
         this.memo = memo;
         this.activity = activity;
         this.isPublic = isPublic;

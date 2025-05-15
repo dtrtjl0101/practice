@@ -66,6 +66,7 @@ public class HighlightService {
                 .memo(memo)
                 .isPublic(isPublic)
                 .activity(activity)
+                .highlightcontent(request.highlightContent())
                 .build();
         
         return HighlightPostResponse.of(highlightRepository.save(highlight));
@@ -139,7 +140,18 @@ public class HighlightService {
                 .map(HighlightReactionResponse::of)
                 .collect(Collectors.toList());
     }
-    
+
+    public HighlightFetchResponse fetchHighlight(UserToken userToken, Long id) {
+        Highlight highlight = highlightRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));
+
+        if (!highlight.getAuthor().getId().equals(userToken.userId()) && !highlight.isPublic()) {
+            throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_SEE);
+        }
+
+        String authorProfileImageURL = s3Service.convertToPublicImageURL(highlight.getAuthor().getProfileImageKey());
+        return HighlightFetchResponse.of(highlight, authorProfileImageURL);
+    }
     // helper methods
     
     private String getPublicImageURL(Highlight highlight) {

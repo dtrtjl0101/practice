@@ -10,7 +10,8 @@ public record HighlightPostResponse(
         String spine,
         String cfi,
         String memo,
-        Long activityId
+        Long activityId,
+        String highlightContent
 ) {
     public static HighlightPostResponse of(Highlight highlight) {
         return HighlightPostResponse.builder()
@@ -20,6 +21,7 @@ public record HighlightPostResponse(
                 .cfi(highlight.getCfi())
                 .memo(highlight.getMemo())
                 .activityId(highlight.getActivity() != null ? highlight.getActivity().getId() : null)
+                .highlightContent(highlight.getHighlightcontent())
                 .build();
     }
 }

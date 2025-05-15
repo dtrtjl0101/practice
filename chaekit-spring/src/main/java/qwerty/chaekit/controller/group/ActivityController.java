@@ -35,6 +35,12 @@ public class ActivityController {
         return ApiSuccessResponse.of(activityService.fetchAllActivities(pageable, groupId));
     }
 
+    @GetMapping("/{activityId}")
+    public ApiSuccessResponse<ActivityFetchResponse> getActivity(@PathVariable long groupId,
+                                                               @PathVariable long activityId) {
+        return ApiSuccessResponse.of(activityService.fetchActivity(groupId, activityId));
+    }
+
     @PatchMapping("/api/groups/{groupId}/activities")
     public ApiSuccessResponse<ActivityPostResponse> updateActivity(@Login UserToken userToken,
                                          @PathVariable long groupId,
