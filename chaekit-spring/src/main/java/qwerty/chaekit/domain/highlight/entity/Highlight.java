@@ -34,6 +34,9 @@ public class Highlight extends BaseEntity {
     @Column(nullable = false)
     private String spine;
 
+    @Column(nullable = false)
+    private String highlightcontent;
+
     private String memo;
 
     @Setter
@@ -48,11 +51,12 @@ public class Highlight extends BaseEntity {
     private List<HighlightComment> comments = new ArrayList<>();
 
     @Builder
-    public Highlight(UserProfile author, Ebook book, String cfi, String spine, String memo, Activity activity) {
+    public Highlight(UserProfile author, Ebook book, String cfi, String spine, String highlightcontent, String memo, Activity activity) {
         this.author = author;
         this.book = book;
         this.cfi = cfi;
         this.spine = spine;
+        this.highlightcontent=highlightcontent;
         this.memo = memo;
         this.activity = activity;
         this.isPublic = false;

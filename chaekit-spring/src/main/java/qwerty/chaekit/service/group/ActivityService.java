@@ -127,9 +127,22 @@ public class ActivityService {
         return ActivityPostResponse.of(activity);
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<ActivityFetchResponse> fetchAllActivities(Pageable pageable, long groupId) {
-        Page<ActivityFetchResponse> page = activityRepository.findByGroup_Id(groupId, pageable)
+        Page<ActivityFetchResponse> page = activityRepository.findByGroup_IdWithBook(groupId, pageable)
                 .map(ActivityFetchResponse::of);
         return PageResponse.of(page);
+    }
+
+    @Transactional(readOnly = true)
+    public ActivityFetchResponse fetchActivity(long groupId, long activityId) {
+        Activity activity = activityRepository.findByIdWithBook(activityId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.ACTIVITY_NOT_FOUND));
+
+        if (!activity.getGroup().getId().equals(groupId)) {
+            throw new ForbiddenException(ErrorCode.ACTIVITY_GROUP_MISMATCH);
+        }
+
+        return ActivityFetchResponse.of(activity);
     }
 }

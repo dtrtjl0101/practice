@@ -185,7 +185,7 @@ class ActivityServiceTest {
         List<Activity> activityList = List.of(activity1, activity2);
         Page<Activity> page = new PageImpl<>(activityList);
 
-        given(activityRepository.findByGroup_Id(groupId, pageable)).willReturn(page);
+        given(activityRepository.findByGroup_IdWithBook(groupId, pageable)).willReturn(page);
 
         // when
         PageResponse<ActivityFetchResponse> result = activityService.fetchAllActivities(pageable, groupId);

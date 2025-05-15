@@ -63,6 +63,7 @@ class HighlightServiceTest {
                 .spine("spine1")
                 .cfi("cfi1")
                 .memo("Test Memo")
+                .highlightContent("내용입니다")
                 .build();
 
         // When
@@ -86,6 +87,7 @@ class HighlightServiceTest {
                 .spine("spine1")
                 .cfi("cfi1")
                 .memo("Test Memo")
+                        .highlightcontent("내용입니다")
                 .build());
 
         Pageable pageable = PageRequest.of(0, 10);
@@ -118,6 +120,7 @@ class HighlightServiceTest {
                 .spine("spine1")
                 .cfi("cfi1")
                 .memo("Old Memo")
+                .highlightcontent("내용입니다")
                 .build());
         HighlightPutRequest request = HighlightPutRequest.builder()
                 .memo("Updated Memo")
@@ -145,6 +148,7 @@ class HighlightServiceTest {
                 .spine("spine1")
                 .cfi("cfi1")
                 .memo("Old Memo")
+                .highlightcontent("내용입니다")
                 .build());
 
         UserProfile anotherUserProfile = testFixtureFactory.createUser("another_user", "another_nickname");

@@ -53,6 +53,7 @@ public enum ErrorCode {
     GROUP_MEMBER_ONLY("GROUP_MEMBER_ONLY", "독서모임에 가입된 회원만 사용할 수 있는 기능입니다"),
     GROUP_UPDATE_FORBIDDEN("GROUP_UPDATE_FORBIDDEN", "독서모임 수정 권한이 없습니다"),
     HIGHLIGHT_NOT_YOURS("HIGHLIGHT_NOT_YOURS", "하이라이트는 본인만 수정할 수 있습니다"),
+    HIGHLIGHT_NOT_SEE("HIGHLIGHT_NOT_SEE","다른사람이 작성한 비공개 하이라이트는 볼 수 없습니다."),
     GROUP_LEADER_ONLY("GROUP_LEADER_ONLY", "모임지기만 사용할 수 있는 기능입니다"),
     ACTIVITY_GROUP_MISMATCH("ACTIVITY_GROUP_MISMATCH", "해당 독서모임의 활동이 아닙니다"),
     ACTIVITY_MEMBER_ONLY("ACTIVITY_MEMBER_ONLY", "해당 독서모임 활동에 가입한 경우에만 가능합니다"),
