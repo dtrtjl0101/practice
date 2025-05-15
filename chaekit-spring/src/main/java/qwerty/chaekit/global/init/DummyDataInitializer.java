@@ -22,7 +22,7 @@ import qwerty.chaekit.service.member.MemberJoinHelper;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@Profile("local")
+@Profile(value = {"local", "dev"})
 @Order(2)
 public class DummyDataInitializer implements ApplicationRunner {
     private final MemberJoinHelper memberJoinHelper;
