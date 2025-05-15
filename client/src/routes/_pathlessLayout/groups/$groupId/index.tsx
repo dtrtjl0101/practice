@@ -3,6 +3,7 @@ import { GroupInfo } from "../../../../types/groups";
 import {
   Box,
   Button,
+  CardActionArea,
   CardMedia,
   Chip,
   Container,
@@ -21,7 +22,7 @@ import {
   Typography,
 } from "@mui/material";
 import {
-  AddTask,
+  Add,
   Cancel,
   Check,
   People,
@@ -188,7 +189,11 @@ function ActivityCard(props: { groupId: string }) {
   const [totalPages, setTotalPages] = useState(1);
   const [activityCreateModalOpen, setActivityCreateModalOpen] = useState(false);
 
-  const { data: activity, isFetching } = useQuery({
+  const {
+    data: activity,
+    isFetching,
+    refetch,
+  } = useQuery({
     queryKey: ["activity", groupId, page],
     queryFn: async () => {
       const groupIdNumber = parseInt(groupId);
@@ -216,14 +221,30 @@ function ActivityCard(props: { groupId: string }) {
     },
   });
 
+  const onJoinActivityButtonClicked = async () => {
+    if (!activity) {
+      return;
+    }
+    const response = await API_CLIENT.activityController.joinActivity(
+      activity.activityId
+    );
+    if (!response.isSuccessful) {
+      alert(response.errorMessage);
+      return;
+    }
+    refetch();
+    alert("활동에 가입되었습니다.");
+  };
+
   return (
     <>
       <ActivityCreateModal
         groupId={groupId}
         open={activityCreateModalOpen}
         onClose={() => setActivityCreateModalOpen(false)}
-        onCreate={(activity) => {
-          console.log(activity);
+        onCreate={(_activity) => {
+          alert("활동이 생성되었습니다.");
+          refetch();
         }}
       />
       <Paper sx={{ p: 2 }}>
@@ -233,81 +254,47 @@ function ActivityCard(props: { groupId: string }) {
               활동
             </Typography>
             <IconButton onClick={() => setActivityCreateModalOpen(true)}>
-              <AddTask />
+              <Add />
             </IconButton>
           </Box>
           <Divider />
           {isFetching ? (
-            <Stack spacing={2} direction={"row"}>
-              <Skeleton
-                variant="rectangular"
-                width={256}
-                height={256}
-                sx={{ borderRadius: 2 }}
-              />
-              <Stack sx={{ flexGrow: 1 }}>
-                <Skeleton variant="text" height={48} width="60%" />
-                <Skeleton
-                  variant="text"
-                  height={24}
-                  width="40%"
-                  sx={{ mt: 1, mb: 1 }}
-                />
-                <Divider />
-                <Skeleton
-                  variant="rectangular"
-                  height={64}
-                  width="100%"
-                  sx={{ mt: 2 }}
-                />
-              </Stack>
-            </Stack>
+            <ActivityPlaceHolder />
           ) : activity ? (
             <Stack spacing={2} direction={"row"}>
-              <CardMedia
-                // TODO: Use book image
-                image="https://picsum.photos/256/256"
-                sx={{
-                  width: 256,
-                  height: 256,
-                  borderRadius: 2,
-                }}
-              />
-              <Stack sx={{ flexGrow: 1 }}>
-                <Stack>
-                  {activity ? (
-                    <Typography variant="h5">{activity.bookId}</Typography>
-                  ) : (
-                    <Skeleton height={48} />
-                  )}
-                  <Box
+              <BookInfo activity={activity} />
+              <Stack spacing={1} sx={{ flexGrow: 1 }}>
+                <Stack spacing={1}>
+                  <Typography variant="h5">{activity.bookId}</Typography>
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
                     sx={{
                       display: "flex",
-                      flexDirection: "row",
-                      justifyContent: "flex-end",
                       alignItems: "center",
                     }}
                   >
-                    <Typography
-                      variant="body2"
-                      color="textSecondary"
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Icon>
-                        <Timelapse />
-                      </Icon>
-                      `${new Date(activity.startTime).toLocaleDateString()} ~ $
-                      {new Date(activity.endTime).toLocaleDateString()}`
-                    </Typography>
-                  </Box>
+                    <Icon>
+                      <Timelapse />
+                    </Icon>
+                    {new Date(activity.startTime).toLocaleDateString()} ~{" "}
+                    {new Date(activity.endTime).toLocaleDateString()}
+                  </Typography>
                 </Stack>
                 <Divider />
-                <Typography variant="body1" sx={{ mt: 2 }}>
+                <Typography variant="body1" flexGrow={1}>
                   {activity.description}
                 </Typography>
+                <Button
+                  variant="contained"
+                  onClick={onJoinActivityButtonClicked}
+                  sx={{
+                    alignSelf: "flex-end",
+                  }}
+                >
+                  {/* TODO: 가입되었으면 리더로 가는 버튼 표시 */}
+                  활동 참여하기
+                </Button>
               </Stack>
             </Stack>
           ) : (
@@ -327,6 +314,115 @@ function ActivityCard(props: { groupId: string }) {
         </Stack>
       </Paper>
     </>
+  );
+}
+
+function ActivityPlaceHolder() {
+  return (
+    <Stack spacing={2} direction={"row"}>
+      <Stack width={256} alignItems={"center"}>
+        <Skeleton
+          variant="rectangular"
+          width={192}
+          height={256}
+          sx={{ borderRadius: 2 }}
+        />
+        <Skeleton variant="text" width={180} />
+        <Skeleton variant="text" width={120} />
+      </Stack>
+      <Stack spacing={1} sx={{ flexGrow: 1 }}>
+        <Skeleton variant="text" width={120} height={40} />
+        <Skeleton variant="text" width={200} />
+        <Divider />
+        <Skeleton variant="rectangular" height={60} />
+        <Skeleton
+          variant="rectangular"
+          width={120}
+          height={36}
+          sx={{ alignSelf: "flex-end" }}
+        />
+      </Stack>
+    </Stack>
+  );
+}
+
+function BookInfo(props: { activity: Activity }) {
+  const { activity } = props;
+
+  const { data: book } = useQuery({
+    queryKey: ["book", activity.bookId],
+    queryFn: async () => {
+      const response = await API_CLIENT.ebookController.getBook(
+        activity.bookId
+      );
+      if (!response.isSuccessful) {
+        throw new Error(response.errorMessage);
+      }
+      return response.data;
+    },
+  });
+
+  if (!book) {
+    return (
+      <Stack width={256} alignItems={"center"}>
+        <Skeleton
+          variant="rectangular"
+          width={192}
+          height={256}
+          sx={{ borderRadius: 2 }}
+        />
+        <Skeleton variant="text" width={180} />
+        <Skeleton variant="text" width={120} />
+      </Stack>
+    );
+  }
+
+  return (
+    <Stack spacing={2} width={256} alignItems={"center"}>
+      <CardActionArea
+        sx={{
+          display: "flex",
+          width: 256,
+          alignItems: "center",
+          borderRadius: 2,
+        }}
+      >
+        <CardMedia
+          image={book.bookCoverImageURL}
+          sx={{
+            height: 256,
+            width: 192,
+            borderRadius: 2,
+          }}
+        />
+      </CardActionArea>
+      <Stack spacing={1}>
+        <CardActionArea
+          sx={{
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            borderRadius: 2,
+          }}
+        >
+          <Typography variant="body2" color="textPrimary">
+            {book.title}
+          </Typography>
+        </CardActionArea>
+        <CardActionArea
+          sx={{
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            borderRadius: 2,
+          }}
+        >
+          <Typography variant="body2" color="textSecondary">
+            {book.author}
+          </Typography>
+        </CardActionArea>
+      </Stack>
+    </Stack>
   );
 }
 
@@ -358,7 +454,7 @@ function ActivityCreateModal(props: {
       groupIdNumber,
       {
         // TODO: 검색후 책 정보 가져오기
-        bookId: 0,
+        bookId: 1,
         endTime: endDate.toISOString(),
         startTime: startDate.toISOString(),
         description,
