@@ -47,6 +47,7 @@ export function ActivityCard(props: { groupId: string }) {
         {
           page,
           size: 1,
+          sort: ["startTime,desc"],
         }
       );
 
