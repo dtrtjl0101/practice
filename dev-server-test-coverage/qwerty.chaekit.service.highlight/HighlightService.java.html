@@ -6,135 +6,157 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import qwerty.chaekit.domain.ebook.repository.EbookRepository;
-import qwerty.chaekit.domain.group.activity.repository.ActivityRepository;
+import qwerty.chaekit.domain.ebook.Ebook;
+import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.highlight.entity.Highlight;
 import qwerty.chaekit.domain.highlight.entity.reaction.HighlightReaction;
 import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
 import qwerty.chaekit.domain.highlight.repository.reaction.HighlightReactionRepository;
-import qwerty.chaekit.domain.member.user.UserProfileRepository;
+import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.dto.highlight.HighlightFetchResponse;
 import qwerty.chaekit.dto.highlight.HighlightPostRequest;
 import qwerty.chaekit.dto.highlight.HighlightPostResponse;
 import qwerty.chaekit.dto.highlight.HighlightPutRequest;
-import qwerty.chaekit.dto.highlight.reaction.ReactionResponse;
+import qwerty.chaekit.dto.highlight.reaction.HighlightReactionResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
+import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.ForbiddenException;
-import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.UserToken;
+import qwerty.chaekit.service.group.ActivityPolicy;
+import qwerty.chaekit.service.util.EntityFinder;
 import qwerty.chaekit.service.util.S3Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-<span class="fc" id="L31">@Slf4j</span>
+<span class="fc" id="L33">@Slf4j</span>
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class HighlightService {
     private final HighlightRepository highlightRepository;
-    private final EbookRepository ebookRepository;
-    private final UserProfileRepository userRepository;
-    private final ActivityRepository activityRepository;
     private final HighlightReactionRepository reactionRepository;
+    private final ActivityPolicy activityPolicy;
+    private final HighlightPolicy highlightPolicy;
     private final S3Service s3Service;
+    private final EntityFinder entityFinder;
 
     public HighlightPostResponse createHighlight(UserToken userToken, HighlightPostRequest request) {
-<span class="fc" id="L44">        Long userId = userToken.userId();</span>
-<span class="pc bpc" id="L45" title="1 of 2 branches missed.">        if(!userRepository.existsById(userId)) {</span>
-<span class="nc" id="L46">            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);</span>
+<span class="fc" id="L46">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
+<span class="fc" id="L47">        Ebook ebook = entityFinder.findEbook(request.bookId());</span>
+<span class="fc" id="L48">        String spine = request.spine();</span>
+<span class="fc" id="L49">        String cfi = request.cfi();</span>
+<span class="fc" id="L50">        String memo = request.memo();</span>
+<span class="fc" id="L51">        Long activityId = request.activityId();</span>
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">        boolean isPublic = activityId!= null;</span>
+        
+        Activity activity;
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">        if (isPublic) {</span>
+<span class="nc" id="L56">            activity = entityFinder.findActivity(request.activityId());</span>
+<span class="nc" id="L57">            activityPolicy.assertJoined(user, activity);</span>
+        } else {
+<span class="fc" id="L59">            activity = null;</span>
         }
-<span class="pc bpc" id="L48" title="1 of 2 branches missed.">        if(!ebookRepository.existsById(request.bookId())) {</span>
-<span class="nc" id="L49">            throw new NotFoundException(ErrorCode.EBOOK_NOT_FOUND);</span>
-        }
-<span class="fc" id="L51">        Highlight highlight = Highlight.builder()</span>
-<span class="fc" id="L52">                .book(ebookRepository.getReferenceById(request.bookId()))</span>
-<span class="fc" id="L53">                .spine(request.spine())</span>
-<span class="fc" id="L54">                .cfi(request.cfi())</span>
-<span class="fc" id="L55">                .author(userRepository.getReferenceById(userId))</span>
-<span class="fc" id="L56">                .memo(request.memo())</span>
-<span class="fc" id="L57">                .highlightcontent(request.highlightContent())</span>
-<span class="pc bpc" id="L58" title="1 of 2 branches missed.">                .activity(request.activityId() != null ? activityRepository.getReferenceById(request.activityId()) : null)</span>
-<span class="fc" id="L59">                .build();</span>
-<span class="fc" id="L60">        Highlight savedHighlight = highlightRepository.save(highlight);</span>
-<span class="fc" id="L61">        return HighlightPostResponse.of(savedHighlight);</span>
+        
+<span class="fc" id="L62">        Highlight highlight = Highlight.builder()</span>
+<span class="fc" id="L63">                .author(user)</span>
+<span class="fc" id="L64">                .book(ebook)</span>
+<span class="fc" id="L65">                .spine(spine)</span>
+<span class="fc" id="L66">                .cfi(cfi)</span>
+<span class="fc" id="L67">                .memo(memo)</span>
+<span class="fc" id="L68">                .isPublic(isPublic)</span>
+<span class="fc" id="L69">                .activity(activity)</span>
+<span class="fc" id="L70">                .highlightcontent(request.highlightContent())</span>
+<span class="fc" id="L71">                .build();</span>
+        
+<span class="fc" id="L73">        return HighlightPostResponse.of(highlightRepository.save(highlight));</span>
     }
 
-    public PageResponse&lt;HighlightFetchResponse&gt; fetchHighlights(UserToken userToken, Pageable pageable, Long activityId, Long bookId, String spine, Boolean me) {
-        /*
-        TODO: activityMemberRepository 구현 시 검증.
-        if(!activityMemberRepository.existsByActivityIdAndUserId(activityId, userToken.userId())){
-            throw new ForbiddenException(ErrorCode.ACTIVITY_MEMBER_ONLY);
+    public PageResponse&lt;HighlightFetchResponse&gt; fetchHighlights(UserToken userToken, Pageable pageable, Long activityId, Long bookId, String spine, boolean me) {
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">        boolean isFetchingByActivity = activityId != null;</span>
+<span class="pc bpc" id="L78" title="2 of 4 branches missed.">        boolean isFetchingBySpineButBookIdIsNull = spine != null &amp;&amp; bookId == null;</span>
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">        boolean isFetchingPublicHighlight = !me;</span>
+        
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">        if (isFetchingBySpineButBookIdIsNull) {</span>
+<span class="nc" id="L82">            throw new BadRequestException(ErrorCode.BOOK_ID_REQUIRED);</span>
         }
-        */
-<span class="fc" id="L71">        Page&lt;Highlight&gt; highlights = highlightRepository.findHighlights(pageable, userToken.userId(), activityId, bookId, spine, me);</span>
-<span class="fc" id="L72">        return PageResponse.of(highlights.map(</span>
-<span class="fc" id="L73">                highlight -&gt; HighlightFetchResponse.of(</span>
+        
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">        if (isFetchingByActivity) {</span>
+<span class="nc" id="L86">            activityPolicy.assertJoined(userToken.userId(), activityId);</span>
+<span class="pc bpc" id="L87" title="1 of 2 branches missed.">        } else if (isFetchingPublicHighlight) {</span>
+<span class="nc" id="L88">            throw new BadRequestException(ErrorCode.ACTIVITY_ID_REQUIRED);</span>
+        }
+        
+<span class="fc" id="L91">        Page&lt;Highlight&gt; highlights = highlightRepository.findHighlights(pageable, userToken.userId(), activityId, bookId, spine, me);</span>
+<span class="fc" id="L92">        return PageResponse.of(highlights.map(</span>
+<span class="fc" id="L93">                highlight -&gt; HighlightFetchResponse.of(</span>
                         highlight,
-<span class="fc" id="L75">                        s3Service.convertToPublicImageURL(highlight.getAuthor().getProfileImageKey())</span>
+<span class="fc" id="L95">                        getPublicImageURL(highlight)</span>
                 )
         ));
     }
 
     @Transactional
     public HighlightPostResponse updateHighlight(UserToken userToken, Long id, HighlightPutRequest request) {
-<span class="fc" id="L82">        Highlight highlight = highlightRepository.findById(id)</span>
-<span class="pc" id="L83">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));</span>
+<span class="fc" id="L102">        Long newActivityId = request.activityId();</span>
+<span class="fc" id="L103">        String newMemo = request.memo();</span>
+        
+<span class="fc" id="L105">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
+<span class="fc" id="L106">        Highlight highlight = entityFinder.findHighlight(id);</span>
 
-<span class="fc bfc" id="L85" title="All 2 branches covered.">        if(!userToken.userId().equals(highlight.getAuthor().getId())) {</span>
-<span class="fc" id="L86">            throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_YOURS);</span>
+<span class="fc" id="L108">        highlightPolicy.assertUpdatable(user, highlight);</span>
+        
+<span class="pc bpc" id="L110" title="1 of 2 branches missed.">        if(newActivityId != null) {</span>
+<span class="nc" id="L111">            Activity activity = entityFinder.findActivity(newActivityId);</span>
+<span class="nc" id="L112">            activityPolicy.assertJoined(user, activity);</span>
+<span class="nc" id="L113">            highlight.setAsPublicActivity(activity);</span>
         }
 
-<span class="pc bpc" id="L89" title="1 of 2 branches missed.">        if (highlight.isPublic()) {</span>
-<span class="nc" id="L90">            throw new ForbiddenException(ErrorCode.HIGHLIGHT_ALREADY_PUBLIC);</span>
-        }
-
-<span class="pc bpc" id="L93" title="1 of 2 branches missed.">        if (request.activityId() != null) {</span>
-<span class="nc" id="L94">            highlight.setActivity(activityRepository.getReferenceById(request.activityId()));</span>
-<span class="nc" id="L95">            highlight.makePublic();</span>
-        }
-
-<span class="fc" id="L98">        highlight.updateMemo(request.memo());</span>
-<span class="fc" id="L99">        return HighlightPostResponse.of(highlightRepository.save(highlight));</span>
+<span class="fc" id="L116">        highlight.updateMemo(newMemo);</span>
+<span class="fc" id="L117">        return HighlightPostResponse.of(highlightRepository.save(highlight));</span>
     }
 
     public void deleteHighlight(UserToken userToken, Long id) {
-<span class="nc" id="L103">        Highlight highlight = highlightRepository.findById(id)</span>
-<span class="nc" id="L104">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));</span>
-        
-<span class="nc bnc" id="L106" title="All 2 branches missed.">        if(!userToken.userId().equals(highlight.getAuthor().getId())) {</span>
-<span class="nc" id="L107">            throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_YOURS);</span>
+<span class="nc" id="L121">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
+<span class="nc" id="L122">        Highlight highlight = entityFinder.findHighlight(id);</span>
+
+<span class="nc" id="L124">        highlightPolicy.assertUpdatable(user, highlight);</span>
+
+<span class="nc" id="L126">        highlightRepository.delete(highlight);</span>
+<span class="nc" id="L127">    }</span>
+
+    // TODO: move this method to HighlightReactionService 
+    public List&lt;HighlightReactionResponse&gt; getHighlightReactions(UserToken userToken, Long highlightId) {
+<span class="nc" id="L131">        Highlight highlight = entityFinder.findHighlight(highlightId);</span>
+<span class="nc bnc" id="L132" title="All 2 branches missed.">        if(highlight.isPublic()) {</span>
+<span class="nc" id="L133">            activityPolicy.assertJoined(userToken.userId(), highlightId);</span>
+        } else {
+<span class="nc" id="L135">            highlightPolicy.assertUpdatable(userToken.userId(), highlight);</span>
         }
 
-<span class="nc bnc" id="L110" title="All 2 branches missed.">        if (highlight.isPublic()) {</span>
-<span class="nc" id="L111">            throw new ForbiddenException(ErrorCode.HIGHLIGHT_ALREADY_PUBLIC);</span>
-        }
-
-<span class="nc" id="L114">        highlightRepository.delete(highlight);</span>
-<span class="nc" id="L115">    }</span>
-
-    public List&lt;ReactionResponse&gt; getHighlightReactions(Long highlightId) {
-<span class="nc" id="L118">        Highlight highlight = highlightRepository.findById(highlightId)</span>
-<span class="nc" id="L119">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));</span>
-
-<span class="nc" id="L121">        List&lt;HighlightReaction&gt; reactions = reactionRepository.findByHighlightIdAndCommentIdIsNull(highlightId);</span>
+<span class="nc" id="L138">        List&lt;HighlightReaction&gt; reactions = reactionRepository.findByHighlightIdAndCommentIdIsNull(highlightId);</span>
         
-<span class="nc" id="L123">        return reactions.stream()</span>
-<span class="nc" id="L124">                .map(ReactionResponse::of)</span>
-<span class="nc" id="L125">                .collect(Collectors.toList());</span>
+<span class="nc" id="L140">        return reactions.stream()</span>
+<span class="nc" id="L141">                .map(HighlightReactionResponse::of)</span>
+<span class="nc" id="L142">                .collect(Collectors.toList());</span>
     }
 
     public HighlightFetchResponse fetchHighlight(UserToken userToken, Long id) {
-<span class="nc" id="L129">        Highlight highlight = highlightRepository.findById(id)</span>
-<span class="nc" id="L130">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));</span>
+<span class="nc" id="L146">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
+<span class="nc" id="L147">        Highlight highlight = entityFinder.findHighlight(id);</span>
 
-<span class="nc bnc" id="L132" title="All 4 branches missed.">        if (!highlight.getAuthor().getId().equals(userToken.userId()) &amp;&amp; !highlight.isPublic()) {</span>
-<span class="nc" id="L133">            throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_SEE);</span>
+<span class="nc bnc" id="L149" title="All 4 branches missed.">        if (!highlight.isAuthor(user) &amp;&amp; !highlight.isPublic()) {</span>
+<span class="nc" id="L150">            throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_SEE);</span>
         }
 
-<span class="nc" id="L136">        String authorProfileImageURL = s3Service.convertToPublicImageURL(highlight.getAuthor().getProfileImageKey());</span>
-<span class="nc" id="L137">        return HighlightFetchResponse.of(highlight, authorProfileImageURL);</span>
+<span class="nc" id="L153">        String authorProfileImageURL = s3Service.convertToPublicImageURL(highlight.getAuthor().getProfileImageKey());</span>
+<span class="nc" id="L154">        return HighlightFetchResponse.of(highlight, authorProfileImageURL);</span>
+    }
+    // helper methods
+    
+    private String getPublicImageURL(Highlight highlight) {
+<span class="fc" id="L159">        return s3Service.convertToPublicImageURL(highlight.getAuthor().getProfileImageKey());</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

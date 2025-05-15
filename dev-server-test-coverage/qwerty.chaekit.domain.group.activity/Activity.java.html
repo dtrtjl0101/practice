@@ -8,8 +8,12 @@ import lombok.NoArgsConstructor;
 import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.group.ReadingGroup;
+import qwerty.chaekit.domain.group.activity.activitymember.ActivityMember;
+import qwerty.chaekit.domain.member.user.UserProfile;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -34,31 +38,61 @@ public class Activity extends BaseEntity {
     @Column(nullable = false)
     private LocalDate endTime;
 
+    @Column(length = 5000)
     private String description;
+    
+<span class="fc" id="L44">    @OneToMany(mappedBy = &quot;activity&quot;, cascade = CascadeType.ALL, orphanRemoval = true)</span>
+    private final List&lt;ActivityMember&gt; participants = new ArrayList&lt;&gt;();
 
     @Builder
-<span class="fc" id="L40">    public Activity(Long id, ReadingGroup group, Ebook book, LocalDate startTime, LocalDate endTime, String description) {</span>
-<span class="fc" id="L41">        this.id = id;</span>
-<span class="fc" id="L42">        this.group = group;</span>
-<span class="fc" id="L43">        this.book = book;</span>
-<span class="fc" id="L44">        this.startTime = startTime;</span>
-<span class="fc" id="L45">        this.endTime = endTime;</span>
-<span class="fc" id="L46">        this.description = description;</span>
-<span class="fc" id="L47">    }</span>
+<span class="fc" id="L48">    public Activity(Long id, ReadingGroup group, Ebook book, LocalDate startTime, LocalDate endTime, String description) {</span>
+<span class="fc" id="L49">        this.id = id;</span>
+<span class="fc" id="L50">        this.group = group;</span>
+<span class="fc" id="L51">        this.book = book;</span>
+<span class="fc" id="L52">        this.startTime = startTime;</span>
+<span class="fc" id="L53">        this.endTime = endTime;</span>
+<span class="fc" id="L54">        this.description = description;</span>
+<span class="fc" id="L55">    }</span>
+    
+    public boolean isParticipant(UserProfile user) {
+<span class="nc" id="L58">        return participants.stream()</span>
+<span class="nc" id="L59">                .anyMatch(participant -&gt; participant.getUser().getId().equals(user.getId()));</span>
+    }
+    
+    public boolean isFromGroup(ReadingGroup group) {
+<span class="fc" id="L63">        return this.group.getId().equals(group.getId());</span>
+    }
+    
+    public boolean isEnded() {
+<span class="nc" id="L67">        return LocalDate.now().isAfter(endTime);</span>
+    }
 
     public void updateTime(LocalDate startTime, LocalDate endTime) {
-<span class="pc bpc" id="L50" title="1 of 2 branches missed.">        if(startTime != null) {</span>
-<span class="fc" id="L51">            this.startTime = startTime;</span>
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">        if(startTime != null) {</span>
+<span class="fc" id="L72">            this.startTime = startTime;</span>
         }
-<span class="pc bpc" id="L53" title="1 of 2 branches missed.">        if(endTime != null) {</span>
-<span class="fc" id="L54">            this.endTime = endTime;</span>
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">        if(endTime != null) {</span>
+<span class="fc" id="L75">            this.endTime = endTime;</span>
         }
-<span class="fc" id="L56">    }</span>
+<span class="fc" id="L77">    }</span>
 
     public void updateDescription(String description) {
-<span class="pc bpc" id="L59" title="1 of 2 branches missed.">        if(description != null) {</span>
-<span class="fc" id="L60">            this.description = description;</span>
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">        if(description != null) {</span>
+<span class="fc" id="L81">            this.description = description;</span>
         }
-<span class="fc" id="L62">    }</span>
+<span class="fc" id="L83">    }</span>
+    
+    public void addParticipant(UserProfile user) {
+<span class="nc" id="L86">        participants.add(</span>
+<span class="nc" id="L87">                ActivityMember.builder()</span>
+<span class="nc" id="L88">                        .activity(this)</span>
+<span class="nc" id="L89">                        .user(user)</span>
+<span class="nc" id="L90">                        .build()</span>
+        );
+<span class="nc" id="L92">    }</span>
+    
+    public void removeParticipant(UserProfile user) {
+<span class="nc" id="L95">        participants.removeIf(participant -&gt; participant.getUser().getId().equals(user.getId()));</span>
+<span class="nc" id="L96">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

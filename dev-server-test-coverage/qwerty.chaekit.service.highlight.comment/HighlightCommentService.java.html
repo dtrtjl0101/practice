@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HighlightCommentService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chaekit</a> &gt; <a href="index.source.html" class="el_package">qwerty.chaekit.service.highlight.comment</a> &gt; <span class="el_source">HighlightCommentService.java</span></div><h1>HighlightCommentService.java</h1><pre class="source lang-java linenums">package qwerty.chaekit.service.highlight.comment;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import qwerty.chaekit.domain.highlight.entity.Highlight;
+import qwerty.chaekit.domain.highlight.entity.comment.HighlightComment;
+import qwerty.chaekit.domain.highlight.entity.reaction.HighlightReaction;
+import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
+import qwerty.chaekit.domain.highlight.repository.comment.HighlightCommentRepository;
+import qwerty.chaekit.domain.highlight.repository.reaction.HighlightReactionRepository;
+import qwerty.chaekit.domain.member.user.UserProfile;
+import qwerty.chaekit.domain.member.user.UserProfileRepository;
+import qwerty.chaekit.dto.highlight.comment.HighlightCommentRequest;
+import qwerty.chaekit.dto.highlight.comment.HighlightCommentResponse;
+import qwerty.chaekit.global.enums.ErrorCode;
+import qwerty.chaekit.global.exception.ForbiddenException;
+import qwerty.chaekit.global.exception.NotFoundException;
+import qwerty.chaekit.global.security.resolver.UserToken;
+import qwerty.chaekit.service.group.ActivityPolicy;
+import qwerty.chaekit.service.notification.NotificationService;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+<span class="fc" id="L27">@Slf4j</span>
+@Service
+@Transactional
+@RequiredArgsConstructor
+public class HighlightCommentService {
+    private final HighlightRepository highlightRepository;
+    private final HighlightCommentRepository commentRepository;
+    private final HighlightReactionRepository reactionRepository;
+    private final UserProfileRepository userRepository;
+    private final NotificationService notificationService;
+    private final ActivityPolicy activityPolicy;
+
+    public HighlightCommentResponse createComment(UserToken userToken, Long highlightId, HighlightCommentRequest request) {
+<span class="nc" id="L40">        Long userId = userToken.userId();</span>
+
+<span class="nc" id="L42">        UserProfile commentAuthor = userRepository.findById(userId)</span>
+<span class="nc" id="L43">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
+
+<span class="nc" id="L45">        Highlight highlight = highlightRepository.findById(highlightId)</span>
+<span class="nc" id="L46">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));</span>
+
+<span class="nc" id="L48">        activityPolicy.assertJoined(commentAuthor, highlight.getActivity());</span>
+        
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        if (!highlight.isPublic()) {</span>
+<span class="nc" id="L51">            throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_PUBLIC);</span>
+        }
+        
+        HighlightComment parent;
+<span class="nc bnc" id="L55" title="All 2 branches missed.">        if (request.parentId() != null) {</span>
+<span class="nc" id="L56">            parent = commentRepository.findById(request.parentId())</span>
+<span class="nc" id="L57">                    .orElseThrow(() -&gt; new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));</span>
+
+<span class="nc bnc" id="L59" title="All 2 branches missed.">            if (!parent.getHighlight().getId().equals(highlightId)) {</span>
+<span class="nc" id="L60">                throw new ForbiddenException(ErrorCode.COMMENT_PARENT_MISMATCH);</span>
+            }
+        } else {
+<span class="nc" id="L63">            parent = null;</span>
+        }
+        
+<span class="nc" id="L66">        HighlightComment comment = HighlightComment.builder()</span>
+<span class="nc" id="L67">                .author(commentAuthor)</span>
+<span class="nc" id="L68">                .highlight(highlight)</span>
+<span class="nc" id="L69">                .content(request.content())</span>
+<span class="nc" id="L70">                .parent(parent)</span>
+<span class="nc" id="L71">                .build();</span>
+        
+<span class="nc" id="L73">        HighlightComment savedComment = commentRepository.save(comment);</span>
+        
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        if (parent != null) {</span>
+<span class="nc" id="L76">            parent.addReply(savedComment);</span>
+        }
+
+<span class="nc bnc" id="L79" title="All 2 branches missed.">        if (parent != null) {</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">            if (!parent.getAuthor().getId().equals(userId)) {</span>
+<span class="nc" id="L81">                notificationService.createHighlightCommentReplyNotification(parent.getAuthor(), commentAuthor, parent);</span>
+            }
+<span class="nc bnc" id="L83" title="All 4 branches missed.">            if (!highlight.getAuthor().getId().equals(userId) &amp;&amp; !highlight.getAuthor().getId().equals(parent.getAuthor().getId())) {</span>
+<span class="nc" id="L84">                notificationService.createHighlightCommentReplyNotification(highlight.getAuthor(), commentAuthor, parent);</span>
+            }
+        } else {
+<span class="nc bnc" id="L87" title="All 2 branches missed.">            if (!highlight.getAuthor().getId().equals(userId)) {</span>
+<span class="nc" id="L88">                notificationService.createHighlightCommentNotification(highlight.getAuthor(), commentAuthor, highlight);</span>
+            }
+        }
+        
+<span class="nc" id="L92">        return HighlightCommentResponse.of(savedComment);</span>
+    }
+    
+    @Transactional(readOnly = true)
+    public List&lt;HighlightCommentResponse&gt; getComments(UserToken userToken, Long highlightId) {
+<span class="nc" id="L97">        UserProfile author = userRepository.findById(userToken.userId())</span>
+<span class="nc" id="L98">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
+        
+<span class="nc" id="L100">        Highlight highlight = highlightRepository.findById(highlightId)</span>
+<span class="nc" id="L101">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));</span>
+
+<span class="nc" id="L103">        activityPolicy.assertJoined(author, highlight.getActivity());</span>
+        
+<span class="nc bnc" id="L105" title="All 2 branches missed.">        if (!highlight.isPublic()) {</span>
+<span class="nc" id="L106">            throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_PUBLIC);</span>
+        }
+
+<span class="nc" id="L109">        List&lt;HighlightComment&gt; rootComments = commentRepository.findRootCommentsByHighlightId(highlightId);</span>
+
+<span class="nc" id="L111">        Set&lt;Long&gt; allCommentIds = new HashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">        for (HighlightComment rootComment : rootComments) {</span>
+<span class="nc" id="L113">            allCommentIds.add(rootComment.getId());</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">            for (HighlightComment reply : rootComment.getReplies()) {</span>
+<span class="nc" id="L115">                allCommentIds.add(reply.getId());</span>
+<span class="nc" id="L116">            }</span>
+<span class="nc" id="L117">        }</span>
+
+        final Map&lt;Long, List&lt;HighlightReaction&gt;&gt; reactionsByCommentId;
+        
+<span class="nc bnc" id="L121" title="All 2 branches missed.">        if (!allCommentIds.isEmpty()) {</span>
+<span class="nc" id="L122">            List&lt;HighlightReaction&gt; allReactions = reactionRepository.findByCommentIdIn(new ArrayList&lt;&gt;(allCommentIds));</span>
+<span class="nc" id="L123">            reactionsByCommentId = allReactions.stream()</span>
+<span class="nc" id="L124">                    .collect(Collectors.groupingBy(reaction -&gt; reaction.getComment().getId()));</span>
+<span class="nc" id="L125">        } else {</span>
+<span class="nc" id="L126">            reactionsByCommentId = Collections.emptyMap();</span>
+        }
+
+<span class="nc" id="L129">        return rootComments.stream()</span>
+<span class="nc" id="L130">                .map(comment -&gt; HighlightCommentResponse.of(comment, reactionsByCommentId))</span>
+<span class="nc" id="L131">                .collect(Collectors.toList());</span>
+    }
+    
+    public HighlightCommentResponse updateComment(UserToken userToken, Long commentId, HighlightCommentRequest request) {
+<span class="nc" id="L135">        Long userId = userToken.userId();</span>
+        
+<span class="nc" id="L137">        HighlightComment comment = commentRepository.findById(commentId)</span>
+<span class="nc" id="L138">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));</span>
+        
+<span class="nc bnc" id="L140" title="All 2 branches missed.">        if (!comment.getAuthor().getId().equals(userId)) {</span>
+<span class="nc" id="L141">            throw new ForbiddenException(ErrorCode.COMMENT_NOT_YOURS);</span>
+        }
+        
+<span class="nc" id="L144">        comment.updateContent(request.content());</span>
+<span class="nc" id="L145">        return HighlightCommentResponse.of(commentRepository.save(comment));</span>
+    }
+    
+    public void deleteComment(UserToken userToken, Long commentId) {
+<span class="nc" id="L149">        Long userId = userToken.userId();</span>
+        
+<span class="nc" id="L151">        HighlightComment comment = commentRepository.findById(commentId)</span>
+<span class="nc" id="L152">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));</span>
+        
+<span class="nc bnc" id="L154" title="All 2 branches missed.">        if (!comment.getAuthor().getId().equals(userId)) {</span>
+<span class="nc" id="L155">            throw new ForbiddenException(ErrorCode.COMMENT_NOT_YOURS);</span>
+        }
+
+<span class="nc" id="L158">        List&lt;HighlightReaction&gt; reactions = reactionRepository.findByCommentId(commentId);</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">        for (HighlightReaction reaction : reactions) {</span>
+<span class="nc" id="L160">            reactionRepository.delete(reaction);</span>
+<span class="nc" id="L161">        }</span>
+
+<span class="nc bnc" id="L163" title="All 2 branches missed.">        if (!comment.getReplies().isEmpty()) {</span>
+<span class="nc" id="L164">            List&lt;Long&gt; replyIds = comment.getReplies().stream()</span>
+<span class="nc" id="L165">                    .map(HighlightComment::getId)</span>
+<span class="nc" id="L166">                    .collect(Collectors.toList());</span>
+            
+<span class="nc" id="L168">            List&lt;HighlightReaction&gt; replyReactions = reactionRepository.findByCommentIdIn(replyIds);</span>
+<span class="nc bnc" id="L169" title="All 2 branches missed.">            for (HighlightReaction reaction : replyReactions) {</span>
+<span class="nc" id="L170">                reactionRepository.delete(reaction);</span>
+<span class="nc" id="L171">            }</span>
+        }
+        
+<span class="nc" id="L174">        commentRepository.delete(comment);</span>
+<span class="nc" id="L175">    }</span>
+} 
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -29,7 +29,7 @@ public class Discussion extends BaseEntity {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 5000)
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -60,5 +60,13 @@ public class Discussion extends BaseEntity {
 <span class="fc" id="L60">            this.content = content;</span>
         }
 <span class="fc" id="L62">    }</span>
+    
+    public boolean isAuthor(UserProfile user) {
+<span class="fc" id="L65">        return author.getId().equals(user.getId());</span>
+    }
+    
+    public void addComment(DiscussionComment comment) {
+<span class="fc" id="L69">        comments.add(comment);</span>
+<span class="fc" id="L70">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

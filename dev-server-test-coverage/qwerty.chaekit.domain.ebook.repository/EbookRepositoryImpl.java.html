@@ -49,7 +49,7 @@ public class EbookRepositoryImpl implements EbookRepository {
 
     @Override
     public Optional&lt;Ebook&gt; findById(Long id) {
-<span class="nc" id="L52">        return ebookJpaRepository.findById(id);</span>
+<span class="fc" id="L52">        return ebookJpaRepository.findById(id);</span>
     }
 
     @Override
@@ -64,12 +64,12 @@ public class EbookRepositoryImpl implements EbookRepository {
 
     @Override
     public boolean existsById(Long id) {
-<span class="fc" id="L67">        return ebookJpaRepository.existsById(id);</span>
+<span class="nc" id="L67">        return ebookJpaRepository.existsById(id);</span>
     }
 
     @Override
     public Ebook getReferenceById(Long id) {
-<span class="fc" id="L72">        return ebookJpaRepository.getReferenceById(id);</span>
+<span class="nc" id="L72">        return ebookJpaRepository.getReferenceById(id);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

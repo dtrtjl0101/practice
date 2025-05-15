@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActivityPolicy.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chaekit</a> &gt; <a href="index.source.html" class="el_package">qwerty.chaekit.service.group</a> &gt; <span class="el_source">ActivityPolicy.java</span></div><h1>ActivityPolicy.java</h1><pre class="source lang-java linenums">package qwerty.chaekit.service.group;
+
+import jakarta.annotation.Nullable;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import qwerty.chaekit.domain.ebook.purchase.repository.EbookPurchaseRepository;
+import qwerty.chaekit.domain.group.activity.Activity;
+import qwerty.chaekit.domain.group.activity.activitymember.ActivityMemberRepository;
+import qwerty.chaekit.domain.group.activity.repository.ActivityRepository;
+import qwerty.chaekit.domain.group.groupmember.GroupMemberRepository;
+import qwerty.chaekit.domain.member.user.UserProfile;
+import qwerty.chaekit.global.enums.ErrorCode;
+import qwerty.chaekit.global.exception.BadRequestException;
+import qwerty.chaekit.global.exception.ForbiddenException;
+
+import java.time.LocalDate;
+
+@Service
+@RequiredArgsConstructor
+public class ActivityPolicy {
+    private final ActivityRepository activityRepository;
+    private final GroupMemberRepository groupMemberRepository;
+    private final ActivityMemberRepository activityMemberRepository;
+    private final EbookPurchaseRepository ebookPurchaseRepository;
+
+    public void assertJoinable(UserProfile user, Activity activity) {
+<span class="nc" id="L27">        groupMemberRepository.findByUserAndReadingGroupAndAcceptedTrue(user, activity.getGroup())</span>
+<span class="nc" id="L28">                .orElseThrow(() -&gt; new BadRequestException(ErrorCode.GROUP_MEMBER_ONLY));</span>
+
+<span class="nc bnc" id="L30" title="All 2 branches missed.">        if (activityMemberRepository.existsByUserAndActivity(user, activity)) {</span>
+<span class="nc" id="L31">            throw new BadRequestException(ErrorCode.ACTIVITY_ALREADY_JOINED);</span>
+        }
+
+<span class="nc bnc" id="L34" title="All 2 branches missed.">        if (activity.isEnded()) {</span>
+<span class="nc" id="L35">            throw new BadRequestException(ErrorCode.ACTIVITY_ALREADY_ENDED);</span>
+        }
+
+<span class="nc bnc" id="L38" title="All 2 branches missed.">        if (!ebookPurchaseRepository.existsByUserIdAndEbookId(user.getId(), activity.getBook().getId())) {</span>
+<span class="nc" id="L39">            throw new BadRequestException(ErrorCode.ACTIVITY_BOOK_NOT_OWNED);</span>
+        }
+<span class="nc" id="L41">    }</span>
+
+    public void assertActivityPeriodValid(long groupId, @Nullable Long activityId, LocalDate startTime, LocalDate endTime) {
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">        if (startTime.isAfter(endTime)) {</span>
+<span class="nc" id="L45">            throw new BadRequestException(ErrorCode.ACTIVITY_TIME_INVALID);</span>
+        }
+
+<span class="fc" id="L48">        activityRepository.findByGroup_Id(groupId).stream()</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">                .filter(a -&gt; !a.getId().equals(activityId))</span>
+<span class="fc" id="L50">                .forEach(a -&gt; {</span>
+<span class="fc" id="L51">                    boolean isBefore = endTime.isBefore(a.getStartTime());</span>
+<span class="fc" id="L52">                    boolean isAfter = startTime.isAfter(a.getEndTime());</span>
+<span class="pc bpc" id="L53" title="2 of 4 branches missed.">                    if (!(isBefore || isAfter)) {</span>
+<span class="fc" id="L54">                        throw new BadRequestException(ErrorCode.ACTIVITY_TIME_CONFLICT);</span>
+                    }
+<span class="nc" id="L56">                });</span>
+<span class="fc" id="L57">    }</span>
+    
+    public void assertJoined(UserProfile user, Activity activity) {
+<span class="nc bnc" id="L60" title="All 4 branches missed.">        if (user.getId() == null || !activityMemberRepository.existsByUserAndActivity(user, activity)) {</span>
+<span class="nc" id="L61">            throw new ForbiddenException(ErrorCode.ACTIVITY_MEMBER_ONLY);</span>
+        }
+<span class="nc" id="L63">    }</span>
+
+    public void assertJoined(Long userId, Long activityId) {
+<span class="nc" id="L66">        UserProfile user = UserProfile.builder().id(userId).build();</span>
+<span class="nc" id="L67">        Activity activity = Activity.builder().id(activityId).build();</span>
+<span class="nc" id="L68">        assertJoined(user, activity);</span>
+<span class="nc" id="L69">    }</span>
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

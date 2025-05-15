@@ -36,10 +36,10 @@ public class Highlight extends BaseEntity {
 
     @Column(nullable = false)
     private String highlightcontent;
-
+  
+    @Column(length = 2000)
     private String memo;
-
-    @Setter
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name=&quot;activity_id&quot;)
     private Activity activity;
@@ -48,10 +48,10 @@ public class Highlight extends BaseEntity {
     private boolean isPublic;
     
 <span class="fc" id="L50">    @OneToMany(mappedBy = &quot;highlight&quot;, cascade = CascadeType.ALL, orphanRemoval = true)</span>
-    private List&lt;HighlightComment&gt; comments = new ArrayList&lt;&gt;();
+    private final List&lt;HighlightComment&gt; comments = new ArrayList&lt;&gt;();
 
     @Builder
-<span class="fc" id="L54">    public Highlight(UserProfile author, Ebook book, String cfi, String spine, String highlightcontent, String memo, Activity activity) {</span>
+<span class="fc" id="L54">    public Highlight(UserProfile author, Ebook book, String cfi, String spine, String highlightcontent, String memo, Activity activity, boolean isPublic) {</span>
 <span class="fc" id="L55">        this.author = author;</span>
 <span class="fc" id="L56">        this.book = book;</span>
 <span class="fc" id="L57">        this.cfi = cfi;</span>
@@ -59,19 +59,24 @@ public class Highlight extends BaseEntity {
 <span class="fc" id="L59">        this.highlightcontent=highlightcontent;</span>
 <span class="fc" id="L60">        this.memo = memo;</span>
 <span class="fc" id="L61">        this.activity = activity;</span>
-<span class="fc" id="L62">        this.isPublic = false;</span>
+<span class="fc" id="L62">        this.isPublic = isPublic;</span>
 <span class="fc" id="L63">    }</span>
 
     public void updateMemo(String memo) {
 <span class="fc" id="L66">        this.memo = memo;</span>
 <span class="fc" id="L67">    }</span>
 
-    public void makePublic() {
-<span class="nc" id="L70">        this.isPublic = true;</span>
-<span class="nc" id="L71">    }</span>
+    public void setAsPublicActivity(Activity activity) {
+<span class="nc" id="L70">        this.activity = activity;</span>
+<span class="nc" id="L71">        this.isPublic = true;</span>
+<span class="nc" id="L72">    }</span>
 
     public boolean isPublic() {
-<span class="fc" id="L74">        return isPublic;</span>
+<span class="fc" id="L75">        return isPublic;</span>
+    }
+    
+    public boolean isAuthor(UserProfile user) {
+<span class="fc" id="L79">        return author.getId().equals(user.getId());</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -5,26 +5,25 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import qwerty.chaekit.domain.group.activity.repository.ActivityRepository;
+import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.group.activity.discussion.Discussion;
-import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment;
 import qwerty.chaekit.domain.group.activity.discussion.comment.repository.DiscussionCommentRepository;
 import qwerty.chaekit.domain.group.activity.discussion.repository.DiscussionRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
-import qwerty.chaekit.domain.member.user.UserProfileRepository;
-import qwerty.chaekit.dto.group.activity.discussion.*;
+import qwerty.chaekit.dto.group.activity.discussion.DiscussionDetailResponse;
+import qwerty.chaekit.dto.group.activity.discussion.DiscussionFetchResponse;
+import qwerty.chaekit.dto.group.activity.discussion.DiscussionPatchRequest;
+import qwerty.chaekit.dto.group.activity.discussion.DiscussionPostRequest;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.mapper.DiscussionMapper;
-import qwerty.chaekit.service.notification.NotificationService;
+import qwerty.chaekit.service.util.EntityFinder;
 
 import java.util.List;
 import java.util.Map;
-
-// TODO: 모든 메서드에서 activity 참여중인지 권한 확인 필요(특히, GET, POST 메서드)
 
 @Service
 @RequiredArgsConstructor
@@ -32,181 +31,88 @@ import java.util.Map;
 public class DiscussionService {
     private final DiscussionRepository discussionRepository;
     private final DiscussionMapper discussionMapper;
-    private final ActivityRepository activityRepository;
-    private final UserProfileRepository userRepository;
     private final DiscussionCommentRepository discussionCommentRepository;
-    private final NotificationService notificationService;
+    private final ActivityPolicy activityPolicy;
+    private final EntityFinder entityFinder;
 
 
     @Transactional(readOnly = true)
     public PageResponse&lt;DiscussionFetchResponse&gt; getDiscussions(UserToken userToken, Pageable pageable, Long activityId) {
-<span class="fc" id="L43">        Long userId = userToken.userId();</span>
+<span class="fc" id="L41">        Long userId = userToken.userId();</span>
 
-<span class="fc" id="L45">        Page&lt;Discussion&gt; discussions = discussionRepository.findByActivityId(activityId, pageable);</span>
-<span class="fc" id="L46">        List&lt;Long&gt; discussionIdList = discussions.stream()</span>
-<span class="fc" id="L47">                .map(Discussion::getId)</span>
-<span class="fc" id="L48">                .toList();</span>
+<span class="fc" id="L43">        activityPolicy.assertJoined(userId, activityId);</span>
+<span class="fc" id="L44">        Page&lt;Discussion&gt; discussions = discussionRepository.findByActivityId(activityId, pageable);</span>
+<span class="fc" id="L45">        List&lt;Long&gt; discussionIdList = discussions.stream()</span>
+<span class="fc" id="L46">                .map(Discussion::getId)</span>
+<span class="fc" id="L47">                .toList();</span>
 
         // Get the count of comments for each discussion
-<span class="fc" id="L51">        Map&lt;Long, Long&gt; counts = discussionCommentRepository.countCommentsByDiscussionIds(discussionIdList);</span>
+<span class="fc" id="L50">        Map&lt;Long, Long&gt; counts = discussionCommentRepository.countCommentsByDiscussionIds(discussionIdList);</span>
 
-<span class="fc" id="L53">        return PageResponse.of(discussions.map(discussion -&gt; {</span>
-<span class="fc" id="L54">            Long commentCount = counts.getOrDefault(discussion.getId(), 0L);</span>
-<span class="fc" id="L55">            return discussionMapper.toFetchResponse(discussion, commentCount, userId);</span>
+<span class="fc" id="L52">        return PageResponse.of(discussions.map(discussion -&gt; {</span>
+<span class="fc" id="L53">            Long commentCount = counts.getOrDefault(discussion.getId(), 0L);</span>
+<span class="fc" id="L54">            return discussionMapper.toFetchResponse(discussion, commentCount, userId);</span>
         }));
     }
 
     public DiscussionFetchResponse createDiscussion(UserToken userToken, Long activityId, DiscussionPostRequest request) {
-<span class="pc bpc" id="L60" title="1 of 2 branches missed.">        if(!activityRepository.existsById(activityId)) {</span>
-<span class="nc" id="L61">            throw new NotFoundException(ErrorCode.ACTIVITY_NOT_FOUND);</span>
-        }
+<span class="fc" id="L59">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
+<span class="fc" id="L60">        Activity activity = entityFinder.findActivity(activityId);</span>
 
-<span class="fc" id="L64">        UserProfile user = userRepository.findById(userToken.userId())</span>
-<span class="pc" id="L65">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
+<span class="fc" id="L62">        activityPolicy.assertJoined(user, activity);</span>
 
-<span class="fc" id="L67">        Discussion discussion = Discussion.builder()</span>
-<span class="fc" id="L68">                .activity(activityRepository.getReferenceById(activityId))</span>
-<span class="fc" id="L69">                .title(request.title())</span>
-<span class="fc" id="L70">                .content(request.content())</span>
-<span class="fc" id="L71">                .author(user)</span>
-<span class="fc" id="L72">                .isDebate(request.isDebate())</span>
-<span class="fc" id="L73">                .build();</span>
+<span class="fc" id="L64">        Discussion discussion = Discussion.builder()</span>
+<span class="fc" id="L65">                .activity(activity)</span>
+<span class="fc" id="L66">                .title(request.title())</span>
+<span class="fc" id="L67">                .content(request.content())</span>
+<span class="fc" id="L68">                .author(user)</span>
+<span class="fc" id="L69">                .isDebate(request.isDebate())</span>
+<span class="fc" id="L70">                .build();</span>
+        
+<span class="fc" id="L72">        discussionRepository.save(discussion);</span>
 
-
-<span class="fc" id="L76">        discussionRepository.save(discussion);</span>
-
-<span class="fc" id="L78">        return discussionMapper.toFetchResponse(discussion, 0L, user.getId());</span>
+<span class="fc" id="L74">        return discussionMapper.toFetchResponse(discussion, 0L, user.getId());</span>
     }
 
     @Transactional(readOnly = true)
     public DiscussionDetailResponse getDiscussionDetail(UserToken userToken, Long discussionId) {
-<span class="fc" id="L83">        Long userId = userToken.userId();</span>
+<span class="fc" id="L79">        Long userId = userToken.userId();</span>
+        
+<span class="fc" id="L81">        activityPolicy.assertJoined(userId, discussionId);</span>
 
-<span class="fc" id="L85">        Discussion discussion = discussionRepository.findByIdWithAuthorAndComments(discussionId)</span>
-<span class="pc" id="L86">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.DISCUSSION_NOT_FOUND));</span>
-<span class="fc" id="L87">        Long commentCount = discussionCommentRepository.countCommentsByDiscussionId(discussion.getId());</span>
+<span class="fc" id="L83">        Discussion discussion = discussionRepository.findByIdWithAuthorAndComments(discussionId)</span>
+<span class="pc" id="L84">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.DISCUSSION_NOT_FOUND));</span>
+<span class="fc" id="L85">        Long commentCount = (long) discussion.getComments().size();</span>
 
-<span class="fc" id="L89">        return discussionMapper.toDetailResponse(discussion, commentCount, userId);</span>
+<span class="fc" id="L87">        return discussionMapper.toDetailResponse(discussion, commentCount, userId);</span>
     }
 
     public DiscussionFetchResponse updateDiscussion(UserToken userToken, Long discussionId, DiscussionPatchRequest request) {
-<span class="fc" id="L93">        Long userId = userToken.userId();</span>
+<span class="fc" id="L91">        Long userId = userToken.userId();</span>
 
-<span class="fc" id="L95">        Discussion discussion = getMyDiscussion(discussionId, userId);</span>
-<span class="fc" id="L96">        Long commentCount = discussionCommentRepository.countCommentsByDiscussionId(discussion.getId());</span>
+<span class="fc" id="L93">        Discussion discussion = getMyDiscussion(userId, discussionId);</span>
+<span class="fc" id="L94">        Long commentCount = discussionCommentRepository.countCommentsByDiscussionId(discussion.getId());</span>
 
-<span class="fc" id="L98">        discussion.update(request.title(), request.content());</span>
+<span class="fc" id="L96">        discussion.update(request.title(), request.content());</span>
 
-<span class="fc" id="L100">        return discussionMapper.toFetchResponse(discussion, commentCount, userId);</span>
+<span class="fc" id="L98">        return discussionMapper.toFetchResponse(discussion, commentCount, userId);</span>
     }
 
     public void deleteDiscussion(UserToken userToken, Long discussionId) {
-<span class="fc" id="L104">        Long userId = userToken.userId();</span>
+<span class="fc" id="L102">        Long userId = userToken.userId();</span>
 
-<span class="fc" id="L106">        Discussion discussion = getMyDiscussion(discussionId, userId);</span>
+<span class="fc" id="L104">        Discussion discussion = getMyDiscussion(userId, discussionId);</span>
 
-<span class="fc" id="L108">        discussionRepository.delete(discussion);</span>
-<span class="fc" id="L109">    }</span>
+<span class="fc" id="L106">        discussionRepository.delete(discussion);</span>
+<span class="fc" id="L107">    }</span>
 
-    private Discussion getMyDiscussion(Long discussionId, Long userId) {
-<span class="fc" id="L112">        Discussion discussion = discussionRepository.findById(discussionId)</span>
-<span class="pc" id="L113">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.DISCUSSION_NOT_FOUND));</span>
-<span class="fc bfc" id="L114" title="All 2 branches covered.">        if (!discussion.getAuthor().getId().equals(userId)) {</span>
-<span class="fc" id="L115">            throw new BadRequestException(ErrorCode.DISCUSSION_NOT_YOURS);</span>
+    private Discussion getMyDiscussion(Long userId, Long discussionId) {
+<span class="fc" id="L110">        UserProfile user = entityFinder.findUser(userId);</span>
+<span class="fc" id="L111">        Discussion discussion = entityFinder.findDiscussion(discussionId);</span>
+<span class="pc bpc" id="L112" title="1 of 2 branches missed.">        if (!discussion.isAuthor(user)) {</span>
+<span class="nc" id="L113">            throw new BadRequestException(ErrorCode.DISCUSSION_NOT_YOURS);</span>
         }
-<span class="fc" id="L117">        return discussion;</span>
+<span class="fc" id="L115">        return discussion;</span>
     }
-
-    public DiscussionCommentFetchResponse getComment(Long commentId) {
-<span class="nc" id="L121">        DiscussionComment comment = discussionCommentRepository.findByIdWithAuthor(commentId)</span>
-<span class="nc" id="L122">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.DISCUSSION_COMMENT_NOT_FOUND));</span>
-<span class="nc" id="L123">        return discussionMapper.toCommentFetchResponse(comment);</span>
-    }
-
-    public DiscussionCommentFetchResponse addComment(Long discussionId, DiscussionCommentPostRequest request, UserToken userToken) {
-<span class="fc" id="L127">        Discussion discussion = discussionRepository.findById(discussionId)</span>
-<span class="pc" id="L128">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.DISCUSSION_NOT_FOUND));</span>
-<span class="fc" id="L129">        UserProfile commentAuthor = userRepository.findById(userToken.userId())</span>
-<span class="pc" id="L130">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
-
-        DiscussionComment parentComment;
-<span class="pc bpc" id="L133" title="1 of 2 branches missed.">        if(request.parentId() != null){</span>
-<span class="nc" id="L134">            parentComment = discussionCommentRepository.findById(request.parentId())</span>
-<span class="nc" id="L135">                    .orElseThrow(() -&gt; new NotFoundException(ErrorCode.DISCUSSION_COMMENT_NOT_FOUND));</span>
-<span class="nc bnc" id="L136" title="All 2 branches missed.">            if(parentComment.getParent() != null){</span>
-<span class="nc" id="L137">                throw new BadRequestException(ErrorCode.INVALID_COMMENT_PARENT);</span>
-            }
-<span class="nc bnc" id="L139" title="All 2 branches missed.">            if(parentComment.isDeleted()){</span>
-<span class="nc" id="L140">                throw new BadRequestException(ErrorCode.DISCUSSION_COMMENT_DELETED);</span>
-            }
-
-        } else {
-<span class="fc" id="L144">            parentComment = null;</span>
-        }
-
-<span class="fc" id="L147">        DiscussionComment comment = DiscussionComment.builder()</span>
-<span class="fc" id="L148">                .author(commentAuthor)</span>
-<span class="fc" id="L149">                .discussion(discussion)</span>
-<span class="fc" id="L150">                .content(request.content())</span>
-<span class="fc" id="L151">                .parent(parentComment)</span>
-<span class="fc" id="L152">                .stance(request.stance())</span>
-<span class="fc" id="L153">                .build();</span>
-<span class="fc" id="L154">        discussionCommentRepository.save(comment);</span>
-
-<span class="pc bpc" id="L156" title="3 of 4 branches missed.">        if (parentComment != null&amp;&amp;parentComment.getAuthor()!=commentAuthor) {</span>
-<span class="nc" id="L157">            notificationService.createCommentReplyNotification(parentComment.getAuthor(), commentAuthor,parentComment);</span>
-        } else {
-<span class="pc bpc" id="L159" title="1 of 2 branches missed.">            if (!discussion.getAuthor().getId().equals(commentAuthor.getId())) {</span>
-<span class="fc" id="L160">                notificationService.createDiscussionCommentNotification(discussion.getAuthor(), commentAuthor, discussion);</span>
-            }
-
-<span class="fc" id="L163">            discussion.getComments().stream()</span>
-<span class="pc bnc" id="L164" title="All 6 branches missed.">                    .filter(c -&gt; !c.isDeleted() &amp;&amp; c.getParent() == null &amp;&amp; !c.getAuthor().getId().equals(commentAuthor.getId()))</span>
-<span class="pc" id="L165">                    .forEach(c -&gt; notificationService.createDiscussionCommentNotification(c.getAuthor(), commentAuthor, discussion));</span>
-        }
-
-<span class="fc" id="L168">        return discussionMapper.toCommentFetchResponse(comment);</span>
-    }
-
-    public DiscussionCommentFetchResponse updateComment(Long commentId, DiscussionCommentPatchRequest request, UserToken userToken) {
-<span class="nc" id="L172">        DiscussionComment comment = discussionCommentRepository.findByIdWithAuthor(commentId)</span>
-<span class="nc" id="L173">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.DISCUSSION_COMMENT_NOT_FOUND));</span>
-<span class="nc bnc" id="L174" title="All 2 branches missed.">        if (comment.isDeleted()) {</span>
-<span class="nc" id="L175">            throw new BadRequestException(ErrorCode.DISCUSSION_COMMENT_DELETED);</span>
-        }
-<span class="nc bnc" id="L177" title="All 2 branches missed.">        if (!comment.getAuthor().getId().equals(userToken.userId())) {</span>
-<span class="nc" id="L178">            throw new BadRequestException(ErrorCode.DISCUSSION_COMMENT_NOT_YOURS);</span>
-        }
-<span class="nc" id="L180">        comment.updateContent(request.content());</span>
-<span class="nc" id="L181">        return discussionMapper.toCommentFetchResponse(comment);</span>
-    }
-
-    public void deleteComment(Long commentId, UserToken userToken) {
-<span class="fc" id="L185">        DiscussionComment comment = discussionCommentRepository.findByIdWithParent(commentId)</span>
-<span class="pc" id="L186">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.DISCUSSION_COMMENT_NOT_FOUND));</span>
-
-<span class="fc bfc" id="L188" title="All 2 branches covered.">        if (!comment.getAuthor().getId().equals(userToken.userId())) {</span>
-<span class="fc" id="L189">            throw new BadRequestException(ErrorCode.DISCUSSION_COMMENT_NOT_YOURS);</span>
-        }
-
-        // 대댓글이 있는 경우 soft delete
-<span class="fc" id="L193">        Long repliesCount = discussionCommentRepository.countByParentId(commentId);</span>
-<span class="fc bfc" id="L194" title="All 2 branches covered.">        if (repliesCount &gt; 0) {</span>
-<span class="fc" id="L195">            comment.softDelete();</span>
-<span class="fc" id="L196">            return;</span>
-        }
-
-        // 마지막 답글인 경우 부모 댓글도 삭제
-<span class="pc bpc" id="L200" title="1 of 4 branches missed.">        if (comment.getParent() != null &amp;&amp; comment.getParent().isDeleted()) {</span>
-<span class="fc" id="L201">            long siblingCount = discussionCommentRepository.countByParentId(comment.getParent().getId());</span>
-<span class="pc bpc" id="L202" title="1 of 2 branches missed.">            if (siblingCount == 1) {</span>
-<span class="fc" id="L203">                discussionCommentRepository.delete(comment);</span>
-<span class="fc" id="L204">                discussionCommentRepository.delete(comment.getParent());</span>
-<span class="fc" id="L205">                return;</span>
-            }
-        }
-
-<span class="fc" id="L209">        discussionCommentRepository.delete(comment);</span>
-<span class="fc" id="L210">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

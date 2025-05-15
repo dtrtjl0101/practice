@@ -9,8 +9,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import qwerty.chaekit.domain.highlight.entity.Highlight;
 import qwerty.chaekit.domain.highlight.entity.QHighlight;
-import qwerty.chaekit.global.enums.ErrorCode;
-import qwerty.chaekit.global.exception.BadRequestException;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,62 +21,56 @@ public class HighlightRepositoryImpl implements HighlightRepository {
 
     @Override
     public Optional&lt;Highlight&gt; findById(Long id) {
-<span class="fc" id="L26">        return highlightJpaRepository.findById(id);</span>
+<span class="fc" id="L24">        return highlightJpaRepository.findById(id);</span>
     }
 
     @Override
     public Highlight save(Highlight highlight) {
-<span class="fc" id="L31">        return highlightJpaRepository.save(highlight);</span>
+<span class="fc" id="L29">        return highlightJpaRepository.save(highlight);</span>
     }
 
     @Override
-    public Page&lt;Highlight&gt; findHighlights(Pageable pageable, Long userId, Long activityId, Long bookId, String spine, Boolean me) {
-<span class="fc" id="L36">        QHighlight highlight = QHighlight.highlight;</span>
-<span class="fc" id="L37">        BooleanBuilder where = new BooleanBuilder();</span>
+    public Page&lt;Highlight&gt; findHighlights(Pageable pageable, Long userId, Long activityId, Long bookId, String spine, boolean me) {
+<span class="fc" id="L34">        QHighlight highlight = QHighlight.highlight;</span>
+<span class="fc" id="L35">        BooleanBuilder where = new BooleanBuilder();</span>
 
-<span class="pc bpc" id="L39" title="1 of 2 branches missed.">        if (bookId != null) {</span>
-<span class="fc" id="L40">            where.and(highlight.book.id.eq(bookId));</span>
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">        if (bookId != null) {</span>
+<span class="fc" id="L38">            where.and(highlight.book.id.eq(bookId));</span>
         }
-<span class="pc bpc" id="L42" title="1 of 2 branches missed.">        if (spine != null) {</span>
-<span class="pc bpc" id="L43" title="1 of 2 branches missed.">            if(bookId == null) {</span>
-<span class="nc" id="L44">                throw new BadRequestException(ErrorCode.BOOK_ID_REQUIRED);</span>
-            }
-<span class="fc" id="L46">            where.and(highlight.spine.eq(spine));</span>
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">        if (spine != null) {</span>
+<span class="fc" id="L41">            where.and(highlight.spine.eq(spine));</span>
         }
 
-<span class="pc bpc" id="L49" title="1 of 2 branches missed.">        if (activityId != null) {</span>
-<span class="nc" id="L50">            where.and(highlight.activity.id.eq(activityId));</span>
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">        if (activityId != null) {</span>
+<span class="nc" id="L45">            where.and(highlight.activity.id.eq(activityId));</span>
         }
 
-<span class="pc bpc" id="L53" title="2 of 4 branches missed.">        if (me == null || me) { // 내 하이라이트</span>
-<span class="fc" id="L54">            where.and(highlight.author.id.eq(userId));</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">        if (!me) { // 내 하이라이트</span>
+<span class="nc" id="L49">            where.and(highlight.isPublic.eq(true));</span>
         } else { // 공개된 하이라이트
-<span class="nc bnc" id="L56" title="All 2 branches missed.">            if(activityId == null) { // 활동명 필수</span>
-<span class="nc" id="L57">                throw new BadRequestException(ErrorCode.ACTIVITY_ID_REQUIRED);</span>
-            }
-<span class="nc" id="L59">            where.and(highlight.isPublic.eq(true));</span>
+<span class="fc" id="L51">            where.and(highlight.author.id.eq(userId));</span>
         }
 
-<span class="fc" id="L62">        List&lt;Highlight&gt; result = jpaQueryFactory</span>
-<span class="fc" id="L63">                .selectFrom(highlight)</span>
-<span class="fc" id="L64">                .leftJoin(highlight.author).fetchJoin()</span>
+<span class="fc" id="L54">        List&lt;Highlight&gt; result = jpaQueryFactory</span>
+<span class="fc" id="L55">                .selectFrom(highlight)</span>
+<span class="fc" id="L56">                .leftJoin(highlight.author).fetchJoin()</span>
+<span class="fc" id="L57">                .where(where)</span>
+<span class="fc" id="L58">                .offset(pageable.getOffset())</span>
+<span class="fc" id="L59">                .limit(pageable.getPageSize())</span>
+<span class="fc" id="L60">                .fetch();</span>
+
+<span class="fc" id="L62">        long total = Optional.ofNullable(jpaQueryFactory</span>
+<span class="fc" id="L63">                .select(highlight.count())</span>
+<span class="fc" id="L64">                .from(highlight)</span>
 <span class="fc" id="L65">                .where(where)</span>
-<span class="fc" id="L66">                .offset(pageable.getOffset())</span>
-<span class="fc" id="L67">                .limit(pageable.getPageSize())</span>
-<span class="fc" id="L68">                .fetch();</span>
+<span class="fc" id="L66">                .fetchOne()).orElse(0L);</span>
 
-<span class="fc" id="L70">        long total = Optional.ofNullable(jpaQueryFactory</span>
-<span class="fc" id="L71">                .select(highlight.count())</span>
-<span class="fc" id="L72">                .from(highlight)</span>
-<span class="fc" id="L73">                .where(where)</span>
-<span class="fc" id="L74">                .fetchOne()).orElse(0L);</span>
-
-<span class="fc" id="L76">        return new PageImpl&lt;&gt;(result, pageable, total);</span>
+<span class="fc" id="L68">        return new PageImpl&lt;&gt;(result, pageable, total);</span>
     }
 
     @Override
     public void delete(Highlight highlight) {
-<span class="nc" id="L81">        highlightJpaRepository.delete(highlight);</span>
-<span class="nc" id="L82">    }</span>
+<span class="nc" id="L73">        highlightJpaRepository.delete(highlight);</span>
+<span class="nc" id="L74">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

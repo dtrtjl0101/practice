@@ -109,7 +109,7 @@ public class DiscussionMapper {
 <span class="fc" id="L109">                .isAuthor(discussion.getAuthor().getId().equals(memberId))</span>
 <span class="fc" id="L110">                .comments(</span>
 <span class="fc" id="L111">                        discussion.getComments().stream()</span>
-<span class="pc bnc" id="L112" title="All 2 branches missed.">                                .filter(comment -&gt; comment.getParent() == null)</span>
+<span class="pc bpc" id="L112" title="1 of 2 branches missed.">                                .filter(comment -&gt; comment.getParent() == null)</span>
 <span class="fc" id="L113">                                .map(this::toCommentFetchResponse)</span>
 <span class="fc" id="L114">                                .toList()</span>
                 )

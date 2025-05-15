@@ -19,104 +19,109 @@ public enum ErrorCode {
 <span class="fc" id="L19">    GROUP_NAME_DUPLICATED(&quot;GROUP_NAME_DUPLICATED&quot;, &quot;독서모임 이름이 중복되었습니다&quot;),</span>
 <span class="fc" id="L20">    ACTIVITY_TIME_CONFLICT(&quot;ACTIVITY_TIME_CONFLICT&quot;, &quot;이미 등록된 독서모임 일정과 겹칩니다&quot;),</span>
 <span class="fc" id="L21">    ACTIVITY_TIME_INVALID(&quot;ACTIVITY_TIME_INVALID&quot;, &quot;시작일과 종료일이 올바르지 않습니다&quot;),</span>
+    // activity
+<span class="fc" id="L23">    ACTIVITY_ALREADY_JOINED(&quot;ACTIVITY_ALREADY_JOINED&quot;, &quot;이미 가입된 독서모임 활동입니다&quot;),</span>
+<span class="fc" id="L24">    ACTIVITY_NOT_JOINED(&quot;ACTIVITY_NOT_JOINED&quot;, &quot;가입되지 않은 독서모임 활동입니다&quot;),</span>
+<span class="fc" id="L25">    ACTIVITY_ALREADY_ENDED(&quot;ACTIVITY_ALREADY_ENDED&quot;, &quot;이미 종료된 독서모임 활동입니다&quot;),</span>
+<span class="fc" id="L26">    ACTIVITY_BOOK_NOT_OWNED(&quot;ACTIVITY_BOOK_NOT_OWNED&quot;, &quot;독서모임 활동에 등록된 전자책이 존재하지 않습니다&quot;),</span>
     // discussion
-<span class="fc" id="L23">    DISCUSSION_NOT_YOURS(&quot;DISCUSSION_NOT_YOURS&quot;, &quot;해당 토론은 본인이 생성한 것이 아닙니다&quot;),</span>
+<span class="fc" id="L28">    DISCUSSION_NOT_YOURS(&quot;DISCUSSION_NOT_YOURS&quot;, &quot;해당 토론은 본인이 생성한 것이 아닙니다&quot;),</span>
     // discussion_comment
-<span class="fc" id="L25">    INVALID_COMMENT_PARENT(&quot;INVALID_COMMENT_PARENT&quot;, &quot;답글에는 다시 답글을 달 수 없습니다.&quot;),</span>
-<span class="fc" id="L26">    DISCUSSION_COMMENT_DELETED(&quot;DISCUSSION_COMMENT_DELETED&quot;, &quot;이미 삭제된 댓글입니다.&quot;),</span>
+<span class="fc" id="L30">    REPLY_CANNOT_HAVE_CHILD(&quot;REPLY_CANNOT_HAVE_CHILD&quot;, &quot;답글에는 다시 답글을 달 수 없습니다.&quot;),</span>
+<span class="fc" id="L31">    DISCUSSION_COMMENT_DELETED(&quot;DISCUSSION_COMMENT_DELETED&quot;, &quot;이미 삭제된 댓글입니다.&quot;),</span>
     // email
-<span class="fc" id="L28">    EMAIL_VERIFICATION_FAILED(&quot;EMAIL_VERIFICATION_FAILED&quot;, &quot;이메일 인증에 실패했습니다.&quot;),</span>
-<span class="fc" id="L29">    EMAIL_SEND_FAILED(&quot;EMAIL_SEND_FAILED&quot;, &quot;이메일 전송에 실패했습니다.&quot;),</span>
+<span class="fc" id="L33">    EMAIL_VERIFICATION_FAILED(&quot;EMAIL_VERIFICATION_FAILED&quot;, &quot;이메일 인증에 실패했습니다.&quot;),</span>
+<span class="fc" id="L34">    EMAIL_SEND_FAILED(&quot;EMAIL_SEND_FAILED&quot;, &quot;이메일 전송에 실패했습니다.&quot;),</span>
     // file
-<span class="fc" id="L31">    FILE_MISSING(&quot;FILE_MISSING&quot;, &quot;파일이 누락되었습니다&quot;),</span>
-<span class="fc" id="L32">    INVALID_EXTENSION(&quot;INVALID_EXTENSION&quot;, &quot;허용되지 않는 확장자입니다&quot;),</span>
-<span class="fc" id="L33">    FILE_SIZE_EXCEEDED(&quot;FILE_SIZE_EXCEED&quot;, &quot;파일 크기가 초과되었습니다&quot;),</span>
+<span class="fc" id="L36">    FILE_MISSING(&quot;FILE_MISSING&quot;, &quot;파일이 누락되었습니다&quot;),</span>
+<span class="fc" id="L37">    INVALID_EXTENSION(&quot;INVALID_EXTENSION&quot;, &quot;허용되지 않는 확장자입니다&quot;),</span>
+<span class="fc" id="L38">    FILE_SIZE_EXCEEDED(&quot;FILE_SIZE_EXCEED&quot;, &quot;파일 크기가 초과되었습니다&quot;),</span>
     // admin
-<span class="fc" id="L35">    PUBLISHER_ALREADY_ACCEPTED(&quot;PUBLISHER_ALREADY_ACCEPTED&quot;, &quot;이미 승인된 출판사입니다&quot;),</span>
+<span class="fc" id="L40">    PUBLISHER_ALREADY_ACCEPTED(&quot;PUBLISHER_ALREADY_ACCEPTED&quot;, &quot;이미 승인된 출판사입니다&quot;),</span>
     // credit payment
-<span class="fc" id="L37">    INVALID_CREDIT_PRODUCT_ID(&quot;INVALID_CREDIT_PRODUCT_ID&quot;, &quot;유효하지 않은 크레딧 상품 ID입니다&quot;),</span>
-<span class="fc" id="L38">    INVALID_PAYMENT_SESSION(&quot;INVALID_PAYMENT_SESSION&quot;, &quot;결제 세션이 만료됐거나 유효하지 않습니다&quot;),</span>
+<span class="fc" id="L42">    INVALID_CREDIT_PRODUCT_ID(&quot;INVALID_CREDIT_PRODUCT_ID&quot;, &quot;유효하지 않은 크레딧 상품 ID입니다&quot;),</span>
+<span class="fc" id="L43">    INVALID_PAYMENT_SESSION(&quot;INVALID_PAYMENT_SESSION&quot;, &quot;결제 세션이 만료됐거나 유효하지 않습니다&quot;),</span>
     // credit usage
-<span class="fc" id="L40">    CREDIT_NOT_ENOUGH(&quot;CREDIT_NOT_ENOUGH&quot;, &quot;크레딧이 부족합니다&quot;),</span>
+<span class="fc" id="L45">    CREDIT_NOT_ENOUGH(&quot;CREDIT_NOT_ENOUGH&quot;, &quot;크레딧이 부족합니다&quot;),</span>
     // credit wallet
-<span class="fc" id="L42">    CREDIT_WALLET_NOT_FOUND(&quot;CREDIT_WALLET_NOT_FOUND&quot;, &quot;크레딧 지갑이 존재하지 않습니다&quot;),</span>
-    // ebook purcahse
-<span class="fc" id="L44">    EBOOK_ALREADY_PURCHASED(&quot;EBOOK_ALREADY_PURCHASED&quot;, &quot;이미 구매한 전자책입니다&quot;),</span>
+<span class="fc" id="L47">    CREDIT_WALLET_NOT_FOUND(&quot;CREDIT_WALLET_NOT_FOUND&quot;, &quot;크레딧 지갑이 존재하지 않습니다&quot;),</span>
+    // ebook purchase
+<span class="fc" id="L49">    EBOOK_ALREADY_PURCHASED(&quot;EBOOK_ALREADY_PURCHASED&quot;, &quot;이미 구매한 전자책입니다&quot;),</span>
 
     // UNAUTHORIZED
-<span class="fc" id="L47">    INVALID_ACCESS_TOKEN(&quot;INVALID_ACCESS_TOKEN&quot;, &quot;유효하지 않은 Access Token입니다&quot;),</span>
-<span class="fc" id="L48">    INVALID_REFRESH_TOKEN(&quot;INVALID_REFRESH_TOKEN&quot;, &quot;유효하지 않은 Refresh Token입니다&quot;),</span>
-<span class="fc" id="L49">    EXPIRED_ACCESS_TOKEN(&quot;EXPIRED_ACCESS_TOKEN&quot;, &quot;Access Token이 만료되었습니다&quot;),</span>
-<span class="fc" id="L50">    EXPIRED_REFRESH_TOKEN(&quot;EXPIRED_REFRESH_TOKEN&quot;, &quot;Refresh Token이 만료되었습니다&quot;),</span>
+<span class="fc" id="L52">    INVALID_ACCESS_TOKEN(&quot;INVALID_ACCESS_TOKEN&quot;, &quot;유효하지 않은 Access Token입니다&quot;),</span>
+<span class="fc" id="L53">    INVALID_REFRESH_TOKEN(&quot;INVALID_REFRESH_TOKEN&quot;, &quot;유효하지 않은 Refresh Token입니다&quot;),</span>
+<span class="fc" id="L54">    EXPIRED_ACCESS_TOKEN(&quot;EXPIRED_ACCESS_TOKEN&quot;, &quot;Access Token이 만료되었습니다&quot;),</span>
+<span class="fc" id="L55">    EXPIRED_REFRESH_TOKEN(&quot;EXPIRED_REFRESH_TOKEN&quot;, &quot;Refresh Token이 만료되었습니다&quot;),</span>
 
     // FORBIDDEN
-<span class="fc" id="L53">    GROUP_MEMBER_ONLY(&quot;GROUP_MEMBER_ONLY&quot;, &quot;독서모임에 가입된 회원만 사용할 수 있는 기능입니다&quot;),</span>
-<span class="fc" id="L54">    GROUP_UPDATE_FORBIDDEN(&quot;GROUP_UPDATE_FORBIDDEN&quot;, &quot;독서모임 수정 권한이 없습니다&quot;),</span>
-<span class="fc" id="L55">    HIGHLIGHT_NOT_YOURS(&quot;HIGHLIGHT_NOT_YOURS&quot;, &quot;하이라이트는 본인만 수정할 수 있습니다&quot;),</span>
-<span class="fc" id="L56">    HIGHLIGHT_NOT_SEE(&quot;HIGHLIGHT_NOT_SEE&quot;,&quot;다른사람이 작성한 비공개 하이라이트는 볼 수 없습니다.&quot;),</span>
-<span class="fc" id="L57">    GROUP_LEADER_ONLY(&quot;GROUP_LEADER_ONLY&quot;, &quot;모임지기만 사용할 수 있는 기능입니다&quot;),</span>
-<span class="fc" id="L58">    ACTIVITY_GROUP_MISMATCH(&quot;ACTIVITY_GROUP_MISMATCH&quot;, &quot;해당 독서모임의 활동이 아닙니다&quot;),</span>
-<span class="fc" id="L59">    ACTIVITY_MEMBER_ONLY(&quot;ACTIVITY_MEMBER_ONLY&quot;, &quot;해당 독서모임 활동에 가입한 경우에만 가능합니다&quot;),</span>
-<span class="fc" id="L60">    DISCUSSION_COMMENT_NOT_YOURS(&quot;DISCUSSION_COMMENT_NOT_YOURS&quot;, &quot;해당 댓글은 본인이 작성한 것이 아닙니다&quot;),</span>
-<span class="fc" id="L61">    EBOOK_NOT_PURCHASED(&quot;EBOOK_NOT_PURCHASED&quot;, &quot;해당 전자책을 구매한 회원만 사용할 수 있는 기능입니다&quot;),</span>
-<span class="fc" id="L62">    PUBLISHER_NOT_APPROVED(&quot;PUBLISHER_NOT_APPROVED&quot;, &quot;현재 출판사 계정이 승인되지 않았습니다&quot;),</span>
+<span class="fc" id="L58">    GROUP_MEMBER_ONLY(&quot;GROUP_MEMBER_ONLY&quot;, &quot;독서모임에 가입된 회원만 사용할 수 있는 기능입니다&quot;),</span>
+<span class="fc" id="L59">    GROUP_UPDATE_FORBIDDEN(&quot;GROUP_UPDATE_FORBIDDEN&quot;, &quot;독서모임 수정 권한이 없습니다&quot;),</span>
+<span class="fc" id="L60">    HIGHLIGHT_NOT_YOURS(&quot;HIGHLIGHT_NOT_YOURS&quot;, &quot;하이라이트는 본인만 수정할 수 있습니다&quot;),</span>
+<span class="fc" id="L61">    HIGHLIGHT_NOT_SEE(&quot;HIGHLIGHT_NOT_SEE&quot;,&quot;다른사람이 작성한 비공개 하이라이트는 볼 수 없습니다.&quot;),</span>
+<span class="fc" id="L62">    GROUP_LEADER_ONLY(&quot;GROUP_LEADER_ONLY&quot;, &quot;모임지기만 사용할 수 있는 기능입니다&quot;),</span>
+<span class="fc" id="L63">    ACTIVITY_GROUP_MISMATCH(&quot;ACTIVITY_GROUP_MISMATCH&quot;, &quot;해당 독서모임의 활동이 아닙니다&quot;),</span>
+<span class="fc" id="L64">    ACTIVITY_MEMBER_ONLY(&quot;ACTIVITY_MEMBER_ONLY&quot;, &quot;해당 독서모임 활동에 가입한 경우에만 가능합니다&quot;),</span>
+<span class="fc" id="L65">    DISCUSSION_COMMENT_NOT_YOURS(&quot;DISCUSSION_COMMENT_NOT_YOURS&quot;, &quot;해당 댓글은 본인이 작성한 것이 아닙니다&quot;),</span>
+<span class="fc" id="L66">    EBOOK_NOT_PURCHASED(&quot;EBOOK_NOT_PURCHASED&quot;, &quot;해당 전자책을 구매한 회원만 사용할 수 있는 기능입니다&quot;),</span>
+<span class="fc" id="L67">    PUBLISHER_NOT_APPROVED(&quot;PUBLISHER_NOT_APPROVED&quot;, &quot;현재 출판사 계정이 승인되지 않았습니다&quot;),</span>
 
-<span class="fc" id="L64">    LOGIN_REQUIRED(&quot;LOGIN_REQUIRED&quot;, &quot;로그인이 필요합니다&quot;),</span>
-<span class="fc" id="L65">    ONLY_USER(&quot;ONLY_USER&quot;, &quot;일반 회원만 사용할 수 있는 기능입니다&quot;),</span>
-<span class="fc" id="L66">    ONLY_PUBLISHER(&quot;ONLY_PUBLISHER&quot;, &quot;출판사 회원만 사용할 수 있는 기능입니다&quot;),</span>
-<span class="fc" id="L67">    ONLY_ADMIN(&quot;ONLY_ADMIN&quot;, &quot;관리자만 사용할 수 있는 기능입니다&quot;),</span>
+<span class="fc" id="L69">    LOGIN_REQUIRED(&quot;LOGIN_REQUIRED&quot;, &quot;로그인이 필요합니다&quot;),</span>
+<span class="fc" id="L70">    ONLY_USER(&quot;ONLY_USER&quot;, &quot;일반 회원만 사용할 수 있는 기능입니다&quot;),</span>
+<span class="fc" id="L71">    ONLY_PUBLISHER(&quot;ONLY_PUBLISHER&quot;, &quot;출판사 회원만 사용할 수 있는 기능입니다&quot;),</span>
+<span class="fc" id="L72">    ONLY_ADMIN(&quot;ONLY_ADMIN&quot;, &quot;관리자만 사용할 수 있는 기능입니다&quot;),</span>
 
 
     // NOT_FOUND
-<span class="fc" id="L71">    MEMBER_NOT_FOUND(&quot;MEMBER_NOT_FOUND&quot;, &quot;해당 회원이 존재하지 않습니다&quot;),</span>
-<span class="fc" id="L72">    EBOOK_NOT_FOUND(&quot;EBOOK_NOT_FOUND&quot;, &quot;해당 전자책이 존재하지 않습니다&quot;),</span>
-<span class="fc" id="L73">    PUBLISHER_NOT_FOUND(&quot;PUBLISHER_NOT_FOUND&quot;, &quot;해당 출판사가 존재하지 않습니다&quot;),</span>
-<span class="fc" id="L74">    USER_NOT_FOUND(&quot;USER_NOT_FOUND&quot;, &quot;일반 회원이 아니거나 존재하지 않습니다&quot;),</span>
-<span class="fc" id="L75">    GROUP_NOT_FOUND(&quot;GROUP_NOT_FOUND&quot;, &quot;해당 독서모임이 존재하지 않습니다&quot;),</span>
-<span class="fc" id="L76">    HIGHLIGHT_NOT_FOUND(&quot;HIGHLIGHT_NOT_FOUND&quot;, &quot;해당 하이라이트가 존재하지 않습니다&quot;),</span>
-<span class="fc" id="L77">    ACTIVITY_NOT_FOUND(&quot;ACTIVITY_NOT_FOUND&quot;, &quot;해당 활동이 존재하지 않습니다&quot;),</span>
-<span class="fc" id="L78">    DISCUSSION_NOT_FOUND(&quot;DISCUSSION_NOT_FOUND&quot;, &quot;해당 토론이 존재하지 않습니다&quot;),</span>
-<span class="fc" id="L79">    DISCUSSION_COMMENT_NOT_FOUND(&quot;DISCUSSION_COMMENT_NOT_FOUND&quot;, &quot;해당 댓글이 존재하지 않습니다&quot;),</span>
+<span class="fc" id="L76">    MEMBER_NOT_FOUND(&quot;MEMBER_NOT_FOUND&quot;, &quot;해당 회원이 존재하지 않습니다&quot;),</span>
+<span class="fc" id="L77">    EBOOK_NOT_FOUND(&quot;EBOOK_NOT_FOUND&quot;, &quot;해당 전자책이 존재하지 않습니다&quot;),</span>
+<span class="fc" id="L78">    PUBLISHER_NOT_FOUND(&quot;PUBLISHER_NOT_FOUND&quot;, &quot;해당 출판사가 존재하지 않습니다&quot;),</span>
+<span class="fc" id="L79">    USER_NOT_FOUND(&quot;USER_NOT_FOUND&quot;, &quot;일반 회원이 아니거나 존재하지 않습니다&quot;),</span>
+<span class="fc" id="L80">    GROUP_NOT_FOUND(&quot;GROUP_NOT_FOUND&quot;, &quot;해당 독서모임이 존재하지 않습니다&quot;),</span>
+<span class="fc" id="L81">    HIGHLIGHT_NOT_FOUND(&quot;HIGHLIGHT_NOT_FOUND&quot;, &quot;해당 하이라이트가 존재하지 않습니다&quot;),</span>
+<span class="fc" id="L82">    ACTIVITY_NOT_FOUND(&quot;ACTIVITY_NOT_FOUND&quot;, &quot;해당 활동이 존재하지 않습니다&quot;),</span>
+<span class="fc" id="L83">    DISCUSSION_NOT_FOUND(&quot;DISCUSSION_NOT_FOUND&quot;, &quot;해당 토론이 존재하지 않습니다&quot;),</span>
+<span class="fc" id="L84">    DISCUSSION_COMMENT_NOT_FOUND(&quot;DISCUSSION_COMMENT_NOT_FOUND&quot;, &quot;해당 댓글이 존재하지 않습니다&quot;),</span>
 
 
     // Comment related
-<span class="fc" id="L83">    COMMENT_NOT_FOUND(&quot;COMMENT_NOT_FOUND&quot;, &quot;해당 댓글이 존재하지 않습니다&quot;),</span>
-<span class="fc" id="L84">    COMMENT_NOT_YOURS(&quot;COMMENT_NOT_YOURS&quot;, &quot;댓글은 본인만 수정/삭제할 수 있습니다&quot;),</span>
-<span class="fc" id="L85">    COMMENT_PARENT_MISMATCH(&quot;COMMENT_PARENT_MISMATCH&quot;, &quot;답글달 댓글이 없습니다&quot;),</span>
-<span class="fc" id="L86">    HIGHLIGHT_NOT_PUBLIC(&quot;HIGHLIGHT_NOT_PUBLIC&quot;, &quot;공개되지 않은 하이라이트에는 댓글을 작성할 수 없습니다&quot;),</span>
-<span class="fc" id="L87">    COMMENT_ID_REQUIRED(&quot;COMMENT_ID_REQUIRED&quot;, &quot;이모티콘 반응을 추가하려면 댓글이 필요합니다&quot;),</span>
+<span class="fc" id="L88">    COMMENT_NOT_FOUND(&quot;COMMENT_NOT_FOUND&quot;, &quot;해당 댓글이 존재하지 않습니다&quot;),</span>
+<span class="fc" id="L89">    COMMENT_NOT_YOURS(&quot;COMMENT_NOT_YOURS&quot;, &quot;댓글은 본인만 수정/삭제할 수 있습니다&quot;),</span>
+<span class="fc" id="L90">    COMMENT_PARENT_MISMATCH(&quot;COMMENT_PARENT_MISMATCH&quot;, &quot;답글달 댓글이 없습니다&quot;),</span>
+<span class="fc" id="L91">    HIGHLIGHT_NOT_PUBLIC(&quot;HIGHLIGHT_NOT_PUBLIC&quot;, &quot;공개되지 않은 하이라이트에는 댓글을 작성할 수 없습니다&quot;),</span>
+<span class="fc" id="L92">    COMMENT_ID_REQUIRED(&quot;COMMENT_ID_REQUIRED&quot;, &quot;이모티콘 반응을 추가하려면 댓글이 필요합니다&quot;),</span>
     
     // Reaction related
-<span class="fc" id="L90">    REACTION_NOT_FOUND(&quot;REACTION_NOT_FOUND&quot;, &quot;해당 이모티콘이 존재하지 않습니다&quot;),</span>
-<span class="fc" id="L91">    NOT_REACTION_AUTHOR(&quot;NOT_REACTION_AUTHOR&quot;, &quot;본인만 삭제할 수 있습니다&quot;),</span>
-<span class="fc" id="L92">    REACTION_ALREADY_EXISTS(&quot;REACTION_ALREADY_EXISTS&quot;, &quot;이미 동일한 이모티콘 반응을 추가했습니다&quot;),</span>
+<span class="fc" id="L95">    REACTION_NOT_FOUND(&quot;REACTION_NOT_FOUND&quot;, &quot;해당 이모티콘이 존재하지 않습니다&quot;),</span>
+<span class="fc" id="L96">    NOT_REACTION_AUTHOR(&quot;NOT_REACTION_AUTHOR&quot;, &quot;본인만 삭제할 수 있습니다&quot;),</span>
+<span class="fc" id="L97">    REACTION_ALREADY_EXISTS(&quot;REACTION_ALREADY_EXISTS&quot;, &quot;이미 동일한 이모티콘 반응을 추가했습니다&quot;),</span>
 
     // Exception Handler
-<span class="fc" id="L95">    INVALID_INPUT(&quot;INVALID_INPUT&quot;, &quot;입력값이 유효하지 않습니다&quot;),</span>
-<span class="fc" id="L96">    INVALID_HTTP_MESSAGE(&quot;INVALID_HTTP_MESSAGE&quot;, &quot;HTTP 요청 본문이 잘못된 형식입니다.&quot;),</span>
+<span class="fc" id="L100">    INVALID_INPUT(&quot;INVALID_INPUT&quot;, &quot;입력값이 유효하지 않습니다&quot;),</span>
+<span class="fc" id="L101">    INVALID_HTTP_MESSAGE(&quot;INVALID_HTTP_MESSAGE&quot;, &quot;HTTP 요청 본문이 잘못된 형식입니다.&quot;),</span>
 
-<span class="fc" id="L98">    METHOD_NOT_ALLOWED(&quot;METHOD_NOT_ALLOWED&quot;, &quot;지원하지 않는 HTTP 메서드입니다&quot;),</span>
-<span class="fc" id="L99">    NO_RESOURCE_FOUND(&quot;NO_RESOURCE_FOUND&quot;, &quot;존재하지 않는 경로입니다&quot;),</span>
+<span class="fc" id="L103">    METHOD_NOT_ALLOWED(&quot;METHOD_NOT_ALLOWED&quot;, &quot;지원하지 않는 HTTP 메서드입니다&quot;),</span>
+<span class="fc" id="L104">    NO_RESOURCE_FOUND(&quot;NO_RESOURCE_FOUND&quot;, &quot;존재하지 않는 경로입니다&quot;),</span>
 
-<span class="fc" id="L101">    ALREADY_JOINED_GROUP(&quot;ALREADY_JOINED_GROUP&quot;, &quot;이미 가입한 그룹입니다&quot;),</span>
-<span class="fc" id="L102">    GROUP_LEADER_CANNOT_LEAVE(&quot;GROUP_LEADER_CANNOT_LEAVE&quot;, &quot;그룹장은 그룹을 탈퇴할 수 없습니다&quot;),</span>
-<span class="fc" id="L103">    ACTIVITY_ID_REQUIRED(&quot;ACTIVITY_ID_REQUIRED&quot;, &quot;활동 ID가 필요합니다&quot;),</span>
-<span class="fc" id="L104">    HIGHLIGHT_ALREADY_SHARED(&quot;HIGHLIGHT_ALREADY_SHARED&quot;, &quot;활동에 가입되면 하이라이트는 수정할 수 없습니다&quot;),</span>
-<span class="fc" id="L105">    HIGHLIGHT_ALREADY_PUBLIC(&quot;HIGHLIGHT_ALREADY_PUBLIC&quot;, &quot;공개된 하이라이트는 수정할 수 없습니다&quot;),</span>
+<span class="fc" id="L106">    ALREADY_JOINED_GROUP(&quot;ALREADY_JOINED_GROUP&quot;, &quot;이미 가입한 그룹입니다&quot;),</span>
+<span class="fc" id="L107">    GROUP_LEADER_CANNOT_LEAVE(&quot;GROUP_LEADER_CANNOT_LEAVE&quot;, &quot;그룹장은 그룹을 탈퇴할 수 없습니다&quot;),</span>
+<span class="fc" id="L108">    ACTIVITY_ID_REQUIRED(&quot;ACTIVITY_ID_REQUIRED&quot;, &quot;활동 ID가 필요합니다&quot;),</span>
+<span class="fc" id="L109">    HIGHLIGHT_ALREADY_SHARED(&quot;HIGHLIGHT_ALREADY_SHARED&quot;, &quot;활동에 가입되면 하이라이트는 수정할 수 없습니다&quot;),</span>
+<span class="fc" id="L110">    HIGHLIGHT_ALREADY_PUBLIC(&quot;HIGHLIGHT_ALREADY_PUBLIC&quot;, &quot;공개된 하이라이트는 수정할 수 없습니다&quot;),</span>
 
     // Notification related
-<span class="fc" id="L108">    NOTIFICATION_NOT_FOUND(&quot;NOTIFICATION_NOT_FOUND&quot;, &quot;해당 알림이 존재하지 않습니다&quot;),</span>
-<span class="fc" id="L109">    NOTIFICATION_NOT_YOURS(&quot;NOTIFICATION_NOT_YOURS&quot;, &quot;본인의 알림만 읽음 처리할 수 있습니다&quot;),</span>
-<span class="fc" id="L110">    NOTIFICATION_CONTENT_DELETED(&quot;NOTIFICATION_CONTENT_DELETED&quot;, &quot;알림과 관련된 내용이 삭제되었습니다&quot;),</span>
+<span class="fc" id="L113">    NOTIFICATION_NOT_FOUND(&quot;NOTIFICATION_NOT_FOUND&quot;, &quot;해당 알림이 존재하지 않습니다&quot;),</span>
+<span class="fc" id="L114">    NOTIFICATION_NOT_YOURS(&quot;NOTIFICATION_NOT_YOURS&quot;, &quot;본인의 알림만 읽음 처리할 수 있습니다&quot;),</span>
+<span class="fc" id="L115">    NOTIFICATION_CONTENT_DELETED(&quot;NOTIFICATION_CONTENT_DELETED&quot;, &quot;알림과 관련된 내용이 삭제되었습니다&quot;),</span>
     ;
 
     private final String code;
     private final String message;
 
-<span class="fc" id="L116">    ErrorCode(String code, String message) {</span>
-<span class="fc" id="L117">        this.code = code;</span>
-<span class="fc" id="L118">        this.message = message;</span>
-<span class="fc" id="L119">    }</span>
+<span class="fc" id="L121">    ErrorCode(String code, String message) {</span>
+<span class="fc" id="L122">        this.code = code;</span>
+<span class="fc" id="L123">        this.message = message;</span>
+<span class="fc" id="L124">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

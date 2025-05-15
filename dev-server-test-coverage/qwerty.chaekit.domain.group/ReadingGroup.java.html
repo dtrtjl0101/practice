@@ -35,8 +35,8 @@ public class ReadingGroup extends BaseEntity {
 <span class="fc" id="L35">    @OneToMany(mappedBy = &quot;readingGroup&quot;, cascade = CascadeType.ALL, orphanRemoval = true)</span>
     @BatchSize(size = 20)
     private List&lt;GroupTag&gt; tags = new ArrayList&lt;&gt;();
-
-    @Column(nullable = false)
+    
+    @Column(length = 5000)
     private String description;
 
 <span class="fc" id="L42">    @OneToMany(mappedBy = &quot;readingGroup&quot;, cascade = CascadeType.ALL, orphanRemoval = true)</span>
@@ -66,7 +66,7 @@ public class ReadingGroup extends BaseEntity {
 
     public GroupMember approveMember(UserProfile user){
 <span class="nc" id="L68">        return groupMembers.stream()</span>
-<span class="nc" id="L69">                .filter(groupMember -&gt; groupMember.getMember().equals(user))</span>
+<span class="nc" id="L69">                .filter(groupMember -&gt; groupMember.getMember().getId().equals(user.getId()))</span>
 <span class="nc" id="L70">                .findFirst()</span>
 <span class="nc" id="L71">                .map(groupMember -&gt; {groupMember.approve(); return groupMember;})</span>
 <span class="nc" id="L72">                .orElse(null);</span>
@@ -81,40 +81,45 @@ public class ReadingGroup extends BaseEntity {
 <span class="nc" id="L81">                .filter(member -&gt; member.getMember().getId().equals(user.getId()))</span>
 <span class="nc" id="L82">                .findFirst()</span>
 <span class="nc" id="L83">                .ifPresent(GroupMember::reject);</span>
-<span class="nc" id="L84">    }</span>
+<span class="nc" id="L84">        removeMember(user);</span>
+<span class="nc" id="L85">    }</span>
 
     public void updateDescription(String description) {
-<span class="nc" id="L87">        this.description = description;</span>
-<span class="nc" id="L88">    }</span>
+<span class="nc" id="L88">        this.description = description;</span>
+<span class="nc" id="L89">    }</span>
 
     public void updateGroupImageKey(String groupImageKey) {
-<span class="nc" id="L91">        this.groupImageKey = groupImageKey;</span>
-<span class="nc" id="L92">    }</span>
+<span class="nc" id="L92">        this.groupImageKey = groupImageKey;</span>
+<span class="nc" id="L93">    }</span>
 
     public boolean isMember(UserProfile userProfile) {
-<span class="nc" id="L95">        return groupMembers.stream()</span>
-<span class="nc" id="L96">                .anyMatch(member -&gt; member.getMember().getId().equals(userProfile.getId()));</span>
+<span class="nc" id="L96">        return groupMembers.stream()</span>
+<span class="nc" id="L97">                .anyMatch(member -&gt; member.getMember().getId().equals(userProfile.getId()));</span>
     }
 
     public MyMemberShipStatus getMemberShipStatus(@Nullable Long userId) {
-<span class="nc bnc" id="L100" title="All 2 branches missed.">        if(userId == null) {</span>
-<span class="nc" id="L101">            return MyMemberShipStatus.NONE;</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">        if(userId == null) {</span>
+<span class="nc" id="L102">            return MyMemberShipStatus.NONE;</span>
         }
-<span class="nc" id="L103">        return groupMembers.stream()</span>
-<span class="nc" id="L104">                .filter(member -&gt; member.getMember().getId().equals(userId))</span>
-<span class="nc" id="L105">                .findFirst()</span>
-<span class="nc bnc" id="L106" title="All 2 branches missed.">                .map(member -&gt; member.isAccepted() ? MyMemberShipStatus.JOINED : MyMemberShipStatus.PENDING)</span>
-<span class="nc" id="L107">                .orElse(MyMemberShipStatus.NONE);</span>
+<span class="nc" id="L104">        return groupMembers.stream()</span>
+<span class="nc" id="L105">                .filter(member -&gt; member.getMember().getId().equals(userId))</span>
+<span class="nc" id="L106">                .findFirst()</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">                .map(member -&gt; member.isAccepted() ? MyMemberShipStatus.JOINED : MyMemberShipStatus.PENDING)</span>
+<span class="nc" id="L108">                .orElse(MyMemberShipStatus.NONE);</span>
+    }
+    
+    public boolean isLeader(UserProfile userProfile) {
+<span class="fc" id="L112">        return groupLeader.getId().equals(userProfile.getId());</span>
     }
 
     @Builder
-<span class="fc" id="L111">    public ReadingGroup(Long id, String name, UserProfile groupLeader, List&lt;GroupTag&gt; tags, String description, String groupImageKey) {</span>
-<span class="fc" id="L112">        this.id = id;</span>
-<span class="fc" id="L113">        this.name = name;</span>
-<span class="fc" id="L114">        this.groupLeader = groupLeader;</span>
-<span class="pc bpc" id="L115" title="1 of 2 branches missed.">        this.tags = (tags != null) ? new ArrayList&lt;&gt;(tags) : new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L116">        this.description = description;</span>
-<span class="fc" id="L117">        this.groupImageKey = groupImageKey;</span>
-<span class="fc" id="L118">    }</span>
+<span class="fc" id="L116">    public ReadingGroup(Long id, String name, UserProfile groupLeader, List&lt;GroupTag&gt; tags, String description, String groupImageKey) {</span>
+<span class="fc" id="L117">        this.id = id;</span>
+<span class="fc" id="L118">        this.name = name;</span>
+<span class="fc" id="L119">        this.groupLeader = groupLeader;</span>
+<span class="pc bpc" id="L120" title="1 of 2 branches missed.">        this.tags = (tags != null) ? new ArrayList&lt;&gt;(tags) : new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L121">        this.description = description;</span>
+<span class="fc" id="L122">        this.groupImageKey = groupImageKey;</span>
+<span class="fc" id="L123">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

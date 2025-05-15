@@ -23,7 +23,7 @@ public class Ebook extends BaseEntity {
     @Column(nullable = false)
     private String author;
 
-    @Column
+    @Column(length = 10000)
     private String description;
 
     private long size;

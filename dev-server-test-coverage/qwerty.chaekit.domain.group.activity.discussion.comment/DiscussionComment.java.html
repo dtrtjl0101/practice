@@ -29,7 +29,7 @@ public class DiscussionComment extends BaseEntity {
     @JoinColumn(name = &quot;discussion_id&quot;)
     private Discussion discussion;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 5000)
     private String content;
 
 <span class="fc" id="L35">    @Column(name = &quot;is_edited&quot;, nullable = false)</span>
@@ -70,5 +70,17 @@ public class DiscussionComment extends BaseEntity {
 <span class="fc" id="L70">        this.content = &quot;삭제된 댓글입니다.&quot;;</span>
 <span class="fc" id="L71">        this.deleted = true;</span>
 <span class="fc" id="L72">    }</span>
+    
+    public boolean isAuthor(UserProfile user) {
+<span class="fc" id="L75">        return author.getId().equals(user.getId());</span>
+    }
+    
+    public boolean isReply() {
+<span class="nc bnc" id="L79" title="All 2 branches missed.">        return parent != null;</span>
+    }
+    
+    public boolean isRootComment() {
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        return parent == null;</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
