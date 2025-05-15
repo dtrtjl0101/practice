@@ -83,13 +83,13 @@ public class Activity extends BaseEntity {
 <span class="fc" id="L83">    }</span>
     
     public void addParticipant(UserProfile user) {
-<span class="nc" id="L86">        participants.add(</span>
-<span class="nc" id="L87">                ActivityMember.builder()</span>
-<span class="nc" id="L88">                        .activity(this)</span>
-<span class="nc" id="L89">                        .user(user)</span>
-<span class="nc" id="L90">                        .build()</span>
+<span class="fc" id="L86">        participants.add(</span>
+<span class="fc" id="L87">                ActivityMember.builder()</span>
+<span class="fc" id="L88">                        .activity(this)</span>
+<span class="fc" id="L89">                        .user(user)</span>
+<span class="fc" id="L90">                        .build()</span>
         );
-<span class="nc" id="L92">    }</span>
+<span class="fc" id="L92">    }</span>
     
     public void removeParticipant(UserProfile user) {
 <span class="nc" id="L95">        participants.removeIf(participant -&gt; participant.getUser().getId().equals(user.getId()));</span>
