@@ -25,7 +25,6 @@ export default function useRefresh() {
     }
 
     const { accessToken, refreshToken } = response.data;
-    API_CLIENT.setSecurityData(accessToken!);
     setLoggedInUser((prev) => {
       const next = {
         ...prev,
