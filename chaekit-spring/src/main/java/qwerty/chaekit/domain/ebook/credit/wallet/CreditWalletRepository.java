@@ -1,4 +1,4 @@
-package qwerty.chaekit.domain.ebook.credit;
+package qwerty.chaekit.domain.ebook.credit.wallet;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

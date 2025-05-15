@@ -22,7 +22,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import API_CLIENT, { wrapApiResponse } from "../../../api/api";
+import API_CLIENT from "../../../api/api";
 import PageNavigation from "../../../component/PageNavigation";
 
 export const Route = createFileRoute("/_pathlessLayout/admin/publisher")({
@@ -44,12 +44,10 @@ function PublisherCard() {
   const { data: publishers, isLoading } = useQuery({
     queryKey: ["publishers", page],
     queryFn: async () => {
-      const response = await wrapApiResponse(
-        API_CLIENT.adminController.fetchPublishers({
-          page,
-          size: 20,
-        })
-      );
+      const response = await API_CLIENT.adminController.fetchPublishers({
+        page,
+        size: 20,
+      });
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);
       }
@@ -145,12 +143,10 @@ function PendingPublisherCard() {
   } = useQuery({
     queryKey: ["publisherApplications", page],
     queryFn: async () => {
-      const response = await wrapApiResponse(
-        API_CLIENT.adminController.fetchPendingList({
-          page,
-          size: 10,
-        })
-      );
+      const response = await API_CLIENT.adminController.fetchPendingList({
+        page,
+        size: 10,
+      });
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);
       }
@@ -161,9 +157,7 @@ function PendingPublisherCard() {
   });
 
   const onApproveButtonClicked = async (id: number) => {
-    const response = await wrapApiResponse(
-      API_CLIENT.adminController.acceptPublisher(id)
-    );
+    const response = await API_CLIENT.adminController.acceptPublisher(id);
 
     if (!response.isSuccessful) {
       console.error(response.errorMessage);
@@ -293,10 +287,11 @@ function RejectPublisherModal(props: {
 
   const onRejectButtonClicked = async () => {
     if (!publisherId) return;
-    const response = await wrapApiResponse(
-      API_CLIENT.adminController.rejectPublisher(publisherId, {
+    const response = await API_CLIENT.adminController.rejectPublisher(
+      publisherId,
+      {
         reason,
-      })
+      }
     );
     if (!response.isSuccessful) {
       console.error(response.errorMessage);

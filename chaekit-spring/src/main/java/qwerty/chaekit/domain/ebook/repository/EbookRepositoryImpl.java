@@ -20,40 +20,15 @@ public class EbookRepositoryImpl implements EbookRepository {
     private final EbookJpaRepository ebookJpaRepository;
 
     @Override
-    public Page<Ebook> findAll(Pageable pageable) {
-        return ebookJpaRepository.findAll(pageable);
-    }
-
-    @Override
-    public Optional<Ebook> findById(Long id) {
-        return ebookJpaRepository.findById(id);
-    }
-
-    @Override
-    public Ebook save(Ebook ebook) {
-        return ebookJpaRepository.save(ebook);
-    }
-
-    @Override
-    public boolean existsById(Long id) {
-        return ebookJpaRepository.existsById(id);
-    }
-
-    @Override
-    public Ebook getReferenceById(Long id) {
-        return ebookJpaRepository.getReferenceById(id);
-    }
-
-    @Override
-    public Page<Ebook> searchEbooks(String authorName, String bookTitle, Pageable pageable) {
+    public Page<Ebook> findAllByTitleAndAuthor(String title, String author, Pageable pageable) {
         QEbook ebook = QEbook.ebook;
         BooleanBuilder where = new BooleanBuilder();
 
-        if (authorName != null && !authorName.isEmpty()) {
-            where.and(ebook.author.contains(authorName));
+        if (author != null && !author.isBlank()) {
+            where.and(ebook.author.startsWith(author));
         }
-        if (bookTitle != null && !bookTitle.isEmpty()) {
-            where.and(ebook.title.contains(bookTitle));
+        if (title != null && !title.isBlank()) {
+            where.and(ebook.title.contains(title));
         }
 
         List<Ebook> result = jpaQueryFactory
@@ -70,5 +45,30 @@ public class EbookRepositoryImpl implements EbookRepository {
                 .fetchOne()).orElse(0L);
 
         return new PageImpl<>(result, pageable, total);
+    }
+
+    @Override
+    public Optional<Ebook> findById(Long id) {
+        return ebookJpaRepository.findById(id);
+    }
+
+    @Override
+    public Optional<Ebook> findByIdWithPublisher(Long id) {
+        return ebookJpaRepository.findByIdWithPublisher(id);
+    }
+
+    @Override
+    public Ebook save(Ebook ebook) {
+        return ebookJpaRepository.save(ebook);
+    }
+
+    @Override
+    public boolean existsById(Long id) {
+        return ebookJpaRepository.existsById(id);
+    }
+
+    @Override
+    public Ebook getReferenceById(Long id) {
+        return ebookJpaRepository.getReferenceById(id);
     }
 }

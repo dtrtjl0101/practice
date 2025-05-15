@@ -12,7 +12,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useMemo, useState } from "react";
-import API_CLIENT, { wrapApiResponse } from "../../api/api";
+import API_CLIENT from "../../api/api";
 import useLogin from "../../api/login/useLogin";
 import { AuthState } from "../../states/auth";
 
@@ -34,11 +34,10 @@ function RouteComponent() {
   const [profileImage, setProfileImage] = useState<File | null>(null);
 
   const onVerificationCodeButtonClick = useCallback(async () => {
-    const response = await wrapApiResponse(
-      API_CLIENT.emailVerificationController.sendVerificationCode({
+    const response =
+      await API_CLIENT.emailVerificationController.sendVerificationCode({
         email,
-      })
-    );
+      });
     if (response.isSuccessful) {
       alert("인증코드가 발송되었습니다.");
       setIsCodeSent(true);
@@ -48,12 +47,10 @@ function RouteComponent() {
   }, [email]);
 
   const onVerifyCodeButtonClick = useCallback(async () => {
-    const response = await wrapApiResponse(
-      API_CLIENT.emailVerificationController.verifyCode({
-        email,
-        verificationCode,
-      })
-    );
+    const response = await API_CLIENT.emailVerificationController.verifyCode({
+      email,
+      verificationCode,
+    });
     if (response.isSuccessful) {
       alert("이메일 인증이 완료되었습니다.");
       setIsVerified(true);
@@ -67,15 +64,13 @@ function RouteComponent() {
       alert("비밀번호가 일치하지 않습니다.");
       return;
     }
-    const response = await wrapApiResponse(
-      API_CLIENT.userController.userJoin({
-        nickname,
-        email,
-        password,
-        verificationCode,
-        ...(profileImage ? { profileImage } : {}),
-      })
-    );
+    const response = await API_CLIENT.userController.userJoin({
+      nickname,
+      email,
+      password,
+      verificationCode,
+      ...(profileImage ? { profileImage } : {}),
+    });
     if (response.isSuccessful) {
       alert("회원가입이 완료되었습니다.");
       const loggedInUser = response.data as AuthState.LoggedInUser;

@@ -1,4 +1,4 @@
-import API_CLIENT, { wrapApiResponse } from "../api/api";
+import API_CLIENT from "../api/api";
 class BookStorage {
   private db: Promise<IDBDatabase>;
   constructor() {
@@ -75,9 +75,8 @@ export default async function loadBook(bookId: number) {
 }
 
 async function fetchBookFromServer(bookId: number): Promise<ArrayBuffer> {
-  const downloadUrlResponse = await wrapApiResponse(
-    API_CLIENT.ebookController.downloadFile(bookId)
-  );
+  const downloadUrlResponse =
+    await API_CLIENT.ebookController.downloadFile(bookId);
   if (!downloadUrlResponse.isSuccessful) {
     throw new Error(downloadUrlResponse.errorCode);
   }

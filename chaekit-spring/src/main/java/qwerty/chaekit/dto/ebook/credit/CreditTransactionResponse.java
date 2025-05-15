@@ -1,7 +1,7 @@
 package qwerty.chaekit.dto.ebook.credit;
 
 import lombok.Builder;
-import qwerty.chaekit.domain.ebook.credit.CreditTransactionType;
+import qwerty.chaekit.domain.ebook.credit.payment.CreditPaymentTransactionType;
 
 import java.time.LocalDateTime;
 
@@ -10,7 +10,7 @@ public record CreditTransactionResponse(
         String orderId,
         int productId,
         String productName,
-        CreditTransactionType type,
+        CreditPaymentTransactionType type,
         int creditAmount,
         int paymentAmount,
         String description,

@@ -8,9 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.ebook.repository.EbookRepository;
 import qwerty.chaekit.dto.ebook.EbookFetchResponse;
-import qwerty.chaekit.dto.ebook.EbookSearchRequest;
-import qwerty.chaekit.dto.ebook.EbookSearchResponse;
 import qwerty.chaekit.dto.page.PageResponse;
+import qwerty.chaekit.global.enums.ErrorCode;
+import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.service.util.S3Service;
 
 @Service
@@ -20,20 +20,20 @@ public class EbookService {
     private final EbookRepository ebookRepository;
     private final S3Service s3Service;
 
-    public PageResponse<EbookFetchResponse> fetchEbookList(Pageable pageable) {
-        Page<EbookFetchResponse> page = ebookRepository.findAll(pageable)
+    public PageResponse<EbookFetchResponse> fetchBooksByQuery(Pageable pageable, String title, String author) {
+        Page<EbookFetchResponse> page = ebookRepository.findAllByTitleAndAuthor(title, author, pageable)
                 .map( ebook -> EbookFetchResponse.of(
                         ebook, s3Service.convertToPublicImageURL(ebook.getCoverImageKey())
                 ));
         return PageResponse.of(page);
     }
 
-    public PageResponse<EbookSearchResponse> searchEbooks(EbookSearchRequest request, Pageable pageable) {
-        Page<Ebook> ebooks = ebookRepository.searchEbooks(
-                request.getAuthorName(),
-                request.getBookTitle(),
-                pageable
+    public EbookFetchResponse fetchById(Long ebookId) {
+        Ebook ebook = ebookRepository.findById(ebookId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.EBOOK_NOT_FOUND));
+        return EbookFetchResponse.of(
+                ebook,
+                s3Service.convertToPublicImageURL(ebook.getCoverImageKey())
         );
-        return PageResponse.of(ebooks.map(EbookSearchResponse::of));
     }
 }

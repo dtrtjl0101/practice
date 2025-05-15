@@ -33,7 +33,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { EpubCFI, Rendition } from "epubjs";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ReactReader } from "react-reader";
-import API_CLIENT, { wrapApiResponse } from "../api/api";
+import API_CLIENT from "../api/api";
 import {
   keepPreviousData,
   useQuery,
@@ -89,13 +89,11 @@ function RouteComponent() {
   const { data: highlights } = useQuery({
     queryKey: ["memos", spine],
     queryFn: async () => {
-      const response = await wrapApiResponse(
-        API_CLIENT.highlightController.getHighlights({
-          page: 0,
-          size: 100,
-          spine,
-        })
-      );
+      const response = await API_CLIENT.highlightController.getHighlights({
+        page: 0,
+        size: 100,
+        spine,
+      });
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);
       }
@@ -230,15 +228,15 @@ function RouteComponent() {
         onClose={() => setOpenHighlightCreationModal(false)}
         selection={selection}
         addHighlight={async ({ cfi, memo }) => {
-          const response = await wrapApiResponse(
-            API_CLIENT.highlightController.createHighlight({
+          const response = await API_CLIENT.highlightController.createHighlight(
+            {
               memo,
               cfi,
               spine,
               // TODO: use BookId and ActivityId
               bookId: 1,
               activityId: 1,
-            })
+            }
           );
 
           if (!response.isSuccessful) {

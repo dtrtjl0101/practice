@@ -33,7 +33,7 @@ public class S3Service {
     }
 
     // Download URL
-    public String getDownloadUrl(String bucket, String fileKey) {
+    public String getPresignedDownloadUrl(String bucket, String fileKey) {
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                 .bucket(bucket)
                 .key(fileKey)
