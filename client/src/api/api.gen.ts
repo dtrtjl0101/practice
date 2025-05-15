@@ -124,6 +124,7 @@ export interface HighlightPostRequest {
   /** @format int64 */
   activityId?: number;
   memo?: string;
+  highlightContent?: string;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -142,9 +143,10 @@ export interface HighlightPostResponse {
   memo?: string;
   /** @format int64 */
   activityId?: number;
+  highlightContent?: string;
 }
 
-export interface ReactionRequest {
+export interface HighlightReactionRequest {
   /** @format int64 */
   commentId?: number;
   reactionType?:
@@ -158,12 +160,12 @@ export interface ReactionRequest {
 }
 
 /** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponseReactionResponse {
+export interface ApiSuccessResponseHighlightReactionResponse {
   isSuccessful?: boolean;
-  data?: ReactionResponse;
+  data?: HighlightReactionResponse;
 }
 
-export interface ReactionResponse {
+export interface HighlightReactionResponse {
   /** @format int64 */
   id?: number;
   /** @format int64 */
@@ -184,19 +186,19 @@ export interface ReactionResponse {
   createdAt?: string;
 }
 
-export interface CommentRequest {
+export interface HighlightCommentRequest {
   content?: string;
   /** @format int64 */
   parentId?: number;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponseCommentResponse {
+export interface ApiSuccessResponseHighlightCommentResponse {
   isSuccessful?: boolean;
-  data?: CommentResponse;
+  data?: HighlightCommentResponse;
 }
 
-export interface CommentResponse {
+export interface HighlightCommentResponse {
   /** @format int64 */
   id?: number;
   /** @format int64 */
@@ -207,8 +209,8 @@ export interface CommentResponse {
   createdAt?: string;
   /** @format date-time */
   updatedAt?: string;
-  replies?: CommentResponse[];
-  reactions?: ReactionResponse[];
+  replies?: HighlightCommentResponse[];
+  reactions?: HighlightReactionResponse[];
 }
 
 export interface GroupPostRequest {
@@ -358,6 +360,12 @@ export interface EbookPostRequest {
   description?: string;
   /** @format binary */
   file: File;
+  /**
+   * 책 가격
+   * @format int32
+   * @example 10000
+   */
+  price: number;
   /** @format binary */
   coverImageFile?: File;
 }
@@ -375,6 +383,26 @@ export interface EbookPostResponse {
   author?: string;
   description?: string;
   coverImageURL?: string;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseEbookPurchaseResponse {
+  isSuccessful?: boolean;
+  data?: EbookPurchaseResponse;
+}
+
+export interface EbookPurchaseResponse {
+  /** @format int64 */
+  userId?: number;
+  /** @format int64 */
+  transactionId?: number;
+  /** @format int32 */
+  creditAmount?: number;
+  /** @format int64 */
+  bookId?: number;
+  title?: string;
+  author?: string;
+  presignedDownloadURL?: string;
 }
 
 export interface RejectPublisherRequest {
@@ -445,6 +473,28 @@ export interface DiscussionCommentPatchRequest {
   content?: string;
 }
 
+export interface ActivityFetchResponse {
+  /** @format int64 */
+  activityId?: number;
+  /** @format int64 */
+  bookId?: number;
+  bookTitle?: string;
+  bookAuthor?: string;
+  coverImageKey?: string;
+  bookDescription?: string;
+  /** @format date */
+  startTime?: string;
+  /** @format date */
+  endTime?: string;
+  description?: string;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseActivityFetchResponse {
+  isSuccessful?: boolean;
+  data?: ActivityFetchResponse;
+}
+
 /** API 에러 응답을 감싸는 클래스 */
 export interface ApiSuccessResponseUserInfoResponse {
   isSuccessful?: boolean;
@@ -474,6 +524,71 @@ export interface PublisherInfoResponse {
   createdAt?: string;
 }
 
+export interface Pageable {
+  /**
+   * @format int32
+   * @min 0
+   */
+  page?: number;
+  /**
+   * @format int32
+   * @min 1
+   */
+  size?: number;
+  sort?: string[];
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponsePageResponseNotificationResponse {
+  isSuccessful?: boolean;
+  data?: PageResponseNotificationResponse;
+}
+
+export interface NotificationResponse {
+  /** @format int64 */
+  id?: number;
+  message?: string;
+  type?:
+    | "GROUP_JOIN_REQUEST"
+    | "GROUP_JOIN_APPROVED"
+    | "GROUP_JOIN_REJECTED"
+    | "PUBLISHER_JOIN_REQUEST"
+    | "PUBLISHER_APPROVED"
+    | "PUBLISHER_REJECTED"
+    | "DISCUSSION_COMMENT"
+    | "COMMENT_REPLY"
+    | "HIGHLIGHT_COMMENT"
+    | "HIGHLIGHT_COMMENT_REPLY";
+  isRead?: boolean;
+  /** @format date-time */
+  createdAt?: string;
+  /** @format int64 */
+  senderId?: number;
+  senderNickname?: string;
+  /** @format int64 */
+  groupId?: number;
+  groupName?: string;
+  /** @format int64 */
+  highlightId?: number;
+  highlightComments?: string;
+  /** @format int64 */
+  discussionId?: number;
+  discussionContents?: string;
+  /** @format int64 */
+  discussionCommentsId?: number;
+  discussionCommentsContents?: string;
+}
+
+export interface PageResponseNotificationResponse {
+  content?: NotificationResponse[];
+  /** @format int32 */
+  currentPage?: number;
+  /** @format int64 */
+  totalItems?: number;
+  /** @format int32 */
+  totalPages?: number;
+}
+
 /** API 에러 응답을 감싸는 클래스 */
 export interface ApiSuccessResponsePageResponseHighlightFetchResponse {
   isSuccessful?: boolean;
@@ -494,6 +609,7 @@ export interface HighlightFetchResponse {
   memo?: string;
   /** @format int64 */
   activityId?: number;
+  highlightContent?: string;
 }
 
 export interface PageResponseHighlightFetchResponse {
@@ -507,15 +623,21 @@ export interface PageResponseHighlightFetchResponse {
 }
 
 /** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponseListReactionResponse {
+export interface ApiSuccessResponseHighlightFetchResponse {
   isSuccessful?: boolean;
-  data?: ReactionResponse[];
+  data?: HighlightFetchResponse;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponseListCommentResponse {
+export interface ApiSuccessResponseListHighlightReactionResponse {
   isSuccessful?: boolean;
-  data?: CommentResponse[];
+  data?: HighlightReactionResponse[];
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseListHighlightCommentResponse {
+  isSuccessful?: boolean;
+  data?: HighlightCommentResponse[];
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -572,18 +694,6 @@ export interface PageResponseGroupPendingMemberResponse {
 export interface ApiSuccessResponseGroupFetchResponse {
   isSuccessful?: boolean;
   data?: GroupFetchResponse;
-}
-
-export interface ActivityFetchResponse {
-  /** @format int64 */
-  activityId?: number;
-  /** @format int64 */
-  bookId?: number;
-  /** @format date */
-  startTime?: string;
-  /** @format date */
-  endTime?: string;
-  description?: string;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -669,7 +779,7 @@ export interface CreditTransactionResponse {
   /** @format int32 */
   productId?: number;
   productName?: string;
-  type?: "CHARGE" | "USE" | "REFUND";
+  type?: "CHARGE" | "REFUND";
   /** @format int32 */
   creditAmount?: number;
   /** @format int32 */
@@ -716,33 +826,10 @@ export interface PageResponseEbookFetchResponse {
   totalPages?: number;
 }
 
-export interface EbookSearchRequest {
-  authorName?: string;
-  bookTitle?: string;
-}
-
 /** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponsePageResponseEbookSearchResponse {
+export interface ApiSuccessResponseEbookFetchResponse {
   isSuccessful?: boolean;
-  data?: PageResponseEbookSearchResponse;
-}
-
-export interface EbookSearchResponse {
-  /** @format int64 */
-  id?: number;
-  title?: string;
-  author?: string;
-  coverImageUrl?: string;
-}
-
-export interface PageResponseEbookSearchResponse {
-  content?: EbookSearchResponse[];
-  /** @format int32 */
-  currentPage?: number;
-  /** @format int64 */
-  totalItems?: number;
-  /** @format int32 */
-  totalPages?: number;
+  data?: EbookFetchResponse;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -1104,12 +1191,14 @@ export class Api<
      * @tags user-controller
      * @name UserJoin
      * @request POST:/api/users/join
+     * @secure
      */
     userJoin: (data: UserJoinRequest, params: RequestParams = {}) =>
       this.request<ApiSuccessResponseLoginResponse, any>({
         path: `/api/users/join`,
         method: "POST",
         body: data,
+        secure: true,
         type: ContentType.FormData,
         ...params,
       }),
@@ -1120,11 +1209,13 @@ export class Api<
      * @tags user-controller
      * @name UserInfo
      * @request GET:/api/users/me
+     * @secure
      */
     userInfo: (params: RequestParams = {}) =>
       this.request<ApiSuccessResponseUserInfoResponse, any>({
         path: `/api/users/me`,
         method: "GET",
+        secure: true,
         ...params,
       }),
   };
@@ -1136,6 +1227,7 @@ export class Api<
      * @name RefreshAccessToken
      * @summary Access Token 재발급
      * @request POST:/api/token/refresh
+     * @secure
      */
     refreshAccessToken: (
       data: RefreshTokenRequest,
@@ -1145,6 +1237,7 @@ export class Api<
         path: `/api/token/refresh`,
         method: "POST",
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1156,12 +1249,14 @@ export class Api<
      * @name Logout
      * @summary 로그아웃
      * @request POST:/api/logout
+     * @secure
      */
     logout: (data: RefreshTokenRequest, params: RequestParams = {}) =>
       this.request<ApiSuccessResponseVoid, any>({
         path: `/api/logout`,
         method: "POST",
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1173,12 +1268,14 @@ export class Api<
      * @tags publisher-controller
      * @name PublisherJoin
      * @request POST:/api/publishers/join
+     * @secure
      */
     publisherJoin: (data: PublisherJoinRequest, params: RequestParams = {}) =>
       this.request<ApiSuccessResponseLoginResponse, any>({
         path: `/api/publishers/join`,
         method: "POST",
         body: data,
+        secure: true,
         type: ContentType.FormData,
         ...params,
       }),
@@ -1189,11 +1286,13 @@ export class Api<
      * @tags publisher-controller
      * @name PublisherInfo
      * @request GET:/api/publishers/me
+     * @secure
      */
     publisherInfo: (params: RequestParams = {}) =>
       this.request<ApiSuccessResponsePublisherInfoResponse, any>({
         path: `/api/publishers/me`,
         method: "GET",
+        secure: true,
         ...params,
       }),
   };
@@ -1205,12 +1304,14 @@ export class Api<
      * @name Login
      * @summary 로그인
      * @request POST:/api/login
+     * @secure
      */
     login: (data: LoginRequest, params: RequestParams = {}) =>
       this.request<ApiSuccessResponseLoginResponse, any>({
         path: `/api/login`,
         method: "POST",
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1222,9 +1323,10 @@ export class Api<
      * @tags highlight-controller
      * @name GetHighlights
      * @request GET:/api/highlights
+     * @secure
      */
     getHighlights: (
-      query?: {
+      query: {
         /**
          * Zero-based page index (0..N)
          * @min 0
@@ -1244,7 +1346,7 @@ export class Api<
         /** @format int64 */
         bookId?: number;
         spine?: string;
-        me?: boolean;
+        me: boolean;
       },
       params: RequestParams = {},
     ) =>
@@ -1252,6 +1354,7 @@ export class Api<
         path: `/api/highlights`,
         method: "GET",
         query: query,
+        secure: true,
         ...params,
       }),
 
@@ -1261,12 +1364,14 @@ export class Api<
      * @tags highlight-controller
      * @name CreateHighlight
      * @request POST:/api/highlights
+     * @secure
      */
     createHighlight: (data: HighlightPostRequest, params: RequestParams = {}) =>
       this.request<ApiSuccessResponseHighlightPostResponse, any>({
         path: `/api/highlights`,
         method: "POST",
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1277,11 +1382,29 @@ export class Api<
      * @tags highlight-controller
      * @name GetHighlightReactions
      * @request GET:/api/highlights/{highlightId}/reactions
+     * @secure
      */
     getHighlightReactions: (highlightId: number, params: RequestParams = {}) =>
-      this.request<ApiSuccessResponseListReactionResponse, any>({
+      this.request<ApiSuccessResponseListHighlightReactionResponse, any>({
         path: `/api/highlights/${highlightId}/reactions`,
         method: "GET",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags highlight-controller
+     * @name GetHighlight
+     * @request GET:/api/highlights/{id}
+     * @secure
+     */
+    getHighlight: (id: number, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseHighlightFetchResponse, any>({
+        path: `/api/highlights/${id}`,
+        method: "GET",
+        secure: true,
         ...params,
       }),
 
@@ -1291,11 +1414,13 @@ export class Api<
      * @tags highlight-controller
      * @name DeleteHighlight
      * @request DELETE:/api/highlights/{id}
+     * @secure
      */
     deleteHighlight: (id: number, params: RequestParams = {}) =>
       this.request<ApiSuccessResponseString, any>({
         path: `/api/highlights/${id}`,
         method: "DELETE",
+        secure: true,
         ...params,
       }),
 
@@ -1305,6 +1430,7 @@ export class Api<
      * @tags highlight-controller
      * @name UpdateHighlight
      * @request PATCH:/api/highlights/{id}
+     * @secure
      */
     updateHighlight: (
       id: number,
@@ -1315,6 +1441,7 @@ export class Api<
         path: `/api/highlights/${id}`,
         method: "PATCH",
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1326,16 +1453,18 @@ export class Api<
      * @tags reaction-controller
      * @name AddReaction
      * @request POST:/api/highlights/{highlightId}/reactions
+     * @secure
      */
     addReaction: (
       highlightId: number,
-      data: ReactionRequest,
+      data: HighlightReactionRequest,
       params: RequestParams = {},
     ) =>
-      this.request<ApiSuccessResponseReactionResponse, any>({
+      this.request<ApiSuccessResponseHighlightReactionResponse, any>({
         path: `/api/highlights/${highlightId}/reactions`,
         method: "POST",
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1346,11 +1475,13 @@ export class Api<
      * @tags reaction-controller
      * @name DeleteReaction
      * @request DELETE:/api/highlights/reactions/{reactionId}
+     * @secure
      */
     deleteReaction: (reactionId: number, params: RequestParams = {}) =>
       this.request<ApiSuccessResponseString, any>({
         path: `/api/highlights/reactions/${reactionId}`,
         method: "DELETE",
+        secure: true,
         ...params,
       }),
   };
@@ -1361,11 +1492,13 @@ export class Api<
      * @tags comment-controller
      * @name GetComments
      * @request GET:/api/highlights/{highlightId}/comments
+     * @secure
      */
     getComments: (highlightId: number, params: RequestParams = {}) =>
-      this.request<ApiSuccessResponseListCommentResponse, any>({
+      this.request<ApiSuccessResponseListHighlightCommentResponse, any>({
         path: `/api/highlights/${highlightId}/comments`,
         method: "GET",
+        secure: true,
         ...params,
       }),
 
@@ -1375,16 +1508,18 @@ export class Api<
      * @tags comment-controller
      * @name CreateComment
      * @request POST:/api/highlights/{highlightId}/comments
+     * @secure
      */
     createComment: (
       highlightId: number,
-      data: CommentRequest,
+      data: HighlightCommentRequest,
       params: RequestParams = {},
     ) =>
-      this.request<ApiSuccessResponseCommentResponse, any>({
+      this.request<ApiSuccessResponseHighlightCommentResponse, any>({
         path: `/api/highlights/${highlightId}/comments`,
         method: "POST",
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1395,11 +1530,13 @@ export class Api<
      * @tags comment-controller
      * @name DeleteComment
      * @request DELETE:/api/highlights/comments/{commentId}
+     * @secure
      */
     deleteComment: (commentId: number, params: RequestParams = {}) =>
       this.request<ApiSuccessResponseString, any>({
         path: `/api/highlights/comments/${commentId}`,
         method: "DELETE",
+        secure: true,
         ...params,
       }),
 
@@ -1409,16 +1546,18 @@ export class Api<
      * @tags comment-controller
      * @name UpdateComment
      * @request PATCH:/api/highlights/comments/{commentId}
+     * @secure
      */
     updateComment: (
       commentId: number,
-      data: CommentRequest,
+      data: HighlightCommentRequest,
       params: RequestParams = {},
     ) =>
-      this.request<ApiSuccessResponseCommentResponse, any>({
+      this.request<ApiSuccessResponseHighlightCommentResponse, any>({
         path: `/api/highlights/comments/${commentId}`,
         method: "PATCH",
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1430,6 +1569,7 @@ export class Api<
      * @tags group-controller
      * @name GetAllGroups
      * @request GET:/api/groups
+     * @secure
      */
     getAllGroups: (
       query?: {
@@ -1454,6 +1594,7 @@ export class Api<
         path: `/api/groups`,
         method: "GET",
         query: query,
+        secure: true,
         ...params,
       }),
 
@@ -1463,12 +1604,14 @@ export class Api<
      * @tags group-controller
      * @name CreateGroup
      * @request POST:/api/groups
+     * @secure
      */
     createGroup: (data: GroupPostRequest, params: RequestParams = {}) =>
       this.request<ApiSuccessResponseGroupPostResponse, any>({
         path: `/api/groups`,
         method: "POST",
         body: data,
+        secure: true,
         type: ContentType.FormData,
         ...params,
       }),
@@ -1479,11 +1622,13 @@ export class Api<
      * @tags group-controller
      * @name RequestJoinGroup
      * @request POST:/api/groups/{groupId}/join
+     * @secure
      */
     requestJoinGroup: (groupId: number, params: RequestParams = {}) =>
       this.request<ApiSuccessResponseGroupJoinResponse, any>({
         path: `/api/groups/${groupId}/join`,
         method: "POST",
+        secure: true,
         ...params,
       }),
 
@@ -1493,6 +1638,7 @@ export class Api<
      * @tags group-controller
      * @name UpdateGroup
      * @request PATCH:/api/groups/{groupId}
+     * @secure
      */
     updateGroup: (
       groupId: number,
@@ -1503,6 +1649,7 @@ export class Api<
         path: `/api/groups/${groupId}`,
         method: "PATCH",
         body: data,
+        secure: true,
         type: ContentType.FormData,
         ...params,
       }),
@@ -1513,6 +1660,7 @@ export class Api<
      * @tags group-controller
      * @name RejectJoinRequest
      * @request PATCH:/api/groups/{groupId}/members/{userId}/reject
+     * @secure
      */
     rejectJoinRequest: (
       groupId: number,
@@ -1522,6 +1670,7 @@ export class Api<
       this.request<ApiSuccessResponseVoid, any>({
         path: `/api/groups/${groupId}/members/${userId}/reject`,
         method: "PATCH",
+        secure: true,
         ...params,
       }),
 
@@ -1531,6 +1680,7 @@ export class Api<
      * @tags group-controller
      * @name ApproveJoinRequest
      * @request PATCH:/api/groups/{groupId}/members/{userId}/approve
+     * @secure
      */
     approveJoinRequest: (
       groupId: number,
@@ -1540,6 +1690,7 @@ export class Api<
       this.request<ApiSuccessResponseGroupJoinResponse, any>({
         path: `/api/groups/${groupId}/members/${userId}/approve`,
         method: "PATCH",
+        secure: true,
         ...params,
       }),
 
@@ -1549,6 +1700,7 @@ export class Api<
      * @tags group-controller
      * @name GetPendingList
      * @request GET:/api/groups/{groupId}/members/pending
+     * @secure
      */
     getPendingList: (
       groupId: number,
@@ -1577,6 +1729,7 @@ export class Api<
         path: `/api/groups/${groupId}/members/pending`,
         method: "GET",
         query: query,
+        secure: true,
         ...params,
       }),
 
@@ -1586,11 +1739,13 @@ export class Api<
      * @tags group-controller
      * @name GetGroup
      * @request GET:/api/groups/{groupId}/info
+     * @secure
      */
     getGroup: (groupId: number, params: RequestParams = {}) =>
       this.request<ApiSuccessResponseGroupFetchResponse, any>({
         path: `/api/groups/${groupId}/info`,
         method: "GET",
+        secure: true,
         ...params,
       }),
 
@@ -1600,11 +1755,13 @@ export class Api<
      * @tags group-controller
      * @name LeaveGroup
      * @request DELETE:/api/groups/{groupId}/members/leave
+     * @secure
      */
     leaveGroup: (groupId: number, params: RequestParams = {}) =>
       this.request<ApiSuccessResponseVoid, any>({
         path: `/api/groups/${groupId}/members/leave`,
         method: "DELETE",
+        secure: true,
         ...params,
       }),
   };
@@ -1615,6 +1772,7 @@ export class Api<
      * @tags activity-controller
      * @name GetAllActivities
      * @request GET:/api/groups/{groupId}/activities
+     * @secure
      */
     getAllActivities: (
       groupId: number,
@@ -1640,6 +1798,7 @@ export class Api<
         path: `/api/groups/${groupId}/activities`,
         method: "GET",
         query: query,
+        secure: true,
         ...params,
       }),
 
@@ -1649,6 +1808,7 @@ export class Api<
      * @tags activity-controller
      * @name CreateActivity
      * @request POST:/api/groups/{groupId}/activities
+     * @secure
      */
     createActivity: (
       groupId: number,
@@ -1659,6 +1819,7 @@ export class Api<
         path: `/api/groups/${groupId}/activities`,
         method: "POST",
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1669,6 +1830,7 @@ export class Api<
      * @tags activity-controller
      * @name UpdateActivity
      * @request PATCH:/api/groups/{groupId}/activities
+     * @secure
      */
     updateActivity: (
       groupId: number,
@@ -1679,7 +1841,58 @@ export class Api<
         path: `/api/groups/${groupId}/activities`,
         method: "PATCH",
         body: data,
+        secure: true,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description 모임 활동에서 탈퇴합니다.
+     *
+     * @tags activity-controller
+     * @name LeaveActivity
+     * @summary 모임 활동 탈퇴
+     * @request POST:/api/activities/{activityId}/leave
+     * @secure
+     */
+    leaveActivity: (activityId: number, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseVoid, any>({
+        path: `/api/activities/${activityId}/leave`,
+        method: "POST",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description 모임 활동에 가입합니다.
+     *
+     * @tags activity-controller
+     * @name JoinActivity
+     * @summary 모임 활동 가입
+     * @request POST:/api/activities/{activityId}/join
+     * @secure
+     */
+    joinActivity: (activityId: number, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseVoid, any>({
+        path: `/api/activities/${activityId}/join`,
+        method: "POST",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags activity-controller
+     * @name GetActivity
+     * @request GET:/{activityId}
+     * @secure
+     */
+    getActivity: (activityId: number, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseActivityFetchResponse, any>({
+        path: `/${activityId}`,
+        method: "GET",
+        secure: true,
         ...params,
       }),
   };
@@ -1691,6 +1904,7 @@ export class Api<
      * @name SendVerificationCode
      * @summary 인증 코드 발송
      * @request POST:/api/email-verification/send-verification-code
+     * @secure
      */
     sendVerificationCode: (
       query: {
@@ -1702,6 +1916,7 @@ export class Api<
         path: `/api/email-verification/send-verification-code`,
         method: "POST",
         query: query,
+        secure: true,
         ...params,
       }),
 
@@ -1712,6 +1927,7 @@ export class Api<
      * @name VerifyCode
      * @summary 인증 코드 검증
      * @request GET:/api/email-verification/verify-code
+     * @secure
      */
     verifyCode: (
       query: {
@@ -1724,6 +1940,7 @@ export class Api<
         path: `/api/email-verification/verify-code`,
         method: "GET",
         query: query,
+        secure: true,
         ...params,
       }),
   };
@@ -1735,6 +1952,7 @@ export class Api<
      * @name AddComment
      * @summary 토론 댓글 작성
      * @request POST:/api/discussions/{discussionId}/comments
+     * @secure
      */
     addComment: (
       discussionId: number,
@@ -1745,6 +1963,7 @@ export class Api<
         path: `/api/discussions/${discussionId}/comments`,
         method: "POST",
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1756,6 +1975,7 @@ export class Api<
      * @name GetDiscussions
      * @summary 토론 목록 조회
      * @request GET:/api/activities/{activityId}/discussions
+     * @secure
      */
     getDiscussions: (
       activityId: number,
@@ -1781,6 +2001,7 @@ export class Api<
         path: `/api/activities/${activityId}/discussions`,
         method: "GET",
         query: query,
+        secure: true,
         ...params,
       }),
 
@@ -1791,6 +2012,7 @@ export class Api<
      * @name CreateDiscussion
      * @summary 토론 생성
      * @request POST:/api/activities/{activityId}/discussions
+     * @secure
      */
     createDiscussion: (
       activityId: number,
@@ -1801,6 +2023,7 @@ export class Api<
         path: `/api/activities/${activityId}/discussions`,
         method: "POST",
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1812,11 +2035,13 @@ export class Api<
      * @name GetDiscussion
      * @summary 토론 상세 조회
      * @request GET:/api/discussions/{discussionId}
+     * @secure
      */
     getDiscussion: (discussionId: number, params: RequestParams = {}) =>
       this.request<ApiSuccessResponseDiscussionDetailResponse, any>({
         path: `/api/discussions/${discussionId}`,
         method: "GET",
+        secure: true,
         ...params,
       }),
 
@@ -1827,11 +2052,13 @@ export class Api<
      * @name DeleteDiscussion
      * @summary 토론 삭제
      * @request DELETE:/api/discussions/{discussionId}
+     * @secure
      */
     deleteDiscussion: (discussionId: number, params: RequestParams = {}) =>
       this.request<ApiSuccessResponseVoid, any>({
         path: `/api/discussions/${discussionId}`,
         method: "DELETE",
+        secure: true,
         ...params,
       }),
 
@@ -1842,6 +2069,7 @@ export class Api<
      * @name UpdateDiscussion
      * @summary 토론 수정
      * @request PATCH:/api/discussions/{discussionId}
+     * @secure
      */
     updateDiscussion: (
       discussionId: number,
@@ -1852,6 +2080,7 @@ export class Api<
         path: `/api/discussions/${discussionId}`,
         method: "PATCH",
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1863,11 +2092,13 @@ export class Api<
      * @name GetComment
      * @summary 토론 댓글 단건 조회
      * @request GET:/api/discussions/comments/{commentId}
+     * @secure
      */
     getComment: (commentId: number, params: RequestParams = {}) =>
       this.request<ApiSuccessResponseDiscussionCommentFetchResponse, any>({
         path: `/api/discussions/comments/${commentId}`,
         method: "GET",
+        secure: true,
         ...params,
       }),
 
@@ -1878,11 +2109,13 @@ export class Api<
      * @name DeleteComment1
      * @summary 토론 댓글 삭제
      * @request DELETE:/api/discussions/comments/{commentId}
+     * @secure
      */
     deleteComment1: (commentId: number, params: RequestParams = {}) =>
       this.request<ApiSuccessResponseVoid, any>({
         path: `/api/discussions/comments/${commentId}`,
         method: "DELETE",
+        secure: true,
         ...params,
       }),
 
@@ -1893,6 +2126,7 @@ export class Api<
      * @name UpdateComment1
      * @summary 토론 댓글 수정
      * @request PATCH:/api/discussions/comments/{commentId}
+     * @secure
      */
     updateComment1: (
       commentId: number,
@@ -1903,6 +2137,7 @@ export class Api<
         path: `/api/discussions/comments/${commentId}`,
         method: "PATCH",
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1915,6 +2150,7 @@ export class Api<
      * @name KakaoPaySuccess
      * @summary 카카오페이 결제 승인
      * @request POST:/api/credits/payment/success
+     * @secure
      */
     kakaoPaySuccess: (
       query: {
@@ -1926,6 +2162,7 @@ export class Api<
         path: `/api/credits/payment/success`,
         method: "POST",
         query: query,
+        secure: true,
         ...params,
       }),
 
@@ -1936,6 +2173,7 @@ export class Api<
      * @name RequestKakaoPay
      * @summary 카카오페이 결제 redirect URL 요청
      * @request POST:/api/credits/payment/ready
+     * @secure
      */
     requestKakaoPay: (
       data: CreditPaymentReadyRequest,
@@ -1945,6 +2183,7 @@ export class Api<
         path: `/api/credits/payment/ready`,
         method: "POST",
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1956,11 +2195,13 @@ export class Api<
      * @name GetCreditProductList
      * @summary 크레딧 상품 목록 조회
      * @request GET:/api/credits
+     * @secure
      */
     getCreditProductList: (params: RequestParams = {}) =>
       this.request<ApiSuccessResponseListCreditProductInfoResponse, any>({
         path: `/api/credits`,
         method: "GET",
+        secure: true,
         ...params,
       }),
 
@@ -1971,11 +2212,13 @@ export class Api<
      * @name GetMyWallet
      * @summary 내 크레딧 지갑 조회
      * @request GET:/api/credits/wallets
+     * @secure
      */
     getMyWallet: (params: RequestParams = {}) =>
       this.request<ApiSuccessResponseCreditWalletResponse, any>({
         path: `/api/credits/wallets`,
         method: "GET",
+        secure: true,
         ...params,
       }),
 
@@ -1986,6 +2229,7 @@ export class Api<
      * @name GetMyWalletTransactions
      * @summary 내 크레딧 거래 내역 조회
      * @request GET:/api/credits/transactions
+     * @secure
      */
     getMyWalletTransactions: (
       query?: {
@@ -2013,6 +2257,7 @@ export class Api<
         path: `/api/credits/transactions`,
         method: "GET",
         query: query,
+        secure: true,
         ...params,
       }),
   };
@@ -2024,8 +2269,120 @@ export class Api<
      * @name GetBooks
      * @summary 전자책 목록 조회
      * @request GET:/api/books
+     * @secure
      */
     getBooks: (
+      query?: {
+        /**
+         * Zero-based page index (0..N)
+         * @min 0
+         * @default 0
+         */
+        page?: number;
+        /**
+         * The size of the page to be returned
+         * @min 1
+         * @default 20
+         */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        /** 책 제목 */
+        title?: string;
+        /** 작가명 */
+        author?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponsePageResponseEbookFetchResponse, any>({
+        path: `/api/books`,
+        method: "GET",
+        query: query,
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description 출판사가 전자책 파일과 정보를 업로드합니다.
+     *
+     * @tags ebook-controller
+     * @name UploadFile
+     * @summary 전자책 업로드
+     * @request POST:/api/books
+     * @secure
+     */
+    uploadFile: (data: EbookPostRequest, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseEbookPostResponse, any>({
+        path: `/api/books`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * @description 전자책의 상세 정보를 조회합니다.
+     *
+     * @tags ebook-controller
+     * @name GetBook
+     * @summary 전자책 상세 조회
+     * @request GET:/api/books/{ebookId}
+     * @secure
+     */
+    getBook: (ebookId: number, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseEbookFetchResponse, any>({
+        path: `/api/books/${ebookId}`,
+        method: "GET",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description 관리자가 전자책 다운로드를 위한 URL을 생성합니다.
+     *
+     * @tags ebook-controller
+     * @name DownloadFile
+     * @summary 전자책 다운로드 URL 생성
+     * @request GET:/api/books/{ebookId}/download
+     * @secure
+     */
+    downloadFile: (ebookId: number, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseEbookDownloadResponse, any>({
+        path: `/api/books/${ebookId}/download`,
+        method: "GET",
+        secure: true,
+        ...params,
+      }),
+  };
+  ebookPurchaseController = {
+    /**
+     * @description 보유한 크레딧으로 전자책을 구매합니다.
+     *
+     * @tags ebook-purchase-controller
+     * @name PurchaseEbook
+     * @summary 전자책 구매
+     * @request POST:/api/books/{bookId}/purchase
+     * @secure
+     */
+    purchaseEbook: (bookId: number, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseEbookPurchaseResponse, any>({
+        path: `/api/books/${bookId}/purchase`,
+        method: "POST",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description 내가 구매한 전자책 목록을 페이지네이션하여 조회합니다.
+     *
+     * @tags ebook-purchase-controller
+     * @name GetMyBooks
+     * @summary 내 전자책 목록 조회
+     * @request GET:/api/books/my
+     * @secure
+     */
+    getMyBooks: (
       query?: {
         /**
          * Zero-based page index (0..N)
@@ -2045,75 +2402,10 @@ export class Api<
       params: RequestParams = {},
     ) =>
       this.request<ApiSuccessResponsePageResponseEbookFetchResponse, any>({
-        path: `/api/books`,
+        path: `/api/books/my`,
         method: "GET",
         query: query,
-        ...params,
-      }),
-
-    /**
-     * @description 출판사가 전자책 파일과 정보를 업로드합니다.
-     *
-     * @tags ebook-controller
-     * @name UploadFile
-     * @summary 전자책 업로드
-     * @request POST:/api/books
-     */
-    uploadFile: (data: EbookPostRequest, params: RequestParams = {}) =>
-      this.request<ApiSuccessResponseEbookPostResponse, any>({
-        path: `/api/books`,
-        method: "POST",
-        body: data,
-        type: ContentType.FormData,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags ebook-controller
-     * @name SearchEbooks
-     * @request GET:/api/books/search
-     */
-    searchEbooks: (
-      query: {
-        /**
-         * Zero-based page index (0..N)
-         * @min 0
-         * @default 0
-         */
-        page?: number;
-        /**
-         * The size of the page to be returned
-         * @min 1
-         * @default 20
-         */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-        request: EbookSearchRequest;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<ApiSuccessResponsePageResponseEbookSearchResponse, any>({
-        path: `/api/books/search`,
-        method: "GET",
-        query: query,
-        ...params,
-      }),
-
-    /**
-     * @description 관리자가 전자책 다운로드를 위한 URL을 생성합니다.
-     *
-     * @tags ebook-controller
-     * @name DownloadFile
-     * @summary 전자책 다운로드 URL 생성
-     * @request GET:/api/books/download/{ebookId}
-     */
-    downloadFile: (ebookId: number, params: RequestParams = {}) =>
-      this.request<ApiSuccessResponseEbookDownloadResponse, any>({
-        path: `/api/books/download/${ebookId}`,
-        method: "GET",
+        secure: true,
         ...params,
       }),
   };
@@ -2125,6 +2417,7 @@ export class Api<
      * @name RejectPublisher
      * @summary 출판사 거절
      * @request POST:/api/admin/publishers/{publisherId}/reject
+     * @secure
      */
     rejectPublisher: (
       publisherId: number,
@@ -2135,6 +2428,7 @@ export class Api<
         path: `/api/admin/publishers/${publisherId}/reject`,
         method: "POST",
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -2146,11 +2440,13 @@ export class Api<
      * @name AcceptPublisher
      * @summary 출판사 승인
      * @request POST:/api/admin/publishers/{publisherId}/accept
+     * @secure
      */
     acceptPublisher: (publisherId: number, params: RequestParams = {}) =>
       this.request<ApiSuccessResponseVoid, any>({
         path: `/api/admin/publishers/${publisherId}/accept`,
         method: "POST",
+        secure: true,
         ...params,
       }),
 
@@ -2161,6 +2457,7 @@ export class Api<
      * @name FetchUsers
      * @summary 유저 목록 조회
      * @request GET:/api/admin/users
+     * @secure
      */
     fetchUsers: (
       query?: {
@@ -2185,6 +2482,7 @@ export class Api<
         path: `/api/admin/users`,
         method: "GET",
         query: query,
+        secure: true,
         ...params,
       }),
 
@@ -2195,6 +2493,7 @@ export class Api<
      * @name FetchPublishers
      * @summary 출판사 목록 조회
      * @request GET:/api/admin/publishers
+     * @secure
      */
     fetchPublishers: (
       query?: {
@@ -2219,6 +2518,7 @@ export class Api<
         path: `/api/admin/publishers`,
         method: "GET",
         query: query,
+        secure: true,
         ...params,
       }),
 
@@ -2229,6 +2529,7 @@ export class Api<
      * @name FetchPendingList
      * @summary 출판사 승인 대기 목록 조회
      * @request GET:/api/admin/publishers/pending
+     * @secure
      */
     fetchPendingList: (
       query?: {
@@ -2253,6 +2554,89 @@ export class Api<
         path: `/api/admin/publishers/pending`,
         method: "GET",
         query: query,
+        secure: true,
+        ...params,
+      }),
+  };
+  publisherNotificationController = {
+    /**
+     * No description
+     *
+     * @tags publisher-notification-controller
+     * @name MarkAsRead
+     * @summary 출판사 알림 읽음 처리
+     * @request PATCH:/api/publisher/notifications/{notificationId}/read
+     * @secure
+     */
+    markAsRead: (notificationId: number, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseVoid, any>({
+        path: `/api/publisher/notifications/${notificationId}/read`,
+        method: "PATCH",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags publisher-notification-controller
+     * @name GetNotifications
+     * @summary 출판사 알림 목록 조회
+     * @request GET:/api/publisher/notifications
+     * @secure
+     */
+    getNotifications: (
+      query: {
+        pageable: Pageable;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponsePageResponseNotificationResponse, any>({
+        path: `/api/publisher/notifications`,
+        method: "GET",
+        query: query,
+        secure: true,
+        ...params,
+      }),
+  };
+  notificationController = {
+    /**
+     * No description
+     *
+     * @tags notification-controller
+     * @name MarkAsRead1
+     * @summary 알림 읽음 처리
+     * @request PATCH:/api/notifications/{notificationId}/read
+     * @secure
+     */
+    markAsRead1: (notificationId: number, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseVoid, any>({
+        path: `/api/notifications/${notificationId}/read`,
+        method: "PATCH",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags notification-controller
+     * @name GetNotifications1
+     * @summary 알림 목록 조회
+     * @request GET:/api/notifications
+     * @secure
+     */
+    getNotifications1: (
+      query: {
+        pageable: Pageable;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponsePageResponseNotificationResponse, any>({
+        path: `/api/notifications`,
+        method: "GET",
+        query: query,
+        secure: true,
         ...params,
       }),
   };
@@ -2263,11 +2647,13 @@ export class Api<
      * @tags main-controller
      * @name MainApi
      * @request GET:/api
+     * @secure
      */
     mainApi: (params: RequestParams = {}) =>
       this.request<ApiSuccessResponseString, any>({
         path: `/api`,
         method: "GET",
+        secure: true,
         ...params,
       }),
   };

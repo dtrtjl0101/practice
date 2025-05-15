@@ -27,6 +27,7 @@ function RouteComponent() {
   const [author, setAuthor] = useState("");
   const [description, setDescription] = useState("");
   const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
+  const [price, setPrice] = useState<number>(0);
 
   const handleUploadBookButtonClicked = async () => {
     const inputElement = document.createElement("input");
@@ -45,6 +46,7 @@ function RouteComponent() {
         description,
         author,
         coverImageFile: coverImageFile ?? undefined,
+        price,
       });
       if (response.isSuccessful) {
         setTitle("");
@@ -98,7 +100,7 @@ function RouteComponent() {
         )}
       </CardActionArea>
       <CardContent>
-        <InputLabel>Title</InputLabel>
+        <InputLabel>제목</InputLabel>
         <TextField
           fullWidth
           placeholder="Title"
@@ -107,7 +109,7 @@ function RouteComponent() {
         />
       </CardContent>
       <CardContent>
-        <InputLabel>Author</InputLabel>
+        <InputLabel>저자</InputLabel>
         <TextField
           fullWidth
           placeholder="Author"
@@ -116,7 +118,7 @@ function RouteComponent() {
         />
       </CardContent>
       <CardContent>
-        <InputLabel>Description</InputLabel>
+        <InputLabel>설명</InputLabel>
         <TextField
           fullWidth
           placeholder="Description"
@@ -130,6 +132,27 @@ function RouteComponent() {
               return;
             }
             setDescription(value);
+          }}
+          helperText={`${description.length} / ${MAX_DESCRIPTION_LENGTH}`}
+        />
+      </CardContent>
+      <CardContent>
+        <InputLabel>가격</InputLabel>
+        <TextField
+          fullWidth
+          placeholder="10000"
+          value={price}
+          onChange={(e) => {
+            const value = e.target.value;
+            const parsedValue = parseInt(value);
+            if (isNaN(parsedValue)) {
+              return;
+            }
+            if (parsedValue < 0) {
+              setPrice(0);
+              return;
+            }
+            setPrice(parsedValue);
           }}
           helperText={`${description.length} / ${MAX_DESCRIPTION_LENGTH}`}
         />

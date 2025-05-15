@@ -373,7 +373,7 @@ type HighlightFilter = {
   spine?: string;
   bookId?: number;
   activityId?: number;
-  me?: boolean;
+  me: boolean;
 };
 
 function getHighlightFilter(kind: HighlightFilterKind): HighlightFilter {
@@ -381,6 +381,8 @@ function getHighlightFilter(kind: HighlightFilterKind): HighlightFilter {
     case "MyHighlights":
       return { me: true };
     default:
-      return {};
+      return {
+        me: false,
+      };
   }
 }
