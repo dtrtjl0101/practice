@@ -9,6 +9,8 @@ import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.member.user.UserProfile;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Table(name = "group_member")
@@ -29,6 +31,8 @@ public class GroupMember extends BaseEntity {
     @Column(name = "is_accepted", nullable = false)
     private boolean accepted = false;
 
+    private LocalDateTime approvedAt;
+
     @Builder
     public GroupMember(ReadingGroup readingGroup, UserProfile user) {
         this.readingGroup = readingGroup;
@@ -46,6 +50,7 @@ public class GroupMember extends BaseEntity {
 
     public void approve() {
         this.accepted = true;
+        this.approvedAt = LocalDateTime.now();
     }
 
     public void reject() {

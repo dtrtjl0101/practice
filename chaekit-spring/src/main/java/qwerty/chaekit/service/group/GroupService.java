@@ -16,7 +16,7 @@ import qwerty.chaekit.dto.group.request.GroupPatchRequest;
 import qwerty.chaekit.dto.group.request.GroupPostRequest;
 import qwerty.chaekit.dto.group.response.GroupFetchResponse;
 import qwerty.chaekit.dto.group.response.GroupJoinResponse;
-import qwerty.chaekit.dto.group.response.GroupPendingMemberResponse;
+import qwerty.chaekit.dto.group.response.GroupMemberResponse;
 import qwerty.chaekit.dto.group.response.GroupPostResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
@@ -66,7 +66,7 @@ public class GroupService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<GroupFetchResponse> fetchAllGroupList(UserToken userToken, Pageable pageable) {
+    public PageResponse<GroupFetchResponse> getAllGroups(UserToken userToken, Pageable pageable) {
         boolean isAnonymous = userToken.isAnonymous();
         Long userId = isAnonymous ? null : userToken.userId();
 
@@ -76,6 +76,46 @@ public class GroupService {
                                 group,
                                 getGroupImageURL(group),
                                 isAnonymous ? MyMemberShipStatus.NONE : group.getMemberShipStatus(userId)
+                        )
+                );
+        return PageResponse.of(page);
+    }
+
+    public PageResponse<GroupFetchResponse> getJoinedGroups(UserToken userToken, Pageable pageable) {
+        Long userId = userToken.userId();
+
+        Page<GroupFetchResponse> page = groupRepository.findAllByUserIdWithDetail(userId, pageable)
+                .map(
+                        group -> GroupFetchResponse.of(
+                                group,
+                                getGroupImageURL(group),
+                                group.getMemberShipStatus(userId)
+                        )
+                );
+        return PageResponse.of(page);
+    }
+
+    public PageResponse<GroupFetchResponse> getCreatedGroups(UserToken userToken, Pageable pageable) {
+        Long userId = userToken.userId();
+
+        Page<GroupFetchResponse> page = groupRepository.findByGroupLeaderIdWithDetail(userId, pageable)
+                .map(
+                        group -> GroupFetchResponse.of(
+                                group,
+                                getGroupImageURL(group),
+                                MyMemberShipStatus.JOINED
+                        )
+                );
+        return PageResponse.of(page);
+    }
+
+    public PageResponse<GroupMemberResponse> getGroupMembers(Long groupId, Pageable pageable) {
+
+        Page<GroupMemberResponse> page = groupMemberRepository.findByReadingGroupId(groupId, pageable)
+                .map(
+                        groupMember -> GroupMemberResponse.of(
+                                groupMember,
+                                getGroupImageURL(groupMember.getGroup())
                         )
                 );
         return PageResponse.of(page);
@@ -211,7 +251,7 @@ public class GroupService {
     }
 
     @Transactional
-    public PageResponse<GroupPendingMemberResponse> fetchPendingList(Pageable pageable, UserToken userToken, long groupId) {
+    public PageResponse<GroupMemberResponse> fetchPendingList(Pageable pageable, UserToken userToken, long groupId) {
         ReadingGroup group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.GROUP_NOT_FOUND));
 
@@ -219,10 +259,10 @@ public class GroupService {
             throw new ForbiddenException(ErrorCode.GROUP_LEADER_ONLY);
         }
 
-        Page<GroupMember> pendingMembersPage = groupMemberRepository.findByReadingGroupAndAcceptedFalse(group, pageable);
+        Page<GroupMember> pendingMembersPage = groupMemberRepository.findByPendingMemberWithUser(group, pageable);
 
-        Page<GroupPendingMemberResponse> page = pendingMembersPage.map(
-                groupMember -> GroupPendingMemberResponse.of(
+        Page<GroupMemberResponse> page = pendingMembersPage.map(
+                groupMember -> GroupMemberResponse.of(
                         groupMember,
                         getGroupImageURL(group)
                 )

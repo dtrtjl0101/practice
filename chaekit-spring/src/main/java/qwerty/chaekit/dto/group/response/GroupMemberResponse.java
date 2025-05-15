@@ -6,18 +6,20 @@ import qwerty.chaekit.domain.group.groupmember.GroupMember;
 import java.time.LocalDateTime;
 
 @Builder
-public record GroupPendingMemberResponse(
+public record GroupMemberResponse(
         Long userId,
         String nickname,
         String profileImageURL,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        LocalDateTime approvedAt
 ) {
-    public static GroupPendingMemberResponse of(GroupMember groupMember, String profileImageURL) {
-        return GroupPendingMemberResponse.builder()
+    public static GroupMemberResponse of(GroupMember groupMember, String imageUrl) {
+        return GroupMemberResponse.builder()
                 .userId(groupMember.getUser().getId())
                 .nickname(groupMember.getUser().getNickname())
-                .profileImageURL(profileImageURL)
+                .profileImageURL(imageUrl)
                 .createdAt(groupMember.getCreatedAt())
+                .approvedAt(groupMember.getApprovedAt())
                 .build();
     }
 }

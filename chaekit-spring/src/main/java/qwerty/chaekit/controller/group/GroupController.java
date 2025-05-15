@@ -1,5 +1,6 @@
 package qwerty.chaekit.controller.group;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +12,7 @@ import qwerty.chaekit.dto.group.request.GroupPatchRequest;
 import qwerty.chaekit.dto.group.request.GroupPostRequest;
 import qwerty.chaekit.dto.group.response.GroupFetchResponse;
 import qwerty.chaekit.dto.group.response.GroupJoinResponse;
-import qwerty.chaekit.dto.group.response.GroupPendingMemberResponse;
+import qwerty.chaekit.dto.group.response.GroupMemberResponse;
 import qwerty.chaekit.dto.group.response.GroupPostResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
@@ -37,30 +38,42 @@ public class GroupController {
     public ApiSuccessResponse<PageResponse<GroupFetchResponse>> getAllGroups(
             @Login(required = false) UserToken userToken,
             @ParameterObject Pageable pageable) {
-        return ApiSuccessResponse.of(groupService.fetchAllGroupList(userToken, pageable));
+        return ApiSuccessResponse.of(groupService.getAllGroups(userToken, pageable));
     }
 
-//    @GetMapping("/api/groups/joined")
-//    public ApiSuccessResponse<PageResponse<GroupFetchResponse>> getJoinedGroups(
-//            @Login UserToken userToken,
-//            @ParameterObject Pageable pageable) {
-//        return ApiSuccessResponse.of(groupService.fetchJoinedGroupList(userToken, pageable));
-//    }
-//
-//    @GetMapping("/api/groups/created")
-//    public ApiSuccessResponse<PageResponse<GroupFetchResponse>> getCreatedGroups(
-//            @Login UserToken userToken,
-//            @ParameterObject Pageable pageable) {
-//        return ApiSuccessResponse.of(groupService.fetchCreatedGroupList(userToken, pageable));
-//    }
-//
-//    @GetMapping("/api/groups/{groupId}/members")
-//    public ApiSuccessResponse<PageResponse<GroupMemberResponse>> getGroupMembers(
-//            @Login(required = false) UserToken userToken,
-//            @ParameterObject Pageable pageable,
-//            @PathVariable long groupId) {
-//        return ApiSuccessResponse.of(groupService.fetchGroupMembers(userToken, pageable, groupId));
-//    }
+    @GetMapping("/api/groups/joined")
+    @Operation(
+            summary = "내가 가입한 그룹 목록 조회",
+            description = "내가 가입한 그룹 목록을 조회합니다."
+    )
+    public ApiSuccessResponse<PageResponse<GroupFetchResponse>> getJoinedGroups(
+            @Login UserToken userToken,
+            @ParameterObject Pageable pageable) {
+        return ApiSuccessResponse.of(groupService.getJoinedGroups(userToken, pageable));
+    }
+
+    @Operation(
+            summary = "내가 생성한 그룹 목록 조회",
+            description = "내가 생성한 그룹 목록을 조회합니다."
+    )
+    @GetMapping("/api/groups/created")
+    public ApiSuccessResponse<PageResponse<GroupFetchResponse>> getCreatedGroups(
+            @Login UserToken userToken,
+            @ParameterObject Pageable pageable) {
+        return ApiSuccessResponse.of(groupService.getCreatedGroups(userToken, pageable));
+    }
+
+    @Operation(
+            summary = "특정 그룹의 멤버 목록 조회",
+            description = "특정 그룹의 멤버 목록을 조회합니다."
+    )
+    @GetMapping("/api/groups/{groupId}/members")
+    public ApiSuccessResponse<PageResponse<GroupMemberResponse>> getGroupMembers(
+            @PathVariable long groupId,
+            @ParameterObject Pageable pageable
+    ) {
+        return ApiSuccessResponse.of(groupService.getGroupMembers(groupId, pageable));
+    }
 
     @GetMapping("/{groupId}/info")
     public ApiSuccessResponse<GroupFetchResponse> getGroup(
@@ -110,7 +123,7 @@ public class GroupController {
     }
 
     @GetMapping("/{groupId}/members/pending")
-    public ApiSuccessResponse<PageResponse<GroupPendingMemberResponse>> getPendingList(
+    public ApiSuccessResponse<PageResponse<GroupMemberResponse>> getPendingList(
             @Login UserToken userToken,
             @ParameterObject Pageable pageable,
             @PathVariable long groupId

@@ -19,6 +19,7 @@ import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.UserToken;
+import qwerty.chaekit.service.ebook.EbookPolicy;
 import qwerty.chaekit.service.util.EntityFinder;
 
 import java.time.LocalDate;
@@ -32,6 +33,7 @@ public class ActivityService {
 
     private final ActivityPolicy activityPolicy;
     private final EntityFinder entityFinder;
+    private final EbookPolicy ebookPolicy;
 
     public ActivityPostResponse createActivity(UserToken userToken, long groupId, ActivityPostRequest request) {
         UserProfile user = entityFinder.findUser(userToken.userId());
@@ -43,6 +45,7 @@ public class ActivityService {
         }
 
         activityPolicy.assertActivityPeriodValid(groupId, null, request.startTime(), request.endTime());
+        ebookPolicy.assertEBookPurchased(user, ebook);
 
         Activity saved = activityRepository.save(
                 Activity.builder()

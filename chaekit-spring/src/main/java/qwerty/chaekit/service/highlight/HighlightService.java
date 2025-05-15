@@ -23,6 +23,7 @@ import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.security.resolver.UserToken;
+import qwerty.chaekit.service.ebook.EbookPolicy;
 import qwerty.chaekit.service.group.ActivityPolicy;
 import qwerty.chaekit.service.util.EntityFinder;
 import qwerty.chaekit.service.util.FileService;
@@ -41,6 +42,7 @@ public class HighlightService {
     private final HighlightPolicy highlightPolicy;
     private final EntityFinder entityFinder;
     private final FileService fileService;
+    private final EbookPolicy ebookPolicy;
 
     public HighlightPostResponse createHighlight(UserToken userToken, HighlightPostRequest request) {
         UserProfile user = entityFinder.findUser(userToken.userId());
@@ -57,6 +59,7 @@ public class HighlightService {
             activityPolicy.assertJoined(user, activity);
         } else {
             activity = null;
+            ebookPolicy.assertEBookPurchased(user, ebook);
         }
         
         Highlight highlight = Highlight.builder()
