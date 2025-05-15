@@ -54,6 +54,7 @@ public class HighlightService {
                 .cfi(request.cfi())
                 .author(userRepository.getReferenceById(userId))
                 .memo(request.memo())
+                .highlightcontent(request.highlightContent())
                 .activity(request.activityId() != null ? activityRepository.getReferenceById(request.activityId()) : null)
                 .build();
         Highlight savedHighlight = highlightRepository.save(highlight);
@@ -122,5 +123,17 @@ public class HighlightService {
         return reactions.stream()
                 .map(ReactionResponse::of)
                 .collect(Collectors.toList());
+    }
+
+    public HighlightFetchResponse fetchHighlight(UserToken userToken, Long id) {
+        Highlight highlight = highlightRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));
+
+        if (!highlight.getAuthor().getId().equals(userToken.userId()) && !highlight.isPublic()) {
+            throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_SEE);
+        }
+
+        String authorProfileImageURL = s3Service.convertToPublicImageURL(highlight.getAuthor().getProfileImageKey());
+        return HighlightFetchResponse.of(highlight, authorProfileImageURL);
     }
 }

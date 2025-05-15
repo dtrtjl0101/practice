@@ -32,6 +32,11 @@ public class HighlightController {
         return ApiSuccessResponse.of(highlightService.fetchHighlights(userToken, pageable, activityId, bookId, spine, me));
     }
 
+    @GetMapping("/{id}")
+    public ApiSuccessResponse<HighlightFetchResponse> getHighlight(@Login UserToken userToken, @PathVariable Long id) {
+        return ApiSuccessResponse.of(highlightService.fetchHighlight(userToken, id));
+    }
+
     @PostMapping
     public ApiSuccessResponse<HighlightPostResponse> createHighlight(@Login UserToken userToken, @RequestBody HighlightPostRequest request) {
         return ApiSuccessResponse.of(highlightService.createHighlight(userToken, request));

@@ -9,6 +9,10 @@ import java.time.LocalDate;
 public record ActivityFetchResponse(
         Long activityId,
         Long bookId,
+        String bookTitle,
+        String bookAuthor,
+        String coverImageKey,
+        String bookDescription,
         LocalDate startTime,
         LocalDate endTime,
         String description
@@ -17,6 +21,10 @@ public record ActivityFetchResponse(
         return ActivityFetchResponse.builder()
                 .activityId(activity.getId())
                 .bookId(activity.getBook().getId())
+                .bookTitle(activity.getBook().getTitle())
+                .bookAuthor(activity.getBook().getAuthor())
+                .coverImageKey(activity.getBook().getCoverImageKey())
+                .bookDescription(activity.getBook().getDescription())
                 .startTime(activity.getStartTime())
                 .endTime(activity.getEndTime())
                 .description(activity.getDescription())
