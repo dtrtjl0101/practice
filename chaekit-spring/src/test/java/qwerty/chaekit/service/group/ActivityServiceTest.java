@@ -10,24 +10,20 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import qwerty.chaekit.domain.ebook.Ebook;
-import qwerty.chaekit.domain.ebook.repository.EbookRepository;
-import qwerty.chaekit.domain.group.repository.GroupRepository;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.group.activity.repository.ActivityRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
-import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.dto.group.activity.ActivityFetchResponse;
 import qwerty.chaekit.dto.group.activity.ActivityPatchRequest;
 import qwerty.chaekit.dto.group.activity.ActivityPostRequest;
 import qwerty.chaekit.dto.group.activity.ActivityPostResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.security.resolver.UserToken;
+import qwerty.chaekit.service.util.EntityFinder;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -40,13 +36,11 @@ class ActivityServiceTest {
     private ActivityService activityService;
 
     @Mock
-    private UserProfileRepository userRepository;
-    @Mock
-    private GroupRepository groupRepository;
-    @Mock
     private ActivityRepository activityRepository;
     @Mock
-    private EbookRepository ebookRepository;
+    private ActivityPolicy activityPolicy;
+    @Mock
+    private EntityFinder entityFinder;
 
     @Test
     void createActivity() {
@@ -86,13 +80,14 @@ class ActivityServiceTest {
                 .book(ebook)
                 .build();
 
-        given(userRepository.existsById(userId)).willReturn(true);
-        given(groupRepository.findById(groupId)).willReturn(Optional.of(readingGroup));
-        given(groupRepository.getReferenceById(groupId)).willReturn(readingGroup);
-        given(ebookRepository.existsById(bookId)).willReturn(true);
-        given(ebookRepository.getReferenceById(bookId)).willReturn(ebook);
-        given(activityRepository.findByGroup_Id(groupId)).willReturn(Collections.emptyList());
-        given(activityRepository.save(any())).willReturn(createdActivity);
+        given(entityFinder.findUser(userId))
+                .willReturn(leader);
+        given(entityFinder.findGroup(groupId))
+                .willReturn(readingGroup);
+        given(entityFinder.findEbook(bookId))
+                .willReturn(ebook);
+        given(activityRepository.save(any(Activity.class)))
+                .willReturn(createdActivity);
 
         // when
         ActivityPostResponse result = activityService.createActivity(userToken, groupId, postRequest);
@@ -140,7 +135,7 @@ class ActivityServiceTest {
                 .id(bookId)
                 .build();
 
-        Activity createdActivity = Activity.builder()
+        Activity oldActivity = Activity.builder()
                 .id(activityId)
                 .group(readingGroup)
                 .startTime(startTime)
@@ -149,11 +144,13 @@ class ActivityServiceTest {
                 .description(oldDescription)
                 .build();
 
-        given(userRepository.existsById(userId)).willReturn(true);
-        given(groupRepository.findById(groupId)).willReturn(Optional.of(readingGroup));
-        given(activityRepository.findById(activityId)).willReturn(Optional.of(createdActivity));
-        given(activityRepository.findByGroup_Id(groupId)).willReturn(Collections.emptyList()); // 기존 활동 조회
-
+        given(entityFinder.findUser(userId))
+                .willReturn(leader);
+        given(entityFinder.findGroup(groupId))
+                .willReturn(readingGroup);
+        given(entityFinder.findActivity(activityId))
+                .willReturn(oldActivity);
+        
         // when
         ActivityPostResponse result = activityService.updateActivity(userToken, groupId, patchRequest);
 

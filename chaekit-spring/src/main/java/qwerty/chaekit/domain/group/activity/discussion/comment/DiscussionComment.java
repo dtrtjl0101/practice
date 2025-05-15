@@ -29,7 +29,7 @@ public class DiscussionComment extends BaseEntity {
     @JoinColumn(name = "discussion_id")
     private Discussion discussion;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 5000)
     private String content;
 
     @Column(name = "is_edited", nullable = false)
@@ -69,5 +69,17 @@ public class DiscussionComment extends BaseEntity {
     public void softDelete() {
         this.content = "삭제된 댓글입니다.";
         this.deleted = true;
+    }
+    
+    public boolean isAuthor(UserProfile user) {
+        return author.getId().equals(user.getId());
+    }
+    
+    public boolean isReply() {
+        return parent != null;
+    }
+    
+    public boolean isRootComment() {
+        return parent == null;
     }
 }

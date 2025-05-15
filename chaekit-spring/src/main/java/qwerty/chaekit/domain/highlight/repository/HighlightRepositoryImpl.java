@@ -9,8 +9,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import qwerty.chaekit.domain.highlight.entity.Highlight;
 import qwerty.chaekit.domain.highlight.entity.QHighlight;
-import qwerty.chaekit.global.enums.ErrorCode;
-import qwerty.chaekit.global.exception.BadRequestException;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,7 +30,7 @@ public class HighlightRepositoryImpl implements HighlightRepository {
     }
 
     @Override
-    public Page<Highlight> findHighlights(Pageable pageable, Long userId, Long activityId, Long bookId, String spine, Boolean me) {
+    public Page<Highlight> findHighlights(Pageable pageable, Long userId, Long activityId, Long bookId, String spine, boolean me) {
         QHighlight highlight = QHighlight.highlight;
         BooleanBuilder where = new BooleanBuilder();
 
@@ -40,9 +38,6 @@ public class HighlightRepositoryImpl implements HighlightRepository {
             where.and(highlight.book.id.eq(bookId));
         }
         if (spine != null) {
-            if(bookId == null) {
-                throw new BadRequestException(ErrorCode.BOOK_ID_REQUIRED);
-            }
             where.and(highlight.spine.eq(spine));
         }
 
@@ -50,13 +45,10 @@ public class HighlightRepositoryImpl implements HighlightRepository {
             where.and(highlight.activity.id.eq(activityId));
         }
 
-        if (me == null || me) { // 내 하이라이트
-            where.and(highlight.author.id.eq(userId));
-        } else { // 공개된 하이라이트
-            if(activityId == null) { // 활동명 필수
-                throw new BadRequestException(ErrorCode.ACTIVITY_ID_REQUIRED);
-            }
+        if (!me) { // 내 하이라이트
             where.and(highlight.isPublic.eq(true));
+        } else { // 공개된 하이라이트
+            where.and(highlight.author.id.eq(userId));
         }
 
         List<Highlight> result = jpaQueryFactory

@@ -6,23 +6,25 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import qwerty.chaekit.domain.ebook.repository.EbookRepository;
-import qwerty.chaekit.domain.group.activity.repository.ActivityRepository;
+import qwerty.chaekit.domain.ebook.Ebook;
+import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.highlight.entity.Highlight;
 import qwerty.chaekit.domain.highlight.entity.reaction.HighlightReaction;
 import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
 import qwerty.chaekit.domain.highlight.repository.reaction.HighlightReactionRepository;
-import qwerty.chaekit.domain.member.user.UserProfileRepository;
+import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.dto.highlight.HighlightFetchResponse;
 import qwerty.chaekit.dto.highlight.HighlightPostRequest;
 import qwerty.chaekit.dto.highlight.HighlightPostResponse;
 import qwerty.chaekit.dto.highlight.HighlightPutRequest;
-import qwerty.chaekit.dto.highlight.reaction.ReactionResponse;
+import qwerty.chaekit.dto.highlight.reaction.HighlightReactionResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
+import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.ForbiddenException;
-import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.UserToken;
+import qwerty.chaekit.service.group.ActivityPolicy;
+import qwerty.chaekit.service.util.EntityFinder;
 import qwerty.chaekit.service.util.S3Service;
 
 import java.util.List;
@@ -34,106 +36,126 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class HighlightService {
     private final HighlightRepository highlightRepository;
-    private final EbookRepository ebookRepository;
-    private final UserProfileRepository userRepository;
-    private final ActivityRepository activityRepository;
     private final HighlightReactionRepository reactionRepository;
+    private final ActivityPolicy activityPolicy;
+    private final HighlightPolicy highlightPolicy;
     private final S3Service s3Service;
+    private final EntityFinder entityFinder;
 
     public HighlightPostResponse createHighlight(UserToken userToken, HighlightPostRequest request) {
-        Long userId = userToken.userId();
-        if(!userRepository.existsById(userId)) {
-            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
+        UserProfile user = entityFinder.findUser(userToken.userId());
+        Ebook ebook = entityFinder.findEbook(request.bookId());
+        String spine = request.spine();
+        String cfi = request.cfi();
+        String memo = request.memo();
+        Long activityId = request.activityId();
+        boolean isPublic = activityId!= null;
+        
+        Activity activity;
+        if (isPublic) {
+            activity = entityFinder.findActivity(request.activityId());
+            activityPolicy.assertJoined(user, activity);
+        } else {
+            activity = null;
         }
-        if(!ebookRepository.existsById(request.bookId())) {
-            throw new NotFoundException(ErrorCode.EBOOK_NOT_FOUND);
-        }
+        
         Highlight highlight = Highlight.builder()
-                .book(ebookRepository.getReferenceById(request.bookId()))
-                .spine(request.spine())
-                .cfi(request.cfi())
-                .author(userRepository.getReferenceById(userId))
-                .memo(request.memo())
+                .author(user)
+                .book(ebook)
+                .spine(spine)
+                .cfi(cfi)
+                .memo(memo)
+                .isPublic(isPublic)
+                .activity(activity)
                 .highlightcontent(request.highlightContent())
-                .activity(request.activityId() != null ? activityRepository.getReferenceById(request.activityId()) : null)
                 .build();
-        Highlight savedHighlight = highlightRepository.save(highlight);
-        return HighlightPostResponse.of(savedHighlight);
+        
+        return HighlightPostResponse.of(highlightRepository.save(highlight));
     }
 
-    public PageResponse<HighlightFetchResponse> fetchHighlights(UserToken userToken, Pageable pageable, Long activityId, Long bookId, String spine, Boolean me) {
-        /*
-        TODO: activityMemberRepository 구현 시 검증.
-        if(!activityMemberRepository.existsByActivityIdAndUserId(activityId, userToken.userId())){
-            throw new ForbiddenException(ErrorCode.ACTIVITY_MEMBER_ONLY);
+    public PageResponse<HighlightFetchResponse> fetchHighlights(UserToken userToken, Pageable pageable, Long activityId, Long bookId, String spine, boolean me) {
+        boolean isFetchingByActivity = activityId != null;
+        boolean isFetchingBySpineButBookIdIsNull = spine != null && bookId == null;
+        boolean isFetchingPublicHighlight = !me;
+        
+        if (isFetchingBySpineButBookIdIsNull) {
+            throw new BadRequestException(ErrorCode.BOOK_ID_REQUIRED);
         }
-        */
+        
+        if (isFetchingByActivity) {
+            activityPolicy.assertJoined(userToken.userId(), activityId);
+        } else if (isFetchingPublicHighlight) {
+            throw new BadRequestException(ErrorCode.ACTIVITY_ID_REQUIRED);
+        }
+        
         Page<Highlight> highlights = highlightRepository.findHighlights(pageable, userToken.userId(), activityId, bookId, spine, me);
         return PageResponse.of(highlights.map(
                 highlight -> HighlightFetchResponse.of(
                         highlight,
-                        s3Service.convertToPublicImageURL(highlight.getAuthor().getProfileImageKey())
+                        getPublicImageURL(highlight)
                 )
         ));
     }
 
     @Transactional
     public HighlightPostResponse updateHighlight(UserToken userToken, Long id, HighlightPutRequest request) {
-        Highlight highlight = highlightRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));
+        Long newActivityId = request.activityId();
+        String newMemo = request.memo();
+        
+        UserProfile user = entityFinder.findUser(userToken.userId());
+        Highlight highlight = entityFinder.findHighlight(id);
 
-        if(!userToken.userId().equals(highlight.getAuthor().getId())) {
-            throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_YOURS);
+        highlightPolicy.assertUpdatable(user, highlight);
+        
+        if(newActivityId != null) {
+            Activity activity = entityFinder.findActivity(newActivityId);
+            activityPolicy.assertJoined(user, activity);
+            highlight.setAsPublicActivity(activity);
         }
 
-        if (highlight.isPublic()) {
-            throw new ForbiddenException(ErrorCode.HIGHLIGHT_ALREADY_PUBLIC);
-        }
-
-        if (request.activityId() != null) {
-            highlight.setActivity(activityRepository.getReferenceById(request.activityId()));
-            highlight.makePublic();
-        }
-
-        highlight.updateMemo(request.memo());
+        highlight.updateMemo(newMemo);
         return HighlightPostResponse.of(highlightRepository.save(highlight));
     }
 
     public void deleteHighlight(UserToken userToken, Long id) {
-        Highlight highlight = highlightRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));
-        
-        if(!userToken.userId().equals(highlight.getAuthor().getId())) {
-            throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_YOURS);
-        }
+        UserProfile user = entityFinder.findUser(userToken.userId());
+        Highlight highlight = entityFinder.findHighlight(id);
 
-        if (highlight.isPublic()) {
-            throw new ForbiddenException(ErrorCode.HIGHLIGHT_ALREADY_PUBLIC);
-        }
+        highlightPolicy.assertUpdatable(user, highlight);
 
         highlightRepository.delete(highlight);
     }
 
-    public List<ReactionResponse> getHighlightReactions(Long highlightId) {
-        Highlight highlight = highlightRepository.findById(highlightId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));
+    // TODO: move this method to HighlightReactionService 
+    public List<HighlightReactionResponse> getHighlightReactions(UserToken userToken, Long highlightId) {
+        Highlight highlight = entityFinder.findHighlight(highlightId);
+        if(highlight.isPublic()) {
+            activityPolicy.assertJoined(userToken.userId(), highlightId);
+        } else {
+            highlightPolicy.assertUpdatable(userToken.userId(), highlight);
+        }
 
         List<HighlightReaction> reactions = reactionRepository.findByHighlightIdAndCommentIdIsNull(highlightId);
         
         return reactions.stream()
-                .map(ReactionResponse::of)
+                .map(HighlightReactionResponse::of)
                 .collect(Collectors.toList());
     }
 
     public HighlightFetchResponse fetchHighlight(UserToken userToken, Long id) {
-        Highlight highlight = highlightRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));
+        UserProfile user = entityFinder.findUser(userToken.userId());
+        Highlight highlight = entityFinder.findHighlight(id);
 
-        if (!highlight.getAuthor().getId().equals(userToken.userId()) && !highlight.isPublic()) {
+        if (!highlight.isAuthor(user) && !highlight.isPublic()) {
             throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_SEE);
         }
 
         String authorProfileImageURL = s3Service.convertToPublicImageURL(highlight.getAuthor().getProfileImageKey());
         return HighlightFetchResponse.of(highlight, authorProfileImageURL);
+    }
+    // helper methods
+    
+    private String getPublicImageURL(Highlight highlight) {
+        return s3Service.convertToPublicImageURL(highlight.getAuthor().getProfileImageKey());
     }
 }

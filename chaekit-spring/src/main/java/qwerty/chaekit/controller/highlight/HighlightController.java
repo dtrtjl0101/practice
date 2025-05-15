@@ -1,17 +1,20 @@
 package qwerty.chaekit.controller.highlight;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-import qwerty.chaekit.dto.highlight.*;
-import qwerty.chaekit.dto.highlight.comment.CommentResponse;
+import qwerty.chaekit.dto.highlight.HighlightFetchResponse;
+import qwerty.chaekit.dto.highlight.HighlightPostRequest;
+import qwerty.chaekit.dto.highlight.HighlightPostResponse;
+import qwerty.chaekit.dto.highlight.HighlightPutRequest;
+import qwerty.chaekit.dto.highlight.reaction.HighlightReactionResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.highlight.HighlightService;
-import qwerty.chaekit.dto.highlight.reaction.ReactionResponse;
 
 import java.util.List;
 
@@ -27,7 +30,7 @@ public class HighlightController {
                                                                                   @RequestParam(required = false) Long activityId,
                                                                                   @RequestParam(required = false) Long bookId,
                                                                                   @RequestParam(required = false) String spine,
-                                                                                  @RequestParam(required = false) Boolean me
+                                                                                  @RequestParam boolean me
     ) {
         return ApiSuccessResponse.of(highlightService.fetchHighlights(userToken, pageable, activityId, bookId, spine, me));
     }
@@ -48,9 +51,11 @@ public class HighlightController {
     }
 
     @GetMapping("/{highlightId}/reactions")
-    public ApiSuccessResponse<List<ReactionResponse>> getHighlightReactions(
-            @PathVariable Long highlightId) {
-        return ApiSuccessResponse.of(highlightService.getHighlightReactions(highlightId));
+    public ApiSuccessResponse<List<HighlightReactionResponse>> getHighlightReactions(
+            @Parameter(hidden = true) @Login UserToken userToken,
+            @PathVariable Long highlightId
+    ) {
+        return ApiSuccessResponse.of(highlightService.getHighlightReactions(userToken, highlightId));
     }
 
     @DeleteMapping("/{id}")

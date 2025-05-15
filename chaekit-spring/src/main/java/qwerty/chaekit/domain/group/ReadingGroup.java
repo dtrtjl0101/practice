@@ -35,8 +35,8 @@ public class ReadingGroup extends BaseEntity {
     @OneToMany(mappedBy = "readingGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 20)
     private List<GroupTag> tags = new ArrayList<>();
-
-    @Column(nullable = false)
+    
+    @Column(length = 5000)
     private String description;
 
     @OneToMany(mappedBy = "readingGroup", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -66,7 +66,7 @@ public class ReadingGroup extends BaseEntity {
 
     public GroupMember approveMember(UserProfile user){
         return groupMembers.stream()
-                .filter(groupMember -> groupMember.getMember().equals(user))
+                .filter(groupMember -> groupMember.getMember().getId().equals(user.getId()))
                 .findFirst()
                 .map(groupMember -> {groupMember.approve(); return groupMember;})
                 .orElse(null);
@@ -81,6 +81,7 @@ public class ReadingGroup extends BaseEntity {
                 .filter(member -> member.getMember().getId().equals(user.getId()))
                 .findFirst()
                 .ifPresent(GroupMember::reject);
+        removeMember(user);
     }
 
     public void updateDescription(String description) {
@@ -105,6 +106,10 @@ public class ReadingGroup extends BaseEntity {
                 .findFirst()
                 .map(member -> member.isAccepted() ? MyMemberShipStatus.JOINED : MyMemberShipStatus.PENDING)
                 .orElse(MyMemberShipStatus.NONE);
+    }
+    
+    public boolean isLeader(UserProfile userProfile) {
+        return groupLeader.getId().equals(userProfile.getId());
     }
 
     @Builder

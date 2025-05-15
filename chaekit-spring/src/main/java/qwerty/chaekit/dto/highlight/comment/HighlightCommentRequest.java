@@ -1,6 +1,6 @@
 package qwerty.chaekit.dto.highlight.comment;
 
-public record CommentRequest(
+public record HighlightCommentRequest(
     String content,
     Long parentId
 ) {
