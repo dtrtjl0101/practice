@@ -142,9 +142,7 @@ export default function CommentSection({
             minRows={2}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={
-              isDebate ? "토론 내용을 입력하세요" : "댓글을 입력하세요"
-            }
+            placeholder={"댓글을 입력하세요"}
           />
           <Button variant="contained" onClick={handleSubmit}>
             작성

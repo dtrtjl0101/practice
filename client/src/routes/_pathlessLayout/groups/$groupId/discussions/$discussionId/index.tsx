@@ -100,7 +100,11 @@ function RouteComponent() {
           </Button>
           <Button
             variant="outlined"
-            onClick={() => router.navigate({ to: `/discussions` })}
+            onClick={() =>
+              router.navigate({
+                to: `/_pathlessLayout/groups/${groupId}/activities/${activityId}/discussions`,
+              })
+            }
           >
             뒤로 가기
           </Button>

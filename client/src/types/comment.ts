@@ -1,11 +1,14 @@
 export type Comment = {
-  id: number;
-  author: string;
+  commentId: number;
+  authorId: string;
+  authorName: string;
+  authorProfileImageURL: string;
   content: string;
-  createdDate: Date;
-  updatedDate?: Date;
-  edited?: boolean;
-  stance?: "agree" | "disagree";
+  createdAt: string;
+  modifiedAt?: string;
+  isEdited: boolean;
+  isDeleted: boolean;
+  stance?: "agree" | "disagree" | "neutral";
   parentId?: number;
-  replied?: Comment[];
+  replies?: string[];
 };

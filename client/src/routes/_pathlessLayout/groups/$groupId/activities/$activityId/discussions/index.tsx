@@ -13,7 +13,6 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../../../../../../../api/api";
 import { Discussion } from "../../../../../../../types/discussion";
-import { HttpResponse } from "../../../../../../../api/api.gen";
 
 export const Route = createFileRoute(
   "/_pathlessLayout/groups/$groupId/activities/$activityId/discussions/"
@@ -24,12 +23,12 @@ export const Route = createFileRoute(
 function Discussions() {
   const navigate = useNavigate();
   const { groupId, activityId } = Route.useParams();
+  const activityIdNumber = parseInt(activityId ?? "");
   const { data: discussions } = useQuery({
     queryKey: ["discussions", activityId],
     queryFn: async () => {
-      const response = await API_CLIENT.discussionController.getDiscussions(
-        parseInt(activityId)
-      );
+      const response =
+        await API_CLIENT.discussionController.getDiscussions(activityIdNumber);
       if (!response.isSuccessful) {
         alert(response.errorMessage);
         return;
@@ -85,7 +84,7 @@ function Discussions() {
                       }}
                       onClick={() =>
                         navigate({
-                          to: `/discussions/${discussion.discussionId}`,
+                          to: `/groups/${groupId}/activities/${activityId}/discussions/${discussion.discussionId}`,
                         })
                       }
                     >

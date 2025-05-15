@@ -1,6 +1,6 @@
 import API_CLIENT from "../api/api";
 import { useState, useEffect } from "react";
-import { useRouter } from "@tanstack/react-router";
+import { useParams, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
   Container,
@@ -22,21 +22,21 @@ import {
 } from "@mui/material";
 import { Discussion } from "../types/discussion";
 
-export default function DiscussionForm({
-  discussionId,
-}: {
-  discussionId: number;
-}) {
+export default function DiscussionForm() {
   const router = useRouter();
   const theme = useTheme();
+
+  const { activityId, discussionId } = useParams({ strict: false });
+  const activityIdNumber = parseInt(activityId ?? "");
+  const discussionIdNumber = parseInt(discussionId ?? "");
+
+  const isEdit = !!discussionId;
   const { data: discussion } = useQuery({
     queryKey: ["discussion", discussionId],
+    enabled: isEdit,
     queryFn: async () => {
-      if (isNaN(discussionId)) {
-        return;
-      }
       const response =
-        await API_CLIENT.discussionController.getDiscussion(discussionId);
+        await API_CLIENT.discussionController.getDiscussion(discussionIdNumber);
       if (!response.isSuccessful) {
         alert(response.errorMessage);
         return;
@@ -45,7 +45,6 @@ export default function DiscussionForm({
     },
   });
 
-  const isEdit = discussion?.modifiedAt !== undefined;
   const [book, setBook] = useState("");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -55,7 +54,7 @@ export default function DiscussionForm({
     setBook(event.target.value);
   };
 
-  const handlePost = () => {
+  const handlePostDiscussion = () => {
     if (!title.trim() || !content.trim()) {
       alert("제목과 내용을 입력해주세요.");
       return;
@@ -64,7 +63,7 @@ export default function DiscussionForm({
     if (isEdit) {
       // 수정 모드: 기존 게시글 수정
       API_CLIENT.discussionController
-        .updateDiscussion(discussionId, {
+        .updateDiscussion(discussionIdNumber, {
           title,
           content,
         })
@@ -77,11 +76,20 @@ export default function DiscussionForm({
         });
     } else {
       // 작성 모드: 새 게시글 추가
-      API_CLIENT.discussionController.createDiscussion(discussionId, {
-        title,
-        content,
-        isDebate,
-      });
+      console.log(activityId);
+      API_CLIENT.discussionController
+        .createDiscussion(activityIdNumber, {
+          title,
+          content,
+          isDebate,
+        })
+        .then((response) => {
+          if (response.isSuccessful) {
+            alert("게시글이 작성되었습니다.");
+          } else {
+            alert(response.errorMessage);
+          }
+        });
     }
     // response를 통해 게시글로 이동
     handleBack();
@@ -157,7 +165,9 @@ export default function DiscussionForm({
         />
         <Stack direction="row" justifyContent="space-between" sx={{ m: 1 }}>
           <Box sx={{ justifySelf: "flex-start" }}>
-            <Button onClick={handlePost}>{isEdit ? "수정" : "작성"}</Button>
+            <Button onClick={handlePostDiscussion}>
+              {isEdit ? "수정" : "작성"}
+            </Button>
             <Button onClick={handleBack}>취소</Button>
           </Box>
           <FormControlLabel

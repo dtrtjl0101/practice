@@ -40,6 +40,29 @@ function RouteComponent() {
     },
   });
 
+  const handleEditDiscussion = () => {
+    router.navigate({
+      to: `/groups/${groupId}/activities/${activityId}/discussions/${discussionId}/edit`,
+    });
+  };
+
+  const handleDeletePost = () => {
+    API_CLIENT.discussionController
+      .deleteDiscussion(parseInt(discussionId))
+      .then((response) => {
+        if (response.isSuccessful) {
+          alert("게시글이 삭제되었습니다.");
+          handleBack();
+        } else {
+          alert(response.errorMessage);
+        }
+      });
+  };
+
+  const handleBack = () => {
+    router.history.back();
+  };
+
   if (!discussion) return <Typography>게시글을 찾을 수 없습니다.</Typography>;
 
   if (isLoading) return <Typography>게시글을 불러오는 중입니다...</Typography>;
@@ -90,22 +113,11 @@ function RouteComponent() {
           <Button
             variant="contained"
             color="primary"
-            onClick={() =>
-              router.navigate({
-                to: `/discussions/${discussion.discussionId}/edit`,
-              })
-            }
+            onClick={handleEditDiscussion}
           >
             수정
           </Button>
-          <Button
-            variant="outlined"
-            onClick={() =>
-              router.navigate({
-                to: `/_pathlessLayout/groups/${groupId}/activities/${activityId}/discussions`,
-              })
-            }
-          >
+          <Button variant="outlined" onClick={handleBack}>
             뒤로 가기
           </Button>
           <Button
@@ -113,19 +125,15 @@ function RouteComponent() {
             color="error"
             size="small"
             sx={{ justifySelf: "flex-end" }}
-            onClick={() =>
-              API_CLIENT.discussionController.deleteDiscussion(
-                parseInt(discussionId)
-              )
-            }
+            onClick={handleDeletePost}
           >
             삭제
           </Button>
         </Stack>
       </Paper>
       {/* <CommentSection
-        isDebate={post?.isDebate}
-        comments={comments}
+        isDebate={discussion.isDebate}
+        comments={discussion.comments}
         onAddComment={handleAddComment}
         onDeleteComment={handleDeleteComment}
         onEditComment={handleEditComment}
