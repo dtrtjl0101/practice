@@ -23,9 +23,7 @@ export const Route = createFileRoute(
 
 function Discussions() {
   const navigate = useNavigate();
-
   const { groupId, activityId } = Route.useParams();
-
   const { data: discussions } = useQuery({
     queryKey: ["discussions", activityId],
     queryFn: async () => {
@@ -36,7 +34,7 @@ function Discussions() {
         alert(response.errorMessage);
         return;
       }
-      return response.data as Discussion[];
+      return response.data.content as Discussion[];
     },
   });
 

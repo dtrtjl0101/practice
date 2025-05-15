@@ -11,7 +11,7 @@ import {
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import useLogin from "../../api/login/useLogin";
 import { useCallback, useState } from "react";
-import API_CLIENT, { wrapApiResponse } from "../../api/api";
+import API_CLIENT from "../../api/api";
 import { AuthState } from "../../states/auth";
 
 export const Route = createFileRoute("/_pathlessLayout/login")({
@@ -26,12 +26,10 @@ function RouteComponent() {
   const [password, setPassword] = useState("");
 
   const onLoginButtonClick = useCallback(async () => {
-    const response = await wrapApiResponse(
-      API_CLIENT.loginFilterController.login({
-        email,
-        password,
-      })
-    );
+    const response = await API_CLIENT.loginFilterController.login({
+      email,
+      password,
+    });
 
     if (!response.isSuccessful) {
       alert("로그인에 실패했습니다.");

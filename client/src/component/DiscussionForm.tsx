@@ -29,12 +29,10 @@ export default function DiscussionForm({
 }) {
   const router = useRouter();
   const theme = useTheme();
-
   const { data: discussion } = useQuery({
     queryKey: ["discussion", discussionId],
     queryFn: async () => {
       if (isNaN(discussionId)) {
-        alert("Invalid discussion ID");
         return;
       }
       const response =
@@ -90,9 +88,10 @@ export default function DiscussionForm({
   };
 
   const handleBack = () => {
-    router.navigate({
-      to: `/discussions/${discussionId}`,
-    });
+    // router.navigate({
+    //   to: `_pathlessLayout/groups/${groupId}/activities/${activityId}/discussions/${discussionId}`,
+    // });
+    router.history.back();
   };
 
   const handleCheckbox = (event: React.ChangeEvent<HTMLInputElement>) => {
