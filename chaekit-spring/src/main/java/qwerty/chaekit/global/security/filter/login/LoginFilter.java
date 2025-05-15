@@ -17,7 +17,7 @@ import qwerty.chaekit.global.security.model.CustomUserDetails;
 import qwerty.chaekit.global.util.SecurityRequestReader;
 import qwerty.chaekit.global.util.SecurityResponseSender;
 import qwerty.chaekit.service.member.token.RefreshTokenService;
-import qwerty.chaekit.service.util.S3Service;
+import qwerty.chaekit.service.util.FileService;
 
 @Slf4j
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
@@ -25,7 +25,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final SecurityRequestReader requestReader;
     private final SecurityResponseSender responseSender;
-    private final S3Service s3Service;
+    private final FileService fileService;
     private final RefreshTokenService refreshTokenService;
 
     public LoginFilter(String loginUrl,
@@ -33,14 +33,14 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
                        AuthenticationManager authManager,
                        SecurityRequestReader reader,
                        SecurityResponseSender sender,
-                       S3Service s3Service,
+                       FileService fileService,
                        RefreshTokenService refreshTokenService
     ) {
         this.jwtUtil = jwtUtil;
         this.authenticationManager = authManager;
         this.requestReader = reader;
         this.responseSender = sender;
-        this.s3Service = s3Service;
+        this.fileService = fileService;
         this.refreshTokenService = refreshTokenService;
 
         setAuthenticationManager(authManager);
@@ -87,7 +87,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             publisherId = null;
         }
 
-        String profileImageURL = s3Service.convertToPublicImageURL(profileImageKey);
+        String profileImageURL = fileService.convertToPublicImageURL(profileImageKey);
         String role = customUserDetails.member().getRole().name();
 
         String refreshToken = refreshTokenService.issueRefreshToken(memberId);

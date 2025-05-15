@@ -7,7 +7,12 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import qwerty.chaekit.dto.group.*;
+import qwerty.chaekit.dto.group.request.GroupPatchRequest;
+import qwerty.chaekit.dto.group.request.GroupPostRequest;
+import qwerty.chaekit.dto.group.response.GroupFetchResponse;
+import qwerty.chaekit.dto.group.response.GroupJoinResponse;
+import qwerty.chaekit.dto.group.response.GroupPendingMemberResponse;
+import qwerty.chaekit.dto.group.response.GroupPostResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
@@ -34,6 +39,28 @@ public class GroupController {
             @ParameterObject Pageable pageable) {
         return ApiSuccessResponse.of(groupService.fetchAllGroupList(userToken, pageable));
     }
+
+//    @GetMapping("/api/groups/joined")
+//    public ApiSuccessResponse<PageResponse<GroupFetchResponse>> getJoinedGroups(
+//            @Login UserToken userToken,
+//            @ParameterObject Pageable pageable) {
+//        return ApiSuccessResponse.of(groupService.fetchJoinedGroupList(userToken, pageable));
+//    }
+//
+//    @GetMapping("/api/groups/created")
+//    public ApiSuccessResponse<PageResponse<GroupFetchResponse>> getCreatedGroups(
+//            @Login UserToken userToken,
+//            @ParameterObject Pageable pageable) {
+//        return ApiSuccessResponse.of(groupService.fetchCreatedGroupList(userToken, pageable));
+//    }
+//
+//    @GetMapping("/api/groups/{groupId}/members")
+//    public ApiSuccessResponse<PageResponse<GroupMemberResponse>> getGroupMembers(
+//            @Login(required = false) UserToken userToken,
+//            @ParameterObject Pageable pageable,
+//            @PathVariable long groupId) {
+//        return ApiSuccessResponse.of(groupService.fetchGroupMembers(userToken, pageable, groupId));
+//    }
 
     @GetMapping("/{groupId}/info")
     public ApiSuccessResponse<GroupFetchResponse> getGroup(

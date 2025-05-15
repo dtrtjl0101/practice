@@ -11,18 +11,21 @@ import qwerty.chaekit.domain.group.repository.GroupRepository;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
-import qwerty.chaekit.dto.group.*;
 import qwerty.chaekit.dto.group.enums.MyMemberShipStatus;
+import qwerty.chaekit.dto.group.request.GroupPatchRequest;
+import qwerty.chaekit.dto.group.request.GroupPostRequest;
+import qwerty.chaekit.dto.group.response.GroupFetchResponse;
+import qwerty.chaekit.dto.group.response.GroupJoinResponse;
+import qwerty.chaekit.dto.group.response.GroupPendingMemberResponse;
+import qwerty.chaekit.dto.group.response.GroupPostResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
-import qwerty.chaekit.global.enums.S3Directory;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
-import qwerty.chaekit.global.properties.AwsProperties;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.notification.NotificationService;
 import qwerty.chaekit.service.util.EmailNotificationService;
-import qwerty.chaekit.service.util.S3Service;
+import qwerty.chaekit.service.util.FileService;
 
 @Service
 @RequiredArgsConstructor
@@ -31,9 +34,8 @@ public class GroupService {
     private final GroupMemberRepository groupMemberRepository;
     private final GroupRepository groupRepository;
     private final EmailNotificationService emailNotificationService;
-    private final S3Service s3Service;
-    private final AwsProperties awsProperties;
     private final NotificationService notificationService;
+    private final FileService fileService;
 
     @Transactional
     public GroupPostResponse createGroup(UserToken userToken, GroupPostRequest request) {
@@ -46,12 +48,7 @@ public class GroupService {
             throw new ForbiddenException(ErrorCode.GROUP_NAME_DUPLICATED);
         }
 
-        String groupImageKey = s3Service.uploadFile(
-                awsProperties.imageBucketName(),
-                S3Directory.GROUP_IMAGE,
-                request.groupImage(),
-                false
-        );
+        String groupImageKey = fileService.uploadGroupImageIfPresent(request.groupImage());
 
         ReadingGroup groupEntity = ReadingGroup.builder()
                 .name(request.name())
@@ -115,12 +112,7 @@ public class GroupService {
             group.updateDescription(request.description());
         }
 
-        String imageKey = s3Service.uploadFile(
-                awsProperties.imageBucketName(),
-                S3Directory.GROUP_IMAGE,
-                request.groupImage(),
-                false
-        );
+        String imageKey = fileService.uploadGroupImageIfPresent(request.groupImage());
 
         if(imageKey != null) {
             group.updateGroupImageKey(imageKey);
@@ -229,12 +221,17 @@ public class GroupService {
 
         Page<GroupMember> pendingMembersPage = groupMemberRepository.findByReadingGroupAndAcceptedFalse(group, pageable);
 
-        Page<GroupPendingMemberResponse> page = pendingMembersPage.map(GroupPendingMemberResponse::of);
+        Page<GroupPendingMemberResponse> page = pendingMembersPage.map(
+                groupMember -> GroupPendingMemberResponse.of(
+                        groupMember,
+                        getGroupImageURL(group)
+                )
+        );
 
         return PageResponse.of(page);
     }
 
     private String getGroupImageURL(ReadingGroup group) {
-        return s3Service.convertToPublicImageURL(group.getGroupImageKey());
+        return fileService.convertToPublicImageURL(group.getGroupImageKey());
     }
 }

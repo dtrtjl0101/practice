@@ -22,7 +22,7 @@ import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.mapper.DiscussionMapper;
 import qwerty.chaekit.service.util.EntityFinder;
-import qwerty.chaekit.service.util.S3Service;
+import qwerty.chaekit.service.util.FileService;
 
 import java.util.List;
 import java.util.Map;
@@ -49,11 +49,11 @@ class DiscussionServiceTest {
     private EntityFinder entityFinder;
 
     @Mock
-    private S3Service s3Service;
+    private FileService fileService;
 
     @BeforeEach
     void setUp() {
-        DiscussionMapper discussionMapper = new DiscussionMapper(s3Service);
+        DiscussionMapper discussionMapper = new DiscussionMapper(fileService);
 
         discussionService = new DiscussionService(
                 discussionRepository,

@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.member.user.UserProfile;
 
@@ -12,7 +13,7 @@ import qwerty.chaekit.domain.member.user.UserProfile;
 @Getter
 @Table(name = "group_member")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class GroupMember {
+public class GroupMember extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

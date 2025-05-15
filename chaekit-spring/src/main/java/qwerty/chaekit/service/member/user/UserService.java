@@ -9,19 +9,19 @@ import qwerty.chaekit.dto.member.UserInfoResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.UserToken;
-import qwerty.chaekit.service.util.S3Service;
+import qwerty.chaekit.service.util.FileService;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserProfileRepository userRepository;
-    private final S3Service s3Service;
+    private final FileService fileService;
 
     public UserInfoResponse getUserProfile(UserToken userToken) {
         UserProfile user = userRepository.findById(userToken.userId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
-        String imageURL = s3Service.convertToPublicImageURL(user.getProfileImageKey());
+        String imageURL = fileService.convertToPublicImageURL(user.getProfileImageKey());
 
         return UserInfoResponse.of(user, imageURL);
     }

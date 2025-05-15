@@ -25,7 +25,7 @@ import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.group.ActivityPolicy;
 import qwerty.chaekit.service.util.EntityFinder;
-import qwerty.chaekit.service.util.S3Service;
+import qwerty.chaekit.service.util.FileService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,8 +39,8 @@ public class HighlightService {
     private final HighlightReactionRepository reactionRepository;
     private final ActivityPolicy activityPolicy;
     private final HighlightPolicy highlightPolicy;
-    private final S3Service s3Service;
     private final EntityFinder entityFinder;
+    private final FileService fileService;
 
     public HighlightPostResponse createHighlight(UserToken userToken, HighlightPostRequest request) {
         UserProfile user = entityFinder.findUser(userToken.userId());
@@ -92,7 +92,7 @@ public class HighlightService {
         return PageResponse.of(highlights.map(
                 highlight -> HighlightFetchResponse.of(
                         highlight,
-                        getPublicImageURL(highlight)
+                        fileService.convertToPublicImageURL(highlight.getAuthor().getProfileImageKey())
                 )
         ));
     }
@@ -150,12 +150,7 @@ public class HighlightService {
             throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_SEE);
         }
 
-        String authorProfileImageURL = s3Service.convertToPublicImageURL(highlight.getAuthor().getProfileImageKey());
+        String authorProfileImageURL = fileService.convertToPublicImageURL(highlight.getAuthor().getProfileImageKey());
         return HighlightFetchResponse.of(highlight, authorProfileImageURL);
-    }
-    // helper methods
-    
-    private String getPublicImageURL(Highlight highlight) {
-        return s3Service.convertToPublicImageURL(highlight.getAuthor().getProfileImageKey());
     }
 }

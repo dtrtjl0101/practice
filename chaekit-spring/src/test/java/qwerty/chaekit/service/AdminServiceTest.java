@@ -24,7 +24,7 @@ import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.service.member.admin.AdminService;
 import qwerty.chaekit.service.notification.NotificationService;
 import qwerty.chaekit.service.util.EmailNotificationService;
-import qwerty.chaekit.service.util.S3Service;
+import qwerty.chaekit.service.util.FileService;
 
 import java.util.List;
 import java.util.Optional;
@@ -46,7 +46,7 @@ class AdminServiceTest {
     @Mock
     private NotificationService notificationService;
     @Mock
-    private S3Service s3Service;
+    private FileService fileService;
     @Mock
     private EmailNotificationService emailNotificationService;
 
@@ -147,7 +147,7 @@ class AdminServiceTest {
                 .willReturn(pageResult);
 
         // S3Service Mocking
-        given(s3Service.convertToPublicImageURL(anyString()))
+        given(fileService.convertToPublicImageURL(anyString()))
                 .willReturn("https://dummy-url.com/image");
 
         // when

@@ -27,7 +27,7 @@ import qwerty.chaekit.global.security.handler.CustomAuthenticationEntryPoint;
 import qwerty.chaekit.global.util.SecurityRequestReader;
 import qwerty.chaekit.global.util.SecurityResponseSender;
 import qwerty.chaekit.service.member.token.RefreshTokenService;
-import qwerty.chaekit.service.util.S3Service;
+import qwerty.chaekit.service.util.FileService;
 
 import java.util.Collections;
 import java.util.List;
@@ -43,7 +43,7 @@ public class SecurityConfig {
     private final CustomAccessDeniedHandler accessDeniedHandler;
     private final SecurityResponseSender responseSender;
     private final SecurityRequestReader requestReader;
-    private final S3Service s3Service;
+    private final FileService fileService;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {//비밀번호 안전하게 암호화하는 클래스
@@ -67,7 +67,7 @@ public class SecurityConfig {
 
     @Bean
     public LoginFilter loginFilter(AuthenticationManager authManager, RefreshTokenService refreshTokenService) {
-        return new LoginFilter("/api/login", jwtUtil, authManager, requestReader, responseSender, s3Service, refreshTokenService);
+        return new LoginFilter("/api/login", jwtUtil, authManager, requestReader, responseSender, fileService, refreshTokenService);
     }
 
     @Bean

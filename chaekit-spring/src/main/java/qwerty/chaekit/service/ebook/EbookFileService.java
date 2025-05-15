@@ -12,45 +12,36 @@ import qwerty.chaekit.dto.ebook.upload.EbookDownloadResponse;
 import qwerty.chaekit.dto.ebook.upload.EbookPostRequest;
 import qwerty.chaekit.dto.ebook.upload.EbookPostResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
-import qwerty.chaekit.global.enums.S3Directory;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
-import qwerty.chaekit.global.properties.AwsProperties;
 import qwerty.chaekit.global.security.resolver.PublisherToken;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.member.admin.AdminService;
-import qwerty.chaekit.service.util.S3Service;
+import qwerty.chaekit.service.util.FileService;
 
 @Service
 @RequiredArgsConstructor
 public class EbookFileService {
     private final EbookRepository ebookRepository;
-    private final S3Service s3Service;
-    private final AwsProperties awsProperties;
     private final PublisherProfileRepository publisherRepository;
     private final AdminService adminService;
     private final EbookPurchaseRepository ebookPurchaseRepository;
+    private final FileService fileService;
+
 
     @Transactional
     public EbookPostResponse uploadEbook(PublisherToken publisherToken, EbookPostRequest request) {
         PublisherProfile publisher = publisherRepository.findById(publisherToken.publisherId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));
+
         if(!publisher.isApproved()) {
             throw new ForbiddenException(ErrorCode.PUBLISHER_NOT_APPROVED);
         }
 
-        String ebookBucket = awsProperties.ebookBucketName();
-        String imageBucket = awsProperties.imageBucketName();
-
-        String fileKey = s3Service.uploadFile(ebookBucket, S3Directory.EBOOK, request.file());
-        String coverImageKey = s3Service.uploadFile(
-                imageBucket,
-                S3Directory.EBOOK_COVER_IMAGE,
-                request.coverImageFile(),
-                false
-        );
-        String coverImageURL = s3Service.convertToPublicImageURL(coverImageKey);
+        String fileKey = fileService.uploadEbook(request.file());
+        String coverImageKey = fileService.uploadEbookCoverImageIfPresent(request.coverImageFile());
+        String coverImageURL = fileService.convertToPublicImageURL(coverImageKey);
 
         Ebook ebook = Ebook.builder()
                 .title(request.title())
@@ -69,7 +60,6 @@ public class EbookFileService {
 
     @Transactional
     public EbookDownloadResponse getPresignedEbookUrl(UserToken userToken, Long ebookId) {
-        String ebookBucket = awsProperties.ebookBucketName();
         Ebook ebook = ebookRepository.findById(ebookId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.EBOOK_NOT_FOUND));
 
@@ -78,11 +68,11 @@ public class EbookFileService {
         }
 
         String ebookFileKey = ebook.getFileKey();
-        String downloadUrl = s3Service.getPresignedDownloadUrl(ebookBucket, ebookFileKey);
+        String downloadUrl = fileService.getEbookDownloadUrl(ebookFileKey);
 
         return EbookDownloadResponse.of(downloadUrl);
     }
-    
+
     private boolean canReadEbook(UserToken userToken, Long ebookId) {
         return ebookPurchaseRepository.existsByUserIdAndEbookId(userToken.userId(), ebookId)
                 || userToken.userId().equals(adminService.getAdminUserId());
