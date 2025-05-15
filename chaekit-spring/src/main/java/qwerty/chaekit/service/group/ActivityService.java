@@ -53,6 +53,7 @@ public class ActivityService {
                     .description(request.description())
                     .build()
         );
+        saved.addParticipant(user);
         return ActivityPostResponse.of(saved);
     }
 
