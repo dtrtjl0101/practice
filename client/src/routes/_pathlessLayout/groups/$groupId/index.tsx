@@ -188,7 +188,7 @@ function ActivityCard(props: { groupId: string }) {
   const [totalPages, setTotalPages] = useState(1);
   const [activityCreateModalOpen, setActivityCreateModalOpen] = useState(false);
 
-  const { data: activity, error } = useQuery({
+  const { data: activity, isFetching } = useQuery({
     queryKey: ["activity", groupId, page],
     queryFn: async () => {
       const groupIdNumber = parseInt(groupId);
@@ -211,15 +211,10 @@ function ActivityCard(props: { groupId: string }) {
       setTotalPages(response.data.totalPages!);
 
       const activity = response.data.content![0] as Activity | undefined;
-      if (!activity) {
-        throw new Error("NO_ACTIVITY");
-      }
 
       return activity;
     },
   });
-
-  const noActivity = error && error.message === "NO_ACTIVITY";
 
   return (
     <>
@@ -242,11 +237,32 @@ function ActivityCard(props: { groupId: string }) {
             </IconButton>
           </Box>
           <Divider />
-          {noActivity ? (
-            <Typography variant="body1" sx={{ mt: 2 }} color="textSecondary">
-              아직 활동이 없어요
-            </Typography>
-          ) : (
+          {isFetching ? (
+            <Stack spacing={2} direction={"row"}>
+              <Skeleton
+                variant="rectangular"
+                width={256}
+                height={256}
+                sx={{ borderRadius: 2 }}
+              />
+              <Stack sx={{ flexGrow: 1 }}>
+                <Skeleton variant="text" height={48} width="60%" />
+                <Skeleton
+                  variant="text"
+                  height={24}
+                  width="40%"
+                  sx={{ mt: 1, mb: 1 }}
+                />
+                <Divider />
+                <Skeleton
+                  variant="rectangular"
+                  height={64}
+                  width="100%"
+                  sx={{ mt: 2 }}
+                />
+              </Stack>
+            </Stack>
+          ) : activity ? (
             <Stack spacing={2} direction={"row"}>
               <CardMedia
                 // TODO: Use book image
@@ -283,25 +299,21 @@ function ActivityCard(props: { groupId: string }) {
                       <Icon>
                         <Timelapse />
                       </Icon>
-                      {activity ? (
-                        `${new Date(activity.startTime).toLocaleDateString()} ~
-                    ${new Date(activity.endTime).toLocaleDateString()}`
-                      ) : (
-                        <Skeleton width={256} />
-                      )}
+                      `${new Date(activity.startTime).toLocaleDateString()} ~ $
+                      {new Date(activity.endTime).toLocaleDateString()}`
                     </Typography>
                   </Box>
                 </Stack>
                 <Divider />
-                {activity ? (
-                  <Typography variant="body1" sx={{ mt: 2 }}>
-                    {activity.description}
-                  </Typography>
-                ) : (
-                  <Skeleton sx={{ mt: 2 }} />
-                )}
+                <Typography variant="body1" sx={{ mt: 2 }}>
+                  {activity.description}
+                </Typography>
               </Stack>
             </Stack>
+          ) : (
+            <Typography variant="body1" sx={{ mt: 2 }} color="textSecondary">
+              아직 활동이 없어요
+            </Typography>
           )}
           <Divider />
           <Pagination
