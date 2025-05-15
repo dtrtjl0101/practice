@@ -13,9 +13,7 @@ import qwerty.chaekit.domain.group.activity.discussion.Discussion;
 import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment;
 import qwerty.chaekit.domain.group.activity.discussion.comment.repository.DiscussionCommentRepository;
 import qwerty.chaekit.domain.group.activity.discussion.repository.DiscussionRepository;
-import qwerty.chaekit.domain.group.activity.repository.ActivityRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
-import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionDetailResponse;
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionFetchResponse;
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionPatchRequest;
@@ -23,7 +21,6 @@ import qwerty.chaekit.dto.group.activity.discussion.DiscussionPostRequest;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.mapper.DiscussionMapper;
-import qwerty.chaekit.service.notification.NotificationService;
 import qwerty.chaekit.service.util.EntityFinder;
 import qwerty.chaekit.service.util.S3Service;
 
@@ -44,9 +41,6 @@ class DiscussionServiceTest {
 
     @Mock
     private DiscussionCommentRepository discussionCommentRepository;
-    
-    @Mock
-    private NotificationService notificationService;
     
     @Mock
     private ActivityPolicy activityPolicy;

@@ -20,7 +20,6 @@ import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.mapper.DiscussionMapper;
-import qwerty.chaekit.service.notification.NotificationService;
 import qwerty.chaekit.service.util.EntityFinder;
 
 import java.util.List;
