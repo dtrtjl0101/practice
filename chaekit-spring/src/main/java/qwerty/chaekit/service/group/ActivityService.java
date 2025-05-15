@@ -29,7 +29,7 @@ import java.util.Optional;
 public class ActivityService {
     private final ActivityRepository activityRepository;
 
-    private final ActivityValidator activityValidator;
+    private final ActivityPolicy activityPolicy;
     private final EntityFinder entityFinder;
 
     public ActivityPostResponse createActivity(UserToken userToken, long groupId, ActivityPostRequest request) {
@@ -41,7 +41,7 @@ public class ActivityService {
             throw new ForbiddenException(ErrorCode.GROUP_LEADER_ONLY);
         }
 
-        activityValidator.validateActivityPeriod(groupId, null, request.startTime(), request.endTime());
+        activityPolicy.assertActivityPeriodValid(groupId, null, request.startTime(), request.endTime());
 
         Activity saved = activityRepository.save(
                 Activity.builder()
@@ -73,7 +73,7 @@ public class ActivityService {
         LocalDate newEndTime = Optional.ofNullable(request.endTime())
                 .orElse(activity.getEndTime());
 
-        activityValidator.validateActivityPeriod(groupId, activity.getId(), newStartTime, newEndTime);
+        activityPolicy.assertActivityPeriodValid(groupId, activity.getId(), newStartTime, newEndTime);
         
         activity.updateTime(newStartTime, newEndTime);
         activity.updateDescription(request.description());
@@ -92,7 +92,7 @@ public class ActivityService {
         UserProfile user = entityFinder.findUser(userToken.userId());
         Activity activity = entityFinder.findActivity(activityId);
         
-        activityValidator.validateJoinable(user, activity);
+        activityPolicy.assertJoinable(user, activity);
         
         activity.addParticipant(user);
     }

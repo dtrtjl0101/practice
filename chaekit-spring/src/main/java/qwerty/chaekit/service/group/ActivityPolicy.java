@@ -11,18 +11,19 @@ import qwerty.chaekit.domain.group.groupmember.GroupMemberRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
+import qwerty.chaekit.global.exception.ForbiddenException;
 
 import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
-public class ActivityValidator {
+public class ActivityPolicy {
     private final ActivityRepository activityRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final ActivityMemberRepository activityMemberRepository;
     private final EbookPurchaseRepository ebookPurchaseRepository;
 
-    public void validateJoinable(UserProfile user, Activity activity) {
+    public void assertJoinable(UserProfile user, Activity activity) {
         groupMemberRepository.findByUserAndReadingGroupAndAcceptedTrue(user, activity.getGroup())
                 .orElseThrow(() -> new BadRequestException(ErrorCode.GROUP_MEMBER_ONLY));
 
@@ -39,7 +40,7 @@ public class ActivityValidator {
         }
     }
 
-    public void validateActivityPeriod(long groupId, @Nullable Long activityId, LocalDate startTime, LocalDate endTime) {
+    public void assertActivityPeriodValid(long groupId, @Nullable Long activityId, LocalDate startTime, LocalDate endTime) {
         if (startTime.isAfter(endTime)) {
             throw new BadRequestException(ErrorCode.ACTIVITY_TIME_INVALID);
         }
@@ -54,4 +55,17 @@ public class ActivityValidator {
                     }
                 });
     }
+    
+    public void assertJoined(UserProfile user, Activity activity) {
+        if (user.getId() == null || !activityMemberRepository.existsByUserAndActivity(user, activity)) {
+            throw new ForbiddenException(ErrorCode.ACTIVITY_MEMBER_ONLY);
+        }
+    }
+
+    public void assertJoined(Long userId, Long activityId) {
+        UserProfile user = UserProfile.builder().id(userId).build();
+        Activity activity = Activity.builder().id(activityId).build();
+        assertJoined(user, activity);
+    }
+    
 }

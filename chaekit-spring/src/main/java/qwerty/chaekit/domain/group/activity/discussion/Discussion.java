@@ -60,4 +60,12 @@ public class Discussion extends BaseEntity {
             this.content = content;
         }
     }
+    
+    public boolean isAuthor(UserProfile user) {
+        return author.getId().equals(user.getId());
+    }
+    
+    public void addComment(DiscussionComment comment) {
+        comments.add(comment);
+    }
 }

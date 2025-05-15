@@ -70,4 +70,16 @@ public class DiscussionComment extends BaseEntity {
         this.content = "삭제된 댓글입니다.";
         this.deleted = true;
     }
+    
+    public boolean isAuthor(UserProfile user) {
+        return author.getId().equals(user.getId());
+    }
+    
+    public boolean isReply() {
+        return parent != null;
+    }
+    
+    public boolean isRootComment() {
+        return parent == null;
+    }
 }

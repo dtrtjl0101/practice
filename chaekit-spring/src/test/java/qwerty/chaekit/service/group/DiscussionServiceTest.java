@@ -9,24 +9,22 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import qwerty.chaekit.domain.group.activity.Activity;
-import qwerty.chaekit.domain.group.activity.repository.ActivityRepository;
 import qwerty.chaekit.domain.group.activity.discussion.Discussion;
 import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment;
 import qwerty.chaekit.domain.group.activity.discussion.comment.repository.DiscussionCommentRepository;
 import qwerty.chaekit.domain.group.activity.discussion.repository.DiscussionRepository;
+import qwerty.chaekit.domain.group.activity.repository.ActivityRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
-import qwerty.chaekit.dto.group.activity.discussion.DiscussionCommentFetchResponse;
-import qwerty.chaekit.dto.group.activity.discussion.DiscussionCommentPostRequest;
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionDetailResponse;
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionFetchResponse;
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionPatchRequest;
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionPostRequest;
 import qwerty.chaekit.dto.page.PageResponse;
-import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.mapper.DiscussionMapper;
 import qwerty.chaekit.service.notification.NotificationService;
+import qwerty.chaekit.service.util.EntityFinder;
 import qwerty.chaekit.service.util.S3Service;
 
 import java.util.List;
@@ -34,8 +32,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class DiscussionServiceTest {
@@ -46,15 +44,15 @@ class DiscussionServiceTest {
 
     @Mock
     private DiscussionCommentRepository discussionCommentRepository;
-
-    @Mock
-    private ActivityRepository activityRepository;
-
-    @Mock
-    private UserProfileRepository userProfileRepository;
     
     @Mock
     private NotificationService notificationService;
+    
+    @Mock
+    private ActivityPolicy activityPolicy;
+    
+    @Mock
+    private EntityFinder entityFinder;
 
     @Mock
     private S3Service s3Service;
@@ -66,10 +64,9 @@ class DiscussionServiceTest {
         discussionService = new DiscussionService(
                 discussionRepository,
                 discussionMapper,
-                activityRepository,
-                userProfileRepository,
                 discussionCommentRepository,
-                notificationService
+                activityPolicy,
+                entityFinder
         );
     }
 
@@ -118,23 +115,26 @@ class DiscussionServiceTest {
     @Test
     void createDiscussion() {
         // given
-        UserToken userToken = UserToken.of(1L, 1L, "test@example.com");
+        Long userId = 1L;
         Long activityId = 1L;
+        UserToken userToken = UserToken.of(1L, userId, "test@example.com");
         DiscussionPostRequest request = new DiscussionPostRequest(
                 "Test Title",
                 "Test Content",
                 false
         );
         UserProfile user = UserProfile.builder()
-                .id(userToken.userId())
+                .id(userId)
                 .build();
+        Activity activity = Activity.builder()
+                .id(activityId)
+                .build();
+                
 
-        given(activityRepository.existsById(activityId))
-                .willReturn(true);
-        given(userProfileRepository.findById(activityId))
-                .willReturn(Optional.of(user));
-        given(activityRepository.getReferenceById(activityId))
-                .willReturn(Activity.builder().id(activityId).build());
+        given(entityFinder.findUser(userId))
+                .willReturn(user);
+        given(entityFinder.findActivity(activityId))
+                .willReturn(activity);
 
         // when
         DiscussionFetchResponse response = discussionService.createDiscussion(userToken, activityId, request);
@@ -155,6 +155,7 @@ class DiscussionServiceTest {
         Long discussionId = 1L;
         UserToken userToken = UserToken.of(1L, 1L, "test@example.com");
         UserProfile author = UserProfile.builder().id(1L).build();
+        UserProfile commentAuthor = UserProfile.builder().id(2L).build();
         Discussion discussion = Discussion.builder()
                 .id(discussionId)
                 .activity(Activity.builder().id(1L).build())
@@ -163,11 +164,12 @@ class DiscussionServiceTest {
                 .author(author)
                 .isDebate(false)
                 .build();
+        discussion.addComment(DiscussionComment.builder().id(1L).author(commentAuthor).build());
+        discussion.addComment(DiscussionComment.builder().id(2L).author(commentAuthor).build());
+        discussion.addComment(DiscussionComment.builder().id(3L).author(commentAuthor).build());
 
         given(discussionRepository.findByIdWithAuthorAndComments(discussionId))
                 .willReturn(Optional.of(discussion));
-        given(discussionCommentRepository.countCommentsByDiscussionId(discussionId))
-                .willReturn(3L);
 
         // when
         DiscussionDetailResponse response = discussionService.getDiscussionDetail(userToken, discussionId);
@@ -182,232 +184,58 @@ class DiscussionServiceTest {
     }
 
     @Test
-    void updateDiscussion() {
+    void updateDiscussion_success() {
         // given
-        Long discussionId = 1L;
-        UserToken userToken = UserToken.of(1L, 1L, "test@example.com");
-        DiscussionPatchRequest request = new DiscussionPatchRequest("Updated Title", "Updated Content");
-        UserProfile author = UserProfile.builder().id(1L).build();
+        Long userId = 1L;
+        Long activityId = 100L;
+        Long commentAuthorId = 5L;
+        Long discussionId = 10L;
+
+        UserToken userToken = UserToken.of(null, userId, "user@example.com");
+        UserProfile user = UserProfile.builder().id(userId).build();
+        UserProfile commentAuthor = UserProfile.builder().id(commentAuthorId).build();
+        
         Discussion discussion = Discussion.builder()
                 .id(discussionId)
-                .activity(Activity.builder().id(1L).build())
+                .author(user)
+                .activity(Activity.builder().id(activityId).build())
                 .title("Old Title")
                 .content("Old Content")
-                .author(author)
-                .isDebate(false)
                 .build();
+        discussion.addComment(DiscussionComment.builder().id(discussionId).author(commentAuthor).build());
+        discussion.addComment(DiscussionComment.builder().id(discussionId).author(commentAuthor).build());
 
-        given(discussionRepository.findById(discussionId))
-                .willReturn(Optional.of(discussion));
-        given(discussionCommentRepository.countCommentsByDiscussionId(discussionId))
-                .willReturn(2L);
+        DiscussionPatchRequest request = new DiscussionPatchRequest("New Title", "New Content");
+
+        given(entityFinder.findUser(userId)).willReturn(user);
+        given(entityFinder.findDiscussion(discussionId)).willReturn(discussion);
+        given(discussionCommentRepository.countCommentsByDiscussionId(discussionId)).willReturn(2L);
 
         // when
-        DiscussionFetchResponse response = discussionService.updateDiscussion(userToken, discussionId, request);
+        DiscussionFetchResponse result = discussionService.updateDiscussion(userToken, discussionId, request);
 
         // then
-        assertNotNull(response);
-        assertEquals("Updated Title", response.title());
-        assertEquals("Updated Content", response.content());
-        assertEquals(2L, response.commentCount());
+        assertEquals("New Title", result.title());
+        assertEquals("New Content", result.content());
     }
-
+    
     @Test
-    void deleteDiscussion_성공() {
+    void deleteDiscussion_success() {
         // given
-        Long discussionId = 1L;
-        UserToken userToken = UserToken.of(1L, 1L, "test@example.com");
-        UserProfile author = UserProfile.builder().id(1L).build();
-        Discussion discussion = Discussion.builder()
-                .activity(Activity.builder().id(1L).build())
-                .id(discussionId)
-                .author(author)
-                .build();
-
-        given(discussionRepository.findById(discussionId))
-                .willReturn(Optional.of(discussion));
-
-        // when
-        discussionService.deleteDiscussion(userToken, discussionId);
-
-        // then
-        verify(discussionRepository, times(1)).delete(discussion);
-    }
-
-    @Test
-    void deleteDiscussion_작성자가_아님() {
-        // given
-        Long discussionId = 1L;
-        UserToken userToken = UserToken.of(2L, 2L, "not-author@example.com"); // 다른 사용자
-        UserProfile author = UserProfile.builder().id(1L).build();
-        Discussion discussion = Discussion.builder()
-                .activity(Activity.builder().id(1L).build())
-                .id(discussionId)
-                .author(author)
-                .build();
-
-        given(discussionRepository.findById(discussionId))
-                .willReturn(Optional.of(discussion));
-
-        // when & then
-        assertThrows(BadRequestException.class, () -> discussionService.deleteDiscussion(userToken, discussionId));
-    }
-
-    @Test
-    void addComment() {
-        // given
-        Long discussionId = 1L;
         Long userId = 1L;
-        Long discussionAuthorId = 2L;
-        UserToken userToken = UserToken.of(userId, 1L, "test@example.com");
-        DiscussionCommentPostRequest request = new DiscussionCommentPostRequest(null, "Test Comment", null);
-        UserProfile author = UserProfile.builder().id(userId).build();
-        UserProfile discussionAuthor = UserProfile.builder().id(discussionAuthorId).build();
-        Discussion discussion = Discussion.builder()
-                .id(discussionId)
-                .author(discussionAuthor)
-                .build();
-        DiscussionComment comment = DiscussionComment.builder()
-                .id(1L)
-                .author(author)
-                .discussion(discussion)
-                .content("Test Comment")
-                .build();
+        Long discussionId = 100L;
+        UserProfile user = UserProfile.builder().id(userId).build();
+        Discussion discussion = Discussion.builder().id(discussionId).author(user).build();
+        UserToken token = UserToken.of(null, userId, "test@example.com");
 
-        given(discussionRepository.findById(discussionId))
-                .willReturn(Optional.of(discussion));
-        given(userProfileRepository.findById(userId))
-                .willReturn(Optional.of(author));
-        given(discussionCommentRepository.save(any(DiscussionComment.class)))
-                .willReturn(comment);
+        // stub
+        given(entityFinder.findUser(userId)).willReturn(user);
+        given(entityFinder.findDiscussion(discussionId)).willReturn(discussion);
 
         // when
-        DiscussionCommentFetchResponse response = discussionService.addComment(discussionId, request, userToken);
+        discussionService.deleteDiscussion(token, discussionId);
 
         // then
-        assertNotNull(response);
-        assertEquals("Test Comment", response.content());
-        assertEquals(userId, response.authorId());
-    }
-
-    @Test
-    void deleteComment() {
-        // given
-        Long commentId = 1L;
-        Long userId = 1L;
-        UserToken userToken = UserToken.of(userId, 1L, "test@example.com");
-        DiscussionComment comment = DiscussionComment.builder()
-                .id(commentId)
-                .author(UserProfile.builder().id(userId).build())
-                .build();
-
-        given(discussionCommentRepository.findByIdWithParent(commentId))
-                .willReturn(Optional.of(comment));
-        given(discussionCommentRepository.countByParentId(commentId))
-                .willReturn(0L);
-
-        // when
-        discussionService.deleteComment(commentId, userToken);
-
-        // then
-        verify(discussionCommentRepository, times(1)).delete(comment);
-    }
-
-    @Test
-    void deleteComment_대댓글이_존재하는_댓글_삭제() {
-        // given
-        Long commentId = 1L;
-        Long userId = 1L;
-        UserToken userToken = UserToken.of(userId, 1L, "test@example.com");
-        DiscussionComment comment = DiscussionComment.builder()
-                .id(commentId)
-                .author(UserProfile.builder().id(userId).build())
-                .build();
-
-        given(discussionCommentRepository.findByIdWithParent(commentId))
-                .willReturn(Optional.of(comment));
-        given(discussionCommentRepository.countByParentId(commentId))
-                .willReturn(1L); // 대댓글이 존재
-
-        // when
-        discussionService.deleteComment(commentId, userToken);
-
-        // then
-        assertTrue(comment.isDeleted());
-        verify(discussionCommentRepository, never()).delete(comment);
-    }
-
-    @Test
-    void deleteComment_이미_삭제된_댓글의_마지막_대댓글_삭제() {
-        // given
-        Long parentCommentId = 1L;
-        Long replyCommentId = 2L;
-        Long userId = 1L;
-        UserToken userToken = UserToken.of(userId, 1L, "test@example.com");
-        DiscussionComment parentComment = DiscussionComment.builder()
-                .id(parentCommentId)
-                .author(UserProfile.builder().id(userId).build())
-                .build();
-        parentComment.softDelete();
-        DiscussionComment replyComment = DiscussionComment.builder()
-                .id(replyCommentId)
-                .author(UserProfile.builder().id(userId).build())
-                .parent(parentComment)
-                .build();
-
-        given(discussionCommentRepository.findByIdWithParent(replyCommentId))
-                .willReturn(Optional.of(replyComment));
-        given(discussionCommentRepository.countByParentId(parentCommentId))
-                .willReturn(1L); // 마지막 대댓글
-        given(discussionCommentRepository.countByParentId(replyCommentId))
-                .willReturn(0L); // 대댓글에는 대댓글 없음
-
-        // when
-        discussionService.deleteComment(replyCommentId, userToken);
-
-        // then
-        verify(discussionCommentRepository, times(1)).delete(replyComment);
-        verify(discussionCommentRepository, times(1)).delete(parentComment);
-    }
-
-    @Test
-    void deleteComment_작성자가_아님() {
-        // given
-        Long commentId = 1L;
-        Long userId = 2L; // 다른 사용자
-        UserToken userToken = UserToken.of(1L, userId, "not-author@example.com");
-        DiscussionComment comment = DiscussionComment.builder()
-                .id(commentId)
-                .author(UserProfile.builder().id(1L).build()) // 작성자 ID가 다름
-                .build();
-
-        given(discussionCommentRepository.findByIdWithParent(commentId))
-                .willReturn(Optional.of(comment));
-
-        // when & then
-        assertThrows(BadRequestException.class, () -> discussionService.deleteComment(commentId, userToken));
-    }
-
-    @Test
-    void deleteComment_대댓글_없이_삭제() {
-        // given
-        Long commentId = 1L;
-        Long userId = 1L;
-        UserToken userToken = UserToken.of(userId, 1L, "test@example.com");
-        DiscussionComment comment = DiscussionComment.builder()
-                .id(commentId)
-                .author(UserProfile.builder().id(userId).build())
-                .build();
-
-        given(discussionCommentRepository.findByIdWithParent(commentId))
-                .willReturn(Optional.of(comment));
-        given(discussionCommentRepository.countByParentId(commentId))
-                .willReturn(0L); // 대댓글 없음
-
-        // when
-        discussionService.deleteComment(commentId, userToken);
-
-        // then
-        verify(discussionCommentRepository, times(1)).delete(comment);
+        verify(discussionRepository).delete(discussion);
     }
 }

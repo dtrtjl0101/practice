@@ -12,6 +12,7 @@ import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
 import qwerty.chaekit.global.security.resolver.UserToken;
+import qwerty.chaekit.service.group.DiscussionCommentService;
 import qwerty.chaekit.service.group.DiscussionService;
 
 @RestController
@@ -19,7 +20,7 @@ import qwerty.chaekit.service.group.DiscussionService;
 @RequiredArgsConstructor
 public class DiscussionController {
     private final DiscussionService discussionService;
-
+    private final DiscussionCommentService discussionCommentService;
     @Operation(
             summary = "토론 목록 조회",
             description = "특정 활동에 해당하는 토론 목록을 조회합니다."
@@ -89,8 +90,10 @@ public class DiscussionController {
             description = "토론 댓글을 조회합니다."
     )
     @GetMapping("/discussions/comments/{commentId}")
-    public ApiSuccessResponse<DiscussionCommentFetchResponse> getComment(@PathVariable Long commentId) {
-        return ApiSuccessResponse.of(discussionService.getComment(commentId));
+    public ApiSuccessResponse<DiscussionCommentFetchResponse> getComment(
+            @Parameter(hidden = true) @Login UserToken userToken,
+            @PathVariable Long commentId) {
+        return ApiSuccessResponse.of(discussionCommentService.getComment(userToken, commentId));
     }
 
     @Operation(
@@ -99,11 +102,11 @@ public class DiscussionController {
     )
     @PostMapping("/discussions/{discussionId}/comments")
     public ApiSuccessResponse<DiscussionCommentFetchResponse> addComment(
+            @Login UserToken userToken,
             @PathVariable Long discussionId,
-            @RequestBody @Valid DiscussionCommentPostRequest request,
-            @Login UserToken userToken
+            @RequestBody @Valid DiscussionCommentPostRequest request
     ) {
-        return ApiSuccessResponse.of(discussionService.addComment(discussionId, request, userToken));
+        return ApiSuccessResponse.of(discussionCommentService.addComment(discussionId, request, userToken));
     }
 
     @Operation(
@@ -112,11 +115,11 @@ public class DiscussionController {
     )
     @PatchMapping("/discussions/comments/{commentId}")
     public ApiSuccessResponse<DiscussionCommentFetchResponse> updateComment(
+            @Login UserToken userToken,
             @PathVariable Long commentId,
-            @RequestBody @Valid DiscussionCommentPatchRequest request,
-            @Login UserToken userToken
+            @RequestBody @Valid DiscussionCommentPatchRequest request
     ) {
-        return ApiSuccessResponse.of(discussionService.updateComment(commentId, request, userToken));
+        return ApiSuccessResponse.of(discussionCommentService.updateComment(commentId, request, userToken));
     }
 
     @Operation(
@@ -124,8 +127,8 @@ public class DiscussionController {
             description = "토론 댓글을 삭제합니다."
     )
     @DeleteMapping("/discussions/comments/{commentId}")
-    public ApiSuccessResponse<Void> deleteComment(@PathVariable Long commentId, @Login UserToken userToken) {
-        discussionService.deleteComment(commentId, userToken);
+    public ApiSuccessResponse<Void> deleteComment(@Login UserToken userToken, @PathVariable Long commentId) {
+        discussionCommentService.deleteComment(commentId, userToken);
         return ApiSuccessResponse.emptyResponse();
     }
 }

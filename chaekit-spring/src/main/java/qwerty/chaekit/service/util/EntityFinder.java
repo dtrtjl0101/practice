@@ -6,8 +6,14 @@ import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.ebook.repository.EbookRepository;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.group.activity.Activity;
+import qwerty.chaekit.domain.group.activity.discussion.Discussion;
+import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment;
+import qwerty.chaekit.domain.group.activity.discussion.comment.repository.DiscussionCommentRepository;
+import qwerty.chaekit.domain.group.activity.discussion.repository.DiscussionRepository;
 import qwerty.chaekit.domain.group.activity.repository.ActivityRepository;
 import qwerty.chaekit.domain.group.repository.GroupRepository;
+import qwerty.chaekit.domain.highlight.entity.Highlight;
+import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.global.exception.NotFoundException;
@@ -22,6 +28,9 @@ public class EntityFinder {
     private final EbookRepository ebookRepository;
     private final ActivityRepository activityRepository;
     private final GroupRepository groupRepository;
+    private final HighlightRepository highlightRepository;
+    private final DiscussionRepository discussionRepository;
+    private final DiscussionCommentRepository discussionCommentRepository;
 
     public UserProfile findUser(Long id) {
         return userRepository.findById(id)
@@ -41,5 +50,20 @@ public class EntityFinder {
     public ReadingGroup findGroup(Long id) {
         return groupRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(GROUP_NOT_FOUND));
+    }
+    
+    public Highlight findHighlight(Long id) {
+        return highlightRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(HIGHLIGHT_NOT_FOUND));
+    }
+    
+    public Discussion findDiscussion(Long id) {
+        return discussionRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(DISCUSSION_NOT_FOUND));
+    }
+    
+    public DiscussionComment findDiscussionComment(Long id) {
+        return discussionCommentRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(DISCUSSION_COMMENT_NOT_FOUND));
     }
 }

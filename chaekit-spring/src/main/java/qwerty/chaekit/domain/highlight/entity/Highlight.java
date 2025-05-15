@@ -36,8 +36,7 @@ public class Highlight extends BaseEntity {
 
     @Column(length = 2000)
     private String memo;
-
-    @Setter
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="activity_id")
     private Activity activity;
@@ -49,25 +48,30 @@ public class Highlight extends BaseEntity {
     private final List<HighlightComment> comments = new ArrayList<>();
 
     @Builder
-    public Highlight(UserProfile author, Ebook book, String cfi, String spine, String memo, Activity activity) {
+    public Highlight(UserProfile author, Ebook book, String cfi, String spine, String memo, Activity activity, boolean isPublic) {
         this.author = author;
         this.book = book;
         this.cfi = cfi;
         this.spine = spine;
         this.memo = memo;
         this.activity = activity;
-        this.isPublic = false;
+        this.isPublic = isPublic;
     }
 
     public void updateMemo(String memo) {
         this.memo = memo;
     }
 
-    public void makePublic() {
+    public void setAsPublicActivity(Activity activity) {
+        this.activity = activity;
         this.isPublic = true;
     }
 
     public boolean isPublic() {
         return isPublic;
+    }
+    
+    public boolean isAuthor(UserProfile user) {
+        return author.getId().equals(user.getId());
     }
 }
