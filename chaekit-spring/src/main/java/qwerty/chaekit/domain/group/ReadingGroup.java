@@ -45,6 +45,12 @@ public class ReadingGroup extends BaseEntity {
 
     private String groupImageKey;
 
+    public void addTags(List<String> tagNames) {
+        for (String tagName : tagNames) {
+            addTag(tagName);
+        }
+    }
+
     public void addTag(String tagName) {
         GroupTag groupTag = new GroupTag(this, tagName);
         tags.add(groupTag);
@@ -92,11 +98,6 @@ public class ReadingGroup extends BaseEntity {
         this.groupImageKey = groupImageKey;
     }
 
-    public boolean isMember(UserProfile userProfile) {
-        return groupMembers.stream()
-                .anyMatch(member -> member.getMember().getId().equals(userProfile.getId()));
-    }
-
     public MyMemberShipStatus getMemberShipStatus(@Nullable Long userId) {
         if(userId == null) {
             return MyMemberShipStatus.NONE;
@@ -107,9 +108,29 @@ public class ReadingGroup extends BaseEntity {
                 .map(member -> member.isAccepted() ? MyMemberShipStatus.JOINED : MyMemberShipStatus.PENDING)
                 .orElse(MyMemberShipStatus.NONE);
     }
+
+    public long memberCount() {
+        return groupMembers.stream()
+                .filter(GroupMember::isAccepted)
+                .count();
+    }
     
-    public boolean isLeader(UserProfile userProfile) {
-        return groupLeader.getId().equals(userProfile.getId());
+    public boolean isLeader(UserProfile user) {
+        return isLeader(user.getId());
+    }
+
+    public boolean isLeader(Long userId) {
+        return groupLeader.getId().equals(userId);
+    }
+
+    public boolean isMemberAlreadyRequested(UserProfile user) {
+        return groupMembers.stream()
+                .anyMatch(gm -> gm.isMember(user));
+    }
+
+    public boolean isPendingMember(Long userId) {
+        return groupMembers.stream()
+                .anyMatch(gm -> gm.isMember(userId) && !gm.isAccepted());
     }
 
     @Builder

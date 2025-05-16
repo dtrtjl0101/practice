@@ -36,18 +36,18 @@ public class GroupController {
 
     @GetMapping
     public ApiSuccessResponse<PageResponse<GroupFetchResponse>> getAllGroups(
-            @Login(required = false) UserToken userToken,
+            @Parameter(hidden = true) @Login(required = false) UserToken userToken,
             @ParameterObject Pageable pageable) {
         return ApiSuccessResponse.of(groupService.getAllGroups(userToken, pageable));
     }
 
-    @GetMapping("/api/groups/joined")
+    @GetMapping("/my/joined")
     @Operation(
             summary = "내가 가입한 그룹 목록 조회",
             description = "내가 가입한 그룹 목록을 조회합니다."
     )
     public ApiSuccessResponse<PageResponse<GroupFetchResponse>> getJoinedGroups(
-            @Login UserToken userToken,
+            @Parameter(hidden = true) @Login UserToken userToken,
             @ParameterObject Pageable pageable) {
         return ApiSuccessResponse.of(groupService.getJoinedGroups(userToken, pageable));
     }
@@ -56,9 +56,9 @@ public class GroupController {
             summary = "내가 생성한 그룹 목록 조회",
             description = "내가 생성한 그룹 목록을 조회합니다."
     )
-    @GetMapping("/api/groups/created")
+    @GetMapping("/my/created")
     public ApiSuccessResponse<PageResponse<GroupFetchResponse>> getCreatedGroups(
-            @Login UserToken userToken,
+            @Parameter(hidden = true) @Login UserToken userToken,
             @ParameterObject Pageable pageable) {
         return ApiSuccessResponse.of(groupService.getCreatedGroups(userToken, pageable));
     }
@@ -67,7 +67,7 @@ public class GroupController {
             summary = "특정 그룹의 멤버 목록 조회",
             description = "특정 그룹의 멤버 목록을 조회합니다."
     )
-    @GetMapping("/api/groups/{groupId}/members")
+    @GetMapping("/{groupId}/members")
     public ApiSuccessResponse<PageResponse<GroupMemberResponse>> getGroupMembers(
             @PathVariable long groupId,
             @ParameterObject Pageable pageable
@@ -77,7 +77,7 @@ public class GroupController {
 
     @GetMapping("/{groupId}/info")
     public ApiSuccessResponse<GroupFetchResponse> getGroup(
-            @Login(required = false) UserToken userToken,
+            @Parameter(hidden = true) @Login(required = false) UserToken userToken,
             @PathVariable long groupId) {
         return ApiSuccessResponse.of(groupService.fetchGroup(userToken, groupId));
     }
@@ -92,14 +92,14 @@ public class GroupController {
 
     @PostMapping("/{groupId}/join")
     public ApiSuccessResponse<GroupJoinResponse> requestJoinGroup(
-            @Login UserToken userToken,
+            @Parameter(hidden = true) @Login UserToken userToken,
             @PathVariable long groupId) {
         return ApiSuccessResponse.of(groupService.requestJoinGroup(userToken, groupId));
     }
 
     @PatchMapping("/{groupId}/members/{userId}/approve")
     public ApiSuccessResponse<GroupJoinResponse> approveJoinRequest(
-            @Login UserToken userToken,
+            @Parameter(hidden = true) @Login UserToken userToken,
             @PathVariable long groupId,
             @PathVariable long userId) {
         return ApiSuccessResponse.of(groupService.approveJoinRequest(userToken, groupId, userId));
@@ -107,7 +107,7 @@ public class GroupController {
 
     @PatchMapping("/{groupId}/members/{userId}/reject")
     public ApiSuccessResponse<Void> rejectJoinRequest(
-            @Login UserToken userToken,
+            @Parameter(hidden = true) @Login UserToken userToken,
             @PathVariable long groupId,
             @PathVariable long userId) {
         groupService.rejectJoinRequest(userToken, groupId, userId);
@@ -116,7 +116,7 @@ public class GroupController {
 
     @DeleteMapping("/{groupId}/members/leave")
     public ApiSuccessResponse<Void> leaveGroup(
-            @Login UserToken userToken,
+            @Parameter(hidden = true) @Login UserToken userToken,
             @PathVariable long groupId) {
         groupService.leaveGroup(userToken, groupId);
         return ApiSuccessResponse.emptyResponse();
@@ -124,7 +124,7 @@ public class GroupController {
 
     @GetMapping("/{groupId}/members/pending")
     public ApiSuccessResponse<PageResponse<GroupMemberResponse>> getPendingList(
-            @Login UserToken userToken,
+            @Parameter(hidden = true) @Login UserToken userToken,
             @ParameterObject Pageable pageable,
             @PathVariable long groupId
     ) {

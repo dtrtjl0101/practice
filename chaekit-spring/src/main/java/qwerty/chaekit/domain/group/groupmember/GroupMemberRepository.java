@@ -12,9 +12,29 @@ import java.util.Optional;
 
 @Repository
 public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> {
-    @Query("SELECT gm FROM GroupMember gm JOIN FETCH gm.user WHERE gm.readingGroup = :group AND gm.accepted = false")
+    @Query(value = """
+                SELECT gm FROM GroupMember gm
+                JOIN FETCH gm.user
+                JOIN FETCH gm.readingGroup
+                WHERE gm.readingGroup = :group
+                AND gm.accepted = false
+            """,
+            countQuery = """
+                SELECT COUNT(gm) FROM GroupMember gm
+                WHERE gm.readingGroup = :group
+                AND gm.accepted = false
+            """)
     Page<GroupMember> findByPendingMemberWithUser(ReadingGroup group, Pageable pageable);
     Optional<GroupMember> findByUserAndReadingGroupAndAcceptedTrue(UserProfile user, ReadingGroup group);
-    @Query("SELECT gm FROM GroupMember gm JOIN FETCH gm.user WHERE gm.readingGroup = :groupId")
+    @Query(value = """
+                SELECT gm FROM GroupMember gm
+                JOIN FETCH gm.user
+                JOIN FETCH gm.readingGroup
+                WHERE gm.readingGroup.id = :groupId
+            """,
+            countQuery = """    
+                SELECT COUNT(gm) FROM GroupMember gm
+                WHERE gm.readingGroup.id = :groupId
+            """)
     Page<GroupMember> findByReadingGroupId(Long groupId, Pageable pageable);
 }
