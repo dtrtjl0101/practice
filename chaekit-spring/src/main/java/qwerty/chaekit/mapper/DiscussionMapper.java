@@ -7,15 +7,15 @@ import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionCommentFetchResponse;
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionDetailResponse;
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionFetchResponse;
-import qwerty.chaekit.service.util.S3Service;
+import qwerty.chaekit.service.util.FileService;
 
 @Component
 @RequiredArgsConstructor
 public class DiscussionMapper {
-    private final S3Service s3Service;
+    private final FileService fileService;
 
     public String convertToPublicImageURL(String imageKey) {
-        return s3Service.convertToPublicImageURL(imageKey);
+        return fileService.convertToPublicImageURL(imageKey);
     }
 
     /*

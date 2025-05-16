@@ -22,15 +22,15 @@ import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.service.util.EmailNotificationService;
-import qwerty.chaekit.service.util.S3Service;
 import qwerty.chaekit.service.notification.NotificationService;
+import qwerty.chaekit.service.util.FileService;
 
 @Service
 @RequiredArgsConstructor
 public class AdminService {
     private final PublisherProfileRepository publisherRepository;
     private final EmailNotificationService emailNotificationService;
-    private final S3Service s3Service;
+    private final FileService fileService;
     private final UserProfileRepository userRepository;
     private final NotificationService notificationService;
 
@@ -48,7 +48,7 @@ public class AdminService {
         Page<PublisherProfile> page = publisherRepository.findAll(pageableWithSort);
         return PageResponse.of(page.map(publisher -> PublisherInfoResponse.of(
                 publisher,
-                s3Service.convertToPublicImageURL(publisher.getProfileImageKey())
+                fileService.convertToPublicImageURL(publisher.getProfileImageKey())
         )));
     }
 
@@ -58,7 +58,7 @@ public class AdminService {
         Page<UserProfile> page = userRepository.findAll(pageableWithSort);
         return PageResponse.of(page.map(user -> UserInfoResponse.of(
                 user,
-                s3Service.convertToPublicImageURL(user.getProfileImageKey())
+                fileService.convertToPublicImageURL(user.getProfileImageKey())
         )));
     }
 
@@ -71,7 +71,7 @@ public class AdminService {
         );
         return PageResponse.of(page.map(publisher -> PublisherInfoResponse.of(
                         publisher,
-                        s3Service.convertToPublicImageURL(publisher.getProfileImageKey())
+                fileService.convertToPublicImageURL(publisher.getProfileImageKey())
                 )));
     }
 

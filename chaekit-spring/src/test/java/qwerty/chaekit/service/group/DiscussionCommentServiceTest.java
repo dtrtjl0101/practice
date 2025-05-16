@@ -16,7 +16,7 @@ import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.mapper.DiscussionMapper;
 import qwerty.chaekit.service.notification.NotificationService;
 import qwerty.chaekit.service.util.EntityFinder;
-import qwerty.chaekit.service.util.S3Service;
+import qwerty.chaekit.service.util.FileService;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,11 +36,11 @@ public class DiscussionCommentServiceTest {
     @Mock
     private EntityFinder entityFinder;
     @Mock
-    private S3Service s3Service;
+    private FileService fileService;
     
     @BeforeEach
     void setUp() {
-        DiscussionMapper discussionMapper = new DiscussionMapper(s3Service);
+        DiscussionMapper discussionMapper = new DiscussionMapper(fileService);
 
         discussionCommentService = new DiscussionCommentService(
                 discussionCommentRepository,

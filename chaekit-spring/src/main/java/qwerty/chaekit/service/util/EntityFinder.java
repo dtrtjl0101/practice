@@ -14,6 +14,8 @@ import qwerty.chaekit.domain.group.activity.repository.ActivityRepository;
 import qwerty.chaekit.domain.group.repository.GroupRepository;
 import qwerty.chaekit.domain.highlight.entity.Highlight;
 import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
+import qwerty.chaekit.domain.member.publisher.PublisherProfile;
+import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.global.exception.NotFoundException;
@@ -25,6 +27,7 @@ import static qwerty.chaekit.global.enums.ErrorCode.*;
 public class EntityFinder {
 
     private final UserProfileRepository userRepository;
+    private final PublisherProfileRepository publisherRepository;
     private final EbookRepository ebookRepository;
     private final ActivityRepository activityRepository;
     private final GroupRepository groupRepository;
@@ -35,6 +38,11 @@ public class EntityFinder {
     public UserProfile findUser(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
+    }
+
+    public PublisherProfile findPublisher(Long id) {
+        return publisherRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(PUBLISHER_NOT_FOUND));
     }
 
     public Ebook findEbook(Long id) {

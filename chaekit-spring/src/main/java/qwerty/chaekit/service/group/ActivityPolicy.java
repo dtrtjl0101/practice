@@ -3,7 +3,6 @@ package qwerty.chaekit.service.group;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import qwerty.chaekit.domain.ebook.purchase.repository.EbookPurchaseRepository;
 import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.group.activity.activitymember.ActivityMemberRepository;
 import qwerty.chaekit.domain.group.activity.repository.ActivityRepository;
@@ -12,6 +11,7 @@ import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.ForbiddenException;
+import qwerty.chaekit.service.ebook.EbookPolicy;
 
 import java.time.LocalDate;
 
@@ -21,7 +21,7 @@ public class ActivityPolicy {
     private final ActivityRepository activityRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final ActivityMemberRepository activityMemberRepository;
-    private final EbookPurchaseRepository ebookPurchaseRepository;
+    private final EbookPolicy ebookPolicy;
 
     public void assertJoinable(UserProfile user, Activity activity) {
         groupMemberRepository.findByUserAndReadingGroupAndAcceptedTrue(user, activity.getGroup())
@@ -35,9 +35,7 @@ public class ActivityPolicy {
             throw new BadRequestException(ErrorCode.ACTIVITY_ALREADY_ENDED);
         }
 
-        if (!ebookPurchaseRepository.existsByUserIdAndEbookId(user.getId(), activity.getBook().getId())) {
-            throw new BadRequestException(ErrorCode.ACTIVITY_BOOK_NOT_OWNED);
-        }
+        ebookPolicy.assertEBookPurchased(user, activity.getBook());
     }
 
     public void assertActivityPeriodValid(long groupId, @Nullable Long activityId, LocalDate startTime, LocalDate endTime) {

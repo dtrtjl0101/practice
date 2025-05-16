@@ -20,6 +20,7 @@ import qwerty.chaekit.dto.group.activity.ActivityPostRequest;
 import qwerty.chaekit.dto.group.activity.ActivityPostResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.security.resolver.UserToken;
+import qwerty.chaekit.service.ebook.EbookPolicy;
 import qwerty.chaekit.service.util.EntityFinder;
 
 import java.time.LocalDate;
@@ -39,6 +40,8 @@ class ActivityServiceTest {
     private ActivityRepository activityRepository;
     @Mock
     private ActivityPolicy activityPolicy;
+    @Mock
+    private EbookPolicy ebookPolicy;
     @Mock
     private EntityFinder entityFinder;
 

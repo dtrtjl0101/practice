@@ -11,19 +11,19 @@ import qwerty.chaekit.dto.ebook.EbookFetchResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.NotFoundException;
-import qwerty.chaekit.service.util.S3Service;
+import qwerty.chaekit.service.util.FileService;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class EbookService {
     private final EbookRepository ebookRepository;
-    private final S3Service s3Service;
+    private final FileService fileService;
 
     public PageResponse<EbookFetchResponse> fetchBooksByQuery(Pageable pageable, String title, String author) {
         Page<EbookFetchResponse> page = ebookRepository.findAllByTitleAndAuthor(title, author, pageable)
                 .map( ebook -> EbookFetchResponse.of(
-                        ebook, s3Service.convertToPublicImageURL(ebook.getCoverImageKey())
+                        ebook, fileService.convertToPublicImageURL(ebook.getCoverImageKey())
                 ));
         return PageResponse.of(page);
     }
@@ -33,7 +33,7 @@ public class EbookService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.EBOOK_NOT_FOUND));
         return EbookFetchResponse.of(
                 ebook,
-                s3Service.convertToPublicImageURL(ebook.getCoverImageKey())
+                fileService.convertToPublicImageURL(ebook.getCoverImageKey())
         );
     }
 }

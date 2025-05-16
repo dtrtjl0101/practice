@@ -9,19 +9,19 @@ import qwerty.chaekit.dto.member.PublisherInfoResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.PublisherToken;
-import qwerty.chaekit.service.util.S3Service;
+import qwerty.chaekit.service.util.FileService;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class PublisherService {
     private final PublisherProfileRepository publisherRepository;
-    private final S3Service s3Service;
+    private final FileService fileService;
 
     public PublisherInfoResponse getPublisherProfile(PublisherToken token) {
         PublisherProfile publisher = publisherRepository.findById(token.publisherId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));
-        String imageURL = s3Service.convertToPublicImageURL(publisher.getProfileImageKey());
+        String imageURL = fileService.convertToPublicImageURL(publisher.getProfileImageKey());
 
         return PublisherInfoResponse.of(publisher, imageURL);
     }
