@@ -16,8 +16,8 @@ public class EbookPolicy {
     private final AdminService adminService;
 
     public void assertEBookPurchased(UserProfile user, Ebook ebook) {
-        if (ebookPurchaseRepository.existsByUserIdAndEbookId(user.getId(), ebook.getId())
-                || user.getId().equals(adminService.getAdminUserId())) {
+        if (!ebookPurchaseRepository.existsByUserIdAndEbookId(user.getId(), ebook.getId())
+                && !user.getId().equals(adminService.getAdminUserId())) {
             throw new ForbiddenException(ErrorCode.EBOOK_NOT_PURCHASED);
         }
     }
