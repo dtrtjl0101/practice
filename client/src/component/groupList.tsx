@@ -17,11 +17,20 @@ import PageNavigation from "./PageNavigation";
 import { GroupInfo } from "../types/groups";
 const ITEM_HEIGHT = 384 - 20;
 
+export enum GroupType {
+  ALL_GROUP = "ALL_GROUP",
+  MY_GROUP = "MY_GROUP",
+  JOINED_GROUP = "JOINED_GROUP",
+}
+
 export default function GroupList(props: {
   size: "small" | "large";
   action?: JSX.Element;
+  title: string;
+  key: string;
+  type?: GroupType;
 }) {
-  const { size, action } = props;
+  const { size, action, title, key } = props;
 
   const [page, setPage] = useState(0);
   const [sort, _setSort] = useState<string[]>([]);
@@ -29,11 +38,12 @@ export default function GroupList(props: {
   const navigate = useNavigate();
 
   const pageSize = size === "small" ? 6 : 12;
+  const groupType = props.type === undefined ? GroupType.ALL_GROUP : props.type;
 
   const { data: groups } = useQuery({
-    queryKey: ["groupList", page, sort, pageSize],
+    queryKey: [key, groupType, page, sort, pageSize],
     queryFn: async () => {
-      const response = await API_CLIENT.groupController.getAllGroups({
+      const response = await getFetchFunction(groupType)({
         page,
         size: pageSize,
         sort,
@@ -61,7 +71,7 @@ export default function GroupList(props: {
           justifyContent="space-between"
           alignItems="center"
         >
-          <Typography variant="h4">모임</Typography>
+          <Typography variant="h4">{title}</Typography>
           {action}
         </Stack>
         <PageNavigation
@@ -149,4 +159,17 @@ function ItemContainer(props: PropsWithChildren) {
       {children}
     </Grid>
   );
+}
+
+function getFetchFunction(groupType: GroupType) {
+  switch (groupType) {
+    case GroupType.ALL_GROUP:
+      return API_CLIENT.groupController.getAllGroups;
+    case GroupType.MY_GROUP:
+      return API_CLIENT.groupController.getCreatedGroups;
+    case GroupType.JOINED_GROUP:
+      return API_CLIENT.groupController.getJoinedGroups;
+    default:
+      throw new Error("Invalid group type");
+  }
 }
