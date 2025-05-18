@@ -25,12 +25,14 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { Dayjs } from "dayjs";
 import { BookMetadata } from "../../../../types/book";
 import LinkButton from "../../../LinkButton";
+import { useNavigate } from "@tanstack/react-router";
 
 export function ActivityCard(props: { groupId: string }) {
   const { groupId } = props;
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [activityCreateModalOpen, setActivityCreateModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   const {
     data: activity,
@@ -73,7 +75,22 @@ export function ActivityCard(props: { groupId: string }) {
       activity.activityId
     );
     if (!response.isSuccessful) {
-      alert(response.errorMessage);
+      switch (response.errorCode) {
+        case "EBOOK_NOT_PURCHASED": {
+          const shouldMoveToPurchasePage = confirm(
+            "활동에 참여하기 위해서는 책을 구매해야 합니다. 구매 페이지로 이동하시겠습니까?"
+          );
+          if (shouldMoveToPurchasePage) {
+            navigate({
+              to: "/books",
+            });
+          }
+          break;
+        }
+        default: {
+          alert(response.errorMessage);
+        }
+      }
       return;
     }
     refetch();

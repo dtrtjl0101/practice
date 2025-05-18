@@ -4,7 +4,6 @@ import API_CLIENT from "../../../api/api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
   Card,
-  CardActionArea,
   CardMedia,
   Container,
   Divider,
@@ -19,6 +18,7 @@ import {
 import PageNavigation from "../../../component/PageNavigation";
 import { BookMetadata } from "../../../types/book";
 import { Search } from "@mui/icons-material";
+import LinkCardActionArea from "../../../component/LinkCardActionArea";
 
 export const Route = createFileRoute("/_pathlessLayout/books/")({
   component: RouteComponent,
@@ -126,19 +126,29 @@ function BookCard(props: { book?: BookMetadata }) {
       }}
     >
       <Stack spacing={1} direction={"row"}>
-        <CardActionArea sx={{ width: 128, height: 160 }}>
+        <LinkCardActionArea
+          sx={{ width: 128, height: 160 }}
+          to="/books/$bookId"
+          params={{ bookId: `${book.id}` }}
+        >
           <CardMedia
             image={book.bookCoverImageURL || "https://picsum.photos/128/160"}
             sx={{ width: 128, height: 160 }}
           />
-        </CardActionArea>
+        </LinkCardActionArea>
         <Stack flexGrow={1} spacing={1}>
-          <CardActionArea>
+          <LinkCardActionArea
+            to="/books/$bookId"
+            params={{ bookId: `${book.id}` }}
+          >
             <Typography variant="h5">{book.title}</Typography>
-          </CardActionArea>
-          <CardActionArea>
+          </LinkCardActionArea>
+          <LinkCardActionArea
+            to="/books/$bookId"
+            params={{ bookId: `${book.id}` }}
+          >
             <Typography variant="body2">{book.author}</Typography>
-          </CardActionArea>
+          </LinkCardActionArea>
           <Typography variant="body2">{book.size} KB</Typography>
         </Stack>
       </Stack>
