@@ -3,6 +3,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { BookMetadata } from "../types/book";
 import API_CLIENT from "../api/api";
+import { Stack, Typography, Avatar } from "@mui/material";
 
 export default function BookSearchInput(props: {
   onAction?: (value: string) => void;
@@ -62,6 +63,8 @@ export default function BookSearchInput(props: {
         books?.map((book) => ({
           label: book.title,
           id: book.id,
+          author: book.author,
+          bookCoverImageURL: book.bookCoverImageURL,
         })) || []
       }
       noOptionsText="검색된 책이 없습니다."
@@ -97,6 +100,23 @@ export default function BookSearchInput(props: {
         }
       }}
       renderInput={(params) => <TextField {...params} placeholder="책 제목" />}
+      renderOption={(props, option) => (
+        <li {...props} key={option.id}>
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Avatar
+              src={option.bookCoverImageURL}
+              variant="rounded"
+              sx={{ width: 40, height: 56 }}
+            />
+            <Stack spacing={1} flexGrow={1}>
+              <Typography variant="body2">{option.label}</Typography>
+              <Typography variant="caption" color="textSecondary">
+                {option.author}
+              </Typography>
+            </Stack>
+          </Stack>
+        </li>
+      )}
     />
   );
 }
