@@ -7,9 +7,7 @@ import {
   CardMedia,
   Container,
   Divider,
-  FilledInput,
   IconButton,
-  InputAdornment,
   Paper,
   Skeleton,
   Stack,
@@ -17,28 +15,37 @@ import {
 } from "@mui/material";
 import PageNavigation from "../../../component/PageNavigation";
 import { BookMetadata } from "../../../types/book";
-import { Search } from "@mui/icons-material";
 import LinkCardActionArea from "../../../component/LinkCardActionArea";
+import BookSearchInput from "../../../component/BookSearchInput";
+import { Search } from "@mui/icons-material";
 
 export const Route = createFileRoute("/_pathlessLayout/books/")({
   component: RouteComponent,
+  validateSearch: (search) => {
+    return {
+      title: search.title as string | undefined,
+    };
+  },
 });
 
 function RouteComponent() {
+  const { title } = Route.useSearch();
   const [page, setPage] = useState(0);
   const [sort, _setSort] = useState<string[]>([]);
   const [totalPages, setTotalPages] = useState(1);
+  const [searchInput, setSearchInput] = useState("");
+  const navigate = Route.useNavigate();
 
   const pageSize = 25;
 
-  // TODO: Search
   const { data: books } = useQuery({
-    queryKey: ["bookList", page, sort, pageSize],
+    queryKey: ["bookList", page, sort, pageSize, title],
     queryFn: async () => {
       const response = await API_CLIENT.ebookController.getBooks({
         page,
         size: pageSize,
         sort,
+        title,
       });
       if (response.isSuccessful) {
         setTotalPages(response.data.totalPages!);
@@ -53,21 +60,32 @@ function RouteComponent() {
     placeholderData: keepPreviousData,
   });
 
+  const handleSearch = () => {
+    if (!searchInput) {
+      return;
+    }
+    navigate({
+      to: ".",
+      search: {
+        title: searchInput,
+      },
+    });
+  };
+
   return (
     <Container maxWidth="lg" sx={{ mt: 4 }}>
       <Stack spacing={4}>
-        <FilledInput
-          placeholder="검색"
-          fullWidth
-          sx={{ padding: 1 }}
-          endAdornment={
-            <InputAdornment position="end">
-              <IconButton>
-                <Search />
-              </IconButton>
-            </InputAdornment>
-          }
-        />
+        <Stack spacing={2} direction={"row"} alignItems="center">
+          <BookSearchInput
+            onValueChange={setSearchInput}
+            onAction={handleSearch}
+            inputValue={searchInput}
+            setInputValue={setSearchInput}
+          />
+          <IconButton onClick={handleSearch}>
+            <Search />
+          </IconButton>
+        </Stack>
         <Paper sx={{ p: 2 }}>
           <Stack spacing={2} sx={{ padding: 2 }}>
             <Stack

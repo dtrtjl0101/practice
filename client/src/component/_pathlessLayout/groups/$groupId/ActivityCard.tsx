@@ -3,7 +3,6 @@ import { Activity } from "../../../../types/activity";
 import API_CLIENT from "../../../../api/api";
 import { useEffect, useState } from "react";
 import {
-  Autocomplete,
   Box,
   Button,
   CardActionArea,
@@ -26,6 +25,7 @@ import dayjs, { Dayjs } from "dayjs";
 import { BookMetadata } from "../../../../types/book";
 import LinkButton from "../../../LinkButton";
 import { useNavigate } from "@tanstack/react-router";
+import BookSearchInput from "../../../BookSearchInput";
 
 export function ActivityCard(props: { groupId: string }) {
   const { groupId } = props;
@@ -82,7 +82,8 @@ export function ActivityCard(props: { groupId: string }) {
           );
           if (shouldMoveToPurchasePage) {
             navigate({
-              to: "/books",
+              to: "/books/$bookId",
+              params: { bookId: activity.bookId.toString() },
             });
           }
           break;
@@ -432,32 +433,8 @@ export function BookPicker(props: {
   onBookPicked: (book: BookMetadata) => void;
 }) {
   const { onBookPicked } = props;
-
-  const [title, setTitle] = useState("");
-  const [titleToSearch, setTitleToSearch] = useState("");
   const [book, setBook] = useState<BookMetadata | null>(null);
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setTitleToSearch(title);
-    }, 400);
-    return () => clearTimeout(handler);
-  }, [title]);
-
-  const { data: books } = useQuery({
-    queryKey: ["books", titleToSearch],
-    queryFn: async () => {
-      const response = await API_CLIENT.ebookController.getBooks({
-        title: titleToSearch,
-        page: 0,
-        size: 10,
-      });
-      if (!response.isSuccessful) {
-        throw new Error(response.errorMessage);
-      }
-      return response.data.content! as BookMetadata[];
-    },
-  });
+  const [inputValue, setInputValue] = useState("");
 
   useEffect(() => {
     if (!book) {
@@ -484,39 +461,13 @@ export function BookPicker(props: {
         )}
       </Box>
       <Stack spacing={2} sx={{ flexGrow: 1 }}>
-        <Autocomplete
-          autoComplete
-          disablePortal
-          options={
-            books?.map((book) => ({
-              label: book.title,
-              id: book.id,
-            })) || []
-          }
-          fullWidth
-          isOptionEqualToValue={(option, value) => {
-            return option.id === value.id;
+        <BookSearchInput
+          onBookChange={(book) => {
+            setBook(book);
           }}
-          onChange={(_, value) => {
-            if (!value) {
-              setBook(null);
-              return;
-            }
-            const selectedBook = books?.find((book) => book.id === value.id);
-            if (!selectedBook) {
-              setBook(null);
-              return;
-            }
-            setBook(selectedBook);
-          }}
-          onInputChange={(_, value) => {
-            setTitle(value);
-          }}
-          renderInput={(params) => (
-            <TextField {...params} placeholder="책 제목" />
-          )}
+          inputValue={inputValue}
+          setInputValue={setInputValue}
         />
-
         <Typography variant="body2" color="textSecondary" sx={{ flexGrow: 1 }}>
           {book ? book.description : "책을 선택해주세요"}
         </Typography>
