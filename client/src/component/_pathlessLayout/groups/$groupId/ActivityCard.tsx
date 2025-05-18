@@ -31,7 +31,11 @@ export function ActivityCard(props: { groupId: string }) {
   const [totalPages, setTotalPages] = useState(1);
   const [activityCreateModalOpen, setActivityCreateModalOpen] = useState(false);
 
-  const { data, isFetching, refetch } = useQuery({
+  const {
+    data: activity,
+    isFetching,
+    refetch,
+  } = useQuery({
     queryKey: ["activity", groupId, page],
     queryFn: async () => {
       const groupIdNumber = parseInt(groupId);
@@ -56,30 +60,9 @@ export function ActivityCard(props: { groupId: string }) {
 
       const activity = response.data.content![0] as Activity | undefined;
 
-      if (!activity) {
-        return undefined;
-      }
-
-      const bookId = activity.bookId;
-      const bookResponse = await API_CLIENT.ebookController.getBook(bookId);
-      if (!bookResponse.isSuccessful) {
-        console.error(bookResponse.errorMessage);
-        throw new Error(bookResponse.errorCode);
-      }
-      const book = bookResponse.data as BookMetadata;
-      if (!book) {
-        return undefined;
-      }
-
-      return {
-        activity,
-        book,
-      };
+      return activity;
     },
   });
-
-  const activity = data?.activity;
-  const book = data?.book;
 
   const onJoinActivityButtonClicked = async () => {
     if (!activity) {
@@ -120,12 +103,12 @@ export function ActivityCard(props: { groupId: string }) {
           <Divider />
           {isFetching ? (
             <ActivityPlaceHolder />
-          ) : activity && book ? (
+          ) : activity ? (
             <Stack spacing={2} direction={"row"}>
               <BookInfo activity={activity} />
               <Stack spacing={1} sx={{ flexGrow: 1 }}>
                 <Stack spacing={1}>
-                  <Typography variant="h5">{book.title}</Typography>
+                  <Typography variant="h5">{activity.bookTitle}</Typography>
                   <Typography
                     variant="body2"
                     color="textSecondary"
@@ -209,20 +192,7 @@ export function ActivityPlaceHolder() {
 export function BookInfo(props: { activity: Activity }) {
   const { activity } = props;
 
-  const { data: book } = useQuery({
-    queryKey: ["book", activity.bookId],
-    queryFn: async () => {
-      const response = await API_CLIENT.ebookController.getBook(
-        activity.bookId
-      );
-      if (!response.isSuccessful) {
-        throw new Error(response.errorMessage);
-      }
-      return response.data;
-    },
-  });
-
-  if (!book) {
+  if (!activity) {
     return (
       <Stack width={256} alignItems={"center"}>
         <Skeleton
@@ -248,7 +218,7 @@ export function BookInfo(props: { activity: Activity }) {
         }}
       >
         <CardMedia
-          image={book.bookCoverImageURL}
+          image={activity.coverImageKey}
           sx={{
             height: 256,
             width: 192,
@@ -266,7 +236,7 @@ export function BookInfo(props: { activity: Activity }) {
           }}
         >
           <Typography variant="body2" color="textPrimary">
-            {book.title}
+            {activity.bookTitle}
           </Typography>
         </CardActionArea>
         <CardActionArea
@@ -278,7 +248,7 @@ export function BookInfo(props: { activity: Activity }) {
           }}
         >
           <Typography variant="body2" color="textSecondary">
-            {book.author}
+            {activity.bookAuthor}
           </Typography>
         </CardActionArea>
       </Stack>
