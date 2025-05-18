@@ -72,7 +72,7 @@ export default function CommentSection({
 
   // 댓글 수정
   const handleEdit = (comment: Comment) => {
-    setEditingId(comment.id);
+    setEditingId(comment.commentId);
     setEditedContent(comment.content);
   };
   const handleCancel = () => {
@@ -92,7 +92,7 @@ export default function CommentSection({
     .filter((c) => !c.parentId)
     .sort(
       (a, b) =>
-        new Date(a.createdDate).getTime() - new Date(b.createdDate).getTime()
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     );
 
   const childComments = (parentId: number) =>
@@ -100,7 +100,7 @@ export default function CommentSection({
       .filter((c) => c.parentId === parentId)
       .sort(
         (a, b) =>
-          new Date(a.createdDate).getTime() - new Date(b.createdDate).getTime()
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
       );
 
   return (
@@ -156,7 +156,7 @@ export default function CommentSection({
           <Typography color="text.secondary">아직 댓글이 없습니다.</Typography>
         ) : (
           rootComments.map((comment) => (
-            <Box key={comment.id}>
+            <Box key={comment.commentId}>
               <CommentItem
                 comment={comment}
                 editingId={editingId}
@@ -178,9 +178,9 @@ export default function CommentSection({
               />
               {/* 답글 목록 */}
               <Stack spacing={1} sx={{ pl: 4 }}>
-                {childComments(comment.id).map((reply) => (
+                {childComments(comment.commentId).map((reply) => (
                   <CommentItem
-                    key={reply.id}
+                    key={reply.commentId}
                     comment={reply}
                     editingId={editingId}
                     editedContent={editedContent}
@@ -255,8 +255,8 @@ function CommentItem({
   isDebate,
   isReply = false,
 }: CommentItemProps) {
-  const isEditing = editingId === comment.id;
-  const isReplying = replyTo === comment.id;
+  const isEditing = editingId === comment.commentId;
+  const isReplying = replyTo === comment.commentId;
 
   return (
     <Paper
@@ -274,14 +274,14 @@ function CommentItem({
             size="small"
           />
         )}
-        <Typography variant="subtitle2">{comment.author}</Typography>
+        <Typography variant="subtitle2">{comment.authorName}</Typography>
         <Typography variant="caption" color="text.disabled">
           {new Date(
-            comment.edited && comment.updatedDate
-              ? comment.updatedDate
-              : comment.createdDate
+            comment.isEdited && comment.modifiedAt
+              ? comment.modifiedAt
+              : comment.createdAt
           ).toLocaleString()}
-          {comment.edited ? " (수정됨)" : ""}
+          {comment.isEdited ? " (수정됨)" : ""}
         </Typography>
         <Box sx={{ flex: 1 }} />
         {isEditing ? (
@@ -292,13 +292,15 @@ function CommentItem({
         ) : (
           <>
             <Button onClick={() => onEdit(comment)}>수정</Button>
-            <Button color="error" onClick={() => onDelete(comment.id)}>
+            <Button color="error" onClick={() => onDelete(comment.commentId)}>
               삭제
             </Button>
             {!isReply && (
               <Button
                 onClick={() =>
-                  setReplyTo(replyTo === comment.id ? null : comment.id)
+                  setReplyTo(
+                    replyTo === comment.commentId ? null : comment.commentId
+                  )
                 }
               >
                 답글
@@ -331,11 +333,11 @@ function CommentItem({
           {isDebate && (
             <RadioGroup
               row
-              value={replyStance[comment.id] || "agree"}
+              value={replyStance[comment.commentId] || "agree"}
               onChange={(e) =>
                 setReplyStance((prev) => ({
                   ...prev,
-                  [comment.id]: e.target.value as "agree" | "disagree",
+                  [comment.commentId]: e.target.value as "agree" | "disagree",
                 }))
               }
             >
@@ -356,18 +358,18 @@ function CommentItem({
               fullWidth
               multiline
               minRows={2}
-              value={replyInput[comment.id] || ""}
+              value={replyInput[comment.commentId] || ""}
               onChange={(e) =>
                 setReplyInput((prev) => ({
                   ...prev,
-                  [comment.id]: e.target.value,
+                  [comment.commentId]: e.target.value,
                 }))
               }
               placeholder="답글을 입력하세요"
             />
             <Button
               variant="contained"
-              onClick={() => handleReplySubmit(comment.id)}
+              onClick={() => handleReplySubmit(comment.commentId)}
             >
               작성
             </Button>

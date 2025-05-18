@@ -42,7 +42,8 @@ function RouteComponent() {
 
   const handleEditDiscussion = () => {
     router.navigate({
-      to: `/groups/${groupId}/activities/${activityId}/discussions/${discussionId}/edit`,
+      from: Route.to,
+      to: "edit",
     });
   };
 
@@ -60,7 +61,7 @@ function RouteComponent() {
   };
 
   const handleBack = () => {
-    router.history.back();
+    router.navigate({ to: ".." });
   };
 
   if (!discussion) return <Typography>게시글을 찾을 수 없습니다.</Typography>;

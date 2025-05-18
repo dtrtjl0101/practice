@@ -1,6 +1,5 @@
 import API_CLIENT from "../api/api";
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
   Container,
@@ -22,24 +21,26 @@ import {
 } from "@mui/material";
 import { Discussion } from "../types/discussion";
 
-export default function DiscussionForm() {
-  const router = useRouter();
+export default function DiscussionForm({
+  activityId,
+  discussionId,
+  handleBack,
+}: {
+  activityId: number;
+  discussionId?: number;
+  handleBack: (discussionId?: number) => void;
+}) {
   const theme = useTheme();
-
-  const { activityId, discussionId } = useParams({ strict: false });
-  const activityIdNumber = parseInt(activityId ?? "");
-  const discussionIdNumber = parseInt(discussionId ?? "");
-
   const isEdit = !!discussionId;
   const { data: discussion } = useQuery({
     queryKey: ["discussion", discussionId],
     enabled: isEdit,
     queryFn: async () => {
-      const response =
-        await API_CLIENT.discussionController.getDiscussion(discussionIdNumber);
+      const response = await API_CLIENT.discussionController.getDiscussion(
+        discussionId!!
+      );
       if (!response.isSuccessful) {
-        alert(response.errorMessage);
-        return;
+        throw new Error(response.errorMessage);
       }
       return response.data as Discussion;
     },
@@ -63,22 +64,22 @@ export default function DiscussionForm() {
     if (isEdit) {
       // 수정 모드: 기존 게시글 수정
       API_CLIENT.discussionController
-        .updateDiscussion(discussionIdNumber, {
+        .updateDiscussion(discussionId!!, {
           title,
           content,
         })
         .then((response) => {
           if (response.isSuccessful) {
             alert("게시글이 수정되었습니다.");
+            handleBack();
           } else {
             alert(response.errorMessage);
           }
         });
     } else {
       // 작성 모드: 새 게시글 추가
-      console.log(activityId);
       API_CLIENT.discussionController
-        .createDiscussion(activityIdNumber, {
+        .createDiscussion(activityId, {
           title,
           content,
           isDebate,
@@ -86,20 +87,12 @@ export default function DiscussionForm() {
         .then((response) => {
           if (response.isSuccessful) {
             alert("게시글이 작성되었습니다.");
+            handleBack(response.data.discussionId);
           } else {
             alert(response.errorMessage);
           }
         });
     }
-    // response를 통해 게시글로 이동
-    handleBack();
-  };
-
-  const handleBack = () => {
-    // router.navigate({
-    //   to: `_pathlessLayout/groups/${groupId}/activities/${activityId}/discussions/${discussionId}`,
-    // });
-    router.history.back();
   };
 
   const handleCheckbox = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -168,7 +161,9 @@ export default function DiscussionForm() {
             <Button onClick={handlePostDiscussion}>
               {isEdit ? "수정" : "작성"}
             </Button>
-            <Button onClick={handleBack}>취소</Button>
+            <Button onClick={() => handleBack && handleBack(discussionId!)}>
+              취소
+            </Button>
           </Box>
           <FormControlLabel
             sx={{ justifySelf: "flex-end" }}
