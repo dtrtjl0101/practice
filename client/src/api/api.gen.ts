@@ -669,19 +669,24 @@ export interface PageResponseGroupFetchResponse {
 }
 
 /** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponsePageResponseGroupPendingMemberResponse {
+export interface ApiSuccessResponsePageResponseGroupMemberResponse {
   isSuccessful?: boolean;
-  data?: PageResponseGroupPendingMemberResponse;
+  data?: PageResponseGroupMemberResponse;
 }
 
-export interface GroupPendingMemberResponse {
+export interface GroupMemberResponse {
   /** @format int64 */
   userId?: number;
   nickname?: string;
+  profileImageURL?: string;
+  /** @format date-time */
+  createdAt?: string;
+  /** @format date-time */
+  approvedAt?: string;
 }
 
-export interface PageResponseGroupPendingMemberResponse {
-  content?: GroupPendingMemberResponse[];
+export interface PageResponseGroupMemberResponse {
+  content?: GroupMemberResponse[];
   /** @format int32 */
   currentPage?: number;
   /** @format int64 */
@@ -1695,6 +1700,43 @@ export class Api<
       }),
 
     /**
+     * @description 특정 그룹의 멤버 목록을 조회합니다.
+     *
+     * @tags group-controller
+     * @name GetGroupMembers
+     * @summary 특정 그룹의 멤버 목록 조회
+     * @request GET:/api/groups/{groupId}/members
+     * @secure
+     */
+    getGroupMembers: (
+      groupId: number,
+      query?: {
+        /**
+         * Zero-based page index (0..N)
+         * @min 0
+         * @default 0
+         */
+        page?: number;
+        /**
+         * The size of the page to be returned
+         * @min 1
+         * @default 20
+         */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponsePageResponseGroupMemberResponse, any>({
+        path: `/api/groups/${groupId}/members`,
+        method: "GET",
+        query: query,
+        secure: true,
+        ...params,
+      }),
+
+    /**
      * No description
      *
      * @tags group-controller
@@ -1722,10 +1764,7 @@ export class Api<
       },
       params: RequestParams = {},
     ) =>
-      this.request<
-        ApiSuccessResponsePageResponseGroupPendingMemberResponse,
-        any
-      >({
+      this.request<ApiSuccessResponsePageResponseGroupMemberResponse, any>({
         path: `/api/groups/${groupId}/members/pending`,
         method: "GET",
         query: query,
@@ -1745,6 +1784,78 @@ export class Api<
       this.request<ApiSuccessResponseGroupFetchResponse, any>({
         path: `/api/groups/${groupId}/info`,
         method: "GET",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description 내가 가입한 그룹 목록을 조회합니다.
+     *
+     * @tags group-controller
+     * @name GetJoinedGroups
+     * @summary 내가 가입한 그룹 목록 조회
+     * @request GET:/api/groups/my/joined
+     * @secure
+     */
+    getJoinedGroups: (
+      query?: {
+        /**
+         * Zero-based page index (0..N)
+         * @min 0
+         * @default 0
+         */
+        page?: number;
+        /**
+         * The size of the page to be returned
+         * @min 1
+         * @default 20
+         */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponsePageResponseGroupFetchResponse, any>({
+        path: `/api/groups/my/joined`,
+        method: "GET",
+        query: query,
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description 내가 생성한 그룹 목록을 조회합니다.
+     *
+     * @tags group-controller
+     * @name GetCreatedGroups
+     * @summary 내가 생성한 그룹 목록 조회
+     * @request GET:/api/groups/my/created
+     * @secure
+     */
+    getCreatedGroups: (
+      query?: {
+        /**
+         * Zero-based page index (0..N)
+         * @min 0
+         * @default 0
+         */
+        page?: number;
+        /**
+         * The size of the page to be returned
+         * @min 1
+         * @default 20
+         */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponsePageResponseGroupFetchResponse, any>({
+        path: `/api/groups/my/created`,
+        method: "GET",
+        query: query,
         secure: true,
         ...params,
       }),
