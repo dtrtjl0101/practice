@@ -1,10 +1,7 @@
 import { Button, Container, Stack } from "@mui/material";
-import {
-  createFileRoute,
-  createLink,
-  useNavigate,
-} from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import GroupList from "../../component/groupList";
+import LinkButton from "../../component/LinkButton";
 
 export const Route = createFileRoute("/_pathlessLayout/")({
   component: Home,
@@ -34,5 +31,3 @@ function Home() {
     </Container>
   );
 }
-
-const LinkButton = createLink(Button);

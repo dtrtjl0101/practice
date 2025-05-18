@@ -24,6 +24,7 @@ import { Add, Cancel, Check, Timelapse } from "@mui/icons-material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { Dayjs } from "dayjs";
 import { BookMetadata } from "../../../../types/book";
+import LinkButton from "../../../LinkButton";
 
 export function ActivityCard(props: { groupId: string }) {
   const { groupId } = props;
@@ -128,16 +129,27 @@ export function ActivityCard(props: { groupId: string }) {
                 <Typography variant="body1" flexGrow={1}>
                   {activity.description}
                 </Typography>
-                <Button
-                  variant="contained"
-                  onClick={onJoinActivityButtonClicked}
-                  sx={{
-                    alignSelf: "flex-end",
-                  }}
+                <Stack
+                  direction={"row"}
+                  spacing={2}
+                  justifyContent={"flex-end"}
+                  alignItems={"center"}
                 >
-                  {/* TODO: 가입되었으면 리더로 가는 버튼 표시 */}
-                  활동 참여하기
-                </Button>
+                  <Button
+                    variant="contained"
+                    onClick={onJoinActivityButtonClicked}
+                  >
+                    {/* TODO: 가입되었으면 리더로 가는 버튼 표시 */}
+                    활동 참여하기
+                  </Button>
+                  <LinkButton
+                    variant="contained"
+                    to={"/reader/$bookId"}
+                    params={{ bookId: activity.bookId.toString() }}
+                  >
+                    책 읽으러 가기
+                  </LinkButton>
+                </Stack>
               </Stack>
             </Stack>
           ) : (
