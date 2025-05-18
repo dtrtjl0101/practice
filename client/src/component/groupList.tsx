@@ -17,7 +17,7 @@ import PageNavigation from "./PageNavigation";
 import { GroupInfo } from "../types/groups";
 const ITEM_HEIGHT = 384 - 20;
 
-export enum GroupType {
+export enum GroupListKind {
   ALL_GROUP = "ALL_GROUP",
   MY_GROUP = "MY_GROUP",
   JOINED_GROUP = "JOINED_GROUP",
@@ -28,7 +28,7 @@ export default function GroupList(props: {
   action?: JSX.Element;
   title: string;
   key: string;
-  type?: GroupType;
+  kind?: GroupListKind;
 }) {
   const { size, action, title, key } = props;
 
@@ -38,7 +38,8 @@ export default function GroupList(props: {
   const navigate = useNavigate();
 
   const pageSize = size === "small" ? 6 : 12;
-  const groupType = props.type === undefined ? GroupType.ALL_GROUP : props.type;
+  const groupType =
+    props.kind === undefined ? GroupListKind.ALL_GROUP : props.kind;
 
   const { data: groups } = useQuery({
     queryKey: [key, groupType, page, sort, pageSize],
@@ -161,13 +162,13 @@ function ItemContainer(props: PropsWithChildren) {
   );
 }
 
-function getFetchFunction(groupType: GroupType) {
+function getFetchFunction(groupType: GroupListKind) {
   switch (groupType) {
-    case GroupType.ALL_GROUP:
+    case GroupListKind.ALL_GROUP:
       return API_CLIENT.groupController.getAllGroups;
-    case GroupType.MY_GROUP:
+    case GroupListKind.MY_GROUP:
       return API_CLIENT.groupController.getCreatedGroups;
-    case GroupType.JOINED_GROUP:
+    case GroupListKind.JOINED_GROUP:
       return API_CLIENT.groupController.getJoinedGroups;
     default:
       throw new Error("Invalid group type");

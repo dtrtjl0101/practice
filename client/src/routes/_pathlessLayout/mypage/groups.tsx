@@ -3,7 +3,7 @@ import { IconButton, Stack } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
 import GroupCreateModal from "../../../component/groupCreate/GroupCreateModal";
 import { useState } from "react";
-import GroupList, { GroupType } from "../../../component/groupList";
+import GroupList, { GroupListKind } from "../../../component/groupList";
 
 export const Route = createFileRoute("/_pathlessLayout/mypage/groups")({
   component: RouteComponent,
@@ -20,7 +20,7 @@ function RouteComponent() {
       />
       <Stack spacing={2} sx={{ padding: 2 }}>
         <GroupList
-          type={GroupType.MY_GROUP}
+          kind={GroupListKind.MY_GROUP}
           key="myGroups"
           size="small"
           title="내 모임"
@@ -31,7 +31,7 @@ function RouteComponent() {
           }
         />
         <GroupList
-          type={GroupType.JOINED_GROUP}
+          kind={GroupListKind.JOINED_GROUP}
           key="participantGroups"
           size="small"
           title="가입된 모임"
