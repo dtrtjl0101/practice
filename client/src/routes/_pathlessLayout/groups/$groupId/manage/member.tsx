@@ -1,4 +1,5 @@
 import {
+  Avatar,
   Button,
   Card,
   CardContent,
@@ -143,6 +144,7 @@ function PendingMemberCard() {
                             spacing={1}
                             alignItems={"center"}
                           >
+                            <Avatar src={pending.profileImageURL} />
                             <Typography>{pending.nickname}</Typography>
                           </Stack>
                         </TableCell>
@@ -197,8 +199,7 @@ function MembersCard() {
       if (isNaN(groupIdNumber)) {
         throw new Error("Invalid group ID");
       }
-      // TODO: Fetch members
-      const response = await API_CLIENT.groupController.getPendingList(
+      const response = await API_CLIENT.groupController.getGroupMembers(
         groupIdNumber,
         {
           page,
@@ -230,6 +231,8 @@ function MembersCard() {
                 <TableRow>
                   <TableCell>ID</TableCell>
                   <TableCell>닉네임</TableCell>
+                  <TableCell>가입 신청일</TableCell>
+                  <TableCell>승인일</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -237,21 +240,33 @@ function MembersCard() {
                   pendingRequests.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={7} align="center">
-                        대기 중인 신청이 없습니다.
+                        모임원이 없습니다
                       </TableCell>
                     </TableRow>
                   ) : (
-                    pendingRequests.map((pending) => (
-                      <TableRow key={pending.userId}>
-                        <TableCell>{pending.userId}</TableCell>
+                    pendingRequests.map((member) => (
+                      <TableRow key={member.userId}>
+                        <TableCell>{member.userId}</TableCell>
                         <TableCell>
                           <Stack
                             direction={"row"}
                             spacing={1}
                             alignItems={"center"}
                           >
-                            <Typography>{pending.nickname}</Typography>
+                            <Avatar src={member.profileImageURL} />
+                            <Typography>{member.nickname}</Typography>
                           </Stack>
+                        </TableCell>
+
+                        <TableCell>
+                          {member.createdAt
+                            ? new Date(member.createdAt).toLocaleString()
+                            : "-"}
+                        </TableCell>
+                        <TableCell>
+                          {member.approvedAt
+                            ? new Date(member.approvedAt).toLocaleString()
+                            : "-"}
                         </TableCell>
                       </TableRow>
                     ))
