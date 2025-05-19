@@ -1,10 +1,8 @@
 import { Button, Container, Stack } from "@mui/material";
-import {
-  createFileRoute,
-  createLink,
-  useNavigate,
-} from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import GroupList from "../../component/groupList";
+import LinkButton from "../../component/LinkButton";
+import BookList from "../../component/BookList";
 
 export const Route = createFileRoute("/_pathlessLayout/")({
   component: Home,
@@ -15,7 +13,7 @@ function Home() {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4 }}>
-      <Stack spacing={2}>
+      <Stack spacing={4}>
         <GroupList
           size="small"
           action={
@@ -23,6 +21,20 @@ function Home() {
           }
           title="인기 그룹"
           key="popularGroups"
+        />
+        <BookList
+          size="small"
+          title="인기 도서"
+          action={
+            <Button
+              variant="text"
+              onClick={() =>
+                navigate({ to: "/books", search: { title: undefined } })
+              }
+            >
+              더보기
+            </Button>
+          }
         />
         <LinkButton variant="contained" color="primary" to="/about">
           Go to About Page
@@ -34,5 +46,3 @@ function Home() {
     </Container>
   );
 }
-
-const LinkButton = createLink(Button);

@@ -4,17 +4,13 @@ import {
   Card,
   CardContent,
   Typography,
-  Button,
   Container,
   Paper,
   Stack,
 } from "@mui/material";
-import {
-  createFileRoute,
-  createLink,
-  useNavigate,
-} from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Post, formattedDate, initialPosts } from "../../../types/post";
+import LinkButton from "../../../component/LinkButton";
 
 export const Route = createFileRoute("/_pathlessLayout/posts/")({
   component: List,
@@ -104,5 +100,3 @@ function List() {
     </Container>
   );
 }
-
-const LinkButton = createLink(Button);

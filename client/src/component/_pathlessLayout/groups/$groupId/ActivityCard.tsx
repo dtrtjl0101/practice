@@ -3,7 +3,6 @@ import { Activity } from "../../../../types/activity";
 import API_CLIENT from "../../../../api/api";
 import { useEffect, useState } from "react";
 import {
-  Autocomplete,
   Box,
   Button,
   CardActionArea,
@@ -24,14 +23,22 @@ import { Add, Cancel, Check, Timelapse } from "@mui/icons-material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { Dayjs } from "dayjs";
 import { BookMetadata } from "../../../../types/book";
+import LinkButton from "../../../LinkButton";
+import { useNavigate } from "@tanstack/react-router";
+import BookSearchInput from "../../../BookSearchInput";
 
 export function ActivityCard(props: { groupId: string }) {
   const { groupId } = props;
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [activityCreateModalOpen, setActivityCreateModalOpen] = useState(false);
+  const navigate = useNavigate();
 
-  const { data, isFetching, refetch } = useQuery({
+  const {
+    data: activity,
+    isFetching,
+    refetch,
+  } = useQuery({
     queryKey: ["activity", groupId, page],
     queryFn: async () => {
       const groupIdNumber = parseInt(groupId);
@@ -56,30 +63,9 @@ export function ActivityCard(props: { groupId: string }) {
 
       const activity = response.data.content![0] as Activity | undefined;
 
-      if (!activity) {
-        return undefined;
-      }
-
-      const bookId = activity.bookId;
-      const bookResponse = await API_CLIENT.ebookController.getBook(bookId);
-      if (!bookResponse.isSuccessful) {
-        console.error(bookResponse.errorMessage);
-        throw new Error(bookResponse.errorCode);
-      }
-      const book = bookResponse.data as BookMetadata;
-      if (!book) {
-        return undefined;
-      }
-
-      return {
-        activity,
-        book,
-      };
+      return activity;
     },
   });
-
-  const activity = data?.activity;
-  const book = data?.book;
 
   const onJoinActivityButtonClicked = async () => {
     if (!activity) {
@@ -89,7 +75,23 @@ export function ActivityCard(props: { groupId: string }) {
       activity.activityId
     );
     if (!response.isSuccessful) {
-      alert(response.errorMessage);
+      switch (response.errorCode) {
+        case "EBOOK_NOT_PURCHASED": {
+          const shouldMoveToPurchasePage = confirm(
+            "활동에 참여하기 위해서는 책을 구매해야 합니다. 구매 페이지로 이동하시겠습니까?"
+          );
+          if (shouldMoveToPurchasePage) {
+            navigate({
+              to: "/books/$bookId",
+              params: { bookId: activity.bookId.toString() },
+            });
+          }
+          break;
+        }
+        default: {
+          alert(response.errorMessage);
+        }
+      }
       return;
     }
     refetch();
@@ -120,12 +122,12 @@ export function ActivityCard(props: { groupId: string }) {
           <Divider />
           {isFetching ? (
             <ActivityPlaceHolder />
-          ) : activity && book ? (
+          ) : activity ? (
             <Stack spacing={2} direction={"row"}>
               <BookInfo activity={activity} />
               <Stack spacing={1} sx={{ flexGrow: 1 }}>
                 <Stack spacing={1}>
-                  <Typography variant="h5">{book.title}</Typography>
+                  <Typography variant="h5">{activity.bookTitle}</Typography>
                   <Typography
                     variant="body2"
                     color="textSecondary"
@@ -145,16 +147,27 @@ export function ActivityCard(props: { groupId: string }) {
                 <Typography variant="body1" flexGrow={1}>
                   {activity.description}
                 </Typography>
-                <Button
-                  variant="contained"
-                  onClick={onJoinActivityButtonClicked}
-                  sx={{
-                    alignSelf: "flex-end",
-                  }}
+                <Stack
+                  direction={"row"}
+                  spacing={2}
+                  justifyContent={"flex-end"}
+                  alignItems={"center"}
                 >
-                  {/* TODO: 가입되었으면 리더로 가는 버튼 표시 */}
-                  활동 참여하기
-                </Button>
+                  <Button
+                    variant="contained"
+                    onClick={onJoinActivityButtonClicked}
+                  >
+                    {/* TODO: 가입되었으면 리더로 가는 버튼 표시 */}
+                    활동 참여하기
+                  </Button>
+                  <LinkButton
+                    variant="contained"
+                    to={"/reader/$bookId"}
+                    params={{ bookId: activity.bookId.toString() }}
+                  >
+                    책 읽으러 가기
+                  </LinkButton>
+                </Stack>
               </Stack>
             </Stack>
           ) : (
@@ -209,20 +222,7 @@ export function ActivityPlaceHolder() {
 export function BookInfo(props: { activity: Activity }) {
   const { activity } = props;
 
-  const { data: book } = useQuery({
-    queryKey: ["book", activity.bookId],
-    queryFn: async () => {
-      const response = await API_CLIENT.ebookController.getBook(
-        activity.bookId
-      );
-      if (!response.isSuccessful) {
-        throw new Error(response.errorMessage);
-      }
-      return response.data;
-    },
-  });
-
-  if (!book) {
+  if (!activity) {
     return (
       <Stack width={256} alignItems={"center"}>
         <Skeleton
@@ -248,7 +248,7 @@ export function BookInfo(props: { activity: Activity }) {
         }}
       >
         <CardMedia
-          image={book.bookCoverImageURL}
+          image={activity.coverImageKey}
           sx={{
             height: 256,
             width: 192,
@@ -266,7 +266,7 @@ export function BookInfo(props: { activity: Activity }) {
           }}
         >
           <Typography variant="body2" color="textPrimary">
-            {book.title}
+            {activity.bookTitle}
           </Typography>
         </CardActionArea>
         <CardActionArea
@@ -278,7 +278,7 @@ export function BookInfo(props: { activity: Activity }) {
           }}
         >
           <Typography variant="body2" color="textSecondary">
-            {book.author}
+            {activity.bookAuthor}
           </Typography>
         </CardActionArea>
       </Stack>
@@ -433,32 +433,8 @@ export function BookPicker(props: {
   onBookPicked: (book: BookMetadata) => void;
 }) {
   const { onBookPicked } = props;
-
-  const [title, setTitle] = useState("");
-  const [titleToSearch, setTitleToSearch] = useState("");
   const [book, setBook] = useState<BookMetadata | null>(null);
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setTitleToSearch(title);
-    }, 400);
-    return () => clearTimeout(handler);
-  }, [title]);
-
-  const { data: books } = useQuery({
-    queryKey: ["books", titleToSearch],
-    queryFn: async () => {
-      const response = await API_CLIENT.ebookController.getBooks({
-        title: titleToSearch,
-        page: 0,
-        size: 10,
-      });
-      if (!response.isSuccessful) {
-        throw new Error(response.errorMessage);
-      }
-      return response.data.content! as BookMetadata[];
-    },
-  });
+  const [inputValue, setInputValue] = useState("");
 
   useEffect(() => {
     if (!book) {
@@ -485,39 +461,13 @@ export function BookPicker(props: {
         )}
       </Box>
       <Stack spacing={2} sx={{ flexGrow: 1 }}>
-        <Autocomplete
-          autoComplete
-          disablePortal
-          options={
-            books?.map((book) => ({
-              label: book.title,
-              id: book.id,
-            })) || []
-          }
-          fullWidth
-          isOptionEqualToValue={(option, value) => {
-            return option.id === value.id;
+        <BookSearchInput
+          onBookChange={(book) => {
+            setBook(book);
           }}
-          onChange={(_, value) => {
-            if (!value) {
-              setBook(null);
-              return;
-            }
-            const selectedBook = books?.find((book) => book.id === value.id);
-            if (!selectedBook) {
-              setBook(null);
-              return;
-            }
-            setBook(selectedBook);
-          }}
-          onInputChange={(_, value) => {
-            setTitle(value);
-          }}
-          renderInput={(params) => (
-            <TextField {...params} placeholder="책 제목" />
-          )}
+          inputValue={inputValue}
+          setInputValue={setInputValue}
         />
-
         <Typography variant="body2" color="textSecondary" sx={{ flexGrow: 1 }}>
           {book ? book.description : "책을 선택해주세요"}
         </Typography>
