@@ -1,6 +1,7 @@
 package qwerty.chaekit.service.group;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.group.activity.discussion.Discussion;
@@ -19,6 +20,7 @@ import qwerty.chaekit.mapper.DiscussionMapper;
 import qwerty.chaekit.service.notification.NotificationService;
 import qwerty.chaekit.service.util.EntityFinder;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -105,23 +107,33 @@ public class DiscussionCommentService {
             throw new BadRequestException(ErrorCode.DISCUSSION_COMMENT_NOT_YOURS);
         }
 
-        // 대댓글이 있는 경우 soft delete
-        Long repliesCount = discussionCommentRepository.countByParentId(commentId);
-        if (repliesCount > 0) {
-            comment.softDelete();
-            return;
-        }
-
-        // 마지막 답글인 경우 부모 댓글도 삭제
-        if (comment.getParent() != null && comment.getParent().isDeleted()) {
-            long siblingCount = discussionCommentRepository.countByParentId(comment.getParent().getId());
-            if (siblingCount == 1) {
-                discussionCommentRepository.delete(comment);
-                discussionCommentRepository.delete(comment.getParent());
-                return;
+        if (comment.isRootComment()) {
+            if (hasReplies(comment)) {
+                if(comment.isDeleted()) {
+                    throw new BadRequestException(ErrorCode.DISCUSSION_COMMENT_DELETED);
+                }
+                comment.softDelete();
+            } else {
+                removeRootComment(comment);
             }
+        } else {
+            DiscussionComment parentComment = comment.getParent();
+            if (parentComment.isDeleted() && hasLastReply(parentComment)) {
+                removeRootComment(parentComment);
+            }
+            parentComment.removeReply(comment);
         }
+    }
 
+    private boolean hasReplies(DiscussionComment comment) {
+        return discussionCommentRepository.countByParentId(comment.getId()) > 0;
+    }
+
+    private boolean hasLastReply(DiscussionComment comment) {
+        return discussionCommentRepository.countByParentId(comment.getId()) == 1;
+    }
+
+    private void removeRootComment(DiscussionComment comment) {
         discussionCommentRepository.delete(comment);
     }
 }

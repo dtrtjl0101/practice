@@ -174,14 +174,11 @@ public class DiscussionCommentServiceTest {
         
         given(discussionCommentRepository.countByParentId(parentCommentId))
                 .willReturn(1L); // 마지막 대댓글
-        given(discussionCommentRepository.countByParentId(replyCommentId))
-                .willReturn(0L); // 대댓글에는 대댓글 없음
 
         // when
         discussionCommentService.deleteComment(replyCommentId, userToken);
 
         // then
-        verify(discussionCommentRepository, times(1)).delete(replyComment);
         verify(discussionCommentRepository, times(1)).delete(parentComment);
     }
 
