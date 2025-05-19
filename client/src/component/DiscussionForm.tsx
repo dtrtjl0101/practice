@@ -48,14 +48,9 @@ export default function DiscussionForm({
     },
   });
 
-  const [book, setBook] = useState("");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isDebate, setDebate] = useState(false);
-
-  const handleBook = (event: SelectChangeEvent) => {
-    setBook(event.target.value);
-  };
 
   const handlePostDiscussion = () => {
     if (!title.trim() || !content.trim()) {
@@ -127,30 +122,16 @@ export default function DiscussionForm({
         />
         {/*제목 title */}
         <OutlinedInput
+          sx={{ mb: 4 }}
           placeholder="제목을 입력하세요"
           value={title}
           fullWidth
           multiline
           onChange={(e) => setTitle(e.target.value)}
         />
-        <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
-          <InputLabel id="demo-simple-select-standard-label">
-            대상 도서
-          </InputLabel>
-          <Select
-            labelId="demo-simple-select-standard-label"
-            id="demo-simple-select-standard"
-            value={book}
-            onChange={handleBook}
-            label="대상 도서"
-          >
-            <MenuItem value={10}>책1</MenuItem>
-            <MenuItem value={20}>책2</MenuItem>
-            <MenuItem value={30}>책3</MenuItem>
-          </Select>
-        </FormControl>
         {/* 본문 content */}
         <OutlinedInput
+          sx={{ mb: 4 }}
           placeholder="내용을 입력하세요"
           value={content}
           onChange={(e) => setContent(e.target.value)}

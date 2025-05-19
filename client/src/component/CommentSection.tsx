@@ -220,6 +220,7 @@ export default function CommentSection({
           ))
         )}
       </Stack>
+      <Divider sx={{ mt: 30 }} />
     </Box>
   );
 }

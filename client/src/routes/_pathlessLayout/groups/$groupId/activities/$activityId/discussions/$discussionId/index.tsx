@@ -7,6 +7,7 @@ import {
   Divider,
   Stack,
   CircularProgress,
+  Box,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../../../../../../../../api/api";
@@ -23,7 +24,6 @@ export const Route = createFileRoute(
 function RouteComponent() {
   const router = useRouter();
   const { discussionId } = Route.useParams();
-
   const {
     data: discussion,
     isLoading,
@@ -65,7 +65,19 @@ function RouteComponent() {
     router.navigate({ to: ".." });
   };
 
-  if (isLoading) return <CircularProgress />;
+  if (isLoading)
+    return (
+      <Box
+        sx={{
+          display: "flex", // " display" 대신 "display"로 수정
+          justifyContent: "center",
+          alignItems: "center", // 수직 중앙 정렬 추가
+          height: "100vh",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
 
   if (!discussion) return <Typography>게시글을 찾을 수 없습니다.</Typography>;
 
