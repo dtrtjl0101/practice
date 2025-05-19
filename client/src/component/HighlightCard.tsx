@@ -48,7 +48,9 @@ export default function HighlightCard({
   const user = useAtomValue(State.Auth.user);
   const [openComments, setOpenComments] = useState(false);
   const [commentContent, setCommentContent] = useState("");
-  const isAuthor = highlight.authorId === user?.memberId;
+  const isAuthor =
+    highlight.authorId ===
+    (user?.role === Role.ROLE_USER ? user.userId : undefined);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [emojiAnchorEl, setEmojiAnchorEl] = useState<null | HTMLElement>(null);
   const emojiList: { type: HighlightReactionType; emoji: string }[] = [
