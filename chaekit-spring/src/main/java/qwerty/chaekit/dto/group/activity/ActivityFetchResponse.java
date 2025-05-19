@@ -11,19 +11,19 @@ public record ActivityFetchResponse(
         Long bookId,
         String bookTitle,
         String bookAuthor,
-        String coverImageKey,
+        String coverImageURL,
         String bookDescription,
         LocalDate startTime,
         LocalDate endTime,
         String description
 ) {
-    public static ActivityFetchResponse of(Activity activity) {
+    public static ActivityFetchResponse of(Activity activity, String coverImageURL) {
         return ActivityFetchResponse.builder()
                 .activityId(activity.getId())
                 .bookId(activity.getBook().getId())
                 .bookTitle(activity.getBook().getTitle())
                 .bookAuthor(activity.getBook().getAuthor())
-                .coverImageKey(activity.getBook().getCoverImageKey())
+                .coverImageURL(coverImageURL)
                 .bookDescription(activity.getBook().getDescription())
                 .startTime(activity.getStartTime())
                 .endTime(activity.getEndTime())

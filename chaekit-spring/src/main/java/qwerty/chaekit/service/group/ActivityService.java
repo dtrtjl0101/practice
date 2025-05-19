@@ -21,6 +21,7 @@ import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.ebook.EbookPolicy;
 import qwerty.chaekit.service.util.EntityFinder;
+import qwerty.chaekit.service.util.FileService;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -34,6 +35,7 @@ public class ActivityService {
     private final ActivityPolicy activityPolicy;
     private final EntityFinder entityFinder;
     private final EbookPolicy ebookPolicy;
+    private final FileService fileService;
 
     public ActivityPostResponse createActivity(UserToken userToken, long groupId, ActivityPostRequest request) {
         UserProfile user = entityFinder.findUser(userToken.userId());
@@ -89,7 +91,11 @@ public class ActivityService {
     @Transactional(readOnly = true)
     public PageResponse<ActivityFetchResponse> fetchAllActivities(Pageable pageable, long groupId) {
         Page<ActivityFetchResponse> page = activityRepository.findByGroup_IdWithBook(groupId, pageable)
-                .map(ActivityFetchResponse::of);
+                .map(
+                        activity -> ActivityFetchResponse.of(
+                                activity, 
+                                fileService.convertToPublicImageURL(activity.getBook().getFileKey())
+                ));
         return PageResponse.of(page);
     }
     
@@ -122,6 +128,6 @@ public class ActivityService {
             throw new ForbiddenException(ErrorCode.ACTIVITY_GROUP_MISMATCH);
         }
 
-        return ActivityFetchResponse.of(activity);
+        return ActivityFetchResponse.of(activity, fileService.convertToPublicImageURL(activity.getBook().getFileKey()));
     }
 }
