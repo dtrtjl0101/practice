@@ -107,6 +107,14 @@ export default function HighlightCard({
     placeholderData: keepPreviousData,
   });
 
+  const getReacted = (reactionType: HighlightReactionType) => {
+    if (!reactions || !user || user.role !== Role.ROLE_USER) return;
+    const reacted = reactions
+      .get(reactionType)!
+      .find((reaction) => reaction.authorId === user.userId);
+    return reacted;
+  };
+
   const onShareToGroupClicked = async () => {
     const response = await API_CLIENT.highlightController.updateHighlight(
       highlight.id,
@@ -123,15 +131,12 @@ export default function HighlightCard({
 
   const onReactionClicked = async (reactionType: HighlightReactionType) => {
     if (!reactions || !user || user.role !== Role.ROLE_USER) return;
-    const alreadyReacted =
-      reactions
-        .get(reactionType)!
-        .findIndex((reaction) => reaction.authorId === user.userId) !== -1;
+    const reacted = getReacted(reactionType);
     const response = await (
-      alreadyReacted
+      reacted
         ? API_CLIENT.reactionController.deleteReaction
         : API_CLIENT.reactionController.addReaction
-    )(highlight.id, {
+    )(reacted ? reacted.id! : highlight.id, {
       reactionType: reactionType,
     });
     if (!response.isSuccessful) {
@@ -195,6 +200,7 @@ export default function HighlightCard({
           >
             {reactions &&
               emojiList.map((e) => {
+                const reacted = getReacted(e.type);
                 const count = reactions.get(e.type)?.length || 0;
                 if (count === 0) return null;
                 return (
@@ -205,6 +211,7 @@ export default function HighlightCard({
                     }}
                     icon={<Typography>{e.emoji}</Typography>}
                     label={count}
+                    variant={reacted ? "filled" : "outlined"}
                   />
                 );
               })}
