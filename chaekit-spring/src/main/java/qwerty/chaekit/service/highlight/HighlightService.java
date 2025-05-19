@@ -133,7 +133,7 @@ public class HighlightService {
     public List<HighlightReactionResponse> getHighlightReactions(UserToken userToken, Long highlightId) {
         Highlight highlight = entityFinder.findHighlight(highlightId);
         if(highlight.isPublic()) {
-            activityPolicy.assertJoined(userToken.userId(), highlightId);
+            activityPolicy.assertJoined(userToken.userId(), highlight.getActivity().getId());
         } else {
             highlightPolicy.assertUpdatable(userToken.userId(), highlight);
         }

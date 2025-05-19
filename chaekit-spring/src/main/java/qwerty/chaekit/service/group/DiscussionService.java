@@ -77,12 +77,12 @@ public class DiscussionService {
     @Transactional(readOnly = true)
     public DiscussionDetailResponse getDiscussionDetail(UserToken userToken, Long discussionId) {
         Long userId = userToken.userId();
-        
-        activityPolicy.assertJoined(userId, discussionId);
 
         Discussion discussion = discussionRepository.findByIdWithAuthorAndComments(discussionId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.DISCUSSION_NOT_FOUND));
         Long commentCount = (long) discussion.getComments().size();
+
+        activityPolicy.assertJoined(userId, discussion.getActivity().getId());
 
         return discussionMapper.toDetailResponse(discussion, commentCount, userId);
     }
