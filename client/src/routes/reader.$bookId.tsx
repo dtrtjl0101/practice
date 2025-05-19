@@ -1,6 +1,10 @@
-import { Note, NoteAdd } from "@mui/icons-material";
+import { ArrowBack, Note, NoteAdd } from "@mui/icons-material";
 import { Badge, Box, Drawer, Fab, Stack, useTheme } from "@mui/material";
-import { createFileRoute } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  useCanGoBack,
+  useRouter,
+} from "@tanstack/react-router";
 import { EpubCFI, Rendition } from "epubjs";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ReactReader } from "react-reader";
@@ -62,6 +66,8 @@ function RouteComponent() {
   useAutoTokenRefresh();
   useInvalidateQueriesOnAuthChange();
   const [book, setBook] = useState<ArrayBuffer>(new ArrayBuffer(0));
+  const canGoBack = useCanGoBack();
+  const router = useRouter();
 
   const queryParam = activityId
     ? {
@@ -176,6 +182,21 @@ function RouteComponent() {
           zIndex: theme.zIndex.fab,
         }}
       >
+        {canGoBack && (
+          <Fab
+            size="small"
+            sx={{
+              position: "absolute",
+              left: theme.spacing(2),
+              top: theme.spacing(2),
+            }}
+            onClick={() => {
+              router.history.back();
+            }}
+          >
+            <ArrowBack />
+          </Fab>
+        )}
         <Fab
           size="small"
           sx={{
