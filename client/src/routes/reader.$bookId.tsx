@@ -235,7 +235,7 @@ function RouteComponent() {
         open={openHighlightDrawer}
         onClose={() => setOpenHighlightDrawer(false)}
       >
-        <Stack spacing={theme.spacing(2)} p={theme.spacing(2)} width={256}>
+        <Stack spacing={theme.spacing(2)} p={theme.spacing(2)} width={320}>
           {highlightsInPage.map((highlight) => (
             <HighlightCard
               key={highlight.id}
