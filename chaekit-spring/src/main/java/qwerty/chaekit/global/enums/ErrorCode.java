@@ -66,6 +66,7 @@ public enum ErrorCode {
     DISCUSSION_COMMENT_NOT_YOURS("DISCUSSION_COMMENT_NOT_YOURS", "해당 댓글은 본인이 작성한 것이 아닙니다"),
     EBOOK_NOT_PURCHASED("EBOOK_NOT_PURCHASED", "해당 전자책을 구매한 회원만 사용할 수 있는 기능입니다"),
     PUBLISHER_NOT_APPROVED("PUBLISHER_NOT_APPROVED", "현재 출판사 계정이 승인되지 않았습니다"),
+    DISCUSSION_HAS_COMMENTS("DISCUSSION_HAS_COMMENTS", "댓글이 달린 토론은 삭제할 수 없습니다"),
 
     LOGIN_REQUIRED("LOGIN_REQUIRED", "로그인이 필요합니다"),
     ONLY_USER("ONLY_USER", "일반 회원만 사용할 수 있는 기능입니다"),
