@@ -166,6 +166,7 @@ export function ActivityCard(props: { groupId: string }) {
                     params={{ bookId: activity.bookId }}
                     search={{
                       activityId: activity.activityId,
+                      temporalProgress: false,
                     }}
                   >
                     책 읽으러 가기

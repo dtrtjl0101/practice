@@ -136,7 +136,7 @@ function RouteComponent() {
                   params={{
                     bookId,
                   }}
-                  search={{ activityId: undefined }}
+                  search={{ activityId: undefined, temporalProgress: false }}
                   variant="contained"
                 >
                   도서 읽기
