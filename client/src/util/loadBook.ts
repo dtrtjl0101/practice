@@ -10,7 +10,7 @@ class BookStorage {
           console.error(event);
         };
         if (!db.objectStoreNames.contains("books")) {
-          db.createObjectStore("books");
+          db.createObjectStore("books", { keyPath: "id" });
         }
       };
       request.onsuccess = () => {
@@ -33,7 +33,7 @@ class BookStorage {
       request.onsuccess = (event) => {
         const result = (event.target as IDBRequest).result;
         if (result) {
-          resolve(result);
+          resolve(result.book);
         } else {
           resolve(null);
         }
