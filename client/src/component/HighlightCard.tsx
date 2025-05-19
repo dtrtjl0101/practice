@@ -8,12 +8,13 @@ import {
   Avatar,
   Typography,
   Stack,
-  Box,
   Divider,
   Badge,
   Popover,
   Input,
   InputAdornment,
+  Chip,
+  Grid,
 } from "@mui/material";
 import {
   Comment,
@@ -33,6 +34,7 @@ import type {
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../api/api";
 import HighlightCommentCard from "./HighlightCommentCard";
+import { Role } from "../types/role";
 
 export default function HighlightCard({
   highlight,
@@ -103,20 +105,6 @@ export default function HighlightCard({
     placeholderData: keepPreviousData,
   });
 
-  const onReactionClicked = async (reaction: HighlightReactionType) => {
-    const response = await API_CLIENT.reactionController.addReaction(
-      highlight.id,
-      {
-        reactionType: reaction,
-      }
-    );
-    if (!response.isSuccessful) {
-      alert(response.errorMessage);
-    }
-    setEmojiAnchorEl(null);
-    refetchReactions();
-  };
-
   const onShareToGroupClicked = async () => {
     const response = await API_CLIENT.highlightController.updateHighlight(
       highlight.id,
@@ -129,6 +117,26 @@ export default function HighlightCard({
     }
     setAnchorEl(null);
     refetchHighlights();
+  };
+
+  const onReactionClicked = async (reactionType: HighlightReactionType) => {
+    if (!reactions || !user || user.role !== Role.ROLE_USER) return;
+    const alreadyReacted =
+      reactions
+        .get(reactionType)!
+        .findIndex((reaction) => reaction.authorId === user.userId) !== -1;
+    const response = await (
+      alreadyReacted
+        ? API_CLIENT.reactionController.deleteReaction
+        : API_CLIENT.reactionController.addReaction
+    )(highlight.id, {
+      reactionType: reactionType,
+    });
+    if (!response.isSuccessful) {
+      alert(response.errorMessage);
+    }
+    setEmojiAnchorEl(null);
+    refetchReactions();
   };
 
   return (
@@ -162,26 +170,28 @@ export default function HighlightCard({
             )}
           </Stack>
           <Typography variant="body1">{highlight.memo}</Typography>
-          {reactions && (
-            <Stack direction="row" spacing={1} alignItems="center">
-              {emojiList.map((e) => {
-                console.log(reactions);
+          <Grid
+            container
+            direction={"row"}
+            spacing={1}
+            sx={{ flexGrow: 1, alignContent: "flex-start", flexWrap: "wrap" }}
+          >
+            {reactions &&
+              emojiList.map((e) => {
                 const count = reactions.get(e.type)?.length || 0;
                 if (count === 0) return null;
                 return (
-                  <Box
+                  <Chip
                     key={e.type}
-                    sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
-                  >
-                    <span style={{ fontSize: 20 }}>{e.emoji}</span>
-                    <Typography variant="body2" color="text.secondary">
-                      {count}
-                    </Typography>
-                  </Box>
+                    onClick={() => {
+                      onReactionClicked(e.type);
+                    }}
+                    icon={<Typography>{e.emoji}</Typography>}
+                    label={count}
+                  />
                 );
               })}
-            </Stack>
-          )}
+          </Grid>
         </Stack>
       </CardContent>
       <CardActions sx={{ justifyContent: "flex-end" }}>
