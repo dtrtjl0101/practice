@@ -29,3 +29,14 @@ export type HighlightReaction = {
   commentId: number;
   createdAt: string;
 };
+
+export type HighlightComment = {
+  id: number;
+  authorId: number;
+  authorName: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  replies: HighlightComment[];
+  reactions: HighlightComment[];
+};
