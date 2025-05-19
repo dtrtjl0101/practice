@@ -6,6 +6,7 @@ import {
   Paper,
   Divider,
   Stack,
+  CircularProgress,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../../../../../../../../api/api";
@@ -22,7 +23,12 @@ export const Route = createFileRoute(
 function RouteComponent() {
   const router = useRouter();
   const { discussionId } = Route.useParams();
-  const { data: discussion } = useQuery({
+
+  const {
+    data: discussion,
+    isLoading,
+    refetch: refetchDiscussion,
+  } = useQuery({
     queryKey: ["discussion", discussionId],
     queryFn: async () => {
       const response = await API_CLIENT.discussionController.getDiscussion(
@@ -59,9 +65,9 @@ function RouteComponent() {
     router.navigate({ to: ".." });
   };
 
-  if (!discussion) return <Typography>게시글을 찾을 수 없습니다.</Typography>;
+  if (isLoading) return <CircularProgress />;
 
-  // if (isLoading) return <Typography>게시글을 불러오는 중입니다...</Typography>;
+  if (!discussion) return <Typography>게시글을 찾을 수 없습니다.</Typography>;
 
   return (
     <Container maxWidth="md" sx={{ mt: 5 }}>
@@ -127,13 +133,12 @@ function RouteComponent() {
           </Button>
         </Stack>
       </Paper>
-      {/* <CommentSection
+      <CommentSection
+        discussionId={parseInt(discussionId)}
         isDebate={discussion.isDebate}
-        comments={discussion.comments}
-        onAddComment={handleAddComment}
-        onDeleteComment={handleDeleteComment}
-        onEditComment={handleEditComment}
-      /> */}
+        comments={discussion.comments as unknown as Comment[]}
+        onRefresh={refetchDiscussion}
+      />
     </Container>
   );
 }

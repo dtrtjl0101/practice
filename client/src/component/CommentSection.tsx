@@ -14,69 +14,113 @@ import {
   FormControl,
   FormLabel,
 } from "@mui/material";
-import { useState } from "react";
-import { Comment } from "../types/comment";
+import { useMemo, useState } from "react";
+import { Comment, StanceOptions } from "../types/comment";
 import API_CLIENT from "../api/api";
 
-type CommentSectionProps = {
-  comments: Comment[];
-  isDebate: boolean;
-};
-
 export default function CommentSection({
+  discussionId,
   comments,
   isDebate,
-}: CommentSectionProps) {
-  const [input, setInput] = useState("");
-  const [stance, setStance] = useState<"agree" | "disagree">("agree");
+  onRefresh,
+}: {
+  discussionId: number;
+  comments: Comment[];
+  isDebate: boolean;
+  onRefresh: () => void;
+}) {
+  const [content, setContent] = useState("");
+  const [replyContent, setReplyContent] = useState<{
+    [parentId: number]: string;
+  }>({});
+  const [stance, setStance] = useState<StanceOptions>("AGREE");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editedContent, setEditedContent] = useState("");
   const [replyTo, setReplyTo] = useState<number | null>(null);
-  const [replyInput, setReplyInput] = useState<{ [key: number]: string }>({});
   const [replyStance, setReplyStance] = useState<{
-    [key: number]: "agree" | "disagree";
+    [parentId: number]: StanceOptions;
   }>({});
 
-  const handleAddComment = () => {
-    API_CLIENT.commentController
-      .createComment(discussionId, {
-        content: input,
-        stance: isDebate ? stance : undefined,
+  const sortedComments = useMemo(() => {
+    return [...comments]
+      .sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      )
+      .map((comment) => {
+        comment.replies = comment.replies?.sort(
+          (a, b) =>
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+        return comment;
+      });
+  }, [comments]);
+
+  const handleAddComment = (parentId?: number) => {
+    const isReply = !!parentId;
+    const currentContent = isReply ? replyContent[parentId!] : content;
+    const currentStance = isReply ? replyStance[parentId!] : stance;
+
+    if (!currentContent?.trim()) {
+      alert(isReply ? "답글을 입력해주세요." : "댓글을 입력해주세요");
+      return;
+    }
+    if (isDebate && !currentStance) {
+      alert("의견을 선택해주세요.");
+      return;
+    }
+
+    API_CLIENT.discussionController
+      .addComment(discussionId, {
+        parentId: parentId,
+        content: currentContent,
+        stance: isDebate ? currentStance : "AGREE",
       })
       .then((response) => {
         if (response.isSuccessful) {
-          alert("댓글이 작성되었습니다.");
-          setInput("");
+          if (isReply) {
+            setReplyContent((prev) => ({ ...prev, [parentId!]: "" }));
+            setReplyTo(null);
+          } else {
+            setContent("");
+          }
+          onRefresh();
         } else {
           alert(response.errorMessage);
         }
       });
   };
-  // 댓글 작성
-  const handleSubmit = () => {
-    if (input.trim() === "") return;
-    if (isDebate) {
-      onAddComment(input.trim(), stance);
-    } else {
-      onAddComment(input.trim());
-    }
-    setInput("");
+
+  const handleEditComment = (commentId: number) => {
+    API_CLIENT.discussionController
+      .updateComment1(commentId, {
+        content: editedContent,
+      })
+      .then((response) => {
+        if (response.isSuccessful) {
+          alert("댓글이 수정되었습니다.");
+          onRefresh();
+        } else {
+          alert(response.errorMessage);
+        }
+      });
   };
 
-  // 답글 작성
-  const handleReplySubmit = (parentId: number) => {
-    const content = replyInput[parentId];
-    if (!content || content.trim() === "") return;
-    if (isDebate) {
-      onAddComment(content.trim(), replyStance[parentId] || "agree", parentId);
-    } else {
-      onAddComment(content.trim(), undefined, parentId);
-    }
-    setReplyInput((prev) => ({ ...prev, [parentId]: "" }));
-    setReplyTo(null);
+  const handleDeleteComment = (commentId: number) => {
+    const confirmDelete = window.confirm("댓글을 삭제하시겠습니까?");
+    if (!confirmDelete) return;
+    API_CLIENT.discussionController
+      .deleteComment1(commentId)
+      .then((response) => {
+        if (response.isSuccessful) {
+          alert("댓글이 삭제되었습니다.");
+          onRefresh();
+        } else {
+          alert(response.errorMessage);
+        }
+      });
   };
 
-  // 댓글 수정
   const handleEdit = (comment: Comment) => {
     setEditingId(comment.commentId);
     setEditedContent(comment.content);
@@ -87,27 +131,11 @@ export default function CommentSection({
   };
   const handleSave = () => {
     if (editingId !== null && editedContent.trim()) {
-      onEditComment(editingId, editedContent.trim());
+      handleEditComment(editingId);
       setEditingId(null);
       setEditedContent("");
     }
   };
-
-  // 시간순 정렬 + 계층적 정렬
-  const rootComments = comments
-    .filter((c) => !c.parentId)
-    .sort(
-      (a, b) =>
-        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-    );
-
-  const childComments = (parentId: number) =>
-    comments
-      .filter((c) => c.parentId === parentId)
-      .sort(
-        (a, b) =>
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-      );
 
   return (
     <Box sx={{ mt: 5 }}>
@@ -116,52 +144,33 @@ export default function CommentSection({
         {isDebate ? "토론 댓글" : "댓글"}
       </Typography>
 
-      {/* 댓글 작성 */}
       <Stack spacing={2} sx={{ mb: 2 }}>
         {isDebate && (
-          <FormControl component="fieldset">
-            <FormLabel component="legend">의견 선택</FormLabel>
-            <RadioGroup
-              row
-              value={stance}
-              onChange={(e) =>
-                setStance(e.target.value as "agree" | "disagree")
-              }
-            >
-              <FormControlLabel
-                value="agree"
-                control={<Radio />}
-                label="찬성"
-              />
-              <FormControlLabel
-                value="disagree"
-                control={<Radio />}
-                label="반대"
-              />
-            </RadioGroup>
-          </FormControl>
+          <StanceSelector
+            stance={stance}
+            setStance={(value) => setStance(value)}
+          />
         )}
         <Stack direction="row" spacing={2}>
           <TextField
             fullWidth
             multiline
             minRows={2}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
             placeholder={"댓글을 입력하세요"}
           />
-          <Button variant="contained" onClick={handleSubmit}>
+          <Button variant="contained" onClick={() => handleAddComment()}>
             작성
           </Button>
         </Stack>
       </Stack>
 
-      {/* 댓글 목록 */}
       <Stack spacing={2}>
-        {rootComments.length === 0 ? (
+        {sortedComments.length === 0 ? (
           <Typography color="text.secondary">아직 댓글이 없습니다.</Typography>
         ) : (
-          rootComments.map((comment) => (
+          sortedComments.map((comment) => (
             <Box key={comment.commentId}>
               <CommentItem
                 comment={comment}
@@ -171,20 +180,19 @@ export default function CommentSection({
                 onEdit={handleEdit}
                 onSave={handleSave}
                 onCancel={handleCancel}
-                onDelete={onDeleteComment}
+                onDelete={handleDeleteComment}
                 setEditingId={setEditingId}
                 replyTo={replyTo}
                 setReplyTo={setReplyTo}
-                replyInput={replyInput}
-                setReplyInput={setReplyInput}
+                replyInput={replyContent}
+                setReplyInput={setReplyContent}
                 replyStance={replyStance}
                 setReplyStance={setReplyStance}
-                handleReplySubmit={handleReplySubmit}
+                handleReplySubmit={handleAddComment}
                 isDebate={isDebate}
               />
-              {/* 답글 목록 */}
               <Stack spacing={1} sx={{ pl: 4 }}>
-                {childComments(comment.commentId).map((reply) => (
+                {comment.replies.map((reply) => (
                   <CommentItem
                     key={reply.commentId}
                     comment={reply}
@@ -194,15 +202,15 @@ export default function CommentSection({
                     onEdit={handleEdit}
                     onSave={handleSave}
                     onCancel={handleCancel}
-                    onDelete={onDeleteComment}
+                    onDelete={handleDeleteComment}
                     setEditingId={setEditingId}
                     replyTo={replyTo}
                     setReplyTo={setReplyTo}
-                    replyInput={replyInput}
-                    setReplyInput={setReplyInput}
+                    replyInput={replyContent}
+                    setReplyInput={setReplyContent}
                     replyStance={replyStance}
                     setReplyStance={setReplyStance}
-                    handleReplySubmit={handleReplySubmit}
+                    handleReplySubmit={handleAddComment}
                     isDebate={isDebate}
                     isReply
                   />
@@ -233,9 +241,9 @@ type CommentItemProps = {
   setReplyInput: React.Dispatch<
     React.SetStateAction<{ [key: number]: string }>
   >;
-  replyStance: { [key: number]: "agree" | "disagree" };
+  replyStance: { [key: number]: StanceOptions };
   setReplyStance: React.Dispatch<
-    React.SetStateAction<{ [key: number]: "agree" | "disagree" }>
+    React.SetStateAction<{ [key: number]: StanceOptions }>
   >;
   handleReplySubmit: (parentId: number) => void;
   isDebate: boolean;
@@ -273,10 +281,22 @@ function CommentItem({
       elevation={0}
     >
       <Stack direction="row" alignItems="center" spacing={1}>
-        {comment.stance && (
+        {isDebate && (
           <Chip
-            label={comment.stance === "agree" ? "찬성" : "반대"}
-            color={comment.stance === "agree" ? "primary" : "error"}
+            label={
+              comment.stance === "AGREE"
+                ? "찬성"
+                : comment.stance === "DISAGREE"
+                  ? "반대"
+                  : "중립"
+            }
+            color={
+              comment.stance === "AGREE"
+                ? "primary"
+                : comment.stance === "DISAGREE"
+                  ? "error"
+                  : "default"
+            }
             size="small"
           />
         )}
@@ -337,27 +357,15 @@ function CommentItem({
       {isReplying && (
         <Stack spacing={1} sx={{ mt: 2 }}>
           {isDebate && (
-            <RadioGroup
-              row
-              value={replyStance[comment.commentId] || "agree"}
-              onChange={(e) =>
+            <StanceSelector
+              stance={replyStance[comment.commentId] || "AGREE"}
+              setStance={(value) =>
                 setReplyStance((prev) => ({
                   ...prev,
-                  [comment.commentId]: e.target.value as "agree" | "disagree",
+                  [comment.commentId]: value as StanceOptions,
                 }))
               }
-            >
-              <FormControlLabel
-                value="agree"
-                control={<Radio />}
-                label="찬성"
-              />
-              <FormControlLabel
-                value="disagree"
-                control={<Radio />}
-                label="반대"
-              />
-            </RadioGroup>
+            />
           )}
           <Stack direction="row" spacing={1}>
             <TextField
@@ -384,5 +392,28 @@ function CommentItem({
         </Stack>
       )}
     </Paper>
+  );
+}
+
+function StanceSelector({
+  stance,
+  setStance,
+}: {
+  stance: StanceOptions;
+  setStance: (stance: StanceOptions) => void;
+}) {
+  return (
+    <FormControl component="fieldset">
+      <FormLabel component="legend">의견 선택</FormLabel>
+      <RadioGroup
+        row
+        value={stance}
+        onChange={(e) => setStance(e.target.value as StanceOptions)}
+      >
+        <FormControlLabel value="AGREE" control={<Radio />} label="찬성" />
+        <FormControlLabel value="DISAGREE" control={<Radio />} label="반대" />
+        <FormControlLabel value="NEUTRAL" control={<Radio />} label="중립" />
+      </RadioGroup>
+    </FormControl>
   );
 }

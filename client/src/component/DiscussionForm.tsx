@@ -1,5 +1,4 @@
 import API_CLIENT from "../api/api";
-import { useLocation } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -161,22 +160,25 @@ export default function DiscussionForm({
         />
         <Stack direction="row" justifyContent="space-between" sx={{ m: 1 }}>
           <Box sx={{ justifySelf: "flex-start" }}>
+            {isEdit ? null : (
+              <FormControlLabel
+                label="토론"
+                control={
+                  <Checkbox
+                    name="isDebate"
+                    checked={isDebate}
+                    onChange={handleCheckbox}
+                  />
+                }
+              />
+            )}
+          </Box>
+          <Box sx={{ justifySelf: "flex-end" }}>
             <Button onClick={handlePostDiscussion}>
               {isEdit ? "수정" : "작성"}
             </Button>
             <Button onClick={handleBack}>취소</Button>
           </Box>
-          <FormControlLabel
-            sx={{ justifySelf: "flex-end" }}
-            label="토론"
-            control={
-              <Checkbox
-                name="isDebate"
-                checked={isDebate}
-                onChange={handleCheckbox}
-              />
-            }
-          />
         </Stack>
       </Card>
     </Container>
