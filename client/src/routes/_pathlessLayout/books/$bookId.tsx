@@ -13,6 +13,7 @@ import { useState } from "react";
 import API_CLIENT from "../../../api/api";
 import { BookMetadata } from "../../../types/book";
 import LinkButton from "../../../component/LinkButton";
+import CreditPurchaseModal from "../../../component/CreditPurchaseModal";
 
 export const Route = createFileRoute("/_pathlessLayout/books/$bookId")({
   component: RouteComponent,
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/_pathlessLayout/books/$bookId")({
 function RouteComponent() {
   const { bookId } = Route.useParams();
   const [purchasing, setPurchasing] = useState(false);
+  const [openCreditPurchaseModal, setOpenCreditPurchaseModal] = useState(false);
 
   const { data: book, isLoading } = useQuery({
     queryKey: ["book", bookId],
@@ -38,7 +40,21 @@ function RouteComponent() {
     );
     setPurchasing(false);
     if (!response.isSuccessful) {
-      alert(response.errorMessage);
+      switch (response.errorCode) {
+        case "CREDIT_NOT_ENOUGH": {
+          const shouldOpenCreditPurchaseModal = confirm(
+            "잔액이 부족합니다. 충전하시겠습니까?"
+          );
+          if (shouldOpenCreditPurchaseModal) {
+            setOpenCreditPurchaseModal(true);
+          }
+          break;
+        }
+        default: {
+          alert(response.errorMessage);
+          break;
+        }
+      }
       return;
     }
     alert("구매가 완료되었습니다!");
@@ -121,6 +137,11 @@ function RouteComponent() {
           </Stack>
         )}
       </Paper>
+      <CreditPurchaseModal
+        open={openCreditPurchaseModal}
+        onClose={() => setOpenCreditPurchaseModal(false)}
+        onPurchased={() => setOpenCreditPurchaseModal(false)}
+      />
     </Container>
   );
 }
