@@ -18,6 +18,7 @@ import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.UserToken;
+import qwerty.chaekit.mapper.HighlightCommentMapper;
 import qwerty.chaekit.service.group.ActivityPolicy;
 import qwerty.chaekit.service.notification.NotificationService;
 
@@ -35,6 +36,7 @@ public class HighlightCommentService {
     private final UserProfileRepository userRepository;
     private final NotificationService notificationService;
     private final ActivityPolicy activityPolicy;
+    private final HighlightCommentMapper highlightCommentMapper;
 
     public HighlightCommentResponse createComment(UserToken userToken, Long highlightId, HighlightCommentRequest request) {
         Long userId = userToken.userId();
@@ -89,7 +91,7 @@ public class HighlightCommentService {
             }
         }
         
-        return HighlightCommentResponse.of(savedComment);
+        return highlightCommentMapper.toResponse(savedComment);
     }
     
     @Transactional(readOnly = true)
@@ -127,7 +129,7 @@ public class HighlightCommentService {
         }
 
         return rootComments.stream()
-                .map(comment -> HighlightCommentResponse.of(comment, reactionsByCommentId))
+                .map(comment -> highlightCommentMapper.toResponse(comment, reactionsByCommentId))
                 .collect(Collectors.toList());
     }
     
@@ -142,7 +144,7 @@ public class HighlightCommentService {
         }
         
         comment.updateContent(request.content());
-        return HighlightCommentResponse.of(commentRepository.save(comment));
+        return highlightCommentMapper.toResponse(commentRepository.save(comment));
     }
     
     public void deleteComment(UserToken userToken, Long commentId) {

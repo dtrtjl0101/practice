@@ -121,13 +121,12 @@ public class ActivityService {
     }
 
     @Transactional(readOnly = true)
-    public ActivityFetchResponse fetchActivity(long groupId, long activityId) {
+    public ActivityFetchResponse fetchActivity(UserToken userToken, long activityId) {
+        Long userId = userToken.userId();
         Activity activity = activityRepository.findByIdWithBook(activityId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.ACTIVITY_NOT_FOUND));
 
-        if (!activity.getGroup().getId().equals(groupId)) {
-            throw new ForbiddenException(ErrorCode.ACTIVITY_GROUP_MISMATCH);
-        }
+        activityPolicy.assertJoined(userId, activity.getId());
 
         return ActivityFetchResponse.of(activity, fileService.convertToPublicImageURL(activity.getBook().getFileKey()), true);
     }
