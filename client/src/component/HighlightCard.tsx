@@ -93,7 +93,7 @@ export default function HighlightCard({
     placeholderData: keepPreviousData,
   });
 
-  const { data: comments } = useQuery({
+  const { data: comments, refetch: refetchComments } = useQuery({
     queryKey: ["highlightComments", highlight.id],
     queryFn: async () => {
       const response = await API_CLIENT.commentController.getComments(
@@ -139,6 +139,21 @@ export default function HighlightCard({
     }
     setEmojiAnchorEl(null);
     refetchReactions();
+  };
+
+  const onCommentCreateButtonClicked = async () => {
+    if (!user) return;
+    const response = await API_CLIENT.commentController.createComment(
+      highlight.id,
+      {
+        content: commentContent,
+      }
+    );
+    if (!response.isSuccessful) {
+      alert(response.errorMessage);
+    }
+    setCommentContent("");
+    refetchComments();
   };
 
   return (
@@ -198,7 +213,7 @@ export default function HighlightCard({
       </CardContent>
       <CardActions sx={{ justifyContent: "flex-end" }}>
         <IconButton size="small" onClick={() => setOpenComments(!openComments)}>
-          <Badge badgeContent={2} color="primary">
+          <Badge badgeContent={comments?.length} color="primary">
             {openComments ? <Comment /> : <CommentOutlined />}
           </Badge>
         </IconButton>
@@ -245,7 +260,10 @@ export default function HighlightCard({
               size="small"
               endAdornment={
                 <InputAdornment position="end">
-                  <IconButton edge="end">
+                  <IconButton
+                    edge="end"
+                    onClick={() => onCommentCreateButtonClicked()}
+                  >
                     <Send />
                   </IconButton>
                 </InputAdornment>
