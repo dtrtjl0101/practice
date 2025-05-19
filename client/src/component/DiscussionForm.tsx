@@ -1,4 +1,5 @@
 import API_CLIENT from "../api/api";
+import { useLocation } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -24,11 +25,13 @@ import { Discussion } from "../types/discussion";
 export default function DiscussionForm({
   activityId,
   discussionId,
+  handlePostRoute,
   handleBack,
 }: {
   activityId: number;
   discussionId?: number;
-  handleBack: (discussionId?: number) => void;
+  handlePostRoute: (discussionId?: number) => void;
+  handleBack: () => void;
 }) {
   const theme = useTheme();
   const isEdit = !!discussionId;
@@ -71,7 +74,7 @@ export default function DiscussionForm({
         .then((response) => {
           if (response.isSuccessful) {
             alert("게시글이 수정되었습니다.");
-            handleBack();
+            handlePostRoute();
           } else {
             alert(response.errorMessage);
           }
@@ -87,7 +90,7 @@ export default function DiscussionForm({
         .then((response) => {
           if (response.isSuccessful) {
             alert("게시글이 작성되었습니다.");
-            handleBack(response.data.discussionId);
+            handlePostRoute(response.data.discussionId);
           } else {
             alert(response.errorMessage);
           }
@@ -161,9 +164,7 @@ export default function DiscussionForm({
             <Button onClick={handlePostDiscussion}>
               {isEdit ? "수정" : "작성"}
             </Button>
-            <Button onClick={() => handleBack && handleBack(discussionId!)}>
-              취소
-            </Button>
+            <Button onClick={handleBack}>취소</Button>
           </Box>
           <FormControlLabel
             sx={{ justifySelf: "flex-end" }}

@@ -27,7 +27,12 @@ function RouteComponent() {
     <DiscussionForm
       activityId={parseInt(activityId)}
       discussionId={parseInt(discussionId)}
-      handleBack={goToDiscussion}
+      handlePostRoute={goToDiscussion}
+      handleBack={() => {
+        navigate({
+          to: "..",
+        });
+      }}
     />
   );
 }

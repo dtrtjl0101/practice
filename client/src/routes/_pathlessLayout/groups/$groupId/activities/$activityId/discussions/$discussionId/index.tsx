@@ -21,20 +21,15 @@ export const Route = createFileRoute(
 
 function RouteComponent() {
   const router = useRouter();
-  const { groupId, activityId, discussionId } = Route.useParams();
-  const { data: discussion, isLoading } = useQuery({
+  const { discussionId } = Route.useParams();
+  const { data: discussion } = useQuery({
     queryKey: ["discussion", discussionId],
     queryFn: async () => {
-      const discussionIdNumber = parseInt(discussionId);
-      if (isNaN(discussionIdNumber)) {
-        alert("Invalid discussion ID");
-        return;
-      }
-      const response =
-        await API_CLIENT.discussionController.getDiscussion(discussionIdNumber);
+      const response = await API_CLIENT.discussionController.getDiscussion(
+        parseInt(discussionId)
+      );
       if (!response.isSuccessful) {
-        alert(response.errorMessage);
-        return;
+        throw new Error(response.errorMessage);
       }
       return response.data as Discussion;
     },
@@ -66,7 +61,7 @@ function RouteComponent() {
 
   if (!discussion) return <Typography>게시글을 찾을 수 없습니다.</Typography>;
 
-  if (isLoading) return <Typography>게시글을 불러오는 중입니다...</Typography>;
+  // if (isLoading) return <Typography>게시글을 불러오는 중입니다...</Typography>;
 
   return (
     <Container maxWidth="md" sx={{ mt: 5 }}>
@@ -119,7 +114,7 @@ function RouteComponent() {
             수정
           </Button>
           <Button variant="outlined" onClick={handleBack}>
-            뒤로 가기
+            목록
           </Button>
           <Button
             variant="text"

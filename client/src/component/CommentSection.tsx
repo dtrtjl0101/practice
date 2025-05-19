@@ -16,24 +16,15 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { Comment } from "../types/comment";
+import API_CLIENT from "../api/api";
 
 type CommentSectionProps = {
   comments: Comment[];
-  onAddComment: (
-    content: string,
-    stance?: "agree" | "disagree",
-    parentId?: number
-  ) => void;
-  onDeleteComment: (id: number) => void;
-  onEditComment: (id: number, newContent: string) => void;
   isDebate: boolean;
 };
 
 export default function CommentSection({
   comments,
-  onAddComment,
-  onDeleteComment,
-  onEditComment,
   isDebate,
 }: CommentSectionProps) {
   const [input, setInput] = useState("");
@@ -46,6 +37,21 @@ export default function CommentSection({
     [key: number]: "agree" | "disagree";
   }>({});
 
+  const handleAddComment = () => {
+    API_CLIENT.commentController
+      .createComment(discussionId, {
+        content: input,
+        stance: isDebate ? stance : undefined,
+      })
+      .then((response) => {
+        if (response.isSuccessful) {
+          alert("댓글이 작성되었습니다.");
+          setInput("");
+        } else {
+          alert(response.errorMessage);
+        }
+      });
+  };
   // 댓글 작성
   const handleSubmit = () => {
     if (input.trim() === "") return;

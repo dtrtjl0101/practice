@@ -8,6 +8,7 @@ import {
   Box,
   Card,
   CardContent,
+  Divider,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -17,18 +18,18 @@ import { Discussion } from "../../../../../../../types/discussion";
 export const Route = createFileRoute(
   "/_pathlessLayout/groups/$groupId/activities/$activityId/discussions/"
 )({
-  component: Discussions,
+  component: RouteComponent,
 });
 
-function Discussions() {
+function RouteComponent() {
   const navigate = useNavigate();
   const { groupId, activityId } = Route.useParams();
-  const activityIdNumber = parseInt(activityId ?? "");
   const { data: discussions } = useQuery({
     queryKey: ["discussions", activityId],
     queryFn: async () => {
-      const response =
-        await API_CLIENT.discussionController.getDiscussions(activityIdNumber);
+      const response = await API_CLIENT.discussionController.getDiscussions(
+        parseInt(activityId)
+      );
       if (!response.isSuccessful) {
         alert(response.errorMessage);
         return;
@@ -45,18 +46,39 @@ function Discussions() {
       <Box sx={{ textAlign: "center", my: 4 }}>
         <Typography variant="h4">게시판</Typography>
       </Box>
-      <Box sx={{ textAlign: "right", mb: 4 }}>
-        <Button
-          variant="contained"
-          onClick={() =>
-            navigate({
-              to: `/groups/${groupId}/activities/${activityId}/discussions/new`,
-            })
-          }
-        >
-          새 게시글 추가
-        </Button>
-      </Box>
+      <Stack direction="row" justifyContent="space-between" sx={{ mb: 2 }}>
+        <Box sx={{ textAlign: "left", mb: 4 }}>
+          <Button
+            variant="contained"
+            onClick={() =>
+              navigate({
+                from: Route.to,
+                to: "/groups/$groupId",
+                params: {
+                  groupId: groupId,
+                },
+              })
+            }
+          >
+            이전 페이지
+          </Button>
+        </Box>
+        <Box sx={{ textAlign: "right", mb: 4 }}>
+          <Button
+            variant="contained"
+            onClick={() =>
+              navigate({
+                from: Route.to,
+                to: `new`,
+              })
+            }
+          >
+            새 게시글 추가
+          </Button>
+        </Box>
+      </Stack>
+      <Divider sx={{ mb: 4 }} />
+
       <Box>
         {discussions?.length == 0 ? (
           <Typography>등록된 글이 없습니다.</Typography>
@@ -84,7 +106,11 @@ function Discussions() {
                       }}
                       onClick={() =>
                         navigate({
-                          to: `/groups/${groupId}/activities/${activityId}/discussions/${discussion.discussionId}`,
+                          from: Route.to,
+                          to: "$discussionId",
+                          params: {
+                            discussionId: discussion.discussionId.toString(),
+                          },
                         })
                       }
                     >
