@@ -1466,32 +1466,6 @@
         }
       }
     },
-    "/{activityId}": {
-      "get": {
-        "tags": ["activity-controller"],
-        "operationId": "getActivity",
-        "parameters": [
-          {
-            "name": "activityId",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "integer", "format": "int64" }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiSuccessResponseActivityFetchResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api": {
       "get": {
         "tags": ["main-controller"],
@@ -2157,6 +2131,32 @@
         }
       }
     },
+    "/api/activities/{activityId}": {
+      "get": {
+        "tags": ["activity-controller"],
+        "operationId": "getActivity",
+        "parameters": [
+          {
+            "name": "activityId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponseActivityFetchResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/highlights/reactions/{reactionId}": {
       "delete": {
         "tags": ["reaction-controller"],
@@ -2444,6 +2444,7 @@
           "id": { "type": "integer", "format": "int64" },
           "authorId": { "type": "integer", "format": "int64" },
           "authorName": { "type": "string" },
+          "authorProfileImageURL": { "type": "string" },
           "content": { "type": "string" },
           "createdAt": { "type": "string", "format": "date-time" },
           "updatedAt": { "type": "string", "format": "date-time" },
@@ -2756,28 +2757,6 @@
         "type": "object",
         "properties": { "content": { "type": "string" } }
       },
-      "ActivityFetchResponse": {
-        "type": "object",
-        "properties": {
-          "activityId": { "type": "integer", "format": "int64" },
-          "bookId": { "type": "integer", "format": "int64" },
-          "bookTitle": { "type": "string" },
-          "bookAuthor": { "type": "string" },
-          "coverImageKey": { "type": "string" },
-          "bookDescription": { "type": "string" },
-          "startTime": { "type": "string", "format": "date" },
-          "endTime": { "type": "string", "format": "date" },
-          "description": { "type": "string" }
-        }
-      },
-      "ApiSuccessResponseActivityFetchResponse": {
-        "type": "object",
-        "properties": {
-          "isSuccessful": { "type": "boolean" },
-          "data": { "$ref": "#/components/schemas/ActivityFetchResponse" }
-        },
-        "description": "API 에러 응답을 감싸는 클래스"
-      },
       "ApiSuccessResponseUserInfoResponse": {
         "type": "object",
         "properties": {
@@ -2965,7 +2944,7 @@
           "groupImageURL": { "type": "string" },
           "myMemberShipStatus": {
             "type": "string",
-            "enum": ["PENDING", "JOINED", "NONE"]
+            "enum": ["OWNED", "PENDING", "JOINED", "NONE"]
           },
           "memberCount": { "type": "integer", "format": "int32" }
         }
@@ -3021,6 +3000,21 @@
           "data": { "$ref": "#/components/schemas/GroupFetchResponse" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
+      },
+      "ActivityFetchResponse": {
+        "type": "object",
+        "properties": {
+          "activityId": { "type": "integer", "format": "int64" },
+          "bookId": { "type": "integer", "format": "int64" },
+          "bookTitle": { "type": "string" },
+          "bookAuthor": { "type": "string" },
+          "coverImageURL": { "type": "string" },
+          "bookDescription": { "type": "string" },
+          "startTime": { "type": "string", "format": "date" },
+          "endTime": { "type": "string", "format": "date" },
+          "description": { "type": "string" },
+          "isParticipant": { "type": "boolean" }
+        }
       },
       "ApiSuccessResponsePageResponseActivityFetchResponse": {
         "type": "object",
@@ -3166,7 +3160,9 @@
           "bookCoverImageURL": { "type": "string" },
           "author": { "type": "string" },
           "description": { "type": "string" },
-          "size": { "type": "integer", "format": "int64" }
+          "size": { "type": "integer", "format": "int64" },
+          "isPurchased": { "type": "boolean" },
+          "price": { "type": "integer", "format": "int32" }
         }
       },
       "PageResponseEbookFetchResponse": {
@@ -3244,6 +3240,14 @@
           "totalItems": { "type": "integer", "format": "int64" },
           "totalPages": { "type": "integer", "format": "int32" }
         }
+      },
+      "ApiSuccessResponseActivityFetchResponse": {
+        "type": "object",
+        "properties": {
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/ActivityFetchResponse" }
+        },
+        "description": "API 에러 응답을 감싸는 클래스"
       },
       "ApiSuccessResponsePageResponseDiscussionFetchResponse": {
         "type": "object",

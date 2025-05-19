@@ -204,6 +204,7 @@ export interface HighlightCommentResponse {
   /** @format int64 */
   authorId?: number;
   authorName?: string;
+  authorProfileImageURL?: string;
   content?: string;
   /** @format date-time */
   createdAt?: string;
@@ -473,28 +474,6 @@ export interface DiscussionCommentPatchRequest {
   content?: string;
 }
 
-export interface ActivityFetchResponse {
-  /** @format int64 */
-  activityId?: number;
-  /** @format int64 */
-  bookId?: number;
-  bookTitle?: string;
-  bookAuthor?: string;
-  coverImageKey?: string;
-  bookDescription?: string;
-  /** @format date */
-  startTime?: string;
-  /** @format date */
-  endTime?: string;
-  description?: string;
-}
-
-/** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponseActivityFetchResponse {
-  isSuccessful?: boolean;
-  data?: ActivityFetchResponse;
-}
-
 /** API 에러 응답을 감싸는 클래스 */
 export interface ApiSuccessResponseUserInfoResponse {
   isSuccessful?: boolean;
@@ -653,7 +632,7 @@ export interface GroupFetchResponse {
   description?: string;
   tags?: string[];
   groupImageURL?: string;
-  myMemberShipStatus?: "PENDING" | "JOINED" | "NONE";
+  myMemberShipStatus?: "OWNED" | "PENDING" | "JOINED" | "NONE";
   /** @format int32 */
   memberCount?: number;
 }
@@ -699,6 +678,23 @@ export interface PageResponseGroupMemberResponse {
 export interface ApiSuccessResponseGroupFetchResponse {
   isSuccessful?: boolean;
   data?: GroupFetchResponse;
+}
+
+export interface ActivityFetchResponse {
+  /** @format int64 */
+  activityId?: number;
+  /** @format int64 */
+  bookId?: number;
+  bookTitle?: string;
+  bookAuthor?: string;
+  coverImageURL?: string;
+  bookDescription?: string;
+  /** @format date */
+  startTime?: string;
+  /** @format date */
+  endTime?: string;
+  description?: string;
+  isParticipant?: boolean;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -819,6 +815,9 @@ export interface EbookFetchResponse {
   description?: string;
   /** @format int64 */
   size?: number;
+  isPurchased?: boolean;
+  /** @format int32 */
+  price?: number;
 }
 
 export interface PageResponseEbookFetchResponse {
@@ -877,6 +876,12 @@ export interface PageResponsePublisherInfoResponse {
   totalItems?: number;
   /** @format int32 */
   totalPages?: number;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseActivityFetchResponse {
+  isSuccessful?: boolean;
+  data?: ActivityFetchResponse;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -1996,12 +2001,12 @@ export class Api<
      *
      * @tags activity-controller
      * @name GetActivity
-     * @request GET:/{activityId}
+     * @request GET:/api/activities/{activityId}
      * @secure
      */
     getActivity: (activityId: number, params: RequestParams = {}) =>
       this.request<ApiSuccessResponseActivityFetchResponse, any>({
-        path: `/${activityId}`,
+        path: `/api/activities/${activityId}`,
         method: "GET",
         secure: true,
         ...params,

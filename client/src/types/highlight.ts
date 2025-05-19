@@ -74,6 +74,7 @@ export type HighlightComment = {
   id: number;
   authorId: number;
   authorName: string;
+  authorProfileImageURL: string;
   content: string;
   createdAt: string;
   updatedAt: string;
