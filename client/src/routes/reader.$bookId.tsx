@@ -17,14 +17,18 @@ import loadBook from "../util/loadBook";
 import useInvalidateQueriesOnAuthChange from "../api/login/useInvalidateQueriesOnAuthChange";
 import HighlightCard from "../component/HighlightCard";
 import HighlightCreationModal from "../component/HighlightCreationModal";
+import loadLocations from "../util/loadLocations";
 
 export const Route = createFileRoute("/reader/$bookId")({
   component: RouteComponent,
   validateSearch: (search) => {
     const activityIdString = search.activityId as string | undefined;
     const activityId = activityIdString ? parseInt(activityIdString) : NaN;
+
+    const temporalProgress = !!search.temporalProgress;
     return {
       activityId: !isNaN(activityId) ? activityId : undefined,
+      temporalProgress,
     };
   },
   params: {
@@ -53,9 +57,9 @@ type Selection = {
 
 function RouteComponent() {
   const { bookId } = Route.useParams();
-  const { activityId } = Route.useSearch();
+  const { activityId, temporalProgress } = Route.useSearch();
   const theme = useTheme();
-  const [location, setLocation] = useState<string | number>(10);
+  const [location, setLocation] = useState<string | null>(null);
   const [highlightsInPage, setHighlightsInPage] = useState<Highlight[]>([]);
   const [rendition, setRendition] = useState<Rendition | undefined>(undefined);
   const [openHighlightDrawer, setOpenHighlightDrawer] = useState(false);
@@ -81,8 +85,11 @@ function RouteComponent() {
       };
 
   const spine = useMemo(() => {
+    if (!location) {
+      return undefined;
+    }
     try {
-      const spinePos = new EpubCFI(location.toString()).spinePos;
+      const spinePos = new EpubCFI(location).spinePos;
       return spinePos.toString();
     } catch (e) {
       console.error("Error parsing spine position", e);
@@ -165,6 +172,18 @@ function RouteComponent() {
       setBook(book);
     });
   }, [bookId]);
+
+  useEffect(() => {
+    if (temporalProgress || !rendition || !location) {
+      return;
+    }
+    try {
+      const readProgress = rendition.book.locations.percentageFromCfi(location);
+      console.log(readProgress);
+    } catch (e) {
+      console.error("Error parsing location", e);
+    }
+  }, [rendition, location]);
 
   return (
     <Box
@@ -307,6 +326,9 @@ function RouteComponent() {
         }}
         showToc={false}
         getRendition={(newRendition) => {
+          newRendition.once("started", async () => {
+            await loadLocations(bookId, newRendition);
+          });
           setRendition(newRendition);
         }}
       />
