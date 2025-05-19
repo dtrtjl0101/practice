@@ -1,6 +1,7 @@
 package qwerty.chaekit.controller.group;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -30,9 +31,12 @@ public class ActivityController {
     }
 
     @GetMapping("/api/groups/{groupId}/activities")
-    public ApiSuccessResponse<PageResponse<ActivityFetchResponse>> getAllActivities(@ParameterObject Pageable pageable,
-                                                                                    @PathVariable long groupId) {
-        return ApiSuccessResponse.of(activityService.fetchAllActivities(pageable, groupId));
+    public ApiSuccessResponse<PageResponse<ActivityFetchResponse>> getAllActivities(
+            @Parameter(hidden = true) @Login UserToken userToken,
+            @ParameterObject Pageable pageable,
+            @PathVariable long groupId
+    ) {
+        return ApiSuccessResponse.of(activityService.fetchAllActivities(userToken, pageable, groupId));
     }
 
     @GetMapping("/{activityId}")

@@ -60,6 +60,8 @@ class ActivityServiceTest {
         PublisherProfile publisher = testFixtureFactory.createPublisher("publisher_email", "publisher_name");
         dummyEbook = testFixtureFactory.createEbook("dummy_ebook", publisher, "author", "description", "file_key");
         dummyGroup = testFixtureFactory.createGroup("dummy_group", groupLeader);
+
+        testFixtureFactory.createEbookPurchase(groupLeader, dummyEbook);
     }
 
     @Test
@@ -189,7 +191,7 @@ class ActivityServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // When
-        PageResponse<ActivityFetchResponse> response = activityService.fetchAllActivities(pageable, dummyGroup.getId());
+        PageResponse<ActivityFetchResponse> response = activityService.fetchAllActivities(groupLeaderLogin, pageable, dummyGroup.getId());
 
         // Then
         assertThat(response).isNotNull();

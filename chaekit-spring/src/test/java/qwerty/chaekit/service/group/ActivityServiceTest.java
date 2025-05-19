@@ -22,6 +22,7 @@ import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.ebook.EbookPolicy;
 import qwerty.chaekit.service.util.EntityFinder;
+import qwerty.chaekit.service.util.FileService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -42,6 +43,8 @@ class ActivityServiceTest {
     private ActivityPolicy activityPolicy;
     @Mock
     private EbookPolicy ebookPolicy;
+    @Mock
+    private FileService fileService;
     @Mock
     private EntityFinder entityFinder;
 
@@ -168,7 +171,12 @@ class ActivityServiceTest {
     @Test
     void fetchAllActivities() {
         // given
+        long userId = 1L;
         long groupId = 5L;
+        
+        UserToken userLogin = UserToken.builder()
+                .userId(userId)
+                .build();
         Pageable pageable = PageRequest.of(0, 10);
 
         ReadingGroup readingGroup = ReadingGroup.builder()
@@ -188,7 +196,7 @@ class ActivityServiceTest {
         given(activityRepository.findByGroup_IdWithBook(groupId, pageable)).willReturn(page);
 
         // when
-        PageResponse<ActivityFetchResponse> result = activityService.fetchAllActivities(pageable, groupId);
+        PageResponse<ActivityFetchResponse> result = activityService.fetchAllActivities(userLogin, pageable, groupId);
 
         // then
         assertNotNull(result);
