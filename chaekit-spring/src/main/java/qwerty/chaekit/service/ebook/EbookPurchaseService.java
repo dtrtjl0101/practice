@@ -21,6 +21,7 @@ import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.NotFoundException;
+import qwerty.chaekit.service.util.EntityFinder;
 import qwerty.chaekit.service.util.FileService;
 
 @Service
@@ -33,6 +34,7 @@ public class EbookPurchaseService {
     private final CreditWalletRepository creditWalletRepository;
     private final EbookRepository ebookRepository;
     private final FileService fileService;
+    private final EntityFinder entityFinder;
 
     public EbookPurchaseResponse purchaseEbook(Long ebookId, Long userId) {
         UserProfile buyer = userRepository.findById(userId)
@@ -84,7 +86,8 @@ public class EbookPurchaseService {
                 purchases.map(
                 purchase -> EbookFetchResponse.of(
                         purchase.getEbook(),
-                        fileService.convertToPublicImageURL(purchase.getEbook().getCoverImageKey())
+                        fileService.convertToPublicImageURL(purchase.getEbook().getCoverImageKey()),
+                        true
                 )));
     }
 }
