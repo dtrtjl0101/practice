@@ -26,15 +26,18 @@ import {
 import { useState } from "react";
 import { useAtomValue } from "jotai";
 import State from "../states";
-import type {
-  Highlight,
-  HighlightComment,
-  HighlightReactionType,
+import {
+  getEmojiFromReactionType,
+  HighlightReaction,
+  type Highlight,
+  type HighlightComment,
+  type HighlightReactionType,
 } from "../types/highlight";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../api/api";
 import HighlightCommentCard from "./HighlightCommentCard";
 import { Role } from "../types/role";
+import createReactionMap from "../util/createReactionMap";
 
 export default function HighlightCard({
   highlight,
@@ -53,15 +56,6 @@ export default function HighlightCard({
     (user?.role === Role.ROLE_USER ? user.userId : undefined);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [emojiAnchorEl, setEmojiAnchorEl] = useState<null | HTMLElement>(null);
-  const emojiList: { type: HighlightReactionType; emoji: string }[] = [
-    { type: "GREAT", emoji: "👍" },
-    { type: "HEART", emoji: "❤️" },
-    { type: "SMILE", emoji: "😊" },
-    { type: "CLAP", emoji: "👏" },
-    { type: "SAD", emoji: "😢" },
-    { type: "ANGRY", emoji: "😡" },
-    { type: "SURPRISED", emoji: "😲" },
-  ];
 
   const { data: reactions, refetch: refetchReactions } = useQuery({
     queryKey: ["highlightReactions", highlight.id],
@@ -73,21 +67,9 @@ export default function HighlightCard({
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);
       }
-      const reactions: Map<
-        HighlightReactionType,
-        (typeof response.data)[number][]
-      > = new Map([
-        ["GREAT", []],
-        ["HEART", []],
-        ["SMILE", []],
-        ["CLAP", []],
-        ["SAD", []],
-        ["ANGRY", []],
-        ["SURPRISED", []],
-      ]);
-      response.data.forEach((reaction) => {
-        reactions.get(reaction.reactionType!)!.push(reaction);
-      });
+      const reactions = createReactionMap(
+        response.data as unknown as HighlightReaction[]
+      );
       return reactions;
     },
     placeholderData: keepPreviousData,
@@ -199,17 +181,19 @@ export default function HighlightCard({
             sx={{ flexGrow: 1, alignContent: "flex-start", flexWrap: "wrap" }}
           >
             {reactions &&
-              emojiList.map((e) => {
-                const reacted = getReacted(e.type);
-                const count = reactions.get(e.type)?.length || 0;
+              Array.from(reactions.entries()).map(([type, reactions]) => {
+                const reacted = getReacted(type);
+                const count = reactions.length || 0;
                 if (count === 0) return null;
                 return (
                   <Chip
-                    key={e.type}
+                    key={type}
                     onClick={() => {
-                      onReactionClicked(e.type);
+                      onReactionClicked(type);
                     }}
-                    icon={<Typography>{e.emoji}</Typography>}
+                    icon={
+                      <Typography>{getEmojiFromReactionType(type)}</Typography>
+                    }
                     label={count}
                     variant={reacted ? "filled" : "outlined"}
                   />
@@ -238,24 +222,30 @@ export default function HighlightCard({
           transformOrigin={{ vertical: "bottom", horizontal: "center" }}
         >
           <Stack direction="row" spacing={1}>
-            {emojiList.map((e) => (
-              <IconButton
-                key={e.type}
-                onClick={() => {
-                  onReactionClicked(e.type);
-                }}
-                size="medium"
-              >
-                {e.emoji}
-              </IconButton>
-            ))}
+            {reactions &&
+              Array.from(reactions.keys()).map((type) => (
+                <IconButton
+                  key={type}
+                  onClick={() => {
+                    onReactionClicked(type);
+                  }}
+                  size="medium"
+                >
+                  {getEmojiFromReactionType(type)}
+                </IconButton>
+              ))}
           </Stack>
         </Popover>
       </CardActions>
       {openComments && comments && (
         <>
           {comments.map((comment) => (
-            <HighlightCommentCard key={comment.id} comment={comment} />
+            <HighlightCommentCard
+              key={comment.id}
+              comment={comment}
+              highlight={highlight}
+              refetchComments={refetchComments}
+            />
           ))}
           <Divider />
           <CardActions>

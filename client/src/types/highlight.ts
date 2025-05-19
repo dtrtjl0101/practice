@@ -19,6 +19,46 @@ export type HighlightReactionType =
   | "SAD"
   | "ANGRY"
   | "SURPRISED";
+export const highlightReactionTypes: HighlightReactionType[] = [
+  "GREAT",
+  "HEART",
+  "SMILE",
+  "CLAP",
+  "SAD",
+  "ANGRY",
+  "SURPRISED",
+];
+
+export function getEmojiFromReactionType(
+  reactionType: HighlightReactionType
+): string {
+  switch (reactionType) {
+    case "GREAT": {
+      return "👍";
+    }
+    case "HEART": {
+      return "❤️";
+    }
+    case "SMILE": {
+      return "😊";
+    }
+    case "CLAP": {
+      return "👏";
+    }
+    case "SAD": {
+      return "😢";
+    }
+    case "ANGRY": {
+      return "😡";
+    }
+    case "SURPRISED": {
+      return "😲";
+    }
+    default: {
+      throw new Error("Unknown reaction type");
+    }
+  }
+}
 
 export type HighlightReaction = {
   id: number;
@@ -38,5 +78,5 @@ export type HighlightComment = {
   createdAt: string;
   updatedAt: string;
   replies: HighlightComment[];
-  reactions: HighlightComment[];
+  reactions: HighlightReaction[];
 };
