@@ -47,6 +47,24 @@ import useInvalidateQueriesOnAuthChange from "../api/login/useInvalidateQueriesO
 
 export const Route = createFileRoute("/reader/$bookId")({
   component: RouteComponent,
+  validateSearch: (search) => {
+    const activityIdString = search.activityId as string | undefined;
+    const activityId = activityIdString ? parseInt(activityIdString) : NaN;
+    return {
+      activityId: !isNaN(activityId) ? activityId : undefined,
+    };
+  },
+  params: {
+    parse: (params) => {
+      const bookId = parseInt(params.bookId);
+      if (isNaN(bookId)) {
+        throw new Error("Invalid bookId");
+      }
+      return {
+        bookId,
+      };
+    },
+  },
 });
 
 type HighlightDiff = {
@@ -62,6 +80,7 @@ type Selection = {
 
 function RouteComponent() {
   const { bookId } = Route.useParams();
+  const { activityId } = Route.useSearch();
   const theme = useTheme();
   const [location, setLocation] = useState<string | number>(10);
   const [highlightsInPage, setHighlightsInPage] = useState<Highlight[]>([]);
@@ -76,6 +95,17 @@ function RouteComponent() {
   useInvalidateQueriesOnAuthChange();
   const [book, setBook] = useState<ArrayBuffer>(new ArrayBuffer(0));
 
+  const queryParam = activityId
+    ? {
+        me: false,
+        bookId,
+        activityId,
+      }
+    : {
+        me: true,
+        bookId,
+      };
+
   const spine = useMemo(() => {
     try {
       const spinePos = new EpubCFI(location.toString()).spinePos;
@@ -87,13 +117,13 @@ function RouteComponent() {
   }, [location]);
 
   const { data: highlights } = useQuery({
-    queryKey: ["memos", spine],
+    queryKey: ["highlights", spine, queryParam],
     queryFn: async () => {
       const response = await API_CLIENT.highlightController.getHighlights({
         page: 0,
         size: 100,
         spine,
-        me: false,
+        ...queryParam,
       });
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);
@@ -162,12 +192,7 @@ function RouteComponent() {
   }, [rendition, highlightsInPage]);
 
   useEffect(() => {
-    const bookIdNumber = parseInt(bookId, 10);
-    if (isNaN(bookIdNumber)) {
-      console.error("Invalid bookId:", bookId);
-      return;
-    }
-    loadBook(bookIdNumber).then((book) => {
+    loadBook(bookId).then((book) => {
       if (!book) {
         console.error("Book not found in IndexedDB");
         return;
@@ -234,9 +259,8 @@ function RouteComponent() {
               memo,
               cfi,
               spine,
-              // TODO: use BookId and ActivityId
-              bookId: 1,
-              activityId: 1,
+              bookId,
+              activityId,
             }
           );
 

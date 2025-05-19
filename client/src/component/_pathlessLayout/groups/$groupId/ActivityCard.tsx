@@ -83,7 +83,7 @@ export function ActivityCard(props: { groupId: string }) {
           if (shouldMoveToPurchasePage) {
             navigate({
               to: "/books/$bookId",
-              params: { bookId: activity.bookId.toString() },
+              params: { bookId: activity.bookId },
             });
           }
           break;
@@ -163,7 +163,10 @@ export function ActivityCard(props: { groupId: string }) {
                   <LinkButton
                     variant="contained"
                     to={"/reader/$bookId"}
-                    params={{ bookId: activity.bookId.toString() }}
+                    params={{ bookId: activity.bookId }}
+                    search={{
+                      activityId: activity.activityId,
+                    }}
                   >
                     책 읽으러 가기
                   </LinkButton>

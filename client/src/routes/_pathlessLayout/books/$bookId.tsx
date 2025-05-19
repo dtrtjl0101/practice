@@ -17,6 +17,15 @@ import CreditPurchaseModal from "../../../component/CreditPurchaseModal";
 
 export const Route = createFileRoute("/_pathlessLayout/books/$bookId")({
   component: RouteComponent,
+  params: {
+    parse: (params) => {
+      const bookId = Number(params.bookId);
+      if (isNaN(bookId)) {
+        throw new Error("Invalid book ID");
+      }
+      return { bookId };
+    },
+  },
 });
 
 function RouteComponent() {
@@ -35,9 +44,8 @@ function RouteComponent() {
 
   const handlePurchase = async () => {
     setPurchasing(true);
-    const response = await API_CLIENT.ebookPurchaseController.purchaseEbook(
-      Number(bookId)
-    );
+    const response =
+      await API_CLIENT.ebookPurchaseController.purchaseEbook(bookId);
     setPurchasing(false);
     if (!response.isSuccessful) {
       switch (response.errorCode) {
@@ -126,8 +134,9 @@ function RouteComponent() {
                 <LinkButton
                   to="/reader/$bookId"
                   params={{
-                    bookId: `${book.id}`,
+                    bookId,
                   }}
+                  search={{ activityId: undefined }}
                   variant="contained"
                 >
                   도서 읽기

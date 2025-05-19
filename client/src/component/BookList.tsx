@@ -101,7 +101,7 @@ function BookListItem(props: { book?: BookMetadata }) {
         <LinkCardActionArea
           sx={{ width: 128, height: 160 }}
           to="/books/$bookId"
-          params={{ bookId: `${book.id}` }}
+          params={{ bookId: book.id }}
         >
           <CardMedia
             image={book.bookCoverImageURL || "https://picsum.photos/128/160"}
@@ -109,16 +109,10 @@ function BookListItem(props: { book?: BookMetadata }) {
           />
         </LinkCardActionArea>
         <Stack flexGrow={1} spacing={1}>
-          <LinkCardActionArea
-            to="/books/$bookId"
-            params={{ bookId: `${book.id}` }}
-          >
+          <LinkCardActionArea to="/books/$bookId" params={{ bookId: book.id }}>
             <Typography variant="h5">{book.title}</Typography>
           </LinkCardActionArea>
-          <LinkCardActionArea
-            to="/books/$bookId"
-            params={{ bookId: `${book.id}` }}
-          >
+          <LinkCardActionArea to="/books/$bookId" params={{ bookId: book.id }}>
             <Typography variant="body2">{book.author}</Typography>
           </LinkCardActionArea>
           <Typography variant="body2">{book.size} KB</Typography>
