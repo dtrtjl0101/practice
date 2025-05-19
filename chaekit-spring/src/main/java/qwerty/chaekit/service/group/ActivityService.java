@@ -89,12 +89,13 @@ public class ActivityService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<ActivityFetchResponse> fetchAllActivities(Pageable pageable, long groupId) {
+    public PageResponse<ActivityFetchResponse> fetchAllActivities(UserToken userToken, Pageable pageable, long groupId) {
         Page<ActivityFetchResponse> page = activityRepository.findByGroup_IdWithBook(groupId, pageable)
                 .map(
                         activity -> ActivityFetchResponse.of(
                                 activity, 
-                                fileService.convertToPublicImageURL(activity.getBook().getFileKey())
+                                fileService.convertToPublicImageURL(activity.getBook().getFileKey()),
+                                activity.isParticipant(entityFinder.findUser(userToken.userId()))
                 ));
         return PageResponse.of(page);
     }
@@ -128,6 +129,6 @@ public class ActivityService {
             throw new ForbiddenException(ErrorCode.ACTIVITY_GROUP_MISMATCH);
         }
 
-        return ActivityFetchResponse.of(activity, fileService.convertToPublicImageURL(activity.getBook().getFileKey()));
+        return ActivityFetchResponse.of(activity, fileService.convertToPublicImageURL(activity.getBook().getFileKey()), true);
     }
 }

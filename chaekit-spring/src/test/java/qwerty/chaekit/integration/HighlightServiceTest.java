@@ -51,6 +51,7 @@ class HighlightServiceTest {
         PublisherProfile dummyPublisherProfile = testFixtureFactory.createPublisher("publisher_email", "publisher_name");
         dummyEbook = testFixtureFactory.createEbook("dummy_ebook", dummyPublisherProfile, "book_author", "book_description", "book_file_key");
         dummyUserToken = testFixtureFactory.createUserToken(dummyUser.getMember(), dummyUser);
+        testFixtureFactory.createEbookPurchase(dummyUser, dummyEbook);
 
     }
 

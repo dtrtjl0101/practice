@@ -15,9 +15,10 @@ public record ActivityFetchResponse(
         String bookDescription,
         LocalDate startTime,
         LocalDate endTime,
-        String description
+        String description,
+        boolean isParticipant
 ) {
-    public static ActivityFetchResponse of(Activity activity, String coverImageURL) {
+    public static ActivityFetchResponse of(Activity activity, String coverImageURL, boolean isParticipant) {
         return ActivityFetchResponse.builder()
                 .activityId(activity.getId())
                 .bookId(activity.getBook().getId())
@@ -28,6 +29,7 @@ public record ActivityFetchResponse(
                 .startTime(activity.getStartTime())
                 .endTime(activity.getEndTime())
                 .description(activity.getDescription())
+                .isParticipant(isParticipant)
                 .build();
     }
 }
