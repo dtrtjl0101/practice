@@ -6,23 +6,30 @@ import PageNavigation from "./PageNavigation";
 import { JSX, useState } from "react";
 import API_CLIENT from "../api/api";
 
+export enum BookListKind {
+  ALL_BOOK = "ALL_BOOK",
+  PURCHASED_BOOK = "PURCHASED_BOOK",
+}
+
 export default function BookList(props: {
   size: "small" | "large";
   action?: JSX.Element;
+  kind?: BookListKind;
   title: string;
   searchTitle?: string;
 }) {
-  const { size, action, title, searchTitle } = props;
+  const { size, action, kind: kind_, title, searchTitle } = props;
   const [sort, _setSort] = useState<string[]>([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
   const pageSize = size === "small" ? 5 : 25;
+  const kind = kind_ ?? BookListKind.ALL_BOOK;
 
   const { data: books } = useQuery({
-    queryKey: ["bookList", page, sort, pageSize, searchTitle],
+    queryKey: [kind, page, sort, pageSize, searchTitle],
     queryFn: async () => {
-      const response = await API_CLIENT.ebookController.getBooks({
+      const response = await getFetchFunction(kind)({
         page,
         size: pageSize,
         sort,
@@ -119,4 +126,15 @@ function BookListItem(props: { book?: BookMetadata }) {
       </Stack>
     </Card>
   );
+}
+
+function getFetchFunction(groupType: BookListKind) {
+  switch (groupType) {
+    case BookListKind.ALL_BOOK:
+      return API_CLIENT.ebookController.getBooks;
+    case BookListKind.PURCHASED_BOOK:
+      return API_CLIENT.ebookPurchaseController.getMyBooks;
+    default:
+      throw new Error("Invalid group type");
+  }
 }

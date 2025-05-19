@@ -1,7 +1,7 @@
 import { Box, Container } from "@mui/material";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import SideNavigationBar from "../../../component/SideNavigatorBar";
-import { Group, Home } from "@mui/icons-material";
+import { Book, Group, Home } from "@mui/icons-material";
 
 export const Route = createFileRoute("/_pathlessLayout/mypage")({
   component: RouteComponent,
@@ -19,6 +19,7 @@ function RouteComponent() {
             disableShowActive: true,
           },
           { to: "/mypage/groups", icon: <Group />, label: "Groups" },
+          { to: "/mypage/books", icon: <Book />, label: "Books" },
         ]}
       />
       <Container sx={{ margin: 2, marginX: "auto" }}>
