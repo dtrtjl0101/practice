@@ -121,7 +121,7 @@ function BookListItem(props: { book?: BookMetadata }) {
 
   return (
     <Card elevation={3} key={book.id}>
-      <LinearProgress value={readProgress * 100} variant="determinate" />
+      <LinearProgress value={readProgress} variant="determinate" />
       <Stack spacing={1} direction={"row"} sx={{ padding: 2 }}>
         <LinkCardActionArea
           sx={{ width: 128, height: 160 }}

@@ -208,8 +208,13 @@ function RouteComponent() {
       return;
     }
     try {
-      const newReadProgress =
-        rendition.book.locations.percentageFromCfi(location);
+      const newReadProgress = Math.max(
+        Math.min(
+          rendition.book.locations.percentageFromCfi(location) * 100,
+          100
+        ),
+        0
+      );
       if (newReadProgress <= readProgressInServer) {
         return;
       }
@@ -240,10 +245,7 @@ function RouteComponent() {
           zIndex: theme.zIndex.fab,
         }}
       >
-        <LinearProgress
-          value={(readProgressInServer || 0) * 100}
-          variant="determinate"
-        />
+        <LinearProgress value={readProgressInServer} variant="determinate" />
         {canGoBack && (
           <Fab
             size="small"
