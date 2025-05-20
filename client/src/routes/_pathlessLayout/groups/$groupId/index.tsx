@@ -1,6 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { GroupInfo } from "../../../../types/groups";
-import { Container, Divider, Paper, Stack, Typography } from "@mui/material";
+import {
+  Container,
+  Divider,
+  Paper,
+  Skeleton,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../../../../api/api";
 import { useState } from "react";
@@ -62,9 +69,9 @@ function RouteComponent() {
           <Stack spacing={2}>
             <Typography variant="h4">모임 대화방</Typography>
             <Divider />
-            <Typography variant="body1" sx={{ mt: 2 }}>
-              현재활동
-            </Typography>
+            <Stack spacing={2}>
+              <Skeleton variant="rectangular" width="100%" height={200} />
+            </Stack>
           </Stack>
         </Paper>
       </Stack>
