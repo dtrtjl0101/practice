@@ -24,6 +24,17 @@ import PageNavigation from "../../../../component/PageNavigation";
 export const Route = createFileRoute("/_pathlessLayout/groups/$groupId/manage")(
   {
     component: RouteComponent,
+    params: {
+      parse: (params) => {
+        const groupId = parseInt(params.groupId);
+        if (isNaN(groupId)) {
+          throw new Error("Invalid groupId");
+        }
+        return {
+          groupId,
+        };
+      },
+    },
   }
 );
 
@@ -47,12 +58,8 @@ function PendingMemberCard() {
   const { data: pendingRequests, refetch } = useQuery({
     queryKey: ["getPendingList", groupId, page],
     queryFn: async () => {
-      const groupIdNumber = parseInt(groupId);
-      if (isNaN(groupIdNumber)) {
-        throw new Error("Invalid group ID");
-      }
       const response = await API_CLIENT.groupController.getPendingList(
-        groupIdNumber,
+        groupId,
         {
           page,
           size: 20,
@@ -70,13 +77,8 @@ function PendingMemberCard() {
   const onApproveButtonClicked = async (
     request: NonNullable<typeof pendingRequests>[number]
   ) => {
-    const groupIdNumber = parseInt(groupId);
-    if (isNaN(groupIdNumber)) {
-      throw new Error("Invalid group ID");
-    }
-
     const response = await API_CLIENT.groupController.approveJoinRequest(
-      groupIdNumber,
+      groupId,
       request.userId!
     );
     if (!response.isSuccessful) {
@@ -91,13 +93,8 @@ function PendingMemberCard() {
   const onRejectButtonClicked = async (
     request: NonNullable<typeof pendingRequests>[number]
   ) => {
-    const groupIdNumber = parseInt(groupId);
-    if (isNaN(groupIdNumber)) {
-      throw new Error("Invalid group ID");
-    }
-
     const response = await API_CLIENT.groupController.rejectJoinRequest(
-      groupIdNumber,
+      groupId,
       request.userId!
     );
     if (!response.isSuccessful) {
@@ -198,12 +195,8 @@ function MembersCard() {
   const { data: pendingRequests } = useQuery({
     queryKey: ["getPendingList", groupId, page],
     queryFn: async () => {
-      const groupIdNumber = parseInt(groupId);
-      if (isNaN(groupIdNumber)) {
-        throw new Error("Invalid group ID");
-      }
       const response = await API_CLIENT.groupController.getGroupMembers(
-        groupIdNumber,
+        groupId,
         {
           page,
           size: 20,
