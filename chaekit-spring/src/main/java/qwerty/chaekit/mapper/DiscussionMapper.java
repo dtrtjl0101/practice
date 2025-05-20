@@ -31,6 +31,7 @@ public class DiscussionMapper {
         if(comment.isDeleted()) {
             return DiscussionCommentFetchResponse.builder()
                     .commentId(comment.getId())
+                    .content(comment.getContent())
                     .replies(
                             comment.getReplies().stream()
                                     .map(this::toCommentFetchResponse)

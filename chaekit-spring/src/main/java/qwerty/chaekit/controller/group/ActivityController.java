@@ -31,15 +31,19 @@ public class ActivityController {
     }
 
     @GetMapping("/api/groups/{groupId}/activities")
-    public ApiSuccessResponse<PageResponse<ActivityFetchResponse>> getAllActivities(@ParameterObject Pageable pageable,
-                                                                                    @PathVariable long groupId) {
-        return ApiSuccessResponse.of(activityService.fetchAllActivities(pageable, groupId));
+    public ApiSuccessResponse<PageResponse<ActivityFetchResponse>> getAllActivities(
+            @Parameter(hidden = true) @Login UserToken userToken,
+            @ParameterObject Pageable pageable,
+            @PathVariable long groupId
+    ) {
+        return ApiSuccessResponse.of(activityService.fetchAllActivities(userToken, pageable, groupId));
     }
 
-    @GetMapping("/{activityId}")
-    public ApiSuccessResponse<ActivityFetchResponse> getActivity(@PathVariable long groupId,
-                                                               @PathVariable long activityId) {
-        return ApiSuccessResponse.of(activityService.fetchActivity(groupId, activityId));
+    @GetMapping("/api/activities/{activityId}")
+    public ApiSuccessResponse<ActivityFetchResponse> getActivity(
+            @Parameter(hidden = true) @Login UserToken userToken,
+            @PathVariable long activityId) {
+        return ApiSuccessResponse.of(activityService.fetchActivity(userToken, activityId));
     }
 
     @PatchMapping("/api/groups/{groupId}/activities")

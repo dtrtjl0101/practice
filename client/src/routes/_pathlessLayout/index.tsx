@@ -1,7 +1,6 @@
 import { Button, Container, Stack } from "@mui/material";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import GroupList from "../../component/groupList";
-import LinkButton from "../../component/LinkButton";
 import BookList from "../../component/BookList";
 
 export const Route = createFileRoute("/_pathlessLayout/")({
@@ -36,12 +35,6 @@ function Home() {
             </Button>
           }
         />
-        <LinkButton variant="contained" color="primary" to="/about">
-          Go to About Page
-        </LinkButton>
-        <LinkButton variant="contained" color="primary" to="/posts">
-          Go to Post List Page
-        </LinkButton>
       </Stack>
     </Container>
   );

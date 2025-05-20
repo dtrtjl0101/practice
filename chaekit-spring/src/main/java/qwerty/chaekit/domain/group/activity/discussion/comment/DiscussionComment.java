@@ -47,7 +47,7 @@ public class DiscussionComment extends BaseEntity {
     @JoinColumn(name = "parent_id")
     private DiscussionComment parent = null;
 
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
     private final List<DiscussionComment> replies = new ArrayList<>();
 
@@ -69,6 +69,10 @@ public class DiscussionComment extends BaseEntity {
     public void softDelete() {
         this.content = "삭제된 댓글입니다.";
         this.deleted = true;
+    }
+
+    public void removeReply(DiscussionComment reply) {
+        replies.remove(reply);
     }
     
     public boolean isAuthor(UserProfile user) {

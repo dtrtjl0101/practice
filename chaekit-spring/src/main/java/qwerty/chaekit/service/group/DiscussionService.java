@@ -102,6 +102,10 @@ public class DiscussionService {
         Long userId = userToken.userId();
 
         Discussion discussion = getMyDiscussion(userId, discussionId);
+        
+        if (!discussion.getComments().isEmpty()) {
+            throw new BadRequestException(ErrorCode.DISCUSSION_HAS_COMMENTS);
+        }
 
         discussionRepository.delete(discussion);
     }

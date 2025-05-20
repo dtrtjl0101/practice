@@ -44,6 +44,7 @@ public class Activity extends BaseEntity {
     private String description;
     
     @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
     private final List<ActivityMember> participants = new ArrayList<>();
 
     @Builder

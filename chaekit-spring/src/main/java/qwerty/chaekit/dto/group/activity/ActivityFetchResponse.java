@@ -11,23 +11,25 @@ public record ActivityFetchResponse(
         Long bookId,
         String bookTitle,
         String bookAuthor,
-        String coverImageKey,
+        String coverImageURL,
         String bookDescription,
         LocalDate startTime,
         LocalDate endTime,
-        String description
+        String description,
+        boolean isParticipant
 ) {
-    public static ActivityFetchResponse of(Activity activity) {
+    public static ActivityFetchResponse of(Activity activity, String coverImageURL, boolean isParticipant) {
         return ActivityFetchResponse.builder()
                 .activityId(activity.getId())
                 .bookId(activity.getBook().getId())
                 .bookTitle(activity.getBook().getTitle())
                 .bookAuthor(activity.getBook().getAuthor())
-                .coverImageKey(activity.getBook().getCoverImageKey())
+                .coverImageURL(coverImageURL)
                 .bookDescription(activity.getBook().getDescription())
                 .startTime(activity.getStartTime())
                 .endTime(activity.getEndTime())
                 .description(activity.getDescription())
+                .isParticipant(isParticipant)
                 .build();
     }
 }

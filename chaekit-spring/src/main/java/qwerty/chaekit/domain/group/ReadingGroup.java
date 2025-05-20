@@ -102,6 +102,9 @@ public class ReadingGroup extends BaseEntity {
         if(userId == null) {
             return MyMemberShipStatus.NONE;
         }
+        if (isLeader(userId)) {
+            return MyMemberShipStatus.OWNED;
+        }
         return groupMembers.stream()
                 .filter(member -> member.getMember().getId().equals(userId))
                 .findFirst()
