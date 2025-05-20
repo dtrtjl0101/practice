@@ -96,6 +96,18 @@ export interface RefreshTokenResponse {
   accessToken?: string;
 }
 
+export interface ReadingProgressRequest {
+  cfi?: string;
+  /** @format int64 */
+  percentage?: number;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseVoid {
+  isSuccessful?: boolean;
+  data?: object;
+}
+
 export interface PublisherJoinRequest {
   publisherName: string;
   email: string;
@@ -103,12 +115,6 @@ export interface PublisherJoinRequest {
   /** @format binary */
   profileImage?: File;
   verificationCode: string;
-}
-
-/** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponseVoid {
-  isSuccessful?: boolean;
-  data?: object;
 }
 
 export interface LoginRequest {
@@ -250,6 +256,30 @@ export interface GroupJoinResponse {
   memberId?: number;
   memberName?: string;
   isAccepted?: boolean;
+}
+
+export interface GroupChatRequest {
+  content: string;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseGroupChatResponse {
+  isSuccessful?: boolean;
+  data?: GroupChatResponse;
+}
+
+export interface GroupChatResponse {
+  /** @format int64 */
+  chatId?: number;
+  /** @format int64 */
+  groupId?: number;
+  /** @format int64 */
+  authorId?: number;
+  authorName?: string;
+  authorProfileImage?: string;
+  content?: string;
+  /** @format date-time */
+  createdAt?: string;
 }
 
 export interface ActivityPostRequest {
@@ -443,6 +473,53 @@ export interface DiscussionFetchResponse {
   isAuthor?: boolean;
 }
 
+export interface Pageable {
+  /**
+   * @format int32
+   * @min 0
+   */
+  page?: number;
+  /**
+   * @format int32
+   * @min 1
+   */
+  size?: number;
+  sort?: string[];
+}
+
+export interface ActivityFetchResponse {
+  /** @format int64 */
+  activityId?: number;
+  /** @format int64 */
+  bookId?: number;
+  bookTitle?: string;
+  bookAuthor?: string;
+  coverImageURL?: string;
+  bookDescription?: string;
+  /** @format date */
+  startTime?: string;
+  /** @format date */
+  endTime?: string;
+  description?: string;
+  isParticipant?: boolean;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponsePageResponseActivityFetchResponse {
+  isSuccessful?: boolean;
+  data?: PageResponseActivityFetchResponse;
+}
+
+export interface PageResponseActivityFetchResponse {
+  content?: ActivityFetchResponse[];
+  /** @format int32 */
+  currentPage?: number;
+  /** @format int64 */
+  totalItems?: number;
+  /** @format int32 */
+  totalPages?: number;
+}
+
 export interface HighlightPutRequest {
   /** @format int64 */
   activityId?: number;
@@ -488,6 +565,40 @@ export interface UserInfoResponse {
 }
 
 /** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseReadingProgressResponse {
+  isSuccessful?: boolean;
+  data?: ReadingProgressResponse;
+}
+
+export interface ReadingProgressResponse {
+  /** @format int64 */
+  bookId?: number;
+  /** @format int64 */
+  userId?: number;
+  userNickname?: string;
+  userProfileImageURL?: string;
+  cfi?: string;
+  /** @format int64 */
+  percentage?: number;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponsePageResponseReadingProgressResponse {
+  isSuccessful?: boolean;
+  data?: PageResponseReadingProgressResponse;
+}
+
+export interface PageResponseReadingProgressResponse {
+  content?: ReadingProgressResponse[];
+  /** @format int32 */
+  currentPage?: number;
+  /** @format int64 */
+  totalItems?: number;
+  /** @format int32 */
+  totalPages?: number;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
 export interface ApiSuccessResponsePublisherInfoResponse {
   isSuccessful?: boolean;
   data?: PublisherInfoResponse;
@@ -501,20 +612,6 @@ export interface PublisherInfoResponse {
   status?: string;
   /** @format date-time */
   createdAt?: string;
-}
-
-export interface Pageable {
-  /**
-   * @format int32
-   * @min 0
-   */
-  page?: number;
-  /**
-   * @format int32
-   * @min 1
-   */
-  size?: number;
-  sort?: string[];
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -680,31 +777,14 @@ export interface ApiSuccessResponseGroupFetchResponse {
   data?: GroupFetchResponse;
 }
 
-export interface ActivityFetchResponse {
-  /** @format int64 */
-  activityId?: number;
-  /** @format int64 */
-  bookId?: number;
-  bookTitle?: string;
-  bookAuthor?: string;
-  coverImageURL?: string;
-  bookDescription?: string;
-  /** @format date */
-  startTime?: string;
-  /** @format date */
-  endTime?: string;
-  description?: string;
-  isParticipant?: boolean;
-}
-
 /** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponsePageResponseActivityFetchResponse {
+export interface ApiSuccessResponsePageResponseGroupChatResponse {
   isSuccessful?: boolean;
-  data?: PageResponseActivityFetchResponse;
+  data?: PageResponseGroupChatResponse;
 }
 
-export interface PageResponseActivityFetchResponse {
-  content?: ActivityFetchResponse[];
+export interface PageResponseGroupChatResponse {
+  content?: GroupChatResponse[];
   /** @format int32 */
   currentPage?: number;
   /** @format int64 */
@@ -1268,6 +1348,69 @@ export class Api<
         body: data,
         secure: true,
         type: ContentType.Json,
+        ...params,
+      }),
+  };
+  readingProgressController = {
+    /**
+     * No description
+     *
+     * @tags reading-progress-controller
+     * @name SaveMyProgress
+     * @request POST:/api/reading-progress/{bookId}/save
+     * @secure
+     */
+    saveMyProgress: (
+      bookId: number,
+      data: ReadingProgressRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponseVoid, any>({
+        path: `/api/reading-progress/${bookId}/save`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags reading-progress-controller
+     * @name GetMyProgress
+     * @request GET:/api/reading-progress/{bookId}
+     * @secure
+     */
+    getMyProgress: (bookId: number, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseReadingProgressResponse, any>({
+        path: `/api/reading-progress/${bookId}`,
+        method: "GET",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description 특정 독서모임 활동에 속하는 모든 사용자의 진행률 정보를 가져옵니다
+     *
+     * @tags reading-progress-controller
+     * @name GetProgressFromActivity
+     * @summary 모든 활동 멤버의 독서 진행률 조회
+     * @request GET:/api/reading-progress/activities/{activityId}
+     * @secure
+     */
+    getProgressFromActivity: (
+      activityId: number,
+      query: {
+        pageable: Pageable;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponsePageResponseReadingProgressResponse, any>({
+        path: `/api/reading-progress/activities/${activityId}`,
+        method: "GET",
+        query: query,
+        secure: true,
         ...params,
       }),
   };
@@ -1881,6 +2024,67 @@ export class Api<
         ...params,
       }),
   };
+  groupChatController = {
+    /**
+     * @description 그룹의 채팅 메시지 목록을 조회합니다.
+     *
+     * @tags group-chat-controller
+     * @name GetChats
+     * @summary 그룹 채팅 메시지 목록 조회
+     * @request GET:/api/groups/{groupId}/chats
+     * @secure
+     */
+    getChats: (
+      groupId: number,
+      query?: {
+        /**
+         * Zero-based page index (0..N)
+         * @min 0
+         * @default 0
+         */
+        page?: number;
+        /**
+         * The size of the page to be returned
+         * @min 1
+         * @default 20
+         */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponsePageResponseGroupChatResponse, any>({
+        path: `/api/groups/${groupId}/chats`,
+        method: "GET",
+        query: query,
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description 그룹에 새로운 채팅 메시지를 작성합니다.
+     *
+     * @tags group-chat-controller
+     * @name CreateChat
+     * @summary 그룹 채팅 메시지 작성
+     * @request POST:/api/groups/{groupId}/chats
+     * @secure
+     */
+    createChat: (
+      groupId: number,
+      data: GroupChatRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponseGroupChatResponse, any>({
+        path: `/api/groups/${groupId}/chats`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        ...params,
+      }),
+  };
   activityController = {
     /**
      * No description
@@ -1992,6 +2196,31 @@ export class Api<
       this.request<ApiSuccessResponseVoid, any>({
         path: `/api/activities/${activityId}/join`,
         method: "POST",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description 내가 가입한 모든 활동을 조회합니다.
+     *
+     * @tags activity-controller
+     * @name GetMyActivity
+     * @summary 내 활동 조회
+     * @request POST:/api/activities/my
+     * @secure
+     */
+    getMyActivity: (
+      query: {
+        /** @format int64 */
+        bookId?: number;
+        pageable: Pageable;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponsePageResponseActivityFetchResponse, any>({
+        path: `/api/activities/my`,
+        method: "POST",
+        query: query,
         secure: true,
         ...params,
       }),

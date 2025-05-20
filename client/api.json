@@ -61,6 +61,42 @@
         }
       }
     },
+    "/api/reading-progress/{bookId}/save": {
+      "post": {
+        "tags": ["reading-progress-controller"],
+        "operationId": "saveMyProgress",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReadingProgressRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponseVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/publishers/join": {
       "post": {
         "tags": ["publisher-controller"],
@@ -435,6 +471,89 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiSuccessResponseGroupJoinResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{groupId}/chats": {
+      "get": {
+        "tags": ["group-chat-controller"],
+        "summary": "그룹 채팅 메시지 목록 조회",
+        "description": "그룹의 채팅 메시지 목록을 조회합니다.",
+        "operationId": "getChats",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "required": false,
+            "schema": { "minimum": 0, "type": "integer", "default": 0 }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "The size of the page to be returned",
+            "required": false,
+            "schema": { "minimum": 1, "type": "integer", "default": 20 }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+            "required": false,
+            "schema": { "type": "array", "items": { "type": "string" } }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponsePageResponseGroupChatResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["group-chat-controller"],
+        "summary": "그룹 채팅 메시지 작성",
+        "description": "그룹에 새로운 채팅 메시지를 작성합니다.",
+        "operationId": "createChat",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/GroupChatRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponseGroupChatResponse"
                 }
               }
             }
@@ -993,6 +1112,40 @@
         }
       }
     },
+    "/api/activities/my": {
+      "post": {
+        "tags": ["activity-controller"],
+        "summary": "내 활동 조회",
+        "description": "내가 가입한 모든 활동을 조회합니다.",
+        "operationId": "getMyActivity",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "format": "int64" }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": { "$ref": "#/components/schemas/Pageable" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponsePageResponseActivityFetchResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/publisher/notifications/{notificationId}/read": {
       "patch": {
         "tags": ["publisher-notification-controller"],
@@ -1496,6 +1649,66 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiSuccessResponseUserInfoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reading-progress/{bookId}": {
+      "get": {
+        "tags": ["reading-progress-controller"],
+        "operationId": "getMyProgress",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponseReadingProgressResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reading-progress/activities/{activityId}": {
+      "get": {
+        "tags": ["reading-progress-controller"],
+        "summary": "모든 활동 멤버의 독서 진행률 조회",
+        "description": "특정 독서모임 활동에 속하는 모든 사용자의 진행률 정보를 가져옵니다",
+        "operationId": "getProgressFromActivity",
+        "parameters": [
+          {
+            "name": "activityId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": { "$ref": "#/components/schemas/Pageable" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponsePageResponseReadingProgressResponse"
                 }
               }
             }
@@ -2316,6 +2529,21 @@
           "accessToken": { "type": "string" }
         }
       },
+      "ReadingProgressRequest": {
+        "type": "object",
+        "properties": {
+          "cfi": { "type": "string" },
+          "percentage": { "type": "integer", "format": "int64" }
+        }
+      },
+      "ApiSuccessResponseVoid": {
+        "type": "object",
+        "properties": {
+          "isSuccessful": { "type": "boolean" },
+          "data": { "type": "object" }
+        },
+        "description": "API 에러 응답을 감싸는 클래스"
+      },
       "PublisherJoinRequest": {
         "required": ["email", "password", "publisherName", "verificationCode"],
         "type": "object",
@@ -2326,14 +2554,6 @@
           "profileImage": { "type": "string", "format": "binary" },
           "verificationCode": { "type": "string" }
         }
-      },
-      "ApiSuccessResponseVoid": {
-        "type": "object",
-        "properties": {
-          "isSuccessful": { "type": "boolean" },
-          "data": { "type": "object" }
-        },
-        "description": "API 에러 응답을 감싸는 클래스"
       },
       "LoginRequest": {
         "required": ["email", "password"],
@@ -2503,6 +2723,31 @@
           "memberId": { "type": "integer", "format": "int64" },
           "memberName": { "type": "string" },
           "isAccepted": { "type": "boolean" }
+        }
+      },
+      "GroupChatRequest": {
+        "required": ["content"],
+        "type": "object",
+        "properties": { "content": { "type": "string" } }
+      },
+      "ApiSuccessResponseGroupChatResponse": {
+        "type": "object",
+        "properties": {
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/GroupChatResponse" }
+        },
+        "description": "API 에러 응답을 감싸는 클래스"
+      },
+      "GroupChatResponse": {
+        "type": "object",
+        "properties": {
+          "chatId": { "type": "integer", "format": "int64" },
+          "groupId": { "type": "integer", "format": "int64" },
+          "authorId": { "type": "integer", "format": "int64" },
+          "authorName": { "type": "string" },
+          "authorProfileImage": { "type": "string" },
+          "content": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" }
         }
       },
       "ActivityPostRequest": {
@@ -2722,6 +2967,51 @@
           "isAuthor": { "type": "boolean" }
         }
       },
+      "Pageable": {
+        "type": "object",
+        "properties": {
+          "page": { "minimum": 0, "type": "integer", "format": "int32" },
+          "size": { "minimum": 1, "type": "integer", "format": "int32" },
+          "sort": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "ActivityFetchResponse": {
+        "type": "object",
+        "properties": {
+          "activityId": { "type": "integer", "format": "int64" },
+          "bookId": { "type": "integer", "format": "int64" },
+          "bookTitle": { "type": "string" },
+          "bookAuthor": { "type": "string" },
+          "coverImageURL": { "type": "string" },
+          "bookDescription": { "type": "string" },
+          "startTime": { "type": "string", "format": "date" },
+          "endTime": { "type": "string", "format": "date" },
+          "description": { "type": "string" },
+          "isParticipant": { "type": "boolean" }
+        }
+      },
+      "ApiSuccessResponsePageResponseActivityFetchResponse": {
+        "type": "object",
+        "properties": {
+          "isSuccessful": { "type": "boolean" },
+          "data": {
+            "$ref": "#/components/schemas/PageResponseActivityFetchResponse"
+          }
+        },
+        "description": "API 에러 응답을 감싸는 클래스"
+      },
+      "PageResponseActivityFetchResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ActivityFetchResponse" }
+          },
+          "currentPage": { "type": "integer", "format": "int32" },
+          "totalItems": { "type": "integer", "format": "int64" },
+          "totalPages": { "type": "integer", "format": "int32" }
+        }
+      },
       "HighlightPutRequest": {
         "type": "object",
         "properties": {
@@ -2773,6 +3063,47 @@
           "profileImageURL": { "type": "string" }
         }
       },
+      "ApiSuccessResponseReadingProgressResponse": {
+        "type": "object",
+        "properties": {
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/ReadingProgressResponse" }
+        },
+        "description": "API 에러 응답을 감싸는 클래스"
+      },
+      "ReadingProgressResponse": {
+        "type": "object",
+        "properties": {
+          "bookId": { "type": "integer", "format": "int64" },
+          "userId": { "type": "integer", "format": "int64" },
+          "userNickname": { "type": "string" },
+          "userProfileImageURL": { "type": "string" },
+          "cfi": { "type": "string" },
+          "percentage": { "type": "integer", "format": "int64" }
+        }
+      },
+      "ApiSuccessResponsePageResponseReadingProgressResponse": {
+        "type": "object",
+        "properties": {
+          "isSuccessful": { "type": "boolean" },
+          "data": {
+            "$ref": "#/components/schemas/PageResponseReadingProgressResponse"
+          }
+        },
+        "description": "API 에러 응답을 감싸는 클래스"
+      },
+      "PageResponseReadingProgressResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ReadingProgressResponse" }
+          },
+          "currentPage": { "type": "integer", "format": "int32" },
+          "totalItems": { "type": "integer", "format": "int64" },
+          "totalPages": { "type": "integer", "format": "int32" }
+        }
+      },
       "ApiSuccessResponsePublisherInfoResponse": {
         "type": "object",
         "properties": {
@@ -2789,14 +3120,6 @@
           "profileImageURL": { "type": "string" },
           "status": { "type": "string" },
           "createdAt": { "type": "string", "format": "date-time" }
-        }
-      },
-      "Pageable": {
-        "type": "object",
-        "properties": {
-          "page": { "minimum": 0, "type": "integer", "format": "int32" },
-          "size": { "minimum": 1, "type": "integer", "format": "int32" },
-          "sort": { "type": "array", "items": { "type": "string" } }
         }
       },
       "ApiSuccessResponsePageResponseNotificationResponse": {
@@ -3001,37 +3324,22 @@
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
-      "ActivityFetchResponse": {
-        "type": "object",
-        "properties": {
-          "activityId": { "type": "integer", "format": "int64" },
-          "bookId": { "type": "integer", "format": "int64" },
-          "bookTitle": { "type": "string" },
-          "bookAuthor": { "type": "string" },
-          "coverImageURL": { "type": "string" },
-          "bookDescription": { "type": "string" },
-          "startTime": { "type": "string", "format": "date" },
-          "endTime": { "type": "string", "format": "date" },
-          "description": { "type": "string" },
-          "isParticipant": { "type": "boolean" }
-        }
-      },
-      "ApiSuccessResponsePageResponseActivityFetchResponse": {
+      "ApiSuccessResponsePageResponseGroupChatResponse": {
         "type": "object",
         "properties": {
           "isSuccessful": { "type": "boolean" },
           "data": {
-            "$ref": "#/components/schemas/PageResponseActivityFetchResponse"
+            "$ref": "#/components/schemas/PageResponseGroupChatResponse"
           }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
-      "PageResponseActivityFetchResponse": {
+      "PageResponseGroupChatResponse": {
         "type": "object",
         "properties": {
           "content": {
             "type": "array",
-            "items": { "$ref": "#/components/schemas/ActivityFetchResponse" }
+            "items": { "$ref": "#/components/schemas/GroupChatResponse" }
           },
           "currentPage": { "type": "integer", "format": "int32" },
           "totalItems": { "type": "integer", "format": "int64" },
