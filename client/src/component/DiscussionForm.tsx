@@ -54,20 +54,21 @@ export default function DiscussionForm({
       return;
     }
     const parts = content.split(/(#\w[\w-]*)/g); // '#'로 시작하는 단어 추출
-    const idSet = new Set<string>();
+    const idSet = new Set<number>();
     parts.forEach((part) => {
       const match = part.match(/#(\w[\w-]*)/);
       if (match) {
-        idSet.add(match[1]); // '#' 제거
+        idSet.add(parseInt(match[1])); // '#' 제거
       }
     });
-
+    const highlightIds = idSet.size > 0 ? Array.from(idSet) : undefined;
     if (isEdit) {
       // 수정 모드: 기존 게시글 수정
       API_CLIENT.discussionController
         .updateDiscussion(discussionId!!, {
           title,
           content,
+          highlightIds,
         })
         .then((response) => {
           if (response.isSuccessful) {
@@ -84,6 +85,7 @@ export default function DiscussionForm({
           title,
           content,
           isDebate,
+          highlightIds,
         })
         .then((response) => {
           if (response.isSuccessful) {
@@ -144,6 +146,7 @@ export default function DiscussionForm({
         </Button>
         <HighlightBrowserModal
           open={openMemoBrowser}
+          activityId={activityId}
           onClose={() => {
             setOpenMemoBrowser(false);
           }}
