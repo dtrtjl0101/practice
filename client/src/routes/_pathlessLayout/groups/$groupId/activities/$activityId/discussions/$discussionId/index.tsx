@@ -12,13 +12,14 @@ import {
   DialogContent,
   DialogTitle,
   DialogActions,
+  Popover,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../../../../../../../../api/api";
 import { Discussion } from "../../../../../../../../types/discussion";
 import CommentSection from "../../../../../../../../component/CommentSection";
 import { Comment } from "../../../../../../../../types/comment";
-import { Fragment, useState } from "react";
+import { Fragment, use, useState } from "react";
 import HighlightCard from "../../../../../../../../component/HighlightCard";
 import { Highlight } from "../../../../../../../../types/highlight";
 
@@ -84,6 +85,34 @@ function RouteComponent() {
     setSelectedHighlight(null);
   }
 
+  const [popoverAnchor, setPopoverAnchor] = useState<HTMLElement | null>(null);
+  const [hoveredHighlightId, setHoveredHighlightId] = useState<number | null>(
+    null
+  );
+  const [closeTimer, setCloseTimer] = useState<ReturnType<
+    typeof setTimeout
+  > | null>(null);
+
+  const handlePopoverOpen = (
+    event: React.MouseEvent<HTMLElement>,
+    highlightId: number
+  ) => {
+    if (closeTimer) {
+      clearTimeout(closeTimer);
+      setCloseTimer(null);
+    }
+    setPopoverAnchor(event.currentTarget);
+    setHoveredHighlightId(highlightId);
+  };
+
+  const handlePopoverClose = () => {
+    const timer = setTimeout(() => {
+      setPopoverAnchor(null);
+      setHoveredHighlightId(null);
+    }, 2000); // 200ms 지연 후 닫힘
+    setCloseTimer(timer);
+  };
+
   if (isLoading)
     return (
       <Box
@@ -107,7 +136,6 @@ function RouteComponent() {
         <Typography variant="h4" fontWeight="bold" gutterBottom>
           {discussion.title}
         </Typography>
-
         {/* 작성자 및 작성일 */}
         <Stack
           direction="row"
@@ -130,15 +158,18 @@ function RouteComponent() {
             ).toLocaleString()}
           </Typography>
         </Stack>
-
         <Divider sx={{ my: 2 }} />
-
         {/* 본문 */}
         <Typography
           variant="body1"
           sx={{ whiteSpace: "pre-line", minHeight: "200px" }}
         >
-          {parseContentWithHighlights(discussion.content, handleHighlightClick)}
+          {parseContentWithHighlights(
+            discussion.content,
+            handleHighlightClick,
+            handlePopoverOpen,
+            handlePopoverClose
+          )}
         </Typography>
         {selectedHighlight && (
           <HighlightModal
@@ -149,8 +180,52 @@ function RouteComponent() {
             refetchHighlights={() => {}}
           />
         )}
+        <Popover
+          open={Boolean(popoverAnchor)}
+          // open={false}
+          anchorEl={popoverAnchor}
+          onClick={() => {
+            alert("click");
+          }}
+          onClose={() => {
+            setPopoverAnchor(null);
+            setHoveredHighlightId(null);
+          }}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "left",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "left",
+          }}
+          PaperProps={{
+            onMouseEnter: () => {
+              if (closeTimer) {
+                clearTimeout(closeTimer);
+                setCloseTimer(null);
+              }
+            },
+            onMouseLeave: () => {
+              const timer = setTimeout(() => {
+                setPopoverAnchor(null);
+                setHoveredHighlightId(null);
+              }, 500); // 0.5초 후 닫기
+              setCloseTimer(timer);
+            },
+          }}
+        >
+          <Box sx={{ p: 2, maxWidth: 300 }}>
+            {hoveredHighlightId ? (
+              <Typography variant="body2">
+                하이라이트 #{hoveredHighlightId}
+              </Typography>
+            ) : (
+              <Typography variant="body2">불러오는 중...</Typography>
+            )}
+          </Box>
+        </Popover>
         <Divider sx={{ my: 3 }} />
-
         {/* 버튼 영역 */}
         <Stack direction="row" spacing={2} justifyContent="flex-end">
           <Button
@@ -186,7 +261,9 @@ function RouteComponent() {
 
 function parseContentWithHighlights(
   content: string,
-  onHighlightClick: (id: number) => void
+  onClick: (id: number) => void,
+  onHover: (e: React.MouseEvent<HTMLElement>, id: number) => void,
+  onLeave: () => void
 ): React.ReactNode[] {
   const parts = content.split(/(#\w[\w-]*)/g); // '#'로 시작하는 단어 추출
 
@@ -199,7 +276,9 @@ function parseContentWithHighlights(
           key={index}
           component="span"
           color="primary"
-          onClick={() => onHighlightClick(parseInt(id))}
+          onClick={() => onClick(parseInt(id))}
+          onMouseEnter={(e) => onHover(e, parseInt(id))}
+          onMouseLeave={onLeave}
           sx={{ cursor: "pointer", textDecoration: "underline" }}
         >
           메모{id}

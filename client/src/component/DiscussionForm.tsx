@@ -53,6 +53,15 @@ export default function DiscussionForm({
       alert("제목과 내용을 입력해주세요.");
       return;
     }
+    const parts = content.split(/(#\w[\w-]*)/g); // '#'로 시작하는 단어 추출
+    const idSet = new Set<string>();
+    parts.forEach((part) => {
+      const match = part.match(/#(\w[\w-]*)/);
+      if (match) {
+        idSet.add(match[1]); // '#' 제거
+      }
+    });
+    const uniqueIds = Array.from(idSet);
 
     if (isEdit) {
       // 수정 모드: 기존 게시글 수정
