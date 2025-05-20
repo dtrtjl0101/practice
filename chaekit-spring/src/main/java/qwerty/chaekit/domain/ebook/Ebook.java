@@ -51,4 +51,6 @@ public class Ebook extends BaseEntity {
         this.coverImageKey = coverImageKey;
         this.publisher = publisher;
     }
+
+
 }

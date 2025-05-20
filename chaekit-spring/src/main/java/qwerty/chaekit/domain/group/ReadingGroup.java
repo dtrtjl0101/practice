@@ -126,6 +126,11 @@ public class ReadingGroup extends BaseEntity {
         return groupLeader.getId().equals(userId);
     }
 
+    public boolean isMember(UserProfile user) {
+        return groupMembers.stream()
+                .anyMatch(member -> member.isMember(user) && member.isAccepted());
+    }
+
     public boolean isMemberAlreadyRequested(UserProfile user) {
         return groupMembers.stream()
                 .anyMatch(gm -> gm.isMember(user));

@@ -12,7 +12,6 @@ public record EbookPurchaseResponse(
         Long bookId,
         String title,
         String author,
-
         String presignedDownloadURL
 ) {
     /**
