@@ -139,7 +139,11 @@ public class ActivityService {
         Ebook book = entityFinder.findEbook(bookId);
 
         Page<ActivityFetchResponse> page = activityMemberRepository.findByUserAndActivity_Book(user, book, pageable)
-                .map(activityMember -> ActivityFetchResponse.of(activityMember.getActivity()));
+                .map(activityMember -> ActivityFetchResponse.of(
+                        activityMember.getActivity(),
+                        fileService.convertToPublicImageURL(activityMember.getUser().getProfileImageKey()),
+                        true
+                ));
 
         return PageResponse.of(page);
 
