@@ -9,6 +9,8 @@ import {
   Input,
   CardActions,
   Button,
+  Stack,
+  OutlinedInput,
 } from "@mui/material";
 import { useState } from "react";
 
@@ -47,25 +49,23 @@ export default function HighlightCreationModal({
           width: 400,
         }}
       >
-        <Card>
-          <CardHeader title="Create Memo" />
-          <CardContent>
+        <Card sx={{ p: 2 }}>
+          <Stack spacing={2}>
+            <Typography variant="h6">하이라이트 만들기</Typography>
             <Typography color="textSecondary" variant="body1">
               {selection.text}
             </Typography>
             <Divider />
-            <Input
+            <OutlinedInput
               value={content}
               onChange={(e) => setContent(e.target.value)}
               type="textarea"
               multiline
               fullWidth
+              placeholder="메모를 입력하세요"
             />
-          </CardContent>
-          <CardActions>
-            <Button color="secondary" onClick={onClose}>
-              Cancel
-            </Button>
+          </Stack>
+          <CardActions sx={{ justifyContent: "flex-end" }}>
             <Button
               variant="contained"
               color="primary"
@@ -81,7 +81,10 @@ export default function HighlightCreationModal({
                 onClose();
               }}
             >
-              Create
+              작성
+            </Button>
+            <Button color="secondary" onClick={onClose}>
+              취소
             </Button>
           </CardActions>
         </Card>
