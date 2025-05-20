@@ -8,12 +8,19 @@ import {
   Stack,
   CircularProgress,
   Box,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogActions,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../../../../../../../../api/api";
 import { Discussion } from "../../../../../../../../types/discussion";
 import CommentSection from "../../../../../../../../component/CommentSection";
 import { Comment } from "../../../../../../../../types/comment";
+import { Fragment, useState } from "react";
+import HighlightCard from "../../../../../../../../component/HighlightCard";
+import { Highlight } from "../../../../../../../../types/highlight";
 
 export const Route = createFileRoute(
   "/_pathlessLayout/groups/$groupId/activities/$activityId/discussions/$discussionId/"
@@ -65,6 +72,18 @@ function RouteComponent() {
     router.navigate({ to: ".." });
   };
 
+  const [selectedHighlight, setSelectedHighlight] = useState<number | null>(
+    null
+  );
+
+  const handleHighlightClick = (id: number) => {
+    setSelectedHighlight(id);
+  };
+
+  function handleCloseModal(): void {
+    setSelectedHighlight(null);
+  }
+
   if (isLoading)
     return (
       <Box
@@ -104,9 +123,11 @@ function RouteComponent() {
           </Typography>
           <Typography variant="subtitle2" color="text.secondary">
             작성일:{" "}
-            {discussion.modifiedAt == undefined
-              ? discussion.createdAt
-              : discussion.modifiedAt}
+            {new Date(
+              discussion.modifiedAt == undefined
+                ? discussion.createdAt
+                : discussion.modifiedAt
+            ).toLocaleString()}
           </Typography>
         </Stack>
 
@@ -117,9 +138,17 @@ function RouteComponent() {
           variant="body1"
           sx={{ whiteSpace: "pre-line", minHeight: "200px" }}
         >
-          {discussion.content}
+          {parseContentWithHighlights(discussion.content, handleHighlightClick)}
         </Typography>
-
+        {selectedHighlight && (
+          <HighlightModal
+            open={true}
+            onClose={() => handleCloseModal()}
+            highlightId={selectedHighlight}
+            activityId={discussion.activityId}
+            refetchHighlights={() => {}}
+          />
+        )}
         <Divider sx={{ my: 3 }} />
 
         {/* 버튼 영역 */}
@@ -152,5 +181,75 @@ function RouteComponent() {
         onRefresh={refetchDiscussion}
       />
     </Container>
+  );
+}
+
+function parseContentWithHighlights(
+  content: string,
+  onHighlightClick: (id: number) => void
+): React.ReactNode[] {
+  const parts = content.split(/(#\w[\w-]*)/g); // '#'로 시작하는 단어 추출
+
+  return parts.map((part, index) => {
+    const match = part.match(/^#(\w[\w-]*)$/);
+    if (match) {
+      const id = match[1];
+      return (
+        <Typography
+          key={index}
+          component="span"
+          color="primary"
+          onClick={() => onHighlightClick(parseInt(id))}
+          sx={{ cursor: "pointer", textDecoration: "underline" }}
+        >
+          메모{id}
+        </Typography>
+      );
+    } else {
+      return <Fragment key={index}>{part}</Fragment>;
+    }
+  });
+}
+
+function HighlightModal({
+  open,
+  onClose,
+  highlightId,
+  activityId,
+  refetchHighlights,
+}: {
+  open: boolean;
+  onClose: () => void;
+  highlightId: number;
+  activityId?: number;
+  refetchHighlights: () => void;
+}) {
+  const { data: highlight } = useQuery({
+    queryKey: ["highlight", highlightId],
+    queryFn: async () => {
+      const response =
+        await API_CLIENT.highlightController.getHighlight(highlightId);
+      if (!response.isSuccessful) {
+        throw new Error(response.errorMessage);
+      }
+      return response.data as Highlight;
+    },
+  });
+
+  if (!highlight) return null;
+
+  return (
+    <Dialog open={open} onClose={onClose}>
+      <DialogTitle>{highlight.highlightContent}</DialogTitle>
+      <DialogContent>
+        <HighlightCard
+          highlight={highlight!!}
+          refetchHighlights={refetchHighlights}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>닫기</Button>
+      </DialogActions>
+    </Dialog>
   );
 }

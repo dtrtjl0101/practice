@@ -254,9 +254,9 @@ function HighlightListItem(props: {
     <ListItemButton onClick={() => onClick(highlight)}>
       <ListItemText
         primary={
-          highlight.memo.length > 20
-            ? highlight.memo.slice(0, 20) + "..."
-            : highlight.memo
+          highlight.highlightContent.length > 20
+            ? highlight.highlightContent.slice(0, 20) + "..."
+            : highlight.highlightContent
         }
         secondary={
           <>
@@ -345,7 +345,7 @@ function HighlightViewer(props: {
               2025.04.06
             </Typography>
             <Typography variant="body2" color="textSecondary">
-              {`${highlight.memo}`}
+              {`${highlight.highlightContent}`}
             </Typography>
             <Divider />
             <Typography variant="body1">{`${highlight.memo}`}</Typography>

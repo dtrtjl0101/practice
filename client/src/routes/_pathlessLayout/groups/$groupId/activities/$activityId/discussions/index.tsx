@@ -56,7 +56,7 @@ function RouteComponent() {
   // const [sort, _setSort] = useState<string[]>([]);
   // const [totalPages, setTotalPages] = useState(1);
   return (
-    <Container>
+    <Container maxWidth="md">
       <Box sx={{ textAlign: "center", my: 4 }}>
         <Typography variant="h4">게시판</Typography>
       </Box>
@@ -156,9 +156,11 @@ function RouteComponent() {
                       {discussion.isDebate ? "찬반" : ""}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {discussion.modifiedAt == undefined
-                        ? discussion.createdAt
-                        : discussion.modifiedAt}
+                      {new Date(
+                        discussion.modifiedAt == undefined
+                          ? discussion.createdAt
+                          : discussion.modifiedAt
+                      ).toLocaleString()}
                     </Typography>
                   </Stack>
                 </CardContent>

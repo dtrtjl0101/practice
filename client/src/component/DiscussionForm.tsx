@@ -15,6 +15,7 @@ import {
   Box,
 } from "@mui/material";
 import { Discussion } from "../types/discussion";
+import HighlightBrowserModal from "./HighlightBrowserModal";
 
 export default function DiscussionForm({
   activityId,
@@ -94,6 +95,8 @@ export default function DiscussionForm({
     }
   };
 
+  const [openMemoBrowser, setOpenMemoBrowser] = useState(false);
+
   useEffect(() => {
     if (!discussion) return;
     setTitle(discussion.title ?? "");
@@ -117,16 +120,33 @@ export default function DiscussionForm({
         />
         {/*제목 title */}
         <OutlinedInput
-          sx={{ mb: 4 }}
+          sx={{ mb: 2 }}
           placeholder="제목을 입력하세요"
           value={title}
           fullWidth
           multiline
           onChange={(e) => setTitle(e.target.value)}
         />
+        <Button
+          variant="outlined"
+          onClick={() => setOpenMemoBrowser(true)}
+          sx={{ mb: 2 }}
+        >
+          Open highlight browser
+        </Button>
+        <HighlightBrowserModal
+          open={openMemoBrowser}
+          onClose={() => {
+            setOpenMemoBrowser(false);
+          }}
+          onSelectHighlight={() => {}}
+          onUseHighlight={(highlight) => {
+            setContent((prev) => prev + "#" + highlight.id);
+          }}
+        />
         {/* 본문 content */}
         <OutlinedInput
-          sx={{ alignItems: "flex-start", minHeight: "300px" }}
+          sx={{ mb: 2, alignItems: "flex-start", minHeight: "300px" }}
           placeholder="내용을 입력하세요"
           value={content}
           onChange={(e) => setContent(e.target.value)}
