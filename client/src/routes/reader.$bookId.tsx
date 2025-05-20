@@ -85,6 +85,9 @@ function RouteComponent() {
   const router = useRouter();
   const navigate = Route.useNavigate();
   const [localReadProgress, setLocalReadProgress] = useState<number>(0);
+  const [focusedHighlight, setFocusedHighlight] = useState<Highlight | null>(
+    null
+  );
 
   const queryParam = activityId
     ? {
@@ -177,22 +180,58 @@ function RouteComponent() {
     return;
   }, [highlights, rendition, location, setHighlightsInPage]);
 
+  const onHighlightClick = (highlight: Highlight) => {
+    if (!openHighlightDrawer) {
+      setOpenHighlightDrawer(true);
+    }
+    setFocusedHighlight(highlight);
+  };
+  const updateHighlight = (props: {
+    removed: Highlight[];
+    added: Highlight[];
+  }) => {
+    const { removed, added } = props;
+    if (!rendition) {
+      return;
+    }
+    removed.forEach((highlight) => {
+      rendition.annotations.remove(highlight.cfi, "highlight");
+    });
+    added.forEach((highlight) => {
+      const shouldFade =
+        focusedHighlight && highlight.id !== focusedHighlight.id;
+      rendition.annotations.highlight(
+        highlight.cfi,
+        {},
+        () => {
+          onHighlightClick(highlight);
+        },
+        undefined,
+        {
+          transition: "all 0.3s ease-out",
+          opacity: shouldFade ? 0 : 0.7,
+        }
+      );
+    });
+  };
+
   useEffect(() => {
     if (!rendition) {
       return;
     }
-
     const { added, removed } = diffMemos(
       previousHighlightsInPage.current,
       highlightsInPage
     );
-    added.forEach((highlight) => {
-      rendition.annotations.highlight(highlight.cfi, {}, () => {});
-    });
-    removed.forEach((highlight) => {
-      rendition.annotations.remove(highlight.cfi, "highlight");
-    });
+    updateHighlight({ added, removed });
   }, [rendition, highlightsInPage]);
+
+  useEffect(() => {
+    updateHighlight({
+      added: highlightsInPage,
+      removed: highlightsInPage,
+    });
+  }, [focusedHighlight]);
 
   useEffect(() => {
     loadBook(bookId).then((book) => {
@@ -241,6 +280,38 @@ function RouteComponent() {
       });
     }
   }, [location]);
+
+  useEffect(() => {
+    if (!focusedHighlight) {
+      return;
+    }
+    const timeout = setTimeout(() => {
+      setFocusedHighlight(null);
+    }, 3000);
+    return () => clearTimeout(timeout);
+  }, [focusedHighlight]);
+
+  const addHighlight = async (props: {
+    memo: string;
+    cfi: string;
+    highlightContent: string;
+  }) => {
+    const { cfi, memo, highlightContent } = props;
+    const response = await API_CLIENT.highlightController.createHighlight({
+      memo,
+      cfi,
+      spine,
+      bookId,
+      activityId,
+      highlightContent,
+    });
+
+    if (!response.isSuccessful) {
+      throw new Error(response.errorMessage);
+    }
+
+    refetchHighlights();
+  };
 
   return (
     <Box
@@ -310,23 +381,7 @@ function RouteComponent() {
         open={openHighlightCreationModal}
         onClose={() => setOpenHighlightCreationModal(false)}
         selection={selection}
-        addHighlight={async ({ cfi, memo }) => {
-          const response = await API_CLIENT.highlightController.createHighlight(
-            {
-              memo,
-              cfi,
-              spine,
-              bookId,
-              activityId,
-            }
-          );
-
-          if (!response.isSuccessful) {
-            throw new Error(response.errorMessage);
-          }
-
-          refetchHighlights();
-        }}
+        addHighlight={addHighlight}
       />
       <Drawer
         anchor="right"
@@ -339,7 +394,12 @@ function RouteComponent() {
               key={highlight.id}
               highlight={highlight}
               activityId={activityId}
+              focused={focusedHighlight?.id === highlight.id}
               refetchHighlights={refetchHighlights}
+              shouldFade={
+                !!focusedHighlight && focusedHighlight.id !== highlight.id
+              }
+              onClick={() => setFocusedHighlight(highlight)}
             />
           ))}
         </Stack>
@@ -367,6 +427,7 @@ function RouteComponent() {
               const selection = window.getSelection();
               if (!selection || selection.isCollapsed) {
                 setSelection(null);
+                setFocusedHighlight(null);
               }
             },
             { once: true }

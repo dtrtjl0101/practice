@@ -27,7 +27,11 @@ export default function HighlightCreationModal({
   open: boolean;
   onClose: () => void;
   selection: Selection | null;
-  addHighlight: (props: { memo: string; cfi: string }) => void;
+  addHighlight: (props: {
+    memo: string;
+    cfi: string;
+    highlightContent: string;
+  }) => void;
 }) {
   const [content, setContent] = useState("");
 
@@ -73,6 +77,7 @@ export default function HighlightCreationModal({
                 addHighlight({
                   memo: content,
                   cfi: selection.epubcfi,
+                  highlightContent: selection.text,
                 });
                 setContent("");
                 onClose();
