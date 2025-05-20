@@ -1,11 +1,16 @@
 export type Comment = {
-  id: number;
-  author: string;
+  commentId: number;
+  authorId: number;
+  authorName: string;
+  authorProfileImageURL: string;
   content: string;
-  createdDate: Date;
-  updatedDate?: Date;
-  edited?: boolean;
-  stance?: "agree" | "disagree";
+  createdAt: string;
+  modifiedAt?: string;
+  isEdited: boolean;
+  isDeleted: boolean;
+  stance?: StanceOptions;
   parentId?: number;
-  replied?: Comment[];
+  replies: Comment[];
 };
+
+export type StanceOptions = "AGREE" | "DISAGREE" | "NEUTRAL";

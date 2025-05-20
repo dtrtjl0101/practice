@@ -167,6 +167,16 @@ export function ActivityCard(props: { groupId: string }) {
                   >
                     책 읽으러 가기
                   </LinkButton>
+                  <LinkButton
+                    variant="contained"
+                    to={"/groups/$groupId/activities/$activityId/discussions"}
+                    params={{
+                      groupId: groupId,
+                      activityId: activity.activityId.toString(),
+                    }}
+                  >
+                    토론게시판
+                  </LinkButton>
                 </Stack>
               </Stack>
             </Stack>
