@@ -16,7 +16,7 @@ import { GroupInfo } from "../../../../types/groups";
 
 interface GroupHeaderProps {
   group: GroupInfo | undefined;
-  groupId: string;
+  groupId: number;
   joinGroupRequested: boolean;
   handleJoinGroup: () => void;
 }
@@ -63,7 +63,7 @@ export function GroupHeader({
                   </Typography>
                   <LinkIconButton
                     to={"/groups/$groupId/manage"}
-                    params={{ groupId }}
+                    params={{ groupId: groupId.toString() }}
                     size="large"
                     sx={{
                       alignSelf: "center",

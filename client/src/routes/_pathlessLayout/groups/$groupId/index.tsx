@@ -9,6 +9,17 @@ import { GroupHeader } from "../../../../component/_pathlessLayout/groups/$group
 
 export const Route = createFileRoute("/_pathlessLayout/groups/$groupId/")({
   component: RouteComponent,
+  params: {
+    parse: (params) => {
+      const groupId = parseInt(params.groupId);
+      if (isNaN(groupId)) {
+        throw new Error("Invalid groupId");
+      }
+      return {
+        groupId,
+      };
+    },
+  },
 });
 
 function RouteComponent() {
@@ -18,11 +29,7 @@ function RouteComponent() {
   const { data: group } = useQuery({
     queryKey: ["group", groupId],
     queryFn: async () => {
-      const groupIdNumber = parseInt(groupId);
-      if (isNaN(groupIdNumber)) {
-        throw new Error("Invalid group ID");
-      }
-      const response = await API_CLIENT.groupController.getGroup(groupIdNumber);
+      const response = await API_CLIENT.groupController.getGroup(groupId);
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);
       }
@@ -32,13 +39,7 @@ function RouteComponent() {
   });
 
   const handleJoinGroup = async () => {
-    const groupIdNumber = parseInt(groupId);
-    if (isNaN(groupIdNumber)) {
-      alert("Invalid group ID");
-      return;
-    }
-    const response =
-      await API_CLIENT.groupController.requestJoinGroup(groupIdNumber);
+    const response = await API_CLIENT.groupController.requestJoinGroup(groupId);
     if (!response.isSuccessful) {
       alert(response.errorMessage);
       return;

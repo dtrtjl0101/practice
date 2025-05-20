@@ -3,14 +3,17 @@ import { Activity } from "../../../../types/activity";
 import API_CLIENT from "../../../../api/api";
 import { useEffect, useState } from "react";
 import {
+  Avatar,
   Box,
   Button,
+  Card,
   CardActionArea,
   CardMedia,
   Container,
   Divider,
   Icon,
   IconButton,
+  LinearProgress,
   Modal,
   Pagination,
   Paper,
@@ -19,7 +22,8 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { Add, Cancel, Check, Timelapse } from "@mui/icons-material";
+import { Add, Cancel, Check, Timelapse, Group } from "@mui/icons-material";
+import Popover from "@mui/material/Popover";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { Dayjs } from "dayjs";
 import { BookMetadata } from "../../../../types/book";
@@ -27,7 +31,7 @@ import LinkButton from "../../../LinkButton";
 import { useNavigate } from "@tanstack/react-router";
 import BookSearchInput from "../../../BookSearchInput";
 
-export function ActivityCard(props: { groupId: string }) {
+export function ActivityCard(props: { groupId: number }) {
   const { groupId } = props;
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -41,12 +45,8 @@ export function ActivityCard(props: { groupId: string }) {
   } = useQuery({
     queryKey: ["activity", groupId, page],
     queryFn: async () => {
-      const groupIdNumber = parseInt(groupId);
-      if (isNaN(groupIdNumber)) {
-        throw new Error("INVALID_GROUP_ID");
-      }
       const response = await API_CLIENT.activityController.getAllActivities(
-        groupIdNumber,
+        groupId,
         {
           page,
           size: 1,
@@ -66,6 +66,38 @@ export function ActivityCard(props: { groupId: string }) {
       return activity;
     },
   });
+
+  const { data: activityReadProgresses } = useQuery({
+    queryKey: ["activityReadProgresses", activity?.activityId],
+    queryFn: async () => {
+      if (!activity) {
+        return [];
+      }
+      const response =
+        await API_CLIENT.readingProgressController.getProgressFromActivity(
+          activity.activityId,
+          {
+            pageable: {
+              page: 0,
+              size: 100,
+            },
+          }
+        );
+      if (!response.isSuccessful) throw new Error(response.errorMessage);
+      return response.data!.content!;
+    },
+    initialData: [],
+  });
+
+  const [progressPopoverAnchor, setProgressPopoverAnchor] =
+    useState<null | HTMLElement>(null);
+  const handleProgressPopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setProgressPopoverAnchor(event.currentTarget);
+  };
+  const handleProgressPopoverClose = () => {
+    setProgressPopoverAnchor(null);
+  };
+  const progressPopoverOpen = Boolean(progressPopoverAnchor);
 
   const onJoinActivityButtonClicked = async () => {
     if (!activity) {
@@ -109,6 +141,53 @@ export function ActivityCard(props: { groupId: string }) {
           refetch();
         }}
       />
+      <Popover
+        open={progressPopoverOpen}
+        anchorEl={progressPopoverAnchor}
+        onClose={handleProgressPopoverClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+        disableRestoreFocus
+        slotProps={{
+          paper: {
+            sx: { p: 2, minWidth: 320 },
+          },
+        }}
+      >
+        <Typography variant="subtitle1" sx={{ mb: 1 }}>
+          활동 참여자 목록
+        </Typography>
+        <Divider />
+        {activityReadProgresses.length === 0 ? (
+          <Typography variant="body2">아직 참여자가 없습니다.</Typography>
+        ) : (
+          <Stack spacing={1}>
+            {activityReadProgresses.map((progress) => (
+              <Card>
+                <Stack key={progress.userId}>
+                  <LinearProgress
+                    value={progress.percentage}
+                    variant="determinate"
+                  />
+                  <Stack
+                    direction={"row"}
+                    spacing={1}
+                    alignItems={"center"}
+                    sx={{ p: 2 }}
+                  >
+                    <Avatar src={progress.userProfileImageURL} />
+                    <Typography variant="body2">
+                      {progress.userNickname!}
+                    </Typography>
+                  </Stack>
+                </Stack>
+              </Card>
+            ))}
+          </Stack>
+        )}
+      </Popover>
       <Paper sx={{ p: 2 }}>
         <Stack spacing={2}>
           <Box sx={{ display: "flex", flexDirection: "row" }}>
@@ -128,20 +207,28 @@ export function ActivityCard(props: { groupId: string }) {
               <Stack spacing={1} sx={{ flexGrow: 1 }}>
                 <Stack spacing={1}>
                   <Typography variant="h5">{activity.bookTitle}</Typography>
-                  <Typography
-                    variant="body2"
-                    color="textSecondary"
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Icon>
-                      <Timelapse />
-                    </Icon>
-                    {new Date(activity.startTime).toLocaleDateString()} ~{" "}
-                    {new Date(activity.endTime).toLocaleDateString()}
-                  </Typography>
+                  <Stack direction={"row"}>
+                    <Typography
+                      variant="body2"
+                      color="textSecondary"
+                      sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+                    >
+                      <Icon>
+                        <Timelapse />
+                      </Icon>
+                      {new Date(activity.startTime).toLocaleDateString()} ~{" "}
+                      {new Date(activity.endTime).toLocaleDateString()}
+                    </Typography>
+                    <Button
+                      sx={{ ml: "auto", gap: 0.5 }}
+                      onClick={handleProgressPopoverOpen}
+                    >
+                      <Icon>
+                        <Group />
+                      </Icon>
+                      {activityReadProgresses.length}
+                    </Button>
+                  </Stack>
                 </Stack>
                 <Divider />
                 <Typography variant="body1" flexGrow={1}>
@@ -176,7 +263,7 @@ export function ActivityCard(props: { groupId: string }) {
                     to={"/groups/$groupId/activities/$activityId/discussions"}
                     params={{
                       groupId: groupId,
-                      activityId: activity.activityId.toString(),
+                      activityId: activity.activityId,
                     }}
                   >
                     토론게시판
@@ -348,7 +435,7 @@ export function DateRangePicker({
 export function ActivityCreateModal(props: {
   open: boolean;
   onClose: () => void;
-  groupId: string;
+  groupId: number;
   onCreate: (activity: Activity) => void;
 }) {
   const { open, onClose, groupId, onCreate } = props;
@@ -368,13 +455,8 @@ export function ActivityCreateModal(props: {
       alert("설명을 입력해주세요");
       return;
     }
-    const groupIdNumber = parseInt(groupId);
-    if (isNaN(groupIdNumber)) {
-      alert("Invalid group ID");
-      return;
-    }
     const response = await API_CLIENT.activityController.createActivity(
-      groupIdNumber,
+      groupId,
       {
         bookId: book.id,
         endTime: endDate.toISOString(),
