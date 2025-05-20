@@ -1,10 +1,11 @@
-package qwerty.chaekit.domain.group.activity.discussion;
+package qwerty.chaekit.domain.discussionhighlight;
 
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import qwerty.chaekit.domain.BaseEntity;
+import qwerty.chaekit.domain.group.activity.discussion.Discussion;
 import qwerty.chaekit.domain.highlight.entity.Highlight;
 
 @Entity

@@ -5,7 +5,9 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import qwerty.chaekit.domain.BaseEntity;
+import qwerty.chaekit.domain.discussionhighlight.DiscussionHighlight;
 import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment;
 import qwerty.chaekit.domain.highlight.entity.Highlight;
@@ -18,6 +20,7 @@ import java.util.List;
 @Getter
 @Table(name = "discussion")
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
+@BatchSize(size = 20)
 public class Discussion extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

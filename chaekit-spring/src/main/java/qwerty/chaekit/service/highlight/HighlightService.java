@@ -6,8 +6,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import qwerty.chaekit.domain.discussionhighlight.DiscussionHighlightRepository;
 import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.group.activity.Activity;
+import qwerty.chaekit.domain.group.activity.discussion.Discussion;
+import qwerty.chaekit.domain.discussionhighlight.DiscussionHighlight;
 import qwerty.chaekit.domain.highlight.entity.Highlight;
 import qwerty.chaekit.domain.highlight.entity.reaction.HighlightReaction;
 import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
@@ -29,6 +32,7 @@ import qwerty.chaekit.service.util.EntityFinder;
 import qwerty.chaekit.service.util.FileService;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -38,6 +42,7 @@ import java.util.stream.Collectors;
 public class HighlightService {
     private final HighlightRepository highlightRepository;
     private final HighlightReactionRepository reactionRepository;
+    private final DiscussionHighlightRepository discussionHighlightRepository;
     private final ActivityPolicy activityPolicy;
     private final HighlightPolicy highlightPolicy;
     private final EntityFinder entityFinder;
@@ -90,12 +95,31 @@ public class HighlightService {
         } else if (isFetchingPublicHighlight) {
             throw new BadRequestException(ErrorCode.ACTIVITY_ID_REQUIRED);
         }
-        
+
+        // 조회 조건에 맞는 하이라이트를 가져옴
+
         Page<Highlight> highlights = highlightRepository.findHighlights(pageable, userToken.userId(), activityId, bookId, spine, me);
+
+        // 1. highlightId 추출
+        List<Long> highlightIds = highlights.stream()
+                .map(Highlight::getId)
+                .toList();
+
+        // 2. 연관된 DiscussionHighlight를 모두 조회
+        List<DiscussionHighlight> discussionLinks = discussionHighlightRepository.findByHighlightIdIn(highlightIds);
+
+        // 3. highlightId → List<Discussion> 매핑
+        Map<Long, List<Discussion>> highlightIdToDiscussions = discussionLinks.stream()
+                .collect(Collectors.groupingBy(
+                        dh -> dh.getHighlight().getId(),
+                        Collectors.mapping(DiscussionHighlight::getDiscussion, Collectors.toList())
+                ));
+
         return PageResponse.of(highlights.map(
                 highlight -> HighlightFetchResponse.of(
                         highlight,
-                        fileService.convertToPublicImageURL(highlight.getAuthor().getProfileImageKey())
+                        fileService.convertToPublicImageURL(highlight.getAuthor().getProfileImageKey()),
+                        highlightIdToDiscussions.getOrDefault(highlight.getId(), List.of())
                 )
         ));
     }
@@ -152,8 +176,10 @@ public class HighlightService {
         if (!highlight.isAuthor(user) && !highlight.isPublic()) {
             throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_SEE);
         }
-
+        List<Discussion> discussionLinks = discussionHighlightRepository.findByHighlight(highlight)
+                .stream()
+                .map(DiscussionHighlight::getDiscussion).toList();
         String authorProfileImageURL = fileService.convertToPublicImageURL(highlight.getAuthor().getProfileImageKey());
-        return HighlightFetchResponse.of(highlight, authorProfileImageURL);
+        return HighlightFetchResponse.of(highlight, authorProfileImageURL, discussionLinks);
     }
 }
