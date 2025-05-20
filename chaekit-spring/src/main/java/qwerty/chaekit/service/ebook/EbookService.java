@@ -7,33 +7,38 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.ebook.repository.EbookRepository;
+import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.dto.ebook.EbookFetchResponse;
 import qwerty.chaekit.dto.page.PageResponse;
-import qwerty.chaekit.global.enums.ErrorCode;
-import qwerty.chaekit.global.exception.NotFoundException;
-import qwerty.chaekit.service.util.S3Service;
+import qwerty.chaekit.global.security.resolver.UserToken;
+import qwerty.chaekit.service.util.EntityFinder;
+import qwerty.chaekit.service.util.FileService;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class EbookService {
     private final EbookRepository ebookRepository;
-    private final S3Service s3Service;
+    private final FileService fileService;
+    private final EntityFinder entityFinder;
 
-    public PageResponse<EbookFetchResponse> fetchBooksByQuery(Pageable pageable, String title, String author) {
+    public PageResponse<EbookFetchResponse> fetchBooksByQuery(UserToken userToken, Pageable pageable, String title, String author) {
+        UserProfile user = entityFinder.findUser(userToken.userId());
         Page<EbookFetchResponse> page = ebookRepository.findAllByTitleAndAuthor(title, author, pageable)
                 .map( ebook -> EbookFetchResponse.of(
-                        ebook, s3Service.convertToPublicImageURL(ebook.getCoverImageKey())
+                        ebook, fileService.convertToPublicImageURL(ebook.getCoverImageKey()),
+                        user.isPurchased(ebook)
                 ));
         return PageResponse.of(page);
     }
 
-    public EbookFetchResponse fetchById(Long ebookId) {
-        Ebook ebook = ebookRepository.findById(ebookId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.EBOOK_NOT_FOUND));
+    public EbookFetchResponse fetchById(UserToken userToken, Long ebookId) {
+        UserProfile user = entityFinder.findUser(userToken.userId());
+        Ebook ebook = entityFinder.findEbook(ebookId);
         return EbookFetchResponse.of(
                 ebook,
-                s3Service.convertToPublicImageURL(ebook.getCoverImageKey())
+                fileService.convertToPublicImageURL(ebook.getCoverImageKey()),
+                user.isPurchased(ebook)
         );
     }
 }

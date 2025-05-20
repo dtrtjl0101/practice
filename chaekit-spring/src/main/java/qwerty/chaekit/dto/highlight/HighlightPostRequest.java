@@ -8,5 +8,6 @@ public record HighlightPostRequest(
         String spine,
         String cfi,
         Long activityId,
-        String memo
+        String memo,
+        String highlightContent
 ) { }

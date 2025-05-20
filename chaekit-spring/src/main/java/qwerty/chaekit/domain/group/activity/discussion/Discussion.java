@@ -29,7 +29,7 @@ public class Discussion extends BaseEntity {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 5000)
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -59,5 +59,13 @@ public class Discussion extends BaseEntity {
         if(content != null) {
             this.content = content;
         }
+    }
+    
+    public boolean isAuthor(UserProfile user) {
+        return author.getId().equals(user.getId());
+    }
+    
+    public void addComment(DiscussionComment comment) {
+        comments.add(comment);
     }
 }

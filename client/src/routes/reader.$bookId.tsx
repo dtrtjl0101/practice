@@ -93,6 +93,7 @@ function RouteComponent() {
         page: 0,
         size: 100,
         spine,
+        me: false,
       });
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);

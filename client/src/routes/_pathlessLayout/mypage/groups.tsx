@@ -1,15 +1,9 @@
 import { GroupAdd } from "@mui/icons-material";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  IconButton,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { IconButton, Stack } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
 import GroupCreateModal from "../../../component/groupCreate/GroupCreateModal";
 import { useState } from "react";
+import GroupList, { GroupListKind } from "../../../component/groupList";
 
 export const Route = createFileRoute("/_pathlessLayout/mypage/groups")({
   component: RouteComponent,
@@ -24,26 +18,29 @@ function RouteComponent() {
         open={openGroupCreateModal}
         onClose={() => setOpenGroupCreateModal(false)}
       />
-      <Stack spacing={2}>
-        <Card>
-          <CardHeader
-            title="내 그룹"
-            action={
-              <IconButton onClick={() => setOpenGroupCreateModal(true)}>
-                <GroupAdd />
-              </IconButton>
-            }
-          />
-          <CardContent>
-            <Typography>[여기에 그룹 표시]</Typography>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader title="내가 속한 그룹" />
-          <CardContent>
-            <Typography>[여기에 그룹 표시]</Typography>
-          </CardContent>
-        </Card>
+      <Stack spacing={2} sx={{ padding: 2 }}>
+        <GroupList
+          kind={GroupListKind.MY_GROUP}
+          key="myGroups"
+          size="small"
+          title="내 모임"
+          action={
+            <IconButton onClick={() => setOpenGroupCreateModal(true)}>
+              <GroupAdd />
+            </IconButton>
+          }
+        />
+        <GroupList
+          kind={GroupListKind.JOINED_GROUP}
+          key="participantGroups"
+          size="small"
+          title="가입된 모임"
+          action={
+            <IconButton onClick={() => setOpenGroupCreateModal(true)}>
+              <GroupAdd />
+            </IconButton>
+          }
+        />
       </Stack>
     </>
   );

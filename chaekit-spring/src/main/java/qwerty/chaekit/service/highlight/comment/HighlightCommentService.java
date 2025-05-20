@@ -12,42 +12,42 @@ import qwerty.chaekit.domain.highlight.repository.comment.HighlightCommentReposi
 import qwerty.chaekit.domain.highlight.repository.reaction.HighlightReactionRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
-import qwerty.chaekit.dto.highlight.comment.CommentRequest;
-import qwerty.chaekit.dto.highlight.comment.CommentResponse;
+import qwerty.chaekit.dto.highlight.comment.HighlightCommentRequest;
+import qwerty.chaekit.dto.highlight.comment.HighlightCommentResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.UserToken;
+import qwerty.chaekit.mapper.HighlightCommentMapper;
+import qwerty.chaekit.service.group.ActivityPolicy;
 import qwerty.chaekit.service.notification.NotificationService;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class CommentService {
+public class HighlightCommentService {
     private final HighlightRepository highlightRepository;
     private final HighlightCommentRepository commentRepository;
     private final HighlightReactionRepository reactionRepository;
     private final UserProfileRepository userRepository;
     private final NotificationService notificationService;
+    private final ActivityPolicy activityPolicy;
+    private final HighlightCommentMapper highlightCommentMapper;
 
-    public CommentResponse createComment(UserToken userToken, Long highlightId, CommentRequest request) {
+    public HighlightCommentResponse createComment(UserToken userToken, Long highlightId, HighlightCommentRequest request) {
         Long userId = userToken.userId();
-        
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
-        }
-        
+
+        UserProfile commentAuthor = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
         Highlight highlight = highlightRepository.findById(highlightId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));
+
+        activityPolicy.assertJoined(commentAuthor, highlight.getActivity());
         
         if (!highlight.isPublic()) {
             throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_PUBLIC);
@@ -65,7 +65,6 @@ public class CommentService {
             parent = null;
         }
         
-        UserProfile commentAuthor = userRepository.getReferenceById(userId);
         HighlightComment comment = HighlightComment.builder()
                 .author(commentAuthor)
                 .highlight(highlight)
@@ -92,13 +91,18 @@ public class CommentService {
             }
         }
         
-        return CommentResponse.of(savedComment);
+        return highlightCommentMapper.toResponse(savedComment);
     }
     
     @Transactional(readOnly = true)
-    public List<CommentResponse> getComments(Long highlightId) {
+    public List<HighlightCommentResponse> getComments(UserToken userToken, Long highlightId) {
+        UserProfile author = userRepository.findById(userToken.userId())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        
         Highlight highlight = highlightRepository.findById(highlightId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));
+
+        activityPolicy.assertJoined(author, highlight.getActivity());
         
         if (!highlight.isPublic()) {
             throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_PUBLIC);
@@ -125,11 +129,11 @@ public class CommentService {
         }
 
         return rootComments.stream()
-                .map(comment -> CommentResponse.of(comment, reactionsByCommentId))
+                .map(comment -> highlightCommentMapper.toResponse(comment, reactionsByCommentId))
                 .collect(Collectors.toList());
     }
     
-    public CommentResponse updateComment(UserToken userToken, Long commentId, CommentRequest request) {
+    public HighlightCommentResponse updateComment(UserToken userToken, Long commentId, HighlightCommentRequest request) {
         Long userId = userToken.userId();
         
         HighlightComment comment = commentRepository.findById(commentId)
@@ -140,7 +144,7 @@ public class CommentService {
         }
         
         comment.updateContent(request.content());
-        return CommentResponse.of(commentRepository.save(comment));
+        return highlightCommentMapper.toResponse(commentRepository.save(comment));
     }
     
     public void deleteComment(UserToken userToken, Long commentId) {

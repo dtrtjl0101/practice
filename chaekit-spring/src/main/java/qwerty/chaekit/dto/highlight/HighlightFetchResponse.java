@@ -13,7 +13,8 @@ public record HighlightFetchResponse(
         String spine,
         String cfi,
         String memo,
-        Long activityId
+        Long activityId,
+        String highlightContent
 ) {
     public static HighlightFetchResponse of(Highlight highlight, String authorProfileImageURL) {
         return HighlightFetchResponse.builder()
@@ -26,6 +27,7 @@ public record HighlightFetchResponse(
                 .cfi(highlight.getCfi())
                 .memo(highlight.getMemo())
                 .activityId(highlight.getActivity() != null ? highlight.getActivity().getId() : null)
+                .highlightContent(highlight.getHighlightcontent())
                 .build();
     }
 }

@@ -1,4 +1,4 @@
-package qwerty.chaekit.dto.group;
+package qwerty.chaekit.dto.group.request;
 
 import org.springframework.web.multipart.MultipartFile;
 

@@ -35,8 +35,8 @@ public class ReadingGroup extends BaseEntity {
     @OneToMany(mappedBy = "readingGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 20)
     private List<GroupTag> tags = new ArrayList<>();
-
-    @Column(nullable = false)
+    
+    @Column(length = 5000)
     private String description;
 
     @OneToMany(mappedBy = "readingGroup", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -44,6 +44,12 @@ public class ReadingGroup extends BaseEntity {
     private final List<GroupMember> groupMembers = new ArrayList<>();
 
     private String groupImageKey;
+
+    public void addTags(List<String> tagNames) {
+        for (String tagName : tagNames) {
+            addTag(tagName);
+        }
+    }
 
     public void addTag(String tagName) {
         GroupTag groupTag = new GroupTag(this, tagName);
@@ -66,7 +72,7 @@ public class ReadingGroup extends BaseEntity {
 
     public GroupMember approveMember(UserProfile user){
         return groupMembers.stream()
-                .filter(groupMember -> groupMember.getMember().equals(user))
+                .filter(groupMember -> groupMember.getMember().getId().equals(user.getId()))
                 .findFirst()
                 .map(groupMember -> {groupMember.approve(); return groupMember;})
                 .orElse(null);
@@ -81,6 +87,7 @@ public class ReadingGroup extends BaseEntity {
                 .filter(member -> member.getMember().getId().equals(user.getId()))
                 .findFirst()
                 .ifPresent(GroupMember::reject);
+        removeMember(user);
     }
 
     public void updateDescription(String description) {
@@ -91,20 +98,42 @@ public class ReadingGroup extends BaseEntity {
         this.groupImageKey = groupImageKey;
     }
 
-    public boolean isMember(UserProfile userProfile) {
-        return groupMembers.stream()
-                .anyMatch(member -> member.getMember().getId().equals(userProfile.getId()));
-    }
-
     public MyMemberShipStatus getMemberShipStatus(@Nullable Long userId) {
         if(userId == null) {
             return MyMemberShipStatus.NONE;
+        }
+        if (isLeader(userId)) {
+            return MyMemberShipStatus.OWNED;
         }
         return groupMembers.stream()
                 .filter(member -> member.getMember().getId().equals(userId))
                 .findFirst()
                 .map(member -> member.isAccepted() ? MyMemberShipStatus.JOINED : MyMemberShipStatus.PENDING)
                 .orElse(MyMemberShipStatus.NONE);
+    }
+
+    public long memberCount() {
+        return groupMembers.stream()
+                .filter(GroupMember::isAccepted)
+                .count();
+    }
+    
+    public boolean isLeader(UserProfile user) {
+        return isLeader(user.getId());
+    }
+
+    public boolean isLeader(Long userId) {
+        return groupLeader.getId().equals(userId);
+    }
+
+    public boolean isMemberAlreadyRequested(UserProfile user) {
+        return groupMembers.stream()
+                .anyMatch(gm -> gm.isMember(user));
+    }
+
+    public boolean isPendingMember(Long userId) {
+        return groupMembers.stream()
+                .anyMatch(gm -> gm.isMember(userId) && !gm.isAccepted());
     }
 
     @Builder

@@ -5,14 +5,17 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.member.user.UserProfile;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Table(name = "group_member")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class GroupMember {
+public class GroupMember extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,6 +30,8 @@ public class GroupMember {
 
     @Column(name = "is_accepted", nullable = false)
     private boolean accepted = false;
+
+    private LocalDateTime approvedAt;
 
     @Builder
     public GroupMember(ReadingGroup readingGroup, UserProfile user) {
@@ -45,10 +50,19 @@ public class GroupMember {
 
     public void approve() {
         this.accepted = true;
+        this.approvedAt = LocalDateTime.now();
     }
 
     public void reject() {
         this.accepted = false;
     }
+
+    public boolean isMember(UserProfile user) {
+        return isMember(user.getId());
+    }
+    public boolean isMember(Long userId) {
+        return this.user.getId().equals(userId);
+    }
+
 
 }

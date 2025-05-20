@@ -1,5 +1,6 @@
 package qwerty.chaekit.controller.group;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -7,7 +8,12 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import qwerty.chaekit.dto.group.*;
+import qwerty.chaekit.dto.group.request.GroupPatchRequest;
+import qwerty.chaekit.dto.group.request.GroupPostRequest;
+import qwerty.chaekit.dto.group.response.GroupFetchResponse;
+import qwerty.chaekit.dto.group.response.GroupJoinResponse;
+import qwerty.chaekit.dto.group.response.GroupMemberResponse;
+import qwerty.chaekit.dto.group.response.GroupPostResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
@@ -30,14 +36,48 @@ public class GroupController {
 
     @GetMapping
     public ApiSuccessResponse<PageResponse<GroupFetchResponse>> getAllGroups(
-            @Login(required = false) UserToken userToken,
+            @Parameter(hidden = true) @Login(required = false) UserToken userToken,
             @ParameterObject Pageable pageable) {
-        return ApiSuccessResponse.of(groupService.fetchAllGroupList(userToken, pageable));
+        return ApiSuccessResponse.of(groupService.getAllGroups(userToken, pageable));
+    }
+
+    @GetMapping("/my/joined")
+    @Operation(
+            summary = "내가 가입한 그룹 목록 조회",
+            description = "내가 가입한 그룹 목록을 조회합니다."
+    )
+    public ApiSuccessResponse<PageResponse<GroupFetchResponse>> getJoinedGroups(
+            @Parameter(hidden = true) @Login UserToken userToken,
+            @ParameterObject Pageable pageable) {
+        return ApiSuccessResponse.of(groupService.getJoinedGroups(userToken, pageable));
+    }
+
+    @Operation(
+            summary = "내가 생성한 그룹 목록 조회",
+            description = "내가 생성한 그룹 목록을 조회합니다."
+    )
+    @GetMapping("/my/created")
+    public ApiSuccessResponse<PageResponse<GroupFetchResponse>> getCreatedGroups(
+            @Parameter(hidden = true) @Login UserToken userToken,
+            @ParameterObject Pageable pageable) {
+        return ApiSuccessResponse.of(groupService.getCreatedGroups(userToken, pageable));
+    }
+
+    @Operation(
+            summary = "특정 그룹의 멤버 목록 조회",
+            description = "특정 그룹의 멤버 목록을 조회합니다."
+    )
+    @GetMapping("/{groupId}/members")
+    public ApiSuccessResponse<PageResponse<GroupMemberResponse>> getGroupMembers(
+            @PathVariable long groupId,
+            @ParameterObject Pageable pageable
+    ) {
+        return ApiSuccessResponse.of(groupService.getGroupMembers(groupId, pageable));
     }
 
     @GetMapping("/{groupId}/info")
     public ApiSuccessResponse<GroupFetchResponse> getGroup(
-            @Login(required = false) UserToken userToken,
+            @Parameter(hidden = true) @Login(required = false) UserToken userToken,
             @PathVariable long groupId) {
         return ApiSuccessResponse.of(groupService.fetchGroup(userToken, groupId));
     }
@@ -52,14 +92,14 @@ public class GroupController {
 
     @PostMapping("/{groupId}/join")
     public ApiSuccessResponse<GroupJoinResponse> requestJoinGroup(
-            @Login UserToken userToken,
+            @Parameter(hidden = true) @Login UserToken userToken,
             @PathVariable long groupId) {
         return ApiSuccessResponse.of(groupService.requestJoinGroup(userToken, groupId));
     }
 
     @PatchMapping("/{groupId}/members/{userId}/approve")
     public ApiSuccessResponse<GroupJoinResponse> approveJoinRequest(
-            @Login UserToken userToken,
+            @Parameter(hidden = true) @Login UserToken userToken,
             @PathVariable long groupId,
             @PathVariable long userId) {
         return ApiSuccessResponse.of(groupService.approveJoinRequest(userToken, groupId, userId));
@@ -67,7 +107,7 @@ public class GroupController {
 
     @PatchMapping("/{groupId}/members/{userId}/reject")
     public ApiSuccessResponse<Void> rejectJoinRequest(
-            @Login UserToken userToken,
+            @Parameter(hidden = true) @Login UserToken userToken,
             @PathVariable long groupId,
             @PathVariable long userId) {
         groupService.rejectJoinRequest(userToken, groupId, userId);
@@ -76,15 +116,15 @@ public class GroupController {
 
     @DeleteMapping("/{groupId}/members/leave")
     public ApiSuccessResponse<Void> leaveGroup(
-            @Login UserToken userToken,
+            @Parameter(hidden = true) @Login UserToken userToken,
             @PathVariable long groupId) {
         groupService.leaveGroup(userToken, groupId);
         return ApiSuccessResponse.emptyResponse();
     }
 
     @GetMapping("/{groupId}/members/pending")
-    public ApiSuccessResponse<PageResponse<GroupPendingMemberResponse>> getPendingList(
-            @Login UserToken userToken,
+    public ApiSuccessResponse<PageResponse<GroupMemberResponse>> getPendingList(
+            @Parameter(hidden = true) @Login UserToken userToken,
             @ParameterObject Pageable pageable,
             @PathVariable long groupId
     ) {

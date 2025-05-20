@@ -21,8 +21,8 @@ import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.NotFoundException;
-import qwerty.chaekit.global.properties.AwsProperties;
-import qwerty.chaekit.service.util.S3Service;
+import qwerty.chaekit.service.util.EntityFinder;
+import qwerty.chaekit.service.util.FileService;
 
 @Service
 @RequiredArgsConstructor
@@ -33,8 +33,8 @@ public class EbookPurchaseService {
     private final UserProfileRepository userRepository;
     private final CreditWalletRepository creditWalletRepository;
     private final EbookRepository ebookRepository;
-    private final S3Service s3Service;
-    private final AwsProperties awsProperties;
+    private final FileService fileService;
+    private final EntityFinder entityFinder;
 
     public EbookPurchaseResponse purchaseEbook(Long ebookId, Long userId) {
         UserProfile buyer = userRepository.findById(userId)
@@ -76,7 +76,7 @@ public class EbookPurchaseService {
                 userId,
                 ebook,
                 savedTransaction,
-                s3Service.getPresignedDownloadUrl(awsProperties.ebookBucketName(), ebook.getFileKey())
+                fileService.getEbookDownloadUrl(ebook.getFileKey())
         );
     }
 
@@ -86,7 +86,8 @@ public class EbookPurchaseService {
                 purchases.map(
                 purchase -> EbookFetchResponse.of(
                         purchase.getEbook(),
-                        s3Service.convertToPublicImageURL(purchase.getEbook().getCoverImageKey())
+                        fileService.convertToPublicImageURL(purchase.getEbook().getCoverImageKey()),
+                        true
                 )));
     }
 }

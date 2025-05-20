@@ -29,7 +29,7 @@ public class HighlightComment extends BaseEntity {
     @JoinColumn(name="highlight_id")
     private Highlight highlight;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 1000)
     private String content;
     
     @ManyToOne(fetch = FetchType.LAZY)

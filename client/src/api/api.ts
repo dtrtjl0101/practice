@@ -3,12 +3,17 @@ import { ENV } from "../env";
 import { Api } from "./api.gen";
 import State from "../states";
 
-const api = new Api<string>({
+const api = new Api<undefined>({
   baseUrl: ENV.CHAEKIT_API_ENDPOINT,
   baseApiParams: {
     secure: true,
   },
-  securityWorker: async (accessToken) => {
+  securityWorker: async () => {
+    const user = getDefaultStore().get(State.Auth.user);
+    if (!user) {
+      return {};
+    }
+    const accessToken = user.accessToken;
     return {
       headers: {
         ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),

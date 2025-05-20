@@ -1,4 +1,4 @@
-package qwerty.chaekit.dto.group;
+package qwerty.chaekit.dto.group.response;
 
 import lombok.Builder;
 import qwerty.chaekit.domain.group.groupmember.GroupMember;

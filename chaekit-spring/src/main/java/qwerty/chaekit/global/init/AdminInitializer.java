@@ -7,6 +7,8 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import qwerty.chaekit.domain.ebook.credit.wallet.CreditWallet;
+import qwerty.chaekit.domain.ebook.credit.wallet.CreditWalletRepository;
 import qwerty.chaekit.domain.member.Member;
 import qwerty.chaekit.domain.member.MemberRepository;
 import qwerty.chaekit.domain.member.enums.Role;
@@ -31,6 +33,7 @@ public class AdminInitializer implements ApplicationRunner {
     private final AdminService adminService;
     private final MemberRepository memberRepository;
     private final UserProfileRepository userProfileRepository;
+    private final CreditWalletRepository creditWalletRepository;
 
 
     @Override
@@ -74,11 +77,17 @@ public class AdminInitializer implements ApplicationRunner {
             log.info("관리자 사용자 프로필이 추가되었습니다.");
             return newProfile;
         });
+        CreditWallet wallet = creditWalletRepository.findByUser_Id(adminUser.getId())
+                .orElseGet(() -> creditWalletRepository.save(
+                        CreditWallet.builder()
+                                .user(adminUser)
+                                .build()
+                ));
 
         adminService.setAdminPublisherId(adminPublisher.getId());
         adminService.setAdminUserId(adminUser.getId());
-        log.info("관리자 설정이 완료되었습니다. email = {}, memberId = {}, publisherId = {}, userId = {}",
-                adminEmail, adminMember.getId(), adminPublisher.getId(), adminUser.getId()
+        log.info("관리자 설정이 완료되었습니다. email = {}, memberId = {}, publisherId = {}, userId = {}, walletId = {}",
+                adminEmail, adminMember.getId(), adminPublisher.getId(), adminUser.getId(), wallet.getId()
         );
     }
 }

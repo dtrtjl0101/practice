@@ -7,7 +7,6 @@ export default function useLogout() {
   const [loggedInUser, setLoggedInUser] = useAtom(State.Auth.user);
 
   const logout = useCallback(async () => {
-    API_CLIENT.setSecurityData(null);
     setLoggedInUser(undefined);
     localStorage.removeItem("loggedInUser");
 
