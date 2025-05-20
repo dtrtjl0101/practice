@@ -34,7 +34,7 @@ function RouteComponent() {
   const [openCreditPurchaseModal, setOpenCreditPurchaseModal] = useState(false);
 
   const { data: book, isLoading } = useQuery({
-    queryKey: ["book", bookId],
+    queryKey: ["books", bookId],
     queryFn: async () => {
       const response = await API_CLIENT.ebookController.getBook(bookId);
       if (!response.isSuccessful) throw new Error(response.errorMessage);
