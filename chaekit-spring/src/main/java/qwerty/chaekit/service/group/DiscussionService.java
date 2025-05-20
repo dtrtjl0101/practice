@@ -9,6 +9,8 @@ import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.group.activity.discussion.Discussion;
 import qwerty.chaekit.domain.group.activity.discussion.comment.repository.DiscussionCommentRepository;
 import qwerty.chaekit.domain.group.activity.discussion.repository.DiscussionRepository;
+import qwerty.chaekit.domain.highlight.entity.Highlight;
+import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionDetailResponse;
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionFetchResponse;
@@ -32,6 +34,7 @@ public class DiscussionService {
     private final DiscussionRepository discussionRepository;
     private final DiscussionMapper discussionMapper;
     private final DiscussionCommentRepository discussionCommentRepository;
+    private final HighlightRepository highlightRepository;
     private final ActivityPolicy activityPolicy;
     private final EntityFinder entityFinder;
 
@@ -68,7 +71,12 @@ public class DiscussionService {
                 .author(user)
                 .isDebate(request.isDebate())
                 .build();
-        
+
+        // 토론에 연결된 하이라이트 추가
+        List<Long> highlightIds = request.highlightIds();
+
+        setDiscussionHighlightLinks(highlightIds, discussion);
+
         discussionRepository.save(discussion);
 
         return discussionMapper.toFetchResponse(discussion, 0L, user.getId());
@@ -90,10 +98,14 @@ public class DiscussionService {
     public DiscussionFetchResponse updateDiscussion(UserToken userToken, Long discussionId, DiscussionPatchRequest request) {
         Long userId = userToken.userId();
 
-        Discussion discussion = getMyDiscussion(userId, discussionId);
+        Discussion discussion = getMyDiscussionById(userId, discussionId);
         Long commentCount = discussionCommentRepository.countCommentsByDiscussionId(discussion.getId());
 
         discussion.update(request.title(), request.content());
+
+        List<Long> highlightIds = request.highlightIds();
+
+        setDiscussionHighlightLinks(highlightIds, discussion);
 
         return discussionMapper.toFetchResponse(discussion, commentCount, userId);
     }
@@ -101,7 +113,7 @@ public class DiscussionService {
     public void deleteDiscussion(UserToken userToken, Long discussionId) {
         Long userId = userToken.userId();
 
-        Discussion discussion = getMyDiscussion(userId, discussionId);
+        Discussion discussion = getMyDiscussionById(userId, discussionId);
         
         if (!discussion.getComments().isEmpty()) {
             throw new BadRequestException(ErrorCode.DISCUSSION_HAS_COMMENTS);
@@ -110,12 +122,23 @@ public class DiscussionService {
         discussionRepository.delete(discussion);
     }
 
-    private Discussion getMyDiscussion(Long userId, Long discussionId) {
+    private Discussion getMyDiscussionById(Long userId, Long discussionId) {
         UserProfile user = entityFinder.findUser(userId);
         Discussion discussion = entityFinder.findDiscussion(discussionId);
         if (!discussion.isAuthor(user)) {
             throw new BadRequestException(ErrorCode.DISCUSSION_NOT_YOURS);
         }
         return discussion;
+    }
+
+    private void setDiscussionHighlightLinks(List<Long> highlightIds, Discussion discussion) {
+        if (highlightIds != null) {
+            long count = highlightRepository.countByIdsAndActivity(highlightIds, discussion.getActivity());
+            if (count != highlightIds.size()) {
+                throw new BadRequestException(ErrorCode.HIGHLIGHT_NOT_FOUND);
+            }
+            discussion.resetHighlights();
+            highlightIds.forEach(highlightId -> discussion.addHighlight(Highlight.builder().id(highlightId).build()));
+        }
     }
 }

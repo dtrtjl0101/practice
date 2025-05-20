@@ -7,8 +7,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.highlight.entity.Highlight;
 import qwerty.chaekit.domain.highlight.entity.QHighlight;
+import qwerty.chaekit.domain.member.user.UserProfile;
 
 import java.util.List;
 import java.util.Optional;
@@ -53,6 +55,33 @@ public class HighlightRepositoryImpl implements HighlightRepository {
             where.and(highlight.author.id.eq(userId));
         }
 
+        return getHighlightsByBooleanBuilder(pageable, highlight, where);
+    }
+
+    @Override
+    public void delete(Highlight highlight) {
+        highlightJpaRepository.delete(highlight);
+    }
+
+    @Override
+    public long countByIdsAndActivity(List<Long> ids, Activity activity) {
+        return highlightJpaRepository.countByIdsAndActivity(ids, activity);
+    }
+
+    @Override
+    public Page<Highlight> findByAuthor(UserProfile user, Long bookId, Pageable pageable) {
+        QHighlight highlight = QHighlight.highlight;
+
+        BooleanBuilder where = new BooleanBuilder();
+        where.and(highlight.author.eq(user));
+        if(bookId != null) {
+            where.and(highlight.book.id.eq(bookId));
+        }
+
+        return getHighlightsByBooleanBuilder(pageable, highlight, where);
+    }
+
+    private PageImpl<Highlight> getHighlightsByBooleanBuilder(Pageable pageable, QHighlight highlight, BooleanBuilder where) {
         List<Highlight> result = jpaQueryFactory
                 .selectFrom(highlight)
                 .leftJoin(highlight.author).fetchJoin()
@@ -68,10 +97,5 @@ public class HighlightRepositoryImpl implements HighlightRepository {
                 .fetchOne()).orElse(0L);
 
         return new PageImpl<>(result, pageable, total);
-    }
-
-    @Override
-    public void delete(Highlight highlight) {
-        highlightJpaRepository.delete(highlight);
     }
 }

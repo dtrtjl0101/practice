@@ -16,5 +16,5 @@ public interface EbookPurchaseRepository {
     Page<EbookPurchase> findByUserIdWithEbook(Long userId, Pageable pageable);
     Optional<EbookPurchase> findByUserAndEbook(UserProfile user, Ebook ebook);
     boolean existsByUserIdAndEbookId(Long userId, Long ebookId);
-    List<EbookPurchase> findByUserIdIn(List<Long> userIdList);
+    List<EbookPurchase> findByUserIdInAndEbook(List<Long> userIdList, Ebook ebook);
 }

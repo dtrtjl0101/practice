@@ -1,6 +1,7 @@
 package qwerty.chaekit.dto.group.activity.discussion;
 
 import lombok.Builder;
+import qwerty.chaekit.dto.highlight.HighlightSummaryResponse;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,6 +20,7 @@ public record DiscussionDetailResponse(
         Long commentCount,
         boolean isDebate,
         boolean isAuthor,
+        List<HighlightSummaryResponse> linkedHighlights,
         List<DiscussionCommentFetchResponse> comments
 ) {
 }

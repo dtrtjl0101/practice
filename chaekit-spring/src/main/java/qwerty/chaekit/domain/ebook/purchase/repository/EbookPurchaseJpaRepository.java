@@ -18,7 +18,7 @@ public interface EbookPurchaseJpaRepository extends JpaRepository<EbookPurchase,
     Page<EbookPurchase> findByUserIdWithEbook(Long userId, Pageable pageable);
 
     Optional<EbookPurchase> findByUserAndEbook(UserProfile user, Ebook ebook);
-    List<EbookPurchase> findByUserIdIn(List<Long> userIdList);
+    List<EbookPurchase> findByUserIdInAndEbook(List<Long> userIds, Ebook ebook);
 
     boolean existsByUser_IdAndEbook_Id(Long userId, Long ebookId);
 }

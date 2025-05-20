@@ -14,16 +14,6 @@ public class DiscussionRepositoryImpl implements DiscussionRepository {
     private final DiscussionJpaRepository jpaRepository;
 
     @Override
-    public Discussion getReferenceById(Long id) {
-        return jpaRepository.getReferenceById(id);
-    }
-
-    @Override
-    public boolean existsById(Long id) {
-        return jpaRepository.existsById(id);
-    }
-
-    @Override
     public Optional<Discussion> findById(Long id) {
         return jpaRepository.findById(id);
     }

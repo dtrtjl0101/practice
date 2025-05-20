@@ -7,6 +7,7 @@ import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionCommentFetchResponse;
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionDetailResponse;
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionFetchResponse;
+import qwerty.chaekit.dto.highlight.HighlightSummaryResponse;
 import qwerty.chaekit.service.util.FileService;
 
 @Component
@@ -80,6 +81,11 @@ public class DiscussionMapper {
                 .commentCount(commentCount)
                 .isDebate(discussion.isDebate())
                 .isAuthor(discussion.getAuthor().getId().equals(memberId))
+                .highlightIds(discussion.getHighlights().stream()
+                        .map(discussionHighlight -> discussionHighlight
+                                .getHighlight()
+                                .getId())
+                        .toList())
                 .build();
     }
 
@@ -112,6 +118,14 @@ public class DiscussionMapper {
                         discussion.getComments().stream()
                                 .filter(comment -> comment.getParent() == null)
                                 .map(this::toCommentFetchResponse)
+                                .toList()
+                )
+                .linkedHighlights(
+                        discussion.getHighlights().stream()
+                                .map(dh-> HighlightSummaryResponse.of(
+                                        dh.getHighlight(),
+                                        convertToPublicImageURL(dh.getHighlight().getAuthor().getProfileImageKey())
+                                ))
                                 .toList()
                 )
                 .build();

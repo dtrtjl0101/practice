@@ -37,7 +37,7 @@ public class EbookPurchaseRepositoryImpl implements EbookPurchaseRepository {
     }
 
     @Override
-    public List<EbookPurchase> findByUserIdIn(List<Long> userIdList) {
-        return ebookPurchaseJpaRepository.findByUserIdIn(userIdList);
+    public List<EbookPurchase> findByUserIdInAndEbook(List<Long> userIdList, Ebook ebook) {
+        return ebookPurchaseJpaRepository.findByUserIdInAndEbook(userIdList, ebook);
     }
 }

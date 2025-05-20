@@ -1,7 +1,11 @@
 package qwerty.chaekit.dto.highlight;
 
 import lombok.Builder;
+import qwerty.chaekit.domain.group.activity.discussion.Discussion;
 import qwerty.chaekit.domain.highlight.entity.Highlight;
+import qwerty.chaekit.dto.group.activity.discussion.DiscussionSummaryResponse;
+
+import java.util.List;
 
 @Builder
 public record HighlightFetchResponse(
@@ -14,9 +18,15 @@ public record HighlightFetchResponse(
         String cfi,
         String memo,
         Long activityId,
+        List<DiscussionSummaryResponse> linkedDiscussions,
         String highlightContent
 ) {
-    public static HighlightFetchResponse of(Highlight highlight, String authorProfileImageURL) {
+    /*
+     * fetch required:
+     *   - discussion.author
+     *   - highlight.author
+     */
+    public static HighlightFetchResponse of(Highlight highlight, String authorProfileImageURL, List<Discussion> discussions) {
         return HighlightFetchResponse.builder()
                 .id(highlight.getId())
                 .bookId(highlight.getBook().getId())
@@ -28,6 +38,11 @@ public record HighlightFetchResponse(
                 .memo(highlight.getMemo())
                 .activityId(highlight.getActivity() != null ? highlight.getActivity().getId() : null)
                 .highlightContent(highlight.getHighlightcontent())
+                .linkedDiscussions(
+                        discussions.stream()
+                            .map(discussion -> DiscussionSummaryResponse.of(discussion, discussion.getActivity()))
+                            .toList()
+                )
                 .build();
     }
 }
