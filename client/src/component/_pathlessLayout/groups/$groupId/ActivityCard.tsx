@@ -183,7 +183,7 @@ export function ActivityCard(props: { groupId: number }) {
               <Card>
                 <Stack key={progress.userId}>
                   <LinearProgress
-                    value={progress.percentage}
+                    value={(progress.percentage || 0) * 100}
                     variant="determinate"
                   />
                   <Stack
@@ -271,7 +271,7 @@ export function ActivityCard(props: { groupId: number }) {
                       temporalProgress: false,
                     }}
                   >
-                    {`책 읽으러 가기${myReadProgress ? ` (${myReadProgress}%)` : ""}`}
+                    {`책 읽으러 가기${myReadProgress ? ` (${Math.round(myReadProgress * 100)}%)` : ""}`}
                   </LinkButton>
                   <LinkButton
                     variant="contained"
