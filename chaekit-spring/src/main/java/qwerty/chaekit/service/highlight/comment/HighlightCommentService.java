@@ -101,12 +101,12 @@ public class HighlightCommentService {
         
         Highlight highlight = highlightRepository.findById(highlightId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));
-
-        activityPolicy.assertJoined(author, highlight.getActivity());
         
         if (!highlight.isPublic()) {
             throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_PUBLIC);
         }
+
+        activityPolicy.assertJoined(author, highlight.getActivity());
 
         List<HighlightComment> rootComments = commentRepository.findRootCommentsByHighlightId(highlightId);
 
