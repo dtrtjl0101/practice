@@ -89,6 +89,21 @@ export function ActivityCard(props: { groupId: number }) {
     initialData: [],
   });
 
+  const bookId = activity?.bookId;
+  const { data: myReadProgress } = useQuery({
+    queryKey: ["readProgress", bookId],
+    queryFn: async () => {
+      if (!bookId) {
+        return undefined;
+      }
+      const response =
+        await API_CLIENT.readingProgressController.getMyProgress(bookId);
+
+      if (!response.isSuccessful) throw new Error(response.errorMessage);
+      return response.data.percentage;
+    },
+  });
+
   const [progressPopoverAnchor, setProgressPopoverAnchor] =
     useState<null | HTMLElement>(null);
   const handleProgressPopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -256,7 +271,7 @@ export function ActivityCard(props: { groupId: number }) {
                       temporalProgress: false,
                     }}
                   >
-                    책 읽으러 가기
+                    {`책 읽으러 가기${myReadProgress ? ` (${myReadProgress}%)` : ""}`}
                   </LinkButton>
                   <LinkButton
                     variant="contained"
