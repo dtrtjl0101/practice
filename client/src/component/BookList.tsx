@@ -90,7 +90,7 @@ function BookListItem(props: { book?: BookMetadata }) {
   const { book } = props;
 
   const { data: readProgress } = useQuery({
-    queryKey: ["book", book?.id],
+    queryKey: ["bookReadProgress", book?.id],
     queryFn: async () => {
       if (!book) return 0;
       const response = await API_CLIENT.readingProgressController.getMyProgress(
@@ -102,6 +102,7 @@ function BookListItem(props: { book?: BookMetadata }) {
       return response.data.percentage!;
     },
     initialData: 0,
+    enabled: book?.isPurchased,
   });
 
   if (!book) {

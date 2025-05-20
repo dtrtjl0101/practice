@@ -33,7 +33,7 @@ function RouteComponent() {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4 }}>
+    <Container sx={{ my: 8 }}>
       <Stack spacing={4}>
         <Stack spacing={2} direction={"row"} alignItems="center">
           <BookSearchInput

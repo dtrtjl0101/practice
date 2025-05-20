@@ -32,8 +32,8 @@ import LinkButton from "../../../LinkButton";
 import { useNavigate } from "@tanstack/react-router";
 import BookSearchInput from "../../../BookSearchInput";
 
-export function ActivityCard(props: { groupId: number }) {
-  const { groupId } = props;
+export function ActivityCard(props: { groupId: number; canCreate?: boolean }) {
+  const { groupId, canCreate } = props;
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [activityCreateModalOpen, setActivityCreateModalOpen] = useState(false);
@@ -182,8 +182,8 @@ export function ActivityCard(props: { groupId: number }) {
         ) : (
           <Stack spacing={1}>
             {activityReadProgresses.map((progress) => (
-              <Card>
-                <Stack key={progress.userId}>
+              <Card key={progress.userId}>
+                <Stack>
                   <LinearProgress
                     value={progress.percentage}
                     variant="determinate"
@@ -211,9 +211,11 @@ export function ActivityCard(props: { groupId: number }) {
             <Typography variant="h4" sx={{ mr: "auto" }}>
               활동
             </Typography>
-            <IconButton onClick={() => setActivityCreateModalOpen(true)}>
-              <Add />
-            </IconButton>
+            {canCreate && (
+              <IconButton onClick={() => setActivityCreateModalOpen(true)}>
+                <Add />
+              </IconButton>
+            )}
           </Box>
           <Divider />
           {isFetching ? (
@@ -268,35 +270,43 @@ export function ActivityCard(props: { groupId: number }) {
                       flexWrap: "wrap",
                     }}
                   >
-                    <Button
-                      variant="contained"
-                      onClick={onJoinActivityButtonClicked}
-                    >
-                      {/* TODO: 가입되었으면 리더로 가는 버튼 표시 */}
-                      활동 참여하기
-                    </Button>
-                    <LinkButton
-                      variant="contained"
-                      to={"/reader/$bookId"}
-                      params={{ bookId: activity.bookId }}
-                      search={{
-                        activityId: activity.activityId,
-                        temporalProgress: false,
-                        initialPage: myReadProgress?.cfi,
-                      }}
-                    >
-                      {`책 읽으러 가기${myReadProgress?.percentage ? ` (${Math.round(myReadProgress.percentage)}%)` : ""}`}
-                    </LinkButton>
-                    <LinkButton
-                      variant="contained"
-                      to={"/groups/$groupId/activities/$activityId/discussions"}
-                      params={{
-                        groupId: groupId,
-                        activityId: activity.activityId,
-                      }}
-                    >
-                      토론게시판
-                    </LinkButton>
+                    {!activity.isParticipant && (
+                      <Button
+                        variant="contained"
+                        onClick={onJoinActivityButtonClicked}
+                      >
+                        {/* TODO: 가입되었으면 리더로 가는 버튼 표시 */}
+                        활동 참여하기
+                      </Button>
+                    )}
+                    {activity.isParticipant && (
+                      <>
+                        <LinkButton
+                          variant="contained"
+                          to={"/reader/$bookId"}
+                          params={{ bookId: activity.bookId }}
+                          search={{
+                            activityId: activity.activityId,
+                            temporalProgress: false,
+                            initialPage: myReadProgress?.cfi,
+                          }}
+                        >
+                          {`책 읽으러 가기${myReadProgress?.percentage ? ` (${Math.round(myReadProgress.percentage)}%)` : ""}`}
+                        </LinkButton>
+                        <LinkButton
+                          variant="contained"
+                          to={
+                            "/groups/$groupId/activities/$activityId/discussions"
+                          }
+                          params={{
+                            groupId: groupId,
+                            activityId: activity.activityId,
+                          }}
+                        >
+                          토론게시판
+                        </LinkButton>
+                      </>
+                    )}
                   </Grid>
                 </Stack>
               </Stack>
@@ -379,7 +389,7 @@ export function BookInfo(props: { activity: Activity }) {
         }}
       >
         <CardMedia
-          image={activity.coverImageKey}
+          image={activity.coverImageURL}
           sx={{
             height: 256,
             width: 192,

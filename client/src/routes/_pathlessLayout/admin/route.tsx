@@ -27,7 +27,7 @@ function RouteComponent() {
           },
         ]}
       />
-      <Container sx={{ margin: 2, marginX: "auto" }}>
+      <Container sx={{ margin: 8, marginX: "auto" }}>
         <Outlet />
       </Container>
     </Box>

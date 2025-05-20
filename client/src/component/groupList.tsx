@@ -81,6 +81,17 @@ export default function GroupList(props: {
           totalPages={totalPages}
         />
         <Grid container spacing={2}>
+          {groups.length === 0 && (
+            <Grid size={12} textAlign={"center"}>
+              <Typography variant="body1" color="textSecondary">
+                {groupType === GroupListKind.MY_GROUP
+                  ? "아직 생성한 모임이 없습니다."
+                  : groupType === GroupListKind.JOINED_GROUP
+                    ? "아직 가입한 모임이 없습니다."
+                    : "아직 모임이 없습니다."}
+              </Typography>
+            </Grid>
+          )}
           {groups?.map((group, index) =>
             group ? (
               <ItemContainer key={group.groupId}>

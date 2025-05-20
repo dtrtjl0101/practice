@@ -4,6 +4,7 @@ import {
   Card,
   CardContent,
   CardHeader,
+  Container,
   Skeleton,
   Stack,
   Table,
@@ -14,24 +15,37 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { createFileRoute } from "@tanstack/react-router";
-import API_CLIENT from "../../../../../api/api";
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import PageNavigation from "../../../../../component/PageNavigation";
+import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import API_CLIENT from "../../../../api/api";
+import PageNavigation from "../../../../component/PageNavigation";
 
-export const Route = createFileRoute(
-  "/_pathlessLayout/groups/$groupId/manage/member"
-)({
-  component: RouteComponent,
-});
+export const Route = createFileRoute("/_pathlessLayout/groups/$groupId/manage")(
+  {
+    component: RouteComponent,
+    params: {
+      parse: (params) => {
+        const groupId = parseInt(params.groupId);
+        if (isNaN(groupId)) {
+          throw new Error("Invalid groupId");
+        }
+        return {
+          groupId,
+        };
+      },
+    },
+  }
+);
 
 function RouteComponent() {
   return (
-    <Stack spacing={4}>
-      <PendingMemberCard />
-      <MembersCard />
-    </Stack>
+    <Container sx={{ my: 8 }}>
+      <Stack spacing={4}>
+        <PendingMemberCard />
+        <MembersCard />
+      </Stack>
+    </Container>
   );
 }
 
@@ -42,14 +56,10 @@ function PendingMemberCard() {
   const [totalPages, setTotalPages] = useState(1);
 
   const { data: pendingRequests, refetch } = useQuery({
-    queryKey: ["getPendingList", groupId, page],
+    queryKey: ["pendingList", groupId, page],
     queryFn: async () => {
-      const groupIdNumber = parseInt(groupId);
-      if (isNaN(groupIdNumber)) {
-        throw new Error("Invalid group ID");
-      }
       const response = await API_CLIENT.groupController.getPendingList(
-        groupIdNumber,
+        groupId,
         {
           page,
           size: 20,
@@ -67,13 +77,8 @@ function PendingMemberCard() {
   const onApproveButtonClicked = async (
     request: NonNullable<typeof pendingRequests>[number]
   ) => {
-    const groupIdNumber = parseInt(groupId);
-    if (isNaN(groupIdNumber)) {
-      throw new Error("Invalid group ID");
-    }
-
     const response = await API_CLIENT.groupController.approveJoinRequest(
-      groupIdNumber,
+      groupId,
       request.userId!
     );
     if (!response.isSuccessful) {
@@ -88,13 +93,8 @@ function PendingMemberCard() {
   const onRejectButtonClicked = async (
     request: NonNullable<typeof pendingRequests>[number]
   ) => {
-    const groupIdNumber = parseInt(groupId);
-    if (isNaN(groupIdNumber)) {
-      throw new Error("Invalid group ID");
-    }
-
     const response = await API_CLIENT.groupController.rejectJoinRequest(
-      groupIdNumber,
+      groupId,
       request.userId!
     );
     if (!response.isSuccessful) {
@@ -193,14 +193,10 @@ function MembersCard() {
   const [totalPages, setTotalPages] = useState(1);
 
   const { data: pendingRequests } = useQuery({
-    queryKey: ["getPendingList", groupId, page],
+    queryKey: ["groupMembers", groupId, page],
     queryFn: async () => {
-      const groupIdNumber = parseInt(groupId);
-      if (isNaN(groupIdNumber)) {
-        throw new Error("Invalid group ID");
-      }
       const response = await API_CLIENT.groupController.getGroupMembers(
-        groupIdNumber,
+        groupId,
         {
           page,
           size: 20,

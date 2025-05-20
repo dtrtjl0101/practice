@@ -23,7 +23,7 @@ import {
   MoreVert,
   Send,
 } from "@mui/icons-material";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAtomValue } from "jotai";
 import State from "../states";
 import {
@@ -43,10 +43,16 @@ export default function HighlightCard({
   highlight,
   refetchHighlights,
   activityId,
+  focused,
+  shouldFade,
+  onClick,
 }: {
   highlight: Highlight;
   activityId?: number;
   refetchHighlights: () => void;
+  focused: boolean;
+  shouldFade: boolean;
+  onClick?: () => void;
 }) {
   const user = useAtomValue(State.Auth.user);
   const [openComments, setOpenComments] = useState(false);
@@ -56,6 +62,7 @@ export default function HighlightCard({
     (user?.role === Role.ROLE_USER ? user.userId : undefined);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [emojiAnchorEl, setEmojiAnchorEl] = useState<null | HTMLElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   const { data: reactions, refetch: refetchReactions } = useQuery({
     queryKey: ["highlightReactions", highlight.id],
@@ -88,6 +95,18 @@ export default function HighlightCard({
     },
     placeholderData: keepPreviousData,
   });
+
+  useEffect(() => {
+    if (!focused) {
+      return;
+    }
+    if (cardRef.current === null) {
+      return;
+    }
+    cardRef.current.scrollIntoView({
+      behavior: "smooth",
+    });
+  }, [focused]);
 
   const getReacted = (reactionType: HighlightReactionType) => {
     if (!reactions || !user || user.role !== Role.ROLE_USER) return;
@@ -144,7 +163,11 @@ export default function HighlightCard({
   };
 
   return (
-    <Card>
+    <Card
+      ref={cardRef}
+      sx={{ opacity: shouldFade ? 0.5 : 1 }}
+      onClick={onClick}
+    >
       <Menu
         anchorEl={anchorEl}
         open={!!anchorEl}
@@ -173,7 +196,11 @@ export default function HighlightCard({
               </IconButton>
             )}
           </Stack>
-          <Typography variant="body1">{highlight.memo}</Typography>
+          <Typography variant="body2" color="textSecondary">
+            {highlight.highlightContent}
+          </Typography>
+          <Divider />
+          <Typography variant="body2">{highlight.memo}</Typography>
           <Grid
             container
             direction={"row"}

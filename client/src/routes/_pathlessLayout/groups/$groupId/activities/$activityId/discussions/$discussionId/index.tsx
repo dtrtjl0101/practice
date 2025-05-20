@@ -8,12 +8,9 @@ import {
   Stack,
   CircularProgress,
   Box,
-  Dialog,
-  DialogContent,
-  DialogTitle,
   Popper,
 } from "@mui/material";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../../../../../../../../api/api";
 import { Discussion } from "../../../../../../../../types/discussion";
 import CommentSection from "../../../../../../../../component/CommentSection";
@@ -196,6 +193,8 @@ function RouteComponent() {
               <HighlightCard
                 highlight={hoveredHighlight}
                 refetchHighlights={() => {}}
+                focused={false}
+                shouldFade={false}
               />
             ) : (
               <Typography>불러오는 중...</Typography>
