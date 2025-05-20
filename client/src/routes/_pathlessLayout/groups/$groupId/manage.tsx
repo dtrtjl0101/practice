@@ -29,7 +29,7 @@ export const Route = createFileRoute("/_pathlessLayout/groups/$groupId/manage")(
 
 function RouteComponent() {
   return (
-    <Container sx={{ margin: 2, marginX: "auto" }}>
+    <Container sx={{ my: 8 }}>
       <Stack spacing={4}>
         <PendingMemberCard />
         <MembersCard />

@@ -49,8 +49,8 @@ function RouteComponent() {
   };
 
   return (
-    <Container sx={{ mt: 4 }}>
-      <Stack spacing={4} sx={{ mb: 2 }}>
+    <Container sx={{ my: 8 }}>
+      <Stack spacing={4}>
         <GroupHeader
           group={group}
           groupId={groupId}
