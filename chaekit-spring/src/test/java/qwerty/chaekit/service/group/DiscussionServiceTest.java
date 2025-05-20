@@ -13,6 +13,7 @@ import qwerty.chaekit.domain.group.activity.discussion.Discussion;
 import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment;
 import qwerty.chaekit.domain.group.activity.discussion.comment.repository.DiscussionCommentRepository;
 import qwerty.chaekit.domain.group.activity.discussion.repository.DiscussionRepository;
+import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionDetailResponse;
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionFetchResponse;
@@ -41,6 +42,9 @@ class DiscussionServiceTest {
 
     @Mock
     private DiscussionCommentRepository discussionCommentRepository;
+
+    @Mock
+    private HighlightRepository highlightRepository;
     
     @Mock
     private ActivityPolicy activityPolicy;
@@ -59,6 +63,7 @@ class DiscussionServiceTest {
                 discussionRepository,
                 discussionMapper,
                 discussionCommentRepository,
+                highlightRepository,
                 activityPolicy,
                 entityFinder
         );
@@ -115,7 +120,8 @@ class DiscussionServiceTest {
         DiscussionPostRequest request = new DiscussionPostRequest(
                 "Test Title",
                 "Test Content",
-                false
+                false,
+                null
         );
         UserProfile user = UserProfile.builder()
                 .id(userId)

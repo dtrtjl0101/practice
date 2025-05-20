@@ -51,7 +51,8 @@ public class Highlight extends BaseEntity {
     private final List<HighlightComment> comments = new ArrayList<>();
 
     @Builder
-    public Highlight(UserProfile author, Ebook book, String cfi, String spine, String highlightcontent, String memo, Activity activity, boolean isPublic) {
+    public Highlight(Long id, UserProfile author, Ebook book, String cfi, String spine, String highlightcontent, String memo, Activity activity, boolean isPublic) {
+        this.id = id;
         this.author = author;
         this.book = book;
         this.cfi = cfi;

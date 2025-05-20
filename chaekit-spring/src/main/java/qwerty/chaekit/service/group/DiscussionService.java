@@ -9,6 +9,8 @@ import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.group.activity.discussion.Discussion;
 import qwerty.chaekit.domain.group.activity.discussion.comment.repository.DiscussionCommentRepository;
 import qwerty.chaekit.domain.group.activity.discussion.repository.DiscussionRepository;
+import qwerty.chaekit.domain.highlight.entity.Highlight;
+import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionDetailResponse;
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionFetchResponse;
@@ -32,6 +34,7 @@ public class DiscussionService {
     private final DiscussionRepository discussionRepository;
     private final DiscussionMapper discussionMapper;
     private final DiscussionCommentRepository discussionCommentRepository;
+    private final HighlightRepository highlightRepository;
     private final ActivityPolicy activityPolicy;
     private final EntityFinder entityFinder;
 
@@ -68,6 +71,17 @@ public class DiscussionService {
                 .author(user)
                 .isDebate(request.isDebate())
                 .build();
+
+        // 토론에 연결된 하이라이트 추가
+        if (request.highlightIds() != null) {
+            long count = highlightRepository.countByIdsAndActivity(request.highlightIds(), activity);
+            if (count != request.highlightIds().size()) {
+                throw new BadRequestException(ErrorCode.HIGHLIGHT_NOT_FOUND);
+            }
+            request.highlightIds().forEach(highlightId -> {
+                discussion.addHighlight(Highlight.builder().id(highlightId).build());
+            });
+        }
         
         discussionRepository.save(discussion);
 

@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment;
+import qwerty.chaekit.domain.highlight.entity.Highlight;
 import qwerty.chaekit.domain.member.user.UserProfile;
 
 import java.util.ArrayList;
@@ -42,6 +43,9 @@ public class Discussion extends BaseEntity {
     @OneToMany(mappedBy = "discussion")
     private final List<DiscussionComment> comments = new ArrayList<>();
 
+    @OneToMany(mappedBy = "discussion", cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<DiscussionHighlight> highlights = new ArrayList<>();
+
     @Builder
     public Discussion(Long id, Activity activity, String title, String content, UserProfile author, boolean isDebate) {
         this.id = id;
@@ -67,5 +71,10 @@ public class Discussion extends BaseEntity {
     
     public void addComment(DiscussionComment comment) {
         comments.add(comment);
+    }
+
+    public void addHighlight(Highlight highlight) {
+        DiscussionHighlight link = new DiscussionHighlight(this, highlight);
+        this.highlights.add(link);
     }
 }
