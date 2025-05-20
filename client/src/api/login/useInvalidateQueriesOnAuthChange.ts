@@ -8,6 +8,7 @@ export default function useInvalidateQueriesOnAuthChange() {
   const user = useAtomValue(State.Auth.user);
 
   useEffect(() => {
+    queryClient.cancelQueries();
     queryClient.invalidateQueries();
   }, [user, queryClient]);
 }
