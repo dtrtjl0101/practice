@@ -22,21 +22,24 @@ import { Delete, Edit, Sort } from "@mui/icons-material";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import API_CLIENT from "../api/api";
 
-type HighlightFilterKind = {
-  kind: "MyHighlights";
-};
-// | {
-//     kind: "ActivityHighlights";
-//     activityId: number;
-//   };
+type HighlightFilterKind =
+  | {
+      kind: "MyHighlights";
+    }
+  | {
+      kind: "ActivityHighlights";
+      activityId: number;
+    };
 
 export default function HighlightBrowserModal(props: {
+  activityId?: number;
   open: boolean;
   onClose: () => void;
   onSelectHighlight?: (highlight: Highlight) => void;
   onUseHighlight?: (highlight: Highlight) => void;
 }) {
-  const { open, onClose, onSelectHighlight, onUseHighlight } = props;
+  const { activityId, open, onClose, onSelectHighlight, onUseHighlight } =
+    props;
   const theme = useTheme();
   const [selectedHighlight, setSelectedHighlight] = useState<Highlight | null>(
     null
@@ -113,15 +116,19 @@ export default function HighlightBrowserModal(props: {
               >
                 <ListItemText primary="내 모든 하이라이트" />
               </ListItemButton>
-              {/* <ListItemButton
+              <ListItemButton
                 onClick={() => {
-                  console.log("특정 책의 내 하이라이트 목록");
+                  setHighlightFilterKind({
+                    kind: "ActivityHighlights",
+                    activityId: activityId!,
+                  });
                   setOpenFilterDialog(false);
                 }}
               >
-                <ListItemText primary="특정 책의 내 하이라이트 목록" />
+                <ListItemText primary="현재 활동의 하이라이트" />
               </ListItemButton>
-              <ListItemButton
+
+              {/*<ListItemButton
                 onClick={() => {
                   console.log("특정 활동에서 공개된 내 하이라이트 목록");
                   setOpenFilterDialog(false);
@@ -254,9 +261,9 @@ function HighlightListItem(props: {
     <ListItemButton onClick={() => onClick(highlight)}>
       <ListItemText
         primary={
-          highlight.memo.length > 20
-            ? highlight.memo.slice(0, 20) + "..."
-            : highlight.memo
+          highlight.highlightContent.length > 20
+            ? highlight.highlightContent.slice(0, 20) + "..."
+            : highlight.highlightContent
         }
         secondary={
           <>
@@ -345,7 +352,7 @@ function HighlightViewer(props: {
               2025.04.06
             </Typography>
             <Typography variant="body2" color="textSecondary">
-              {`${highlight.memo}`}
+              {`${highlight.highlightContent}`}
             </Typography>
             <Divider />
             <Typography variant="body1">{`${highlight.memo}`}</Typography>
@@ -380,9 +387,10 @@ function getHighlightFilter(kind: HighlightFilterKind): HighlightFilter {
   switch (kind.kind) {
     case "MyHighlights":
       return { me: true };
-    default:
+    case "ActivityHighlights":
       return {
-        me: false,
+        me: true,
+        activityId: kind.activityId,
       };
   }
 }

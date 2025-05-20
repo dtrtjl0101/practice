@@ -11,4 +11,5 @@ export type Discussion = {
   commentCount: number; // 서버에서 자동으로 기록
   isDebate: boolean;
   comments: Comment[]; // 서버에서 자동으로 기록
+  linkedHighlights: Highlight[]; // 서버에서 자동으로 기록
 };

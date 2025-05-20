@@ -11,6 +11,7 @@ import {
   CardMedia,
   Container,
   Divider,
+  Grid,
   Icon,
   IconButton,
   LinearProgress,
@@ -256,35 +257,47 @@ export function ActivityCard(props: { groupId: number }) {
                   justifyContent={"flex-end"}
                   alignItems={"center"}
                 >
-                  <Button
-                    variant="contained"
-                    onClick={onJoinActivityButtonClicked}
-                  >
-                    {/* TODO: 가입되었으면 리더로 가는 버튼 표시 */}
-                    활동 참여하기
-                  </Button>
-                  <LinkButton
-                    variant="contained"
-                    to={"/reader/$bookId"}
-                    params={{ bookId: activity.bookId }}
-                    search={{
-                      activityId: activity.activityId,
-                      temporalProgress: false,
-                      initialPage: myReadProgress?.cfi,
+                  <Grid
+                    container
+                    direction={"row"}
+                    spacing={1}
+                    sx={{
+                      flexGrow: 1,
+                      alignContent: "flex-end",
+                      justifyContent: "flex-end",
+                      flexWrap: "wrap",
                     }}
                   >
-                    {`책 읽으러 가기${myReadProgress?.percentage ? ` (${Math.round(myReadProgress.percentage)}%)` : ""}`}
-                  </LinkButton>
-                  <LinkButton
-                    variant="contained"
-                    to={"/groups/$groupId/activities/$activityId/discussions"}
-                    params={{
-                      groupId: groupId,
-                      activityId: activity.activityId,
-                    }}
-                  >
-                    토론게시판
-                  </LinkButton>
+                    <Button
+                      variant="contained"
+                      onClick={onJoinActivityButtonClicked}
+                    >
+                      {/* TODO: 가입되었으면 리더로 가는 버튼 표시 */}
+                      활동 참여하기
+                    </Button>
+                    <LinkButton
+                      variant="contained"
+                      to={"/reader/$bookId"}
+                      params={{ bookId: activity.bookId }}
+                      search={{
+                        activityId: activity.activityId,
+                        temporalProgress: false,
+                        initialPage: myReadProgress?.cfi,
+                      }}
+                    >
+                      {`책 읽으러 가기${myReadProgress?.percentage ? ` (${Math.round(myReadProgress.percentage)}%)` : ""}`}
+                    </LinkButton>
+                    <LinkButton
+                      variant="contained"
+                      to={"/groups/$groupId/activities/$activityId/discussions"}
+                      params={{
+                        groupId: groupId,
+                        activityId: activity.activityId,
+                      }}
+                    >
+                      토론게시판
+                    </LinkButton>
+                  </Grid>
                 </Stack>
               </Stack>
             </Stack>

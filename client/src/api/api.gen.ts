@@ -444,6 +444,7 @@ export interface DiscussionPostRequest {
   title: string;
   content: string;
   isDebate: boolean;
+  highlightIds?: number[];
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -469,8 +470,54 @@ export interface DiscussionFetchResponse {
   modifiedAt?: string;
   /** @format int64 */
   commentCount?: number;
+  highlightIds?: number[];
   isDebate?: boolean;
   isAuthor?: boolean;
+}
+
+export interface HighlightPutRequest {
+  /** @format int64 */
+  activityId?: number;
+  memo?: string;
+}
+
+export interface GroupPatchRequest {
+  description?: string;
+  /** @format binary */
+  groupImage?: File;
+}
+
+export interface ActivityPatchRequest {
+  /** @format int64 */
+  activityId: number;
+  /** @format date */
+  startTime?: string;
+  /** @format date */
+  endTime?: string;
+  description?: string;
+}
+
+export interface DiscussionPatchRequest {
+  title?: string;
+  content?: string;
+  highlightIds?: number[];
+}
+
+export interface DiscussionCommentPatchRequest {
+  content?: string;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseUserInfoResponse {
+  isSuccessful?: boolean;
+  data?: UserInfoResponse;
+}
+
+export interface UserInfoResponse {
+  /** @format int64 */
+  userId?: number;
+  nickname?: string;
+  profileImageURL?: string;
 }
 
 export interface Pageable {
@@ -490,6 +537,8 @@ export interface Pageable {
 export interface ActivityFetchResponse {
   /** @format int64 */
   activityId?: number;
+  /** @format int64 */
+  groupId?: number;
   /** @format int64 */
   bookId?: number;
   bookTitle?: string;
@@ -518,50 +567,6 @@ export interface PageResponseActivityFetchResponse {
   totalItems?: number;
   /** @format int32 */
   totalPages?: number;
-}
-
-export interface HighlightPutRequest {
-  /** @format int64 */
-  activityId?: number;
-  memo?: string;
-}
-
-export interface GroupPatchRequest {
-  description?: string;
-  /** @format binary */
-  groupImage?: File;
-}
-
-export interface ActivityPatchRequest {
-  /** @format int64 */
-  activityId: number;
-  /** @format date */
-  startTime?: string;
-  /** @format date */
-  endTime?: string;
-  description?: string;
-}
-
-export interface DiscussionPatchRequest {
-  title?: string;
-  content?: string;
-}
-
-export interface DiscussionCommentPatchRequest {
-  content?: string;
-}
-
-/** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponseUserInfoResponse {
-  isSuccessful?: boolean;
-  data?: UserInfoResponse;
-}
-
-export interface UserInfoResponse {
-  /** @format int64 */
-  userId?: number;
-  nickname?: string;
-  profileImageURL?: string;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -671,6 +676,17 @@ export interface ApiSuccessResponsePageResponseHighlightFetchResponse {
   data?: PageResponseHighlightFetchResponse;
 }
 
+export interface DiscussionSummaryResponse {
+  /** @format int64 */
+  discussionId?: number;
+  /** @format int64 */
+  activityId?: number;
+  title?: string;
+  /** @format int64 */
+  authorId?: number;
+  authorName?: string;
+}
+
 export interface HighlightFetchResponse {
   /** @format int64 */
   id?: number;
@@ -685,6 +701,7 @@ export interface HighlightFetchResponse {
   memo?: string;
   /** @format int64 */
   activityId?: number;
+  relatedDiscussions?: DiscussionSummaryResponse[];
   highlightContent?: string;
 }
 
@@ -729,6 +746,10 @@ export interface GroupFetchResponse {
   description?: string;
   tags?: string[];
   groupImageURL?: string;
+  /** @format int64 */
+  leaderId?: number;
+  leaderNickname?: string;
+  leaderProfileImageURL?: string;
   myMemberShipStatus?: "OWNED" | "PENDING" | "JOINED" | "NONE";
   /** @format int32 */
   memberCount?: number;
@@ -818,6 +839,7 @@ export interface DiscussionDetailResponse {
   commentCount?: number;
   isDebate?: boolean;
   isAuthor?: boolean;
+  highlightIds?: number[];
   comments?: DiscussionCommentFetchResponse[];
 }
 
@@ -2206,7 +2228,7 @@ export class Api<
      * @tags activity-controller
      * @name GetMyActivity
      * @summary 내 활동 조회
-     * @request POST:/api/activities/my
+     * @request GET:/api/users/me/activities
      * @secure
      */
     getMyActivity: (
@@ -2218,8 +2240,8 @@ export class Api<
       params: RequestParams = {},
     ) =>
       this.request<ApiSuccessResponsePageResponseActivityFetchResponse, any>({
-        path: `/api/activities/my`,
-        method: "POST",
+        path: `/api/users/me/activities`,
+        method: "GET",
         query: query,
         secure: true,
         ...params,

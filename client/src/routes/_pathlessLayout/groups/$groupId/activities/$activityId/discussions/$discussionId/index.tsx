@@ -8,12 +8,19 @@ import {
   Stack,
   CircularProgress,
   Box,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Popper,
 } from "@mui/material";
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../../../../../../../../api/api";
 import { Discussion } from "../../../../../../../../types/discussion";
 import CommentSection from "../../../../../../../../component/CommentSection";
 import { Comment } from "../../../../../../../../types/comment";
+import { Fragment, useMemo, useState } from "react";
+import HighlightCard from "../../../../../../../../component/HighlightCard";
+import { Highlight } from "../../../../../../../../types/highlight";
 
 export const Route = createFileRoute(
   "/_pathlessLayout/groups/$groupId/activities/$activityId/discussions/$discussionId/"
@@ -23,7 +30,9 @@ export const Route = createFileRoute(
 
 function RouteComponent() {
   const router = useRouter();
-  const { discussionId } = Route.useParams();
+  const navigate = Route.useNavigate();
+  const { activityId, discussionId } = Route.useParams();
+
   const {
     data: discussion,
     isLoading,
@@ -40,6 +49,11 @@ function RouteComponent() {
       return response.data as Discussion;
     },
   });
+
+  // 하이라이트 데이터가 배열인지 확인하고 적절히 처리
+  const highlights: Highlight[] = Array.isArray(discussion?.linkedHighlights)
+    ? (discussion?.linkedHighlights as unknown as Highlight[])
+    : [];
 
   const handleEditDiscussion = () => {
     router.navigate({
@@ -65,13 +79,52 @@ function RouteComponent() {
     router.navigate({ to: ".." });
   };
 
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const [popperOpen, setPopperOpen] = useState(false);
+
+  const handleHighlightClick = (highlight: Highlight) => {
+    if (highlight) {
+      navigate({
+        to: "/reader/$bookId",
+        params: {
+          bookId: highlight.bookId,
+        },
+        search: {
+          activityId: parseInt(activityId),
+          temporalProgress: true,
+          initialPage: highlight.cfi,
+        },
+      });
+    }
+  };
+
+  const handleMouseEnter = (
+    event: React.MouseEvent<HTMLElement>,
+    id: number
+  ) => {
+    setAnchorEl(event.currentTarget);
+    setHoveredId(id);
+    setPopperOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    setPopperOpen(false);
+    setHoveredId(null);
+  };
+
+  const hoveredHighlight = useMemo(
+    () => highlights.find((h) => h.id === hoveredId),
+    [highlights, hoveredId]
+  );
+
   if (isLoading)
     return (
       <Box
         sx={{
-          display: "flex", // " display" 대신 "display"로 수정
+          display: "flex",
           justifyContent: "center",
-          alignItems: "center", // 수직 중앙 정렬 추가
+          alignItems: "center",
           height: "100vh",
         }}
       >
@@ -88,7 +141,6 @@ function RouteComponent() {
         <Typography variant="h4" fontWeight="bold" gutterBottom>
           {discussion.title}
         </Typography>
-
         {/* 작성자 및 작성일 */}
         <Stack
           direction="row"
@@ -104,24 +156,53 @@ function RouteComponent() {
           </Typography>
           <Typography variant="subtitle2" color="text.secondary">
             작성일:{" "}
-            {discussion.modifiedAt == undefined
-              ? discussion.createdAt
-              : discussion.modifiedAt}
+            {new Date(
+              discussion.modifiedAt ?? discussion.createdAt
+            ).toLocaleString()}
           </Typography>
         </Stack>
-
         <Divider sx={{ my: 2 }} />
-
         {/* 본문 */}
         <Typography
           variant="body1"
           sx={{ whiteSpace: "pre-line", minHeight: "200px" }}
         >
-          {discussion.content}
+          {parseContentWithHighlights(
+            discussion.content,
+            highlights,
+            handleHighlightClick,
+            handleMouseEnter,
+            handleMouseLeave
+          )}
         </Typography>
-
+        <Popper
+          open={popperOpen && !!hoveredHighlight}
+          anchorEl={anchorEl}
+          placement="bottom-start"
+          disablePortal
+          onMouseEnter={() => setPopperOpen(true)}
+          onMouseLeave={handleMouseLeave}
+          style={{ zIndex: 1300 }}
+        >
+          <Box
+            sx={{
+              bgcolor: "background.paper",
+              boxShadow: 3,
+              borderRadius: 2,
+              maxWidth: 400,
+            }}
+          >
+            {hoveredHighlight ? (
+              <HighlightCard
+                highlight={hoveredHighlight}
+                refetchHighlights={() => {}}
+              />
+            ) : (
+              <Typography>불러오는 중...</Typography>
+            )}
+          </Box>
+        </Popper>
         <Divider sx={{ my: 3 }} />
-
         {/* 버튼 영역 */}
         <Stack direction="row" spacing={2} justifyContent="flex-end">
           <Button
@@ -153,4 +234,44 @@ function RouteComponent() {
       />
     </Container>
   );
+}
+
+function parseContentWithHighlights(
+  content: string,
+  highlights: Highlight[],
+  onClick: (highlight: Highlight) => void,
+  onHover: (e: React.MouseEvent<HTMLElement>, id: number) => void,
+  onLeave: () => void
+): React.ReactNode[] {
+  if (!content) return [];
+
+  const parts = content.split(/(#\w[\w-]*)/g);
+
+  return parts.map((part, index) => {
+    const match = part.match(/^#(\w[\w-]*)$/);
+    if (match) {
+      const id = parseInt(match[1]);
+      const highlight = highlights.find((h) => h.id === id);
+
+      if (!highlight) {
+        return <Fragment key={index}>{part}</Fragment>;
+      }
+
+      return (
+        <Typography
+          key={index}
+          component="span"
+          color="primary"
+          onClick={() => onClick(highlight)}
+          onMouseEnter={(e) => onHover(e, id)}
+          onMouseLeave={onLeave}
+          sx={{ cursor: "pointer", textDecoration: "underline" }}
+        >
+          메모{id}
+        </Typography>
+      );
+    } else {
+      return <Fragment key={index}>{part}</Fragment>;
+    }
+  });
 }

@@ -15,6 +15,7 @@ import {
   Box,
 } from "@mui/material";
 import { Discussion } from "../types/discussion";
+import HighlightBrowserModal from "./HighlightBrowserModal";
 
 export default function DiscussionForm({
   activityId,
@@ -52,13 +53,22 @@ export default function DiscussionForm({
       alert("제목과 내용을 입력해주세요.");
       return;
     }
-
+    const parts = content.split(/(#\w[\w-]*)/g); // '#'로 시작하는 단어 추출
+    const idSet = new Set<number>();
+    parts.forEach((part) => {
+      const match = part.match(/#(\w[\w-]*)/);
+      if (match) {
+        idSet.add(parseInt(match[1])); // '#' 제거
+      }
+    });
+    const highlightIds = idSet.size > 0 ? Array.from(idSet) : undefined;
     if (isEdit) {
       // 수정 모드: 기존 게시글 수정
       API_CLIENT.discussionController
         .updateDiscussion(discussionId!!, {
           title,
           content,
+          highlightIds,
         })
         .then((response) => {
           if (response.isSuccessful) {
@@ -75,6 +85,7 @@ export default function DiscussionForm({
           title,
           content,
           isDebate,
+          highlightIds,
         })
         .then((response) => {
           if (response.isSuccessful) {
@@ -93,6 +104,8 @@ export default function DiscussionForm({
       alert("토론이 체크되었습니다.");
     }
   };
+
+  const [openMemoBrowser, setOpenMemoBrowser] = useState(false);
 
   useEffect(() => {
     if (!discussion) return;
@@ -117,16 +130,34 @@ export default function DiscussionForm({
         />
         {/*제목 title */}
         <OutlinedInput
-          sx={{ mb: 4 }}
+          sx={{ mb: 2 }}
           placeholder="제목을 입력하세요"
           value={title}
           fullWidth
           multiline
           onChange={(e) => setTitle(e.target.value)}
         />
+        <Button
+          variant="outlined"
+          onClick={() => setOpenMemoBrowser(true)}
+          sx={{ mb: 2 }}
+        >
+          Open highlight browser
+        </Button>
+        <HighlightBrowserModal
+          open={openMemoBrowser}
+          activityId={activityId}
+          onClose={() => {
+            setOpenMemoBrowser(false);
+          }}
+          onSelectHighlight={() => {}}
+          onUseHighlight={(highlight) => {
+            setContent((prev) => prev + "#" + highlight.id);
+          }}
+        />
         {/* 본문 content */}
         <OutlinedInput
-          sx={{ alignItems: "flex-start", minHeight: "300px" }}
+          sx={{ mb: 2, alignItems: "flex-start", minHeight: "300px" }}
           placeholder="내용을 입력하세요"
           value={content}
           onChange={(e) => setContent(e.target.value)}
