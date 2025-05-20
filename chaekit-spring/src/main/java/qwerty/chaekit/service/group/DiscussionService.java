@@ -98,7 +98,7 @@ public class DiscussionService {
     public DiscussionFetchResponse updateDiscussion(UserToken userToken, Long discussionId, DiscussionPatchRequest request) {
         Long userId = userToken.userId();
 
-        Discussion discussion = getMyDiscussion(userId, discussionId);
+        Discussion discussion = getMyDiscussionById(userId, discussionId);
         Long commentCount = discussionCommentRepository.countCommentsByDiscussionId(discussion.getId());
 
         discussion.update(request.title(), request.content());
@@ -113,7 +113,7 @@ public class DiscussionService {
     public void deleteDiscussion(UserToken userToken, Long discussionId) {
         Long userId = userToken.userId();
 
-        Discussion discussion = getMyDiscussion(userId, discussionId);
+        Discussion discussion = getMyDiscussionById(userId, discussionId);
         
         if (!discussion.getComments().isEmpty()) {
             throw new BadRequestException(ErrorCode.DISCUSSION_HAS_COMMENTS);
@@ -122,7 +122,7 @@ public class DiscussionService {
         discussionRepository.delete(discussion);
     }
 
-    private Discussion getMyDiscussion(Long userId, Long discussionId) {
+    private Discussion getMyDiscussionById(Long userId, Long discussionId) {
         UserProfile user = entityFinder.findUser(userId);
         Discussion discussion = entityFinder.findDiscussion(discussionId);
         if (!discussion.isAuthor(user)) {
@@ -138,9 +138,7 @@ public class DiscussionService {
                 throw new BadRequestException(ErrorCode.HIGHLIGHT_NOT_FOUND);
             }
             discussion.resetHighlights();
-            highlightIds.forEach(highlightId -> {
-                discussion.addHighlight(Highlight.builder().id(highlightId).build());
-            });
+            highlightIds.forEach(highlightId -> discussion.addHighlight(Highlight.builder().id(highlightId).build()));
         }
     }
 }
