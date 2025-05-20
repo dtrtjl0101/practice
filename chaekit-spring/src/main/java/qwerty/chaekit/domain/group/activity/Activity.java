@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.group.ReadingGroup;
@@ -19,6 +20,7 @@ import java.util.List;
 @Getter
 @Table(name = "activity")
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
+@BatchSize(size = 20) // mostly for fetching ebooks
 public class Activity extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

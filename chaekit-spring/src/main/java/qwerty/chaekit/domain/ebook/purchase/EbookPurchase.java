@@ -30,10 +30,23 @@ public class EbookPurchase extends BaseEntity {
     @JoinColumn(name="credit_usage_transaction_id")
     private CreditUsageTransaction creditUsageTransaction;
 
+    @Column
+    private String cfi;
+
+    @Column
+    private long percentage = 0L;
+
     @Builder
-    public EbookPurchase(Ebook ebook, UserProfile user, CreditUsageTransaction transaction) {
+    public EbookPurchase(Ebook ebook, UserProfile user, CreditUsageTransaction transaction,String cfi, long percentage) {
         this.ebook = ebook;
         this.user = user;
         this.creditUsageTransaction = transaction;
+        this.cfi = cfi;
+        this.percentage = percentage;
+    }
+
+    public void saveProgress(String cfi, long percentage) {
+        this.cfi = cfi;
+        this.percentage = percentage;
     }
 }

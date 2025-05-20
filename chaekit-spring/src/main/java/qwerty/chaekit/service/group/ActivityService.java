@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.group.activity.Activity;
+import qwerty.chaekit.domain.group.activity.activitymember.ActivityMemberRepository;
 import qwerty.chaekit.domain.group.activity.repository.ActivityRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.dto.group.activity.ActivityFetchResponse;
@@ -30,6 +31,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ActivityService {
     private final ActivityRepository activityRepository;
+    private final ActivityMemberRepository activityMemberRepository;
 
     private final ActivityPolicy activityPolicy;
     private final EntityFinder entityFinder;
@@ -123,5 +125,17 @@ public class ActivityService {
         }
 
         return ActivityFetchResponse.of(activity);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<ActivityFetchResponse> getMyActivities(UserToken userToken, Long bookId, Pageable pageable) {
+        UserProfile user = entityFinder.findUser(userToken.userId());
+        Ebook book = entityFinder.findEbook(bookId);
+
+        Page<ActivityFetchResponse> page = activityMemberRepository.findByUserAndActivity_Book(user, book, pageable)
+                .map(activityMember -> ActivityFetchResponse.of(activityMember.getActivity()));
+
+        return PageResponse.of(page);
+
     }
 }

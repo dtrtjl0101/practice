@@ -1,6 +1,7 @@
 package qwerty.chaekit.controller.group;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -72,6 +73,19 @@ public class ActivityController {
     ) {
         activityService.leaveActivity(userToken, activityId);
         return ApiSuccessResponse.emptyResponse();
+    }
+
+    @Operation(
+            summary = "내 활동 조회",
+            description = "내가 가입한 모든 활동을 조회합니다."
+    )
+    @PostMapping("/api/activities/my")
+    public ApiSuccessResponse<PageResponse<ActivityFetchResponse>> getMyActivity(
+            @Parameter(hidden = true) @Login UserToken userToken,
+            @RequestParam(required = false) Long bookId,
+            Pageable pageable
+    ) {
+        return ApiSuccessResponse.of(activityService.getMyActivities(userToken, bookId, pageable));
     }
 
 }
