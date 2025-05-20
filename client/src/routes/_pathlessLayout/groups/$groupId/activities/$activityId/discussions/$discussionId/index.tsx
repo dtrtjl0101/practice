@@ -11,15 +11,14 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
-  DialogActions,
-  Popover,
+  Popper,
 } from "@mui/material";
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../../../../../../../../api/api";
 import { Discussion } from "../../../../../../../../types/discussion";
 import CommentSection from "../../../../../../../../component/CommentSection";
 import { Comment } from "../../../../../../../../types/comment";
-import { Fragment, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import HighlightCard from "../../../../../../../../component/HighlightCard";
 import { Highlight } from "../../../../../../../../types/highlight";
 
@@ -31,7 +30,9 @@ export const Route = createFileRoute(
 
 function RouteComponent() {
   const router = useRouter();
+  const navigate = Route.useNavigate();
   const { discussionId } = Route.useParams();
+
   const {
     data: discussion,
     isLoading,
@@ -48,6 +49,27 @@ function RouteComponent() {
       return response.data as Discussion;
     },
   });
+
+  const highlightQueries = useQueries({
+    queries: Array.isArray(discussion?.highlightIds)
+      ? discussion.highlightIds.map((highlightId) => ({
+          queryKey: ["highlight", highlightId],
+          queryFn: async () => {
+            const response =
+              await API_CLIENT.highlightController.getHighlight(highlightId);
+            if (!response.isSuccessful) {
+              throw new Error(response.errorMessage);
+            }
+            return response.data as Highlight;
+          },
+          enabled: !!discussion,
+        }))
+      : [],
+  });
+
+  const highlights = highlightQueries
+    .filter((q) => q.data)
+    .map((q) => q.data as Highlight);
 
   const handleEditDiscussion = () => {
     router.navigate({
@@ -77,41 +99,50 @@ function RouteComponent() {
     null
   );
 
-  const handleHighlightClick = (id: number) => {
-    setSelectedHighlight(id);
+  const handleHighlightClick = (highlight: Highlight) => {
+    navigate({
+      from: Route.to,
+      to: "../../../../../../books/$bookId",
+      params: {
+        bookId: highlight.bookId,
+      },
+    });
   };
 
   function handleCloseModal(): void {
     setSelectedHighlight(null);
   }
 
-  const [popoverAnchor, setPopoverAnchor] = useState<HTMLElement | null>(null);
-  const [hoveredHighlightId, setHoveredHighlightId] = useState<number | null>(
-    null
-  );
-  const [closeTimer, setCloseTimer] = useState<ReturnType<
-    typeof setTimeout
-  > | null>(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const [popperOpen, setPopperOpen] = useState(false);
 
-  const handlePopoverOpen = (
+  const handleClickPopper = (
     event: React.MouseEvent<HTMLElement>,
-    highlightId: number
+    highlight: Highlight
   ) => {
-    if (closeTimer) {
-      clearTimeout(closeTimer);
-      setCloseTimer(null);
-    }
-    setPopoverAnchor(event.currentTarget);
-    setHoveredHighlightId(highlightId);
+    handleHighlightClick(highlight);
+
+    setAnchorEl(event.currentTarget);
+    setHoveredId(highlight.id);
+    setPopperOpen((prev) => !prev);
   };
 
-  const handlePopoverClose = () => {
-    const timer = setTimeout(() => {
-      setPopoverAnchor(null);
-      setHoveredHighlightId(null);
-    }, 2000); // 200ms 지연 후 닫힘
-    setCloseTimer(timer);
+  const handleMouseEnter = (
+    event: React.MouseEvent<HTMLElement>,
+    id: number
+  ) => {
+    setAnchorEl(event.currentTarget);
+    setHoveredId(id);
+    setPopperOpen(true);
   };
+
+  const handleMouseLeave = () => {
+    setPopperOpen(false);
+    setHoveredId(null);
+  };
+
+  const hoveredHighlight = highlights.find((h) => h.id === hoveredId);
 
   if (isLoading)
     return (
@@ -166,65 +197,39 @@ function RouteComponent() {
         >
           {parseContentWithHighlights(
             discussion.content,
+            highlights,
             handleHighlightClick,
-            handlePopoverOpen,
-            handlePopoverClose
+            handleMouseEnter,
+            handleMouseLeave
           )}
         </Typography>
-        {selectedHighlight && (
-          <HighlightModal
-            open={true}
-            onClose={() => handleCloseModal()}
-            highlightId={selectedHighlight}
-            activityId={discussion.activityId}
-            refetchHighlights={() => {}}
-          />
-        )}
-        <Popover
-          open={Boolean(popoverAnchor)}
-          // open={false}
-          anchorEl={popoverAnchor}
-          onClick={() => {
-            alert("click");
-          }}
-          onClose={() => {
-            setPopoverAnchor(null);
-            setHoveredHighlightId(null);
-          }}
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "left",
-          }}
-          transformOrigin={{
-            vertical: "top",
-            horizontal: "left",
-          }}
-          PaperProps={{
-            onMouseEnter: () => {
-              if (closeTimer) {
-                clearTimeout(closeTimer);
-                setCloseTimer(null);
-              }
-            },
-            onMouseLeave: () => {
-              const timer = setTimeout(() => {
-                setPopoverAnchor(null);
-                setHoveredHighlightId(null);
-              }, 500); // 0.5초 후 닫기
-              setCloseTimer(timer);
-            },
-          }}
+        <Popper
+          open={popperOpen}
+          anchorEl={anchorEl}
+          placement="bottom-start"
+          disablePortal
+          onMouseEnter={() => setPopperOpen(true)} // Popper 위에 마우스 올라가도 유지
+          onMouseLeave={handleMouseLeave} // Popper 밖으로 나가면 닫기
+          style={{ zIndex: 1300 }}
         >
-          <Box sx={{ p: 2, maxWidth: 300 }}>
-            {hoveredHighlightId ? (
-              <Typography variant="body2">
-                하이라이트 #{hoveredHighlightId}
-              </Typography>
+          <Box
+            sx={{
+              bgcolor: "background.paper",
+              boxShadow: 3,
+              borderRadius: 2,
+              maxWidth: 400,
+            }}
+          >
+            {hoveredHighlight ? (
+              <HighlightCard
+                highlight={hoveredHighlight}
+                refetchHighlights={() => {}}
+              />
             ) : (
-              <Typography variant="body2">불러오는 중...</Typography>
+              <Typography>불러오는 중...</Typography>
             )}
           </Box>
-        </Popover>
+        </Popper>
         <Divider sx={{ my: 3 }} />
         {/* 버튼 영역 */}
         <Stack direction="row" spacing={2} justifyContent="flex-end">
@@ -261,7 +266,8 @@ function RouteComponent() {
 
 function parseContentWithHighlights(
   content: string,
-  onClick: (id: number) => void,
+  highlights: Highlight[],
+  onClick: (highlight: Highlight) => void,
   onHover: (e: React.MouseEvent<HTMLElement>, id: number) => void,
   onLeave: () => void
 ): React.ReactNode[] {
@@ -271,12 +277,15 @@ function parseContentWithHighlights(
     const match = part.match(/^#(\w[\w-]*)$/);
     if (match) {
       const id = match[1];
+      const highlight = highlights.find((h) => h.id === parseInt(id));
+      console.log(highlights);
+
       return (
         <Typography
           key={index}
           component="span"
           color="primary"
-          onClick={() => onClick(parseInt(id))}
+          onClick={() => onClick(highlight!)}
           onMouseEnter={(e) => onHover(e, parseInt(id))}
           onMouseLeave={onLeave}
           sx={{ cursor: "pointer", textDecoration: "underline" }}
@@ -288,47 +297,4 @@ function parseContentWithHighlights(
       return <Fragment key={index}>{part}</Fragment>;
     }
   });
-}
-
-function HighlightModal({
-  open,
-  onClose,
-  highlightId,
-  activityId: _activityId,
-  refetchHighlights,
-}: {
-  open: boolean;
-  onClose: () => void;
-  highlightId: number;
-  activityId?: number;
-  refetchHighlights: () => void;
-}) {
-  const { data: highlight } = useQuery({
-    queryKey: ["highlight", highlightId],
-    queryFn: async () => {
-      const response =
-        await API_CLIENT.highlightController.getHighlight(highlightId);
-      if (!response.isSuccessful) {
-        throw new Error(response.errorMessage);
-      }
-      return response.data as Highlight;
-    },
-  });
-
-  if (!highlight) return null;
-
-  return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle>{highlight.highlightContent}</DialogTitle>
-      <DialogContent>
-        <HighlightCard
-          highlight={highlight!!}
-          refetchHighlights={refetchHighlights}
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>닫기</Button>
-      </DialogActions>
-    </Dialog>
-  );
 }
