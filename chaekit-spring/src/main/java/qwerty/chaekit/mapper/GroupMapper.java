@@ -22,6 +22,7 @@ public class GroupMapper {
      * fetch required:
      *   - ReadingGroup.tags
      *   - ReadingGroup.groupMembers
+     *   - ReadingGroup.groupLeader
      */
     public GroupFetchResponse toGroupFetchResponse(ReadingGroup group, Long userId) {
         return GroupFetchResponse.builder()
@@ -33,6 +34,9 @@ public class GroupMapper {
                         .toList())
                 .groupImageURL(convertToPublicImageURL(group.getGroupImageKey()))
                 .myMemberShipStatus(group.getMemberShipStatus(userId))
+                .leaderId(group.getGroupLeader().getId())
+                .leaderNickname(group.getGroupLeader().getNickname())
+                .leaderProfileImageURL(convertToPublicImageURL(group.getGroupLeader().getProfileImageKey()))
                 .memberCount((int) group.memberCount())
                 .build();
     }

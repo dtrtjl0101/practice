@@ -20,6 +20,7 @@ import java.util.List;
 @Getter
 @Table(name = "reading_group")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@BatchSize(size = 20)
 public class ReadingGroup extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,10 +59,6 @@ public class ReadingGroup extends BaseEntity {
 
     public void removeTag(String tagName) {
         tags.removeIf(tag -> tag.getTagName().equals(tagName));
-    }
-
-    public List<UserProfile> getMembers() {
-        return groupMembers.stream().map(GroupMember::getMember).toList();
     }
 
     public GroupMember addMember(UserProfile user) {
