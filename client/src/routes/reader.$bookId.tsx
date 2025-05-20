@@ -2,6 +2,7 @@ import { ArrowBack, Note, NoteAdd } from "@mui/icons-material";
 import {
   Badge,
   Box,
+  Chip,
   Drawer,
   Fab,
   LinearProgress,
@@ -320,6 +321,7 @@ function RouteComponent() {
         width: "100vw",
         height: "100vh",
         position: "relative",
+        overflow: "hidden",
       }}
     >
       <Box
@@ -330,36 +332,57 @@ function RouteComponent() {
         }}
       >
         <LinearProgress value={localReadProgress} variant="determinate" />
-        {canGoBack && (
-          <Fab
-            size="small"
-            sx={{
-              position: "absolute",
-              left: theme.spacing(2),
-              top: theme.spacing(2),
-            }}
-            onClick={() => {
-              router.history.back();
-            }}
-          >
-            <ArrowBack />
-          </Fab>
-        )}
-        <Fab
-          size="small"
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent={"space-between"}
+          spacing={1}
           sx={{
             position: "absolute",
-            right: theme.spacing(2),
             top: theme.spacing(2),
-          }}
-          onClick={() => {
-            setOpenHighlightDrawer(true);
+            left: theme.spacing(2),
+            right: theme.spacing(2),
           }}
         >
-          <Badge badgeContent={highlightsInPage.length} color="primary">
-            <Note />
-          </Badge>
-        </Fab>
+          {canGoBack && (
+            <Fab
+              size="small"
+              onClick={() => {
+                router.history.back();
+              }}
+            >
+              <ArrowBack />
+            </Fab>
+          )}
+          {activityId && (
+            <Chip
+              label="함께읽기 활성화됨"
+              color="info"
+              onDelete={() => {
+                navigate({
+                  to: ".",
+                  search: {
+                    activityId: undefined,
+                    temporalProgress,
+                    initialPage,
+                  },
+                  replace: true,
+                });
+              }}
+            />
+          )}
+          <Fab
+            size="small"
+            onClick={() => {
+              setOpenHighlightDrawer(true);
+            }}
+            sx={{}}
+          >
+            <Badge badgeContent={highlightsInPage.length} color="primary">
+              <Note />
+            </Badge>
+          </Fab>
+        </Stack>
         {selection && (
           <Fab
             size="small"
