@@ -63,7 +63,7 @@ function GroupsCards() {
         kind={GroupListKind.MY_GROUP}
         key="myGroups"
         size="small"
-        title="내 모임"
+        title="내가 만든 모임"
         action={
           <IconButton onClick={() => setOpenGroupCreateModal(true)}>
             <GroupAdd />
