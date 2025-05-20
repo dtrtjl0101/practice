@@ -26,7 +26,7 @@ public record HighlightFetchResponse(
      *   - discussion.author
      *   - highlight.author
      */
-    public static HighlightFetchResponse of(Highlight highlight, String authorProfileImageURL, List<Discussion> discussions) {
+    public static HighlightFetchResponse of(Highlight highlight, String authorProfileImageURL, List<Discussion> relatedDiscussion) {
         return HighlightFetchResponse.builder()
                 .id(highlight.getId())
                 .bookId(highlight.getBook().getId())
@@ -38,9 +38,11 @@ public record HighlightFetchResponse(
                 .memo(highlight.getMemo())
                 .activityId(highlight.getActivity() != null ? highlight.getActivity().getId() : null)
                 .highlightContent(highlight.getHighlightcontent())
-                .relatedDiscussions(discussions.stream()
-                        .map(discussion -> DiscussionSummaryResponse.of(discussion, highlight.getActivity()))
-                        .toList())
+                .relatedDiscussions(
+                        relatedDiscussion.stream()
+                            .map(discussion -> DiscussionSummaryResponse.of(discussion, discussion.getActivity()))
+                            .toList()
+                )
                 .build();
     }
 }
