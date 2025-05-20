@@ -9,11 +9,6 @@ import {
   Button,
   useTheme,
   CardHeader,
-  FormControl,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-  InputLabel,
   Checkbox,
   Stack,
   FormControlLabel,
@@ -137,7 +132,6 @@ export default function DiscussionForm({
           onChange={(e) => setContent(e.target.value)}
           fullWidth
           multiline
-          sx={{ alignItems: "flex-start", minHeight: "300px" }}
         />
         <Stack direction="row" justifyContent="space-between" sx={{ m: 1 }}>
           <Box sx={{ justifySelf: "flex-start" }}>

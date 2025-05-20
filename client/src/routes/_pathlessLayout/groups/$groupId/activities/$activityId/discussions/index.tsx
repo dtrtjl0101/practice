@@ -10,7 +10,6 @@ import {
   CardContent,
   Divider,
 } from "@mui/material";
-import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../../../../../../../api/api";
 import { Discussion } from "../../../../../../../types/discussion";
