@@ -17,6 +17,15 @@ import CreditPurchaseModal from "../../../component/CreditPurchaseModal";
 
 export const Route = createFileRoute("/_pathlessLayout/books/$bookId")({
   component: RouteComponent,
+  params: {
+    parse: (params) => {
+      const bookId = Number(params.bookId);
+      if (isNaN(bookId)) {
+        throw new Error("Invalid book ID");
+      }
+      return { bookId };
+    },
+  },
 });
 
 function RouteComponent() {
@@ -27,17 +36,26 @@ function RouteComponent() {
   const { data: book, isLoading } = useQuery({
     queryKey: ["book", bookId],
     queryFn: async () => {
-      const response = await API_CLIENT.ebookController.getBook(Number(bookId));
+      const response = await API_CLIENT.ebookController.getBook(bookId);
       if (!response.isSuccessful) throw new Error(response.errorMessage);
       return response.data as BookMetadata;
     },
   });
 
+  const { data: readProgress } = useQuery({
+    queryKey: ["readProgress", bookId],
+    queryFn: async () => {
+      const response =
+        await API_CLIENT.readingProgressController.getMyProgress(bookId);
+      if (!response.isSuccessful) throw new Error(response.errorMessage);
+      return response.data;
+    },
+  });
+
   const handlePurchase = async () => {
     setPurchasing(true);
-    const response = await API_CLIENT.ebookPurchaseController.purchaseEbook(
-      Number(bookId)
-    );
+    const response =
+      await API_CLIENT.ebookPurchaseController.purchaseEbook(bookId);
     setPurchasing(false);
     if (!response.isSuccessful) {
       switch (response.errorCode) {
@@ -95,9 +113,7 @@ function RouteComponent() {
                   가격
                 </Typography>
                 <Typography variant="h5" color="primary.main" fontWeight={700}>
-                  {"price" in book && typeof book.price === "number"
-                    ? book.price.toLocaleString() + "원"
-                    : "-"}
+                  {book.price.toLocaleString() + "원"}
                 </Typography>
               </Stack>
               <Stack direction="row" spacing={2} alignItems="center">
@@ -126,11 +142,16 @@ function RouteComponent() {
                 <LinkButton
                   to="/reader/$bookId"
                   params={{
-                    bookId: `${book.id}`,
+                    bookId,
+                  }}
+                  search={{
+                    activityId: undefined,
+                    temporalProgress: false,
+                    initialPage: readProgress?.cfi,
                   }}
                   variant="contained"
                 >
-                  도서 읽기
+                  {`도서 읽기${readProgress?.percentage ? ` (${readProgress.percentage}%)` : ""}`}
                 </LinkButton>
               </Stack>
             </Stack>

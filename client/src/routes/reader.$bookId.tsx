@@ -1,52 +1,58 @@
-import {
-  Comment,
-  CommentOutlined,
-  MoreVert,
-  Note,
-  NoteAdd,
-  Send,
-  ThumbUp,
-  ThumbUpOutlined,
-} from "@mui/icons-material";
+import { ArrowBack, Note, NoteAdd } from "@mui/icons-material";
 import {
   Badge,
   Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  CardHeader,
-  Divider,
   Drawer,
   Fab,
-  IconButton,
-  Input,
-  InputAdornment,
-  Modal,
+  LinearProgress,
   Stack,
-  Typography,
   useTheme,
-  MenuItem,
-  Menu,
 } from "@mui/material";
-import { createFileRoute } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  useCanGoBack,
+  useRouter,
+} from "@tanstack/react-router";
 import { EpubCFI, Rendition } from "epubjs";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ReactReader } from "react-reader";
 import API_CLIENT from "../api/api";
-import {
-  keepPreviousData,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Highlight } from "../types/highlight";
 import useAutoLogin from "../api/login/useAutoLogin";
 import useAutoTokenRefresh from "../api/login/useAutoTokenRefresh";
 import loadBook from "../util/loadBook";
 import useInvalidateQueriesOnAuthChange from "../api/login/useInvalidateQueriesOnAuthChange";
+import HighlightCard from "../component/HighlightCard";
+import HighlightCreationModal from "../component/HighlightCreationModal";
+import loadLocations from "../util/loadLocations";
 
 export const Route = createFileRoute("/reader/$bookId")({
   component: RouteComponent,
+  validateSearch: (search) => {
+    const activityIdString = search.activityId as string | undefined;
+    const activityId = activityIdString ? parseInt(activityIdString) : NaN;
+
+    const temporalProgress = !!search.temporalProgress;
+
+    const initialPage = search.initialPage as string | undefined;
+    return {
+      activityId: !isNaN(activityId) ? activityId : undefined,
+      temporalProgress,
+      initialPage,
+    };
+  },
+  params: {
+    parse: (params) => {
+      const bookId = parseInt(params.bookId);
+      if (isNaN(bookId)) {
+        throw new Error("Invalid bookId");
+      }
+      return {
+        bookId,
+      };
+    },
+  },
 });
 
 type HighlightDiff = {
@@ -62,23 +68,41 @@ type Selection = {
 
 function RouteComponent() {
   const { bookId } = Route.useParams();
+  const { activityId, temporalProgress, initialPage } = Route.useSearch();
   const theme = useTheme();
-  const [location, setLocation] = useState<string | number>(10);
+  const [location, setLocation] = useState<string | null>(initialPage ?? null);
   const [highlightsInPage, setHighlightsInPage] = useState<Highlight[]>([]);
   const [rendition, setRendition] = useState<Rendition | undefined>(undefined);
   const [openHighlightDrawer, setOpenHighlightDrawer] = useState(false);
   const [selection, setSelection] = useState<Selection | null>(null);
   const [openHighlightCreationModal, setOpenHighlightCreationModal] =
     useState<boolean>(false);
-  const queryClient = useQueryClient();
   useAutoLogin();
   useAutoTokenRefresh();
   useInvalidateQueriesOnAuthChange();
   const [book, setBook] = useState<ArrayBuffer>(new ArrayBuffer(0));
+  const canGoBack = useCanGoBack();
+  const router = useRouter();
+  const navigate = Route.useNavigate();
+  const [localReadProgress, setLocalReadProgress] = useState<number>(0);
+
+  const queryParam = activityId
+    ? {
+        me: false,
+        bookId,
+        activityId,
+      }
+    : {
+        me: true,
+        bookId,
+      };
 
   const spine = useMemo(() => {
+    if (!location) {
+      return undefined;
+    }
     try {
-      const spinePos = new EpubCFI(location.toString()).spinePos;
+      const spinePos = new EpubCFI(location).spinePos;
       return spinePos.toString();
     } catch (e) {
       console.error("Error parsing spine position", e);
@@ -86,14 +110,14 @@ function RouteComponent() {
     }
   }, [location]);
 
-  const { data: highlights } = useQuery({
-    queryKey: ["memos", spine],
+  const { data: highlights, refetch: refetchHighlights } = useQuery({
+    queryKey: ["highlights", spine, queryParam],
     queryFn: async () => {
       const response = await API_CLIENT.highlightController.getHighlights({
         page: 0,
         size: 100,
         spine,
-        me: false,
+        ...queryParam,
       });
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);
@@ -102,19 +126,28 @@ function RouteComponent() {
       return response.data.content!.map((highlight) => highlight as Highlight);
     },
     placeholderData: keepPreviousData,
-    initialData: [
-      {
-        id: 0,
-        bookId: 0,
-        cfi: "epubcfi(/6/22!/4/2/2/18,/1:4,/1:20)",
-        memo: "셋!",
-        spine: "10",
-        activityId: 0,
-      },
-    ],
+    initialData: [],
   });
 
   const previousHighlightsInPage = useRef<Highlight[]>([]);
+
+  const { data: readProgressInServer, refetch: refetchReadProgressInServer } =
+    useQuery({
+      queryKey: ["readProgress", bookId],
+      queryFn: async () => {
+        if (!rendition || !location) {
+          throw new Error("Rendition or location is not available");
+        }
+        const response =
+          await API_CLIENT.readingProgressController.getMyProgress(bookId);
+        if (!response.isSuccessful) {
+          throw new Error(response.errorMessage);
+        }
+        return response.data.percentage!;
+      },
+      placeholderData: keepPreviousData,
+      enabled: !!rendition && !!location,
+    });
 
   useEffect(() => {
     previousHighlightsInPage.current = highlightsInPage;
@@ -162,12 +195,7 @@ function RouteComponent() {
   }, [rendition, highlightsInPage]);
 
   useEffect(() => {
-    const bookIdNumber = parseInt(bookId, 10);
-    if (isNaN(bookIdNumber)) {
-      console.error("Invalid bookId:", bookId);
-      return;
-    }
-    loadBook(bookIdNumber).then((book) => {
+    loadBook(bookId).then((book) => {
       if (!book) {
         console.error("Book not found in IndexedDB");
         return;
@@ -175,6 +203,44 @@ function RouteComponent() {
       setBook(book);
     });
   }, [bookId]);
+
+  useEffect(() => {
+    if (temporalProgress || !rendition || !location) {
+      return;
+    }
+    try {
+      const newReadProgress = Math.max(
+        Math.min(
+          rendition.book.locations.percentageFromCfi(location) * 100,
+          100
+        ),
+        0
+      );
+      setLocalReadProgress(newReadProgress);
+      if (
+        typeof readProgressInServer === "number" &&
+        newReadProgress > readProgressInServer
+      ) {
+        API_CLIENT.readingProgressController
+          .saveMyProgress(bookId, {
+            percentage: newReadProgress,
+            cfi: location,
+          })
+          .then(() => refetchReadProgressInServer());
+      }
+    } catch (e) {
+      console.error("Error parsing location", e);
+    }
+  }, [rendition, location]);
+
+  useEffect(() => {
+    if (initialPage) {
+      navigate({
+        search: { initialPage: undefined, activityId, temporalProgress },
+        replace: true,
+      });
+    }
+  }, [location]);
 
   return (
     <Box
@@ -192,6 +258,22 @@ function RouteComponent() {
           zIndex: theme.zIndex.fab,
         }}
       >
+        <LinearProgress value={localReadProgress} variant="determinate" />
+        {canGoBack && (
+          <Fab
+            size="small"
+            sx={{
+              position: "absolute",
+              left: theme.spacing(2),
+              top: theme.spacing(2),
+            }}
+            onClick={() => {
+              router.history.back();
+            }}
+          >
+            <ArrowBack />
+          </Fab>
+        )}
         <Fab
           size="small"
           sx={{
@@ -234,9 +316,8 @@ function RouteComponent() {
               memo,
               cfi,
               spine,
-              // TODO: use BookId and ActivityId
-              bookId: 1,
-              activityId: 1,
+              bookId,
+              activityId,
             }
           );
 
@@ -244,9 +325,7 @@ function RouteComponent() {
             throw new Error(response.errorMessage);
           }
 
-          queryClient.resetQueries({
-            queryKey: ["memos", spine],
-          });
+          refetchHighlights();
         }}
       />
       <Drawer
@@ -254,9 +333,14 @@ function RouteComponent() {
         open={openHighlightDrawer}
         onClose={() => setOpenHighlightDrawer(false)}
       >
-        <Stack spacing={theme.spacing(2)} p={theme.spacing(2)} width={256}>
+        <Stack spacing={theme.spacing(2)} p={theme.spacing(2)} width={320}>
           {highlightsInPage.map((highlight) => (
-            <HighlightCard key={highlight.id} highlight={highlight} />
+            <HighlightCard
+              key={highlight.id}
+              highlight={highlight}
+              activityId={activityId}
+              refetchHighlights={refetchHighlights}
+            />
           ))}
         </Stack>
       </Drawer>
@@ -300,6 +384,9 @@ function RouteComponent() {
         }}
         showToc={false}
         getRendition={(newRendition) => {
+          newRendition.once("started", async () => {
+            await loadLocations(bookId, newRendition);
+          });
           setRendition(newRendition);
         }}
       />
@@ -321,158 +408,4 @@ function diffMemos(prev: Highlight[], next: Highlight[]): HighlightDiff {
     added,
     removed,
   };
-}
-
-function HighlightCard({ highlight }: { highlight: Highlight }) {
-  const [openComments, setOpenComments] = useState(false);
-  const [commentContent, setCommentContent] = useState("");
-  const liked = false; // TODO
-  const isAuthor = true; // TODO
-  // const user = useAtomValue(State.Auth.user);
-  // const isAuthor =
-  //   highlight.memberId && user && highlight.memberId === user.memberId;
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
-  return (
-    <Card>
-      <CardHeader
-        title="NicknameNickname"
-        avatar="N"
-        sx={{ pb: 0 }}
-        action={
-          isAuthor && (
-            <IconButton
-              onClick={(e) => {
-                setAnchorEl(e.currentTarget);
-              }}
-            >
-              <MoreVert />
-            </IconButton>
-          )
-        }
-      />
-      <Menu anchorEl={anchorEl} open={!!anchorEl}>
-        {/* TODO: handle click */}
-        <MenuItem value="public">전체 공개</MenuItem>
-        <MenuItem value="private">나만 보기</MenuItem>
-        <MenuItem value="group">그룹 공개</MenuItem>
-      </Menu>
-      <CardContent sx={{ pt: 1 }}>
-        <Typography variant="body1">{highlight.memo}</Typography>
-      </CardContent>
-      <CardActions sx={{ justifyContent: "flex-end" }}>
-        <IconButton size="small" onClick={() => setOpenComments(!openComments)}>
-          <Badge badgeContent={2} color="primary">
-            {openComments ? <Comment /> : <CommentOutlined />}
-          </Badge>
-        </IconButton>
-        <IconButton size="small">
-          {liked ? <ThumbUp /> : <ThumbUpOutlined />}
-        </IconButton>
-      </CardActions>
-      {openComments && (
-        <>
-          {new Array(2).fill(0).map(() => {
-            return (
-              <>
-                <Divider />
-                <CardHeader title="Nickname2" avatar="2" sx={{ pb: 0 }} />
-                <CardContent sx={{ pt: 1 }}>
-                  <Typography variant="body1">Comment</Typography>
-                </CardContent>
-              </>
-            );
-          })}
-          <Divider />
-          <CardActions>
-            <Input
-              value={commentContent}
-              onChange={(e) => setCommentContent(e.target.value)}
-              fullWidth
-              multiline
-              size="small"
-              endAdornment={
-                <InputAdornment position="end">
-                  <IconButton edge="end">
-                    <Send />
-                  </IconButton>
-                </InputAdornment>
-              }
-            />
-          </CardActions>
-        </>
-      )}
-    </Card>
-  );
-}
-
-function HighlightCreationModal({
-  open,
-  onClose,
-  selection,
-  addHighlight,
-}: {
-  open: boolean;
-  onClose: () => void;
-  selection: Selection | null;
-  addHighlight: (props: { memo: string; cfi: string }) => void;
-}) {
-  const [content, setContent] = useState("");
-
-  if (!selection) {
-    return null;
-  }
-
-  return (
-    <Modal open={open} onClose={onClose}>
-      <Box
-        sx={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: 400,
-        }}
-      >
-        <Card>
-          <CardHeader title="Create Memo" />
-          <CardContent>
-            <Typography color="textSecondary" variant="body1">
-              {selection.text}
-            </Typography>
-            <Divider />
-            <Input
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              type="textarea"
-              multiline
-              fullWidth
-            />
-          </CardContent>
-          <CardActions>
-            <Button color="secondary" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => {
-                if (!selection) {
-                  return;
-                }
-                addHighlight({
-                  memo: content,
-                  cfi: selection.epubcfi,
-                });
-                setContent("");
-                onClose();
-              }}
-            >
-              Create
-            </Button>
-          </CardActions>
-        </Card>
-      </Box>
-    </Modal>
-  );
 }

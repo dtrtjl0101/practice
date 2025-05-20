@@ -1,4 +1,11 @@
-import { Card, CardMedia, Skeleton, Stack, Typography } from "@mui/material";
+import {
+  Card,
+  CardMedia,
+  LinearProgress,
+  Skeleton,
+  Stack,
+  Typography,
+} from "@mui/material";
 import LinkCardActionArea from "./LinkCardActionArea";
 import { BookMetadata } from "../types/book";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
@@ -81,6 +88,22 @@ export default function BookList(props: {
 
 function BookListItem(props: { book?: BookMetadata }) {
   const { book } = props;
+
+  const { data: readProgress } = useQuery({
+    queryKey: ["book", book?.id],
+    queryFn: async () => {
+      if (!book) return 0;
+      const response = await API_CLIENT.readingProgressController.getMyProgress(
+        book.id
+      );
+      if (!response.isSuccessful) {
+        throw new Error(response.errorMessage);
+      }
+      return response.data.percentage!;
+    },
+    initialData: 0,
+  });
+
   if (!book) {
     return (
       <Card elevation={3} sx={{ padding: 2 }}>
@@ -95,13 +118,15 @@ function BookListItem(props: { book?: BookMetadata }) {
       </Card>
     );
   }
+
   return (
-    <Card elevation={3} key={book.id} sx={{ padding: 2 }}>
-      <Stack spacing={1} direction={"row"}>
+    <Card elevation={3} key={book.id}>
+      <LinearProgress value={readProgress} variant="determinate" />
+      <Stack spacing={1} direction={"row"} sx={{ padding: 2 }}>
         <LinkCardActionArea
           sx={{ width: 128, height: 160 }}
           to="/books/$bookId"
-          params={{ bookId: `${book.id}` }}
+          params={{ bookId: book.id }}
         >
           <CardMedia
             image={book.bookCoverImageURL || "https://picsum.photos/128/160"}
@@ -109,16 +134,10 @@ function BookListItem(props: { book?: BookMetadata }) {
           />
         </LinkCardActionArea>
         <Stack flexGrow={1} spacing={1}>
-          <LinkCardActionArea
-            to="/books/$bookId"
-            params={{ bookId: `${book.id}` }}
-          >
+          <LinkCardActionArea to="/books/$bookId" params={{ bookId: book.id }}>
             <Typography variant="h5">{book.title}</Typography>
           </LinkCardActionArea>
-          <LinkCardActionArea
-            to="/books/$bookId"
-            params={{ bookId: `${book.id}` }}
-          >
+          <LinkCardActionArea to="/books/$bookId" params={{ bookId: book.id }}>
             <Typography variant="body2">{book.author}</Typography>
           </LinkCardActionArea>
           <Typography variant="body2">{book.size} KB</Typography>

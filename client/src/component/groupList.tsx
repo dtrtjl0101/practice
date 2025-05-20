@@ -96,7 +96,7 @@ export default function GroupList(props: {
                     onClick={() => {
                       navigate({
                         to: "/groups/$groupId",
-                        params: { groupId: group.groupId!.toString() },
+                        params: { groupId: group.groupId! },
                       });
                     }}
                   >

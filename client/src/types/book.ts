@@ -5,4 +5,5 @@ export type BookMetadata = {
   author: string;
   description: string | null;
   size: number;
+  price: number;
 };

@@ -18,6 +18,22 @@ export const Route = createFileRoute(
   "/_pathlessLayout/groups/$groupId/activities/$activityId/discussions/"
 )({
   component: RouteComponent,
+  params: {
+    parse: (params) => {
+      const groupId = parseInt(params.groupId);
+      if (isNaN(groupId)) {
+        throw new Error("Invalid groupId");
+      }
+      const activityId = parseInt(params.activityId);
+      if (isNaN(activityId)) {
+        throw new Error("Invalid activityId");
+      }
+      return {
+        groupId,
+        activityId,
+      };
+    },
+  },
 });
 
 function RouteComponent() {
@@ -26,9 +42,8 @@ function RouteComponent() {
   const { data: discussions } = useQuery({
     queryKey: ["discussions", activityId],
     queryFn: async () => {
-      const response = await API_CLIENT.discussionController.getDiscussions(
-        parseInt(activityId)
-      );
+      const response =
+        await API_CLIENT.discussionController.getDiscussions(activityId);
       if (!response.isSuccessful) {
         alert(response.errorMessage);
         return;
@@ -54,7 +69,7 @@ function RouteComponent() {
                 from: Route.to,
                 to: "/groups/$groupId",
                 params: {
-                  groupId: groupId,
+                  groupId,
                 },
               })
             }

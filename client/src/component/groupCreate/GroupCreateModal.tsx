@@ -28,7 +28,7 @@ export default function GroupCreateModal(props: {
 
     navigate({
       to: "/groups/$groupId",
-      params: { groupId: response.data.groupId!.toString() },
+      params: { groupId: response.data.groupId! },
     });
 
     if (onCreateGroup) {
