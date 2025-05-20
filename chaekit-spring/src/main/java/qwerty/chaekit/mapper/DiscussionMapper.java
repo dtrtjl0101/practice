@@ -7,6 +7,7 @@ import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionCommentFetchResponse;
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionDetailResponse;
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionFetchResponse;
+import qwerty.chaekit.dto.highlight.HighlightSummaryResponse;
 import qwerty.chaekit.service.util.FileService;
 
 @Component
@@ -119,11 +120,14 @@ public class DiscussionMapper {
                                 .map(this::toCommentFetchResponse)
                                 .toList()
                 )
-                .highlightIds(discussion.getHighlights().stream()
-                        .map(discussionHighlight -> discussionHighlight
-                                .getHighlight()
-                                .getId())
-                        .toList())
+                .linkedHighlights(
+                        discussion.getHighlights().stream()
+                                .map(dh-> HighlightSummaryResponse.of(
+                                        dh.getHighlight(),
+                                        convertToPublicImageURL(dh.getHighlight().getAuthor().getProfileImageKey())
+                                ))
+                                .toList()
+                )
                 .build();
     }
 }

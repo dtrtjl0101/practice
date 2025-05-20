@@ -97,7 +97,7 @@ public class ActivityService {
                 .map(
                         activity -> ActivityFetchResponse.of(
                                 activity, 
-                                fileService.convertToPublicImageURL(activity.getBook().getFileKey()),
+                                fileService.convertToPublicImageURL(activity.getBook().getCoverImageKey()),
                                 activity.isParticipant(entityFinder.findUser(userToken.userId()))
                 ));
         return PageResponse.of(page);
@@ -131,7 +131,7 @@ public class ActivityService {
 
         activityPolicy.assertJoined(userId, activity.getId());
 
-        return ActivityFetchResponse.of(activity, fileService.convertToPublicImageURL(activity.getBook().getFileKey()), true);
+        return ActivityFetchResponse.of(activity, fileService.convertToPublicImageURL(activity.getBook().getCoverImageKey()), true);
     }
 
     @Transactional(readOnly = true)

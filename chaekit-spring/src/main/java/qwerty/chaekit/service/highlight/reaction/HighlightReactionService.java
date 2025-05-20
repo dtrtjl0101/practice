@@ -20,8 +20,12 @@ import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.group.ActivityPolicy;
+import qwerty.chaekit.service.highlight.HighlightPolicy;
+import qwerty.chaekit.service.util.EntityFinder;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -33,15 +37,14 @@ public class HighlightReactionService {
     private final HighlightReactionRepository reactionRepository;
     private final UserProfileRepository userRepository;
     private final ActivityPolicy activityPolicy;
+    private final HighlightPolicy highlightPolicy;
+    private final EntityFinder entityFinder;
 
     public HighlightReactionResponse addReaction(UserToken userToken, Long highlightId, HighlightReactionRequest request) {
         Long userId = userToken.userId();
 
-        UserProfile author = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
-
-        Highlight highlight = highlightRepository.findById(highlightId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));
+        UserProfile author = entityFinder.findUser(userId);
+        Highlight highlight = entityFinder.findHighlight(highlightId);
 
         activityPolicy.assertJoined(author, highlight.getActivity());
         
@@ -81,6 +84,21 @@ public class HighlightReactionService {
         HighlightReaction savedReaction = reactionRepository.save(reaction);
 
         return HighlightReactionResponse.of(savedReaction);
+    }
+
+    public List<HighlightReactionResponse> getHighlightReactions(UserToken userToken, Long highlightId) {
+        Highlight highlight = entityFinder.findHighlight(highlightId);
+        if(highlight.isPublic()) {
+            activityPolicy.assertJoined(userToken.userId(), highlight.getActivity().getId());
+        } else {
+            highlightPolicy.assertUpdatable(userToken.userId(), highlight);
+        }
+
+        List<HighlightReaction> reactions = reactionRepository.findByHighlightIdAndCommentIdIsNull(highlightId);
+
+        return reactions.stream()
+                .map(HighlightReactionResponse::of)
+                .collect(Collectors.toList());
     }
 
     public void deleteReaction(UserToken userToken, Long reactionId) {

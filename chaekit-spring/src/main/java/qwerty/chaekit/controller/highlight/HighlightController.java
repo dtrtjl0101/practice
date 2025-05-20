@@ -15,6 +15,7 @@ import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.highlight.HighlightService;
+import qwerty.chaekit.service.highlight.reaction.HighlightReactionService;
 
 import java.util.List;
 
@@ -23,6 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class HighlightController {
     private final HighlightService highlightService;
+    private final HighlightReactionService highlightReactionService;
 
     @GetMapping
     public ApiSuccessResponse<PageResponse<HighlightFetchResponse>> getHighlights(@Login UserToken userToken,
@@ -55,7 +57,7 @@ public class HighlightController {
             @Parameter(hidden = true) @Login UserToken userToken,
             @PathVariable Long highlightId
     ) {
-        return ApiSuccessResponse.of(highlightService.getHighlightReactions(userToken, highlightId));
+        return ApiSuccessResponse.of(highlightReactionService.getHighlightReactions(userToken, highlightId));
     }
 
     @DeleteMapping("/{id}")

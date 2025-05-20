@@ -18,7 +18,7 @@ public record HighlightFetchResponse(
         String cfi,
         String memo,
         Long activityId,
-        List<DiscussionSummaryResponse> relatedDiscussions,
+        List<DiscussionSummaryResponse> linkedDiscussions,
         String highlightContent
 ) {
     /*
@@ -38,9 +38,11 @@ public record HighlightFetchResponse(
                 .memo(highlight.getMemo())
                 .activityId(highlight.getActivity() != null ? highlight.getActivity().getId() : null)
                 .highlightContent(highlight.getHighlightcontent())
-                .relatedDiscussions(discussions.stream()
-                        .map(discussion -> DiscussionSummaryResponse.of(discussion, highlight.getActivity()))
-                        .toList())
+                .linkedDiscussions(
+                        discussions.stream()
+                            .map(discussion -> DiscussionSummaryResponse.of(discussion, discussion.getActivity()))
+                            .toList()
+                )
                 .build();
     }
 }
