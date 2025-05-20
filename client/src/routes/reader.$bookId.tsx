@@ -34,9 +34,12 @@ export const Route = createFileRoute("/reader/$bookId")({
     const activityId = activityIdString ? parseInt(activityIdString) : NaN;
 
     const temporalProgress = !!search.temporalProgress;
+
+    const initialPage = search.initialPage as string | undefined;
     return {
       activityId: !isNaN(activityId) ? activityId : undefined,
       temporalProgress,
+      initialPage,
     };
   },
   params: {
@@ -65,9 +68,9 @@ type Selection = {
 
 function RouteComponent() {
   const { bookId } = Route.useParams();
-  const { activityId, temporalProgress } = Route.useSearch();
+  const { activityId, temporalProgress, initialPage } = Route.useSearch();
   const theme = useTheme();
-  const [location, setLocation] = useState<string | null>(null);
+  const [location, setLocation] = useState<string | null>(initialPage ?? null);
   const [highlightsInPage, setHighlightsInPage] = useState<Highlight[]>([]);
   const [rendition, setRendition] = useState<Rendition | undefined>(undefined);
   const [openHighlightDrawer, setOpenHighlightDrawer] = useState(false);
@@ -80,6 +83,8 @@ function RouteComponent() {
   const [book, setBook] = useState<ArrayBuffer>(new ArrayBuffer(0));
   const canGoBack = useCanGoBack();
   const router = useRouter();
+  const navigate = Route.useNavigate();
+  const [localReadProgress, setLocalReadProgress] = useState<number>(0);
 
   const queryParam = activityId
     ? {
@@ -131,7 +136,7 @@ function RouteComponent() {
       queryKey: ["readProgress", bookId],
       queryFn: async () => {
         if (!rendition || !location) {
-          return;
+          throw new Error("Rendition or location is not available");
         }
         const response =
           await API_CLIENT.readingProgressController.getMyProgress(bookId);
@@ -141,6 +146,7 @@ function RouteComponent() {
         return response.data.percentage!;
       },
       placeholderData: keepPreviousData,
+      enabled: !!rendition && !!location,
     });
 
   useEffect(() => {
@@ -199,12 +205,7 @@ function RouteComponent() {
   }, [bookId]);
 
   useEffect(() => {
-    if (
-      temporalProgress ||
-      !rendition ||
-      !location ||
-      typeof readProgressInServer === "undefined"
-    ) {
+    if (temporalProgress || !rendition || !location) {
       return;
     }
     try {
@@ -215,19 +216,31 @@ function RouteComponent() {
         ),
         0
       );
-      if (newReadProgress <= readProgressInServer) {
-        return;
+      setLocalReadProgress(newReadProgress);
+      if (
+        typeof readProgressInServer === "number" &&
+        newReadProgress > readProgressInServer
+      ) {
+        API_CLIENT.readingProgressController
+          .saveMyProgress(bookId, {
+            percentage: newReadProgress,
+            cfi: location,
+          })
+          .then(() => refetchReadProgressInServer());
       }
-      API_CLIENT.readingProgressController
-        .saveMyProgress(bookId, {
-          percentage: newReadProgress,
-          cfi: location,
-        })
-        .then(() => refetchReadProgressInServer());
     } catch (e) {
       console.error("Error parsing location", e);
     }
   }, [rendition, location]);
+
+  useEffect(() => {
+    if (initialPage) {
+      navigate({
+        search: { initialPage: undefined, activityId, temporalProgress },
+        replace: true,
+      });
+    }
+  }, [location]);
 
   return (
     <Box
@@ -245,7 +258,7 @@ function RouteComponent() {
           zIndex: theme.zIndex.fab,
         }}
       >
-        <LinearProgress value={readProgressInServer} variant="determinate" />
+        <LinearProgress value={localReadProgress} variant="determinate" />
         {canGoBack && (
           <Fab
             size="small"

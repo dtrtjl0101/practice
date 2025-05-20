@@ -94,14 +94,15 @@ export function ActivityCard(props: { groupId: number }) {
     queryKey: ["readProgress", bookId],
     queryFn: async () => {
       if (!bookId) {
-        return undefined;
+        throw new Error("Book ID is not defined");
       }
       const response =
         await API_CLIENT.readingProgressController.getMyProgress(bookId);
 
       if (!response.isSuccessful) throw new Error(response.errorMessage);
-      return response.data.percentage;
+      return response.data!;
     },
+    enabled: !!bookId,
   });
 
   const [progressPopoverAnchor, setProgressPopoverAnchor] =
@@ -269,9 +270,10 @@ export function ActivityCard(props: { groupId: number }) {
                     search={{
                       activityId: activity.activityId,
                       temporalProgress: false,
+                      initialPage: myReadProgress?.cfi,
                     }}
                   >
-                    {`책 읽으러 가기${myReadProgress ? ` (${Math.round(myReadProgress)}%)` : ""}`}
+                    {`책 읽으러 가기${myReadProgress?.percentage ? ` (${Math.round(myReadProgress.percentage)}%)` : ""}`}
                   </LinkButton>
                   <LinkButton
                     variant="contained"
