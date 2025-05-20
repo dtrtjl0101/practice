@@ -31,7 +31,7 @@ export const Route = createFileRoute(
 function RouteComponent() {
   const router = useRouter();
   const navigate = Route.useNavigate();
-  const { discussionId } = Route.useParams();
+  const { activityId, discussionId } = Route.useParams();
 
   const {
     data: discussion,
@@ -50,26 +50,10 @@ function RouteComponent() {
     },
   });
 
-  const highlightQueries = useQueries({
-    queries: Array.isArray(discussion?.highlightIds)
-      ? discussion.highlightIds.map((highlightId) => ({
-          queryKey: ["highlight", highlightId],
-          queryFn: async () => {
-            const response =
-              await API_CLIENT.highlightController.getHighlight(highlightId);
-            if (!response.isSuccessful) {
-              throw new Error(response.errorMessage);
-            }
-            return response.data as Highlight;
-          },
-          enabled: !!discussion,
-        }))
-      : [],
-  });
-
-  const highlights = highlightQueries
-    .filter((q) => q.data)
-    .map((q) => q.data as Highlight);
+  // 하이라이트 데이터가 배열인지 확인하고 적절히 처리
+  const highlights: Highlight[] = Array.isArray(discussion?.linkedHighlights)
+    ? (discussion?.linkedHighlights as unknown as Highlight[])
+    : [];
 
   const handleEditDiscussion = () => {
     router.navigate({
@@ -95,37 +79,24 @@ function RouteComponent() {
     router.navigate({ to: ".." });
   };
 
-  const [selectedHighlight, setSelectedHighlight] = useState<number | null>(
-    null
-  );
-
-  const handleHighlightClick = (highlight: Highlight) => {
-    navigate({
-      from: Route.to,
-      to: "../../../../../../books/$bookId",
-      params: {
-        bookId: highlight.bookId,
-      },
-    });
-  };
-
-  function handleCloseModal(): void {
-    setSelectedHighlight(null);
-  }
-
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [popperOpen, setPopperOpen] = useState(false);
 
-  const handleClickPopper = (
-    event: React.MouseEvent<HTMLElement>,
-    highlight: Highlight
-  ) => {
-    handleHighlightClick(highlight);
-
-    setAnchorEl(event.currentTarget);
-    setHoveredId(highlight.id);
-    setPopperOpen((prev) => !prev);
+  const handleHighlightClick = (highlight: Highlight) => {
+    if (highlight) {
+      navigate({
+        to: "/reader/$bookId",
+        params: {
+          bookId: highlight.bookId,
+        },
+        search: {
+          activityId: parseInt(activityId),
+          temporalProgress: true,
+          initialPage: highlight.cfi,
+        },
+      });
+    }
   };
 
   const handleMouseEnter = (
@@ -142,15 +113,18 @@ function RouteComponent() {
     setHoveredId(null);
   };
 
-  const hoveredHighlight = highlights.find((h) => h.id === hoveredId);
+  const hoveredHighlight = useMemo(
+    () => highlights.find((h) => h.id === hoveredId),
+    [highlights, hoveredId]
+  );
 
   if (isLoading)
     return (
       <Box
         sx={{
-          display: "flex", // " display" 대신 "display"로 수정
+          display: "flex",
           justifyContent: "center",
-          alignItems: "center", // 수직 중앙 정렬 추가
+          alignItems: "center",
           height: "100vh",
         }}
       >
@@ -183,9 +157,7 @@ function RouteComponent() {
           <Typography variant="subtitle2" color="text.secondary">
             작성일:{" "}
             {new Date(
-              discussion.modifiedAt == undefined
-                ? discussion.createdAt
-                : discussion.modifiedAt
+              discussion.modifiedAt ?? discussion.createdAt
             ).toLocaleString()}
           </Typography>
         </Stack>
@@ -204,12 +176,12 @@ function RouteComponent() {
           )}
         </Typography>
         <Popper
-          open={popperOpen}
+          open={popperOpen && !!hoveredHighlight}
           anchorEl={anchorEl}
           placement="bottom-start"
           disablePortal
-          onMouseEnter={() => setPopperOpen(true)} // Popper 위에 마우스 올라가도 유지
-          onMouseLeave={handleMouseLeave} // Popper 밖으로 나가면 닫기
+          onMouseEnter={() => setPopperOpen(true)}
+          onMouseLeave={handleMouseLeave}
           style={{ zIndex: 1300 }}
         >
           <Box
@@ -271,22 +243,27 @@ function parseContentWithHighlights(
   onHover: (e: React.MouseEvent<HTMLElement>, id: number) => void,
   onLeave: () => void
 ): React.ReactNode[] {
-  const parts = content.split(/(#\w[\w-]*)/g); // '#'로 시작하는 단어 추출
+  if (!content) return [];
+
+  const parts = content.split(/(#\w[\w-]*)/g);
 
   return parts.map((part, index) => {
     const match = part.match(/^#(\w[\w-]*)$/);
     if (match) {
-      const id = match[1];
-      const highlight = highlights.find((h) => h.id === parseInt(id));
-      console.log(highlights);
+      const id = parseInt(match[1]);
+      const highlight = highlights.find((h) => h.id === id);
+
+      if (!highlight) {
+        return <Fragment key={index}>{part}</Fragment>;
+      }
 
       return (
         <Typography
           key={index}
           component="span"
           color="primary"
-          onClick={() => onClick(highlight!)}
-          onMouseEnter={(e) => onHover(e, parseInt(id))}
+          onClick={() => onClick(highlight)}
+          onMouseEnter={(e) => onHover(e, id)}
           onMouseLeave={onLeave}
           sx={{ cursor: "pointer", textDecoration: "underline" }}
         >
