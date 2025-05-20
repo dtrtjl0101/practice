@@ -43,11 +43,13 @@ public class HighlightRepositoryImpl implements HighlightRepository {
 
         if (activityId != null) {
             where.and(highlight.activity.id.eq(activityId));
+        } else {
+            where.and(highlight.isPublic.eq(false));
         }
 
-        if (!me) { // 내 하이라이트
+        if (!me) {// 공개된 하이라이트
             where.and(highlight.isPublic.eq(true));
-        } else { // 공개된 하이라이트
+        } else { // 내 하이라이트
             where.and(highlight.author.id.eq(userId));
         }
 
