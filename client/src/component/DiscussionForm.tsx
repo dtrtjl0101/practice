@@ -61,7 +61,6 @@ export default function DiscussionForm({
         idSet.add(match[1]); // '#' 제거
       }
     });
-    const uniqueIds = Array.from(idSet);
 
     if (isEdit) {
       // 수정 모드: 기존 게시글 수정

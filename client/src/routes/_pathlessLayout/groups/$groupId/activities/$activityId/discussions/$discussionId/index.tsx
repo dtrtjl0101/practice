@@ -19,7 +19,7 @@ import API_CLIENT from "../../../../../../../../api/api";
 import { Discussion } from "../../../../../../../../types/discussion";
 import CommentSection from "../../../../../../../../component/CommentSection";
 import { Comment } from "../../../../../../../../types/comment";
-import { Fragment, use, useState } from "react";
+import { Fragment, useState } from "react";
 import HighlightCard from "../../../../../../../../component/HighlightCard";
 import { Highlight } from "../../../../../../../../types/highlight";
 
@@ -294,7 +294,7 @@ function HighlightModal({
   open,
   onClose,
   highlightId,
-  activityId,
+  activityId: _activityId,
   refetchHighlights,
 }: {
   open: boolean;
