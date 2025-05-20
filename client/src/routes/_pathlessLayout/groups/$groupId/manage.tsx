@@ -56,7 +56,7 @@ function PendingMemberCard() {
   const [totalPages, setTotalPages] = useState(1);
 
   const { data: pendingRequests, refetch } = useQuery({
-    queryKey: ["getPendingList", groupId, page],
+    queryKey: ["pendingList", groupId, page],
     queryFn: async () => {
       const response = await API_CLIENT.groupController.getPendingList(
         groupId,
@@ -193,7 +193,7 @@ function MembersCard() {
   const [totalPages, setTotalPages] = useState(1);
 
   const { data: pendingRequests } = useQuery({
-    queryKey: ["getPendingList", groupId, page],
+    queryKey: ["groupMembers", groupId, page],
     queryFn: async () => {
       const response = await API_CLIENT.groupController.getGroupMembers(
         groupId,
