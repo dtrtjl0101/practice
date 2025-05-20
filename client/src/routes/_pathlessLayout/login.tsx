@@ -46,7 +46,7 @@ function RouteComponent() {
   }, [login, navigate, email, password]);
 
   return (
-    <Container maxWidth="sm" sx={{ mt: theme.spacing(4) }}>
+    <Container maxWidth="sm" sx={{ my: 8 }}>
       <Card>
         <CardHeader title="로그인" />
         <CardContent

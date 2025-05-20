@@ -11,7 +11,7 @@ function Home() {
   const navigate = useNavigate();
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4 }}>
+    <Container sx={{ my: 8 }}>
       <Stack spacing={4}>
         <GroupList
           size="small"

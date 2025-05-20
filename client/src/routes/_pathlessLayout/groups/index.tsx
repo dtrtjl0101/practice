@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_pathlessLayout/groups/")({
 
 function RouteComponent() {
   return (
-    <Container maxWidth="lg" sx={{ mt: 4 }}>
+    <Container sx={{ my: 8 }}>
       <Stack spacing={2}>
         <GroupList size="large" key="allGroups" title="모든 그룹" />
       </Stack>

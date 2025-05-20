@@ -80,7 +80,7 @@ function RouteComponent() {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4 }}>
+    <Container sx={{ my: 8 }}>
       <Paper sx={{ p: 4 }}>
         {isLoading || !book ? (
           <Typography>로딩 중...</Typography>
