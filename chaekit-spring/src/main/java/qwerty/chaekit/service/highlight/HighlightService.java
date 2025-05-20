@@ -86,11 +86,13 @@ public class HighlightService {
         UserProfile user = entityFinder.findUser(userToken.userId());
         Page<Highlight> highlights = highlightRepository.findByAuthor(user, bookId, pageable);
 
+        Map<Long, List<Discussion>> relatedDiscussionMap = getRelatedDiscussionMap(highlights);
+
         return PageResponse.of(highlights.map(
                 highlight -> HighlightFetchResponse.of(
                         highlight,
                         fileService.convertToPublicImageURL(highlight.getAuthor().getProfileImageKey()),
-                        List.of()
+                        relatedDiscussionMap.getOrDefault(highlight.getId(), List.of())
                 )
         ));
     }
@@ -114,6 +116,18 @@ public class HighlightService {
 
         Page<Highlight> highlights = highlightRepository.findHighlights(pageable, userToken.userId(), activityId, bookId, spine, me);
 
+        Map<Long, List<Discussion>> relatedDiscussionMap = getRelatedDiscussionMap(highlights);
+
+        return PageResponse.of(highlights.map(
+                highlight -> HighlightFetchResponse.of(
+                        highlight,
+                        fileService.convertToPublicImageURL(highlight.getAuthor().getProfileImageKey()),
+                        relatedDiscussionMap.getOrDefault(highlight.getId(), List.of())
+                )
+        ));
+    }
+
+    private Map<Long, List<Discussion>> getRelatedDiscussionMap(Page<Highlight> highlights) {
         // 1. highlightId 추출
         List<Long> highlightIds = highlights.stream()
                 .map(Highlight::getId)
@@ -123,19 +137,11 @@ public class HighlightService {
         List<DiscussionHighlight> discussionLinks = discussionHighlightRepository.findByHighlightIdIn(highlightIds);
 
         // 3. highlightId → List<Discussion> 매핑
-        Map<Long, List<Discussion>> highlightIdToDiscussions = discussionLinks.stream()
+        return discussionLinks.stream()
                 .collect(Collectors.groupingBy(
                         dh -> dh.getHighlight().getId(),
                         Collectors.mapping(DiscussionHighlight::getDiscussion, Collectors.toList())
                 ));
-
-        return PageResponse.of(highlights.map(
-                highlight -> HighlightFetchResponse.of(
-                        highlight,
-                        fileService.convertToPublicImageURL(highlight.getAuthor().getProfileImageKey()),
-                        highlightIdToDiscussions.getOrDefault(highlight.getId(), List.of())
-                )
-        ));
     }
 
     @Transactional
@@ -165,22 +171,6 @@ public class HighlightService {
         highlightPolicy.assertUpdatable(user, highlight);
 
         highlightRepository.delete(highlight);
-    }
-
-    // TODO: move this method to HighlightReactionService 
-    public List<HighlightReactionResponse> getHighlightReactions(UserToken userToken, Long highlightId) {
-        Highlight highlight = entityFinder.findHighlight(highlightId);
-        if(highlight.isPublic()) {
-            activityPolicy.assertJoined(userToken.userId(), highlight.getActivity().getId());
-        } else {
-            highlightPolicy.assertUpdatable(userToken.userId(), highlight);
-        }
-
-        List<HighlightReaction> reactions = reactionRepository.findByHighlightIdAndCommentIdIsNull(highlightId);
-        
-        return reactions.stream()
-                .map(HighlightReactionResponse::of)
-                .collect(Collectors.toList());
     }
 
     public HighlightFetchResponse fetchHighlight(UserToken userToken, Long id) {
