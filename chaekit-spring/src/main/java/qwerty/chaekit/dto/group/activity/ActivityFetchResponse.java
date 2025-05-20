@@ -8,6 +8,7 @@ import java.time.LocalDate;
 @Builder
 public record ActivityFetchResponse(
         Long activityId,
+        Long groupId,
         Long bookId,
         String bookTitle,
         String bookAuthor,
@@ -20,6 +21,7 @@ public record ActivityFetchResponse(
 ) {
     public static ActivityFetchResponse of(Activity activity, String coverImageURL, boolean isParticipant) {
         return ActivityFetchResponse.builder()
+                .groupId(activity.getGroup().getId())
                 .activityId(activity.getId())
                 .bookId(activity.getBook().getId())
                 .bookTitle(activity.getBook().getTitle())

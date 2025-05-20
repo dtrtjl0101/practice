@@ -29,7 +29,7 @@ public class EbookController {
     @GetMapping
     @Operation(summary = "전자책 목록 조회", description = "전자책 목록을 페이지네이션하여 조회합니다.")
     public ApiSuccessResponse<PageResponse<EbookFetchResponse>> getBooks(
-            @Parameter(hidden = true) @Login UserToken userToken,
+            @Parameter(hidden = true) @Login(required = false) UserToken userToken,
             @Parameter(description = "페이지네이션 정보") @ParameterObject Pageable pageable,
             @Parameter(description = "책 제목") @RequestParam(required = false) String title,
             @Parameter(description = "작가명") @RequestParam(required = false) String author

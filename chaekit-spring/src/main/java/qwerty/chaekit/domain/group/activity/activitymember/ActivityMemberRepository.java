@@ -12,4 +12,5 @@ public interface ActivityMemberRepository extends JpaRepository<ActivityMember, 
     boolean existsByUserAndActivity(UserProfile user, Activity activity);
     Page<ActivityMember> findByUserAndActivity_Book(UserProfile user, Ebook ebook, Pageable pageable);
     Page<ActivityMember> findByActivity(Activity activity, Pageable pageable);
+    Page<ActivityMember> findByUser(UserProfile user, Pageable pageable);
 }

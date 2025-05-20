@@ -39,6 +39,19 @@ public class ActivityController {
         return ApiSuccessResponse.of(activityService.fetchAllActivities(userToken, pageable, groupId));
     }
 
+    @Operation(
+            summary = "내 활동 조회",
+            description = "내가 가입한 모든 활동을 조회합니다."
+    )
+    @GetMapping("/api/users/me/activities")
+    public ApiSuccessResponse<PageResponse<ActivityFetchResponse>> getMyActivity(
+            @Parameter(hidden = true) @Login UserToken userToken,
+            @RequestParam(required = false) Long bookId,
+            Pageable pageable
+    ) {
+        return ApiSuccessResponse.of(activityService.getMyActivities(userToken, bookId, pageable));
+    }
+
     @GetMapping("/api/activities/{activityId}")
     public ApiSuccessResponse<ActivityFetchResponse> getActivity(
             @Parameter(hidden = true) @Login UserToken userToken,
@@ -77,19 +90,6 @@ public class ActivityController {
     ) {
         activityService.leaveActivity(userToken, activityId);
         return ApiSuccessResponse.emptyResponse();
-    }
-
-    @Operation(
-            summary = "내 활동 조회",
-            description = "내가 가입한 모든 활동을 조회합니다."
-    )
-    @PostMapping("/api/activities/my")
-    public ApiSuccessResponse<PageResponse<ActivityFetchResponse>> getMyActivity(
-            @Parameter(hidden = true) @Login UserToken userToken,
-            @RequestParam(required = false) Long bookId,
-            Pageable pageable
-    ) {
-        return ApiSuccessResponse.of(activityService.getMyActivities(userToken, bookId, pageable));
     }
 
 }
