@@ -3,7 +3,8 @@ export type BookMetadata = {
   title: string;
   bookCoverImageURL: string;
   author: string;
-  description: string | null;
+  description: string;
   size: number;
+  isPurchased: boolean;
   price: number;
 };

@@ -50,6 +50,7 @@ function RouteComponent() {
       if (!response.isSuccessful) throw new Error(response.errorMessage);
       return response.data;
     },
+    enabled: book?.isPurchased,
   });
 
   const handlePurchase = async () => {
