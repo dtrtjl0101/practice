@@ -126,7 +126,7 @@ export default function DiscussionForm({
         />
         {/* 본문 content */}
         <OutlinedInput
-          sx={{ mb: 4 }}
+          sx={{ alignItems: "flex-start", minHeight: "300px" }}
           placeholder="내용을 입력하세요"
           value={content}
           onChange={(e) => setContent(e.target.value)}
