@@ -1,5 +1,13 @@
 import { ArrowBack, Note, NoteAdd } from "@mui/icons-material";
-import { Badge, Box, Drawer, Fab, Stack, useTheme } from "@mui/material";
+import {
+  Badge,
+  Box,
+  Drawer,
+  Fab,
+  LinearProgress,
+  Stack,
+  useTheme,
+} from "@mui/material";
 import {
   createFileRoute,
   useCanGoBack,
@@ -118,6 +126,23 @@ function RouteComponent() {
 
   const previousHighlightsInPage = useRef<Highlight[]>([]);
 
+  const { data: readProgressInServer, refetch: refetchReadProgressInServer } =
+    useQuery({
+      queryKey: ["readProgress", bookId],
+      queryFn: async () => {
+        if (!rendition || !location) {
+          return;
+        }
+        const response =
+          await API_CLIENT.readingProgressController.getMyProgress(bookId);
+        if (!response.isSuccessful) {
+          throw new Error(response.errorMessage);
+        }
+        return response.data.percentage!;
+      },
+      placeholderData: keepPreviousData,
+    });
+
   useEffect(() => {
     previousHighlightsInPage.current = highlightsInPage;
     if (!rendition || !rendition.location) {
@@ -174,12 +199,26 @@ function RouteComponent() {
   }, [bookId]);
 
   useEffect(() => {
-    if (temporalProgress || !rendition || !location) {
+    if (
+      temporalProgress ||
+      !rendition ||
+      !location ||
+      typeof readProgressInServer === "undefined"
+    ) {
       return;
     }
     try {
-      const readProgress = rendition.book.locations.percentageFromCfi(location);
-      console.log(readProgress);
+      const newReadProgress =
+        rendition.book.locations.percentageFromCfi(location);
+      if (newReadProgress <= readProgressInServer) {
+        return;
+      }
+      API_CLIENT.readingProgressController
+        .saveMyProgress(bookId, {
+          percentage: newReadProgress,
+          cfi: location,
+        })
+        .then(() => refetchReadProgressInServer());
     } catch (e) {
       console.error("Error parsing location", e);
     }
@@ -201,6 +240,10 @@ function RouteComponent() {
           zIndex: theme.zIndex.fab,
         }}
       >
+        <LinearProgress
+          value={(readProgressInServer || 0) * 100}
+          variant="determinate"
+        />
         {canGoBack && (
           <Fab
             size="small"
