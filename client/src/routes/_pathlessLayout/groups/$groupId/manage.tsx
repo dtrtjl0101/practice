@@ -4,6 +4,7 @@ import {
   Card,
   CardContent,
   CardHeader,
+  Container,
   Skeleton,
   Stack,
   Table,
@@ -14,24 +15,26 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { createFileRoute } from "@tanstack/react-router";
-import API_CLIENT from "../../../../../api/api";
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import PageNavigation from "../../../../../component/PageNavigation";
+import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import API_CLIENT from "../../../../api/api";
+import PageNavigation from "../../../../component/PageNavigation";
 
-export const Route = createFileRoute(
-  "/_pathlessLayout/groups/$groupId/manage/member"
-)({
-  component: RouteComponent,
-});
+export const Route = createFileRoute("/_pathlessLayout/groups/$groupId/manage")(
+  {
+    component: RouteComponent,
+  }
+);
 
 function RouteComponent() {
   return (
-    <Stack spacing={4}>
-      <PendingMemberCard />
-      <MembersCard />
-    </Stack>
+    <Container sx={{ margin: 2, marginX: "auto" }}>
+      <Stack spacing={4}>
+        <PendingMemberCard />
+        <MembersCard />
+      </Stack>
+    </Container>
   );
 }
 
