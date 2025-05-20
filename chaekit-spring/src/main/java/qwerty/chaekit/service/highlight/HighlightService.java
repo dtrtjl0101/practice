@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.discussionhighlight.DiscussionHighlightRepository;
@@ -79,6 +80,19 @@ public class HighlightService {
                 .build();
         
         return HighlightPostResponse.of(highlightRepository.save(highlight));
+    }
+
+    public PageResponse<HighlightFetchResponse> getMyHighlights(UserToken userToken, @Nullable Long bookId, Pageable pageable) {
+        UserProfile user = entityFinder.findUser(userToken.userId());
+        Page<Highlight> highlights = highlightRepository.findByAuthor(user, bookId, pageable);
+
+        return PageResponse.of(highlights.map(
+                highlight -> HighlightFetchResponse.of(
+                        highlight,
+                        fileService.convertToPublicImageURL(highlight.getAuthor().getProfileImageKey()),
+                        List.of()
+                )
+        ));
     }
 
     public PageResponse<HighlightFetchResponse> fetchHighlights(UserToken userToken, Pageable pageable, Long activityId, Long bookId, String spine, boolean me) {
