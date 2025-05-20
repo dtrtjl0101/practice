@@ -12,6 +12,9 @@ public record GroupFetchResponse(
         String description,
         List<String> tags,
         String groupImageURL,
+        Long leaderId,
+        String leaderNickname,
+        String leaderProfileImageURL,
         MyMemberShipStatus myMemberShipStatus,
         int memberCount
 ) { }

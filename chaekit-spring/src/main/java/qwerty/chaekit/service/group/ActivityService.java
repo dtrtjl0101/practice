@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.group.activity.Activity;
+import qwerty.chaekit.domain.group.activity.activitymember.ActivityMember;
 import qwerty.chaekit.domain.group.activity.activitymember.ActivityMemberRepository;
 import qwerty.chaekit.domain.group.activity.repository.ActivityRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
@@ -136,15 +137,19 @@ public class ActivityService {
     @Transactional(readOnly = true)
     public PageResponse<ActivityFetchResponse> getMyActivities(UserToken userToken, Long bookId, Pageable pageable) {
         UserProfile user = entityFinder.findUser(userToken.userId());
-        Ebook book = entityFinder.findEbook(bookId);
-
-        Page<ActivityFetchResponse> page = activityMemberRepository.findByUserAndActivity_Book(user, book, pageable)
+        Page<ActivityMember> fetchResults;
+        if (bookId == null) {
+            fetchResults = activityMemberRepository.findByUser(user, pageable);
+        } else {
+            Ebook book = entityFinder.findEbook(bookId);
+            fetchResults = activityMemberRepository.findByUserAndActivity_Book(user, book, pageable);
+        }
+        Page<ActivityFetchResponse> page = fetchResults
                 .map(activityMember -> ActivityFetchResponse.of(
                         activityMember.getActivity(),
                         fileService.convertToPublicImageURL(activityMember.getUser().getProfileImageKey()),
                         true
                 ));
-
         return PageResponse.of(page);
 
     }

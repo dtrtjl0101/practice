@@ -23,11 +23,11 @@ public class EbookService {
     private final EntityFinder entityFinder;
 
     public PageResponse<EbookFetchResponse> fetchBooksByQuery(UserToken userToken, Pageable pageable, String title, String author) {
-        UserProfile user = entityFinder.findUser(userToken.userId());
+        UserProfile user = userToken.isAnonymous() ? null : entityFinder.findUser(userToken.userId());
         Page<EbookFetchResponse> page = ebookRepository.findAllByTitleAndAuthor(title, author, pageable)
                 .map( ebook -> EbookFetchResponse.of(
                         ebook, fileService.convertToPublicImageURL(ebook.getCoverImageKey()),
-                        user.isPurchased(ebook)
+                        user != null && user.isPurchased(ebook)
                 ));
         return PageResponse.of(page);
     }
