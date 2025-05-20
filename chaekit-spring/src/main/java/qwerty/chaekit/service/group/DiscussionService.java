@@ -73,16 +73,10 @@ public class DiscussionService {
                 .build();
 
         // 토론에 연결된 하이라이트 추가
-        if (request.highlightIds() != null) {
-            long count = highlightRepository.countByIdsAndActivity(request.highlightIds(), activity);
-            if (count != request.highlightIds().size()) {
-                throw new BadRequestException(ErrorCode.HIGHLIGHT_NOT_FOUND);
-            }
-            request.highlightIds().forEach(highlightId -> {
-                discussion.addHighlight(Highlight.builder().id(highlightId).build());
-            });
-        }
-        
+        List<Long> highlightIds = request.highlightIds();
+
+        setDiscussionHighlightLinks(highlightIds, discussion);
+
         discussionRepository.save(discussion);
 
         return discussionMapper.toFetchResponse(discussion, 0L, user.getId());
@@ -109,6 +103,10 @@ public class DiscussionService {
 
         discussion.update(request.title(), request.content());
 
+        List<Long> highlightIds = request.highlightIds();
+
+        setDiscussionHighlightLinks(highlightIds, discussion);
+
         return discussionMapper.toFetchResponse(discussion, commentCount, userId);
     }
 
@@ -131,5 +129,18 @@ public class DiscussionService {
             throw new BadRequestException(ErrorCode.DISCUSSION_NOT_YOURS);
         }
         return discussion;
+    }
+
+    private void setDiscussionHighlightLinks(List<Long> highlightIds, Discussion discussion) {
+        if (highlightIds != null) {
+            long count = highlightRepository.countByIdsAndActivity(highlightIds, discussion.getActivity());
+            if (count != highlightIds.size()) {
+                throw new BadRequestException(ErrorCode.HIGHLIGHT_NOT_FOUND);
+            }
+            discussion.resetHighlights();
+            highlightIds.forEach(highlightId -> {
+                discussion.addHighlight(Highlight.builder().id(highlightId).build());
+            });
+        }
     }
 }

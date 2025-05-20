@@ -19,6 +19,7 @@ public record DiscussionDetailResponse(
         Long commentCount,
         boolean isDebate,
         boolean isAuthor,
+        List<Long> highlightIds,
         List<DiscussionCommentFetchResponse> comments
 ) {
 }

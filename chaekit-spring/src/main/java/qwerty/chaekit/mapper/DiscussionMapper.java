@@ -80,6 +80,11 @@ public class DiscussionMapper {
                 .commentCount(commentCount)
                 .isDebate(discussion.isDebate())
                 .isAuthor(discussion.getAuthor().getId().equals(memberId))
+                .highlightIds(discussion.getHighlights().stream()
+                        .map(discussionHighlight -> discussionHighlight
+                                .getHighlight()
+                                .getId())
+                        .toList())
                 .build();
     }
 
@@ -114,6 +119,11 @@ public class DiscussionMapper {
                                 .map(this::toCommentFetchResponse)
                                 .toList()
                 )
+                .highlightIds(discussion.getHighlights().stream()
+                        .map(discussionHighlight -> discussionHighlight
+                                .getHighlight()
+                                .getId())
+                        .toList())
                 .build();
     }
 }

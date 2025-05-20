@@ -205,7 +205,7 @@ class DiscussionServiceTest {
         discussion.addComment(DiscussionComment.builder().id(discussionId).author(commentAuthor).build());
         discussion.addComment(DiscussionComment.builder().id(discussionId).author(commentAuthor).build());
 
-        DiscussionPatchRequest request = new DiscussionPatchRequest("New Title", "New Content");
+        DiscussionPatchRequest request = new DiscussionPatchRequest("New Title", "New Content", List.of());
 
         given(entityFinder.findUser(userId)).willReturn(user);
         given(entityFinder.findDiscussion(discussionId)).willReturn(discussion);

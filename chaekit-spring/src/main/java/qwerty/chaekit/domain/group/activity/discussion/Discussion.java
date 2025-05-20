@@ -76,6 +76,10 @@ public class Discussion extends BaseEntity {
         comments.add(comment);
     }
 
+    public void resetHighlights() {
+        this.highlights.clear();
+    }
+
     public void addHighlight(Highlight highlight) {
         DiscussionHighlight link = new DiscussionHighlight(this, highlight);
         this.highlights.add(link);

@@ -4,6 +4,7 @@ package qwerty.chaekit.domain.discussionhighlight;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.group.activity.discussion.Discussion;
 import qwerty.chaekit.domain.highlight.entity.Highlight;
@@ -11,6 +12,7 @@ import qwerty.chaekit.domain.highlight.entity.Highlight;
 @Entity
 @Getter
 @Table(name = "discussion_highlight")
+@BatchSize(size = 20)
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 public class DiscussionHighlight extends BaseEntity {
     @Id
