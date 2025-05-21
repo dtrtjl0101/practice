@@ -1,11 +1,12 @@
-import { ArrowBack, Note, NoteAdd } from "@mui/icons-material";
+import { ArrowBack, Close, Note, NoteAdd } from "@mui/icons-material";
 import {
   Badge,
   Box,
-  Chip,
   Drawer,
   Fab,
+  IconButton,
   LinearProgress,
+  Snackbar,
   Stack,
   useTheme,
 } from "@mui/material";
@@ -89,6 +90,8 @@ function RouteComponent() {
   const [focusedHighlight, setFocusedHighlight] = useState<Highlight | null>(
     null
   );
+  const [readTogetherSnackbarOpen, setReadTogetherSnackbarOpen] =
+    useState(!!activityId);
 
   const queryParam = activityId
     ? {
@@ -354,23 +357,25 @@ function RouteComponent() {
               <ArrowBack />
             </Fab>
           )}
-          {activityId && (
-            <Chip
-              label="함께읽기 활성화됨"
-              color="info"
-              onDelete={() => {
-                navigate({
-                  to: ".",
-                  search: {
-                    activityId: undefined,
-                    temporalProgress,
-                    initialPage,
-                  },
-                  replace: true,
-                });
-              }}
-            />
-          )}
+          <Snackbar
+            anchorOrigin={{ vertical: "top", horizontal: "center" }}
+            open={readTogetherSnackbarOpen}
+            onClose={() => {
+              setReadTogetherSnackbarOpen(false);
+            }}
+            action={
+              <IconButton
+                size="small"
+                aria-label="close"
+                color="inherit"
+                onClick={() => setReadTogetherSnackbarOpen(false)}
+              >
+                <Close />
+              </IconButton>
+            }
+            message="함께읽기 활성화됨"
+            autoHideDuration={3000}
+          />
           <Fab
             size="small"
             onClick={() => {
