@@ -12,7 +12,7 @@ public enum DummyEbook {
             "ebook/sample-alice.epub", 
             "ebook-cover-image/cover-alice.jpg", 1914953, 0
     ),
-    ROMEO_AND_JULIET("로미오와 줄리앳", "윌리엄 셰익스피어",
+    ROMEO_AND_JULIET("로미오와 줄리엣", "윌리엄 셰익스피어",
             """
                     사랑은 가장 순수하지만, 세상은 가장 잔혹하다.
                     비극적인 운명 속에서 피어난 젊은 연인의 이야기.
