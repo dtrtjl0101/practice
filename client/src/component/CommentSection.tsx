@@ -13,33 +13,34 @@ import {
   Radio,
   FormControl,
   FormLabel,
+  Avatar,
 } from "@mui/material";
-import { useMemo, useState } from "react";
+import { useMemo, useState, Fragment } from "react";
 import { Comment, StanceOptions } from "../types/comment";
 import API_CLIENT from "../api/api";
+
+interface CommentSectionProps {
+  discussionId: number;
+  comments: Comment[];
+  isDebate: boolean;
+  onRefresh: () => void;
+}
 
 export default function CommentSection({
   discussionId,
   comments,
   isDebate,
   onRefresh,
-}: {
-  discussionId: number;
-  comments: Comment[];
-  isDebate: boolean;
-  onRefresh: () => void;
-}) {
+}: CommentSectionProps) {
   const [content, setContent] = useState("");
-  const [replyContent, setReplyContent] = useState<{
-    [parentId: number]: string;
-  }>({});
+  const [replyContent, setReplyContent] = useState<Record<number, string>>({});
   const [stance, setStance] = useState<StanceOptions>("AGREE");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editedContent, setEditedContent] = useState("");
   const [replyTo, setReplyTo] = useState<number | null>(null);
-  const [replyStance, setReplyStance] = useState<{
-    [parentId: number]: StanceOptions;
-  }>({});
+  const [replyStance, setReplyStance] = useState<Record<number, StanceOptions>>(
+    {}
+  );
 
   const sortedComments = useMemo(() => {
     return [...comments]
@@ -47,16 +48,17 @@ export default function CommentSection({
         (a, b) =>
           new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
       )
-      .map((comment) => {
-        comment.replies = comment.replies?.sort(
-          (a, b) =>
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        );
-        return comment;
-      });
+      .map((comment) => ({
+        ...comment,
+        replies:
+          comment.replies?.sort(
+            (a, b) =>
+              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          ) || [],
+      }));
   }, [comments]);
 
-  const handleAddComment = (parentId?: number) => {
+  const handleAddComment = async (parentId?: number) => {
     const isReply = !!parentId;
     const currentContent = isReply ? replyContent[parentId!] : content;
     const currentStance = isReply ? replyStance[parentId!] : stance;
@@ -65,355 +67,498 @@ export default function CommentSection({
       alert(isReply ? "답글을 입력해주세요." : "댓글을 입력해주세요");
       return;
     }
+
     if (isDebate && !currentStance) {
       alert("의견을 선택해주세요.");
       return;
     }
 
-    API_CLIENT.discussionController
-      .addComment(discussionId, {
-        parentId: parentId,
-        content: currentContent,
-        stance: isDebate ? currentStance : "AGREE",
-      })
-      .then((response) => {
-        if (response.isSuccessful) {
-          if (isReply) {
-            setReplyContent((prev) => ({ ...prev, [parentId!]: "" }));
-            setReplyTo(null);
-          } else {
-            setContent("");
-          }
-          onRefresh();
-        } else {
-          alert(response.errorMessage);
+    try {
+      const response = await API_CLIENT.discussionController.addComment(
+        discussionId,
+        {
+          parentId,
+          content: currentContent,
+          stance: isDebate ? currentStance : "AGREE",
         }
-      });
+      );
+
+      if (response.isSuccessful) {
+        if (isReply) {
+          setReplyContent((prev) => ({ ...prev, [parentId!]: "" }));
+          setReplyTo(null);
+        } else {
+          setContent("");
+        }
+        onRefresh();
+      } else {
+        alert(response.errorMessage);
+      }
+    } catch (error) {
+      alert("댓글 작성 중 오류가 발생했습니다.");
+    }
   };
 
-  const handleEditComment = (commentId: number) => {
-    API_CLIENT.discussionController
-      .updateComment1(commentId, {
-        content: editedContent,
-      })
-      .then((response) => {
-        if (response.isSuccessful) {
-          alert("댓글이 수정되었습니다.");
-          onRefresh();
-        } else {
-          alert(response.errorMessage);
+  const handleEditComment = async (commentId: number) => {
+    if (!editedContent.trim()) {
+      alert("수정할 내용을 입력해주세요.");
+      return;
+    }
+
+    try {
+      const response = await API_CLIENT.discussionController.updateComment1(
+        commentId,
+        {
+          content: editedContent,
         }
-      });
+      );
+
+      if (response.isSuccessful) {
+        alert("댓글이 수정되었습니다.");
+        setEditingId(null);
+        setEditedContent("");
+        onRefresh();
+      } else {
+        alert(response.errorMessage);
+      }
+    } catch (error) {
+      alert("댓글 수정 중 오류가 발생했습니다.");
+    }
   };
 
-  const handleDeleteComment = (commentId: number) => {
+  const handleDeleteComment = async (commentId: number) => {
     const confirmDelete = window.confirm("댓글을 삭제하시겠습니까?");
     if (!confirmDelete) return;
-    API_CLIENT.discussionController
-      .deleteComment1(commentId)
-      .then((response) => {
-        if (response.isSuccessful) {
-          alert("댓글이 삭제되었습니다.");
-          onRefresh();
-        } else {
-          alert(response.errorMessage);
-        }
-      });
+
+    try {
+      const response =
+        await API_CLIENT.discussionController.deleteComment1(commentId);
+
+      if (response.isSuccessful) {
+        alert("댓글이 삭제되었습니다.");
+        onRefresh();
+      } else {
+        alert(response.errorMessage);
+      }
+    } catch (error) {
+      alert("댓글 삭제 중 오류가 발생했습니다.");
+    }
   };
 
-  const handleEdit = (comment: Comment) => {
+  const handleEditStart = (comment: Comment) => {
     setEditingId(comment.commentId);
     setEditedContent(comment.content);
   };
-  const handleCancel = () => {
+
+  const handleEditCancel = () => {
     setEditingId(null);
     setEditedContent("");
   };
-  const handleSave = () => {
+
+  const handleEditSave = () => {
     if (editingId !== null && editedContent.trim()) {
       handleEditComment(editingId);
-      setEditingId(null);
-      setEditedContent("");
     }
+  };
+
+  const handleReplyToggle = (commentId: number) => {
+    setReplyTo(replyTo === commentId ? null : commentId);
   };
 
   return (
     <Box sx={{ mt: 5 }}>
-      <Divider sx={{ mb: 2 }} />
-      <Typography variant="h6" gutterBottom>
+      <Divider sx={{ mb: 3 }} />
+
+      {/* 댓글 섹션 헤더 */}
+      <Typography variant="h6" fontWeight="bold" gutterBottom>
         {isDebate ? "토론 댓글" : "댓글"}
+        {sortedComments.length > 0 && (
+          <Typography
+            component="span"
+            variant="body2"
+            color="text.secondary"
+            sx={{ ml: 1 }}
+          >
+            ({sortedComments.length})
+          </Typography>
+        )}
       </Typography>
 
-      <Stack spacing={2} sx={{ mb: 2 }}>
-        {isDebate && (
-          <StanceSelector
-            stance={stance}
-            setStance={(value) => setStance(value)}
-          />
-        )}
-        <Stack direction="row" spacing={2}>
-          <TextField
-            fullWidth
-            multiline
-            minRows={2}
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder={"댓글을 입력하세요"}
-          />
-          <Button variant="contained" onClick={() => handleAddComment()}>
-            작성
-          </Button>
-        </Stack>
-      </Stack>
+      {/* 댓글 작성 영역 */}
+      <Paper elevation={1} sx={{ p: 3, mb: 3 }}>
+        <Stack spacing={2}>
+          {isDebate && (
+            <StanceSelector stance={stance} onStanceChange={setStance} />
+          )}
 
+          <Stack direction="row" spacing={2} alignItems="flex-start">
+            <TextField
+              fullWidth
+              multiline
+              minRows={3}
+              maxRows={8}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="댓글을 입력하세요"
+              variant="outlined"
+            />
+            <Button
+              variant="contained"
+              onClick={() => handleAddComment()}
+              disabled={!content.trim()}
+              sx={{ minWidth: 80, alignSelf: "flex-start" }}
+            >
+              작성
+            </Button>
+          </Stack>
+        </Stack>
+      </Paper>
+
+      {/* 댓글 목록 */}
       <Stack spacing={2}>
         {sortedComments.length === 0 ? (
-          <Typography color="text.secondary">아직 댓글이 없습니다.</Typography>
+          <Box sx={{ textAlign: "center", py: 4 }}>
+            <Typography color="text.secondary">
+              아직 댓글이 없습니다.
+            </Typography>
+          </Box>
         ) : (
           sortedComments.map((comment) => (
-            <Box key={comment.commentId}>
+            <Fragment key={comment.commentId}>
               <CommentItem
                 comment={comment}
                 editingId={editingId}
                 editedContent={editedContent}
-                setEditedContent={setEditedContent}
-                onEdit={handleEdit}
-                onSave={handleSave}
-                onCancel={handleCancel}
+                onEditedContentChange={setEditedContent}
+                onEditStart={handleEditStart}
+                onEditSave={handleEditSave}
+                onEditCancel={handleEditCancel}
                 onDelete={handleDeleteComment}
-                setEditingId={setEditingId}
                 replyTo={replyTo}
-                setReplyTo={setReplyTo}
-                replyInput={replyContent}
-                setReplyInput={setReplyContent}
+                onReplyToggle={handleReplyToggle}
+                replyContent={replyContent}
+                onReplyContentChange={setReplyContent}
                 replyStance={replyStance}
-                setReplyStance={setReplyStance}
-                handleReplySubmit={handleAddComment}
+                onReplyStanceChange={setReplyStance}
+                onReplySubmit={handleAddComment}
                 isDebate={isDebate}
               />
-              <Stack spacing={1} sx={{ pl: 4 }}>
-                {comment.replies.map((reply) => (
-                  <CommentItem
-                    key={reply.commentId}
-                    comment={reply}
-                    editingId={editingId}
-                    editedContent={editedContent}
-                    setEditedContent={setEditedContent}
-                    onEdit={handleEdit}
-                    onSave={handleSave}
-                    onCancel={handleCancel}
-                    onDelete={handleDeleteComment}
-                    setEditingId={setEditingId}
-                    replyTo={replyTo}
-                    setReplyTo={setReplyTo}
-                    replyInput={replyContent}
-                    setReplyInput={setReplyContent}
-                    replyStance={replyStance}
-                    setReplyStance={setReplyStance}
-                    handleReplySubmit={handleAddComment}
-                    isDebate={isDebate}
-                    isReply
-                  />
-                ))}
-              </Stack>
-            </Box>
+
+              {/* 답글 목록 */}
+              {comment.replies && comment.replies.length > 0 && (
+                <Stack
+                  spacing={1}
+                  sx={{ pl: 6, borderLeft: 2, borderColor: "grey.100" }}
+                >
+                  {comment.replies.map((reply) => (
+                    <CommentItem
+                      key={reply.commentId}
+                      comment={reply}
+                      editingId={editingId}
+                      editedContent={editedContent}
+                      onEditedContentChange={setEditedContent}
+                      onEditStart={handleEditStart}
+                      onEditSave={handleEditSave}
+                      onEditCancel={handleEditCancel}
+                      onDelete={handleDeleteComment}
+                      replyTo={replyTo}
+                      onReplyToggle={handleReplyToggle}
+                      replyContent={replyContent}
+                      onReplyContentChange={setReplyContent}
+                      replyStance={replyStance}
+                      onReplyStanceChange={setReplyStance}
+                      onReplySubmit={handleAddComment}
+                      isDebate={isDebate}
+                      isReply
+                    />
+                  ))}
+                </Stack>
+              )}
+            </Fragment>
           ))
         )}
       </Stack>
-      <Divider sx={{ mt: 30 }} />
+
+      <Divider sx={{ mt: 4 }} />
     </Box>
   );
 }
 
-// 댓글 아이템 컴포넌트
-type CommentItemProps = {
+interface CommentItemProps {
   comment: Comment;
   editingId: number | null;
   editedContent: string;
-  setEditedContent: (c: string) => void;
-  onEdit: (comment: Comment) => void;
-  onSave: () => void;
-  onCancel: () => void;
+  onEditedContentChange: (content: string) => void;
+  onEditStart: (comment: Comment) => void;
+  onEditSave: () => void;
+  onEditCancel: () => void;
   onDelete: (id: number) => void;
-  setEditingId: (id: number | null) => void;
   replyTo: number | null;
-  setReplyTo: (id: number | null) => void;
-  replyInput: { [key: number]: string };
-  setReplyInput: React.Dispatch<
-    React.SetStateAction<{ [key: number]: string }>
+  onReplyToggle: (id: number) => void;
+  replyContent: Record<number, string>;
+  onReplyContentChange: React.Dispatch<
+    React.SetStateAction<Record<number, string>>
   >;
-  replyStance: { [key: number]: StanceOptions };
-  setReplyStance: React.Dispatch<
-    React.SetStateAction<{ [key: number]: StanceOptions }>
+  replyStance: Record<number, StanceOptions>;
+  onReplyStanceChange: React.Dispatch<
+    React.SetStateAction<Record<number, StanceOptions>>
   >;
-  handleReplySubmit: (parentId: number) => void;
+  onReplySubmit: (parentId: number) => void;
   isDebate: boolean;
   isReply?: boolean;
-};
+}
 
 function CommentItem({
   comment,
   editingId,
   editedContent,
-  setEditedContent,
-  onEdit,
-  onSave,
-  onCancel,
+  onEditedContentChange,
+  onEditStart,
+  onEditSave,
+  onEditCancel,
   onDelete,
   replyTo,
-  setReplyTo,
-  replyInput,
-  setReplyInput,
+  onReplyToggle,
+  replyContent,
+  onReplyContentChange,
   replyStance,
-  setReplyStance,
-  handleReplySubmit,
+  onReplyStanceChange,
+  onReplySubmit,
   isDebate,
   isReply = false,
 }: CommentItemProps) {
   const isEditing = editingId === comment.commentId;
   const isReplying = replyTo === comment.commentId;
 
+  const getStanceColor = (stance: StanceOptions) => {
+    switch (stance) {
+      case "AGREE":
+        return "primary";
+      case "DISAGREE":
+        return "error";
+      default:
+        return "default";
+    }
+  };
+
+  const getStanceLabel = (stance: StanceOptions) => {
+    switch (stance) {
+      case "AGREE":
+        return "찬성";
+      case "DISAGREE":
+        return "반대";
+      default:
+        return "중립";
+    }
+  };
+
   return (
-    <Paper
-      sx={{
-        p: 2,
-        mt: isReply ? 1 : 0,
-      }}
-      elevation={0}
-    >
-      <Stack direction="row" alignItems="center" spacing={1}>
-        {isDebate && (
-          <Chip
-            label={
-              comment.stance === "AGREE"
-                ? "찬성"
-                : comment.stance === "DISAGREE"
-                  ? "반대"
-                  : "중립"
-            }
-            color={
-              comment.stance === "AGREE"
-                ? "primary"
-                : comment.stance === "DISAGREE"
-                  ? "error"
-                  : "default"
-            }
-            size="small"
-          />
-        )}
-        <Typography variant="subtitle2">{comment.authorName}</Typography>
-        <Typography variant="caption" color="text.disabled">
-          {new Date(
-            comment.isEdited && comment.modifiedAt
-              ? comment.modifiedAt
-              : comment.createdAt
-          ).toLocaleString()}
-          {comment.isEdited ? " (수정됨)" : ""}
-        </Typography>
-        <Box sx={{ flex: 1 }} />
-        {isEditing ? (
-          <>
-            <Button onClick={onSave}>저장</Button>
-            <Button onClick={onCancel}>취소</Button>
-          </>
-        ) : (
-          <>
-            <Button onClick={() => onEdit(comment)}>수정</Button>
-            <Button color="error" onClick={() => onDelete(comment.commentId)}>
-              삭제
-            </Button>
-            {!isReply && (
+    <Paper elevation={isReply ? 1 : 2} sx={{ p: 3 }}>
+      {/* 댓글 헤더 */}
+      <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            justifyContent: "space-between",
+            alignItems: { xs: "flex-start", sm: "center" },
+            width: "100%",
+            gap: 2,
+            mt: 1,
+          }}
+        >
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Avatar
+              src={comment.authorProfileImageURL}
+              alt={comment.authorName}
+              sx={{ width: 32, height: 32 }}
+            />
+            <Stack spacing={1}>
+              <Stack direction="row" spacing={2} alignItems="center">
+                <Typography variant="subtitle2" fontWeight="medium">
+                  {comment.authorName}
+                </Typography>
+                {isDebate && (
+                  <Chip
+                    label={getStanceLabel(comment.stance!)}
+                    color={getStanceColor(comment.stance!)}
+                    size="small"
+                    variant="outlined"
+                  />
+                )}
+              </Stack>
+              <Typography variant="caption" color="text.secondary">
+                {new Date(
+                  comment.isEdited && comment.modifiedAt
+                    ? comment.modifiedAt
+                    : comment.createdAt
+                ).toLocaleString()}
+                {comment.isEdited && " (수정됨)"}
+              </Typography>
+            </Stack>
+          </Stack>
+        </Box>
+        {/* 액션 버튼들 */}
+        <Stack direction="row" spacing={1}>
+          {isEditing ? (
+            <>
               <Button
-                onClick={() =>
-                  setReplyTo(
-                    replyTo === comment.commentId ? null : comment.commentId
-                  )
-                }
+                size="small"
+                onClick={onEditSave}
+                disabled={!editedContent.trim()}
               >
-                답글
+                저장
               </Button>
-            )}
-          </>
-        )}
+              <Button size="small" onClick={onEditCancel}>
+                취소
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button size="small" onClick={() => onEditStart(comment)}>
+                수정
+              </Button>
+              <Button
+                size="small"
+                color="error"
+                onClick={() => onDelete(comment.commentId)}
+              >
+                삭제
+              </Button>
+              {!isReply && (
+                <Button
+                  size="small"
+                  onClick={() => onReplyToggle(comment.commentId)}
+                >
+                  답글
+                </Button>
+              )}
+            </>
+          )}
+        </Stack>
       </Stack>
+
+      {/* 댓글 내용 */}
       {isEditing ? (
         <OutlinedInput
           fullWidth
           multiline
+          minRows={3}
           value={editedContent}
-          onChange={(e) => setEditedContent(e.target.value)}
-          sx={{ mt: 1, mb: 1 }}
+          onChange={(e) => onEditedContentChange(e.target.value)}
+          sx={{ mb: 1 }}
         />
       ) : (
         <Typography
           variant="body2"
-          sx={{ whiteSpace: "pre-line", mt: 1 }}
-          color="text.secondary"
+          sx={{
+            whiteSpace: "pre-line",
+            color: "text.primary",
+            lineHeight: 1.6,
+            marginLeft: 6,
+          }}
         >
           {comment.content}
         </Typography>
       )}
 
-      {/* 답글 입력창 */}
+      {/* 답글 작성 영역 */}
       {isReplying && (
-        <Stack spacing={1} sx={{ mt: 2 }}>
-          {isDebate && (
-            <StanceSelector
-              stance={replyStance[comment.commentId] || "AGREE"}
-              setStance={(value) =>
-                setReplyStance((prev) => ({
-                  ...prev,
-                  [comment.commentId]: value as StanceOptions,
-                }))
-              }
-            />
-          )}
-          <Stack direction="row" spacing={1}>
-            <TextField
-              fullWidth
-              multiline
-              minRows={2}
-              value={replyInput[comment.commentId] || ""}
-              onChange={(e) =>
-                setReplyInput((prev) => ({
-                  ...prev,
-                  [comment.commentId]: e.target.value,
-                }))
-              }
-              placeholder="답글을 입력하세요"
-            />
-            <Button
-              variant="contained"
-              onClick={() => handleReplySubmit(comment.commentId)}
-            >
-              작성
-            </Button>
-            <Button onClick={() => setReplyTo(null)}>취소</Button>
+        <Box sx={{ mt: 3, pt: 3, borderTop: 1, borderColor: "grey.200" }}>
+          <Stack spacing={2}>
+            {isDebate && (
+              <StanceSelector
+                stance={replyStance[comment.commentId] || "AGREE"}
+                onStanceChange={(value) =>
+                  onReplyStanceChange((prev) => ({
+                    ...prev,
+                    [comment.commentId]: value,
+                  }))
+                }
+              />
+            )}
+
+            <Stack direction="row" spacing={2} alignItems="flex-start">
+              <TextField
+                fullWidth
+                multiline
+                minRows={2}
+                maxRows={6}
+                value={replyContent[comment.commentId] || ""}
+                onChange={(e) =>
+                  onReplyContentChange((prev) => ({
+                    ...prev,
+                    [comment.commentId]: e.target.value,
+                  }))
+                }
+                placeholder="답글을 입력하세요"
+                variant="outlined"
+                size="small"
+              />
+
+              <Stack spacing={1}>
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={() => onReplySubmit(comment.commentId)}
+                  disabled={!replyContent[comment.commentId]?.trim()}
+                  sx={{ minWidth: 60 }}
+                >
+                  작성
+                </Button>
+                <Button
+                  size="small"
+                  onClick={() => onReplyToggle(comment.commentId)}
+                  sx={{ minWidth: 60 }}
+                >
+                  취소
+                </Button>
+              </Stack>
+            </Stack>
           </Stack>
-        </Stack>
+        </Box>
       )}
     </Paper>
   );
 }
 
-function StanceSelector({
-  stance,
-  setStance,
-}: {
+interface StanceSelectorProps {
   stance: StanceOptions;
-  setStance: (stance: StanceOptions) => void;
-}) {
+  onStanceChange: (stance: StanceOptions) => void;
+}
+
+function StanceSelector({ stance, onStanceChange }: StanceSelectorProps) {
   return (
     <FormControl component="fieldset">
-      <FormLabel component="legend">의견 선택</FormLabel>
+      <FormLabel
+        component="legend"
+        sx={{ fontSize: "0.875rem", fontWeight: "medium" }}
+      >
+        의견 선택
+      </FormLabel>
       <RadioGroup
         row
         value={stance}
-        onChange={(e) => setStance(e.target.value as StanceOptions)}
+        onChange={(e) => onStanceChange(e.target.value as StanceOptions)}
+        sx={{ mt: 1 }}
       >
-        <FormControlLabel value="AGREE" control={<Radio />} label="찬성" />
-        <FormControlLabel value="DISAGREE" control={<Radio />} label="반대" />
-        <FormControlLabel value="NEUTRAL" control={<Radio />} label="중립" />
+        <FormControlLabel
+          value="AGREE"
+          control={<Radio size="small" />}
+          label="찬성"
+          sx={{ mr: 3 }}
+        />
+        <FormControlLabel
+          value="DISAGREE"
+          control={<Radio size="small" />}
+          label="반대"
+          sx={{ mr: 3 }}
+        />
+        <FormControlLabel
+          value="NEUTRAL"
+          control={<Radio size="small" />}
+          label="중립"
+        />
       </RadioGroup>
     </FormControl>
   );
