@@ -62,8 +62,6 @@ type HighlightDiff = {
   removed: Highlight[];
 };
 type Selection = {
-  left: number;
-  top: number;
   text: string;
   epubcfi: string;
 };
@@ -92,6 +90,13 @@ function RouteComponent() {
   );
   const [readTogetherSnackbarOpen, setReadTogetherSnackbarOpen] =
     useState(!!activityId);
+  const [lastMouseUpPosition, setLastMouseUpPosition] = useState<{
+    left: number;
+    top: number;
+  }>({
+    left: 0,
+    top: 0,
+  });
 
   const queryParam = activityId
     ? {
@@ -295,6 +300,17 @@ function RouteComponent() {
     return () => clearTimeout(timeout);
   }, [focusedHighlight]);
 
+  useEffect(() => {
+    if (rendition) {
+      rendition.on("mouseup", (e: MouseEvent) => {
+        setLastMouseUpPosition({
+          left: e.clientX,
+          top: e.clientY,
+        });
+      });
+    }
+  }, [rendition]);
+
   const addHighlight = async (props: {
     memo: string;
     cfi: string;
@@ -393,9 +409,9 @@ function RouteComponent() {
             size="small"
             sx={{
               position: "absolute",
-              left: selection.left,
-              top: selection.top,
-              translate: "50% 50%",
+              left: lastMouseUpPosition.left,
+              top: lastMouseUpPosition.top,
+              translate: "130% 130%",
             }}
             onClick={() => {
               setOpenHighlightCreationModal(true);
@@ -461,12 +477,7 @@ function RouteComponent() {
             { once: true }
           );
 
-          const boundingClientRect = selection
-            .getRangeAt(0)
-            .getBoundingClientRect();
           setSelection({
-            left: boundingClientRect.left,
-            top: boundingClientRect.top,
             text: selection.toString(),
             epubcfi: cfiRange,
           });

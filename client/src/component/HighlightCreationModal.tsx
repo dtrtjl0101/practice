@@ -12,8 +12,6 @@ import {
 import { useState } from "react";
 
 type Selection = {
-  left: number;
-  top: number;
   text: string;
   epubcfi: string;
 };
