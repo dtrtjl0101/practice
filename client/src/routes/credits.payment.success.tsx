@@ -43,6 +43,7 @@ function RouteComponent() {
         const opener = window.opener as Window;
         opener.postMessage(paymentSuccessToken);
       }
+      window.close();
       return data;
     },
     enabled: !!pgToken,
