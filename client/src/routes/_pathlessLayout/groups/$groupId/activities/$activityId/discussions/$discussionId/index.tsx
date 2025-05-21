@@ -18,8 +18,6 @@ import { Discussion } from "../../../../../../../../types/discussion";
 import CommentSection from "../../../../../../../../component/CommentSection";
 import { Comment } from "../../../../../../../../types/comment";
 import { Fragment, useMemo, useRef, useState } from "react";
-import SimpleHighlightCard from "../../../../../../../../component/SimpleHighlightCard";
-import { Highlight } from "../../../../../../../../types/highlight";
 import MessageIcon from "@mui/icons-material/Message";
 import StickyNote2OutlinedIcon from "@mui/icons-material/StickyNote2Outlined";
 import { HighlightSummary } from "../../../../../../../../types/highlight";
@@ -243,7 +241,6 @@ function RouteComponent() {
           >
             {hoveredHighlight ? (
               <HighlightSummaryCard highlightSummary={hoveredHighlight} />
-
             ) : (
               <Typography>불러오는 중...</Typography>
             )}

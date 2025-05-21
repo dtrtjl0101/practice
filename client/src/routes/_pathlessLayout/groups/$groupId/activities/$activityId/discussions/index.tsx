@@ -18,7 +18,6 @@ import { useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../../../../../../../api/api";
 import { Discussion } from "../../../../../../../types/discussion";
 import MessageIcon from "@mui/icons-material/Message";
-import PersonIcon from "@mui/icons-material/Person";
 
 export const Route = createFileRoute(
   "/_pathlessLayout/groups/$groupId/activities/$activityId/discussions/"
