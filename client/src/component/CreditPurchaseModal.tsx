@@ -27,7 +27,7 @@ export default function CreditPurchaseModal(props: {
     null
   );
 
-  const { data: myWallet } = useQuery({
+  const { data: myWallet, refetch: refetchMyWallet } = useQuery({
     queryKey: ["myWallet"],
     queryFn: async () => {
       const response = await API_CLIENT.creditController.getMyWallet();
@@ -86,7 +86,7 @@ export default function CreditPurchaseModal(props: {
     const listenMessage = (event: MessageEvent) => {
       if (event.origin !== window.location.origin) return;
       if (event.data === paymentSuccessToken) {
-        alert("결제가 완료되었습니다.");
+        refetchMyWallet();
         if (popup) {
           popup.close();
           setPopup(null);
@@ -96,6 +96,7 @@ export default function CreditPurchaseModal(props: {
           onPurchased();
         }
         onClose();
+        alert("결제가 완료되었습니다.");
       }
     };
     window.addEventListener("message", listenMessage);
