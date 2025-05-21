@@ -72,6 +72,7 @@ public class AdminInitializer implements ApplicationRunner {
                     UserProfile.builder()
                             .member(adminMember)
                             .nickname(adminName)
+                            .profileImageKey("profile-image/logo.png")
                             .build()
             );
             log.info("관리자 사용자 프로필이 추가되었습니다.");

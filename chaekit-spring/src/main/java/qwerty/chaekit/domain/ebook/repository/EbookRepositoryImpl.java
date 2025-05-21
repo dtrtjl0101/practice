@@ -63,12 +63,8 @@ public class EbookRepositoryImpl implements EbookRepository {
     }
 
     @Override
-    public boolean existsById(Long id) {
-        return ebookJpaRepository.existsById(id);
+    public boolean existsByTitle(String name) {
+        return ebookJpaRepository.existsByTitle(name);
     }
-
-    @Override
-    public Ebook getReferenceById(Long id) {
-        return ebookJpaRepository.getReferenceById(id);
-    }
+    
 }
