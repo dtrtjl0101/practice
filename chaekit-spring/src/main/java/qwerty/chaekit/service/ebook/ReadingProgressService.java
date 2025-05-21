@@ -20,7 +20,6 @@ import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.mapper.ReadingProgressMapper;
-import qwerty.chaekit.service.group.ActivityPolicy;
 import qwerty.chaekit.service.util.EntityFinder;
 
 import java.util.List;
@@ -33,7 +32,6 @@ public class ReadingProgressService {
     private final EbookPurchaseRepository ebookPurchaseRepository;
     private final ActivityMemberRepository activityMemberRepository;
     private final ReadingProgressMapper readingProgressMapper;
-    private final ActivityPolicy activityPolicy;
     private final EntityFinder entityFinder;
 
 
@@ -58,11 +56,8 @@ public class ReadingProgressService {
         return readingProgressMapper.toResponse(ebookPurchase);
     }
 
-    public PageResponse<ReadingProgressResponse> getProgressFromActivity(UserToken userToken, Long activityId, Pageable pageable) {
-        UserProfile user = entityFinder.findUser(userToken.userId());
+    public PageResponse<ReadingProgressResponse> getProgressFromActivity(Long activityId, Pageable pageable) {
         Activity activity = entityFinder.findActivity(activityId);
-
-        activityPolicy.assertJoined(user, activity);
 
         Page<ActivityMember> activityMembers = activityMemberRepository.findByActivity(activity, pageable);
         List<Long> userIdList = activityMembers

@@ -46,10 +46,9 @@ public class ReadingProgressController {
     )
     @GetMapping("/activities/{activityId}")
     public ApiSuccessResponse<PageResponse<ReadingProgressResponse>> getProgressFromActivity(
-            @Parameter(hidden = true) @Login UserToken userToken,
             @PathVariable Long activityId,
             Pageable pageable
     ) {
-        return ApiSuccessResponse.of(readingProgressService.getProgressFromActivity(userToken, activityId, pageable));
+        return ApiSuccessResponse.of(readingProgressService.getProgressFromActivity(activityId, pageable));
     }
 }
