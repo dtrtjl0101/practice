@@ -153,6 +153,7 @@ function RouteComponent() {
                     bookId,
                   }}
                   search={{
+                    groupId: undefined,
                     activityId: undefined,
                     temporalProgress: false,
                     initialPage: readProgress?.cfi,

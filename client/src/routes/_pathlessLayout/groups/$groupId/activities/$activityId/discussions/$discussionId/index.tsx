@@ -28,7 +28,7 @@ export const Route = createFileRoute(
 function RouteComponent() {
   const router = useRouter();
   const navigate = Route.useNavigate();
-  const { activityId, discussionId } = Route.useParams();
+  const { groupId, activityId, discussionId } = Route.useParams();
 
   const {
     data: discussion,
@@ -90,6 +90,7 @@ function RouteComponent() {
           bookId: highlight.bookId,
         },
         search: {
+          groupId: parseInt(groupId),
           activityId: parseInt(activityId),
           temporalProgress: true,
           initialPage: highlight.cfi,

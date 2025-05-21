@@ -286,6 +286,7 @@ export function ActivityCard(props: { groupId: number; canCreate?: boolean }) {
                           to={"/reader/$bookId"}
                           params={{ bookId: activity.bookId }}
                           search={{
+                            groupId: groupId,
                             activityId: activity.activityId,
                             temporalProgress: false,
                             initialPage: myReadProgress?.cfi,
