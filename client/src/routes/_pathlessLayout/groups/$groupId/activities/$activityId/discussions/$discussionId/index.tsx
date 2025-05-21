@@ -9,13 +9,15 @@ import {
   CircularProgress,
   Box,
   Popper,
+  Avatar,
+  Chip,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../../../../../../../../api/api";
 import { Discussion } from "../../../../../../../../types/discussion";
 import CommentSection from "../../../../../../../../component/CommentSection";
 import { Comment } from "../../../../../../../../types/comment";
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useMemo, useRef, useState } from "react";
 import SimpleHighlightCard from "../../../../../../../../component/SimpleHighlightCard";
 import { Highlight } from "../../../../../../../../types/highlight";
 
@@ -30,6 +32,7 @@ function RouteComponent() {
   const navigate = Route.useNavigate();
   const { activityId, discussionId } = Route.useParams();
   const [isAuthor, setIsAuthor] = useState(false);
+  const commentSectionRef = useRef<HTMLDivElement>(null);
 
   const {
     data: discussion,
@@ -136,29 +139,72 @@ function RouteComponent() {
   return (
     <Container maxWidth="md" sx={{ mt: 5 }}>
       <Paper elevation={3} sx={{ p: 4 }}>
-        {/* 제목 */}
-        <Typography variant="h4" fontWeight="bold" gutterBottom>
-          {discussion.title}
-        </Typography>
-        {/* 작성자 및 작성일 */}
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          sx={{ mb: 2 }}
-        >
-          <Typography variant="subtitle2" color="text.secondary">
-            작성자: {discussion.authorName}
+        {/* 헤더 영역 */}
+        <Stack direction="column" spacing={2} sx={{ mb: 3 }}>
+          {/* 제목 */}
+          <Typography variant="h4" fontWeight="bold">
+            {discussion.title}
           </Typography>
-          <Typography variant="subtitle2" color="text.secondary">
-            {discussion.isDebate ? "토론" : ""}
-          </Typography>
-          <Typography variant="subtitle2" color="text.secondary">
-            작성일:{" "}
-            {new Date(
-              discussion.modifiedAt ?? discussion.createdAt
-            ).toLocaleString()}
-          </Typography>
+
+          {/* 작성자 정보 및 메타데이터 */}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", sm: "row" },
+              justifyContent: "space-between",
+              alignItems: { xs: "flex-start", sm: "center" },
+              width: "100%",
+              gap: 2,
+              mt: 1,
+            }}
+          >
+            {/* 작성자 아바타 및 정보 */}
+            <Stack direction="row" spacing={2} alignItems="center">
+              <Avatar
+                src={discussion.authorProfileImage}
+                alt={discussion.authorName}
+                sx={{ width: 48, height: 48 }}
+              />
+              <Stack>
+                <Typography variant="subtitle1" fontWeight="medium">
+                  {discussion.authorName}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {new Date(
+                    discussion.modifiedAt ?? discussion.createdAt
+                  ).toLocaleString()}
+                </Typography>
+              </Stack>
+            </Stack>
+
+            {/* 우측 메타데이터 */}
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={1}
+              alignItems={{ xs: "flex-start", sm: "center" }}
+            >
+              {discussion.isDebate && (
+                <Chip
+                  label="토론"
+                  color="success"
+                  size="small"
+                  variant="outlined"
+                />
+              )}
+              <Chip
+                label={"댓글 " + (discussion.comments?.length || 0)}
+                color="info"
+                size="small"
+                variant="outlined"
+                onClick={() => {
+                  commentSectionRef.current?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                  });
+                }}
+              />
+            </Stack>
+          </Box>
         </Stack>
         <Divider sx={{ my: 2 }} />
         {/* 본문 */}
@@ -202,36 +248,43 @@ function RouteComponent() {
         {/* 버튼 영역 */}
         <Stack direction="row" spacing={2} justifyContent="flex-end">
           {isAuthor && (
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleEditDiscussion}
-            >
-              수정
-            </Button>
+            <>
+              <Button
+                variant="outlined"
+                color="primary"
+                size="small"
+                onClick={handleEditDiscussion}
+              >
+                수정
+              </Button>
+              <Button
+                variant="outlined"
+                color="error"
+                size="small"
+                onClick={handleDeletePost}
+              >
+                삭제
+              </Button>
+            </>
           )}
-          {isAuthor && (
-            <Button
-              variant="text"
-              color="error"
-              size="small"
-              sx={{ justifySelf: "flex-end" }}
-              onClick={handleDeletePost}
-            >
-              삭제
-            </Button>
-          )}
-          <Button variant="outlined" onClick={handleBack}>
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={handleBack}
+          >
             목록
           </Button>
         </Stack>
       </Paper>
-      <CommentSection
-        discussionId={parseInt(discussionId)}
-        isDebate={discussion.isDebate}
-        comments={discussion.comments as unknown as Comment[]}
-        onRefresh={refetchDiscussion}
-      />
+      <Box ref={commentSectionRef}>
+        <CommentSection
+          discussionId={parseInt(discussionId)}
+          isDebate={discussion.isDebate}
+          comments={discussion.comments as unknown as Comment[]}
+          onRefresh={refetchDiscussion}
+        />
+      </Box>
     </Container>
   );
 }
