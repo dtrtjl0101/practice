@@ -22,6 +22,8 @@ import SimpleHighlightCard from "../../../../../../../../component/SimpleHighlig
 import { Highlight } from "../../../../../../../../types/highlight";
 import MessageIcon from "@mui/icons-material/Message";
 import StickyNote2OutlinedIcon from "@mui/icons-material/StickyNote2Outlined";
+import { HighlightSummary } from "../../../../../../../../types/highlight";
+import HighlightSummaryCard from "../../../../../../../../component/HighlightSumarryCard";
 
 export const Route = createFileRoute(
   "/_pathlessLayout/groups/$groupId/activities/$activityId/discussions/$discussionId/"
@@ -32,9 +34,9 @@ export const Route = createFileRoute(
 function RouteComponent() {
   const router = useRouter();
   const navigate = Route.useNavigate();
-  const { activityId, discussionId } = Route.useParams();
   const [isAuthor, setIsAuthor] = useState(false);
   const commentSectionRef = useRef<HTMLDivElement>(null);
+  const { groupId, activityId, discussionId } = Route.useParams();
 
   const {
     data: discussion,
@@ -55,8 +57,10 @@ function RouteComponent() {
   });
 
   // 하이라이트 데이터가 배열인지 확인하고 적절히 처리
-  const highlights: Highlight[] = Array.isArray(discussion?.linkedHighlights)
-    ? (discussion?.linkedHighlights as unknown as Highlight[])
+  const highlights: HighlightSummary[] = Array.isArray(
+    discussion?.linkedHighlights
+  )
+    ? (discussion?.linkedHighlights as unknown as HighlightSummary[])
     : [];
 
   const handleEditDiscussion = () => {
@@ -87,7 +91,7 @@ function RouteComponent() {
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [popperOpen, setPopperOpen] = useState(false);
 
-  const handleHighlightClick = (highlight: Highlight) => {
+  const handleHighlightClick = (highlight: HighlightSummary) => {
     if (highlight) {
       navigate({
         to: "/reader/$bookId",
@@ -95,6 +99,7 @@ function RouteComponent() {
           bookId: highlight.bookId,
         },
         search: {
+          groupId: parseInt(groupId),
           activityId: parseInt(activityId),
           temporalProgress: true,
           initialPage: highlight.cfi,
@@ -237,7 +242,8 @@ function RouteComponent() {
             }}
           >
             {hoveredHighlight ? (
-              <SimpleHighlightCard highlight={hoveredHighlight} />
+              <HighlightSummaryCard highlightSummary={hoveredHighlight} />
+
             ) : (
               <Typography>불러오는 중...</Typography>
             )}
@@ -290,8 +296,8 @@ function RouteComponent() {
 
 function parseContentWithHighlights(
   content: string,
-  highlights: Highlight[],
-  onClick: (highlight: Highlight) => void,
+  highlights: HighlightSummary[],
+  onClick: (highlight: HighlightSummary) => void,
   onHover: (e: React.MouseEvent<HTMLElement>, id: number) => void,
   onLeave: () => void
 ): React.ReactNode[] {

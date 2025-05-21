@@ -34,7 +34,11 @@ function RouteComponent() {
   const [purchasing, setPurchasing] = useState(false);
   const [openCreditPurchaseModal, setOpenCreditPurchaseModal] = useState(false);
 
-  const { data: book, isLoading } = useQuery({
+  const {
+    data: book,
+    isLoading,
+    refetch: refetchBook,
+  } = useQuery({
     queryKey: ["books", bookId],
     queryFn: async () => {
       const response = await API_CLIENT.ebookController.getBook(bookId);
@@ -153,6 +157,7 @@ function RouteComponent() {
                     bookId,
                   }}
                   search={{
+                    groupId: undefined,
                     activityId: undefined,
                     temporalProgress: false,
                     initialPage: readProgress?.cfi,
@@ -169,7 +174,10 @@ function RouteComponent() {
       <CreditPurchaseModal
         open={openCreditPurchaseModal}
         onClose={() => setOpenCreditPurchaseModal(false)}
-        onPurchased={() => setOpenCreditPurchaseModal(false)}
+        onPurchased={() => {
+          refetchBook();
+          setOpenCreditPurchaseModal(false);
+        }}
       />
     </Container>
   );

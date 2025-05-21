@@ -13,6 +13,5 @@ public interface EbookRepository {
     Optional<Ebook> findById(Long id);
     Optional<Ebook> findByIdWithPublisher(Long id);
     Ebook save(Ebook ebook);
-    boolean existsById(Long id);
-    Ebook getReferenceById(Long id);
+    boolean existsByTitle(String title);
 }

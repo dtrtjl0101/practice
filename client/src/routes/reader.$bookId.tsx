@@ -35,11 +35,16 @@ export const Route = createFileRoute("/reader/$bookId")({
     const activityIdString = search.activityId as string | undefined;
     const activityId = activityIdString ? parseInt(activityIdString) : NaN;
 
+    const groupIdString = search.groupId as string | undefined;
+    const groupId = groupIdString ? parseInt(groupIdString) : NaN;
+
     const temporalProgress = !!search.temporalProgress;
 
     const initialPage = search.initialPage as string | undefined;
+
     return {
       activityId: !isNaN(activityId) ? activityId : undefined,
+      groupId: !isNaN(groupId) ? groupId : undefined,
       temporalProgress,
       initialPage,
     };
@@ -68,7 +73,8 @@ type Selection = {
 
 function RouteComponent() {
   const { bookId } = Route.useParams();
-  const { activityId, temporalProgress, initialPage } = Route.useSearch();
+  const { groupId, activityId, temporalProgress, initialPage } =
+    Route.useSearch();
   const theme = useTheme();
   const [location, setLocation] = useState<string | null>(initialPage ?? null);
   const [highlightsInPage, setHighlightsInPage] = useState<Highlight[]>([]);
@@ -284,7 +290,12 @@ function RouteComponent() {
   useEffect(() => {
     if (initialPage) {
       navigate({
-        search: { initialPage: undefined, activityId, temporalProgress },
+        search: {
+          initialPage: undefined,
+          activityId,
+          groupId,
+          temporalProgress,
+        },
         replace: true,
       });
     }
@@ -437,6 +448,7 @@ function RouteComponent() {
             <HighlightCard
               key={highlight.id}
               highlight={highlight}
+              groupId={groupId}
               activityId={activityId}
               focused={focusedHighlight?.id === highlight.id}
               refetchHighlights={refetchHighlights}

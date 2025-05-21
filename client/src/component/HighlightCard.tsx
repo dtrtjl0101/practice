@@ -20,6 +20,7 @@ import {
   Comment,
   CommentOutlined,
   EmojiEmotions,
+  Link,
   MoreVert,
   Send,
 } from "@mui/icons-material";
@@ -38,16 +39,19 @@ import API_CLIENT from "../api/api";
 import HighlightCommentCard from "./HighlightCommentCard";
 import { Role } from "../types/role";
 import createReactionMap from "../util/createReactionMap";
+import { LinkChip } from "./LinkChip";
 
 export default function HighlightCard({
   highlight,
   refetchHighlights,
+  groupId,
   activityId,
   focused,
   shouldFade,
   onClick,
 }: {
   highlight: Highlight;
+  groupId?: number;
   activityId?: number;
   refetchHighlights: () => void;
   focused: boolean;
@@ -201,6 +205,7 @@ export default function HighlightCard({
           </Typography>
           <Divider />
           <Typography variant="body2">{highlight.memo}</Typography>
+
           <Grid
             container
             direction={"row"}
@@ -226,6 +231,27 @@ export default function HighlightCard({
                   />
                 );
               })}
+            {highlight.linkedDiscussions.map((discussion) => {
+              if (typeof groupId === "undefined") {
+                return null;
+              }
+              return (
+                <LinkChip
+                  key={discussion.discussionId}
+                  icon={<Link />}
+                  label={discussion.title}
+                  variant="outlined"
+                  to={
+                    "/groups/$groupId/activities/$activityId/discussions/$discussionId"
+                  }
+                  params={{
+                    groupId: groupId?.toString(),
+                    activityId: discussion.activityId.toString(),
+                    discussionId: discussion.discussionId.toString(),
+                  }}
+                />
+              );
+            })}
           </Grid>
         </Stack>
       </CardContent>
