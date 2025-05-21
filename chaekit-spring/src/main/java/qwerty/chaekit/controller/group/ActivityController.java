@@ -32,7 +32,7 @@ public class ActivityController {
 
     @GetMapping("/api/groups/{groupId}/activities")
     public ApiSuccessResponse<PageResponse<ActivityFetchResponse>> getAllActivities(
-            @Parameter(hidden = true) @Login UserToken userToken,
+            @Parameter(hidden = true) @Login(required = false) UserToken userToken,
             @ParameterObject Pageable pageable,
             @PathVariable long groupId
     ) {

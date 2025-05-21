@@ -50,7 +50,7 @@ public class GroupMapper {
         return GroupMemberResponse.builder()
                 .userId(groupMember.getUser().getId())
                 .nickname(groupMember.getUser().getNickname())
-                .profileImageURL(convertToPublicImageURL(groupMember.getGroup().getGroupImageKey()))
+                .profileImageURL(convertToPublicImageURL(groupMember.getMember().getProfileImageKey()))
                 .createdAt(groupMember.getCreatedAt())
                 .approvedAt(groupMember.getApprovedAt())
                 .build();
