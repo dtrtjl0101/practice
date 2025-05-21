@@ -520,6 +520,51 @@ export interface UserInfoResponse {
   profileImageURL?: string;
 }
 
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponsePageResponseHighlightFetchResponse {
+  isSuccessful?: boolean;
+  data?: PageResponseHighlightFetchResponse;
+}
+
+export interface DiscussionSummaryResponse {
+  /** @format int64 */
+  discussionId?: number;
+  /** @format int64 */
+  activityId?: number;
+  title?: string;
+  /** @format int64 */
+  authorId?: number;
+  authorName?: string;
+}
+
+export interface HighlightFetchResponse {
+  /** @format int64 */
+  id?: number;
+  /** @format int64 */
+  bookId?: number;
+  /** @format int64 */
+  authorId?: number;
+  authorName?: string;
+  authorProfileImageURL?: string;
+  spine?: string;
+  cfi?: string;
+  memo?: string;
+  /** @format int64 */
+  activityId?: number;
+  linkedDiscussions?: DiscussionSummaryResponse[];
+  highlightContent?: string;
+}
+
+export interface PageResponseHighlightFetchResponse {
+  content?: HighlightFetchResponse[];
+  /** @format int32 */
+  currentPage?: number;
+  /** @format int64 */
+  totalItems?: number;
+  /** @format int32 */
+  totalPages?: number;
+}
+
 export interface Pageable {
   /**
    * @format int32
@@ -532,6 +577,38 @@ export interface Pageable {
    */
   size?: number;
   sort?: string[];
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponsePageResponseGroupFetchResponse {
+  isSuccessful?: boolean;
+  data?: PageResponseGroupFetchResponse;
+}
+
+export interface GroupFetchResponse {
+  /** @format int64 */
+  groupId?: number;
+  name?: string;
+  description?: string;
+  tags?: string[];
+  groupImageURL?: string;
+  /** @format int64 */
+  leaderId?: number;
+  leaderNickname?: string;
+  leaderProfileImageURL?: string;
+  myMemberShipStatus?: "OWNED" | "PENDING" | "JOINED" | "NONE";
+  /** @format int32 */
+  memberCount?: number;
+}
+
+export interface PageResponseGroupFetchResponse {
+  content?: GroupFetchResponse[];
+  /** @format int32 */
+  currentPage?: number;
+  /** @format int64 */
+  totalItems?: number;
+  /** @format int32 */
+  totalPages?: number;
 }
 
 export interface ActivityFetchResponse {
@@ -671,51 +748,6 @@ export interface PageResponseNotificationResponse {
 }
 
 /** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponsePageResponseHighlightFetchResponse {
-  isSuccessful?: boolean;
-  data?: PageResponseHighlightFetchResponse;
-}
-
-export interface DiscussionSummaryResponse {
-  /** @format int64 */
-  discussionId?: number;
-  /** @format int64 */
-  activityId?: number;
-  title?: string;
-  /** @format int64 */
-  authorId?: number;
-  authorName?: string;
-}
-
-export interface HighlightFetchResponse {
-  /** @format int64 */
-  id?: number;
-  /** @format int64 */
-  bookId?: number;
-  /** @format int64 */
-  authorId?: number;
-  authorName?: string;
-  authorProfileImageURL?: string;
-  spine?: string;
-  cfi?: string;
-  memo?: string;
-  /** @format int64 */
-  activityId?: number;
-  relatedDiscussions?: DiscussionSummaryResponse[];
-  highlightContent?: string;
-}
-
-export interface PageResponseHighlightFetchResponse {
-  content?: HighlightFetchResponse[];
-  /** @format int32 */
-  currentPage?: number;
-  /** @format int64 */
-  totalItems?: number;
-  /** @format int32 */
-  totalPages?: number;
-}
-
-/** API 에러 응답을 감싸는 클래스 */
 export interface ApiSuccessResponseHighlightFetchResponse {
   isSuccessful?: boolean;
   data?: HighlightFetchResponse;
@@ -731,38 +763,6 @@ export interface ApiSuccessResponseListHighlightReactionResponse {
 export interface ApiSuccessResponseListHighlightCommentResponse {
   isSuccessful?: boolean;
   data?: HighlightCommentResponse[];
-}
-
-/** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponsePageResponseGroupFetchResponse {
-  isSuccessful?: boolean;
-  data?: PageResponseGroupFetchResponse;
-}
-
-export interface GroupFetchResponse {
-  /** @format int64 */
-  groupId?: number;
-  name?: string;
-  description?: string;
-  tags?: string[];
-  groupImageURL?: string;
-  /** @format int64 */
-  leaderId?: number;
-  leaderNickname?: string;
-  leaderProfileImageURL?: string;
-  myMemberShipStatus?: "OWNED" | "PENDING" | "JOINED" | "NONE";
-  /** @format int32 */
-  memberCount?: number;
-}
-
-export interface PageResponseGroupFetchResponse {
-  content?: GroupFetchResponse[];
-  /** @format int32 */
-  currentPage?: number;
-  /** @format int64 */
-  totalItems?: number;
-  /** @format int32 */
-  totalPages?: number;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -839,8 +839,23 @@ export interface DiscussionDetailResponse {
   commentCount?: number;
   isDebate?: boolean;
   isAuthor?: boolean;
-  highlightIds?: number[];
+  linkedHighlights?: HighlightSummaryResponse[];
   comments?: DiscussionCommentFetchResponse[];
+}
+
+export interface HighlightSummaryResponse {
+  /** @format int64 */
+  id?: number;
+  /** @format int64 */
+  bookId?: number;
+  /** @format int64 */
+  authorId?: number;
+  authorName?: string;
+  authorProfileImageURL?: string;
+  spine?: string;
+  cfi?: string;
+  memo?: string;
+  highlightContent?: string;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -1298,10 +1313,11 @@ export class Api<
 > extends HttpClient<SecurityDataType> {
   userController = {
     /**
-     * No description
+     * @description 회원가입을 진행합니다.
      *
      * @tags user-controller
      * @name UserJoin
+     * @summary 회원가입
      * @request POST:/api/users/join
      * @secure
      */
@@ -1316,10 +1332,11 @@ export class Api<
       }),
 
     /**
-     * No description
+     * @description 내 계정 정보를 조회합니다.
      *
      * @tags user-controller
      * @name UserInfo
+     * @summary 내 계정 정보 조회
      * @request GET:/api/users/me
      * @secure
      */
@@ -1327,6 +1344,92 @@ export class Api<
       this.request<ApiSuccessResponseUserInfoResponse, any>({
         path: `/api/users/me`,
         method: "GET",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description 내가 작성한 하이라이트를 조회합니다.
+     *
+     * @tags user-controller
+     * @name GetMyHighlights
+     * @summary 내 하이라이트 조회
+     * @request GET:/api/users/me/highlights
+     * @secure
+     */
+    getMyHighlights: (
+      query?: {
+        /**
+         * Zero-based page index (0..N)
+         * @min 0
+         * @default 0
+         */
+        page?: number;
+        /**
+         * The size of the page to be returned
+         * @min 1
+         * @default 20
+         */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        /** @format int64 */
+        bookId?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponsePageResponseHighlightFetchResponse, any>({
+        path: `/api/users/me/highlights`,
+        method: "GET",
+        query: query,
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description 내가 가입한 모든 모임을 조회합니다.
+     *
+     * @tags user-controller
+     * @name GetMyGroups
+     * @summary 내 모임 조회
+     * @request GET:/api/users/me/groups
+     * @secure
+     */
+    getMyGroups: (
+      query: {
+        pageable: Pageable;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponsePageResponseGroupFetchResponse, any>({
+        path: `/api/users/me/groups`,
+        method: "GET",
+        query: query,
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description 내가 가입한 모든 활동을 조회합니다.
+     *
+     * @tags user-controller
+     * @name GetMyActivities
+     * @summary 내 활동 조회
+     * @request GET:/api/users/me/activities
+     * @secure
+     */
+    getMyActivities: (
+      query: {
+        /** @format int64 */
+        bookId?: number;
+        pageable: Pageable;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponsePageResponseActivityFetchResponse, any>({
+        path: `/api/users/me/activities`,
+        method: "GET",
+        query: query,
         secure: true,
         ...params,
       }),
@@ -2218,31 +2321,6 @@ export class Api<
       this.request<ApiSuccessResponseVoid, any>({
         path: `/api/activities/${activityId}/join`,
         method: "POST",
-        secure: true,
-        ...params,
-      }),
-
-    /**
-     * @description 내가 가입한 모든 활동을 조회합니다.
-     *
-     * @tags activity-controller
-     * @name GetMyActivity
-     * @summary 내 활동 조회
-     * @request GET:/api/users/me/activities
-     * @secure
-     */
-    getMyActivity: (
-      query: {
-        /** @format int64 */
-        bookId?: number;
-        pageable: Pageable;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<ApiSuccessResponsePageResponseActivityFetchResponse, any>({
-        path: `/api/users/me/activities`,
-        method: "GET",
-        query: query,
         secure: true,
         ...params,
       }),

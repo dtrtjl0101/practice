@@ -11,6 +11,8 @@
     "/api/users/join": {
       "post": {
         "tags": ["user-controller"],
+        "summary": "회원가입",
+        "description": "회원가입을 진행합니다.",
         "operationId": "userJoin",
         "requestBody": {
           "content": {
@@ -1606,6 +1608,8 @@
     "/api/users/me": {
       "get": {
         "tags": ["user-controller"],
+        "summary": "내 계정 정보 조회",
+        "description": "내 계정 정보를 조회합니다.",
         "operationId": "userInfo",
         "parameters": [],
         "responses": {
@@ -1622,12 +1626,89 @@
         }
       }
     },
+    "/api/users/me/highlights": {
+      "get": {
+        "tags": ["user-controller"],
+        "summary": "내 하이라이트 조회",
+        "description": "내가 작성한 하이라이트를 조회합니다.",
+        "operationId": "getMyHighlights",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "required": false,
+            "schema": { "minimum": 0, "type": "integer", "default": 0 }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "The size of the page to be returned",
+            "required": false,
+            "schema": { "minimum": 1, "type": "integer", "default": 20 }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+            "required": false,
+            "schema": { "type": "array", "items": { "type": "string" } }
+          },
+          {
+            "name": "bookId",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponsePageResponseHighlightFetchResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/me/groups": {
+      "get": {
+        "tags": ["user-controller"],
+        "summary": "내 모임 조회",
+        "description": "내가 가입한 모든 모임을 조회합니다.",
+        "operationId": "getMyGroups",
+        "parameters": [
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": { "$ref": "#/components/schemas/Pageable" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponsePageResponseGroupFetchResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/users/me/activities": {
       "get": {
-        "tags": ["activity-controller"],
+        "tags": ["user-controller"],
         "summary": "내 활동 조회",
         "description": "내가 가입한 모든 활동을 조회합니다.",
-        "operationId": "getMyActivity",
+        "operationId": "getMyActivities",
         "parameters": [
           {
             "name": "bookId",
@@ -3030,12 +3111,105 @@
           "profileImageURL": { "type": "string" }
         }
       },
+      "ApiSuccessResponsePageResponseHighlightFetchResponse": {
+        "type": "object",
+        "properties": {
+          "isSuccessful": { "type": "boolean" },
+          "data": {
+            "$ref": "#/components/schemas/PageResponseHighlightFetchResponse"
+          }
+        },
+        "description": "API 에러 응답을 감싸는 클래스"
+      },
+      "DiscussionSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "discussionId": { "type": "integer", "format": "int64" },
+          "activityId": { "type": "integer", "format": "int64" },
+          "title": { "type": "string" },
+          "authorId": { "type": "integer", "format": "int64" },
+          "authorName": { "type": "string" }
+        }
+      },
+      "HighlightFetchResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "bookId": { "type": "integer", "format": "int64" },
+          "authorId": { "type": "integer", "format": "int64" },
+          "authorName": { "type": "string" },
+          "authorProfileImageURL": { "type": "string" },
+          "spine": { "type": "string" },
+          "cfi": { "type": "string" },
+          "memo": { "type": "string" },
+          "activityId": { "type": "integer", "format": "int64" },
+          "linkedDiscussions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscussionSummaryResponse"
+            }
+          },
+          "highlightContent": { "type": "string" }
+        }
+      },
+      "PageResponseHighlightFetchResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/HighlightFetchResponse" }
+          },
+          "currentPage": { "type": "integer", "format": "int32" },
+          "totalItems": { "type": "integer", "format": "int64" },
+          "totalPages": { "type": "integer", "format": "int32" }
+        }
+      },
       "Pageable": {
         "type": "object",
         "properties": {
           "page": { "minimum": 0, "type": "integer", "format": "int32" },
           "size": { "minimum": 1, "type": "integer", "format": "int32" },
           "sort": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "ApiSuccessResponsePageResponseGroupFetchResponse": {
+        "type": "object",
+        "properties": {
+          "isSuccessful": { "type": "boolean" },
+          "data": {
+            "$ref": "#/components/schemas/PageResponseGroupFetchResponse"
+          }
+        },
+        "description": "API 에러 응답을 감싸는 클래스"
+      },
+      "GroupFetchResponse": {
+        "type": "object",
+        "properties": {
+          "groupId": { "type": "integer", "format": "int64" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "groupImageURL": { "type": "string" },
+          "leaderId": { "type": "integer", "format": "int64" },
+          "leaderNickname": { "type": "string" },
+          "leaderProfileImageURL": { "type": "string" },
+          "myMemberShipStatus": {
+            "type": "string",
+            "enum": ["OWNED", "PENDING", "JOINED", "NONE"]
+          },
+          "memberCount": { "type": "integer", "format": "int32" }
+        }
+      },
+      "PageResponseGroupFetchResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/GroupFetchResponse" }
+          },
+          "currentPage": { "type": "integer", "format": "int32" },
+          "totalItems": { "type": "integer", "format": "int64" },
+          "totalPages": { "type": "integer", "format": "int32" }
         }
       },
       "ActivityFetchResponse": {
@@ -3191,59 +3365,6 @@
           "totalPages": { "type": "integer", "format": "int32" }
         }
       },
-      "ApiSuccessResponsePageResponseHighlightFetchResponse": {
-        "type": "object",
-        "properties": {
-          "isSuccessful": { "type": "boolean" },
-          "data": {
-            "$ref": "#/components/schemas/PageResponseHighlightFetchResponse"
-          }
-        },
-        "description": "API 에러 응답을 감싸는 클래스"
-      },
-      "DiscussionSummaryResponse": {
-        "type": "object",
-        "properties": {
-          "discussionId": { "type": "integer", "format": "int64" },
-          "activityId": { "type": "integer", "format": "int64" },
-          "title": { "type": "string" },
-          "authorId": { "type": "integer", "format": "int64" },
-          "authorName": { "type": "string" }
-        }
-      },
-      "HighlightFetchResponse": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "integer", "format": "int64" },
-          "bookId": { "type": "integer", "format": "int64" },
-          "authorId": { "type": "integer", "format": "int64" },
-          "authorName": { "type": "string" },
-          "authorProfileImageURL": { "type": "string" },
-          "spine": { "type": "string" },
-          "cfi": { "type": "string" },
-          "memo": { "type": "string" },
-          "activityId": { "type": "integer", "format": "int64" },
-          "relatedDiscussions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DiscussionSummaryResponse"
-            }
-          },
-          "highlightContent": { "type": "string" }
-        }
-      },
-      "PageResponseHighlightFetchResponse": {
-        "type": "object",
-        "properties": {
-          "content": {
-            "type": "array",
-            "items": { "$ref": "#/components/schemas/HighlightFetchResponse" }
-          },
-          "currentPage": { "type": "integer", "format": "int32" },
-          "totalItems": { "type": "integer", "format": "int64" },
-          "totalPages": { "type": "integer", "format": "int32" }
-        }
-      },
       "ApiSuccessResponseHighlightFetchResponse": {
         "type": "object",
         "properties": {
@@ -3275,46 +3396,6 @@
           }
         },
         "description": "API 에러 응답을 감싸는 클래스"
-      },
-      "ApiSuccessResponsePageResponseGroupFetchResponse": {
-        "type": "object",
-        "properties": {
-          "isSuccessful": { "type": "boolean" },
-          "data": {
-            "$ref": "#/components/schemas/PageResponseGroupFetchResponse"
-          }
-        },
-        "description": "API 에러 응답을 감싸는 클래스"
-      },
-      "GroupFetchResponse": {
-        "type": "object",
-        "properties": {
-          "groupId": { "type": "integer", "format": "int64" },
-          "name": { "type": "string" },
-          "description": { "type": "string" },
-          "tags": { "type": "array", "items": { "type": "string" } },
-          "groupImageURL": { "type": "string" },
-          "leaderId": { "type": "integer", "format": "int64" },
-          "leaderNickname": { "type": "string" },
-          "leaderProfileImageURL": { "type": "string" },
-          "myMemberShipStatus": {
-            "type": "string",
-            "enum": ["OWNED", "PENDING", "JOINED", "NONE"]
-          },
-          "memberCount": { "type": "integer", "format": "int32" }
-        }
-      },
-      "PageResponseGroupFetchResponse": {
-        "type": "object",
-        "properties": {
-          "content": {
-            "type": "array",
-            "items": { "$ref": "#/components/schemas/GroupFetchResponse" }
-          },
-          "currentPage": { "type": "integer", "format": "int32" },
-          "totalItems": { "type": "integer", "format": "int64" },
-          "totalPages": { "type": "integer", "format": "int32" }
-        }
       },
       "ApiSuccessResponsePageResponseGroupMemberResponse": {
         "type": "object",
@@ -3401,9 +3482,9 @@
           "commentCount": { "type": "integer", "format": "int64" },
           "isDebate": { "type": "boolean" },
           "isAuthor": { "type": "boolean" },
-          "highlightIds": {
+          "linkedHighlights": {
             "type": "array",
-            "items": { "type": "integer", "format": "int64" }
+            "items": { "$ref": "#/components/schemas/HighlightSummaryResponse" }
           },
           "comments": {
             "type": "array",
@@ -3411,6 +3492,20 @@
               "$ref": "#/components/schemas/DiscussionCommentFetchResponse"
             }
           }
+        }
+      },
+      "HighlightSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "bookId": { "type": "integer", "format": "int64" },
+          "authorId": { "type": "integer", "format": "int64" },
+          "authorName": { "type": "string" },
+          "authorProfileImageURL": { "type": "string" },
+          "spine": { "type": "string" },
+          "cfi": { "type": "string" },
+          "memo": { "type": "string" },
+          "highlightContent": { "type": "string" }
         }
       },
       "ApiSuccessResponseListCreditProductInfoResponse": {

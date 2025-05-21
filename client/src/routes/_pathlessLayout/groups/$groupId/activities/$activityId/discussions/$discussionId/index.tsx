@@ -16,8 +16,8 @@ import { Discussion } from "../../../../../../../../types/discussion";
 import CommentSection from "../../../../../../../../component/CommentSection";
 import { Comment } from "../../../../../../../../types/comment";
 import { Fragment, useMemo, useState } from "react";
-import HighlightCard from "../../../../../../../../component/HighlightCard";
-import { Highlight } from "../../../../../../../../types/highlight";
+import { HighlightSummary } from "../../../../../../../../types/highlight";
+import HighlightSummaryCard from "../../../../../../../../component/HighlightSumarryCard";
 
 export const Route = createFileRoute(
   "/_pathlessLayout/groups/$groupId/activities/$activityId/discussions/$discussionId/"
@@ -48,8 +48,10 @@ function RouteComponent() {
   });
 
   // 하이라이트 데이터가 배열인지 확인하고 적절히 처리
-  const highlights: Highlight[] = Array.isArray(discussion?.linkedHighlights)
-    ? (discussion?.linkedHighlights as unknown as Highlight[])
+  const highlights: HighlightSummary[] = Array.isArray(
+    discussion?.linkedHighlights
+  )
+    ? (discussion?.linkedHighlights as unknown as HighlightSummary[])
     : [];
 
   const handleEditDiscussion = () => {
@@ -80,7 +82,7 @@ function RouteComponent() {
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [popperOpen, setPopperOpen] = useState(false);
 
-  const handleHighlightClick = (highlight: Highlight) => {
+  const handleHighlightClick = (highlight: HighlightSummary) => {
     if (highlight) {
       navigate({
         to: "/reader/$bookId",
@@ -190,12 +192,7 @@ function RouteComponent() {
             }}
           >
             {hoveredHighlight ? (
-              <HighlightCard
-                highlight={hoveredHighlight}
-                refetchHighlights={() => {}}
-                focused={false}
-                shouldFade={false}
-              />
+              <HighlightSummaryCard highlightSummary={hoveredHighlight} />
             ) : (
               <Typography>불러오는 중...</Typography>
             )}
@@ -237,8 +234,8 @@ function RouteComponent() {
 
 function parseContentWithHighlights(
   content: string,
-  highlights: Highlight[],
-  onClick: (highlight: Highlight) => void,
+  highlights: HighlightSummary[],
+  onClick: (highlight: HighlightSummary) => void,
   onHover: (e: React.MouseEvent<HTMLElement>, id: number) => void,
   onLeave: () => void
 ): React.ReactNode[] {
