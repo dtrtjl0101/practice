@@ -21,6 +21,7 @@ import { Fragment, useMemo, useRef, useState } from "react";
 import SimpleHighlightCard from "../../../../../../../../component/SimpleHighlightCard";
 import { Highlight } from "../../../../../../../../types/highlight";
 import MessageIcon from "@mui/icons-material/Message";
+import StickyNote2OutlinedIcon from "@mui/icons-material/StickyNote2Outlined";
 
 export const Route = createFileRoute(
   "/_pathlessLayout/groups/$groupId/activities/$activityId/discussions/$discussionId/"
@@ -309,17 +310,19 @@ function parseContentWithHighlights(
       }
 
       return (
-        <Typography
+        <Chip
           key={index}
-          component="span"
+          icon={<StickyNote2OutlinedIcon fontSize="small" />}
+          label={"메모"}
+          size="small"
           color="primary"
           onClick={() => onClick(highlight)}
           onMouseEnter={(e) => onHover(e, id)}
           onMouseLeave={onLeave}
-          sx={{ cursor: "pointer", textDecoration: "underline" }}
-        >
-          메모
-        </Typography>
+          sx={{
+            cursor: "pointer",
+          }}
+        />
       );
     } else {
       return <Fragment key={index}>{part}</Fragment>;

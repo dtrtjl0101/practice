@@ -18,7 +18,6 @@ import { useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../../../../../../../api/api";
 import { Discussion } from "../../../../../../../types/discussion";
 import MessageIcon from "@mui/icons-material/Message";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import PersonIcon from "@mui/icons-material/Person";
 
 export const Route = createFileRoute(
@@ -118,7 +117,6 @@ function RouteComponent() {
           <Button
             variant="outlined"
             color="primary"
-            startIcon={<AccessTimeIcon />}
             onClick={handleNavigateToGroup}
             size="medium"
           >
@@ -304,7 +302,6 @@ function DiscussionCard({ discussion, onClick }: DiscussionCardProps) {
               </Stack>
 
               <Stack direction="row" spacing={0.5} alignItems="center">
-                <AccessTimeIcon fontSize="small" />
                 <Typography variant="caption">{formattedDate}</Typography>
               </Stack>
             </Stack>
