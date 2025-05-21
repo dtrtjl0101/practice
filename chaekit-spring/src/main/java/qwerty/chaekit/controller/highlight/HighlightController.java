@@ -1,6 +1,7 @@
 package qwerty.chaekit.controller.highlight;
 
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
@@ -43,7 +44,7 @@ public class HighlightController {
     }
 
     @PostMapping
-    public ApiSuccessResponse<HighlightPostResponse> createHighlight(@Login UserToken userToken, @RequestBody HighlightPostRequest request) {
+    public ApiSuccessResponse<HighlightPostResponse> createHighlight(@Login UserToken userToken, @RequestBody @Valid HighlightPostRequest request) {
         return ApiSuccessResponse.of(highlightService.createHighlight(userToken, request));
     }
 
