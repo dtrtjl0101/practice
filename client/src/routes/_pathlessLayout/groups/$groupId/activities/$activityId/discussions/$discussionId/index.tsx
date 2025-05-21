@@ -16,8 +16,8 @@ import { Discussion } from "../../../../../../../../types/discussion";
 import CommentSection from "../../../../../../../../component/CommentSection";
 import { Comment } from "../../../../../../../../types/comment";
 import { Fragment, useMemo, useState } from "react";
-import { HighlightSummary } from "../../../../../../../../types/highlight";
-import HighlightSummaryCard from "../../../../../../../../component/HighlightSumarryCard";
+import SimpleHighlightCard from "../../../../../../../../component/SimpleHighlightCard";
+import { Highlight } from "../../../../../../../../types/highlight";
 
 export const Route = createFileRoute(
   "/_pathlessLayout/groups/$groupId/activities/$activityId/discussions/$discussionId/"
@@ -29,6 +29,7 @@ function RouteComponent() {
   const router = useRouter();
   const navigate = Route.useNavigate();
   const { activityId, discussionId } = Route.useParams();
+  const [isAuthor, setIsAuthor] = useState(false);
 
   const {
     data: discussion,
@@ -43,15 +44,14 @@ function RouteComponent() {
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);
       }
+      setIsAuthor(response.data.isAuthor!);
       return response.data as Discussion;
     },
   });
 
   // 하이라이트 데이터가 배열인지 확인하고 적절히 처리
-  const highlights: HighlightSummary[] = Array.isArray(
-    discussion?.linkedHighlights
-  )
-    ? (discussion?.linkedHighlights as unknown as HighlightSummary[])
+  const highlights: Highlight[] = Array.isArray(discussion?.linkedHighlights)
+    ? (discussion?.linkedHighlights as unknown as Highlight[])
     : [];
 
   const handleEditDiscussion = () => {
@@ -82,7 +82,7 @@ function RouteComponent() {
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [popperOpen, setPopperOpen] = useState(false);
 
-  const handleHighlightClick = (highlight: HighlightSummary) => {
+  const handleHighlightClick = (highlight: Highlight) => {
     if (highlight) {
       navigate({
         to: "/reader/$bookId",
@@ -192,7 +192,7 @@ function RouteComponent() {
             }}
           >
             {hoveredHighlight ? (
-              <HighlightSummaryCard highlightSummary={hoveredHighlight} />
+              <SimpleHighlightCard highlight={hoveredHighlight} />
             ) : (
               <Typography>불러오는 중...</Typography>
             )}
@@ -201,24 +201,28 @@ function RouteComponent() {
         <Divider sx={{ my: 3 }} />
         {/* 버튼 영역 */}
         <Stack direction="row" spacing={2} justifyContent="flex-end">
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleEditDiscussion}
-          >
-            수정
-          </Button>
+          {isAuthor && (
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleEditDiscussion}
+            >
+              수정
+            </Button>
+          )}
+          {isAuthor && (
+            <Button
+              variant="text"
+              color="error"
+              size="small"
+              sx={{ justifySelf: "flex-end" }}
+              onClick={handleDeletePost}
+            >
+              삭제
+            </Button>
+          )}
           <Button variant="outlined" onClick={handleBack}>
             목록
-          </Button>
-          <Button
-            variant="text"
-            color="error"
-            size="small"
-            sx={{ justifySelf: "flex-end" }}
-            onClick={handleDeletePost}
-          >
-            삭제
           </Button>
         </Stack>
       </Paper>
@@ -234,8 +238,8 @@ function RouteComponent() {
 
 function parseContentWithHighlights(
   content: string,
-  highlights: HighlightSummary[],
-  onClick: (highlight: HighlightSummary) => void,
+  highlights: Highlight[],
+  onClick: (highlight: Highlight) => void,
   onHover: (e: React.MouseEvent<HTMLElement>, id: number) => void,
   onLeave: () => void
 ): React.ReactNode[] {
