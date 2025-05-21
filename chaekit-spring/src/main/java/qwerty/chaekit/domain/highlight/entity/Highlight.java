@@ -34,7 +34,7 @@ public class Highlight extends BaseEntity {
     @Column(nullable = false)
     private String spine;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 1000)
     private String highlightcontent;
   
     @Column(length = 2000)

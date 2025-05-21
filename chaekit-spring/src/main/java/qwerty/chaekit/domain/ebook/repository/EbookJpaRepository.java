@@ -11,4 +11,6 @@ import java.util.Optional;
 public interface EbookJpaRepository extends JpaRepository<Ebook, Long> {
     @Query("SELECT e FROM Ebook e LEFT JOIN FETCH e.publisher WHERE e.id = :id")
     Optional<Ebook> findByIdWithPublisher(Long id);
+    
+    boolean existsByTitle(String title);
 } 

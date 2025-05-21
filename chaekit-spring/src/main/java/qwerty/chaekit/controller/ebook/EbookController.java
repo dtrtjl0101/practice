@@ -41,7 +41,7 @@ public class EbookController {
     @GetMapping("/{ebookId}")
     @Operation(summary = "전자책 상세 조회", description = "전자책의 상세 정보를 조회합니다.")
     public ApiSuccessResponse<EbookFetchResponse> getBook(
-            @Parameter(hidden = true) @Login UserToken userToken,
+            @Parameter(hidden = true) @Login(required = false) UserToken userToken,
             @Parameter(description = "조회할 전자책 ID") @PathVariable Long ebookId
     ) {
         return ApiSuccessResponse.of(ebookService.fetchById(userToken, ebookId));
