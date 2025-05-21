@@ -1,3 +1,5 @@
+import { DiscussionSummary } from "./discussion";
+
 export type Highlight = {
   id: number;
   bookId: number;
@@ -8,6 +10,7 @@ export type Highlight = {
   cfi: string;
   memo: string;
   activityId?: number;
+  linkedDiscussions: DiscussionSummary[];
   highlightContent: string;
 };
 
@@ -80,4 +83,16 @@ export type HighlightComment = {
   updatedAt: string;
   replies: HighlightComment[];
   reactions: HighlightReaction[];
+};
+
+export type HighlightSummary = {
+  id: number;
+  bookId: number;
+  authorId: number;
+  authorName: string;
+  authorProfileImageURL: string;
+  spine: string;
+  cfi: string;
+  memo: string;
+  highlightContent: string;
 };

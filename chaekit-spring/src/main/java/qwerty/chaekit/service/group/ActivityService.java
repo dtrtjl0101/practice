@@ -93,12 +93,13 @@ public class ActivityService {
 
     @Transactional(readOnly = true)
     public PageResponse<ActivityFetchResponse> fetchAllActivities(UserToken userToken, Pageable pageable, long groupId) {
+        Long userId = userToken.userId();
         Page<ActivityFetchResponse> page = activityRepository.findByGroup_IdWithBook(groupId, pageable)
                 .map(
                         activity -> ActivityFetchResponse.of(
                                 activity, 
                                 fileService.convertToPublicImageURL(activity.getBook().getCoverImageKey()),
-                                activity.isParticipant(entityFinder.findUser(userToken.userId()))
+                                userId != null && activity.isParticipant(entityFinder.findUser(userId))
                 ));
         return PageResponse.of(page);
     }

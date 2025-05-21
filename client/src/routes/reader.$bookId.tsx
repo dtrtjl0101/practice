@@ -1,11 +1,12 @@
-import { ArrowBack, Note, NoteAdd } from "@mui/icons-material";
+import { ArrowBack, Close, Note, NoteAdd } from "@mui/icons-material";
 import {
   Badge,
   Box,
-  Chip,
   Drawer,
   Fab,
+  IconButton,
   LinearProgress,
+  Snackbar,
   Stack,
   useTheme,
 } from "@mui/material";
@@ -34,11 +35,16 @@ export const Route = createFileRoute("/reader/$bookId")({
     const activityIdString = search.activityId as string | undefined;
     const activityId = activityIdString ? parseInt(activityIdString) : NaN;
 
+    const groupIdString = search.groupId as string | undefined;
+    const groupId = groupIdString ? parseInt(groupIdString) : NaN;
+
     const temporalProgress = !!search.temporalProgress;
 
     const initialPage = search.initialPage as string | undefined;
+
     return {
       activityId: !isNaN(activityId) ? activityId : undefined,
+      groupId: !isNaN(groupId) ? groupId : undefined,
       temporalProgress,
       initialPage,
     };
@@ -61,15 +67,14 @@ type HighlightDiff = {
   removed: Highlight[];
 };
 type Selection = {
-  left: number;
-  top: number;
   text: string;
   epubcfi: string;
 };
 
 function RouteComponent() {
   const { bookId } = Route.useParams();
-  const { activityId, temporalProgress, initialPage } = Route.useSearch();
+  const { groupId, activityId, temporalProgress, initialPage } =
+    Route.useSearch();
   const theme = useTheme();
   const [location, setLocation] = useState<string | null>(initialPage ?? null);
   const [highlightsInPage, setHighlightsInPage] = useState<Highlight[]>([]);
@@ -89,6 +94,15 @@ function RouteComponent() {
   const [focusedHighlight, setFocusedHighlight] = useState<Highlight | null>(
     null
   );
+  const [readTogetherSnackbarOpen, setReadTogetherSnackbarOpen] =
+    useState(!!activityId);
+  const [lastMouseUpPosition, setLastMouseUpPosition] = useState<{
+    left: number;
+    top: number;
+  }>({
+    left: 0,
+    top: 0,
+  });
 
   const queryParam = activityId
     ? {
@@ -276,7 +290,12 @@ function RouteComponent() {
   useEffect(() => {
     if (initialPage) {
       navigate({
-        search: { initialPage: undefined, activityId, temporalProgress },
+        search: {
+          initialPage: undefined,
+          activityId,
+          groupId,
+          temporalProgress,
+        },
         replace: true,
       });
     }
@@ -291,6 +310,17 @@ function RouteComponent() {
     }, 3000);
     return () => clearTimeout(timeout);
   }, [focusedHighlight]);
+
+  useEffect(() => {
+    if (rendition) {
+      rendition.on("mouseup", (e: MouseEvent) => {
+        setLastMouseUpPosition({
+          left: e.clientX,
+          top: e.clientY,
+        });
+      });
+    }
+  }, [rendition]);
 
   const addHighlight = async (props: {
     memo: string;
@@ -354,23 +384,25 @@ function RouteComponent() {
               <ArrowBack />
             </Fab>
           )}
-          {activityId && (
-            <Chip
-              label="함께읽기 활성화됨"
-              color="info"
-              onDelete={() => {
-                navigate({
-                  to: ".",
-                  search: {
-                    activityId: undefined,
-                    temporalProgress,
-                    initialPage,
-                  },
-                  replace: true,
-                });
-              }}
-            />
-          )}
+          <Snackbar
+            anchorOrigin={{ vertical: "top", horizontal: "center" }}
+            open={readTogetherSnackbarOpen}
+            onClose={() => {
+              setReadTogetherSnackbarOpen(false);
+            }}
+            action={
+              <IconButton
+                size="small"
+                aria-label="close"
+                color="inherit"
+                onClick={() => setReadTogetherSnackbarOpen(false)}
+              >
+                <Close />
+              </IconButton>
+            }
+            message="함께읽기 활성화됨"
+            autoHideDuration={3000}
+          />
           <Fab
             size="small"
             onClick={() => {
@@ -388,9 +420,9 @@ function RouteComponent() {
             size="small"
             sx={{
               position: "absolute",
-              left: selection.left,
-              top: selection.top,
-              translate: "50% 50%",
+              left: lastMouseUpPosition.left,
+              top: lastMouseUpPosition.top,
+              translate: "130% 130%",
             }}
             onClick={() => {
               setOpenHighlightCreationModal(true);
@@ -416,6 +448,7 @@ function RouteComponent() {
             <HighlightCard
               key={highlight.id}
               highlight={highlight}
+              groupId={groupId}
               activityId={activityId}
               focused={focusedHighlight?.id === highlight.id}
               refetchHighlights={refetchHighlights}
@@ -456,12 +489,7 @@ function RouteComponent() {
             { once: true }
           );
 
-          const boundingClientRect = selection
-            .getRangeAt(0)
-            .getBoundingClientRect();
           setSelection({
-            left: boundingClientRect.left,
-            top: boundingClientRect.top,
             text: selection.toString(),
             epubcfi: cfiRange,
           });

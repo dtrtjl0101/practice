@@ -30,14 +30,20 @@ export const Route = createFileRoute("/_pathlessLayout/books/$bookId")({
 
 function RouteComponent() {
   const { bookId } = Route.useParams();
+  const [isPurchased, setIsPurchased] = useState(false);
   const [purchasing, setPurchasing] = useState(false);
   const [openCreditPurchaseModal, setOpenCreditPurchaseModal] = useState(false);
 
-  const { data: book, isLoading } = useQuery({
+  const {
+    data: book,
+    isLoading,
+    refetch: refetchBook,
+  } = useQuery({
     queryKey: ["books", bookId],
     queryFn: async () => {
       const response = await API_CLIENT.ebookController.getBook(bookId);
       if (!response.isSuccessful) throw new Error(response.errorMessage);
+      setIsPurchased(response.data.isPurchased!);
       return response.data as BookMetadata;
     },
   });
@@ -77,6 +83,7 @@ function RouteComponent() {
       return;
     }
     alert("구매가 완료되었습니다!");
+    setIsPurchased(true);
   };
 
   return (
@@ -136,9 +143,13 @@ function RouteComponent() {
                 <Button
                   variant="contained"
                   onClick={handlePurchase}
-                  disabled={purchasing}
+                  disabled={purchasing || isPurchased}
                 >
-                  {purchasing ? "구매 중..." : "구매하기"}
+                  {purchasing
+                    ? "구매 중..."
+                    : isPurchased
+                      ? "보유중"
+                      : "구매하기"}
                 </Button>
                 <LinkButton
                   to="/reader/$bookId"
@@ -146,6 +157,7 @@ function RouteComponent() {
                     bookId,
                   }}
                   search={{
+                    groupId: undefined,
                     activityId: undefined,
                     temporalProgress: false,
                     initialPage: readProgress?.cfi,
@@ -162,7 +174,10 @@ function RouteComponent() {
       <CreditPurchaseModal
         open={openCreditPurchaseModal}
         onClose={() => setOpenCreditPurchaseModal(false)}
-        onPurchased={() => setOpenCreditPurchaseModal(false)}
+        onPurchased={() => {
+          refetchBook();
+          setOpenCreditPurchaseModal(false);
+        }}
       />
     </Container>
   );
