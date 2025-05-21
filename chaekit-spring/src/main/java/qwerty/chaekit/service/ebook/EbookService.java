@@ -33,12 +33,12 @@ public class EbookService {
     }
 
     public EbookFetchResponse fetchById(UserToken userToken, Long ebookId) {
-        UserProfile user = entityFinder.findUser(userToken.userId());
+        UserProfile user = userToken.isAnonymous() ? null : entityFinder.findUser(userToken.userId());
         Ebook ebook = entityFinder.findEbook(ebookId);
         return EbookFetchResponse.of(
                 ebook,
                 fileService.convertToPublicImageURL(ebook.getCoverImageKey()),
-                user.isPurchased(ebook)
+                user != null && user.isPurchased(ebook)
         );
     }
 }
