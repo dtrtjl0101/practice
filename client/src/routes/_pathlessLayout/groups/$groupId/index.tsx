@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { GroupInfo } from "../../../../types/groups";
+import { GroupInfo, GroupMembershipStatus } from "../../../../types/groups";
 import {
   Container,
   Divider,
@@ -47,7 +47,10 @@ function RouteComponent() {
     <Container sx={{ my: 8 }}>
       <Stack spacing={4}>
         <GroupHeader group={group} groupId={groupId} />
-        <ActivityCard groupId={groupId} />
+        <ActivityCard
+          groupId={groupId}
+          canCreate={group?.myMemberShipStatus === GroupMembershipStatus.OWNED}
+        />
         <Paper sx={{ p: 2 }}>
           <Stack spacing={2}>
             <Typography variant="h4">모임 대화방</Typography>
