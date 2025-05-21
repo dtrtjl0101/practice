@@ -20,6 +20,7 @@ import { Comment } from "../../../../../../../../types/comment";
 import { Fragment, useMemo, useRef, useState } from "react";
 import SimpleHighlightCard from "../../../../../../../../component/SimpleHighlightCard";
 import { Highlight } from "../../../../../../../../types/highlight";
+import MessageIcon from "@mui/icons-material/Message";
 
 export const Route = createFileRoute(
   "/_pathlessLayout/groups/$groupId/activities/$activityId/discussions/$discussionId/"
@@ -178,23 +179,12 @@ function RouteComponent() {
             </Stack>
 
             {/* 우측 메타데이터 */}
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              spacing={1}
-              alignItems={{ xs: "flex-start", sm: "center" }}
-            >
-              {discussion.isDebate && (
-                <Chip
-                  label="토론"
-                  color="success"
-                  size="small"
-                  variant="outlined"
-                />
-              )}
+            <Stack spacing={1} alignItems="center">
               <Chip
-                label={"댓글 " + (discussion.comments?.length || 0)}
-                color="info"
+                icon={<MessageIcon fontSize="small" />}
+                label={discussion.commentCount}
                 size="small"
+                color="default"
                 variant="outlined"
                 onClick={() => {
                   commentSectionRef.current?.scrollIntoView({
@@ -203,6 +193,14 @@ function RouteComponent() {
                   });
                 }}
               />
+              {discussion.isDebate && (
+                <Chip
+                  label="토론"
+                  color="success"
+                  size="small"
+                  variant="outlined"
+                />
+              )}
             </Stack>
           </Box>
         </Stack>
@@ -320,7 +318,7 @@ function parseContentWithHighlights(
           onMouseLeave={onLeave}
           sx={{ cursor: "pointer", textDecoration: "underline" }}
         >
-          메모{id}
+          메모
         </Typography>
       );
     } else {
