@@ -100,7 +100,7 @@ public class GroupService {
                 .map(
                         groupMember -> GroupMemberResponse.of(
                                 groupMember,
-                                getGroupImageURL(groupMember.getGroup())
+                                fileService.convertToPublicImageURL(groupMember.getUser().getProfileImageKey())
                         )
                 );
         return PageResponse.of(page);
