@@ -1,4 +1,4 @@
-import { Divider } from "@mui/material";
+import { Divider, Skeleton } from "@mui/material";
 import {
   Button,
   CardMedia,
@@ -86,12 +86,14 @@ function RouteComponent() {
     setIsPurchased(true);
   };
 
+  if (isLoading) {
+    return <PlaceHolder />;
+  }
+
   return (
     <Container sx={{ my: 8 }}>
       <Paper sx={{ p: 4 }}>
-        {isLoading || !book ? (
-          <Typography>로딩 중...</Typography>
-        ) : (
+        {book && (
           <Stack direction={{ xs: "column", md: "row" }} spacing={4}>
             <CardMedia
               image={book.bookCoverImageURL}
@@ -140,32 +142,32 @@ function RouteComponent() {
               </Stack>
 
               <Stack spacing={2} direction="row" justifyContent="flex-end">
-                <Button
-                  variant="contained"
-                  onClick={handlePurchase}
-                  disabled={purchasing || isPurchased}
-                >
-                  {purchasing
-                    ? "구매 중..."
-                    : isPurchased
-                      ? "보유중"
-                      : "구매하기"}
-                </Button>
-                <LinkButton
-                  to="/reader/$bookId"
-                  params={{
-                    bookId,
-                  }}
-                  search={{
-                    groupId: undefined,
-                    activityId: undefined,
-                    temporalProgress: false,
-                    initialPage: readProgress?.cfi,
-                  }}
-                  variant="contained"
-                >
-                  {`도서 읽기${readProgress?.percentage ? ` (${readProgress.percentage}%)` : ""}`}
-                </LinkButton>
+                {!isPurchased && (
+                  <Button
+                    variant="contained"
+                    onClick={handlePurchase}
+                    disabled={purchasing || isPurchased}
+                  >
+                    {purchasing ? "구매 중..." : "구매하기"}
+                  </Button>
+                )}
+                {isPurchased && (
+                  <LinkButton
+                    to="/reader/$bookId"
+                    params={{
+                      bookId,
+                    }}
+                    search={{
+                      groupId: undefined,
+                      activityId: undefined,
+                      temporalProgress: false,
+                      initialPage: readProgress?.cfi,
+                    }}
+                    variant="contained"
+                  >
+                    {`도서 읽기${readProgress?.percentage ? ` (${readProgress.percentage}%)` : ""}`}
+                  </LinkButton>
+                )}
               </Stack>
             </Stack>
           </Stack>
@@ -179,6 +181,41 @@ function RouteComponent() {
           setOpenCreditPurchaseModal(false);
         }}
       />
+    </Container>
+  );
+}
+function PlaceHolder() {
+  return (
+    <Container sx={{ my: 8 }}>
+      <Paper sx={{ p: 4 }}>
+        <Stack direction={{ xs: "column", md: "row" }} spacing={4}>
+          <Skeleton
+            variant="rectangular"
+            width={192}
+            height={256}
+            sx={{ borderRadius: 2, mb: 2 }}
+          />
+          <Stack spacing={2} flex={1}>
+            <Skeleton variant="text" width="60%" height={48} />
+            <Skeleton variant="text" width="40%" height={32} />
+            <Divider />
+            <Skeleton variant="rectangular" width="100%" height={80} />
+            <Divider />
+            <Stack direction="row" spacing={2} alignItems="center">
+              <Skeleton variant="text" width={80} height={32} />
+              <Skeleton variant="text" width={120} height={40} />
+            </Stack>
+            <Stack direction="row" spacing={2} alignItems="center">
+              <Skeleton variant="text" width={80} height={32} />
+              <Skeleton variant="text" width={120} height={32} />
+            </Stack>
+            <Stack spacing={2} direction="row" justifyContent="flex-end">
+              <Skeleton variant="rectangular" width={120} height={40} />
+              <Skeleton variant="rectangular" width={120} height={40} />
+            </Stack>
+          </Stack>
+        </Stack>
+      </Paper>
     </Container>
   );
 }
