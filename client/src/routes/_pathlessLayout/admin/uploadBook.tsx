@@ -15,7 +15,7 @@ import { useMemo, useState } from "react";
 import API_CLIENT from "../../../api/api";
 import { Add } from "@mui/icons-material";
 
-const MAX_DESCRIPTION_LENGTH = 255;
+const MAX_DESCRIPTION_LENGTH = 10000;
 
 export const Route = createFileRoute("/_pathlessLayout/admin/uploadBook")({
   component: RouteComponent,
@@ -53,6 +53,7 @@ function RouteComponent() {
         setAuthor("");
         setDescription("");
         setCoverImageFile(null);
+        setPrice(0);
       }
     };
     inputElement.click();
@@ -64,8 +65,8 @@ function RouteComponent() {
   }, [coverImageFile]);
 
   return (
-    <Card>
-      <CardHeader title="Upload Book" />
+    <Card sx={{ p: 2 }}>
+      <CardHeader title="전자책 업로드" />
       <CardActionArea
         onClick={() => {
           const fileInput = document.createElement("input");
@@ -124,7 +125,9 @@ function RouteComponent() {
           placeholder="Description"
           multiline
           value={description}
-          inputProps={{ maxLength: MAX_DESCRIPTION_LENGTH }}
+          slotProps={{
+            htmlInput: { maxLength: MAX_DESCRIPTION_LENGTH },
+          }}
           onChange={(e) => {
             const value = e.target.value;
             if (value.length >= MAX_DESCRIPTION_LENGTH) {
@@ -141,9 +144,9 @@ function RouteComponent() {
         <TextField
           fullWidth
           placeholder="10000"
-          value={price}
+          value={price.toLocaleString()}
           onChange={(e) => {
-            const value = e.target.value;
+            const value = e.target.value.replace(/,/g, "");
             const parsedValue = parseInt(value);
             if (isNaN(parsedValue)) {
               return;
@@ -154,7 +157,6 @@ function RouteComponent() {
             }
             setPrice(parsedValue);
           }}
-          helperText={`${description.length} / ${MAX_DESCRIPTION_LENGTH}`}
         />
       </CardContent>
       <CardActions>
