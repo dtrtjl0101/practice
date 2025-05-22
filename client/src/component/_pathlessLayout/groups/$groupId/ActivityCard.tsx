@@ -524,8 +524,16 @@ export function ActivityCreateModal(props: {
         }}
       >
         <Container maxWidth="md">
-          <Paper sx={{ width: "100%", height: "100%", padding: 4 }}>
-            <Stack spacing={2} sx={{ height: "100%", overflowY: "auto" }}>
+          <Paper
+            sx={{
+              width: "100%",
+              height: "100%",
+              padding: 4,
+              maxHeight: "90vh",
+              overflowY: "auto",
+            }}
+          >
+            <Stack spacing={2} sx={{ height: "100%" }}>
               <BookPicker
                 onBookPicked={(book) => {
                   setBook(book);
