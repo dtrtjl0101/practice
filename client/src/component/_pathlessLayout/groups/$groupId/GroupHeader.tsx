@@ -142,19 +142,15 @@ export function GroupHeader({ group, groupId }: GroupHeaderProps) {
             <Stack flexGrow={1}>
               <Stack direction={"row"} spacing={2} flexGrow={1}>
                 <Stack>
-                  {group ? (
-                    <CardMedia
-                      image={group.groupImageURL}
-                      sx={{ width: 256, height: 256 }}
-                    />
-                  ) : (
-                    <Skeleton variant="rectangular" width={256} height={256} />
-                  )}
+                  <CardMedia
+                    image={group.groupImageURL}
+                    sx={{ width: 256, height: 256 }}
+                  />
                 </Stack>
-                <Stack sx={{ flexGrow: 1 }}>
+                <Stack spacing={2} sx={{ flexGrow: 1 }}>
                   <Stack direction={"row"} spacing={1}>
                     <Typography variant="h3" flexGrow={1}>
-                      {group ? group.name : <Skeleton variant="text" />}
+                      {group.name}
                     </Typography>
                     <Button
                       sx={{ ml: "auto", gap: 0.5 }}
@@ -180,8 +176,14 @@ export function GroupHeader({ group, groupId }: GroupHeaderProps) {
                       </LinkIconButton>
                     )}
                   </Stack>
+                  <Stack direction={"row"} spacing={1} alignItems={"center"}>
+                    <Avatar src={group.leaderProfileImageURL} />
+                    <Typography variant="body2">
+                      {group.leaderNickname}
+                    </Typography>
+                  </Stack>
                   <Typography variant="body1" flexGrow={1}>
-                    {group ? group.description : <Skeleton />}
+                    {group.description}
                   </Typography>
                   {(group.myMemberShipStatus === GroupMembershipStatus.NONE ||
                     group.myMemberShipStatus ===
