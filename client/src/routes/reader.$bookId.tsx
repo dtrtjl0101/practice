@@ -314,9 +314,11 @@ function RouteComponent() {
   useEffect(() => {
     if (rendition) {
       rendition.on("mouseup", (e: MouseEvent) => {
+        console.log(e.screenX, e.clientX);
+        console.log(e.screenY, e.clientY)
         setLastMouseUpPosition({
-          left: e.clientX,
-          top: e.clientY,
+          left: e.screenX-50,
+          top: e.screenY-196,
         });
       });
     }
