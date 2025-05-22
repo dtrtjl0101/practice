@@ -317,8 +317,16 @@ function RouteComponent() {
       return;
     }
     rendition.on("mouseup", (e: MouseEvent) => {
-      const clientRect =
-        readerRef.current?.readerRef.current?.viewerRef.current?.getBoundingClientRect();
+      const viewerElement =
+        readerRef.current?.readerRef.current?.viewerRef.current;
+      if (!viewerElement) {
+        return;
+      }
+      const readerIframeElement = viewerElement.querySelector("iframe");
+      if (!readerIframeElement) {
+        return;
+      }
+      const clientRect = readerIframeElement.getBoundingClientRect();
       if (!clientRect) {
         return;
       }
