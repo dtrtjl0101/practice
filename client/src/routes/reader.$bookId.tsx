@@ -103,6 +103,7 @@ function RouteComponent() {
     left: 0,
     top: 0,
   });
+  const readerRef = useRef<ReactReader | null>(null);
 
   const queryParam = activityId
     ? {
@@ -312,16 +313,20 @@ function RouteComponent() {
   }, [focusedHighlight]);
 
   useEffect(() => {
-    if (rendition) {
-      rendition.on("mouseup", (e: MouseEvent) => {
-        console.log(e.screenX, e.clientX);
-        console.log(e.screenY, e.clientY)
-        setLastMouseUpPosition({
-          left: e.screenX-50,
-          top: e.screenY-196,
-        });
-      });
+    if (!rendition) {
+      return;
     }
+    rendition.on("mouseup", (e: MouseEvent) => {
+      const clientRect =
+        readerRef.current?.readerRef.current?.viewerRef.current?.getBoundingClientRect();
+      if (!clientRect) {
+        return;
+      }
+      setLastMouseUpPosition({
+        left: e.clientX + clientRect.left,
+        top: e.clientY + clientRect.top,
+      });
+    });
   }, [rendition]);
 
   const addHighlight = async (props: {
@@ -424,7 +429,6 @@ function RouteComponent() {
               position: "absolute",
               left: lastMouseUpPosition.left,
               top: lastMouseUpPosition.top,
-              translate: "130% 130%",
             }}
             onClick={() => {
               setOpenHighlightCreationModal(true);
@@ -463,6 +467,7 @@ function RouteComponent() {
         </Stack>
       </Drawer>
       <ReactReader
+        ref={readerRef}
         url={book}
         epubOptions={{
           spread: "none",
