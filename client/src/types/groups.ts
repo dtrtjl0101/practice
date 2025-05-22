@@ -11,6 +11,9 @@ export type GroupInfo = {
   description: string;
   tags: string[];
   groupImageURL: string;
+  leaderId: number;
+  leaderNickname: string;
+  leaderProfileImageURL: string;
   myMemberShipStatus: GroupMembershipStatus;
   memberCount: number;
 };

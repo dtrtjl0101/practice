@@ -141,7 +141,24 @@ function BookListItem(props: { book?: BookMetadata }) {
           <LinkCardActionArea to="/books/$bookId" params={{ bookId: book.id }}>
             <Typography variant="body2">{book.author}</Typography>
           </LinkCardActionArea>
-          <Typography variant="body2">{book.size} KB</Typography>
+          <Typography variant="body2" color="textSecondary">
+            {book.description.length > 50
+              ? book.description.slice(0, 128) + "..."
+              : book.description}
+          </Typography>
+          <Stack
+            direction="row"
+            justifyContent="flex-end"
+            alignItems={"center"}
+            spacing={2}
+          >
+            <Typography variant="body2" color="textSecondary">
+              {(book.size / 1024 / 1024).toFixed(1)} MiB
+            </Typography>
+            <Typography variant="body1" color="primary">
+              {book.price.toLocaleString()}원
+            </Typography>
+          </Stack>
         </Stack>
       </Stack>
     </Card>
