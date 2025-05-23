@@ -53,7 +53,7 @@ import {
   Cancel as CancelIcon,
   AdminPanelSettings as AdminIcon,
 } from "@mui/icons-material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import API_CLIENT from "../../../../api/api";
@@ -178,14 +178,6 @@ function RouteComponent() {
 function GroupDashboard() {
   const { groupId } = Route.useParams();
 
-  // Mock data - 실제로는 API에서 가져와야 함
-  const dashboardData = {
-    totalMembers: 156,
-    pendingRequests: 8,
-    activeMembers: 89,
-    newMembersThisMonth: 12,
-  };
-
   // $groupId에서 caching
   const { data: groupData } = useQuery({
     queryKey: ["getGroup", groupId],
@@ -198,7 +190,7 @@ function GroupDashboard() {
     },
   });
 
-  const totalMembers = groupData?.memberCount;
+  const totalMembers = groupData?.memberCount || 0;
 
   const { data: pendingRequests } = useQuery({
     queryKey: ["pendingCount", groupId],
@@ -209,9 +201,10 @@ function GroupDashboard() {
       }
       return response.data.content?.length || 0;
     },
+    initialData: 0,
   });
 
-  const { data: newMembersThisMonth } = useQuery({
+  const { data: getGroupMembersResponse } = useQuery({
     queryKey: ["groupMembersCount", groupId],
     queryFn: async () => {
       const response =
@@ -219,21 +212,22 @@ function GroupDashboard() {
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);
       }
-      const currentYearMonth = new Date().toISOString().slice(0, 7);
-
-      return response.data.content
-        ?.filter(
-          (member) =>
-            member.approvedAt &&
-            member.approvedAt.slice(0, 7) === currentYearMonth
-        )
-        .map((member) => member.approvedAt)?.length;
+      return response.data.content;
     },
+    initialData: [],
   });
 
+  const newMembersThisMonth = getGroupMembersResponse
+    ?.filter(
+      (member) =>
+        member.approvedAt &&
+        member.approvedAt.slice(0, 7) === new Date().toISOString().slice(0, 7)
+    )
+    .map((member) => member.approvedAt)?.length;
+
   return (
-    <Grid container spacing={3}>
-      <Grid item xs={12} sm={6} md={3}>
+    <Grid container spacing={3} sx={{ "& > *": { minWidth: 150 } }}>
+      <Grid item sx={{ xs: 12, sm: 6, md: 3 }}>
         <Paper sx={{ p: 3, textAlign: "center" }}>
           <GroupIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
           <Typography variant="h4" fontWeight="bold">
@@ -245,7 +239,7 @@ function GroupDashboard() {
         </Paper>
       </Grid>
 
-      <Grid item xs={12} sm={6} md={3}>
+      <Grid item sx={{ xs: 12, sm: 6, md: 3 }}>
         <Paper sx={{ p: 3, textAlign: "center" }}>
           <NotificationsIcon color="warning" sx={{ fontSize: 40, mb: 1 }} />
           <Typography variant="h4" fontWeight="bold">
@@ -257,7 +251,7 @@ function GroupDashboard() {
         </Paper>
       </Grid>
 
-      <Grid item xs={12} sm={6} md={3}>
+      <Grid item sx={{ xs: 12, sm: 6, md: 3 }}>
         <Paper sx={{ p: 3, textAlign: "center" }}>
           <CheckCircleIcon color="success" sx={{ fontSize: 40, mb: 1 }} />
           <Typography variant="h4" fontWeight="bold" color="error">
@@ -265,12 +259,12 @@ function GroupDashboard() {
             TODO
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            활성 멤버
+            활동 중인 멤버
           </Typography>
         </Paper>
       </Grid>
 
-      <Grid item xs={12} sm={6} md={3}>
+      <Grid item sx={{ xs: 12, sm: 6, md: 3 }}>
         <Paper sx={{ p: 3, textAlign: "center" }}>
           <PersonAddIcon color="info" sx={{ fontSize: 40, mb: 1 }} />
           <Typography variant="h4" fontWeight="bold">
@@ -487,7 +481,7 @@ function PendingMemberCard() {
                         <TableCell>
                           <Typography variant="body2">
                             {pending.createdAt
-                              ? new Date(pending.createdAt).toLocaleDateString(
+                              ? new Date(pending.createdAt).toLocaleString(
                                   "ko-KR"
                                 )
                               : "-"}
@@ -581,6 +575,12 @@ function MembersCard() {
     setSelectedMember(null);
   };
 
+  const searchTermDebounced = useDebounce(searchTerm, 500); // 300ms 후 실행
+
+  const filteredMembers = members?.filter((member) =>
+    member.nickname?.toLowerCase().includes(searchTermDebounced.toLowerCase())
+  );
+
   return (
     <Card>
       <CardHeader
@@ -632,17 +632,12 @@ function MembersCard() {
               >
                 <MenuItem value="all">전체</MenuItem>
                 <MenuItem value="admin">관리자</MenuItem>
-                <MenuItem value="member">일반 멤버</MenuItem>
+                <MenuItem value="member">
+                  <Chip label="일반 멤버" />
+                </MenuItem>
               </Select>
             </FormControl>
           </Stack>
-
-          <PageNavigation
-            pageZeroBased={page}
-            setPage={setPage}
-            totalPages={totalPages}
-          />
-
           <TableContainer>
             <Table>
               <TableHead>
@@ -670,7 +665,7 @@ function MembersCard() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    members.map((member) => (
+                    filteredMembers?.map((member) => (
                       <TableRow key={member.userId}>
                         <TableCell>
                           <Stack
@@ -822,4 +817,20 @@ function GroupStatisticsCard() {
       </CardContent>
     </Card>
   );
+}
+
+function useDebounce(value: any, delay: number) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
 }
