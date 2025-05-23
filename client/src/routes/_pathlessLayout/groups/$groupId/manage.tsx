@@ -632,9 +632,7 @@ function MembersCard() {
               >
                 <MenuItem value="all">전체</MenuItem>
                 <MenuItem value="admin">관리자</MenuItem>
-                <MenuItem value="member">
-                  <Chip label="일반 멤버" />
-                </MenuItem>
+                <MenuItem value="member">멤버</MenuItem>
               </Select>
             </FormControl>
           </Stack>
