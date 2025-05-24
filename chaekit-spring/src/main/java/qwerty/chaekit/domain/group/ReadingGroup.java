@@ -125,17 +125,17 @@ public class ReadingGroup extends BaseEntity {
 
     public boolean isMember(UserProfile user) {
         return groupMembers.stream()
-                .anyMatch(member -> member.isMember(user) && member.isAccepted());
+                .anyMatch(member -> member.matchesUser(user) && member.isAccepted());
     }
 
     public boolean isMemberAlreadyRequested(UserProfile user) {
         return groupMembers.stream()
-                .anyMatch(gm -> gm.isMember(user));
+                .anyMatch(gm -> gm.matchesUser(user));
     }
 
     public boolean isPendingMember(Long userId) {
         return groupMembers.stream()
-                .anyMatch(gm -> gm.isMember(userId) && !gm.isAccepted());
+                .anyMatch(gm -> gm.matchesUserId(userId) && !gm.isAccepted());
     }
 
     @Builder

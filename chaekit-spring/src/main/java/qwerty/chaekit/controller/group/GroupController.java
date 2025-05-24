@@ -65,7 +65,7 @@ public class GroupController {
 
     @Operation(
             summary = "특정 그룹의 멤버 목록 조회",
-            description = "특정 그룹의 멤버 목록을 조회합니다."
+            description = "특정 그룹에서 가입된 + 대기중인 멤버 목록을 조회합니다."
     )
     @GetMapping("/{groupId}/members")
     public ApiSuccessResponse<PageResponse<GroupMemberResponse>> getGroupMembers(
