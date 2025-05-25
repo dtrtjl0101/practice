@@ -202,8 +202,12 @@ function NotificationItemContent({
     case "HIGHLIGHT_COMMENT_REPLY": {
       return null;
     }
+    case "GROUP_BANNED": {
+      return null;
+    }
     default: {
       throw new Error("Unknown notification type");
+      return null;
     }
   }
 }
