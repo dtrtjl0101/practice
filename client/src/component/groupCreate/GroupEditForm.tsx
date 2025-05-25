@@ -13,7 +13,7 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export type GroupEditData = {
   name: string;
@@ -23,6 +23,7 @@ export type GroupEditData = {
 };
 
 export default function GroupEditForm(props: {
+  groupEditData?: GroupEditData;
   onEditDone: (data: GroupEditData) => void;
   onCancel: () => void;
 }) {
@@ -65,6 +66,16 @@ export default function GroupEditForm(props: {
     }
     return URL.createObjectURL(groupImage);
   }, [groupImage]);
+
+  useEffect(() => {
+    if (props.groupEditData) {
+      const { name, description, tags, groupImage } = props.groupEditData;
+      setName(name);
+      setDescription(description);
+      setTags(tags);
+      setGroupImage(groupImage);
+    }
+  }, [props.groupEditData]);
 
   return (
     <Paper sx={{ width: "100%", height: "100%", padding: 2 }}>
