@@ -9,6 +9,7 @@ export enum NotificationType {
   COMMENT_REPLY = "COMMENT_REPLY",
   HIGHLIGHT_COMMENT = "HIGHLIGHT_COMMENT",
   HIGHLIGHT_COMMENT_REPLY = "HIGHLIGHT_COMMENT_REPLY",
+  GROUP_BANNED = "GROUP_BANNED",
 }
 
 type NotificationCommon = {
@@ -95,4 +96,12 @@ export type Notification =
       senderNickname: string;
       highlightId: number;
       highlightMemo: string;
+    })
+  | (NotificationCommon & {
+      type: NotificationType.GROUP_BANNED;
+      receiverId: number;
+      senderId: number;
+      groupId: number;
+      groupName: string;
+      message: string;
     });

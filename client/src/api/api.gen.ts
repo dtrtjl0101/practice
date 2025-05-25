@@ -482,6 +482,8 @@ export interface HighlightPutRequest {
 }
 
 export interface GroupPatchRequest {
+  name?: string;
+  tags?: string[];
   description?: string;
   /** @format binary */
   groupImage?: File;
@@ -716,7 +718,8 @@ export interface NotificationResponse {
     | "DISCUSSION_COMMENT"
     | "COMMENT_REPLY"
     | "HIGHLIGHT_COMMENT"
-    | "HIGHLIGHT_COMMENT_REPLY";
+    | "HIGHLIGHT_COMMENT_REPLY"
+    | "GROUP_BANNED";
   isRead?: boolean;
   /** @format date-time */
   createdAt?: string;
@@ -776,6 +779,8 @@ export interface GroupMemberResponse {
   userId?: number;
   nickname?: string;
   profileImageURL?: string;
+  isApproved?: boolean;
+  isLeader?: boolean;
   /** @format date-time */
   createdAt?: string;
   /** @format date-time */
@@ -1895,6 +1900,27 @@ export class Api<
       }),
 
     /**
+     * @description 모임장만 멤버를 추방할 수 있습니다.
+     *
+     * @tags group-controller
+     * @name KickGroupMember
+     * @summary 모임 멤버 추방
+     * @request POST:/api/groups/{groupId}/members/{userId}/kick
+     * @secure
+     */
+    kickGroupMember: (
+      groupId: number,
+      userId: number,
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponseVoid, ApiSuccessResponseVoid>({
+        path: `/api/groups/${groupId}/members/${userId}/kick`,
+        method: "POST",
+        secure: true,
+        ...params,
+      }),
+
+    /**
      * No description
      *
      * @tags group-controller
@@ -1906,6 +1932,23 @@ export class Api<
       this.request<ApiSuccessResponseGroupJoinResponse, any>({
         path: `/api/groups/${groupId}/join`,
         method: "POST",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description 모임지기가 하이라이트 연결을 끊고 모임과 자식 엔티티를 삭제할 수 있습니다.
+     *
+     * @tags group-controller
+     * @name DeleteGroup
+     * @summary 모임 삭제
+     * @request DELETE:/api/groups/{groupId}
+     * @secure
+     */
+    deleteGroup: (groupId: number, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseVoid, ApiSuccessResponseVoid>({
+        path: `/api/groups/${groupId}`,
+        method: "DELETE",
         secure: true,
         ...params,
       }),
@@ -1973,7 +2016,7 @@ export class Api<
       }),
 
     /**
-     * @description 특정 그룹의 멤버 목록을 조회합니다.
+     * @description 특정 그룹에서 가입된 + 대기중인 멤버 목록을 조회합니다.
      *
      * @tags group-controller
      * @name GetGroupMembers
