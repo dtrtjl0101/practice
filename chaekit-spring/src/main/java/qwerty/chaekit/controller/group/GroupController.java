@@ -2,6 +2,8 @@ package qwerty.chaekit.controller.group;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -132,7 +134,22 @@ public class GroupController {
     ) {
         return ApiSuccessResponse.of(groupMemberService.fetchPendingList(pageable, userToken, groupId));
     }
-    
+
+    @Operation(summary = "모임 멤버 추방", description = "모임장만 멤버를 추방할 수 있습니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "400", description = """
+                    다음과 같은 비즈니스 에러 발생 가능:
+                    - GROUP_LEADER_CANNOT_LEAVE
+                    - GROUP_MEMBER_NOT_JOINED
+                    """
+            ),
+            @ApiResponse(responseCode = "403", description = """
+                    다음과 같은 비즈니스 에러 발생 가능:
+                    - GROUP_LEADER_ONLY
+                    """
+            )
+    })
     @PostMapping("/{groupId}/members/{userId}/kick")
     public ApiSuccessResponse<Void> kickGroupMember(
             @Parameter(hidden = true) @Login UserToken userToken,
@@ -140,6 +157,24 @@ public class GroupController {
             @PathVariable Long userId
     ) {
         groupMemberService.kickGroupMember(userToken, groupId, userId);
+        return ApiSuccessResponse.emptyResponse();
+    }
+
+    @Operation(summary = "모임 삭제", description = "모임지기가 하이라이트 연결을 끊고 모임과 자식 엔티티를 삭제할 수 있습니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "403", description = """
+                    다음과 같은 비즈니스 에러 발생 가능:
+                    - GROUP_LEADER_ONLY
+                    """
+            )
+    })
+    @DeleteMapping("/{groupId}")
+    public ApiSuccessResponse<Void> deleteGroup(
+            @Parameter(hidden = true) @Login UserToken userToken,
+            @PathVariable Long groupId
+    ) {
+        groupService.deleteGroup(userToken, groupId);
         return ApiSuccessResponse.emptyResponse();
     }
 }

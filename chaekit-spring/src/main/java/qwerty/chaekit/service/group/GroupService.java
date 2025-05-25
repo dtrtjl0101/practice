@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.group.repository.GroupRepository;
+import qwerty.chaekit.domain.highlight.entity.Highlight;
+import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.dto.group.request.GroupPatchRequest;
 import qwerty.chaekit.dto.group.request.GroupPostRequest;
@@ -33,6 +35,7 @@ public class GroupService {
     private final FileService fileService;
     private final GroupMapper groupMapper;
     private final EntityFinder entityFinder;
+    private final HighlightRepository highlightRepository;
 
     @Transactional
     public GroupPostResponse createGroup(UserToken userToken, GroupPostRequest request) {
@@ -129,6 +132,24 @@ public class GroupService {
             group.updateGroupImageKey(imageKey);
         }
         return GroupPostResponse.of(group, getGroupImageURL(group));
+    }
+    
+    @Transactional
+    public void deleteGroup(UserToken userToken, Long groupId) {
+        ReadingGroup group = entityFinder.findGroup(groupId);
+        
+        if (!group.isLeader(userToken.userId())) {
+            throw new ForbiddenException(ErrorCode.GROUP_LEADER_ONLY);
+        }
+        
+        // 1. 관련된 Highlight 찾아서 후처리
+        List<Highlight> highlights = highlightRepository.findByGroup(group);
+        for (Highlight highlight : highlights) {
+            highlight.detachActivity();
+        }
+
+        // 2. Activity 삭제
+        groupRepository.delete(group);
     }
 
     private String getGroupImageURL(ReadingGroup group) {
