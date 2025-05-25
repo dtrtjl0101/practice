@@ -454,6 +454,60 @@
         }
       }
     },
+    "/api/groups/{groupId}/members/{userId}/kick": {
+      "post": {
+        "tags": ["group-controller"],
+        "summary": "모임 멤버 추방",
+        "description": "모임장만 멤버를 추방할 수 있습니다.",
+        "operationId": "kickGroupMember",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponseVoid"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "다음과 같은 비즈니스 에러 발생 가능:\n- GROUP_LEADER_ONLY\n",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponseVoid"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "다음과 같은 비즈니스 에러 발생 가능:\n- GROUP_LEADER_CANNOT_LEAVE\n- GROUP_MEMBER_NOT_JOINED\n",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponseVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/groups/{groupId}/join": {
       "post": {
         "tags": ["group-controller"],
@@ -1311,6 +1365,42 @@
       }
     },
     "/api/groups/{groupId}": {
+      "delete": {
+        "tags": ["group-controller"],
+        "summary": "모임 삭제",
+        "description": "모임지기가 하이라이트 연결을 끊고 모임과 자식 엔티티를 삭제할 수 있습니다.",
+        "operationId": "deleteGroup",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponseVoid"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "다음과 같은 비즈니스 에러 발생 가능:\n- GROUP_LEADER_ONLY\n",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponseVoid"
+                }
+              }
+            }
+          }
+        }
+      },
       "patch": {
         "tags": ["group-controller"],
         "operationId": "updateGroup",
@@ -1874,7 +1964,7 @@
       "get": {
         "tags": ["group-controller"],
         "summary": "특정 그룹의 멤버 목록 조회",
-        "description": "특정 그룹의 멤버 목록을 조회합니다.",
+        "description": "특정 그룹에서 가입된 + 대기중인 멤버 목록을 조회합니다.",
         "operationId": "getGroupMembers",
         "parameters": [
           {
@@ -3066,6 +3156,8 @@
       "GroupPatchRequest": {
         "type": "object",
         "properties": {
+          "name": { "type": "string" },
+          "tags": { "type": "array", "items": { "type": "string" } },
           "description": { "type": "string" },
           "groupImage": { "type": "string", "format": "binary" }
         }
@@ -3336,7 +3428,8 @@
               "DISCUSSION_COMMENT",
               "COMMENT_REPLY",
               "HIGHLIGHT_COMMENT",
-              "HIGHLIGHT_COMMENT_REPLY"
+              "HIGHLIGHT_COMMENT_REPLY",
+              "GROUP_BANNED"
             ]
           },
           "isRead": { "type": "boolean" },
@@ -3413,6 +3506,8 @@
           "userId": { "type": "integer", "format": "int64" },
           "nickname": { "type": "string" },
           "profileImageURL": { "type": "string" },
+          "isApproved": { "type": "boolean" },
+          "isLeader": { "type": "boolean" },
           "createdAt": { "type": "string", "format": "date-time" },
           "approvedAt": { "type": "string", "format": "date-time" }
         }
