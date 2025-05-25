@@ -46,6 +46,10 @@ public class ReadingGroup extends BaseEntity {
 
     private String groupImageKey;
 
+    public void changeName(String name) {
+        this.name = name;
+    }
+
     public void addTags(List<String> tagNames) {
         for (String tagName : tagNames) {
             addTag(tagName);
@@ -55,6 +59,10 @@ public class ReadingGroup extends BaseEntity {
     public void addTag(String tagName) {
         GroupTag groupTag = new GroupTag(this, tagName);
         tags.add(groupTag);
+    }
+    
+    public void removeAllTags() {
+        tags.clear();
     }
 
     public void removeTag(String tagName) {

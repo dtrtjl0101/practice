@@ -14,12 +14,16 @@ import qwerty.chaekit.dto.group.response.GroupFetchResponse;
 import qwerty.chaekit.dto.group.response.GroupPostResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
+import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.mapper.GroupMapper;
 import qwerty.chaekit.service.util.EntityFinder;
 import qwerty.chaekit.service.util.FileService;
+
+import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -48,7 +52,8 @@ public class GroupService {
                 .build();
         ReadingGroup savedGroup = groupRepository.save(groupEntity);
         if(request.tags() != null) {
-            savedGroup.addTags(request.tags());
+            List<String> validTags = getValidTags(request.tags());
+            savedGroup.addTags(validTags);
         }
         savedGroup.addMember(leader).approve();
 
@@ -102,8 +107,20 @@ public class GroupService {
         if (!group.isLeader(user)) {
             throw new ForbiddenException(ErrorCode.GROUP_UPDATE_FORBIDDEN);
         }
+        
         if(request.description() != null) {
             group.updateDescription(request.description());
+        }
+
+        if (request.tags() != null) {
+            List<String> validTags = getValidTags(request.tags());
+
+            group.removeAllTags();
+            group.addTags(validTags);
+        }
+
+        if (request.name() != null && !request.name().isBlank()) {
+            group.changeName(request.name());
         }
 
         String imageKey = fileService.uploadGroupImageIfPresent(request.groupImage());
@@ -116,5 +133,19 @@ public class GroupService {
 
     private String getGroupImageURL(ReadingGroup group) {
         return fileService.convertToPublicImageURL(group.getGroupImageKey());
+    }
+
+    private static List<String> getValidTags(List<String> tags) {
+        List<String> validTags = tags.stream()
+                .filter(Objects::nonNull)
+                .map(String::trim) // 앞 뒤 공백 제거
+                .filter(tag -> !tag.isEmpty() && tag.length() <= 10)
+                .distinct()
+                .toList();
+
+        if (validTags.size() != tags.size()) {
+            throw new BadRequestException(ErrorCode.INVALID_TAG_LIST);
+        }
+        return validTags;
     }
 }

@@ -12,4 +12,6 @@ public interface UserProfileRepository  extends JpaRepository<UserProfile,Long> 
     Optional<UserProfile> findByMember_Email(String email);
     @Query("SELECT u FROM UserProfile u JOIN FETCH u.member m WHERE u.id = :userId")
     Optional<UserProfile> findByIdWithMember(Long userId);
+
+    Optional<UserProfile> findByNickname(String nickname);
 }

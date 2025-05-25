@@ -2,6 +2,8 @@ package qwerty.chaekit.global.init.dummy;
 
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 public enum DummyGroup {
     CLASSIC(
@@ -19,20 +21,24 @@ public enum DummyGroup {
                 함께 읽고, 해석하고, 질문하면서
                 고전의 "그 너머"를 함께 탐험해요.
                 """,
-            "group-image/group-classic.png"
+            "group-image/group-classic.png",
+            List.of("소설", "고전", "원작")
             );
     
     DummyGroup(
             String name, 
             String description,
-            String groupImageKey
+            String groupImageKey,
+            List<String> tags
     ) {
         this.name = name;
         this.description = description;
         this.groupImageKey = groupImageKey;
+        this.tags = tags;
     }
     
     private final String name;
     private final String description;
     private final String groupImageKey;
+    private final List<String> tags;
 }

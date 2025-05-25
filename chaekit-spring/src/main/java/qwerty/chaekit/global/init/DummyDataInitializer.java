@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import qwerty.chaekit.domain.member.user.UserProfile;
 
 @Slf4j
 @Component
@@ -25,9 +24,9 @@ public class DummyDataInitializer implements ApplicationRunner {
     @Transactional
     public void run(ApplicationArguments args) {
         log.info("더미 데이터를 생성을 시도합니다.");
-        UserProfile leader = dummyUserFactory.saveDummyUsers();
+        dummyUserFactory.saveDummyUsers();
         dummyPublisherFactory.saveDummyPublishers();
         dummyEbookFactory.saveDummyEbooks();
-        dummyGroupFactory.saveDummyGroups(leader);
+        dummyGroupFactory.saveDummyGroups();
     }
 }
