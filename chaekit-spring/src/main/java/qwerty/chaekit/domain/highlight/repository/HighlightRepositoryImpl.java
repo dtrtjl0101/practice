@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.highlight.entity.Highlight;
 import qwerty.chaekit.domain.highlight.entity.QHighlight;
@@ -97,5 +98,10 @@ public class HighlightRepositoryImpl implements HighlightRepository {
                 .fetchOne()).orElse(0L);
 
         return new PageImpl<>(result, pageable, total);
+    }
+
+    @Override
+    public List<Highlight> findByGroup(ReadingGroup group) {
+        return highlightJpaRepository.findByActivity_Group(group);
     }
 }

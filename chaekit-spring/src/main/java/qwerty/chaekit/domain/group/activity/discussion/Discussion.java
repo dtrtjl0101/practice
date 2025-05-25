@@ -43,10 +43,12 @@ public class Discussion extends BaseEntity {
     @Column(nullable = false)
     private boolean isDebate = false;
 
-    @OneToMany(mappedBy = "discussion")
+    @OneToMany(mappedBy = "discussion", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 20)
     private final List<DiscussionComment> comments = new ArrayList<>();
 
     @OneToMany(mappedBy = "discussion", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 20)
     private final List<DiscussionHighlight> highlights = new ArrayList<>();
 
     @Builder

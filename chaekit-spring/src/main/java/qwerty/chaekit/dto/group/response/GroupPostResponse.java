@@ -20,7 +20,7 @@ public record GroupPostResponse(
                 .name(group.getName())
                 .description(group.getDescription())
                 .groupImageURL(groupImageURL)
-                .tags(group.getTags().stream()
+                .tags(group.getGroupTags().stream()
                         .map(GroupTag::getTagName)
                         .toList())
                 .build();

@@ -10,6 +10,7 @@ import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.group.activity.activitymember.ActivityMember;
+import qwerty.chaekit.domain.group.activity.discussion.Discussion;
 import qwerty.chaekit.domain.member.user.UserProfile;
 
 import java.time.LocalDate;
@@ -46,6 +47,10 @@ public class Activity extends BaseEntity {
     @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
     private final List<ActivityMember> participants = new ArrayList<>();
+
+    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 20)
+    private final List<Discussion> discussions = new ArrayList<>();
 
     @Builder
     public Activity(Long id, ReadingGroup group, Ebook book, LocalDate startTime, LocalDate endTime, String description) {

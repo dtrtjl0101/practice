@@ -29,7 +29,7 @@ public class GroupMapper {
                 .groupId(group.getId())
                 .name(group.getName())
                 .description(group.getDescription())
-                .tags(group.getTags().stream()
+                .tags(group.getGroupTags().stream()
                         .map(GroupTag::getTagName)
                         .toList())
                 .groupImageURL(convertToPublicImageURL(group.getGroupImageKey()))

@@ -2,6 +2,8 @@ package qwerty.chaekit.controller.group;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -18,6 +20,7 @@ import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
 import qwerty.chaekit.global.security.resolver.UserToken;
+import qwerty.chaekit.service.group.GroupMemberService;
 import qwerty.chaekit.service.group.GroupService;
 
 @RestController
@@ -25,6 +28,7 @@ import qwerty.chaekit.service.group.GroupService;
 @RequiredArgsConstructor
 public class GroupController {
     private final GroupService groupService;
+    private final GroupMemberService groupMemberService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiSuccessResponse<GroupPostResponse> createGroup(
@@ -63,18 +67,6 @@ public class GroupController {
         return ApiSuccessResponse.of(groupService.getCreatedGroups(userToken, pageable));
     }
 
-    @Operation(
-            summary = "특정 그룹의 멤버 목록 조회",
-            description = "특정 그룹의 멤버 목록을 조회합니다."
-    )
-    @GetMapping("/{groupId}/members")
-    public ApiSuccessResponse<PageResponse<GroupMemberResponse>> getGroupMembers(
-            @PathVariable long groupId,
-            @ParameterObject Pageable pageable
-    ) {
-        return ApiSuccessResponse.of(groupService.getGroupMembers(groupId, pageable));
-    }
-
     @GetMapping("/{groupId}/info")
     public ApiSuccessResponse<GroupFetchResponse> getGroup(
             @Parameter(hidden = true) @Login(required = false) UserToken userToken,
@@ -94,15 +86,27 @@ public class GroupController {
     public ApiSuccessResponse<GroupJoinResponse> requestJoinGroup(
             @Parameter(hidden = true) @Login UserToken userToken,
             @PathVariable long groupId) {
-        return ApiSuccessResponse.of(groupService.requestJoinGroup(userToken, groupId));
+        return ApiSuccessResponse.of(groupMemberService.requestGroupJoin(userToken, groupId));
     }
 
+    @Operation(
+            summary = "특정 그룹의 멤버 목록 조회",
+            description = "특정 그룹에서 가입된 + 대기중인 멤버 목록을 조회합니다."
+    )
+    @GetMapping("/{groupId}/members")
+    public ApiSuccessResponse<PageResponse<GroupMemberResponse>> getGroupMembers(
+            @PathVariable long groupId,
+            @ParameterObject Pageable pageable
+    ) {
+        return ApiSuccessResponse.of(groupMemberService.getGroupMembers(groupId, pageable));
+    }
+    
     @PatchMapping("/{groupId}/members/{userId}/approve")
     public ApiSuccessResponse<GroupJoinResponse> approveJoinRequest(
             @Parameter(hidden = true) @Login UserToken userToken,
             @PathVariable long groupId,
             @PathVariable long userId) {
-        return ApiSuccessResponse.of(groupService.approveJoinRequest(userToken, groupId, userId));
+        return ApiSuccessResponse.of(groupMemberService.approveJoinRequest(userToken, groupId, userId));
     }
 
     @PatchMapping("/{groupId}/members/{userId}/reject")
@@ -110,7 +114,7 @@ public class GroupController {
             @Parameter(hidden = true) @Login UserToken userToken,
             @PathVariable long groupId,
             @PathVariable long userId) {
-        groupService.rejectJoinRequest(userToken, groupId, userId);
+        groupMemberService.rejectJoinRequest(userToken, groupId, userId);
         return ApiSuccessResponse.emptyResponse();
     }
 
@@ -118,7 +122,7 @@ public class GroupController {
     public ApiSuccessResponse<Void> leaveGroup(
             @Parameter(hidden = true) @Login UserToken userToken,
             @PathVariable long groupId) {
-        groupService.leaveGroup(userToken, groupId);
+        groupMemberService.leaveGroup(userToken, groupId);
         return ApiSuccessResponse.emptyResponse();
     }
 
@@ -128,6 +132,49 @@ public class GroupController {
             @ParameterObject Pageable pageable,
             @PathVariable long groupId
     ) {
-        return ApiSuccessResponse.of(groupService.fetchPendingList(pageable, userToken, groupId));
+        return ApiSuccessResponse.of(groupMemberService.fetchPendingList(pageable, userToken, groupId));
+    }
+
+    @Operation(summary = "모임 멤버 추방", description = "모임장만 멤버를 추방할 수 있습니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "400", description = """
+                    다음과 같은 비즈니스 에러 발생 가능:
+                    - GROUP_LEADER_CANNOT_LEAVE
+                    - GROUP_MEMBER_NOT_JOINED
+                    """
+            ),
+            @ApiResponse(responseCode = "403", description = """
+                    다음과 같은 비즈니스 에러 발생 가능:
+                    - GROUP_LEADER_ONLY
+                    """
+            )
+    })
+    @PostMapping("/{groupId}/members/{userId}/kick")
+    public ApiSuccessResponse<Void> kickGroupMember(
+            @Parameter(hidden = true) @Login UserToken userToken,
+            @PathVariable Long groupId,
+            @PathVariable Long userId
+    ) {
+        groupMemberService.kickGroupMember(userToken, groupId, userId);
+        return ApiSuccessResponse.emptyResponse();
+    }
+
+    @Operation(summary = "모임 삭제", description = "모임지기가 하이라이트 연결을 끊고 모임과 자식 엔티티를 삭제할 수 있습니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "403", description = """
+                    다음과 같은 비즈니스 에러 발생 가능:
+                    - GROUP_LEADER_ONLY
+                    """
+            )
+    })
+    @DeleteMapping("/{groupId}")
+    public ApiSuccessResponse<Void> deleteGroup(
+            @Parameter(hidden = true) @Login UserToken userToken,
+            @PathVariable Long groupId
+    ) {
+        groupService.deleteGroup(userToken, groupId);
+        return ApiSuccessResponse.emptyResponse();
     }
 }

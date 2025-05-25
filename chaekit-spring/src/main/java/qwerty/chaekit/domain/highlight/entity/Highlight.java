@@ -2,10 +2,13 @@ package qwerty.chaekit.domain.highlight.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 import qwerty.chaekit.domain.BaseEntity;
+import qwerty.chaekit.domain.discussionhighlight.DiscussionHighlight;
 import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.highlight.entity.comment.HighlightComment;
+import qwerty.chaekit.domain.highlight.entity.reaction.HighlightReaction;
 import qwerty.chaekit.domain.member.user.UserProfile;
 
 import java.util.ArrayList;
@@ -48,7 +51,16 @@ public class Highlight extends BaseEntity {
     private boolean isPublic;
     
     @OneToMany(mappedBy = "highlight", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 20)
     private final List<HighlightComment> comments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "highlight", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 20)
+    private final List<HighlightReaction> reactions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "highlight", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 20)
+    private final List<DiscussionHighlight> relatedDiscussions = new ArrayList<>();
 
     @Builder
     public Highlight(Long id, UserProfile author, Ebook book, String cfi, String spine, String highlightcontent, String memo, Activity activity, boolean isPublic) {
@@ -78,5 +90,10 @@ public class Highlight extends BaseEntity {
     
     public boolean isAuthor(UserProfile user) {
         return author.getId().equals(user.getId());
+    }
+
+    public void detachActivity() {
+        this.isPublic = false;
+        this.activity = null;
     }
 }

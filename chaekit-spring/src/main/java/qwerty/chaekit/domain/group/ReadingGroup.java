@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.BatchSize;
 import org.springframework.lang.Nullable;
 import qwerty.chaekit.domain.BaseEntity;
+import qwerty.chaekit.domain.group.activity.Activity;
+import qwerty.chaekit.domain.group.chat.GroupChat;
 import qwerty.chaekit.domain.group.groupmember.GroupMember;
 import qwerty.chaekit.domain.group.grouptag.GroupTag;
 import qwerty.chaekit.domain.member.user.UserProfile;
@@ -32,19 +34,31 @@ public class ReadingGroup extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_leader_id", nullable = false)
     private UserProfile groupLeader;
-
-    @OneToMany(mappedBy = "readingGroup", cascade = CascadeType.ALL, orphanRemoval = true)
-    @BatchSize(size = 20)
-    private List<GroupTag> tags = new ArrayList<>();
     
     @Column(length = 5000)
     private String description;
 
     @OneToMany(mappedBy = "readingGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 20)
+    private List<GroupTag> groupTags = new ArrayList<>();
+
+    @OneToMany(mappedBy = "readingGroup", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 20)
     private final List<GroupMember> groupMembers = new ArrayList<>();
 
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 100)
+    private final List<GroupChat> groupChats = new ArrayList<>();
+    
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 20)
+    private final List<Activity> activities = new ArrayList<>();
+
     private String groupImageKey;
+
+    public void changeName(String name) {
+        this.name = name;
+    }
 
     public void addTags(List<String> tagNames) {
         for (String tagName : tagNames) {
@@ -54,11 +68,15 @@ public class ReadingGroup extends BaseEntity {
 
     public void addTag(String tagName) {
         GroupTag groupTag = new GroupTag(this, tagName);
-        tags.add(groupTag);
+        groupTags.add(groupTag);
+    }
+    
+    public void removeAllTags() {
+        groupTags.clear();
     }
 
     public void removeTag(String tagName) {
-        tags.removeIf(tag -> tag.getTagName().equals(tagName));
+        groupTags.removeIf(tag -> tag.getTagName().equals(tagName));
     }
 
     public GroupMember addMember(UserProfile user) {
@@ -123,27 +141,27 @@ public class ReadingGroup extends BaseEntity {
         return groupLeader.getId().equals(userId);
     }
 
-    public boolean isMember(UserProfile user) {
+    public boolean isNotAcceptedMember(UserProfile user) {
         return groupMembers.stream()
-                .anyMatch(member -> member.isMember(user) && member.isAccepted());
+                .noneMatch(member -> member.matchesUser(user) && member.isAccepted());
     }
 
     public boolean isMemberAlreadyRequested(UserProfile user) {
         return groupMembers.stream()
-                .anyMatch(gm -> gm.isMember(user));
+                .anyMatch(gm -> gm.matchesUser(user));
     }
 
     public boolean isPendingMember(Long userId) {
         return groupMembers.stream()
-                .anyMatch(gm -> gm.isMember(userId) && !gm.isAccepted());
+                .anyMatch(gm -> gm.matchesUserId(userId) && !gm.isAccepted());
     }
 
     @Builder
-    public ReadingGroup(Long id, String name, UserProfile groupLeader, List<GroupTag> tags, String description, String groupImageKey) {
+    public ReadingGroup(Long id, String name, UserProfile groupLeader, List<GroupTag> groupTags, String description, String groupImageKey) {
         this.id = id;
         this.name = name;
         this.groupLeader = groupLeader;
-        this.tags = (tags != null) ? new ArrayList<>(tags) : new ArrayList<>();
+        this.groupTags = (groupTags != null) ? new ArrayList<>(groupTags) : new ArrayList<>();
         this.description = description;
         this.groupImageKey = groupImageKey;
     }

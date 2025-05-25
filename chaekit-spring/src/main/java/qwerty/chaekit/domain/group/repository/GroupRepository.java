@@ -10,7 +10,7 @@ import qwerty.chaekit.domain.group.ReadingGroup;
 import java.util.Optional;
 
 public interface GroupRepository extends JpaRepository<ReadingGroup, Long> {
-    @Query("SELECT g FROM ReadingGroup g LEFT JOIN FETCH g.tags WHERE g.id = :groupId")
+    @Query("SELECT g FROM ReadingGroup g LEFT JOIN FETCH g.groupTags WHERE g.id = :groupId")
     Optional<ReadingGroup> findByIdWithTags(Long groupId);
 
     @Query("SELECT g FROM ReadingGroup g JOIN g.groupMembers gm WHERE gm.user.id = :userId AND gm.accepted = TRUE")
