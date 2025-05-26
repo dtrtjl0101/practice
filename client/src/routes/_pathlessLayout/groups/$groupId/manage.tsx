@@ -63,7 +63,7 @@ function RouteComponent() {
   const [tabValue, setTabValue] = useState(0);
   const { groupId } = Route.useParams();
   const navigate = Route.useNavigate();
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
@@ -79,7 +79,7 @@ function RouteComponent() {
   });
   const groupName = groupData?.name;
 
-  const handleToGroups = () => {
+  const handleRouteGroups = () => {
     navigate({ to: "/groups" });
   };
 
@@ -133,7 +133,10 @@ function RouteComponent() {
         </TabPanel>
 
         <TabPanel value={tabValue} index={2}>
-          <GroupSettingsCard groupId={groupId} onDeleteRoute={handleToGroups} />
+          <GroupSettingsCard
+            groupId={groupId}
+            onDeleteRoute={handleRouteGroups}
+          />
         </TabPanel>
 
         <TabPanel value={tabValue} index={3}>
