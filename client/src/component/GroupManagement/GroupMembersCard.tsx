@@ -2,7 +2,6 @@ import {
   Card,
   CardHeader,
   Stack,
-  Button,
   CardContent,
   TextField,
   InputAdornment,
@@ -28,10 +27,8 @@ import {
 import {
   Search as SearchIcon,
   MoreVert as MoreVertIcon,
-  PersonAdd as PersonAddIcon,
   Group as GroupIcon,
   Notifications as NotificationsIcon,
-  Download as DownloadIcon,
   Delete as DeleteIcon,
   Edit as EditIcon,
   AdminPanelSettings as AdminIcon,
@@ -47,8 +44,6 @@ export default function GroupMembersCard({ groupId }: { groupId: number }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedMember, setSelectedMember] = useState<any>(null);
-
   const { data: members } = useQuery({
     queryKey: ["groupMembers", groupId, page],
     queryFn: async () => {
@@ -68,17 +63,12 @@ export default function GroupMembersCard({ groupId }: { groupId: number }) {
     initialData: [],
   });
 
-  const handleMenuClick = (
-    event: React.MouseEvent<HTMLElement>,
-    member: any
-  ) => {
+  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
-    setSelectedMember(member);
   };
 
   const handleMenuClose = () => {
     setAnchorEl(null);
-    setSelectedMember(null);
   };
 
   const searchTermDebounced = useDebounce(searchTerm, 500); // 300ms 후 실행
@@ -209,7 +199,7 @@ export default function GroupMembersCard({ groupId }: { groupId: number }) {
                         <TableCell>
                           <IconButton
                             size="small"
-                            onClick={(e) => handleMenuClick(e, member)}
+                            onClick={(e) => handleMenuClick(e)}
                           >
                             <MoreVertIcon />
                           </IconButton>
