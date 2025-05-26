@@ -83,33 +83,19 @@ export default function GroupMembersCard({ groupId }: { groupId: number }) {
 
   const searchTermDebounced = useDebounce(searchTerm, 500); // 300ms 후 실행
 
-  const filteredMembers = members?.filter((member) =>
-    member.nickname?.toLowerCase().includes(searchTermDebounced.toLowerCase())
+  const filteredMembers = members?.filter(
+    (member) =>
+      member.nickname
+        ?.toLowerCase()
+        .includes(searchTermDebounced.toLowerCase()) &&
+      (roleFilter === "all" ||
+        (roleFilter === "admin" && member.isLeader) ||
+        (roleFilter === "member" && !member.isLeader))
   );
 
   return (
     <Card>
-      <CardHeader
-        title="멤버 관리"
-        action={
-          <Stack direction="row" spacing={1}>
-            <Button
-              variant="outlined"
-              startIcon={<DownloadIcon />}
-              size="small"
-            >
-              내보내기
-            </Button>
-            <Button
-              variant="contained"
-              startIcon={<PersonAddIcon />}
-              size="small"
-            >
-              멤버 초대
-            </Button>
-          </Stack>
-        }
-      />
+      <CardHeader title="멤버 관리" />
       <CardContent>
         <Stack spacing={3}>
           {/* 검색 및 필터 */}
@@ -137,8 +123,8 @@ export default function GroupMembersCard({ groupId }: { groupId: number }) {
                 onChange={(e) => setRoleFilter(e.target.value)}
               >
                 <MenuItem value="all">전체</MenuItem>
-                <MenuItem value="admin">관리자</MenuItem>
-                <MenuItem value="member">멤버</MenuItem>
+                <MenuItem value="admin">모임지기</MenuItem>
+                <MenuItem value="member">모임원</MenuItem>
               </Select>
             </FormControl>
           </Stack>
@@ -193,7 +179,7 @@ export default function GroupMembersCard({ groupId }: { groupId: number }) {
                         </TableCell>
                         <TableCell>
                           <Chip
-                            label={member.isLeader || "멤버"}
+                            label={member.isLeader ? "모임지기" : "모임원"}
                             color={member.isLeader ? "primary" : "default"}
                             size="small"
                             icon={member.isLeader ? <AdminIcon /> : undefined}

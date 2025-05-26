@@ -22,7 +22,7 @@ export default function GroupStatisticsCard() {
             • 게시글/댓글 분석
             <br />
             • 참여도 분석
-            <br />• 월별/주별 리포트
+            <br />• 월별/주별 리포트 등등등...
           </Typography>
         </Stack>
       </CardContent>

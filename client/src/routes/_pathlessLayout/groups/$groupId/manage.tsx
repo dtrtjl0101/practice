@@ -62,6 +62,7 @@ function TabPanel(props: TabPanelProps) {
 function RouteComponent() {
   const [tabValue, setTabValue] = useState(0);
   const { groupId } = Route.useParams();
+  const navigate = Route.useNavigate();
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
@@ -77,6 +78,10 @@ function RouteComponent() {
     },
   });
   const groupName = groupData?.name;
+
+  const handleToGroups = () => {
+    navigate({ to: "/groups" });
+  };
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -128,7 +133,7 @@ function RouteComponent() {
         </TabPanel>
 
         <TabPanel value={tabValue} index={2}>
-          <GroupSettingsCard groupId={groupId} />
+          <GroupSettingsCard groupId={groupId} onDeleteRoute={handleToGroups} />
         </TabPanel>
 
         <TabPanel value={tabValue} index={3}>

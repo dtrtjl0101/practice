@@ -9,34 +9,8 @@ import {
 } from "@mui/icons-material";
 
 export default function GroupDashboard({ groupId }: { groupId: number }) {
-  // $groupId에서 caching
-  const { data: groupData } = useQuery({
-    queryKey: ["getGroup", groupId],
-    queryFn: async () => {
-      const response = await API_CLIENT.groupController.getGroup(groupId);
-      if (!response.isSuccessful) {
-        throw new Error(response.errorMessage);
-      }
-      return response.data;
-    },
-  });
-
-  const totalMembers = groupData?.memberCount || 0;
-
-  const { data: pendingRequests } = useQuery({
-    queryKey: ["pendingCount", groupId],
-    queryFn: async () => {
-      const response = await API_CLIENT.groupController.getPendingList(groupId);
-      if (!response.isSuccessful) {
-        throw new Error(response.errorMessage);
-      }
-      return response.data.content?.length || 0;
-    },
-    initialData: 0,
-  });
-
-  const { data: getGroupMembersResponse } = useQuery({
-    queryKey: ["groupMembersCount", groupId],
+  const { data: groupMembers } = useQuery({
+    queryKey: ["groupMembers", groupId],
     queryFn: async () => {
       const response =
         await API_CLIENT.groupController.getGroupMembers(groupId);
@@ -48,7 +22,12 @@ export default function GroupDashboard({ groupId }: { groupId: number }) {
     initialData: [],
   });
 
-  const newMembersThisMonth = getGroupMembersResponse
+  const totalMembers =
+    groupMembers?.filter((member) => member.isApproved == true).length || 0;
+
+  const pendingMembers = groupMembers?.length! - totalMembers || 0;
+
+  const newMembersThisMonth = groupMembers
     ?.filter(
       (member) =>
         member.approvedAt &&
@@ -57,7 +36,7 @@ export default function GroupDashboard({ groupId }: { groupId: number }) {
     .map((member) => member.approvedAt)?.length;
 
   return (
-    <Grid container spacing={3} sx={{ "& > *": { minWidth: 200 } }}>
+    <Grid container spacing={3} sx={{ "& > *": { minWidth: 140 } }}>
       <Grid sx={{ xs: 12, sm: 6, md: 3 }}>
         <Paper sx={{ p: 3, textAlign: "center" }}>
           <GroupIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
@@ -74,7 +53,7 @@ export default function GroupDashboard({ groupId }: { groupId: number }) {
         <Paper sx={{ p: 3, textAlign: "center" }}>
           <NotificationsIcon color="warning" sx={{ fontSize: 40, mb: 1 }} />
           <Typography variant="h4" fontWeight="bold">
-            {pendingRequests}
+            {pendingMembers}
           </Typography>
           <Typography variant="body2" color="text.secondary">
             대기 중인 신청

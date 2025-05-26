@@ -15,22 +15,35 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import API_CLIENT from "../../api/api";
-import GroupEditForm from "../groupCreate/GroupEditForm";
+import GroupEditForm, { GroupEditData } from "../groupCreate/GroupEditForm";
 import {
   Group as GroupIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
 } from "@mui/icons-material";
-export default function GroupSettingsCard({ groupId }: { groupId: number }) {
+export default function GroupSettingsCard({
+  groupId,
+  onDeleteRoute,
+}: {
+  groupId: number;
+  onDeleteRoute: () => void;
+}) {
   const [isEditing, setIsEditing] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   // 폼 상태 관리
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    description: string;
+    tags: string[];
+    groupImage?: File;
+    groupImageURL?: string;
+  }>({
     name: "",
     description: "",
+    tags: [],
+    groupImage: undefined,
     groupImageURL: "",
-    tags: [] as string[],
   });
 
   // 그룹 데이터 가져오기
@@ -45,52 +58,65 @@ export default function GroupSettingsCard({ groupId }: { groupId: number }) {
     },
   });
 
-  // 그룹 데이터가 로드되면 폼 데이터 초기화
-  useEffect(() => {
-    if (groupData) {
-      setFormData({
-        name: groupData.name || "",
-        description: groupData.description || "",
-        groupImageURL: groupData.groupImageURL || "",
-        tags: groupData.tags || [],
-      });
-    }
-  }, [groupData]);
-
-  const handleSave = async () => {
+  // GroupSettingsCard.tsx - handleSave 함수 수정된 버전
+  const handleSave = async (editedData: GroupEditData) => {
     try {
-      // updateGroup API는 description과 groupImageURL만 포함
-      const updateData = {
-        description: formData.description,
-        groupImageURL: formData.groupImageURL,
-      };
+      // GroupPatchRequest 인터페이스에 맞춰 데이터 구성
+      const updateData: {
+        name?: string;
+        tags?: string[];
+        description?: string;
+        groupImage?: File;
+      } = {};
+
+      // 변경된 필드만 포함
+      if (editedData.name !== groupData?.name) {
+        updateData.name = editedData.name;
+      }
+      if (JSON.stringify(editedData.tags) !== JSON.stringify(groupData?.tags)) {
+        updateData.tags = editedData.tags;
+      }
+      if (editedData.description !== groupData?.description) {
+        updateData.description = editedData.description;
+      }
+
+      // 이미지 처리: 새로운 파일이 업로드된 경우만 포함
+      if (
+        editedData.imageAction === "update" &&
+        editedData.groupImage instanceof File
+      ) {
+        updateData.groupImage = editedData.groupImage;
+      }
 
       const response = await API_CLIENT.groupController.updateGroup(
         groupId,
         updateData
       );
+
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);
       }
+
       setIsEditing(false);
-      refetch();
+      await refetch(); // refetch가 완료될 때까지 대기
       alert("그룹 정보가 성공적으로 수정되었습니다.");
     } catch (error) {
+      console.error("그룹 수정 오류:", error);
       alert("그룹 정보 수정에 실패했습니다.");
     }
   };
 
   const handleCancel = () => {
-    // 원래 데이터로 되돌리기
     if (groupData) {
       setFormData({
         name: groupData.name || "",
         description: groupData.description || "",
-        groupImageURL: groupData.groupImageURL || "",
         tags: groupData.tags || [],
+        groupImage: undefined, // 새로 업로드된 파일은 초기화
+        groupImageURL: groupData.groupImageURL || "", // 기존 이미지 URL은 유지
       });
+      setPreviewImage(groupData.groupImageURL || null);
     }
-    setPreviewImage(null);
     setIsEditing(false);
   };
 
@@ -105,132 +131,233 @@ export default function GroupSettingsCard({ groupId }: { groupId: number }) {
         throw new Error(response.errorMessage);
       }
       alert("그룹이 성공적으로 삭제되었습니다.");
+      onDeleteRoute();
     });
   };
+
+  // 그룹 데이터가 로드되면 폼 데이터 초기화
+  useEffect(() => {
+    if (groupData) {
+      setFormData({
+        name: groupData.name || "",
+        description: groupData.description || "",
+        tags: groupData.tags || [],
+        groupImage: undefined, // 편집 전에는 업로드된 파일이 없으므로 undefined
+        groupImageURL: groupData.groupImageURL || "",
+      });
+      setPreviewImage(groupData.groupImageURL || null); // 이미지 미리보기 URL 따로 저장
+    }
+  }, [groupData]);
 
   return (
     <Stack spacing={3}>
       {/* 그룹 정보 수정 카드 */}
-      <Card>
+      <Card elevation={2}>
         <CardHeader
-          title="그룹 정보 수정"
+          title={
+            <Typography variant="h6" fontWeight="600">
+              그룹 정보 수정
+            </Typography>
+          }
           action={
             <Button
               variant="outlined"
               startIcon={<EditIcon />}
               onClick={() => setIsEditing(true)}
-              disabled={isEditing} // 이미 편집 중이면 버튼 비활성화
+              disabled={isEditing}
+              sx={{
+                borderRadius: 2,
+                textTransform: "none",
+                fontWeight: 500,
+              }}
             >
               수정
             </Button>
           }
+          sx={{ pb: 1 }}
         />
+
         <Modal
           open={isEditing}
           onClose={handleCancel}
           sx={{
-            width: "100vw",
-            height: "100vh",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
+            p: 2,
           }}
         >
-          <Container sx={{ height: "60vh", width: "120vh" }}>
+          <Container
+            maxWidth="md"
+            sx={{
+              height: "80vh",
+              maxHeight: 600,
+              borderRadius: 2,
+              overflow: "hidden",
+            }}
+          >
             <GroupEditForm
-              groupEditData={formData}
+              groupEditData={{
+                name: formData.name,
+                description: formData.description,
+                tags: formData.tags,
+                groupImage: formData.groupImage,
+                groupImageURL: formData.groupImageURL,
+              }}
               onEditDone={handleSave}
               onCancel={handleCancel}
             />
           </Container>
         </Modal>
-        <CardContent>
-          <Stack spacing={4}>
+
+        <CardContent sx={{ pt: 0 }}>
+          <Stack spacing={3}>
             {/* 그룹 이미지 */}
             <Box>
-              <Typography variant="subtitle1" gutterBottom>
+              <Typography
+                variant="subtitle1"
+                fontWeight="600"
+                color="text.primary"
+                gutterBottom
+              >
                 그룹 이미지
               </Typography>
-              <Stack direction="row" spacing={3} alignItems="center">
+              <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
                 <Avatar
-                  src={previewImage || formData.groupImageURL}
-                  sx={{ width: 80, height: 80 }}
+                  src={previewImage || ""}
+                  sx={{
+                    width: 80,
+                    height: 80,
+                    border: "2px solid",
+                    borderColor: "divider",
+                  }}
                 >
-                  <GroupIcon sx={{ fontSize: 40 }} />
+                  <GroupIcon sx={{ fontSize: 40, color: "text.secondary" }} />
                 </Avatar>
-              </Stack>
+              </Box>
             </Box>
 
             {/* 그룹명 */}
             <Box>
-              <Typography variant="subtitle1" gutterBottom>
+              <Typography
+                variant="subtitle1"
+                fontWeight="600"
+                color="text.primary"
+                gutterBottom
+              >
                 그룹명
               </Typography>
               <Typography
-                variant="body2"
-                fontStyle="italic"
-                color="text.secondary"
-                gutterBottom
+                variant="body1"
+                sx={{
+                  mt: 1,
+                  p: 1.5,
+                  borderRadius: 1,
+                  border: "1px solid",
+                  borderColor: "divider",
+                }}
               >
-                *현재 수정 불가
+                {groupData?.name || "-"}
               </Typography>
-
-              <Typography variant="body1">{groupData?.name || "-"}</Typography>
             </Box>
 
             {/* 그룹 설명 */}
             <Box>
-              <Typography variant="subtitle1" gutterBottom>
+              <Typography
+                variant="subtitle1"
+                fontWeight="600"
+                color="text.primary"
+                gutterBottom
+              >
                 그룹 설명
               </Typography>
-
-              <Typography variant="body1" sx={{ whiteSpace: "pre-wrap" }}>
+              <Typography
+                variant="body1"
+                sx={{
+                  whiteSpace: "pre-wrap",
+                  mt: 1,
+                  p: 1.5,
+                  borderRadius: 1,
+                  border: "1px solid",
+                  borderColor: "divider",
+                  minHeight: 60,
+                }}
+              >
                 {groupData?.description || "설명이 없습니다."}
               </Typography>
             </Box>
 
             {/* 태그 */}
             <Box>
-              <Typography variant="subtitle1" gutterBottom>
-                태그
-              </Typography>
               <Typography
-                variant="body2"
-                fontStyle="italic"
-                color="text.secondary"
+                variant="subtitle1"
+                fontWeight="600"
+                color="text.primary"
                 gutterBottom
               >
-                *현재 수정 불가
+                태그
               </Typography>
-              <Stack spacing={2}>
-                {/* 현재 태그들 */}
-                <Box>
-                  {formData.tags.length > 0 ? (
-                    <Stack direction="row" spacing={1} flexWrap="wrap">
-                      {formData.tags.map((tag, index) => (
-                        <Chip
-                          key={index}
-                          label={tag}
-                          variant="outlined"
-                          size="small"
-                        />
-                      ))}
-                    </Stack>
-                  ) : (
+              <Box sx={{ mt: 1 }}>
+                {formData.tags.length > 0 ? (
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    flexWrap="wrap"
+                    useFlexGap
+                    sx={{ gap: 1 }}
+                  >
+                    {formData.tags.map((tag, index) => (
+                      <Chip
+                        key={index}
+                        label={tag}
+                        variant="outlined"
+                        size="small"
+                        sx={{
+                          borderRadius: 2,
+                          fontWeight: 500,
+                        }}
+                      />
+                    ))}
+                  </Stack>
+                ) : (
+                  <Box
+                    sx={{
+                      p: 2,
+                      borderRadius: 1,
+                      border: "1px dashed",
+                      borderColor: "divider",
+                      textAlign: "center",
+                    }}
+                  >
                     <Typography variant="body2" color="text.secondary">
                       등록된 태그가 없습니다.
                     </Typography>
-                  )}
-                </Box>
-              </Stack>
+                  </Box>
+                )}
+              </Box>
             </Box>
 
             {/* 그룹 ID (읽기 전용) */}
             <Box>
-              <Typography variant="subtitle1" gutterBottom>
+              <Typography
+                variant="subtitle1"
+                fontWeight="600"
+                color="text.primary"
+                gutterBottom
+              >
                 그룹 ID
               </Typography>
-              <Typography variant="body1" color="text.secondary">
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{
+                  mt: 1,
+                  p: 1.5,
+                  borderRadius: 1,
+                  fontFamily: "monospace",
+                  fontSize: "0.875rem",
+                }}
+              >
                 {groupData?.groupId}
               </Typography>
             </Box>
@@ -238,63 +365,9 @@ export default function GroupSettingsCard({ groupId }: { groupId: number }) {
         </CardContent>
       </Card>
 
-      {/* 기타 설정들 */}
-      <Card>
-        <CardHeader title="그룹 설정" />
-        <CardContent>
-          <Stack spacing={3}>
-            <Alert severity="info">아래 기능들은 개발 중입니다.</Alert>
-
-            <Stack spacing={2}>
-              <Typography variant="h6">개발 예정 기능</Typography>
-              <Box component="ul" sx={{ pl: 2 }}>
-                <Typography
-                  component="li"
-                  variant="body2"
-                  color="text.secondary"
-                >
-                  공개/비공개 설정
-                </Typography>
-                <Typography
-                  component="li"
-                  variant="body2"
-                  color="text.secondary"
-                >
-                  가입 승인 방식 설정 (자동/수동)
-                </Typography>
-                <Typography
-                  component="li"
-                  variant="body2"
-                  color="text.secondary"
-                >
-                  멤버 권한 관리
-                </Typography>
-                <Typography
-                  component="li"
-                  variant="body2"
-                  color="text.secondary"
-                >
-                  그룹 카테고리 설정
-                </Typography>
-                <Typography
-                  component="li"
-                  variant="body2"
-                  color="text.secondary"
-                >
-                  알림 설정
-                </Typography>
-              </Box>
-            </Stack>
-          </Stack>
-        </CardContent>
-      </Card>
-
       {/* 위험한 작업들 */}
       <Card>
-        <CardHeader
-          title="위험 구역"
-          titleTypographyProps={{ color: "error.main" }}
-        />
+        <CardHeader title="위험 구역" sx={{ color: "error.main" }} />
         <CardContent>
           <Stack spacing={2}>
             <Alert severity="warning">
