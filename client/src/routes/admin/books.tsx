@@ -11,10 +11,10 @@ import {
 } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { BookMetadata } from "../../../types/book";
-import API_CLIENT from "../../../api/api";
+import { BookMetadata } from "../../types/book";
+import API_CLIENT from "../../api/api";
 
-export const Route = createFileRoute("/_pathlessLayout/admin/books")({
+export const Route = createFileRoute("/admin/books")({
   component: RouteComponent,
 });
 

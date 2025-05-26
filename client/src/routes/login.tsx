@@ -9,12 +9,12 @@ import {
   CardHeader,
 } from "@mui/material";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import useLogin from "../../api/login/useLogin";
+import useLogin from "../api/login/useLogin";
 import { useCallback, useState } from "react";
-import API_CLIENT from "../../api/api";
-import { AuthState } from "../../states/auth";
+import API_CLIENT from "../api/api";
+import { AuthState } from "../states/auth";
 
-export const Route = createFileRoute("/_pathlessLayout/login")({
+export const Route = createFileRoute("/login")({
   component: RouteComponent,
 });
 

@@ -1,9 +1,9 @@
 import { Button, Card, CardContent, CardHeader } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
-import HighlightBrowserModal from "../../../component/HighlightBrowserModal";
+import HighlightBrowserModal from "../../component/HighlightBrowserModal";
 import { useState } from "react";
 
-export const Route = createFileRoute("/_pathlessLayout/admin/")({
+export const Route = createFileRoute("/admin/")({
   component: RouteComponent,
 });
 

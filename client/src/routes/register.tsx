@@ -12,11 +12,11 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useMemo, useState } from "react";
-import API_CLIENT from "../../api/api";
-import useLogin from "../../api/login/useLogin";
-import { AuthState } from "../../states/auth";
+import API_CLIENT from "../api/api";
+import useLogin from "../api/login/useLogin";
+import { AuthState } from "../states/auth";
 
-export const Route = createFileRoute("/_pathlessLayout/register")({
+export const Route = createFileRoute("/register")({
   component: RouteComponent,
 });
 

@@ -12,12 +12,12 @@ import {
 } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import API_CLIENT from "../../../api/api";
+import API_CLIENT from "../../api/api";
 import { Add } from "@mui/icons-material";
 
 const MAX_DESCRIPTION_LENGTH = 10000;
 
-export const Route = createFileRoute("/_pathlessLayout/admin/uploadBook")({
+export const Route = createFileRoute("/admin/uploadBook")({
   component: RouteComponent,
 });
 

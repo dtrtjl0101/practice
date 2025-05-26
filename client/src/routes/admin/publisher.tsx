@@ -22,10 +22,10 @@ import {
   Typography,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import API_CLIENT from "../../../api/api";
-import PageNavigation from "../../../component/PageNavigation";
+import API_CLIENT from "../../api/api";
+import PageNavigation from "../../component/PageNavigation";
 
-export const Route = createFileRoute("/_pathlessLayout/admin/publisher")({
+export const Route = createFileRoute("/admin/publisher")({
   component: RouteComponent,
 });
 

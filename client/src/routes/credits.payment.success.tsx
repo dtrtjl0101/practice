@@ -2,9 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import API_CLIENT from "../api/api";
 import { Box, CircularProgress, Stack, Typography } from "@mui/material";
-import useAutoLogin from "../api/login/useAutoLogin";
-import useAutoTokenRefresh from "../api/login/useAutoTokenRefresh";
-import useInvalidateQueriesOnAuthChange from "../api/login/useInvalidateQueriesOnAuthChange";
 import { paymentSuccessToken } from "../types/paymentSuccessMessage";
 
 export const Route = createFileRoute("/credits/payment/success")({
@@ -22,9 +19,6 @@ export const Route = createFileRoute("/credits/payment/success")({
 
 function RouteComponent() {
   const { pgToken } = Route.useSearch();
-  useAutoLogin();
-  useAutoTokenRefresh();
-  useInvalidateQueriesOnAuthChange();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["kakaoPaySuccess", pgToken],
