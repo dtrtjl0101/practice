@@ -7,12 +7,15 @@ import {
   Button,
   useTheme,
   CardHeader,
+  Typography,
 } from "@mui/material";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import useLogin from "../api/login/useLogin";
 import { useCallback, useState } from "react";
 import API_CLIENT from "../api/api";
 import { AuthState } from "../states/auth";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import { Role } from "../types/role";
 
 export const Route = createFileRoute("/login")({
   component: RouteComponent,
@@ -39,10 +42,17 @@ function RouteComponent() {
 
     const loggedInUser = response.data as AuthState.LoggedInUser;
     login(loggedInUser);
-    navigate({
-      to: "/",
-      replace: true,
-    });
+    if ([Role.ROLE_PUBLISHER, Role.ROLE_ADMIN].includes(loggedInUser.role)) {
+      navigate({
+        to: "/mypage",
+        replace: true,
+      });
+    } else if (loggedInUser.role === Role.ROLE_USER) {
+      navigate({
+        to: "/",
+        replace: true,
+      });
+    }
   }, [login, navigate, email, password]);
 
   return (
@@ -84,12 +94,38 @@ function RouteComponent() {
             variant="text"
             onClick={() => {
               navigate({
-                to: "/register",
+                to: "/register/member",
               });
             }}
           >
             회원가입
           </Button>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            gutterBottom
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "right",
+            }}
+          >
+            <Typography
+              component="span"
+              onClick={() => {
+                navigate({
+                  to: "/register/publisher",
+                });
+              }}
+              sx={{
+                cursor: "pointer",
+                textDecoration: "underline",
+              }}
+            >
+              출판사, 비즈니스 회원가입
+            </Typography>
+            <ArrowForwardIcon />
+          </Typography>
         </CardContent>
       </Card>
     </Container>
