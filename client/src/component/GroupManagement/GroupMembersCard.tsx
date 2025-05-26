@@ -96,7 +96,8 @@ export default function GroupMembersCard({ groupId }: { groupId: number }) {
         .includes(searchTermDebounced.toLowerCase()) &&
       (roleFilter === "all" ||
         (roleFilter === "admin" && member.isLeader) ||
-        (roleFilter === "member" && !member.isLeader))
+        (roleFilter === "member" && !member.isLeader)) &&
+      member.isApproved
   );
 
   const handleKickMember = () => {
