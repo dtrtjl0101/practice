@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import RegisterForm from "../../../component/RegisterForm";
 
 export const Route = createFileRoute("/_pathlessLayout/register/publisher")({
