@@ -12,7 +12,7 @@ import qwerty.chaekit.service.highlight.reaction.HighlightReactionService;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/highlights")
-public class ReactionController {
+public class HighlightReactionController {
     private final HighlightReactionService highlightReactionService;
     
     @PostMapping("/{highlightId}/reactions")
