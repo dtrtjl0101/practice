@@ -1,25 +1,27 @@
 import {
-  Avatar,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
   Container,
-  Skeleton,
   Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Typography,
+  Box,
+  Paper,
+  Tabs,
+  Tab,
 } from "@mui/material";
+import {
+  PersonAdd as PersonAddIcon,
+  Group as GroupIcon,
+  Settings as SettingsIcon,
+  BarChart as BarChartIcon,
+} from "@mui/icons-material";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
 import API_CLIENT from "../../../../api/api";
-import PageNavigation from "../../../../component/PageNavigation";
+import GroupStatisticsCard from "../../../../component/GroupManagement/GroupStatisticCard";
+import PendingMemberCard from "../../../../component/GroupManagement/PendingMemberCard";
+import GroupDashboard from "../../../../component/GroupManagement/GroupDashboard";
+import GroupMembersCard from "../../../../component/GroupManagement/GroupMembersCard";
+import GroupSettingsCard from "../../../../component/GroupManagement/GroupSettingsCard";
 
 export const Route = createFileRoute("/_pathlessLayout/groups/$groupId/manage")(
   {
@@ -30,256 +32,117 @@ export const Route = createFileRoute("/_pathlessLayout/groups/$groupId/manage")(
         if (isNaN(groupId)) {
           throw new Error("Invalid groupId");
         }
-        return {
-          groupId,
-        };
+        return { groupId };
       },
     },
   }
 );
 
-function RouteComponent() {
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
   return (
-    <Container sx={{ my: 8 }}>
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`group-management-tabpanel-${index}`}
+      aria-labelledby={`group-management-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
+    </div>
+  );
+}
+
+function RouteComponent() {
+  const [tabValue, setTabValue] = useState(0);
+  const { groupId } = Route.useParams();
+  const navigate = Route.useNavigate();
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+  };
+
+  const { data: groupData } = useQuery({
+    queryKey: ["getGroup", groupId],
+    queryFn: async () => {
+      const response = await API_CLIENT.groupController.getGroup(groupId);
+      if (!response.isSuccessful) {
+        throw new Error(response.errorMessage);
+      }
+      return response.data;
+    },
+  });
+  const groupName = groupData?.name;
+
+  const handleRouteGroups = () => {
+    navigate({ to: "/groups" });
+  };
+
+  return (
+    <Container maxWidth="lg" sx={{ py: 4 }}>
       <Stack spacing={4}>
-        <PendingMemberCard />
-        <MembersCard />
+        {/* 헤더 영역 */}
+        <Box>
+          <Typography variant="h4" fontWeight="bold" gutterBottom>
+            {groupName} 그룹 관리
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            멤버 관리, 설정 변경 및 그룹 운영을 관리하세요
+          </Typography>
+        </Box>
+
+        {/* 대시보드 카드 */}
+        <GroupDashboard groupId={groupId} />
+
+        {/* 탭 네비게이션 */}
+        <Paper elevation={0} sx={{ borderBottom: 1, borderColor: "divider" }}>
+          <Tabs
+            value={tabValue}
+            onChange={handleTabChange}
+            aria-label="그룹 관리 탭"
+            variant="scrollable"
+            scrollButtons="auto"
+          >
+            <Tab
+              icon={<PersonAddIcon />}
+              label="가입 신청"
+              iconPosition="start"
+            />
+            <Tab icon={<GroupIcon />} label="멤버 관리" iconPosition="start" />
+            <Tab
+              icon={<SettingsIcon />}
+              label="그룹 설정"
+              iconPosition="start"
+            />
+            <Tab icon={<BarChartIcon />} label="통계" iconPosition="start" />
+          </Tabs>
+        </Paper>
+
+        {/* 탭 패널 */}
+        <TabPanel value={tabValue} index={0}>
+          <PendingMemberCard groupId={groupId} />
+        </TabPanel>
+
+        <TabPanel value={tabValue} index={1}>
+          <GroupMembersCard groupId={groupId} />
+        </TabPanel>
+
+        <TabPanel value={tabValue} index={2}>
+          <GroupSettingsCard
+            groupId={groupId}
+            onDeleteRoute={handleRouteGroups}
+          />
+        </TabPanel>
+
+        <TabPanel value={tabValue} index={3}>
+          <GroupStatisticsCard />
+        </TabPanel>
       </Stack>
     </Container>
-  );
-}
-
-function PendingMemberCard() {
-  const { groupId } = Route.useParams();
-
-  const [page, setPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
-
-  const { data: pendingRequests, refetch } = useQuery({
-    queryKey: ["pendingList", groupId, page],
-    queryFn: async () => {
-      const response = await API_CLIENT.groupController.getPendingList(
-        groupId,
-        {
-          page,
-          size: 20,
-        }
-      );
-      if (!response.isSuccessful) {
-        throw new Error(response.errorMessage);
-      }
-      setTotalPages(response.data.totalPages!);
-      return response.data.content;
-    },
-    initialData: [],
-  });
-
-  const onApproveButtonClicked = async (
-    request: NonNullable<typeof pendingRequests>[number]
-  ) => {
-    const response = await API_CLIENT.groupController.approveJoinRequest(
-      groupId,
-      request.userId!
-    );
-    if (!response.isSuccessful) {
-      console.error("Failed to accept request:", response.errorMessage);
-      alert("요청 수락에 실패했습니다. 잠시 후 다시 시도해주세요.");
-      return;
-    }
-
-    refetch();
-    alert("요청이 수락되었습니다.");
-  };
-  const onRejectButtonClicked = async (
-    request: NonNullable<typeof pendingRequests>[number]
-  ) => {
-    const response = await API_CLIENT.groupController.rejectJoinRequest(
-      groupId,
-      request.userId!
-    );
-    if (!response.isSuccessful) {
-      console.error("Failed to reject request:", response.errorMessage);
-      alert("요청 거절에 실패했습니다. 잠시 후 다시 시도해주세요.");
-      return;
-    }
-
-    refetch();
-    alert("요청이 거절되었습니다.");
-  };
-
-  return (
-    <Card>
-      <CardHeader title="대기중인 모임원 가입 신청 목록" />
-      <CardContent>
-        <Stack spacing={2}>
-          <PageNavigation
-            pageZeroBased={page}
-            setPage={setPage}
-            totalPages={totalPages}
-          />
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>ID</TableCell>
-                  <TableCell>닉네임</TableCell>
-                  <TableCell>작업</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {pendingRequests ? (
-                  pendingRequests.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={7} align="center">
-                        대기 중인 신청이 없습니다.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    pendingRequests.map((pending) => (
-                      <TableRow key={pending.userId}>
-                        <TableCell>{pending.userId}</TableCell>
-                        <TableCell>
-                          <Stack
-                            direction={"row"}
-                            spacing={1}
-                            alignItems={"center"}
-                          >
-                            <Avatar src={pending.profileImageURL} />
-                            <Typography>{pending.nickname}</Typography>
-                          </Stack>
-                        </TableCell>
-                        <TableCell>
-                          <Stack direction={"row"} spacing={1}>
-                            <Button
-                              variant="contained"
-                              color="primary"
-                              onClick={() => onApproveButtonClicked(pending)}
-                            >
-                              승인
-                            </Button>
-                            <Button
-                              variant="contained"
-                              color="error"
-                              onClick={() => onRejectButtonClicked(pending)}
-                            >
-                              거절
-                            </Button>
-                          </Stack>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )
-                ) : (
-                  <Skeleton />
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-          <PageNavigation
-            pageZeroBased={page}
-            setPage={setPage}
-            totalPages={totalPages}
-          />
-        </Stack>
-      </CardContent>
-    </Card>
-  );
-}
-
-function MembersCard() {
-  const { groupId } = Route.useParams();
-
-  const [page, setPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
-
-  const { data: pendingRequests } = useQuery({
-    queryKey: ["groupMembers", groupId, page],
-    queryFn: async () => {
-      const response = await API_CLIENT.groupController.getGroupMembers(
-        groupId,
-        {
-          page,
-          size: 20,
-        }
-      );
-      if (!response.isSuccessful) {
-        throw new Error(response.errorMessage);
-      }
-      setTotalPages(response.data.totalPages!);
-      return response.data.content;
-    },
-    initialData: [],
-  });
-
-  return (
-    <Card>
-      <CardHeader title="모임원 목록" />
-      <CardContent>
-        <Stack spacing={2}>
-          <PageNavigation
-            pageZeroBased={page}
-            setPage={setPage}
-            totalPages={totalPages}
-          />
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>ID</TableCell>
-                  <TableCell>닉네임</TableCell>
-                  <TableCell>가입 신청일</TableCell>
-                  <TableCell>승인일</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {pendingRequests ? (
-                  pendingRequests.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={7} align="center">
-                        모임원이 없습니다
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    pendingRequests.map((member) => (
-                      <TableRow key={member.userId}>
-                        <TableCell>{member.userId}</TableCell>
-                        <TableCell>
-                          <Stack
-                            direction={"row"}
-                            spacing={1}
-                            alignItems={"center"}
-                          >
-                            <Avatar src={member.profileImageURL} />
-                            <Typography>{member.nickname}</Typography>
-                          </Stack>
-                        </TableCell>
-
-                        <TableCell>
-                          {member.createdAt
-                            ? new Date(member.createdAt).toLocaleString()
-                            : "-"}
-                        </TableCell>
-                        <TableCell>
-                          {member.approvedAt
-                            ? new Date(member.approvedAt).toLocaleString()
-                            : "-"}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )
-                ) : (
-                  <Skeleton />
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-          <PageNavigation
-            pageZeroBased={page}
-            setPage={setPage}
-            totalPages={totalPages}
-          />
-        </Stack>
-      </CardContent>
-    </Card>
   );
 }

@@ -1,28 +1,30 @@
 import { Add, Delete } from "@mui/icons-material";
 import {
   Button,
-  CardActionArea,
   CardMedia,
   Chip,
   Grid,
-  Icon,
   IconButton,
   InputAdornment,
   OutlinedInput,
   Paper,
   Stack,
   TextField,
+  Box,
 } from "@mui/material";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export type GroupEditData = {
   name: string;
   description: string;
   tags: string[];
   groupImage?: File;
+  groupImageURL?: string; // 기존 이미지 URL 추가
+  imageAction?: "keep" | "update" | "remove"; // 이미지 액션 구분
 };
 
 export default function GroupEditForm(props: {
+  groupEditData?: GroupEditData;
   onEditDone: (data: GroupEditData) => void;
   onCancel: () => void;
 }) {
@@ -33,14 +35,27 @@ export default function GroupEditForm(props: {
   const [tag, setTag] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [groupImage, setGroupImage] = useState<File | undefined>(undefined);
+  const [currentImageURL, setCurrentImageURL] = useState<string>("");
+  const [imageAction, setImageAction] = useState<"keep" | "update" | "remove">(
+    "keep"
+  );
 
   const handleEditDoneButtonClicked = () => {
-    onEditDone({
+    const editData: GroupEditData = {
       name,
       description,
       tags,
-      groupImage,
-    });
+      imageAction,
+    };
+
+    // 이미지 액션에 따라 데이터 설정
+    if (imageAction === "update" && groupImage) {
+      editData.groupImage = groupImage;
+    } else if (imageAction === "keep" && currentImageURL) {
+      editData.groupImageURL = currentImageURL;
+    }
+
+    onEditDone(editData);
   };
 
   const handleTagAddButtonClicked = () => {
@@ -59,49 +74,113 @@ export default function GroupEditForm(props: {
     setTags((prev) => prev.filter((t) => t !== tag));
   };
 
-  const groupImagePreviewUrl = useMemo(() => {
-    if (!groupImage) {
-      return "";
+  const handleImageUpload = () => {
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "image/*";
+    fileInput.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        setGroupImage(file);
+        setImageAction("update");
+      }
+    };
+    fileInput.click();
+  };
+
+  const handleImageRemove = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setGroupImage(undefined);
+    setImageAction("remove");
+  };
+
+  // 표시할 이미지 URL 결정
+  const displayImageUrl = useMemo(() => {
+    if (imageAction === "update" && groupImage) {
+      return URL.createObjectURL(groupImage);
     }
-    return URL.createObjectURL(groupImage);
-  }, [groupImage]);
+    if (imageAction === "keep" && currentImageURL) {
+      return currentImageURL;
+    }
+    return null;
+  }, [groupImage, currentImageURL, imageAction]);
+
+  useEffect(() => {
+    if (props.groupEditData) {
+      const { name, description, tags, groupImage, groupImageURL } =
+        props.groupEditData;
+      setName(name);
+      setDescription(description);
+      setTags(tags);
+      setGroupImage(groupImage);
+      setCurrentImageURL(groupImageURL || "");
+      setImageAction("keep");
+    }
+  }, [props.groupEditData]);
 
   return (
     <Paper sx={{ width: "100%", height: "100%", padding: 2 }}>
       <Stack spacing={2} sx={{ height: "100%", overflowY: "auto", padding: 2 }}>
-        <CardActionArea
-          onClick={() => {
-            const fileInput = document.createElement("input");
-            fileInput.type = "file";
-            fileInput.accept = "image/*";
-            fileInput.onchange = (e) => {
-              const file = (e.target as HTMLInputElement).files?.[0];
-              if (file) {
-                setGroupImage(file);
-              }
-            };
-            fileInput.click();
-          }}
+        {/* 이미지 업로드 영역 - CardActionArea 제거하고 Box로 변경 */}
+        <Box
+          onClick={handleImageUpload}
           sx={{
             display: "flex",
             textAlign: "center",
             justifyContent: "center",
+            position: "relative",
+            cursor: "pointer",
+            borderRadius: 2,
+            padding: 2,
+            "&:hover": {
+              borderColor: "#999",
+              backgroundColor: "rgba(0,0,0,0.02)",
+            },
           }}
         >
-          {groupImage ? (
-            <CardMedia
-              image={groupImagePreviewUrl}
+          {displayImageUrl ? (
+            <>
+              <CardMedia
+                image={displayImageUrl}
+                sx={{
+                  width: 256,
+                  height: 256,
+                  borderRadius: 1,
+                }}
+              />
+              <IconButton
+                onClick={handleImageRemove}
+                sx={{
+                  position: "absolute",
+                  top: 16,
+                  right: 16,
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                  color: "white",
+                  "&:hover": {
+                    backgroundColor: "rgba(0,0,0,0.7)",
+                  },
+                }}
+                size="small"
+              >
+                <Delete />
+              </IconButton>
+            </>
+          ) : (
+            <Box
               sx={{
                 width: 256,
                 height: 256,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#ccc",
               }}
-            />
-          ) : (
-            <Icon sx={{ width: 256, height: 256, lineHeight: "256px" }}>
-              <Add fontSize="large" />
-            </Icon>
+            >
+              <Add sx={{ fontSize: 64 }} />
+            </Box>
           )}
-        </CardActionArea>
+        </Box>
+
         <TextField
           placeholder="모임 이름"
           variant="outlined"
@@ -142,9 +221,10 @@ export default function GroupEditForm(props: {
           spacing={1}
           sx={{ flexGrow: 1, alignContent: "flex-start", flexWrap: "wrap" }}
         >
-          {tags.map((tag) => {
+          {tags.map((tag, index) => {
             return (
               <Chip
+                key={index}
                 label={tag}
                 onDelete={() => handleTagDeleteButtonClicked(tag)}
                 deleteIcon={<Delete />}
