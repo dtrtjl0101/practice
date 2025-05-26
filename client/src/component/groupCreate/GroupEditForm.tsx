@@ -4,7 +4,6 @@ import {
   CardMedia,
   Chip,
   Grid,
-  Icon,
   IconButton,
   InputAdornment,
   OutlinedInput,
