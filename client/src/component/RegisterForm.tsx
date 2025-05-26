@@ -10,20 +10,20 @@ import {
   useTheme,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useMemo, useState } from "react";
-import API_CLIENT from "../../api/api";
-import useLogin from "../../api/login/useLogin";
-import { AuthState } from "../../states/auth";
+import API_CLIENT from "../api/api";
+import useLogin from "../api/login/useLogin";
+import { AuthState } from "../states/auth";
 
-export const Route = createFileRoute("/_pathlessLayout/register")({
-  component: RouteComponent,
-});
-
-function RouteComponent() {
+export default function RegisterForm({
+  registerType,
+  handleBack,
+}: {
+  registerType?: "member" | "publisher";
+  handleBack: () => void;
+}) {
   const theme = useTheme();
   const { login } = useLogin();
-  const navigate = Route.useNavigate();
   const [nickname, setNickname] = useState("");
   const [email, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -64,37 +64,54 @@ function RouteComponent() {
       alert("비밀번호가 일치하지 않습니다.");
       return;
     }
-    const response = await API_CLIENT.userController.userJoin({
-      nickname,
-      email,
-      password,
-      verificationCode,
-      ...(profileImage ? { profileImage } : {}),
-    });
+
+    let response;
+
+    if (registerType === "member") {
+      response = await API_CLIENT.userController.userJoin({
+        nickname,
+        email,
+        password,
+        verificationCode,
+        ...(profileImage ? { profileImage } : {}),
+      });
+    } else if (registerType === "publisher") {
+      response = await API_CLIENT.publisherController.publisherJoin({
+        publisherName: nickname,
+        email,
+        password,
+        verificationCode,
+        ...(profileImage ? { profileImage } : {}),
+      });
+    } else {
+      alert("잘못된 회원가입 유형입니다.");
+      return;
+    }
+
     if (response.isSuccessful) {
       alert("회원가입이 완료되었습니다.");
       const loggedInUser = response.data as AuthState.LoggedInUser;
       login(loggedInUser);
-      navigate({
-        to: "/",
-        replace: true,
-      });
+      handleBack();
       return;
     }
+
+    // 에러 처리
     switch (response.errorCode) {
-      case "NICKNAME_ALREADY_EXISTS": {
+      case "NICKNAME_ALREADY_EXISTS":
         alert("이미 존재하는 닉네임입니다.");
         break;
-      }
     }
   }, [
-    login,
-    navigate,
+    registerType,
     email,
     password,
     confirmPassword,
     nickname,
     verificationCode,
+    profileImage,
+    login,
+    handleBack,
   ]);
 
   const profileImagePreviewUrl = useMemo(() => {
@@ -107,7 +124,9 @@ function RouteComponent() {
   return (
     <Container maxWidth="sm" sx={{ my: 8 }}>
       <Card>
-        <CardHeader title="회원가입" />
+        <CardHeader
+          title={registerType == "member" ? "회원가입" : "출판사 회원가입"}
+        />
         <CardContent
           sx={{
             display: "flex",
@@ -201,9 +220,13 @@ function RouteComponent() {
                   {!profileImage && <AddIcon />}
                 </Avatar>
               </div>
-              <InputLabel>Nickname</InputLabel>
+              <InputLabel>
+                {registerType == "member" ? "Nickname" : "Publisher Name"}
+              </InputLabel>
               <OutlinedInput
-                placeholder="Nickname"
+                placeholder={
+                  registerType == "member" ? "Nickname" : "Publisher Name"
+                }
                 fullWidth
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
