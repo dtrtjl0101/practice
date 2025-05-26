@@ -1,4 +1,10 @@
-import { Button, Card, CardContent, CardHeader } from "@mui/material";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Container,
+} from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
 import HighlightBrowserModal from "../../component/HighlightBrowserModal";
 import { useState } from "react";
@@ -11,21 +17,23 @@ function RouteComponent() {
   const [openMemoBrowser, setOpenMemoBrowser] = useState(false);
 
   return (
-    <Card>
-      <CardHeader title="Dashboard" />
-      <CardContent>
-        <Button onClick={() => setOpenMemoBrowser(true)}>
-          Open highlight browser
-        </Button>
-        <HighlightBrowserModal
-          open={openMemoBrowser}
-          onClose={() => {
-            setOpenMemoBrowser(false);
-          }}
-          onSelectHighlight={() => {}}
-          onUseHighlight={() => {}}
-        />
-      </CardContent>
-    </Card>
+    <Container sx={{ my: 8 }}>
+      <Card>
+        <CardHeader title="Dashboard" />
+        <CardContent>
+          <Button onClick={() => setOpenMemoBrowser(true)}>
+            Open highlight browser
+          </Button>
+          <HighlightBrowserModal
+            open={openMemoBrowser}
+            onClose={() => {
+              setOpenMemoBrowser(false);
+            }}
+            onSelectHighlight={() => {}}
+            onUseHighlight={() => {}}
+          />
+        </CardContent>
+      </Card>
+    </Container>
   );
 }

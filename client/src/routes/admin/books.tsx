@@ -2,6 +2,7 @@ import {
   Card,
   CardContent,
   CardHeader,
+  Container,
   Table,
   TableBody,
   TableCell,
@@ -43,32 +44,34 @@ function RouteComponent() {
   }, [setBooks]);
 
   return (
-    <Card>
-      <CardHeader title="Books" />
-      <CardContent>
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Title</TableCell>
-                <TableCell>Author</TableCell>
-                <TableCell>Size</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {books.map((book) => {
-                return (
-                  <TableRow key={book.id}>
-                    <TableCell>{book.title}</TableCell>
-                    <TableCell>{book.author}</TableCell>
-                    <TableCell>{book.size}</TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </CardContent>
-    </Card>
+    <Container sx={{ my: 8 }}>
+      <Card>
+        <CardHeader title="Books" />
+        <CardContent>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Title</TableCell>
+                  <TableCell>Author</TableCell>
+                  <TableCell>Size</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {books.map((book) => {
+                  return (
+                    <TableRow key={book.id}>
+                      <TableCell>{book.title}</TableCell>
+                      <TableCell>{book.author}</TableCell>
+                      <TableCell>{book.size}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </CardContent>
+      </Card>
+    </Container>
   );
 }

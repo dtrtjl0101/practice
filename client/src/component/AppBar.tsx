@@ -33,7 +33,14 @@ export default function AppBar() {
   };
 
   return (
-    <MuiAppBar position="static">
+    <MuiAppBar
+      position="fixed"
+      color="transparent"
+      sx={{
+        backdropFilter: "blur(10px)",
+        zIndex: (theme) => theme.zIndex.drawer + 1,
+      }}
+    >
       <Toolbar>
         <LogoButton to="/" sx={{ mr: "auto" }}>
           <img src="/logoTitle.png" alt="Logo" height={40} />
@@ -43,25 +50,7 @@ export default function AppBar() {
             value={colorScheme === "light"}
             onChange={onColorSchemeChangeSwitchClicked}
           />
-          <LinkButton
-            color="inherit"
-            to={"/books"}
-            search={{ title: undefined }}
-          >
-            도서
-          </LinkButton>
-          <LinkButton color="inherit" to={"/groups"}>
-            모임
-          </LinkButton>
           <Divider orientation="vertical" flexItem variant="middle" />
-          {user && user.role === Role.ROLE_ADMIN && (
-            <>
-              <LinkButton color="inherit" to={"/admin"}>
-                관리자
-              </LinkButton>
-              <Divider orientation="vertical" flexItem variant="middle" />
-            </>
-          )}
           {user ? (
             <>
               <LinkButton color="inherit" to={"/mypage"}>

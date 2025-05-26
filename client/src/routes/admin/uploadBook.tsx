@@ -6,6 +6,7 @@ import {
   CardContent,
   CardHeader,
   CardMedia,
+  Container,
   Icon,
   InputLabel,
   TextField,
@@ -65,109 +66,111 @@ function RouteComponent() {
   }, [coverImageFile]);
 
   return (
-    <Card sx={{ p: 2 }}>
-      <CardHeader title="전자책 업로드" />
-      <CardActionArea
-        onClick={() => {
-          const fileInput = document.createElement("input");
-          fileInput.type = "file";
-          fileInput.accept = "image/*";
-          fileInput.onchange = (e) => {
-            const file = (e.target as HTMLInputElement).files?.[0];
-            if (file) {
-              setCoverImageFile(file);
-            }
-          };
-          fileInput.click();
-        }}
-        sx={{
-          display: "flex",
-          textAlign: "center",
-          justifyContent: "center",
-        }}
-      >
-        {coverImageFile ? (
-          <CardMedia
-            image={coverImageFilePreviewUrl}
-            sx={{
-              width: 256,
-              height: 256,
+    <Container sx={{ my: 8 }}>
+      <Card sx={{ p: 2 }}>
+        <CardHeader title="전자책 업로드" />
+        <CardActionArea
+          onClick={() => {
+            const fileInput = document.createElement("input");
+            fileInput.type = "file";
+            fileInput.accept = "image/*";
+            fileInput.onchange = (e) => {
+              const file = (e.target as HTMLInputElement).files?.[0];
+              if (file) {
+                setCoverImageFile(file);
+              }
+            };
+            fileInput.click();
+          }}
+          sx={{
+            display: "flex",
+            textAlign: "center",
+            justifyContent: "center",
+          }}
+        >
+          {coverImageFile ? (
+            <CardMedia
+              image={coverImageFilePreviewUrl}
+              sx={{
+                width: 256,
+                height: 256,
+              }}
+            />
+          ) : (
+            <Icon sx={{ width: 256, height: 256, lineHeight: "256px" }}>
+              <Add fontSize="large" />
+            </Icon>
+          )}
+        </CardActionArea>
+        <CardContent>
+          <InputLabel>제목</InputLabel>
+          <TextField
+            fullWidth
+            placeholder="Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        </CardContent>
+        <CardContent>
+          <InputLabel>저자</InputLabel>
+          <TextField
+            fullWidth
+            placeholder="Author"
+            value={author}
+            onChange={(e) => setAuthor(e.target.value)}
+          />
+        </CardContent>
+        <CardContent>
+          <InputLabel>설명</InputLabel>
+          <TextField
+            fullWidth
+            placeholder="Description"
+            multiline
+            value={description}
+            slotProps={{
+              htmlInput: { maxLength: MAX_DESCRIPTION_LENGTH },
+            }}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value.length >= MAX_DESCRIPTION_LENGTH) {
+                setDescription(value.slice(0, MAX_DESCRIPTION_LENGTH));
+                return;
+              }
+              setDescription(value);
+            }}
+            helperText={`${description.length} / ${MAX_DESCRIPTION_LENGTH}`}
+          />
+        </CardContent>
+        <CardContent>
+          <InputLabel>가격</InputLabel>
+          <TextField
+            fullWidth
+            placeholder="10000"
+            value={price.toLocaleString()}
+            onChange={(e) => {
+              const value = e.target.value.replace(/,/g, "");
+              const parsedValue = parseInt(value);
+              if (isNaN(parsedValue)) {
+                return;
+              }
+              if (parsedValue < 0) {
+                setPrice(0);
+                return;
+              }
+              setPrice(parsedValue);
             }}
           />
-        ) : (
-          <Icon sx={{ width: 256, height: 256, lineHeight: "256px" }}>
-            <Add fontSize="large" />
-          </Icon>
-        )}
-      </CardActionArea>
-      <CardContent>
-        <InputLabel>제목</InputLabel>
-        <TextField
-          fullWidth
-          placeholder="Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-      </CardContent>
-      <CardContent>
-        <InputLabel>저자</InputLabel>
-        <TextField
-          fullWidth
-          placeholder="Author"
-          value={author}
-          onChange={(e) => setAuthor(e.target.value)}
-        />
-      </CardContent>
-      <CardContent>
-        <InputLabel>설명</InputLabel>
-        <TextField
-          fullWidth
-          placeholder="Description"
-          multiline
-          value={description}
-          slotProps={{
-            htmlInput: { maxLength: MAX_DESCRIPTION_LENGTH },
-          }}
-          onChange={(e) => {
-            const value = e.target.value;
-            if (value.length >= MAX_DESCRIPTION_LENGTH) {
-              setDescription(value.slice(0, MAX_DESCRIPTION_LENGTH));
-              return;
-            }
-            setDescription(value);
-          }}
-          helperText={`${description.length} / ${MAX_DESCRIPTION_LENGTH}`}
-        />
-      </CardContent>
-      <CardContent>
-        <InputLabel>가격</InputLabel>
-        <TextField
-          fullWidth
-          placeholder="10000"
-          value={price.toLocaleString()}
-          onChange={(e) => {
-            const value = e.target.value.replace(/,/g, "");
-            const parsedValue = parseInt(value);
-            if (isNaN(parsedValue)) {
-              return;
-            }
-            if (parsedValue < 0) {
-              setPrice(0);
-              return;
-            }
-            setPrice(parsedValue);
-          }}
-        />
-      </CardContent>
-      <CardActions>
-        <Button
-          variant="contained"
-          sx={{ ml: "auto" }}
-          onClick={handleUploadBookButtonClicked}
-        >
-          Upload
-        </Button>
-      </CardActions>
-    </Card>
+        </CardContent>
+        <CardActions>
+          <Button
+            variant="contained"
+            sx={{ ml: "auto" }}
+            onClick={handleUploadBookButtonClicked}
+          >
+            Upload
+          </Button>
+        </CardActions>
+      </Card>
+    </Container>
   );
 }
