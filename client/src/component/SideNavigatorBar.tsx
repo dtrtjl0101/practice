@@ -1,4 +1,4 @@
-import { Menu } from "@mui/icons-material";
+import { ExpandLess, ExpandMore, Menu } from "@mui/icons-material";
 import {
   List,
   ListItem,
@@ -9,25 +9,40 @@ import {
   ListItemText,
   Theme,
   CSSObject,
+  Collapse,
 } from "@mui/material";
 import { createLink, LinkComponentProps } from "@tanstack/react-router";
 import { JSX, useState } from "react";
 
 const drawerWidth = 240;
 
+export type NavigationItem = {
+  to: LinkComponentProps["to"];
+  icon: JSX.Element;
+  label: string;
+  disableShowActive?: boolean;
+};
+
 export default function SideNavigationBar(props: {
-  items: {
-    to: LinkComponentProps["to"];
-    icon: JSX.Element;
-    label: string;
-    disableShowActive?: boolean;
-  }[];
+  itemsWithGroups: NavigationItem[][];
 }) {
-  const { items } = props;
+  const { itemsWithGroups } = props;
   const [open, setOpen] = useState(false);
 
   return (
-    <Drawer open={open} variant="permanent">
+    <Drawer
+      open={open}
+      variant="permanent"
+      elevation={0}
+      slotProps={{
+        paper: {
+          elevation: 0,
+          sx: {
+            border: "0px",
+          },
+        },
+      }}
+    >
       <List>
         <ListItem disablePadding>
           <ListItemButton
@@ -40,20 +55,16 @@ export default function SideNavigationBar(props: {
             </ListItemIcon>
           </ListItemButton>
         </ListItem>
-        {items.map(({ to, icon, label, disableShowActive }) => {
+        {itemsWithGroups.map(([header, ...children]) => {
           return (
-            <LinkListItem disablePadding to={to} key={to}>
-              {({ isActive }) => {
-                return (
-                  <ListItemButton
-                    selected={disableShowActive ? false : isActive}
-                  >
-                    <ListItemIcon>{icon}</ListItemIcon>
-                    <ListItemText primary={label} />
-                  </ListItemButton>
-                );
+            <LinkListButtonGroup
+              to={header.to}
+              headerButton={header}
+              childButtons={children}
+              activeProps={{
+                open: true,
               }}
-            </LinkListItem>
+            />
           );
         })}
       </List>
@@ -115,4 +126,54 @@ const Drawer = styled(MuiDrawer, {
   ],
 }));
 
-const LinkListItem = createLink(ListItem);
+const LinkListItemButton = createLink(ListItemButton);
+
+function ListButtonGroup(props: {
+  headerButton: NavigationItem;
+  childButtons: NavigationItem[];
+  open?: boolean;
+}): JSX.Element {
+  const { headerButton, childButtons, open } = props;
+  const hasChildren = childButtons.length > 0;
+
+  return (
+    <>
+      <LinkListItemButton
+        to={headerButton.to}
+        activeProps={{
+          selected: !headerButton.disableShowActive,
+        }}
+        inactiveProps={{
+          selected: false,
+        }}
+      >
+        <ListItemIcon>{headerButton.icon}</ListItemIcon>
+        <ListItemText primary={headerButton.label} />
+        {hasChildren && (open ? <ExpandLess /> : <ExpandMore />)}
+      </LinkListItemButton>
+      {hasChildren && (
+        <Collapse in={open} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            {childButtons.map((child) => (
+              <LinkListItemButton
+                to={child.to}
+                activeProps={{
+                  selected: !headerButton.disableShowActive,
+                }}
+                inactiveProps={{
+                  selected: false,
+                }}
+                sx={{ pl: 2 }}
+              >
+                <ListItemIcon>{child.icon}</ListItemIcon>
+                <ListItemText primary={child.label} />
+              </LinkListItemButton>
+            ))}
+          </List>
+        </Collapse>
+      )}
+    </>
+  );
+}
+
+const LinkListButtonGroup = createLink(ListButtonGroup);

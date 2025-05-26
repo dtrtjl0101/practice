@@ -1,8 +1,8 @@
 import { Container, Stack } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
-import GroupList from "../../../component/groupList";
+import GroupList from "../../component/groupList";
 
-export const Route = createFileRoute("/_pathlessLayout/groups/")({
+export const Route = createFileRoute("/groups/")({
   component: RouteComponent,
 });
 

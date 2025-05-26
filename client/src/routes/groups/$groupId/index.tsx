@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { GroupInfo, GroupMembershipStatus } from "../../../../types/groups";
+import { GroupInfo, GroupMembershipStatus } from "../../../types/groups";
 import {
   Container,
   Divider,
@@ -9,12 +9,12 @@ import {
   Typography,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import API_CLIENT from "../../../../api/api";
-import { ActivityCard } from "../../../../component/_pathlessLayout/groups/$groupId/ActivityCard";
-import { GroupHeader } from "../../../../component/_pathlessLayout/groups/$groupId/GroupHeader";
-import GroupReviewCard from "../../../../component/GroupReviewCard";
+import API_CLIENT from "../../../api/api";
+import { ActivityCard } from "../../../component/_pathlessLayout/groups/$groupId/ActivityCard";
+import { GroupHeader } from "../../../component/_pathlessLayout/groups/$groupId/GroupHeader";
+import GroupReviewCard from "../../../component/GroupReviewCard";
 
-export const Route = createFileRoute("/_pathlessLayout/groups/$groupId/")({
+export const Route = createFileRoute("/groups/$groupId/")({
   component: RouteComponent,
   params: {
     parse: (params) => {

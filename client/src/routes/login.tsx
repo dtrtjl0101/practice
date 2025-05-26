@@ -10,14 +10,14 @@ import {
   Typography,
 } from "@mui/material";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import useLogin from "../../api/login/useLogin";
+import useLogin from "../api/login/useLogin";
 import { useCallback, useState } from "react";
-import API_CLIENT from "../../api/api";
-import { AuthState } from "../../states/auth";
+import API_CLIENT from "../api/api";
+import { AuthState } from "../states/auth";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import { Role } from "../../types/role";
+import { Role } from "../types/role";
 
-export const Route = createFileRoute("/_pathlessLayout/login")({
+export const Route = createFileRoute("/login")({
   component: RouteComponent,
 });
 

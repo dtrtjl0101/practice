@@ -5,46 +5,50 @@ import {
   Divider,
   Avatar,
   Stack,
+  IconButton,
 } from "@mui/material";
 import { createLink } from "@tanstack/react-router";
-import { useAtomValue } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { AuthState } from "../states/auth";
 import { Role } from "../types/role";
 import useLogout from "../api/login/useLogout";
 import LinkButton from "./LinkButton";
 import NotificationButton from "./NotificationButton";
+import State from "../states";
+import { Nightlight, Sunny } from "@mui/icons-material";
 
 export default function AppBar() {
   const user = useAtomValue(AuthState.user);
-
+  const [colorScheme, setColorScheme] = useAtom(State.UI.userColorScheme);
   const { logout } = useLogout();
 
+  const onColorSchemeChangeButtonClicked = () => {
+    setColorScheme((prev) => {
+      const next = prev === "light" ? "dark" : "light";
+      localStorage.setItem("colorScheme", next);
+      return next;
+    });
+  };
+
   return (
-    <MuiAppBar position="static">
+    <MuiAppBar
+      position="fixed"
+      color="transparent"
+      sx={{
+        backdropFilter: "blur(10px)",
+        zIndex: (theme) => theme.zIndex.drawer + 1,
+      }}
+      elevation={0}
+    >
       <Toolbar>
         <LogoButton to="/" sx={{ mr: "auto" }}>
           <img src="/logoTitle.png" alt="Logo" height={40} />
         </LogoButton>
         <Stack direction="row" spacing={1}>
-          <LinkButton
-            color="inherit"
-            to={"/books"}
-            search={{ title: undefined }}
-          >
-            도서
-          </LinkButton>
-          <LinkButton color="inherit" to={"/groups"}>
-            모임
-          </LinkButton>
+          <IconButton onClick={onColorSchemeChangeButtonClicked}>
+            {colorScheme === "light" ? <Sunny /> : <Nightlight />}
+          </IconButton>
           <Divider orientation="vertical" flexItem variant="middle" />
-          {user && user.role === Role.ROLE_ADMIN && (
-            <>
-              <LinkButton color="inherit" to={"/admin"}>
-                관리자
-              </LinkButton>
-              <Divider orientation="vertical" flexItem variant="middle" />
-            </>
-          )}
           {user ? (
             <>
               <LinkButton color="inherit" to={"/mypage"}>

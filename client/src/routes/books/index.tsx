@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Container, IconButton, Stack } from "@mui/material";
-import BookSearchInput from "../../../component/BookSearchInput";
+import BookSearchInput from "../../component/BookSearchInput";
 import { Search } from "@mui/icons-material";
-import BookList from "../../../component/BookList";
+import BookList from "../../component/BookList";
 
-export const Route = createFileRoute("/_pathlessLayout/books/")({
+export const Route = createFileRoute("/books/")({
   component: RouteComponent,
   validateSearch: (search) => {
     return {
