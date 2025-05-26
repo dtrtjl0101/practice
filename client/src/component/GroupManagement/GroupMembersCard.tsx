@@ -38,13 +38,24 @@ import { useEffect, useState } from "react";
 import API_CLIENT from "../../api/api";
 import PageNavigation from "../PageNavigation";
 
+interface Member {
+  userId: number;
+  nickname: string;
+  profileImageURL: string;
+  isApproved: boolean;
+  isLeader: boolean;
+  createdAt: string;
+  approvedAt: string;
+}
+
 export default function GroupMembersCard({ groupId }: { groupId: number }) {
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const { data: members } = useQuery({
+  const [selectedMember, setSelectedMember] = useState<null | Member>();
+  const { data: members, refetch } = useQuery({
     queryKey: ["groupMembers", groupId, page],
     queryFn: async () => {
       const response = await API_CLIENT.groupController.getGroupMembers(
@@ -63,12 +74,17 @@ export default function GroupMembersCard({ groupId }: { groupId: number }) {
     initialData: [],
   });
 
-  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+  const handleMenuClick = (
+    event: React.MouseEvent<HTMLElement>,
+    member: any
+  ) => {
     setAnchorEl(event.currentTarget);
+    setSelectedMember(member);
   };
 
   const handleMenuClose = () => {
     setAnchorEl(null);
+    setSelectedMember(null);
   };
 
   const searchTermDebounced = useDebounce(searchTerm, 500); // 300ms 후 실행
@@ -82,6 +98,25 @@ export default function GroupMembersCard({ groupId }: { groupId: number }) {
         (roleFilter === "admin" && member.isLeader) ||
         (roleFilter === "member" && !member.isLeader))
   );
+
+  const handleKickMember = () => {
+    if (!selectedMember) return;
+    const confirmKick = window.confirm(
+      `멤버 ${selectedMember.nickname}을(를) 추방하시겠습니까?`
+    );
+    if (!confirmKick) return;
+    API_CLIENT.groupController
+      .kickGroupMember(groupId, selectedMember.userId)
+      .then((response) => {
+        if (response.isSuccessful) {
+          alert(`멤버 ${selectedMember.nickname}이(가) 추방되었습니다.`);
+          refetch();
+        } else {
+          alert(`멤버 추방에 실패했습니다: ${response.errorMessage}`);
+        }
+      });
+    handleMenuClose();
+  };
 
   return (
     <Card>
@@ -197,12 +232,14 @@ export default function GroupMembersCard({ groupId }: { groupId: number }) {
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <IconButton
-                            size="small"
-                            onClick={(e) => handleMenuClick(e)}
-                          >
-                            <MoreVertIcon />
-                          </IconButton>
+                          {!member.isLeader && (
+                            <IconButton
+                              size="small"
+                              onClick={(e) => handleMenuClick(e, member)}
+                            >
+                              <MoreVertIcon />
+                            </IconButton>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))
@@ -233,9 +270,9 @@ export default function GroupMembersCard({ groupId }: { groupId: number }) {
               메시지 보내기
             </MenuItem>
             <Divider />
-            <MenuItem onClick={handleMenuClose} sx={{ color: "error.main" }}>
+            <MenuItem onClick={handleKickMember} sx={{ color: "error.main" }}>
               <DeleteIcon sx={{ mr: 1 }} />
-              멤버 제거
+              멤버 추방
             </MenuItem>
           </Menu>
 
