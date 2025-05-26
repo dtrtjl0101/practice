@@ -71,7 +71,7 @@ public class PublisherJoinService {
                 .email(member.getEmail())
                 .publisherName(publisher.getPublisherName())
                 .profileImageURL(profileImageUrl)
-                .role(Role.ROLE_USER.name())
+                .role(Role.ROLE_USER)
                 .build();
     }
 }
