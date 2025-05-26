@@ -21,10 +21,7 @@ import { ReactReader } from "react-reader";
 import API_CLIENT from "../api/api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Highlight } from "../types/highlight";
-import useAutoLogin from "../api/login/useAutoLogin";
-import useAutoTokenRefresh from "../api/login/useAutoTokenRefresh";
 import loadBook from "../util/loadBook";
-import useInvalidateQueriesOnAuthChange from "../api/login/useInvalidateQueriesOnAuthChange";
 import HighlightCard from "../component/HighlightCard";
 import HighlightCreationModal from "../component/HighlightCreationModal";
 import loadLocations from "../util/loadLocations";
@@ -83,9 +80,6 @@ function RouteComponent() {
   const [selection, setSelection] = useState<Selection | null>(null);
   const [openHighlightCreationModal, setOpenHighlightCreationModal] =
     useState<boolean>(false);
-  useAutoLogin();
-  useAutoTokenRefresh();
-  useInvalidateQueriesOnAuthChange();
   const [book, setBook] = useState<ArrayBuffer>(new ArrayBuffer(0));
   const canGoBack = useCanGoBack();
   const router = useRouter();

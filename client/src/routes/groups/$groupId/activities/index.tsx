@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute(
-  '/_pathlessLayout/groups/$groupId/activities/',
+  '/groups/$groupId/activities/',
 )({
   component: RouteComponent,
 })

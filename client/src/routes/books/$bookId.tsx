@@ -10,12 +10,12 @@ import {
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import API_CLIENT from "../../../api/api";
-import { BookMetadata } from "../../../types/book";
-import LinkButton from "../../../component/LinkButton";
-import CreditPurchaseModal from "../../../component/CreditPurchaseModal";
+import API_CLIENT from "../../api/api";
+import { BookMetadata } from "../../types/book";
+import LinkButton from "../../component/LinkButton";
+import CreditPurchaseModal from "../../component/CreditPurchaseModal";
 
-export const Route = createFileRoute("/_pathlessLayout/books/$bookId")({
+export const Route = createFileRoute("/books/$bookId")({
   component: RouteComponent,
   params: {
     parse: (params) => {

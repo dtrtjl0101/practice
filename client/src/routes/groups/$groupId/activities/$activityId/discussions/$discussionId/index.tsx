@@ -13,18 +13,18 @@ import {
   Chip,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import API_CLIENT from "../../../../../../../../api/api";
-import { Discussion } from "../../../../../../../../types/discussion";
-import CommentSection from "../../../../../../../../component/CommentSection";
-import { Comment } from "../../../../../../../../types/comment";
+import API_CLIENT from "../../../../../../../api/api";
+import { Discussion } from "../../../../../../../types/discussion";
+import CommentSection from "../../../../../../../component/CommentSection";
+import { Comment } from "../../../../../../../types/comment";
 import { Fragment, useMemo, useRef, useState } from "react";
 import MessageIcon from "@mui/icons-material/Message";
 import StickyNote2OutlinedIcon from "@mui/icons-material/StickyNote2Outlined";
-import { HighlightSummary } from "../../../../../../../../types/highlight";
-import HighlightSummaryCard from "../../../../../../../../component/HighlightSumarryCard";
+import { HighlightSummary } from "../../../../../../../types/highlight";
+import HighlightSummaryCard from "../../../../../../../component/HighlightSumarryCard";
 
 export const Route = createFileRoute(
-  "/_pathlessLayout/groups/$groupId/activities/$activityId/discussions/$discussionId/"
+  "/groups/$groupId/activities/$activityId/discussions/$discussionId/"
 )({
   component: RouteComponent,
 });

@@ -1,9 +1,9 @@
 import { Button, Container, Stack } from "@mui/material";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import GroupList from "../../component/groupList";
-import BookList from "../../component/BookList";
+import GroupList from "../component/groupList";
+import BookList from "../component/BookList";
 
-export const Route = createFileRoute("/_pathlessLayout/")({
+export const Route = createFileRoute("/")({
   component: Home,
 });
 

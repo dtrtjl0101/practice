@@ -15,13 +15,13 @@ import {
   CardActionArea,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import API_CLIENT from "../../../../../../../api/api";
-import { Discussion } from "../../../../../../../types/discussion";
+import API_CLIENT from "../../../../../../api/api";
+import { Discussion } from "../../../../../../types/discussion";
 import MessageIcon from "@mui/icons-material/Message";
 // import StarIcon from "@mui/icons-material/Star";
 
 export const Route = createFileRoute(
-  "/_pathlessLayout/groups/$groupId/activities/$activityId/discussions/"
+  "/groups/$groupId/activities/$activityId/discussions/"
 )({
   component: RouteComponent,
   params: {

@@ -16,27 +16,25 @@ import {
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import API_CLIENT from "../../../../api/api";
-import GroupStatisticsCard from "../../../../component/GroupManagement/GroupStatisticCard";
-import PendingMemberCard from "../../../../component/GroupManagement/PendingMemberCard";
-import GroupDashboard from "../../../../component/GroupManagement/GroupDashboard";
-import GroupMembersCard from "../../../../component/GroupManagement/GroupMembersCard";
-import GroupSettingsCard from "../../../../component/GroupManagement/GroupSettingsCard";
+import API_CLIENT from "../../../api/api";
+import GroupStatisticsCard from "../../../component/GroupManagement/GroupStatisticCard";
+import PendingMemberCard from "../../../component/GroupManagement/PendingMemberCard";
+import GroupDashboard from "../../../component/GroupManagement/GroupDashboard";
+import GroupMembersCard from "../../../component/GroupManagement/GroupMembersCard";
+import GroupSettingsCard from "../../../component/GroupManagement/GroupSettingsCard";
 
-export const Route = createFileRoute("/_pathlessLayout/groups/$groupId/manage")(
-  {
-    component: RouteComponent,
-    params: {
-      parse: (params) => {
-        const groupId = parseInt(params.groupId);
-        if (isNaN(groupId)) {
-          throw new Error("Invalid groupId");
-        }
-        return { groupId };
-      },
+export const Route = createFileRoute("/groups/$groupId/manage")({
+  component: RouteComponent,
+  params: {
+    parse: (params) => {
+      const groupId = parseInt(params.groupId);
+      if (isNaN(groupId)) {
+        throw new Error("Invalid groupId");
+      }
+      return { groupId };
     },
-  }
-);
+  },
+});
 
 interface TabPanelProps {
   children?: React.ReactNode;

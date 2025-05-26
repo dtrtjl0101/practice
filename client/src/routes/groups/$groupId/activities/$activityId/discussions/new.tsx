@@ -1,16 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import DiscussionForm from "../../../../../../../../component/DiscussionForm";
+import DiscussionForm from "../../../../../../component/DiscussionForm";
 
 export const Route = createFileRoute(
-  "/_pathlessLayout/groups/$groupId/activities/$activityId/discussions/$discussionId/edit"
+  "/groups/$groupId/activities/$activityId/discussions/new"
 )({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const { activityId, discussionId } = Route.useParams();
+  const { activityId } = Route.useParams();
   const navigate = Route.useNavigate();
-  const goToDiscussion = () => {
+  const goToDiscussion = (discussionId?: number) => {
     if (!discussionId) {
       alert("Invalid discussion ID");
       return;
@@ -26,7 +26,6 @@ function RouteComponent() {
   return (
     <DiscussionForm
       activityId={parseInt(activityId)}
-      discussionId={parseInt(discussionId)}
       handlePostRoute={goToDiscussion}
       handleBack={() => {
         navigate({
