@@ -38,6 +38,7 @@ export default function AppBar() {
         backdropFilter: "blur(10px)",
         zIndex: (theme) => theme.zIndex.drawer + 1,
       }}
+      elevation={0}
     >
       <Toolbar>
         <LogoButton to="/" sx={{ mr: "auto" }}>

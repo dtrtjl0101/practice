@@ -30,7 +30,19 @@ export default function SideNavigationBar(props: {
   const [open, setOpen] = useState(false);
 
   return (
-    <Drawer open={open} variant="permanent">
+    <Drawer
+      open={open}
+      variant="permanent"
+      elevation={0}
+      slotProps={{
+        paper: {
+          elevation: 0,
+          sx: {
+            border: "0px",
+          },
+        },
+      }}
+    >
       <List>
         <ListItem disablePadding>
           <ListItemButton
