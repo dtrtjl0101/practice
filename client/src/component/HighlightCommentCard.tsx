@@ -56,8 +56,8 @@ export default function HighlightCommentCard({
     const reacted = getReacted(reactionType);
     const response = await (
       reacted
-        ? API_CLIENT.reactionController.deleteReaction
-        : API_CLIENT.reactionController.addReaction
+        ? API_CLIENT.highlightReactionController.deleteReaction
+        : API_CLIENT.highlightReactionController.addReaction
     )(reacted ? reacted.id! : highlight.id, {
       commentId: comment.id,
       reactionType: reactionType,

@@ -1,12 +1,12 @@
 export type GroupReview = {
-  id: number;
-  authorId: number;
-  authorName: string;
-  authorProfileImage?: string;
+  reviewId: number;
+  groupId: number;
+  groupName: string;
   content: string;
+  authorId: number;
+  authorNickname: string;
+  authorProfileImageURL?: string;
   tags: string[];
-  activityId: number;
-  activityTitle: string;
   createdAt: string;
   modifiedAt: string;
 };
