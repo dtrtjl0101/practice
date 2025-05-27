@@ -48,7 +48,7 @@ public class EbookFileService {
         String coverImageKey = fileService.uploadEbookCoverImageIfPresent(request.coverImageFile());
         String coverImageURL = fileService.convertToPublicImageURL(coverImageKey);
 
-        EbookRequest ebook = EbookRequest.builder()
+        EbookRequest ebookRequest = EbookRequest.builder()
                 .title(request.title())
                 .author(request.author())
                 .description(request.description())
@@ -58,13 +58,13 @@ public class EbookFileService {
                 .coverImageKey(coverImageKey)
                 .publisher(publisher)
                 .build();
-        EbookRequest saved = ebookRequestRepository.save(ebook);
+        EbookRequest saved = ebookRequestRepository.save(ebookRequest);
 
-        if (publisher.isNotAdmin()) {
+        if (publisher.isAdmin()) {
             approveRequest(saved);
         }
 
-        return EbookPostResponse.of(saved.toEbook(), coverImageURL);
+        return EbookPostResponse.of(saved.toEbook(), ebookRequest.getId(), coverImageURL);
     }
 
     @Transactional
@@ -90,6 +90,21 @@ public class EbookFileService {
         }
 
         String ebookFileKey = ebook.getFileKey();
+        String downloadUrl = fileService.getEbookDownloadUrl(ebookFileKey);
+
+        return EbookDownloadResponse.of(downloadUrl);
+    }
+    
+    @Transactional
+    public EbookDownloadResponse getPresignedTempEbookUrlForPublisher(PublisherToken publisherToken, Long ebookRequestId) {
+        PublisherProfile publisher = entityFinder.findPublisher(publisherToken.publisherId());
+        EbookRequest ebookRequest = entityFinder.findEbookRequest(ebookRequestId);
+
+        if (!ebookRequest.isRequestedBy(publisher) && publisher.isNotAdmin()) {
+            throw new ForbiddenException(ErrorCode.EBOOK_REQUEST_NOT_YOURS);
+        }
+
+        String ebookFileKey = ebookRequest.getFileKey();
         String downloadUrl = fileService.getEbookDownloadUrl(ebookFileKey);
 
         return EbookDownloadResponse.of(downloadUrl);

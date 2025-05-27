@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.dto.ebook.request.EbookRequestFetchResponse;
 import qwerty.chaekit.dto.ebook.request.EbookRequestRejectRequest;
+import qwerty.chaekit.dto.ebook.upload.EbookDownloadResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
@@ -48,6 +49,15 @@ public class EbookRequestController {
     ) {
         ebookFileService.rejectEbookByAdmin(publisherToken, requestId, requestBody);
         return ApiSuccessResponse.emptyResponse();
+    }
+    
+    @GetMapping("/{requestId}/download")
+    @Operation(summary = "요청된 출판물 다운로드", description = "출판사 또는 관리자가 출판물을 미리 다운로드합니다.")
+    public ApiSuccessResponse<EbookDownloadResponse> download(
+            @Parameter(hidden = true) @Login PublisherToken publisherToken,
+            @Parameter(description = "승인할 출판물 요청 ID")  @PathVariable Long requestId
+    ) {
+        return ApiSuccessResponse.of(ebookFileService.getPresignedTempEbookUrlForPublisher(publisherToken, requestId));
     }
 
 }

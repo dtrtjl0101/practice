@@ -50,6 +50,10 @@ public class PublisherProfile extends BaseEntity {
     }
 
     public boolean isNotAdmin() {
-        return !member.isAdmin();
+        return !isAdmin();
+    }
+    
+    public boolean isAdmin() {
+        return member.isAdmin();
     }
 }

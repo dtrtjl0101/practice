@@ -96,4 +96,8 @@ public class EbookRequest extends BaseEntity {
         this.status = EbookRequestStatus.REJECTED;
         this.rejectReason = reason;
     }
+
+    public boolean isRequestedBy(PublisherProfile publisher) {
+        return publisher.getId().equals(this.publisher.getId());
+    }
 }
