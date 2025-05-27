@@ -77,21 +77,17 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         Member member = customUserDetails.member();
         UserProfile user = customUserDetails.user();
         PublisherProfile publisher = customUserDetails.publisher();
-        String profileImageKey;
-        Long memberId, userId, publisherId;
-        memberId = member.getId();
+        String profileImageKey = null;
+        Long memberId = member.getId();
+        Long publisherId = null;
+        Long userId = null;
+        if(publisher != null){
+            profileImageKey = publisher.getProfileImageKey();
+            publisherId = publisher.getId();
+        }
         if(user != null) {
             profileImageKey = user.getProfileImageKey();
             userId = user.getId();
-            publisherId = null;
-        } else if(publisher != null){
-            profileImageKey = publisher.getProfileImageKey();
-            userId = null;
-            publisherId = publisher.getId();
-        } else {
-            userId = null;
-            publisherId = null;
-            profileImageKey = null;
         }
 
         String profileImageURL = fileService.convertToPublicImageURL(profileImageKey);
