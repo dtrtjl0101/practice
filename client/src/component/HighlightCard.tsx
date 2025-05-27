@@ -89,7 +89,7 @@ export default function HighlightCard({
   const { data: comments, refetch: refetchComments } = useQuery({
     queryKey: ["highlightComments", highlight.id],
     queryFn: async () => {
-      const response = await API_CLIENT.commentController.getComments(
+      const response = await API_CLIENT.highlightCommentController.getComments(
         highlight.id
       );
       if (!response.isSuccessful) {
@@ -139,8 +139,8 @@ export default function HighlightCard({
     const reacted = getReacted(reactionType);
     const response = await (
       reacted
-        ? API_CLIENT.reactionController.deleteReaction
-        : API_CLIENT.reactionController.addReaction
+        ? API_CLIENT.highlightReactionController.deleteReaction
+        : API_CLIENT.highlightReactionController.addReaction
     )(reacted ? reacted.id! : highlight.id, {
       reactionType: reactionType,
     });
@@ -153,7 +153,7 @@ export default function HighlightCard({
 
   const onCommentCreateButtonClicked = async () => {
     if (!user) return;
-    const response = await API_CLIENT.commentController.createComment(
+    const response = await API_CLIENT.highlightCommentController.createComment(
       highlight.id,
       {
         content: commentContent,

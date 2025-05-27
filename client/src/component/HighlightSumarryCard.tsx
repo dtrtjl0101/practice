@@ -63,8 +63,8 @@ export default function HighlightSummaryCard({
     const reacted = getReacted(reactionType);
     const response = await (
       reacted
-        ? API_CLIENT.reactionController.deleteReaction
-        : API_CLIENT.reactionController.addReaction
+        ? API_CLIENT.highlightReactionController.deleteReaction
+        : API_CLIENT.highlightReactionController.addReaction
     )(reacted ? reacted.id! : highlightSummary.id, {
       reactionType: reactionType,
     });
