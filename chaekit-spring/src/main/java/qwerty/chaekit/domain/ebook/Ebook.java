@@ -52,5 +52,4 @@ public class Ebook extends BaseEntity {
         this.publisher = publisher;
     }
 
-
 }

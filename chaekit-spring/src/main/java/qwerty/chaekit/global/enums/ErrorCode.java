@@ -86,7 +86,8 @@ public enum ErrorCode {
     ACTIVITY_NOT_FOUND("ACTIVITY_NOT_FOUND", "해당 활동이 존재하지 않습니다"),
     DISCUSSION_NOT_FOUND("DISCUSSION_NOT_FOUND", "해당 토론이 존재하지 않습니다"),
     DISCUSSION_COMMENT_NOT_FOUND("DISCUSSION_COMMENT_NOT_FOUND", "해당 댓글이 존재하지 않습니다"),
-
+    EBOOK_REQUEST_NOT_FOUND("EBOOK_REQUEST_NOT_FOUND", "해당 전자책 요청이 존재하지 않습니다"),
+    EBOOK_REQUEST_NOT_PENDING("EBOOK_REQUEST_NOT_PENDING", "해당 전자책 요청은 대기 중이 아닙니다"),
 
     // Comment related
     COMMENT_NOT_FOUND("COMMENT_NOT_FOUND", "해당 댓글이 존재하지 않습니다"),

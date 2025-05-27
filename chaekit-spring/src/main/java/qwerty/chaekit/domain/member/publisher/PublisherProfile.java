@@ -48,4 +48,8 @@ public class PublisherProfile extends BaseEntity {
     public boolean isApproved() {
         return approvalStatus == PublisherApprovalStatus.APPROVED;
     }
+
+    public boolean isNotAdmin() {
+        return !member.isAdmin();
+    }
 }

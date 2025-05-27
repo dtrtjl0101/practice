@@ -31,4 +31,8 @@ public class Member extends BaseEntity {
         this.password = password;
         this.role = role;
     }
+    
+    public boolean isAdmin() {
+        return role == Role.ROLE_ADMIN;
+    }
 }
