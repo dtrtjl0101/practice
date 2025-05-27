@@ -22,7 +22,7 @@ public class EbookRequestController {
 
     @GetMapping
     @Operation(summary = "출판물 요청 목록 조회", description = "대기중인 출판물 목록을 조회합니다. 출판사는 자신의 요청만 조회할 수 있습니다.")
-    public ApiSuccessResponse<PageResponse<EbookRequestFetchResponse>> downloadFile(
+    public ApiSuccessResponse<PageResponse<EbookRequestFetchResponse>> getEbookRequests(
             @Parameter(hidden = true) @Login PublisherToken publisherToken,
             @ParameterObject Pageable pageable
     ) {

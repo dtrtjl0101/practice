@@ -51,5 +51,9 @@ public class Ebook extends BaseEntity {
         this.coverImageKey = coverImageKey;
         this.publisher = publisher;
     }
+    
+    public boolean isOwnedBy(PublisherProfile publisher) {
+        return this.publisher.equals(publisher);
+    }
 
 }

@@ -68,12 +68,27 @@ public class EbookFileService {
     }
 
     @Transactional
-    public EbookDownloadResponse getPresignedEbookUrl(UserToken userToken, Long ebookId) {
+    public EbookDownloadResponse getPresignedEbookUrlForUser(UserToken userToken, Long ebookId) {
         UserProfile user = entityFinder.findUser(userToken.userId());
         Ebook ebook = entityFinder.findEbook(ebookId);
 
         ebookPolicy.assertEBookPurchased(user, ebook);
         
+        String ebookFileKey = ebook.getFileKey();
+        String downloadUrl = fileService.getEbookDownloadUrl(ebookFileKey);
+
+        return EbookDownloadResponse.of(downloadUrl);
+    }
+    
+    @Transactional
+    public EbookDownloadResponse getPresignedEbookUrlForPublisher(PublisherToken publisherToken, Long ebookId) {
+        PublisherProfile publisher = entityFinder.findPublisher(publisherToken.publisherId());
+        Ebook ebook = entityFinder.findEbook(ebookId);
+
+        if (!ebook.isOwnedBy(publisher)) {
+            throw new ForbiddenException(ErrorCode.EBOOK_NOT_OWNED);
+        }
+
         String ebookFileKey = ebook.getFileKey();
         String downloadUrl = fileService.getEbookDownloadUrl(ebookFileKey);
 
@@ -110,7 +125,7 @@ public class EbookFileService {
         
         if (publisher.isNotAdmin()) {
             return PageResponse.of(
-                    ebookRequestRepository.findByPublisherAndStatus(publisher, EbookRequestStatus.PENDING, pageable)
+                    ebookRequestRepository.findByPublisher(publisher, pageable)
                             .map(ebookRequestMapper::toFetchResponse)
             );
         }

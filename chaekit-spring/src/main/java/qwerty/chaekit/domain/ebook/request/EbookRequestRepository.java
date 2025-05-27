@@ -7,5 +7,5 @@ import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 
 public interface EbookRequestRepository extends JpaRepository<EbookRequest, Long> {
     Page<EbookRequest> findByStatus(EbookRequestStatus status, Pageable pageable);
-    Page<EbookRequest> findByPublisherAndStatus(PublisherProfile publisher, EbookRequestStatus status, Pageable pageable);
+    Page<EbookRequest> findByPublisher(PublisherProfile publisher, Pageable pageable);
 }

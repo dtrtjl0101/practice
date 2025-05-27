@@ -7,9 +7,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.ebook.repository.EbookRepository;
+import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.dto.ebook.EbookFetchResponse;
 import qwerty.chaekit.dto.page.PageResponse;
+import qwerty.chaekit.global.security.resolver.PublisherToken;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.util.EntityFinder;
 import qwerty.chaekit.service.util.FileService;
@@ -40,5 +42,16 @@ public class EbookService {
                 fileService.convertToPublicImageURL(ebook.getCoverImageKey()),
                 user != null && user.isPurchased(ebook)
         );
+    }
+    
+    public PageResponse<EbookFetchResponse> fetchBooksByPublisher(PublisherToken token, Pageable pageable) {
+        PublisherProfile publisher = entityFinder.findPublisher(token.publisherId());
+        Page<EbookFetchResponse> page = ebookRepository.findAllByPublisher(publisher, pageable)
+                .map(ebook -> EbookFetchResponse.of(
+                        ebook,
+                        fileService.convertToPublicImageURL(ebook.getCoverImageKey()),
+                        false
+                ));
+        return PageResponse.of(page);
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.ebook.QEbook;
+import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 
 import java.util.List;
 import java.util.Optional;
@@ -66,5 +67,9 @@ public class EbookRepositoryImpl implements EbookRepository {
     public boolean existsByTitle(String name) {
         return ebookJpaRepository.existsByTitle(name);
     }
-    
+
+    @Override
+    public Page<Ebook> findAllByPublisher(PublisherProfile publisher, Pageable pageable) {
+        return ebookJpaRepository.findAllByPublisher(publisher, pageable);
+    }
 }

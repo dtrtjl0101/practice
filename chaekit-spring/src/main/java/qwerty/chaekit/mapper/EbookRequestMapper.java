@@ -16,18 +16,19 @@ public class EbookRequestMapper {
     }
 
     public EbookRequestFetchResponse toFetchResponse(EbookRequest ebookRequest) {
-        return new EbookRequestFetchResponse(
-                ebookRequest.getId(),
-                ebookRequest.getTitle(),
-                ebookRequest.getAuthor(),
-                ebookRequest.getDescription(),
-                ebookRequest.getSize(),
-                ebookRequest.getPrice(),
-                convertToPublicImageURL(ebookRequest.getCoverImageKey()),
-                ebookRequest.getPublisher().getId(),
-                ebookRequest.getPublisher().getPublisherName(),
-                ebookRequest.getPublisher().getMember().getEmail(),
-                ebookRequest.getRejectReason()
-        );
+        return EbookRequestFetchResponse.builder()
+                .requestId(ebookRequest.getId())
+                .title(ebookRequest.getTitle())
+                .author(ebookRequest.getAuthor())
+                .description(ebookRequest.getDescription())
+                .size(ebookRequest.getSize())
+                .price(ebookRequest.getPrice())
+                .coverImageURL(convertToPublicImageURL(ebookRequest.getCoverImageKey()))
+                .publisherId(ebookRequest.getPublisher().getId())
+                .publisherName(ebookRequest.getPublisher().getPublisherName())
+                .publisherEmail(ebookRequest.getPublisher().getMember().getEmail())
+                .status(ebookRequest.getStatus())
+                .rejectReason(ebookRequest.getRejectReason())
+                .build();
     }
 }

@@ -1,10 +1,11 @@
 package qwerty.chaekit.dto.ebook.request;
 
 import lombok.Builder;
+import qwerty.chaekit.domain.ebook.request.EbookRequestStatus;
 
 @Builder
 public record EbookRequestFetchResponse(
-    Long id,
+    Long requestId,
     String title,
     String author,
     String description,
@@ -14,5 +15,6 @@ public record EbookRequestFetchResponse(
     Long publisherId,
     String publisherName,
     String publisherEmail,
+    EbookRequestStatus status,
     String rejectReason
 ) { }
