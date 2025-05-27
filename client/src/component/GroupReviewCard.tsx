@@ -17,9 +17,15 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
+  CircularProgress,
 } from "@mui/material";
 import { Add, ExpandLess, ExpandMore } from "@mui/icons-material";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  useInfiniteQuery,
+} from "@tanstack/react-query";
 import { GroupReview } from "../types/groupReview";
 import API_CLIENT from "../api/api";
 import { Activity } from "../types/activity";
@@ -45,6 +51,15 @@ const REVIEW_TAGS = {
   WELL_MODERATED: { emoji: "🧭", label: "진행자가 잘 이끌어요" },
 };
 
+interface ReviewResponse {
+  content: GroupReview[];
+  currentPage: number;
+  totalItems: number;
+  totalPages: number;
+}
+
+const REVIEWS_PER_PAGE = 1;
+
 export default function GroupReviewCard({
   groupId,
   canWriteReview,
@@ -59,23 +74,40 @@ export default function GroupReviewCard({
   const [expandedReviews, setExpandedReviews] = useState<Set<number>>(
     new Set()
   );
-
+  const [showAllTags, setShowAllTags] = useState(false); // 태그 통계 전체 보기 상태
   const queryClient = useQueryClient();
 
-  // 후기 목록 조회
-  const { data: reviews, isLoading: reviewsLoading } = useQuery({
+  // 무한 스크롤 후기 목록 조회
+  const {
+    data: reviewsData,
+    isLoading: reviewsLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = useInfiniteQuery({
     queryKey: ["group-reviews", groupId],
-    queryFn: async () => {
-      const response =
-        await API_CLIENT.groupReviewController.getReviews(groupId);
+    queryFn: async ({ pageParam = 0 }) => {
+      const response = await API_CLIENT.groupReviewController.getReviews(
+        groupId,
+        { page: pageParam, size: REVIEWS_PER_PAGE }
+      );
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);
       }
-      return response.data.content as GroupReview[];
+      return response.data as ReviewResponse;
     },
-    initialData: [] as GroupReview[],
+    getNextPageParam: (lastPage) => {
+      if (lastPage.currentPage < lastPage.totalPages - 1) {
+        return lastPage.currentPage + 1;
+      }
+      return undefined;
+    },
+    initialPageParam: 0,
   });
-  console.log("GroupReviewCard reviews:", reviews);
+
+  // 모든 페이지의 리뷰를 평면화
+  const reviews = reviewsData?.pages.flatMap((page) => page.content) || [];
+  const totalReviews = reviewsData?.pages[0]?.totalItems || 0;
 
   // 참여한 활동 목록 조회 (후기 작성용)
   const { data: groupActivities } = useQuery({
@@ -108,6 +140,9 @@ export default function GroupReviewCard({
     onSuccess: () => {
       alert("후기가 등록되었습니다!");
       queryClient.invalidateQueries({ queryKey: ["group-reviews", groupId] });
+      queryClient.invalidateQueries({
+        queryKey: ["group-review-tags", groupId],
+      });
       setOpenDialog(false);
       setReviewContent("");
       setSelectedTags([]);
@@ -190,9 +225,23 @@ export default function GroupReviewCard({
     ) {
       return null;
     }
+
     const maxTagCount = Math.max(
       ...tagStatsData.tagStats.map((stat) => stat.count || 0)
     );
+
+    const INITIAL_TAGS_SHOW = 3; // 처음에 보여줄 태그 개수
+
+    const sortedTagStats = [...tagStatsData.tagStats].sort(
+      (a, b) => (b.count || 0) - (a.count || 0)
+    );
+
+    const displayTags = showAllTags
+      ? sortedTagStats
+      : sortedTagStats.slice(0, INITIAL_TAGS_SHOW);
+
+    const hasMoreTags = tagStatsData.tagStats.length > INITIAL_TAGS_SHOW;
+
     return (
       <Box>
         <Typography variant="subtitle1" fontWeight={600}>
@@ -203,7 +252,7 @@ export default function GroupReviewCard({
           참여자
         </Typography>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 1 }}>
-          {tagStatsData.tagStats.map((tagStat) => {
+          {displayTags.map((tagStat) => {
             const tagInfo =
               REVIEW_TAGS[tagStat.tag as keyof typeof REVIEW_TAGS];
             return (
@@ -237,12 +286,28 @@ export default function GroupReviewCard({
               </Box>
             );
           })}
+
+          {/* 태그 더보기/접기 버튼 */}
+          {hasMoreTags && (
+            <Box display="flex" justifyContent="center" mt={1}>
+              <Button
+                size="small"
+                variant="text"
+                onClick={() => setShowAllTags(!showAllTags)}
+                startIcon={showAllTags ? <ExpandLess /> : <ExpandMore />}
+              >
+                {showAllTags
+                  ? "접기"
+                  : `더보기 (+${tagStatsData.tagStats.length - INITIAL_TAGS_SHOW})`}
+              </Button>
+            </Box>
+          )}
         </Box>
       </Box>
     );
   };
 
-  // 태그 렌더링 함수 (긴 텍스트일 때만 접힌 상태에서 1개만 표시 + 나머지 개수)
+  // 태그 렌더링 함수
   const renderTags = (tags: string[], reviewId: number) => {
     const isExpanded = expandedReviews.has(reviewId);
     const shouldShowAll = isExpanded || tags.length <= 1;
@@ -284,6 +349,7 @@ export default function GroupReviewCard({
             onClick={() => {
               toggleReviewExpansion(reviewId);
             }}
+            sx={{ cursor: "pointer" }}
           />
         )}
       </Box>
@@ -301,7 +367,7 @@ export default function GroupReviewCard({
     <Paper sx={{ p: 3 }}>
       <Stack spacing={3}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography variant="h4">모임 후기</Typography>
+          <Typography variant="h4">모임 후기 ({totalReviews})</Typography>
           {canWriteReview && (
             <Button
               variant="contained"
@@ -405,6 +471,31 @@ export default function GroupReviewCard({
                 </CardContent>
               </Card>
             ))}
+
+            {/* 더 보기 버튼 또는 로딩 표시 */}
+            {hasNextPage && (
+              <Box display="flex" justifyContent="center" mt={2}>
+                <Button
+                  variant="outlined"
+                  onClick={() => fetchNextPage()}
+                  disabled={isFetchingNextPage}
+                  startIcon={
+                    isFetchingNextPage ? <CircularProgress size={16} /> : null
+                  }
+                >
+                  {isFetchingNextPage ? "로딩 중..." : "후기 더보기"}
+                </Button>
+              </Box>
+            )}
+
+            {/* 로딩 중일 때 스켈레톤 표시 */}
+            {isFetchingNextPage && (
+              <Stack spacing={2} mt={2}>
+                {[1, 2].map((i) => (
+                  <Skeleton key={i} variant="rectangular" height={120} />
+                ))}
+              </Stack>
+            )}
           </Stack>
         ) : (
           <Alert severity="info">
@@ -431,7 +522,7 @@ export default function GroupReviewCard({
               SelectProps={{ native: true }}
               fullWidth
             >
-              <option value=""></option>
+              <option value="" />
               {groupActivities?.map((activity) => (
                 <option key={activity.activityId} value={activity.activityId}>
                   {activity.bookTitle} ({activity.startTime} ~{" "}
