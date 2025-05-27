@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.dto.group.review.GroupReviewFetchResponse;
 import qwerty.chaekit.dto.group.review.GroupReviewPostRequest;
+import qwerty.chaekit.dto.group.review.GroupReviewStatsResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
@@ -38,5 +39,12 @@ public class GroupReviewController {
             @ParameterObject Pageable pageable
     ) {
         return ApiSuccessResponse.of(groupReviewService.getReviews(groupId, pageable));
+    }
+
+    @GetMapping("/stats")
+    public ApiSuccessResponse<GroupReviewStatsResponse> getReviewStats(
+            @PathVariable Long groupId
+    ) {
+        return ApiSuccessResponse.of(groupReviewService.getReviewStats(groupId));
     }
 }

@@ -7,12 +7,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.group.activity.Activity;
-import qwerty.chaekit.domain.group.activity.activitymember.ActivityMemberRepository;
 import qwerty.chaekit.domain.group.review.GroupReview;
 import qwerty.chaekit.domain.group.review.GroupReviewRepository;
+import qwerty.chaekit.domain.group.review.GroupReviewTagRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.dto.group.review.GroupReviewFetchResponse;
 import qwerty.chaekit.dto.group.review.GroupReviewPostRequest;
+import qwerty.chaekit.dto.group.review.GroupReviewStatsResponse;
+import qwerty.chaekit.dto.group.review.TagStatDto;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
@@ -20,14 +22,16 @@ import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.mapper.GroupReviewMapper;
 import qwerty.chaekit.service.util.EntityFinder;
 
+import java.util.List;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class GroupReviewService {
     private final GroupReviewRepository groupReviewRepository;
+    private final GroupReviewTagRepository groupReviewTagRepository;
     private final EntityFinder entityFinder;
     private final GroupReviewMapper groupReviewMapper;
-    private final ActivityMemberRepository activityMemberRepository;
     private final ActivityPolicy activityPolicy;
 
     public GroupReviewFetchResponse createReview(
@@ -75,5 +79,21 @@ public class GroupReviewService {
                 .map(groupReviewMapper::toFetchResponse);
         
         return PageResponse.of(reviews);
+    }
+    
+    public GroupReviewStatsResponse getReviewStats(Long groupId) {
+        ReadingGroup group = entityFinder.findGroup(groupId);
+        
+        long reviewCount = groupReviewRepository.countByGroup(group);
+        List<TagStatDto> tagStats = groupReviewTagRepository.countTagsByGroupId(group);
+        long tagCount = tagStats.stream()
+                .mapToLong(TagStatDto::count)
+                .sum();
+        
+        return GroupReviewStatsResponse.builder()
+                .reviewCount(reviewCount)
+                .tagStats(tagStats)
+                .tagCount(tagCount)
+                .build();
     }
 }
