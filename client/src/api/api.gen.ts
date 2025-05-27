@@ -68,7 +68,7 @@ export interface LoginResponse {
    * 회원 역할
    * @example "ROLE_USER"
    */
-  role: string;
+  role: "ROLE_USER" | "ROLE_PUBLISHER" | "ROLE_ADMIN";
   /**
    * Refresh Token (재발급용)
    * @example "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -241,6 +241,63 @@ export interface GroupPostResponse {
   description?: string;
   groupImageURL?: string;
   tags?: string[];
+}
+
+export interface GroupReviewPostRequest {
+  /** @format int64 */
+  activityId?: number;
+  content?: string;
+  tags?: (
+    | "FUNNY"
+    | "CALM"
+    | "PASSIONATE"
+    | "HEARTWARMING"
+    | "DEEP_THOUGHT"
+    | "INSIGHTFUL"
+    | "DIVERSE_OPINIONS"
+    | "TALKATIVE"
+    | "GOOD_LISTENERS"
+    | "STRUCTURED"
+    | "CASUAL"
+    | "WELL_MODERATED"
+  )[];
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseGroupReviewFetchResponse {
+  isSuccessful?: boolean;
+  data?: GroupReviewFetchResponse;
+}
+
+export interface GroupReviewFetchResponse {
+  /** @format int64 */
+  reviewId?: number;
+  /** @format int64 */
+  groupId?: number;
+  groupName?: string;
+  content?: string;
+  /** @format int64 */
+  authorId?: number;
+  authorNickname?: string;
+  authorProfileImageURL?: string;
+  tags?: (
+    | "FUNNY"
+    | "CALM"
+    | "PASSIONATE"
+    | "HEARTWARMING"
+    | "DEEP_THOUGHT"
+    | "INSIGHTFUL"
+    | "DIVERSE_OPINIONS"
+    | "TALKATIVE"
+    | "GOOD_LISTENERS"
+    | "STRUCTURED"
+    | "CASUAL"
+    | "WELL_MODERATED"
+  )[];
+  /** @format date */
+  createdAt?: string;
+  /** @format date */
+  modifiedAt?: string;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -769,6 +826,54 @@ export interface ApiSuccessResponseListHighlightCommentResponse {
 }
 
 /** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponsePageResponseGroupReviewFetchResponse {
+  isSuccessful?: boolean;
+  data?: PageResponseGroupReviewFetchResponse;
+}
+
+export interface PageResponseGroupReviewFetchResponse {
+  content?: GroupReviewFetchResponse[];
+  /** @format int32 */
+  currentPage?: number;
+  /** @format int64 */
+  totalItems?: number;
+  /** @format int32 */
+  totalPages?: number;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseGroupReviewStatsResponse {
+  isSuccessful?: boolean;
+  data?: GroupReviewStatsResponse;
+}
+
+export interface GroupReviewStatsResponse {
+  /** @format int64 */
+  reviewCount?: number;
+  /** @format int64 */
+  tagCount?: number;
+  tagStats?: TagStatDto[];
+}
+
+export interface TagStatDto {
+  tag?:
+    | "FUNNY"
+    | "CALM"
+    | "PASSIONATE"
+    | "HEARTWARMING"
+    | "DEEP_THOUGHT"
+    | "INSIGHTFUL"
+    | "DIVERSE_OPINIONS"
+    | "TALKATIVE"
+    | "GOOD_LISTENERS"
+    | "STRUCTURED"
+    | "CASUAL"
+    | "WELL_MODERATED";
+  /** @format int64 */
+  count?: number;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
 export interface ApiSuccessResponsePageResponseGroupMemberResponse {
   isSuccessful?: boolean;
   data?: PageResponseGroupMemberResponse;
@@ -1093,7 +1198,7 @@ export type ApiResponse<D, E> =
     };
 
 export class HttpClient<SecurityDataType = unknown> {
-  public baseUrl: string = "";
+  public baseUrl: string = "http://localhost:8080";
   private securityData: SecurityDataType | null = null;
   private securityWorker?: ApiConfig<SecurityDataType>["securityWorker"];
   private abortControllers = new Map<CancelToken, AbortController>();
@@ -1310,6 +1415,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title Chaekit API
  * @version 1.0
+ * @baseUrl http://localhost:8080
  *
  * 책잇 API 명세서
  */
@@ -1729,11 +1835,11 @@ export class Api<
         ...params,
       }),
   };
-  reactionController = {
+  highlightReactionController = {
     /**
      * No description
      *
-     * @tags reaction-controller
+     * @tags highlight-reaction-controller
      * @name AddReaction
      * @request POST:/api/highlights/{highlightId}/reactions
      * @secure
@@ -1755,7 +1861,7 @@ export class Api<
     /**
      * No description
      *
-     * @tags reaction-controller
+     * @tags highlight-reaction-controller
      * @name DeleteReaction
      * @request DELETE:/api/highlights/reactions/{reactionId}
      * @secure
@@ -1768,11 +1874,11 @@ export class Api<
         ...params,
       }),
   };
-  commentController = {
+  highlightCommentController = {
     /**
      * No description
      *
-     * @tags comment-controller
+     * @tags highlight-comment-controller
      * @name GetComments
      * @request GET:/api/highlights/{highlightId}/comments
      * @secure
@@ -1788,7 +1894,7 @@ export class Api<
     /**
      * No description
      *
-     * @tags comment-controller
+     * @tags highlight-comment-controller
      * @name CreateComment
      * @request POST:/api/highlights/{highlightId}/comments
      * @secure
@@ -1810,7 +1916,7 @@ export class Api<
     /**
      * No description
      *
-     * @tags comment-controller
+     * @tags highlight-comment-controller
      * @name DeleteComment
      * @request DELETE:/api/highlights/comments/{commentId}
      * @secure
@@ -1826,7 +1932,7 @@ export class Api<
     /**
      * No description
      *
-     * @tags comment-controller
+     * @tags highlight-comment-controller
      * @name UpdateComment
      * @request PATCH:/api/highlights/comments/{commentId}
      * @secure
@@ -2105,11 +2211,11 @@ export class Api<
       }),
 
     /**
-     * @description 내가 가입한 그룹 목록을 조회합니다.
+     * @description 내가 가입한 모임 목록을 조회합니다.
      *
      * @tags group-controller
      * @name GetJoinedGroups
-     * @summary 내가 가입한 그룹 목록 조회
+     * @summary 내가 가입한 모임 목록 조회
      * @request GET:/api/groups/my/joined
      * @secure
      */
@@ -2141,11 +2247,11 @@ export class Api<
       }),
 
     /**
-     * @description 내가 생성한 그룹 목록을 조회합니다.
+     * @description 내가 생성한 모임 목록을 조회합니다.
      *
      * @tags group-controller
      * @name GetCreatedGroups
-     * @summary 내가 생성한 그룹 목록 조회
+     * @summary 내가 생성한 모임 목록 조회
      * @request GET:/api/groups/my/created
      * @secure
      */
@@ -2192,13 +2298,93 @@ export class Api<
         ...params,
       }),
   };
+  groupReviewController = {
+    /**
+     * @description 모임의 리뷰 목록을 조회합니다.
+     *
+     * @tags group-review-controller
+     * @name GetReviews
+     * @summary 모임 리뷰 목록 조회
+     * @request GET:/api/groups/{groupId}/reviews
+     * @secure
+     */
+    getReviews: (
+      groupId: number,
+      query?: {
+        /**
+         * Zero-based page index (0..N)
+         * @min 0
+         * @default 0
+         */
+        page?: number;
+        /**
+         * The size of the page to be returned
+         * @min 1
+         * @default 20
+         */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponsePageResponseGroupReviewFetchResponse, any>(
+        {
+          path: `/api/groups/${groupId}/reviews`,
+          method: "GET",
+          query: query,
+          secure: true,
+          ...params,
+        },
+      ),
+
+    /**
+     * @description 모임에 새로운 리뷰를 작성하거나 내용 및 태그를 수정합니다.
+     *
+     * @tags group-review-controller
+     * @name CreateReview
+     * @summary 모임 리뷰 작성
+     * @request POST:/api/groups/{groupId}/reviews
+     * @secure
+     */
+    createReview: (
+      groupId: number,
+      data: GroupReviewPostRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponseGroupReviewFetchResponse, any>({
+        path: `/api/groups/${groupId}/reviews`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description 모임의 리뷰 통계를 조회합니다.
+     *
+     * @tags group-review-controller
+     * @name GetReviewStats
+     * @summary 모임 리뷰 통계 조회
+     * @request GET:/api/groups/{groupId}/reviews/stats
+     * @secure
+     */
+    getReviewStats: (groupId: number, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseGroupReviewStatsResponse, any>({
+        path: `/api/groups/${groupId}/reviews/stats`,
+        method: "GET",
+        secure: true,
+        ...params,
+      }),
+  };
   groupChatController = {
     /**
-     * @description 그룹의 채팅 메시지 목록을 조회합니다.
+     * @description 모임의 채팅 메시지 목록을 조회합니다.
      *
      * @tags group-chat-controller
      * @name GetChats
-     * @summary 그룹 채팅 메시지 목록 조회
+     * @summary 모임 채팅 메시지 목록 조회
      * @request GET:/api/groups/{groupId}/chats
      * @secure
      */
@@ -2231,11 +2417,11 @@ export class Api<
       }),
 
     /**
-     * @description 그룹에 새로운 채팅 메시지를 작성합니다.
+     * @description 모임에 새로운 채팅 메시지를 작성합니다.
      *
      * @tags group-chat-controller
      * @name CreateChat
-     * @summary 그룹 채팅 메시지 작성
+     * @summary 모임 채팅 메시지 작성
      * @request POST:/api/groups/{groupId}/chats
      * @secure
      */

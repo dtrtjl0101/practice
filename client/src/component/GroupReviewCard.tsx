@@ -66,17 +66,20 @@ export default function GroupReviewCard({
   const { data: reviews, isLoading: reviewsLoading } = useQuery({
     queryKey: ["group-reviews", groupId],
     queryFn: async () => {
-      const response = 0;
-      await API_CLIENT.groupController.get(groupId);
-      return response.data as GroupReview[];
-
-      return;
+      const response =
+        await API_CLIENT.groupReviewController.getReviews(groupId);
+      if (!response.isSuccessful) {
+        throw new Error(response.errorMessage);
+      }
+      return response.data.content as GroupReview[];
     },
+    initialData: [] as GroupReview[],
   });
+  console.log("GroupReviewCard reviews:", reviews);
 
   // 참여한 활동 목록 조회 (후기 작성용)
-  const { data: myActivities } = useQuery({
-    queryKey: ["my-activities", groupId],
+  const { data: groupActivities } = useQuery({
+    queryKey: ["group-activities", groupId],
     queryFn: async () => {
       const response =
         await API_CLIENT.activityController.getAllActivities(groupId);
@@ -86,16 +89,24 @@ export default function GroupReviewCard({
       return response.data.content as Activity[];
     },
     enabled: canWriteReview,
+    initialData: [] as Activity[],
   });
 
   // 후기 작성/수정 뮤테이션
   const createReviewMutation = useMutation({
     mutationFn: async (reviewData: any) => {
-      // 실제 API 호출
-      // return API_CLIENT.groupController.createReview(groupId, reviewData);
-      console.log("Creating review:", reviewData);
+      const response = await API_CLIENT.groupReviewController.createReview(
+        groupId,
+        reviewData
+      );
+      if (!response.isSuccessful) {
+        alert(response.errorMessage);
+        throw new Error(response.errorMessage);
+      }
+      return response;
     },
     onSuccess: () => {
+      alert("후기가 등록되었습니다!");
       queryClient.invalidateQueries({ queryKey: ["group-reviews", groupId] });
       setOpenDialog(false);
       setReviewContent("");
@@ -151,24 +162,85 @@ export default function GroupReviewCard({
     return content;
   };
 
-  // 태그 통계 데이터
-  let totalTags = 0;
-  const tagCounts: Record<string, number> = {};
-  reviews?.forEach((review) => {
-    review.tags.forEach((tag) => {
-      tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-      totalTags += 1;
-    });
+  // 태그 통계 조회
+  const { data: tagStatsData } = useQuery({
+    queryKey: ["group-review-tags", groupId],
+    queryFn: async () => {
+      const response =
+        await API_CLIENT.groupReviewController.getReviewStats(groupId);
+      if (!response.isSuccessful) {
+        throw new Error(response.errorMessage);
+      }
+      return response.data;
+    },
+    initialData: {
+      tagCount: 0,
+      reviewCount: 0,
+      tagStats: [],
+    },
+    enabled: reviews && reviews.length > 0, // 후기가 있을 때만 통계 조회
   });
 
-  const tagStatsData = Object.entries(tagCounts).map(([tagKey, count]) => ({
-    key: tagKey,
-    emoji: REVIEW_TAGS[tagKey as keyof typeof REVIEW_TAGS]?.emoji ?? "",
-    label: REVIEW_TAGS[tagKey as keyof typeof REVIEW_TAGS]?.label ?? tagKey,
-    count,
-  }));
-
-  const maxCount = Math.max(...tagStatsData.map((d) => d.count));
+  // 태그 통계 데이터 렌더링
+  const renderTagStats = () => {
+    if (
+      !tagStatsData ||
+      !tagStatsData.tagStats ||
+      tagStatsData.tagStats.length === 0
+    ) {
+      return null;
+    }
+    const maxTagCount = Math.max(
+      ...tagStatsData.tagStats.map((stat) => stat.count || 0)
+    );
+    return (
+      <Box>
+        <Typography variant="subtitle1" fontWeight={600}>
+          이런 점이 좋았어요
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {tagStatsData.tagCount || 0}회, {tagStatsData.reviewCount || 0}명의
+          참여자
+        </Typography>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 1 }}>
+          {tagStatsData.tagStats.map((tagStat) => {
+            const tagInfo =
+              REVIEW_TAGS[tagStat.tag as keyof typeof REVIEW_TAGS];
+            return (
+              <Box key={tagStat.tag}>
+                <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                  <Typography variant="body2" fontSize={16}>
+                    {tagInfo
+                      ? `${tagInfo.emoji} ${tagInfo.label}`
+                      : tagStat.tag}
+                  </Typography>
+                  <Typography variant="body2">{tagStat.count || 0}</Typography>
+                </Box>
+                <Box
+                  sx={{
+                    height: 8,
+                    width: "100%",
+                    backgroundColor: "#eee",
+                    borderRadius: 4,
+                    mt: 0.5,
+                  }}
+                >
+                  <Box
+                    sx={{
+                      height: "100%",
+                      width: `${((tagStat.count || 0) / (maxTagCount || 1)) * 100}%`,
+                      backgroundColor: "primary.main",
+                      borderRadius: 4,
+                    }}
+                  />
+                </Box>
+              </Box>
+            );
+          })}
+        </Box>
+      </Box>
+    );
+  };
 
   // 태그 렌더링 함수 (긴 텍스트일 때만 접힌 상태에서 1개만 표시 + 나머지 개수)
   const renderTags = (tags: string[], reviewId: number) => {
@@ -218,6 +290,13 @@ export default function GroupReviewCard({
     );
   };
 
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setReviewContent("");
+    setSelectedTags([]);
+    setSelectedActivity(null);
+  };
+
   return (
     <Paper sx={{ p: 3 }}>
       <Stack spacing={3}>
@@ -234,47 +313,10 @@ export default function GroupReviewCard({
           )}
         </Box>
 
-        <Divider sx={{ my: 2 }} />
+        <Divider />
 
-        {/* 통계 */}
-        <Box sx={{ mt: 2 }}>
-          <Typography variant="subtitle1" fontWeight={600}>
-            이런 점이 좋았어요
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {totalTags}회, {reviews?.length ?? 0}명의 참여자
-          </Typography>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 1 }}>
-            {tagStatsData.map((tag) => (
-              <Box key={tag.key}>
-                <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                  <Typography variant="body2" fontSize={16}>
-                    {tag.emoji} "{tag.label}"
-                  </Typography>
-                  <Typography variant="body2">{tag.count}</Typography>
-                </Box>
-                <Box
-                  sx={{
-                    height: 8,
-                    width: "100%",
-                    backgroundColor: "#eee",
-                    borderRadius: 4,
-                    mt: 0.5,
-                  }}
-                >
-                  <Box
-                    sx={{
-                      height: "100%",
-                      width: `${(tag.count / maxCount) * 100}%`,
-                      backgroundColor: "primary.main",
-                      borderRadius: 4,
-                    }}
-                  />
-                </Box>
-              </Box>
-            ))}
-          </Box>
-        </Box>
+        {/* 통계 - 후기가 있을 때만 표시 */}
+        {reviews && reviews.length > 0 && renderTagStats()}
 
         {reviewsLoading ? (
           <Stack spacing={2}>
@@ -285,23 +327,22 @@ export default function GroupReviewCard({
         ) : reviews && reviews.length > 0 ? (
           <Stack spacing={2}>
             {reviews.map((review) => (
-              <Card key={review.id} variant="outlined">
+              <Card key={review.reviewId} variant="outlined">
                 <CardContent>
                   <Stack spacing={2}>
                     <Box display="flex" alignItems="center" gap={2}>
                       <Avatar
-                        src={review.authorProfileImage}
+                        src={review.authorProfileImageURL}
                         sx={{ width: 40, height: 40 }}
-                      >
-                        {review.authorName[0]}
-                      </Avatar>
+                      />
                       <Stack>
                         <Typography variant="subtitle2">
-                          {review.authorName}
+                          {review.authorNickname}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          {review.activityTitle} •{" "}
-                          {new Date(review.createdAt).toLocaleDateString()}
+                          {review.modifiedAt
+                            ? new Date(review.modifiedAt).toLocaleDateString()
+                            : new Date(review.createdAt).toLocaleDateString()}
                         </Typography>
                       </Stack>
                     </Box>
@@ -311,21 +352,25 @@ export default function GroupReviewCard({
                         <>
                           <Typography
                             variant="body2"
-                            onClick={() => toggleReviewExpansion(review.id)}
+                            onClick={() =>
+                              toggleReviewExpansion(review.reviewId)
+                            }
                             sx={{
                               cursor: "pointer",
                             }}
                           >
-                            {expandedReviews.has(review.id)
+                            {expandedReviews.has(review.reviewId)
                               ? review.content
                               : getTruncatedContent(review.content)}
                           </Typography>
 
                           <Button
                             size="small"
-                            onClick={() => toggleReviewExpansion(review.id)}
+                            onClick={() =>
+                              toggleReviewExpansion(review.reviewId)
+                            }
                             startIcon={
-                              expandedReviews.has(review.id) ? (
+                              expandedReviews.has(review.reviewId) ? (
                                 <ExpandLess />
                               ) : (
                                 <ExpandMore />
@@ -333,13 +378,15 @@ export default function GroupReviewCard({
                             }
                             sx={{ mt: 1, p: 0.5, minHeight: "auto" }}
                           >
-                            {expandedReviews.has(review.id) ? "접기" : "더보기"}
+                            {expandedReviews.has(review.reviewId)
+                              ? "접기"
+                              : "더보기"}
                           </Button>
                         </>
                       ) : (
                         <Typography
                           variant="body2"
-                          onClick={() => toggleReviewExpansion(review.id)}
+                          onClick={() => toggleReviewExpansion(review.reviewId)}
                           sx={{
                             cursor: "pointer",
                           }}
@@ -350,7 +397,7 @@ export default function GroupReviewCard({
                       {/* 태그 렌더링 */}
                       {review.tags.length > 0 && (
                         <Box sx={{ mt: 1 }}>
-                          {renderTags(review.tags, review.id)}
+                          {renderTags(review.tags, review.reviewId)}
                         </Box>
                       )}
                     </Box>
@@ -365,10 +412,11 @@ export default function GroupReviewCard({
           </Alert>
         )}
       </Stack>
+
       {/* 후기 작성 다이얼로그 */}
       <Dialog
         open={openDialog}
-        onClose={() => setOpenDialog(false)}
+        onClose={() => handleCloseDialog()}
         maxWidth="md"
         fullWidth
       >
@@ -384,7 +432,7 @@ export default function GroupReviewCard({
               fullWidth
             >
               <option value=""></option>
-              {myActivities?.map((activity) => (
+              {groupActivities?.map((activity) => (
                 <option key={activity.activityId} value={activity.activityId}>
                   {activity.bookTitle} ({activity.startTime} ~{" "}
                   {activity.endTime})
@@ -464,7 +512,7 @@ export default function GroupReviewCard({
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>취소</Button>
+          <Button onClick={() => handleCloseDialog()}>취소</Button>
           <Button
             variant="contained"
             onClick={handleSubmitReview}
