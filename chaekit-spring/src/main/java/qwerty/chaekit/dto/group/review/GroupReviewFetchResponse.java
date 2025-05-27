@@ -11,6 +11,16 @@ public record GroupReviewFetchResponse(
         Long reviewId,
         Long groupId,
         String groupName,
+        
+        Long activityId,
+        LocalDate activityStartTime,
+        LocalDate activityEndTime,
+        
+        Long bookId,
+        String bookTitle,
+        String bookAuthor,
+        String bookCoverImageURL,
+        
         String content,
         Long authorId,
         String authorNickname,

@@ -8,7 +8,10 @@ import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.member.user.UserProfile;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -47,10 +50,19 @@ public class GroupReview extends BaseEntity {
     }
     
     public void setTags(List<GroupReviewTag> tags) {
-        if (tags == null) {
-            return;
+        if (tags == null) return;
+
+        Set<GroupReviewTag> existing = this.tags.stream()
+                .map(GroupReviewTagRelation::getTag)
+                .collect(Collectors.toSet());
+
+        Set<GroupReviewTag> incoming = new HashSet<>(tags);
+
+        if (existing.equals(incoming)) {
+            return; // 동일하면 아무것도 하지 않음
         }
-        this.tags.clear();
+
+        this.tags.clear(); // 그 외에는 기존 삭제 + 새로 등록
         this.tags.addAll(tags.stream()
                 .map(tag -> GroupReviewTagRelation.builder()
                         .review(this)

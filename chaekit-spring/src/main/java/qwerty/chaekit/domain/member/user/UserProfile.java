@@ -53,4 +53,8 @@ public class UserProfile extends BaseEntity {
                 .stream()
                 .anyMatch(purchase -> purchase.getEbook().getId().equals(ebook.getId()));
     }
+    
+    public boolean isNotAdmin() {
+        return !member.isAdmin();
+    }
 }

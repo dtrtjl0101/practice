@@ -69,6 +69,7 @@ public enum ErrorCode {
     EBOOK_NOT_PURCHASED("EBOOK_NOT_PURCHASED", "해당 전자책을 구매한 회원만 사용할 수 있는 기능입니다"),
     PUBLISHER_NOT_APPROVED("PUBLISHER_NOT_APPROVED", "현재 출판사 계정이 승인되지 않았습니다"),
     DISCUSSION_HAS_COMMENTS("DISCUSSION_HAS_COMMENTS", "댓글이 달린 토론은 삭제할 수 없습니다"),
+    EBOOK_REQUEST_NOT_YOURS("EBOOK_REQUEST_NOT_YOURS", "현재 출판사 계정으로 등록한 전자책 요청이 아닙니다"),
 
     LOGIN_REQUIRED("LOGIN_REQUIRED", "로그인이 필요합니다"),
     ONLY_USER("ONLY_USER", "일반 회원만 사용할 수 있는 기능입니다"),
@@ -86,7 +87,8 @@ public enum ErrorCode {
     ACTIVITY_NOT_FOUND("ACTIVITY_NOT_FOUND", "해당 활동이 존재하지 않습니다"),
     DISCUSSION_NOT_FOUND("DISCUSSION_NOT_FOUND", "해당 토론이 존재하지 않습니다"),
     DISCUSSION_COMMENT_NOT_FOUND("DISCUSSION_COMMENT_NOT_FOUND", "해당 댓글이 존재하지 않습니다"),
-
+    EBOOK_REQUEST_NOT_FOUND("EBOOK_REQUEST_NOT_FOUND", "해당 전자책 요청이 존재하지 않습니다"),
+    EBOOK_REQUEST_NOT_PENDING("EBOOK_REQUEST_NOT_PENDING", "해당 전자책 요청은 대기 중이 아닙니다"),
 
     // Comment related
     COMMENT_NOT_FOUND("COMMENT_NOT_FOUND", "해당 댓글이 존재하지 않습니다"),
@@ -117,7 +119,7 @@ public enum ErrorCode {
     NOTIFICATION_NOT_FOUND("NOTIFICATION_NOT_FOUND", "해당 알림이 존재하지 않습니다"),
     NOTIFICATION_NOT_YOURS("NOTIFICATION_NOT_YOURS", "본인의 알림만 읽음 처리할 수 있습니다"),
     NOTIFICATION_CONTENT_DELETED("NOTIFICATION_CONTENT_DELETED", "알림과 관련된 내용이 삭제되었습니다"),
-    ;
+    EBOOK_NOT_OWNED("EBOOK_NOT_OWNED", "다른 출판사가 등록한 전자책입니다");
 
     private final String code;
     private final String message;

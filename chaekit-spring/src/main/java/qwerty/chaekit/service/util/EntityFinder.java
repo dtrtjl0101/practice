@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.ebook.repository.EbookRepository;
+import qwerty.chaekit.domain.ebook.request.EbookRequest;
+import qwerty.chaekit.domain.ebook.request.EbookRequestRepository;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.group.activity.discussion.Discussion;
@@ -34,6 +36,7 @@ public class EntityFinder {
     private final HighlightRepository highlightRepository;
     private final DiscussionRepository discussionRepository;
     private final DiscussionCommentRepository discussionCommentRepository;
+    private final EbookRequestRepository ebookRequestRepository;
 
     public UserProfile findUser(Long id) {
         return userRepository.findById(id)
@@ -73,5 +76,10 @@ public class EntityFinder {
     public DiscussionComment findDiscussionComment(Long id) {
         return discussionCommentRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(DISCUSSION_COMMENT_NOT_FOUND));
+    }
+    
+    public EbookRequest findEbookRequest(Long id) {
+        return ebookRequestRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(EBOOK_REQUEST_NOT_FOUND));
     }
 }

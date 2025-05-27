@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import qwerty.chaekit.domain.BaseEntity;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Table(name= "group_review_tag")
@@ -28,6 +30,7 @@ public class GroupReviewTagRelation extends BaseEntity {
     public GroupReviewTagRelation(GroupReview review, GroupReviewTag tag) {
         this.review = review;
         this.tag = tag;
+        this.modifiedAt = LocalDateTime.now();
     }
     
 }
