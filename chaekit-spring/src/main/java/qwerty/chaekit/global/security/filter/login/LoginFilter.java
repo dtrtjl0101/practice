@@ -122,7 +122,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
                 .publisherId(publisher != null ? publisher.getId() : null)
                 .publisherName(publisher != null ? publisher.getPublisherName() : null)
                 .profileImageURL(profileImageURL)
-                .role(role.name())
+                .role(role)
                 .build();
         responseSender.sendSuccess(response, loginResponse);
     }

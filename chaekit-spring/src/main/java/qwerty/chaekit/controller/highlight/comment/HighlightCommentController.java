@@ -14,7 +14,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/highlights")
-public class CommentController {
+public class HighlightCommentController {
     private final HighlightCommentService highlightCommentService;
     
     @PostMapping("/{highlightId}/comments")

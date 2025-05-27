@@ -2,9 +2,9 @@ package qwerty.chaekit.domain.notification.entity;
 
 public enum NotificationType {
 
-    GROUP_JOIN_REQUEST("그룹 가입 요청이 있습니다."),
-    GROUP_JOIN_APPROVED("그룹 가입이 승인되었습니다."),
-    GROUP_JOIN_REJECTED("그룹 가입이 거절되었습니다."),
+    GROUP_JOIN_REQUEST("모임 가입 요청이 있습니다."),
+    GROUP_JOIN_APPROVED("모임 가입이 승인되었습니다."),
+    GROUP_JOIN_REJECTED("모임 가입이 거절되었습니다."),
     PUBLISHER_JOIN_REQUEST("출판사의 가입 요청이 있습니다."),
     PUBLISHER_APPROVED("가입이 승인되었습니다."),
     PUBLISHER_REJECTED("가입이 거절되었습니다."),

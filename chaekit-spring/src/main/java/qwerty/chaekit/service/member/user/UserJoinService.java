@@ -83,7 +83,7 @@ public class UserJoinService {
                 .email(member.getEmail())
                 .nickname(user.getNickname())
                 .profileImageURL(profileImageKey)
-                .role(Role.ROLE_USER.name())
+                .role(Role.ROLE_USER)
                 .build();
     }
 }

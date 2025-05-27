@@ -3,6 +3,7 @@ package qwerty.chaekit.dto.member;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
+import qwerty.chaekit.domain.member.enums.Role;
 
 @Builder
 public record LoginResponse(
@@ -34,7 +35,7 @@ public record LoginResponse(
 
         @Schema(description = "회원 역할", example = "ROLE_USER")
         @NotNull
-        String role,
+        Role role,
 
         @Schema(description = "Refresh Token (재발급용)", example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
         @NotNull
