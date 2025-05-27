@@ -5,12 +5,14 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 
 @Entity
 @Getter
 @Table(name = "ebook")
+@BatchSize(size = 20)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Ebook extends BaseEntity {
     @Id

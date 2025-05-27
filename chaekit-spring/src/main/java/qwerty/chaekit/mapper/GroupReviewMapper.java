@@ -21,6 +21,16 @@ public class GroupReviewMapper {
                 .reviewId(review.getId())
                 .groupId(review.getGroup().getId())
                 .groupName(review.getGroup().getName())
+                
+                .activityId(review.getActivity().getId())
+                .activityStartTime(review.getActivity().getEndTime())
+                .activityEndTime(review.getActivity().getEndTime())
+                
+                .bookId(review.getActivity().getId())
+                .bookTitle(review.getActivity().getBook().getTitle())
+                .bookAuthor(review.getActivity().getBook().getAuthor())
+                .bookCoverImageURL(convertToPublicImageURL(review.getActivity().getBook().getCoverImageKey()))
+                
                 .authorId(review.getAuthor().getId())
                 .authorNickname(review.getAuthor().getNickname())
                 .authorProfileImageURL(convertToPublicImageURL(review.getAuthor().getProfileImageKey()))
