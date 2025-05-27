@@ -23,7 +23,7 @@ public class GroupReviewController {
     private final GroupReviewService groupReviewService;
 
     @PostMapping
-    @Operation(summary = "모임 리뷰 작성", description = "모임에 새로운 리뷰를 작성합니다.")
+    @Operation(summary = "모임 리뷰 작성", description = "모임에 새로운 리뷰를 작성하거나 내용 및 태그를 수정합니다.")
     public ApiSuccessResponse<GroupReviewFetchResponse> createReview(
             @Parameter(hidden = true) @Login UserToken userToken,
             @PathVariable Long groupId,
@@ -42,6 +42,7 @@ public class GroupReviewController {
     }
 
     @GetMapping("/stats")
+    @Operation(summary = "모임 리뷰 통계 조회", description = "모임의 리뷰 통계를 조회합니다.")
     public ApiSuccessResponse<GroupReviewStatsResponse> getReviewStats(
             @PathVariable Long groupId
     ) {
