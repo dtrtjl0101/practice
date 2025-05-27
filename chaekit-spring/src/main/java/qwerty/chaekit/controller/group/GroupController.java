@@ -47,8 +47,8 @@ public class GroupController {
 
     @GetMapping("/my/joined")
     @Operation(
-            summary = "내가 가입한 그룹 목록 조회",
-            description = "내가 가입한 그룹 목록을 조회합니다."
+            summary = "내가 가입한 모임 목록 조회",
+            description = "내가 가입한 모임 목록을 조회합니다."
     )
     public ApiSuccessResponse<PageResponse<GroupFetchResponse>> getJoinedGroups(
             @Parameter(hidden = true) @Login UserToken userToken,
@@ -57,8 +57,8 @@ public class GroupController {
     }
 
     @Operation(
-            summary = "내가 생성한 그룹 목록 조회",
-            description = "내가 생성한 그룹 목록을 조회합니다."
+            summary = "내가 생성한 모임 목록 조회",
+            description = "내가 생성한 모임 목록을 조회합니다."
     )
     @GetMapping("/my/created")
     public ApiSuccessResponse<PageResponse<GroupFetchResponse>> getCreatedGroups(

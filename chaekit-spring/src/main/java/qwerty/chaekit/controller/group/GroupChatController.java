@@ -21,7 +21,7 @@ public class GroupChatController {
     private final GroupChatService groupChatService;
 
     @PostMapping
-    @Operation(summary = "그룹 채팅 메시지 작성", description = "그룹에 새로운 채팅 메시지를 작성합니다.")
+    @Operation(summary = "모임 채팅 메시지 작성", description = "모임에 새로운 채팅 메시지를 작성합니다.")
     public ApiSuccessResponse<GroupChatResponse> createChat(
             @Login UserToken userToken,
             @PathVariable Long groupId,
@@ -31,7 +31,7 @@ public class GroupChatController {
     }
 
     @GetMapping
-    @Operation(summary = "그룹 채팅 메시지 목록 조회", description = "그룹의 채팅 메시지 목록을 조회합니다.")
+    @Operation(summary = "모임 채팅 메시지 목록 조회", description = "모임의 채팅 메시지 목록을 조회합니다.")
     public ApiSuccessResponse<PageResponse<GroupChatResponse>> getChats(
             @PathVariable Long groupId,
             @ParameterObject Pageable pageable
