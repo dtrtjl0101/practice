@@ -66,8 +66,8 @@ export default function GroupReviewCard({
   const { data: reviews, isLoading: reviewsLoading } = useQuery({
     queryKey: ["group-reviews", groupId],
     queryFn: async () => {
-      const response =
-        await API_CLIENT.groupController.getGroupReviews(groupId);
+      const response = 0;
+      await API_CLIENT.groupController.get(groupId);
       return response.data as GroupReview[];
 
       return;
