@@ -12,10 +12,17 @@ import {
   Avatar,
   Skeleton,
   Alert,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
 } from "@mui/material";
 import { Add, ExpandLess, ExpandMore } from "@mui/icons-material";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { GroupReview } from "../types/groupReview";
+import API_CLIENT from "../api/api";
+import { Activity } from "../types/activity";
 
 // 태그 정의
 const REVIEW_TAGS = {
@@ -45,148 +52,75 @@ export default function GroupReviewCard({
   groupId: number;
   canWriteReview: boolean;
 }) {
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedActivity, setSelectedActivity] = useState<number | null>(null);
+  const [reviewContent, setReviewContent] = useState("");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [expandedReviews, setExpandedReviews] = useState<Set<number>>(
     new Set()
   );
+
+  const queryClient = useQueryClient();
 
   // 후기 목록 조회
   const { data: reviews, isLoading: reviewsLoading } = useQuery({
     queryKey: ["group-reviews", groupId],
     queryFn: async () => {
-      // API 호출 예시 (실제 구현 시)
-      // const response = await API_CLIENT.groupController.getGroupReviews(groupId);
-      // return response.data as GroupReview[];
+      const response =
+        await API_CLIENT.groupController.getGroupReviews(groupId);
+      return response.data as GroupReview[];
 
-      // 목업 데이터
-      return [
-        {
-          id: 1,
-          authorId: 1,
-          authorName: "김독서",
-          authorProfileImage: "/api/placeholder/40/40",
-          content:
-            "정말 유익한 시간이었습니다. 다양한 관점과 따뜻한 분위기가 좋았어요.",
-          tags: ["INSIGHTFUL", "DIVERSE_OPINIONS", "HEARTWARMING"],
-          activityId: 1,
-          activityTitle: "이번 달 추천도서 토론",
-          createdAt: "2025-05-25T10:00:00Z",
-          modifiedAt: "2025-05-25T10:00:00Z",
-        },
-        {
-          id: 2,
-          authorId: 2,
-          authorName: "박서평",
-          authorProfileImage: "/api/placeholder/40/40",
-          content:
-            "진행이 매끄럽고 참여자들의 이야기를 잘 들어주는 분위기였습니다.",
-          tags: ["WELL_MODERATED", "CALM", "GOOD_LISTENERS"],
-          activityId: 2,
-          activityTitle: "신간 소개 모임",
-          createdAt: "2025-05-24T14:30:00Z",
-          modifiedAt: "2025-05-24T14:30:00Z",
-        },
-        {
-          id: 3,
-          authorId: 3,
-          authorName: "이문학",
-          authorProfileImage: "/api/placeholder/40/40",
-          content: "모두가 열정적으로 참여해서 에너지가 넘쳤어요.",
-          tags: ["PASSIONATE", "FUNNY"],
-          activityId: 3,
-          activityTitle: "에세이 나눔",
-          createdAt: "2025-05-23T18:00:00Z",
-          modifiedAt: "2025-05-23T18:00:00Z",
-        },
-        {
-          id: 4,
-          authorId: 4,
-          authorName: "정철학",
-          authorProfileImage: "/api/placeholder/40/40",
-          content: "자유로운 분위기 속에서도 주제가 명확해서 좋았습니다.",
-          tags: ["STRUCTURED", "CASUAL"],
-          activityId: 4,
-          activityTitle: "심리학 서적 토론",
-          createdAt: "2025-05-22T16:20:00Z",
-          modifiedAt: "2025-05-22T16:20:00Z",
-        },
-        {
-          id: 5,
-          authorId: 5,
-          authorName: "송지식",
-          authorProfileImage: "/api/placeholder/40/40",
-          content:
-            "많은 인사이트를 얻을 수 있었고 모두가 적극적으로 참여했어요.",
-          tags: ["INSIGHTFUL", "TALKATIVE", "PASSIONATE"],
-          activityId: 5,
-          activityTitle: "경제 도서 읽기 모임",
-          createdAt: "2025-05-21T11:10:00Z",
-          modifiedAt: "2025-05-21T11:10:00Z",
-        },
-        {
-          id: 6,
-          authorId: 6,
-          authorName: "안차분",
-          authorProfileImage: "/api/placeholder/40/40",
-          content: "편안하고 차분한 분위기에서 이야기할 수 있어서 좋았습니다.",
-          tags: ["CALM", "GOOD_LISTENERS"],
-          activityId: 6,
-          activityTitle: "고전문학 탐구 모임",
-          createdAt: "2025-05-20T15:00:00Z",
-          modifiedAt: "2025-05-20T15:00:00Z",
-        },
-        {
-          id: 7,
-          authorId: 7,
-          authorName: "장열정",
-          authorProfileImage: "/api/placeholder/40/40",
-          content: "활발한 대화와 명확한 진행이 인상 깊었어요.",
-          tags: ["TALKATIVE", "WELL_MODERATED", "STRUCTURED"],
-          activityId: 7,
-          activityTitle: "과학책 탐독회",
-          createdAt: "2025-05-19T10:45:00Z",
-          modifiedAt: "2025-05-19T10:45:00Z",
-        },
-        {
-          id: 8,
-          authorId: 8,
-          authorName: "최자유",
-          authorProfileImage: "/api/placeholder/40/40",
-          content:
-            "자연스럽게 흘러가는 대화가 좋아요. 부담 없이 참여할 수 있어요.",
-          tags: ["CASUAL", "CALM"],
-          activityId: 8,
-          activityTitle: "수필 낭독 모임",
-          createdAt: "2025-05-18T17:00:00Z",
-          modifiedAt: "2025-05-18T17:00:00Z",
-        },
-        {
-          id: 9,
-          authorId: 9,
-          authorName: "하청취",
-          authorProfileImage: "/api/placeholder/40/40",
-          content: "서로의 말을 경청하고 존중하는 분위기가 너무 좋았어요.",
-          tags: ["GOOD_LISTENERS", "HEARTWARMING"],
-          activityId: 9,
-          activityTitle: "인문학 카페 모임",
-          createdAt: "2025-05-17T13:30:00Z",
-          modifiedAt: "2025-05-17T13:30:00Z",
-        },
-        {
-          id: 10,
-          authorId: 10,
-          authorName: "백지식",
-          authorProfileImage: "/api/placeholder/40/40",
-          content: "지식을 나누는 재미가 있는 모임이었어요.",
-          tags: ["INSIGHTFUL", "DEEP_THOUGHT"],
-          activityId: 10,
-          activityTitle: "지식 나눔 독서회",
-          createdAt: "2025-05-16T12:10:00Z",
-          modifiedAt: "2025-05-16T12:10:00Z",
-        },
-        // ... 이후 20개는 계속됩니다
-      ] as GroupReview[];
+      return;
     },
   });
+
+  // 참여한 활동 목록 조회 (후기 작성용)
+  const { data: myActivities } = useQuery({
+    queryKey: ["my-activities", groupId],
+    queryFn: async () => {
+      const response =
+        await API_CLIENT.activityController.getAllActivities(groupId);
+      if (!response.isSuccessful) {
+        throw new Error(response.errorMessage);
+      }
+      return response.data.content as Activity[];
+    },
+    enabled: canWriteReview,
+  });
+
+  // 후기 작성/수정 뮤테이션
+  const createReviewMutation = useMutation({
+    mutationFn: async (reviewData: any) => {
+      // 실제 API 호출
+      // return API_CLIENT.groupController.createReview(groupId, reviewData);
+      console.log("Creating review:", reviewData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["group-reviews", groupId] });
+      setOpenDialog(false);
+      setReviewContent("");
+      setSelectedTags([]);
+      setSelectedActivity(null);
+    },
+  });
+
+  const handleSubmitReview = () => {
+    if (!selectedActivity || !reviewContent.trim()) return;
+
+    createReviewMutation.mutate({
+      activityId: selectedActivity,
+      content: reviewContent,
+      tags: selectedTags,
+    });
+  };
+
+  const handleTagToggle = (tagKey: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tagKey)
+        ? prev.filter((t) => t !== tagKey)
+        : [...prev, tagKey]
+    );
+  };
 
   // 후기 확장/축소 토글
   const toggleReviewExpansion = (reviewId: number) => {
@@ -217,6 +151,7 @@ export default function GroupReviewCard({
     return content;
   };
 
+  // 태그 통계 데이터
   let totalTags = 0;
   const tagCounts: Record<string, number> = {};
   reviews?.forEach((review) => {
@@ -289,7 +224,11 @@ export default function GroupReviewCard({
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h4">모임 후기</Typography>
           {canWriteReview && (
-            <Button variant="contained" startIcon={<Add />} onClick={() => {}}>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={() => setOpenDialog(true)}
+            >
               후기 작성
             </Button>
           )}
@@ -297,6 +236,7 @@ export default function GroupReviewCard({
 
         <Divider sx={{ my: 2 }} />
 
+        {/* 통계 */}
         <Box sx={{ mt: 2 }}>
           <Typography variant="subtitle1" fontWeight={600}>
             이런 점이 좋았어요
@@ -425,6 +365,119 @@ export default function GroupReviewCard({
           </Alert>
         )}
       </Stack>
+      {/* 후기 작성 다이얼로그 */}
+      <Dialog
+        open={openDialog}
+        onClose={() => setOpenDialog(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>모임 후기 작성</DialogTitle>
+        <DialogContent>
+          <Stack spacing={3} sx={{ mt: 1 }}>
+            <TextField
+              select
+              label="참여한 활동"
+              value={selectedActivity || ""}
+              onChange={(e) => setSelectedActivity(Number(e.target.value))}
+              SelectProps={{ native: true }}
+              fullWidth
+            >
+              <option value=""></option>
+              {myActivities?.map((activity) => (
+                <option key={activity.activityId} value={activity.activityId}>
+                  {activity.bookTitle} ({activity.startTime} ~{" "}
+                  {activity.endTime})
+                </option>
+              ))}
+            </TextField>
+
+            <TextField
+              label="후기 내용"
+              multiline
+              rows={4}
+              value={reviewContent}
+              onChange={(e) => setReviewContent(e.target.value)}
+              placeholder="모임에 대한 솔직한 후기를 작성해주세요..."
+              fullWidth
+              inputProps={{ maxLength: 1000 }}
+            />
+
+            <Box>
+              <Typography variant="subtitle2" gutterBottom>
+                모임 분위기 (복수 선택 가능)
+              </Typography>
+              <Box display="flex" gap={1} flexWrap="wrap" mb={2}>
+                {Object.entries(REVIEW_TAGS)
+                  .slice(0, 4)
+                  .map(([key, tag]) => (
+                    <Chip
+                      key={key}
+                      label={`${tag.emoji} ${tag.label}`}
+                      onClick={() => handleTagToggle(key)}
+                      color={selectedTags.includes(key) ? "primary" : "default"}
+                      variant={
+                        selectedTags.includes(key) ? "filled" : "outlined"
+                      }
+                    />
+                  ))}
+              </Box>
+
+              <Typography variant="subtitle2" gutterBottom>
+                대화 흐름
+              </Typography>
+              <Box display="flex" gap={1} flexWrap="wrap" mb={2}>
+                {Object.entries(REVIEW_TAGS)
+                  .slice(4, 9)
+                  .map(([key, tag]) => (
+                    <Chip
+                      key={key}
+                      label={`${tag.emoji} ${tag.label}`}
+                      onClick={() => handleTagToggle(key)}
+                      color={selectedTags.includes(key) ? "primary" : "default"}
+                      variant={
+                        selectedTags.includes(key) ? "filled" : "outlined"
+                      }
+                    />
+                  ))}
+              </Box>
+
+              <Typography variant="subtitle2" gutterBottom>
+                운영 방식
+              </Typography>
+              <Box display="flex" gap={1} flexWrap="wrap">
+                {Object.entries(REVIEW_TAGS)
+                  .slice(9)
+                  .map(([key, tag]) => (
+                    <Chip
+                      key={key}
+                      label={`${tag.emoji} ${tag.label}`}
+                      onClick={() => handleTagToggle(key)}
+                      color={selectedTags.includes(key) ? "primary" : "default"}
+                      variant={
+                        selectedTags.includes(key) ? "filled" : "outlined"
+                      }
+                    />
+                  ))}
+              </Box>
+            </Box>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)}>취소</Button>
+          <Button
+            variant="contained"
+            onClick={handleSubmitReview}
+            disabled={
+              !selectedActivity ||
+              !reviewContent.trim() ||
+              createReviewMutation.isPending
+            }
+          >
+            {createReviewMutation.isPending ? "저장 중..." : "후기 등록"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 }
