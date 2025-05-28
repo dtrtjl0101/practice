@@ -1,0 +1,1 @@
+ALTER TABLE group_member ADD COLUMN is_accepted BOOLEAN DEFAULT false;
