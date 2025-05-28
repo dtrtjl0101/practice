@@ -20,6 +20,7 @@ A mono repo for qwerty
   - Java 17, Spring Boot 3
   - Gradle
   - MySQL, Redis
+  - JPA, Querydsl
   - Flyway (DB 마이그레이션)
   - JaCoCo (테스트 커버리지)
   - Docker, docker-compose, Nginx
@@ -35,6 +36,7 @@ A mono repo for qwerty
 - **인프라/배포**:
   - AWS CDK (TypeScript)
   - AWS S3, CloudFront, Certificate Manager 등
+  - AWS ECR, ECS, RDS, ec2
 
 ---
 
