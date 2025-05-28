@@ -9,7 +9,7 @@ import {
 
 export default function GroupStatisticsCard() {
   return (
-    <Card>
+    <Card variant="outlined">
       <CardHeader title="통계 및 분석" />
       <CardContent>
         <Stack spacing={3}>

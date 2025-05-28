@@ -45,7 +45,7 @@ function RouteComponent() {
 
   return (
     <Container sx={{ my: 8 }}>
-      <Card>
+      <Card variant="outlined">
         <CardHeader title="Books" />
         <CardContent>
           <TableContainer>

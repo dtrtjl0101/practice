@@ -32,10 +32,12 @@ export const Route = createFileRoute("/admin/publisher")({
 
 function RouteComponent() {
   return (
-    <Stack spacing={4}>
-      <PendingPublisherCard />
-      <PublisherCard />
-    </Stack>
+    <Container sx={{ my: 8 }}>
+      <Stack spacing={8}>
+        <PendingPublisherCard />
+        <PublisherCard />
+      </Stack>
+    </Container>
   );
 }
 
@@ -60,13 +62,13 @@ function PublisherCard() {
 
   if (isLoading)
     return (
-      <Card>
+      <Card variant="outlined">
         <CircularProgress />
       </Card>
     );
 
   return (
-    <Card>
+    <Card variant="outlined">
       <CardHeader title="출판사 목록" />
       <CardContent>
         <Stack spacing={2}>
@@ -174,7 +176,7 @@ function PendingPublisherCard() {
 
   if (isLoading)
     return (
-      <Card>
+      <Card variant="outlined">
         <CircularProgress />
       </Card>
     );
@@ -190,93 +192,89 @@ function PendingPublisherCard() {
           refetch();
         }}
       />
-      <Container sx={{ my: 8 }}>
-        <Card>
-          <CardHeader title="대기중인 출판사 가입 신청 목록" />
-          <CardContent>
-            <Stack spacing={2}>
-              <PageNavigation
-                pageZeroBased={page}
-                setPage={setPage}
-                totalPages={totalPages}
-              />
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>ID</TableCell>
-                      <TableCell>출판사명</TableCell>
-                      <TableCell>신청일</TableCell>
-                      <TableCell>작업</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {pendingPublishers ? (
-                      pendingPublishers.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={7} align="center">
-                            대기 중인 신청이 없습니다.
+      <Card variant="outlined">
+        <CardHeader title="대기중인 출판사 가입 신청 목록" />
+        <CardContent>
+          <Stack spacing={2}>
+            <PageNavigation
+              pageZeroBased={page}
+              setPage={setPage}
+              totalPages={totalPages}
+            />
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>ID</TableCell>
+                    <TableCell>출판사명</TableCell>
+                    <TableCell>신청일</TableCell>
+                    <TableCell>작업</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {pendingPublishers ? (
+                    pendingPublishers.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={7} align="center">
+                          대기 중인 신청이 없습니다.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      pendingPublishers.map((pending) => (
+                        <TableRow key={pending.publisherId}>
+                          <TableCell>{pending.publisherId}</TableCell>
+                          <TableCell>
+                            <Stack
+                              direction={"row"}
+                              spacing={1}
+                              alignItems={"center"}
+                            >
+                              <Avatar src={pending.profileImageURL} />
+                              <Typography>{pending.publisherName}</Typography>
+                            </Stack>
+                          </TableCell>
+                          <TableCell>
+                            {new Date(pending.createdAt!).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell>
+                            <Stack direction={"row"} spacing={1}>
+                              <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={() =>
+                                  onApproveButtonClicked(pending.publisherId!)
+                                }
+                              >
+                                승인
+                              </Button>
+                              <Button
+                                variant="contained"
+                                color="error"
+                                onClick={() =>
+                                  onRejectButtonClicked(pending.publisherId!)
+                                }
+                              >
+                                거절
+                              </Button>
+                            </Stack>
                           </TableCell>
                         </TableRow>
-                      ) : (
-                        pendingPublishers.map((pending) => (
-                          <TableRow key={pending.publisherId}>
-                            <TableCell>{pending.publisherId}</TableCell>
-                            <TableCell>
-                              <Stack
-                                direction={"row"}
-                                spacing={1}
-                                alignItems={"center"}
-                              >
-                                <Avatar src={pending.profileImageURL} />
-                                <Typography>{pending.publisherName}</Typography>
-                              </Stack>
-                            </TableCell>
-                            <TableCell>
-                              {new Date(
-                                pending.createdAt!
-                              ).toLocaleDateString()}
-                            </TableCell>
-                            <TableCell>
-                              <Stack direction={"row"} spacing={1}>
-                                <Button
-                                  variant="contained"
-                                  color="primary"
-                                  onClick={() =>
-                                    onApproveButtonClicked(pending.publisherId!)
-                                  }
-                                >
-                                  승인
-                                </Button>
-                                <Button
-                                  variant="contained"
-                                  color="error"
-                                  onClick={() =>
-                                    onRejectButtonClicked(pending.publisherId!)
-                                  }
-                                >
-                                  거절
-                                </Button>
-                              </Stack>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      )
-                    ) : (
-                      <Skeleton />
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-              <PageNavigation
-                pageZeroBased={page}
-                setPage={setPage}
-                totalPages={totalPages}
-              />
-            </Stack>
-          </CardContent>
-        </Card>
-      </Container>
+                      ))
+                    )
+                  ) : (
+                    <Skeleton />
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <PageNavigation
+              pageZeroBased={page}
+              setPage={setPage}
+              totalPages={totalPages}
+            />
+          </Stack>
+        </CardContent>
+      </Card>
     </>
   );
 }

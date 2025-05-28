@@ -120,7 +120,7 @@ export default function PendingMemberCard({ groupId }: { groupId: number }) {
   };
 
   return (
-    <Card>
+    <Card variant="outlined">
       <CardHeader
         title="가입 신청 관리"
         action={

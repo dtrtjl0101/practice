@@ -114,7 +114,7 @@ export function GroupHeader({ group, groupId }: GroupHeaderProps) {
           <Stack spacing={1} textAlign={"center"}>
             {members &&
               members.map((member) => (
-                <Card key={member.userId}>
+                <Card key={member.userId} variant="outlined">
                   <Stack
                     direction={"row"}
                     spacing={1}

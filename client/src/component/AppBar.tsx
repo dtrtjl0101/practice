@@ -51,17 +51,19 @@ export default function AppBar(props: {
         }}
         elevation={0}
       >
-        <Toolbar>
-          <IconButton
-            onClick={() => {
-              setSidebarOpen((prev) => !prev);
-            }}
-          >
-            <Menu />
-          </IconButton>
-          <LogoButton to="/" sx={{ mr: "auto" }}>
-            <img src="/logoTitle.png" alt="Logo" height={40} />
-          </LogoButton>
+        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <IconButton
+              onClick={() => {
+                setSidebarOpen((prev) => !prev);
+              }}
+            >
+              <Menu />
+            </IconButton>
+            <LogoButton to="/" sx={{ display: { xs: "none", sm: "flex" } }}>
+              <img src="/logoTitle.png" alt="Logo" height={40} />
+            </LogoButton>
+          </Stack>
           <Stack direction="row" spacing={1}>
             <IconButton onClick={onColorSchemeChangeButtonClicked}>
               {colorScheme === "light" ? <Sunny /> : <Nightlight />}
@@ -70,7 +72,11 @@ export default function AppBar(props: {
             {user ? (
               <>
                 <LinkButton color="inherit" to={"/mypage"}>
-                  <Stack direction="row" alignItems="center">
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    sx={{ textWrap: "nowrap" }}
+                  >
                     <Avatar
                       src={user.profileImageURL}
                       sx={{ width: 24, height: 24, mr: 1 }}
@@ -83,7 +89,11 @@ export default function AppBar(props: {
                   </Stack>
                 </LinkButton>
                 <NotificationButton />
-                <Button color="inherit" onClick={logout}>
+                <Button
+                  color="inherit"
+                  onClick={logout}
+                  sx={{ textWrap: "nowrap" }}
+                >
                   로그아웃
                 </Button>
               </>

@@ -12,7 +12,7 @@ function Home() {
 
   return (
     <Container sx={{ my: 8 }}>
-      <Stack spacing={4}>
+      <Stack spacing={8}>
         <GroupList
           size="small"
           action={

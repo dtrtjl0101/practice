@@ -182,7 +182,7 @@ export function ActivityCard(props: { groupId: number; canCreate?: boolean }) {
         ) : (
           <Stack spacing={1}>
             {activityReadProgresses.map((progress) => (
-              <Card key={progress.userId}>
+              <Card key={progress.userId} variant="outlined">
                 <Stack>
                   <LinearProgress
                     value={progress.percentage}

@@ -119,7 +119,7 @@ export default function DiscussionForm({
       maxWidth="md"
       sx={{ mt: theme.spacing(4), justifyContent: "space-between" }}
     >
-      <Card sx={{ padding: 3 }}>
+      <Card variant="outlined" sx={{ padding: 3 }}>
         <CardHeader title={isEdit ? "게시글 수정" : "게시글 작성"} />
         <CardContent
           sx={{

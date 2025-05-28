@@ -170,6 +170,7 @@ export default function HighlightCard({
     <Card
       ref={cardRef}
       sx={{ opacity: shouldFade ? 0.5 : 1 }}
+      variant="outlined"
       onClick={onClick}
     >
       <Menu

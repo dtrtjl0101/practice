@@ -152,7 +152,7 @@ export default function GroupSettingsCard({
   return (
     <Stack spacing={3}>
       {/* 그룹 정보 수정 카드 */}
-      <Card elevation={2}>
+      <Card variant="outlined" elevation={2}>
         <CardHeader
           title={
             <Typography variant="h6" fontWeight="600">

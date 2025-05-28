@@ -4,6 +4,7 @@ import {
   CardContent,
   CardHeader,
   CardMedia,
+  Container,
   Grid,
   Skeleton,
   Stack,
@@ -65,8 +66,8 @@ export default function GroupList(props: {
   });
 
   return (
-    <Card>
-      <Stack spacing={2} sx={{ padding: 2 }}>
+    <Container>
+      <Stack spacing={1}>
         <Stack
           direction="row"
           justifyContent="space-between"
@@ -95,7 +96,7 @@ export default function GroupList(props: {
           {groups?.map((group, index) =>
             group ? (
               <ItemContainer key={group.groupId}>
-                <Card sx={{ height: ITEM_HEIGHT }} elevation={3}>
+                <Card sx={{ height: ITEM_HEIGHT }} variant="outlined">
                   <CardActionArea
                     sx={{
                       height: ITEM_HEIGHT,
@@ -151,7 +152,7 @@ export default function GroupList(props: {
           totalPages={totalPages}
         />
       </Stack>
-    </Card>
+    </Container>
   );
 }
 

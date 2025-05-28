@@ -31,7 +31,7 @@ function RouteComponent() {
       />
       <Container sx={{ my: 8 }}>
         <Stack spacing={4}>
-          <Card>
+          <Card variant="outlined">
             <CardHeader title="마이페이지" />
             <CardContent>
               <Button

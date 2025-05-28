@@ -18,7 +18,7 @@ function RouteComponent() {
 
   return (
     <Container sx={{ my: 8 }}>
-      <Card>
+      <Card variant="outlined">
         <CardHeader title="Dashboard" />
         <CardContent>
           <Button onClick={() => setOpenMemoBrowser(true)}>

@@ -144,11 +144,14 @@ export default function CreditPurchaseModal(props: {
                     const selected = selectedProductId === product.id;
                     return (
                       <Grid key={product.id} size={6}>
-                        <Card elevation={selected ? 4 : 2}>
+                        <Card
+                          variant="outlined"
+                          elevation={selected ? 4 : 2}
+                          sx={{
+                            p: 2,
+                          }}
+                        >
                           <CardActionArea
-                            sx={{
-                              p: 2,
-                            }}
                             onClick={() => setSelectedProductId(product.id!)}
                           >
                             <Typography

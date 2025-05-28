@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Card,
   CardActions,
   CircularProgress,
   Dialog,
@@ -322,7 +323,8 @@ function HighlightViewer(props: {
 
   return (
     <Grid size={8} sx={{ height: "100%" }}>
-      <Paper
+      <Card
+        variant="outlined"
         elevation={2}
         sx={{
           height: "100%",
@@ -371,7 +373,7 @@ function HighlightViewer(props: {
             )}
           </CardActions>
         </Stack>
-      </Paper>
+      </Card>
     </Grid>
   );
 }

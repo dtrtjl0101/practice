@@ -15,6 +15,7 @@ export default function SimpleHighlightCard({
 }) {
   return (
     <Card
+      variant="outlined"
       sx={{
         elevation: 3,
         borderRadius: 2,

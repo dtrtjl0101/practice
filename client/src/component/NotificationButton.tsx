@@ -95,7 +95,7 @@ function NotificationItem({
   const notRead = !notification.isRead;
 
   return (
-    <Card variant="elevation">
+    <Card variant="outlined">
       <LinearProgress
         value={notRead ? 100 : 0}
         variant="determinate"
