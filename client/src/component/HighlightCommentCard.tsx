@@ -83,7 +83,7 @@ export default function HighlightCommentCard({
           onClick={onShareToGroupClicked}
           value="group"
         >
-          그룹 공개
+          모임 공개
         </MenuItem> */}
         </Menu>
         <CardContent sx={{ pt: 1 }}>

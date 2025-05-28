@@ -18,7 +18,7 @@ function Home() {
           action={
             <Button onClick={() => navigate({ to: "/groups" })}>더보기</Button>
           }
-          title="인기 그룹"
+          title="인기 모임"
           key="popularGroups"
         />
         <BookList

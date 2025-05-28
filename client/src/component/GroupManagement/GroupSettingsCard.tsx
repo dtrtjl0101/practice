@@ -46,7 +46,7 @@ export default function GroupSettingsCard({
     groupImageURL: "",
   });
 
-  // 그룹 데이터 가져오기
+  // 모임 데이터 가져오기
   const { data: groupData, refetch } = useQuery({
     queryKey: ["getGroup", groupId],
     queryFn: async () => {
@@ -99,10 +99,10 @@ export default function GroupSettingsCard({
 
       setIsEditing(false);
       await refetch(); // refetch가 완료될 때까지 대기
-      alert("그룹 정보가 성공적으로 수정되었습니다.");
+      alert("모임 정보가 성공적으로 수정되었습니다.");
     } catch (error) {
-      console.error("그룹 수정 오류:", error);
-      alert("그룹 정보 수정에 실패했습니다.");
+      console.error("모임 수정 오류:", error);
+      alert("모임 정보 수정에 실패했습니다.");
     }
   };
 
@@ -122,7 +122,7 @@ export default function GroupSettingsCard({
 
   const handleDeleteGroup = () => {
     const confirmDelete = window.confirm(
-      "정말로 이 그룹을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
+      "정말로 이 모임을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
     );
     if (!confirmDelete) return;
 
@@ -130,12 +130,12 @@ export default function GroupSettingsCard({
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);
       }
-      alert("그룹이 성공적으로 삭제되었습니다.");
+      alert("모임이 성공적으로 삭제되었습니다.");
       onDeleteRoute();
     });
   };
 
-  // 그룹 데이터가 로드되면 폼 데이터 초기화
+  // 모임 데이터가 로드되면 폼 데이터 초기화
   useEffect(() => {
     if (groupData) {
       setFormData({
@@ -151,12 +151,12 @@ export default function GroupSettingsCard({
 
   return (
     <Stack spacing={3}>
-      {/* 그룹 정보 수정 카드 */}
+      {/* 모임 정보 수정 카드 */}
       <Card variant="outlined" elevation={2}>
         <CardHeader
           title={
             <Typography variant="h6" fontWeight="600">
-              그룹 정보 수정
+              모임 정보 수정
             </Typography>
           }
           action={
@@ -212,7 +212,7 @@ export default function GroupSettingsCard({
 
         <CardContent sx={{ pt: 0 }}>
           <Stack spacing={3}>
-            {/* 그룹 이미지 */}
+            {/* 모임 이미지 */}
             <Box>
               <Typography
                 variant="subtitle1"
@@ -220,7 +220,7 @@ export default function GroupSettingsCard({
                 color="text.primary"
                 gutterBottom
               >
-                그룹 이미지
+                모임 이미지
               </Typography>
               <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
                 <Avatar
@@ -237,7 +237,7 @@ export default function GroupSettingsCard({
               </Box>
             </Box>
 
-            {/* 그룹명 */}
+            {/* 모임명 */}
             <Box>
               <Typography
                 variant="subtitle1"
@@ -245,7 +245,7 @@ export default function GroupSettingsCard({
                 color="text.primary"
                 gutterBottom
               >
-                그룹명
+                모임명
               </Typography>
               <Typography
                 variant="body1"
@@ -261,7 +261,7 @@ export default function GroupSettingsCard({
               </Typography>
             </Box>
 
-            {/* 그룹 설명 */}
+            {/* 모임 설명 */}
             <Box>
               <Typography
                 variant="subtitle1"
@@ -269,7 +269,7 @@ export default function GroupSettingsCard({
                 color="text.primary"
                 gutterBottom
               >
-                그룹 설명
+                모임 설명
               </Typography>
               <Typography
                 variant="body1"
@@ -337,7 +337,7 @@ export default function GroupSettingsCard({
               </Box>
             </Box>
 
-            {/* 그룹 ID (읽기 전용) */}
+            {/* 모임 ID (읽기 전용) */}
             <Box>
               <Typography
                 variant="subtitle1"
@@ -345,7 +345,7 @@ export default function GroupSettingsCard({
                 color="text.primary"
                 gutterBottom
               >
-                그룹 ID
+                모임 ID
               </Typography>
               <Typography
                 variant="body2"
@@ -381,7 +381,7 @@ export default function GroupSettingsCard({
                 startIcon={<DeleteIcon />}
                 onClick={handleDeleteGroup}
               >
-                그룹 삭제
+                모임 삭제
               </Button>
             </Stack>
           </Stack>

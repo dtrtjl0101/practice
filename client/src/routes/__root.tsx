@@ -31,7 +31,7 @@ const navigationShellHidePathIds: FileRouteTypes["id"][] = [
 const defaultNavigationItems: NavigationItem[][] = [
   [{ to: "/", label: "홈", icon: <Home /> }],
   [{ to: "/books", label: "도서", icon: <Book /> }],
-  [{ to: "/groups", label: "그룹", icon: <Group /> }],
+  [{ to: "/groups", label: "모임", icon: <Group /> }],
 ];
 
 const adminNavigationItems: NavigationItem[] = [
