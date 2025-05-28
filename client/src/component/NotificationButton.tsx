@@ -52,7 +52,7 @@ export default function NotificationButton() {
           horizontal: "left",
         }}
       >
-        <Stack spacing={2} padding={1} sx={{ width: 352 }}>
+        <Stack spacing={2} padding={1} sx={{ maxWidth: 352 }}>
           {notifications?.map((notification) => (
             <NotificationItem
               notification={notification}
