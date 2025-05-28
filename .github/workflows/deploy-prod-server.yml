@@ -91,6 +91,8 @@ jobs:
             ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
             AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
             SECRET_ACCESS_KEY=${{ secrets.SECRET_ACCESS_KEY }}
+            KAKAO_PAY_CID=${{ secrets.KAKAO_PAY_CID}}
+            KAKAO_PAY_SECRET_KEY=${{ secrets.KAKAO_PAY_SECRET_KEY}}
 
       - name: Deploy ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
