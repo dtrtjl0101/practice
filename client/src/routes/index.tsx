@@ -1,6 +1,6 @@
 import { Button, Container, Stack } from "@mui/material";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import GroupList from "../component/groupList";
+import GroupList from "../component/GroupList";
 import BookList from "../component/BookList";
 
 export const Route = createFileRoute("/")({

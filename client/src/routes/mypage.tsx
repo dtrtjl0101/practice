@@ -12,7 +12,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import BookList, { BookListKind } from "../component/BookList";
 import GroupCreateModal from "../component/groupCreate/GroupCreateModal";
-import GroupList, { GroupListKind } from "../component/groupList";
+import GroupList, { GroupListKind } from "../component/GroupList";
 import HighlightBrowserModal from "../component/HighlightBrowserModal";
 
 export const Route = createFileRoute("/mypage")({
