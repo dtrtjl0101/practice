@@ -37,6 +37,9 @@ public class ReadingGroup extends BaseEntity {
     
     @Column(length = 5000)
     private String description;
+    
+    @Column(name = "is_auto_approval")
+    private boolean autoApproval = true;
 
     @OneToMany(mappedBy = "readingGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 20)
@@ -156,13 +159,26 @@ public class ReadingGroup extends BaseEntity {
                 .anyMatch(gm -> gm.matchesUserId(userId) && !gm.isAccepted());
     }
 
+    public void changeAutoApproval(boolean autoApproval) {
+        this.autoApproval = autoApproval;
+    }
+
     @Builder
-    public ReadingGroup(Long id, String name, UserProfile groupLeader, List<GroupTag> groupTags, String description, String groupImageKey) {
+    public ReadingGroup(
+            Long id, 
+            String name, 
+            UserProfile groupLeader, 
+            List<GroupTag> groupTags, 
+            String description, 
+            String groupImageKey, 
+            boolean isAutoApproval
+    ) {
         this.id = id;
         this.name = name;
         this.groupLeader = groupLeader;
         this.groupTags = (groupTags != null) ? new ArrayList<>(groupTags) : new ArrayList<>();
         this.description = description;
         this.groupImageKey = groupImageKey;
+        this.autoApproval = isAutoApproval;
     }
 }

@@ -11,5 +11,6 @@ public record GroupPatchRequest(
         List<String> tags,
         @Length(max = 5000)
         String description,
-        MultipartFile groupImage
+        MultipartFile groupImage,
+        Boolean autoApproval
 ) { }

@@ -56,6 +56,16 @@ public class GroupMemberService {
         }
 
         GroupMember groupMember = group.addMember(userProfile);
+        
+        if (group.isAutoApproval()) {
+            group.approveMember(userProfile);
+            notificationService.createGroupJoinApprovedNotification(
+                    userProfile,
+                    group.getGroupLeader(),
+                    group
+            );
+            return GroupJoinResponse.of(groupMember);
+        }
 
         notificationService.createGroupJoinRequestNotification(
             group.getGroupLeader(),

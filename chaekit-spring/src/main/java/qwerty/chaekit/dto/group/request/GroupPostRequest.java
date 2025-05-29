@@ -14,5 +14,6 @@ public record GroupPostRequest(
         @Length(max = 5000)
         String description,
         List<String> tags,
-        MultipartFile groupImage
+        MultipartFile groupImage,
+        Boolean autoApproval
 ) { }
