@@ -58,7 +58,7 @@ interface ReviewResponse {
   totalPages: number;
 }
 
-const REVIEWS_PER_PAGE = 1;
+const REVIEWS_PER_PAGE = 3;
 
 export default function GroupReviewCard({
   groupId,

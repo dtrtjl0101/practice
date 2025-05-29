@@ -37,7 +37,7 @@ export default function GroupDashboard({ groupId }: { groupId: number }) {
 
   return (
     <Grid container spacing={3} sx={{ "& > *": { minWidth: 140 } }}>
-      <Grid sx={{ xs: 12, sm: 6, md: 3 }}>
+      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
         <Paper sx={{ p: 3, textAlign: "center" }}>
           <GroupIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
           <Typography variant="h4" fontWeight="bold">
@@ -49,7 +49,7 @@ export default function GroupDashboard({ groupId }: { groupId: number }) {
         </Paper>
       </Grid>
 
-      <Grid sx={{ xs: 12, sm: 6, md: 3 }}>
+      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
         <Paper sx={{ p: 3, textAlign: "center" }}>
           <NotificationsIcon color="warning" sx={{ fontSize: 40, mb: 1 }} />
           <Typography variant="h4" fontWeight="bold">
@@ -61,7 +61,7 @@ export default function GroupDashboard({ groupId }: { groupId: number }) {
         </Paper>
       </Grid>
 
-      <Grid sx={{ xs: 12, sm: 6, md: 3 }}>
+      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
         <Paper sx={{ p: 3, textAlign: "center" }}>
           <CheckCircleIcon color="success" sx={{ fontSize: 40, mb: 1 }} />
           <Typography variant="h4" fontWeight="bold" color="error">
@@ -74,7 +74,7 @@ export default function GroupDashboard({ groupId }: { groupId: number }) {
         </Paper>
       </Grid>
 
-      <Grid sx={{ xs: 12, sm: 6, md: 3 }}>
+      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
         <Paper sx={{ p: 3, textAlign: "center" }}>
           <PersonAddIcon color="info" sx={{ fontSize: 40, mb: 1 }} />
           <Typography variant="h4" fontWeight="bold">
