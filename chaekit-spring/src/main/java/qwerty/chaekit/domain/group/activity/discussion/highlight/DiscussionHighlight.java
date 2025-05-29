@@ -1,4 +1,4 @@
-package qwerty.chaekit.domain.discussionhighlight;
+package qwerty.chaekit.domain.group.activity.discussion.highlight;
 
 
 import jakarta.persistence.*;

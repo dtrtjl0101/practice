@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
 import qwerty.chaekit.domain.BaseEntity;
-import qwerty.chaekit.domain.discussionhighlight.DiscussionHighlight;
+import qwerty.chaekit.domain.group.activity.discussion.highlight.DiscussionHighlight;
 import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.highlight.entity.comment.HighlightComment;
