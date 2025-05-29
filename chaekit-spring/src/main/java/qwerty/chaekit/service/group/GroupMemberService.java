@@ -180,8 +180,5 @@ public class GroupMemberService {
         group.removeMember(targetUser);
         notificationService.createGroupBannedNotification(targetUser, group);
     }
-
-    private String getGroupImageURL(ReadingGroup group) {
-        return fileService.convertToPublicImageURL(group.getGroupImageKey());
-    }
+    
 }

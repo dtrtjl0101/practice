@@ -78,10 +78,6 @@ public class ReadingGroup extends BaseEntity {
         groupTags.clear();
     }
 
-    public void removeTag(String tagName) {
-        groupTags.removeIf(tag -> tag.getTagName().equals(tagName));
-    }
-
     public GroupMember addMember(UserProfile user) {
         GroupMember groupMember = new GroupMember(this, user);
         groupMembers.add(groupMember);
