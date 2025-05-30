@@ -2,6 +2,7 @@ import { Button, Container, Stack } from "@mui/material";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import GroupList from "../component/GroupList";
 import BookList from "../component/BookList";
+import EventCarousel from "../component/EventCarousel";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -13,6 +14,7 @@ function Home() {
   return (
     <Container sx={{ my: 8 }}>
       <Stack spacing={8}>
+        <EventCarousel />
         <GroupList
           size="small"
           action={
