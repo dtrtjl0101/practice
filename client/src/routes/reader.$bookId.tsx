@@ -90,13 +90,11 @@ function RouteComponent() {
   );
   const [readTogetherSnackbarOpen, setReadTogetherSnackbarOpen] =
     useState(!!activityId);
-  const [lastMouseUpPosition, setLastMouseUpPosition] = useState<{
-    left: number;
-    top: number;
-  }>({
-    left: 0,
-    top: 0,
-  });
+  const [selectenRightBottomPosition, setSelectenRightBottomPosition] =
+    useState({
+      left: 0,
+      top: 0,
+    });
   const readerRef = useRef<ReactReader | null>(null);
 
   const queryParam = activityId
@@ -306,31 +304,6 @@ function RouteComponent() {
     return () => clearTimeout(timeout);
   }, [focusedHighlight]);
 
-  useEffect(() => {
-    if (!rendition) {
-      return;
-    }
-    rendition.on("mouseup", (e: MouseEvent) => {
-      const viewerElement =
-        readerRef.current?.readerRef.current?.viewerRef.current;
-      if (!viewerElement) {
-        return;
-      }
-      const readerIframeElement = viewerElement.querySelector("iframe");
-      if (!readerIframeElement) {
-        return;
-      }
-      const clientRect = readerIframeElement.getBoundingClientRect();
-      if (!clientRect) {
-        return;
-      }
-      setLastMouseUpPosition({
-        left: e.clientX + clientRect.left,
-        top: e.clientY + clientRect.top,
-      });
-    });
-  }, [rendition]);
-
   const addHighlight = async (props: {
     memo: string;
     cfi: string;
@@ -435,8 +408,8 @@ function RouteComponent() {
             size="small"
             sx={{
               position: "absolute",
-              left: lastMouseUpPosition.left,
-              top: lastMouseUpPosition.top,
+              left: selectenRightBottomPosition.left,
+              top: selectenRightBottomPosition.top,
             }}
             onClick={() => {
               setOpenHighlightCreationModal(true);
@@ -504,6 +477,33 @@ function RouteComponent() {
             { once: true }
           );
 
+          const selectionClientRect = selection
+            .getRangeAt(0)
+            .getBoundingClientRect();
+          const viewerElement =
+            readerRef.current?.readerRef.current?.viewerRef.current;
+          if (!viewerElement) {
+            return;
+          }
+          const readerIframeElement = viewerElement.querySelector("iframe");
+          if (!readerIframeElement) {
+            return;
+          }
+          const viewerClientRect = readerIframeElement.getBoundingClientRect();
+          if (!viewerClientRect) {
+            return;
+          }
+
+          setSelectenRightBottomPosition({
+            left:
+              selectionClientRect.left +
+              selectionClientRect.width +
+              viewerClientRect.left,
+            top:
+              selectionClientRect.top +
+              selectionClientRect.height * 0.5 +
+              viewerClientRect.top,
+          });
           setSelection({
             text: selection.toString(),
             epubcfi: cfiRange,
