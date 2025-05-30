@@ -143,7 +143,7 @@ function RouteComponent() {
 
   return (
     <Container maxWidth="md" sx={{ mt: 5 }}>
-      <Paper elevation={3} sx={{ p: 4 }}>
+      <Paper variant="outlined" sx={{ p: 4 }}>
         {/* 헤더 영역 */}
         <Stack direction="column" spacing={2} sx={{ mb: 3 }}>
           {/* 제목 */}
