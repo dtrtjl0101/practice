@@ -20,7 +20,7 @@ import {
   useRouter,
 } from "@tanstack/react-router";
 import { EpubCFI, Rendition } from "epubjs";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { ReactReader } from "react-reader";
 import API_CLIENT from "../api/api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
@@ -101,6 +101,7 @@ function RouteComponent() {
   const readerRef = useRef<ReactReader | null>(null);
   const [showHighlightsOnOnlyCurrentPage, setShowAllHighlights] =
     useState(true);
+  const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
   const spine = useMemo(() => {
     if (!location) {
@@ -560,7 +561,7 @@ function RouteComponent() {
         showToc={false}
         getRendition={(newRendition) => {
           newRendition.once("started", async () => {
-            await loadLocations(bookId, newRendition);
+            await loadLocations(bookId, newRendition).then(forceUpdate);
           });
           setRendition(newRendition);
         }}
