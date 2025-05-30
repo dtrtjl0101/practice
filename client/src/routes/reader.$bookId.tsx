@@ -1,4 +1,4 @@
-import { Cancel, Close, Note, NoteAdd } from "@mui/icons-material";
+import { Close, Note, NoteAdd } from "@mui/icons-material";
 import {
   Badge,
   Box,
@@ -415,7 +415,7 @@ function RouteComponent() {
                 router.history.back();
               }}
             >
-              <Cancel />
+              <Close />
             </Fab>
           )}
           <Fab
