@@ -6,6 +6,7 @@ import {
   Avatar,
   Stack,
   IconButton,
+  Chip,
 } from "@mui/material";
 import { createLink } from "@tanstack/react-router";
 import { useAtom, useAtomValue } from "jotai";
@@ -18,6 +19,9 @@ import State from "../states";
 import { Menu, Nightlight, Sunny } from "@mui/icons-material";
 import { useState } from "react";
 import SideNavigationBar, { NavigationItem } from "./SideNavigatorBar";
+import { useQuery } from "@tanstack/react-query";
+import API_CLIENT from "../api/api";
+import CreditPurchaseModal from "./CreditPurchaseModal";
 
 export default function AppBar(props: {
   sideNavigationBarItemsWithGroups: NavigationItem[][];
@@ -27,6 +31,19 @@ export default function AppBar(props: {
   const [colorScheme, setColorScheme] = useAtom(State.UI.userColorScheme);
   const { logout } = useLogout();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [creditPurchaseModalOpen, setCreditPurchaseModalOpen] = useState(false);
+
+  const { data: myWallet } = useQuery({
+    queryKey: ["myWallet"],
+    queryFn: async () => {
+      const response = await API_CLIENT.creditController.getMyWallet();
+      if (!response.isSuccessful) {
+        throw new Error(response.errorMessage);
+      }
+      return response.data;
+    },
+    enabled: !!user,
+  });
 
   const onColorSchemeChangeButtonClicked = () => {
     setColorScheme((prev) => {
@@ -38,6 +55,10 @@ export default function AppBar(props: {
 
   return (
     <>
+      <CreditPurchaseModal
+        open={creditPurchaseModalOpen}
+        onClose={() => setCreditPurchaseModalOpen(false)}
+      />
       <SideNavigationBar
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
@@ -71,6 +92,21 @@ export default function AppBar(props: {
             <Divider orientation="vertical" flexItem variant="middle" />
             {user ? (
               <>
+                {myWallet && (
+                  <Chip
+                    label={`${myWallet.balance?.toLocaleString() ?? 0} 크레딧`}
+                    color="info"
+                    size="small"
+                    sx={{
+                      display: {
+                        xs: "none",
+                        sm: "flex",
+                      },
+                      alignSelf: "center",
+                    }}
+                    onClick={() => setCreditPurchaseModalOpen(true)}
+                  />
+                )}
                 <LinkButton color="inherit" to={"/mypage"}>
                   <Stack
                     direction="row"
