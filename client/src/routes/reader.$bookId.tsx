@@ -93,7 +93,7 @@ function RouteComponent() {
   );
   const [readTogetherSnackbarOpen, setReadTogetherSnackbarOpen] =
     useState(!!activityId);
-  const [selectenRightBottomPosition, setSelectenRightBottomPosition] =
+  const [selectionRightBottomPosition, setSelectionRightBottomPosition] =
     useState({
       left: 0,
       top: 0,
@@ -424,8 +424,8 @@ function RouteComponent() {
             size="small"
             sx={{
               position: "absolute",
-              left: selectenRightBottomPosition.left,
-              top: selectenRightBottomPosition.top,
+              left: selectionRightBottomPosition.left,
+              top: selectionRightBottomPosition.top,
             }}
             onClick={() => {
               setOpenHighlightCreationModal(true);
@@ -542,7 +542,7 @@ function RouteComponent() {
             return;
           }
 
-          setSelectenRightBottomPosition({
+          setSelectionRightBottomPosition({
             left:
               selectionClientRect.left +
               selectionClientRect.width +
