@@ -1,4 +1,3 @@
-import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { Card, CardMedia, Box } from "@mui/material";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
