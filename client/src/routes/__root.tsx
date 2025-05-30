@@ -4,10 +4,8 @@ import AppBar from "../component/AppBar";
 import useAutoLogin from "../api/login/useAutoLogin";
 import useAutoTokenRefresh from "../api/login/useAutoTokenRefresh";
 import useInvalidateQueriesOnAuthChange from "../api/login/useInvalidateQueriesOnAuthChange";
-import { Box, Toolbar } from "@mui/material";
-import SideNavigationBar, {
-  NavigationItem,
-} from "../component/SideNavigatorBar";
+import { Toolbar } from "@mui/material";
+import { NavigationItem } from "../component/SideNavigatorBar";
 import {
   AdminPanelSettings,
   Badge,
@@ -33,7 +31,7 @@ const navigationShellHidePathIds: FileRouteTypes["id"][] = [
 const defaultNavigationItems: NavigationItem[][] = [
   [{ to: "/", label: "홈", icon: <Home /> }],
   [{ to: "/books", label: "도서", icon: <Book /> }],
-  [{ to: "/groups", label: "그룹", icon: <Group /> }],
+  [{ to: "/groups", label: "모임", icon: <Group /> }],
 ];
 
 const adminNavigationItems: NavigationItem[] = [
@@ -55,23 +53,20 @@ function RouteComponent() {
   const isAdmin = user && user.role === Role.ROLE_ADMIN;
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <>
       {!shouldHideNavigationShell && (
         <>
-          <AppBar />
-          <SideNavigationBar
-            itemsWithGroups={[
+          <AppBar
+            sideNavigationBarItemsWithGroups={[
               ...defaultNavigationItems,
               ...(isAdmin ? [adminNavigationItems] : []),
             ]}
           />
+          <Toolbar />
         </>
       )}
-      <Box component="main" sx={{ flexGrow: 1 }}>
-        {!shouldHideNavigationShell && <Toolbar />}
-        <Outlet />
-      </Box>
+      <Outlet />
       <TanStackRouterDevtools />
-    </Box>
+    </>
   );
 }

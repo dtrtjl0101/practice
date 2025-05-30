@@ -67,7 +67,7 @@ function RouteComponent() {
 
   return (
     <Container sx={{ my: 8 }}>
-      <Card sx={{ p: 2 }}>
+      <Card variant="outlined" sx={{ p: 2 }}>
         <CardHeader title="전자책 업로드" />
         <CardActionArea
           onClick={() => {

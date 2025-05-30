@@ -1,18 +1,14 @@
-import { ExpandLess, ExpandMore, Menu } from "@mui/icons-material";
+import { Close, ExpandLess, ExpandMore } from "@mui/icons-material";
 import {
   List,
-  ListItem,
   ListItemButton,
   ListItemIcon,
-  styled,
-  Drawer as MuiDrawer,
   ListItemText,
-  Theme,
-  CSSObject,
   Collapse,
+  Drawer,
 } from "@mui/material";
 import { createLink, LinkComponentProps } from "@tanstack/react-router";
-import { JSX, useState } from "react";
+import { JSX } from "react";
 
 const drawerWidth = 240;
 
@@ -24,37 +20,33 @@ export type NavigationItem = {
 };
 
 export default function SideNavigationBar(props: {
+  open: boolean;
+  onClose: () => void;
   itemsWithGroups: NavigationItem[][];
 }) {
-  const { itemsWithGroups } = props;
-  const [open, setOpen] = useState(false);
+  const { open, onClose, itemsWithGroups } = props;
 
   return (
     <Drawer
       open={open}
-      variant="permanent"
+      onClose={onClose}
+      variant="temporary"
       elevation={0}
       slotProps={{
         paper: {
           elevation: 0,
           sx: {
-            border: "0px",
+            minWidth: drawerWidth,
           },
         },
       }}
     >
       <List>
-        <ListItem disablePadding>
-          <ListItemButton
-            onClick={() => {
-              setOpen(!open);
-            }}
-          >
-            <ListItemIcon>
-              <Menu />
-            </ListItemIcon>
-          </ListItemButton>
-        </ListItem>
+        <ListItemButton onClick={onClose}>
+          <ListItemIcon>
+            <Close />
+          </ListItemIcon>
+        </ListItemButton>
         {itemsWithGroups.map(([header, ...children]) => {
           return (
             <LinkListButtonGroup
@@ -71,60 +63,6 @@ export default function SideNavigationBar(props: {
     </Drawer>
   );
 }
-
-const openedMixin = (theme: Theme): CSSObject => ({
-  width: drawerWidth,
-  transition: theme.transitions.create("width", {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.enteringScreen,
-  }),
-  overflowX: "hidden",
-});
-
-const closedMixin = (theme: Theme): CSSObject => ({
-  transition: theme.transitions.create("width", {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  overflowX: "hidden",
-  width: `calc(${theme.spacing(7)} + 1px)`,
-  [theme.breakpoints.up("sm")]: {
-    width: `calc(${theme.spacing(7)} + 1px)`,
-  },
-});
-
-const Drawer = styled(MuiDrawer, {
-  shouldForwardProp: (prop) => prop !== "open",
-})(({ theme }) => ({
-  width: drawerWidth,
-  flexShrink: 0,
-  whiteSpace: "nowrap",
-  boxSizing: "border-box",
-  "& .MuiDrawer-paper": {
-    marginTop: theme.spacing(8),
-  },
-
-  variants: [
-    {
-      props: ({ open }) => open,
-      style: {
-        ...openedMixin(theme),
-        "& .MuiDrawer-paper": {
-          ...openedMixin(theme),
-        },
-      },
-    },
-    {
-      props: ({ open }) => !open,
-      style: {
-        ...closedMixin(theme),
-        "& .MuiDrawer-paper": {
-          ...closedMixin(theme),
-        },
-      },
-    },
-  ],
-}));
 
 const LinkListItemButton = createLink(ListItemButton);
 

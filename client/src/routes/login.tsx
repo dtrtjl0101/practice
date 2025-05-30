@@ -62,7 +62,7 @@ function RouteComponent() {
 
   return (
     <Container maxWidth="sm" sx={{ my: 8 }}>
-      <Card>
+      <Card variant="outlined">
         <CardHeader title="로그인" />
         <CardContent
           sx={{

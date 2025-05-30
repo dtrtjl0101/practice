@@ -170,6 +170,7 @@ export default function HighlightCard({
     <Card
       ref={cardRef}
       sx={{ opacity: shouldFade ? 0.5 : 1 }}
+      variant="outlined"
       onClick={onClick}
     >
       <Menu
@@ -182,7 +183,7 @@ export default function HighlightCard({
           onClick={onShareToGroupClicked}
           value="group"
         >
-          그룹 공개
+          모임 공개
         </MenuItem>
       </Menu>
       <CardContent sx={{ pt: 1 }}>
@@ -290,16 +291,17 @@ export default function HighlightCard({
           </Stack>
         </Popover>
       </CardActions>
-      {openComments && comments && (
+      {openComments && (
         <>
-          {comments.map((comment) => (
-            <HighlightCommentCard
-              key={comment.id}
-              comment={comment}
-              highlight={highlight}
-              refetchComments={refetchComments}
-            />
-          ))}
+          {comments &&
+            comments.map((comment) => (
+              <HighlightCommentCard
+                key={comment.id}
+                comment={comment}
+                highlight={highlight}
+                refetchComments={refetchComments}
+              />
+            ))}
           <Divider />
           <CardActions>
             <Input

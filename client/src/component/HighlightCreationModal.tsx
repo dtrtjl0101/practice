@@ -48,7 +48,7 @@ export default function HighlightCreationModal({
           width: 400,
         }}
       >
-        <Card sx={{ p: 2 }}>
+        <Card variant="outlined" sx={{ p: 2 }}>
           <Stack spacing={2}>
             <Typography variant="h6">하이라이트 만들기</Typography>
             <Typography color="textSecondary" variant="body1">

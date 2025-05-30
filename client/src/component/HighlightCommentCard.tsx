@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import {
   Avatar,
+  Card,
   CardActions,
   CardContent,
   Chip,
@@ -69,68 +70,72 @@ export default function HighlightCommentCard({
   };
 
   return (
-    <>
-      <Divider />
-      <Menu
-        anchorEl={anchorEl}
-        open={!!anchorEl}
-        onClose={() => setAnchorEl(null)}
-      >
-        {/* <MenuItem
+    <Card variant="outlined">
+      <>
+        <Divider />
+        <Menu
+          anchorEl={anchorEl}
+          open={!!anchorEl}
+          onClose={() => setAnchorEl(null)}
+        >
+          {/* <MenuItem
           disabled={!!comment.activityId}
           onClick={onShareToGroupClicked}
           value="group"
         >
-          그룹 공개
+          모임 공개
         </MenuItem> */}
-      </Menu>
-      <CardContent sx={{ pt: 1 }}>
-        <Stack spacing={1}>
-          <Stack spacing={1} direction={"row"} alignItems={"center"}>
-            <Avatar src={comment.authorProfileImageURL} />
-            <Typography variant="body1">{comment.authorName}</Typography>
-            {isAuthor && (
-              <IconButton
-                onClick={(e) => {
-                  setAnchorEl(e.currentTarget);
-                }}
-              >
-                <MoreVert />
-              </IconButton>
-            )}
+        </Menu>
+        <CardContent sx={{ pt: 1 }}>
+          <Stack spacing={1}>
+            <Stack spacing={1} direction={"row"} alignItems={"center"}>
+              <Avatar src={comment.authorProfileImageURL} />
+              <Typography variant="body1">{comment.authorName}</Typography>
+              {isAuthor && (
+                <IconButton
+                  onClick={(e) => {
+                    setAnchorEl(e.currentTarget);
+                  }}
+                >
+                  <MoreVert />
+                </IconButton>
+              )}
+            </Stack>
+            <Typography variant="body1">{comment.content}</Typography>
+            <Grid
+              container
+              direction={"row"}
+              spacing={1}
+              sx={{ flexGrow: 1, alignContent: "flex-start", flexWrap: "wrap" }}
+            >
+              {reactions &&
+                Array.from(reactions.entries()).map(([type, reactions]) => {
+                  const reacted = getReacted(type);
+                  const count = reactions.length || 0;
+                  if (count === 0) return null;
+                  return (
+                    <Chip
+                      key={type}
+                      onClick={() => {
+                        onReactionClicked(type);
+                      }}
+                      icon={
+                        <Typography>
+                          {getEmojiFromReactionType(type)}
+                        </Typography>
+                      }
+                      label={count}
+                      variant={reacted ? "filled" : "outlined"}
+                    />
+                  );
+                })}
+            </Grid>
           </Stack>
-          <Typography variant="body1">{comment.content}</Typography>
-          <Grid
-            container
-            direction={"row"}
-            spacing={1}
-            sx={{ flexGrow: 1, alignContent: "flex-start", flexWrap: "wrap" }}
-          >
-            {reactions &&
-              Array.from(reactions.entries()).map(([type, reactions]) => {
-                const reacted = getReacted(type);
-                const count = reactions.length || 0;
-                if (count === 0) return null;
-                return (
-                  <Chip
-                    key={type}
-                    onClick={() => {
-                      onReactionClicked(type);
-                    }}
-                    icon={
-                      <Typography>{getEmojiFromReactionType(type)}</Typography>
-                    }
-                    label={count}
-                    variant={reacted ? "filled" : "outlined"}
-                  />
-                );
-              })}
-          </Grid>
-        </Stack>
-      </CardContent>
-      <CardActions sx={{ justifyContent: "flex-end" }}>
-        <EmojiReactionButton onReactionClicked={onReactionClicked} />
-      </CardActions>
-    </>
+        </CardContent>
+        <CardActions sx={{ justifyContent: "flex-end" }}>
+          <EmojiReactionButton onReactionClicked={onReactionClicked} />
+        </CardActions>
+      </>
+    </Card>
   );
 }

@@ -75,7 +75,12 @@ export default function HighlightSummaryCard({
   };
 
   return (
-    <Card ref={cardRef} onClick={onClick} sx={{ width: 320 }}>
+    <Card
+      variant="outlined"
+      ref={cardRef}
+      onClick={onClick}
+      sx={{ width: 320 }}
+    >
       <CardContent sx={{ pt: 1 }}>
         <Stack spacing={1}>
           <Stack spacing={1} direction={"row"} alignItems={"center"}>

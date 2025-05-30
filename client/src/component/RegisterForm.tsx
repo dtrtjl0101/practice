@@ -123,7 +123,7 @@ export default function RegisterForm({
 
   return (
     <Container maxWidth="sm" sx={{ my: 8 }}>
-      <Card>
+      <Card variant="outlined">
         <CardHeader
           title={registerType == "member" ? "회원가입" : "출판사 회원가입"}
         />
