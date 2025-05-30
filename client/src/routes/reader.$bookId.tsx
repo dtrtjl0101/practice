@@ -6,9 +6,10 @@ import {
   Fab,
   FormControlLabel,
   IconButton,
-  LinearProgress,
+  Slider,
   Snackbar,
   Stack,
+  styled,
   Switch,
   Typography,
   useTheme,
@@ -117,9 +118,7 @@ function RouteComponent() {
 
   const queryParam: HighlightQueryParam = createHighlightQueryParam(
     bookId,
-    showHighlightsOnOnlyCurrentPage,
-    activityId,
-    spine
+    activityId
   );
 
   const { data: highlights, refetch: refetchHighlights } = useQuery({
@@ -142,6 +141,16 @@ function RouteComponent() {
   });
 
   const previousHighlightsInPage = useRef<Highlight[]>([]);
+
+  const readProgressSliderMarks = useMemo(() => {
+    if (!rendition) {
+      return [];
+    }
+    const marks: { value: number }[] = highlights.map((highlight) => ({
+      value: rendition.book.locations.percentageFromCfi(highlight.cfi) * 100,
+    }));
+    return marks;
+  }, [rendition, highlights]);
 
   const { data: readProgressInServer, refetch: refetchReadProgressInServer } =
     useQuery({
@@ -343,10 +352,24 @@ function RouteComponent() {
           position: "absolute",
         }}
       >
-        <LinearProgress
+        <ReadProgressSlider
+          min={0}
+          max={100}
           value={localReadProgress}
-          variant="determinate"
-          sx={{ zIndex: theme.zIndex.fab }}
+          onChange={(_, value) => {
+            const percent = typeof value === "number" ? value : value[0];
+            const cfi = rendition?.book.locations.cfiFromPercentage(
+              percent / 100
+            );
+            if (!cfi) {
+              return;
+            }
+            setLocation(cfi);
+          }}
+          slots={{
+            mark: ReadProgressSliderMark,
+          }}
+          marks={readProgressSliderMarks}
         />
         <Snackbar
           anchorOrigin={{ vertical: "top", horizontal: "center" }}
@@ -582,9 +605,7 @@ type HighlightQueryParam = {
 
 function createHighlightQueryParam(
   bookId: number,
-  showCurrentPageOnly: boolean,
-  activityId?: number,
-  spine?: string
+  activityId?: number
 ): HighlightQueryParam {
   const param: HighlightQueryParam = activityId
     ? {
@@ -597,9 +618,41 @@ function createHighlightQueryParam(
         bookId,
       };
 
-  if (showCurrentPageOnly) {
-    param.spine = spine;
-  }
-
   return param;
+}
+
+const ReadProgressSlider = styled(Slider)(({ theme }) => ({
+  height: 5,
+  zIndex: theme.zIndex.fab,
+  "& .MuiSlider-thumb": {
+    top: 0,
+  },
+  "& .MuiSlider-track": {
+    top: 0,
+    height: 10,
+  },
+  "& .MuiSlider-rail": {
+    top: 0,
+    height: 10,
+  },
+}));
+
+function ReadProgressSliderMark(props: { style: { left: string } }) {
+  const theme = useTheme();
+  const left = props.style.left;
+
+  return (
+    <Box
+      sx={{
+        width: 10,
+        height: 10,
+        borderRadius: "50%",
+        position: "absolute",
+        transform: "translate(-50%, -50%)",
+        top: 2.5,
+        left,
+        backgroundColor: theme.palette.primary.light,
+      }}
+    />
+  );
 }
