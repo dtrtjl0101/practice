@@ -40,11 +40,8 @@ import {
   MenuBook,
   Visibility,
   ShoppingCart,
-  AttachMoney,
-  Star,
   PendingActions,
   Edit,
-  Delete,
   FileUpload,
   Analytics,
   Business,
@@ -102,7 +99,7 @@ const bookSalesData = [
   { name: "소설 E", sales: 900, revenue: 540000, views: 3800, activities: 12 },
 ];
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
+// const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 
 interface TabPanelProps {
   children?: React.ReactNode;
