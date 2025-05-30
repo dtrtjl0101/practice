@@ -2,14 +2,14 @@ import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { Card, CardMedia, Box } from "@mui/material";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
-import event1 from "../../public/events/event1.jpg";
-import event2 from "../../public/events/event2.jpg";
-import event3 from "../../public/events/event3.jpg";
-import event4 from "../../public/events/event4.jpg";
-import event5 from "../../public/events/event5.jpg";
-import event6 from "../../public/events/event6.jpg";
-import event7 from "../../public/events/event7.jpg";
-import event8 from "../../public/events/event8.jpg";
+import event1 from "/events/event1.jpg";
+import event2 from "/events/event2.jpg";
+import event3 from "/events/event3.jpg";
+import event4 from "/events/event4.jpg";
+import event5 from "/events/event5.jpg";
+import event6 from "/events/event6.jpg";
+import event7 from "/events/event7.jpg";
+import event8 from "/events/event8.jpg";
 
 const events = [
   { id: 1, image: event1 },
