@@ -205,7 +205,7 @@ export function ActivityCard(props: { groupId: number; canCreate?: boolean }) {
           </Stack>
         )}
       </Popover>
-      <Paper sx={{ p: 2 }}>
+      <Paper sx={{ p: 2 }} variant="outlined">
         <Stack spacing={2}>
           <Box sx={{ display: "flex", flexDirection: "row" }}>
             <Typography variant="h4" sx={{ mr: "auto" }}>
@@ -221,7 +221,7 @@ export function ActivityCard(props: { groupId: number; canCreate?: boolean }) {
           {isFetching ? (
             <ActivityPlaceHolder />
           ) : activity ? (
-            <Stack spacing={2} direction={"row"}>
+            <Stack spacing={2} direction={{ xs: "column", sm: "row" }}>
               <BookInfo activity={activity} />
               <Stack spacing={1} sx={{ flexGrow: 1 }}>
                 <Stack spacing={1}>
@@ -366,7 +366,7 @@ export function BookInfo(props: { activity: Activity }) {
 
   if (!activity) {
     return (
-      <Stack width={256} alignItems={"center"}>
+      <Stack width={256} alignItems={"center"} alignSelf={"center"}>
         <Skeleton
           variant="rectangular"
           width={192}
@@ -380,7 +380,7 @@ export function BookInfo(props: { activity: Activity }) {
   }
 
   return (
-    <Stack spacing={2} width={256} alignItems={"center"}>
+    <Stack spacing={2} width={256} alignItems={"center"} alignSelf={"center"}>
       <CardActionArea
         sx={{
           display: "flex",
