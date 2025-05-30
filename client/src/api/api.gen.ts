@@ -275,6 +275,17 @@ export interface GroupReviewFetchResponse {
   /** @format int64 */
   groupId?: number;
   groupName?: string;
+  /** @format int64 */
+  activityId?: number;
+  /** @format date */
+  activityStartTime?: string;
+  /** @format date */
+  activityEndTime?: string;
+  /** @format int64 */
+  bookId?: number;
+  bookTitle?: string;
+  bookAuthor?: string;
+  bookCoverImageURL?: string;
   content?: string;
   /** @format int64 */
   authorId?: number;
@@ -466,6 +477,8 @@ export interface ApiSuccessResponseEbookPostResponse {
 
 export interface EbookPostResponse {
   /** @format int64 */
+  requestId?: number;
+  /** @format int64 */
   bookId?: number;
   title?: string;
   author?: string;
@@ -491,6 +504,10 @@ export interface EbookPurchaseResponse {
   title?: string;
   author?: string;
   presignedDownloadURL?: string;
+}
+
+export interface EbookRequestRejectRequest {
+  reason?: string;
 }
 
 export interface RejectPublisherRequest {
@@ -753,6 +770,36 @@ export interface PublisherInfoResponse {
   status?: string;
   /** @format date-time */
   createdAt?: string;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponsePageResponseEbookFetchResponse {
+  isSuccessful?: boolean;
+  data?: PageResponseEbookFetchResponse;
+}
+
+export interface EbookFetchResponse {
+  /** @format int64 */
+  id?: number;
+  title?: string;
+  bookCoverImageURL?: string;
+  author?: string;
+  description?: string;
+  /** @format int64 */
+  size?: number;
+  isPurchased?: boolean;
+  /** @format int32 */
+  price?: number;
+}
+
+export interface PageResponseEbookFetchResponse {
+  content?: EbookFetchResponse[];
+  /** @format int32 */
+  currentPage?: number;
+  /** @format int64 */
+  totalItems?: number;
+  /** @format int32 */
+  totalPages?: number;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -1028,36 +1075,6 @@ export interface PageResponseCreditTransactionResponse {
 }
 
 /** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponsePageResponseEbookFetchResponse {
-  isSuccessful?: boolean;
-  data?: PageResponseEbookFetchResponse;
-}
-
-export interface EbookFetchResponse {
-  /** @format int64 */
-  id?: number;
-  title?: string;
-  bookCoverImageURL?: string;
-  author?: string;
-  description?: string;
-  /** @format int64 */
-  size?: number;
-  isPurchased?: boolean;
-  /** @format int32 */
-  price?: number;
-}
-
-export interface PageResponseEbookFetchResponse {
-  content?: EbookFetchResponse[];
-  /** @format int32 */
-  currentPage?: number;
-  /** @format int64 */
-  totalItems?: number;
-  /** @format int32 */
-  totalPages?: number;
-}
-
-/** API 에러 응답을 감싸는 클래스 */
 export interface ApiSuccessResponseEbookFetchResponse {
   isSuccessful?: boolean;
   data?: EbookFetchResponse;
@@ -1071,6 +1088,41 @@ export interface ApiSuccessResponseEbookDownloadResponse {
 
 export interface EbookDownloadResponse {
   presignedUrl?: string;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponsePageResponseEbookRequestFetchResponse {
+  isSuccessful?: boolean;
+  data?: PageResponseEbookRequestFetchResponse;
+}
+
+export interface EbookRequestFetchResponse {
+  /** @format int64 */
+  requestId?: number;
+  title?: string;
+  author?: string;
+  description?: string;
+  /** @format int64 */
+  size?: number;
+  /** @format int32 */
+  price?: number;
+  coverImageURL?: string;
+  /** @format int64 */
+  publisherId?: number;
+  publisherName?: string;
+  publisherEmail?: string;
+  status?: "PENDING" | "APPROVED" | "REJECTED";
+  rejectReason?: string;
+}
+
+export interface PageResponseEbookRequestFetchResponse {
+  content?: EbookRequestFetchResponse[];
+  /** @format int32 */
+  currentPage?: number;
+  /** @format int64 */
+  totalItems?: number;
+  /** @format int32 */
+  totalPages?: number;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -1681,6 +1733,41 @@ export class Api<
       this.request<ApiSuccessResponsePublisherInfoResponse, any>({
         path: `/api/publishers/me`,
         method: "GET",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags publisher-controller
+     * @name GetPublisherBooks
+     * @request GET:/api/publishers/me/books
+     * @secure
+     */
+    getPublisherBooks: (
+      query?: {
+        /**
+         * Zero-based page index (0..N)
+         * @min 0
+         * @default 0
+         */
+        page?: number;
+        /**
+         * The size of the page to be returned
+         * @min 1
+         * @default 20
+         */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponsePageResponseEbookFetchResponse, any>({
+        path: `/api/publishers/me/books`,
+        method: "GET",
+        query: query,
         secure: true,
         ...params,
       }),
@@ -3013,15 +3100,38 @@ export class Api<
       }),
 
     /**
-     * @description 관리자가 전자책 다운로드를 위한 URL을 생성합니다.
+     * @description 출판사가 자신이 업로드한 전자책을 다운로드하기 위한 URL을 생성합니다.
      *
      * @tags ebook-controller
-     * @name DownloadFile
+     * @name GetPresignedEbookUrlForPublisher
+     * @summary 출판사용 전자책 다운로드 URL 생성
+     * @request GET:/api/books/{ebookId}/publisher-download
+     * @secure
+     */
+    getPresignedEbookUrlForPublisher: (
+      ebookId: number,
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponseEbookDownloadResponse, any>({
+        path: `/api/books/${ebookId}/publisher-download`,
+        method: "GET",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description 책을 구매한 사용자에게 전자책 다운로드를 위한 URL을 생성합니다.
+     *
+     * @tags ebook-controller
+     * @name GetPresignedEbookUrlForUser
      * @summary 전자책 다운로드 URL 생성
      * @request GET:/api/books/{ebookId}/download
      * @secure
      */
-    downloadFile: (ebookId: number, params: RequestParams = {}) =>
+    getPresignedEbookUrlForUser: (
+      ebookId: number,
+      params: RequestParams = {},
+    ) =>
       this.request<ApiSuccessResponseEbookDownloadResponse, any>({
         path: `/api/books/${ebookId}/download`,
         method: "GET",
@@ -3079,6 +3189,103 @@ export class Api<
         path: `/api/books/my`,
         method: "GET",
         query: query,
+        secure: true,
+        ...params,
+      }),
+  };
+  ebookRequestController = {
+    /**
+     * @description 출판사의 출판물 요청을 승인합니다. 관리자가 요청을 승인할 수 있습니다.
+     *
+     * @tags ebook-request-controller
+     * @name RejectRequest
+     * @summary 출판물 요청 승인
+     * @request POST:/api/book-requests/{requestId}/reject
+     * @secure
+     */
+    rejectRequest: (
+      requestId: number,
+      data: EbookRequestRejectRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiSuccessResponseVoid, any>({
+        path: `/api/book-requests/${requestId}/reject`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description 출판사의 출판물 요청을 승인합니다. 관리자가 요청을 승인할 수 있습니다.
+     *
+     * @tags ebook-request-controller
+     * @name ApproveRequest
+     * @summary 출판물 요청 승인
+     * @request POST:/api/book-requests/{requestId}/approve
+     * @secure
+     */
+    approveRequest: (requestId: number, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseVoid, any>({
+        path: `/api/book-requests/${requestId}/approve`,
+        method: "POST",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description 대기중인 출판물 목록을 조회합니다. 출판사는 자신의 요청만 조회할 수 있습니다.
+     *
+     * @tags ebook-request-controller
+     * @name GetEbookRequests
+     * @summary 출판물 요청 목록 조회
+     * @request GET:/api/book-requests
+     * @secure
+     */
+    getEbookRequests: (
+      query?: {
+        /**
+         * Zero-based page index (0..N)
+         * @min 0
+         * @default 0
+         */
+        page?: number;
+        /**
+         * The size of the page to be returned
+         * @min 1
+         * @default 20
+         */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<
+        ApiSuccessResponsePageResponseEbookRequestFetchResponse,
+        any
+      >({
+        path: `/api/book-requests`,
+        method: "GET",
+        query: query,
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description 출판사 또는 관리자가 출판물을 미리 다운로드합니다.
+     *
+     * @tags ebook-request-controller
+     * @name Download
+     * @summary 요청된 출판물 다운로드
+     * @request GET:/api/book-requests/{requestId}/download
+     * @secure
+     */
+    download: (requestId: number, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseEbookDownloadResponse, any>({
+        path: `/api/book-requests/${requestId}/download`,
+        method: "GET",
         secure: true,
         ...params,
       }),

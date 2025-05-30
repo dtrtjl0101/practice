@@ -124,7 +124,7 @@ export default function GroupReviewCard({
     initialData: [] as Activity[],
   });
 
-  // 후기 작성/수정 뮤테이션
+  // 후기 작성 뮤테이션
   const createReviewMutation = useMutation({
     mutationFn: async (reviewData: any) => {
       const response = await API_CLIENT.groupReviewController.createReview(
@@ -140,13 +140,7 @@ export default function GroupReviewCard({
     onSuccess: () => {
       alert("후기가 등록되었습니다!");
       queryClient.invalidateQueries({ queryKey: ["group-reviews", groupId] });
-      queryClient.invalidateQueries({
-        queryKey: ["group-review-tags", groupId],
-      });
-      setOpenDialog(false);
-      setReviewContent("");
-      setSelectedTags([]);
-      setSelectedActivity(null);
+      handleCloseDialog();
     },
   });
 

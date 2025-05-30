@@ -30,6 +30,7 @@ import {
   DialogActions,
   TextField,
   Alert,
+  InputAdornment,
 } from "@mui/material";
 import {
   Add,
@@ -62,6 +63,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
 import { AuthState } from "../../../states/auth";
 import { Role } from "../../../types/role";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import API_CLIENT from "../../../api/api";
+import { BookMetadata, PendingBooks } from "../../../types/book";
 
 export const Route = createFileRoute("/mypage/publisher/")({
   component: RouteComponent,
@@ -91,66 +95,6 @@ const bookSalesData = [
   { name: "소설 E", sales: 900, revenue: 540000, views: 3800, activities: 12 },
 ];
 
-const pendingBooks = [
-  {
-    id: 1,
-    title: "새로운 소설",
-    author: "김작가",
-    submittedAt: "2025-05-25",
-    status: "심사중",
-  },
-  {
-    id: 2,
-    title: "여행 에세이",
-    author: "박여행",
-    submittedAt: "2025-05-24",
-    status: "보완요청",
-  },
-  {
-    id: 3,
-    title: "요리책",
-    author: "이셰프",
-    submittedAt: "2025-05-23",
-    status: "심사중",
-  },
-];
-
-const publishedBooks = [
-  {
-    id: 1,
-    title: "소설 A",
-    author: "김소설",
-    publishedAt: "2025-03-15",
-    sales: 1200,
-    revenue: 720000,
-    views: 4500,
-    activities: 15,
-    cover: "/api/placeholder/60/80",
-  },
-  {
-    id: 2,
-    title: "에세이 B",
-    author: "박에세이",
-    publishedAt: "2025-02-20",
-    sales: 800,
-    revenue: 480000,
-    views: 3200,
-    activities: 8,
-    cover: "/api/placeholder/60/80",
-  },
-  {
-    id: 3,
-    title: "자기계발 C",
-    author: "이성장",
-    publishedAt: "2025-01-10",
-    sales: 1500,
-    revenue: 900000,
-    views: 5800,
-    activities: 22,
-    cover: "/api/placeholder/60/80",
-  },
-];
-
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 
 interface TabPanelProps {
@@ -168,10 +112,23 @@ function TabPanel({ children, value, index }: TabPanelProps) {
 }
 
 function RouteComponent() {
+  const user = useAtomValue(AuthState.user);
+  if (user?.role !== Role.ROLE_PUBLISHER) {
+    alert("출판사 계정만 접근 가능합니다.");
+    return;
+  }
+
   const [currentTab, setCurrentTab] = useState(0);
   const [timePeriod, setTimePeriod] = useState("month");
-  const [openAddDialog, setOpenAddDialog] = useState(false);
-  const user = useAtomValue(AuthState.user);
+  const [openAddBookDialog, setOpenAddBookDialog] = useState(false);
+  const [bookTitle, setBookTitle] = useState("");
+  const [bookAuthor, setBookAuthor] = useState("");
+  const [bookPrice, setBookPrice] = useState<number | null>(null);
+  const [bookDescription, setBookDescription] = useState("");
+  const [bookFile, setBookFile] = useState<File | undefined>(undefined);
+  const [bookCover, setBookCover] = useState<File | undefined>(undefined);
+  const [openBookDetailsDialog, setOpenBookDetailsDialog] = useState(false);
+  const [selectedBook, setSelectedBook] = useState<number | null>(null);
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setCurrentTab(newValue);
@@ -402,10 +359,102 @@ function RouteComponent() {
     </Grid>
   );
 
-  if (user?.role !== Role.ROLE_PUBLISHER) {
-    alert("출판사 계정만 접근 가능합니다.");
-    return;
-  }
+  const { data: publisherInfo } = useQuery({
+    queryKey: ["publisherInfo", user?.publisherId],
+    queryFn: async () => {
+      const response = await API_CLIENT.publisherController.publisherInfo();
+      if (!response.isSuccessful) {
+        alert(response.errorMessage);
+        throw new Error(response.errorMessage);
+      }
+      return response.data;
+    },
+    initialData: {},
+  });
+
+  // TODO: pagination
+  const { data: publishedBooks } = useQuery({
+    queryKey: ["publishedBooks", user?.publisherId],
+    queryFn: async () => {
+      const response = await API_CLIENT.publisherController.getPublisherBooks();
+      if (!response.isSuccessful) {
+        alert(response.errorMessage);
+        throw new Error(response.errorMessage);
+      }
+      return response.data.content as BookMetadata[];
+    },
+    initialData: [],
+  });
+  // TODO: pagination
+  const { data: pendingBooks } = useQuery({
+    queryKey: ["pendingBooks", user?.publisherId],
+    queryFn: async () => {
+      const response =
+        await API_CLIENT.ebookRequestController.getEbookRequests();
+      if (!response.isSuccessful) {
+        alert(response.errorMessage);
+        throw new Error(response.errorMessage);
+      }
+      return response.data.content as PendingBooks[];
+    },
+    initialData: [],
+  });
+
+  const createBookMutation = useMutation({
+    mutationFn: async (bookData: any) => {
+      const response = await API_CLIENT.ebookController.uploadFile(bookData);
+      if (!response.isSuccessful) {
+        alert(response.errorMessage);
+        throw new Error(response.errorMessage);
+      }
+      return response;
+    },
+    onSuccess: () => {
+      alert("도서 등록 신청이 완료되었습니다.");
+      handleCloseAddBookDialog();
+    },
+  });
+
+  const handleUploadBook = () => {
+    if (
+      !bookTitle ||
+      !bookAuthor ||
+      !bookDescription ||
+      !bookFile ||
+      !bookCover
+    ) {
+      alert("모든 필드를 입력해주세요.");
+      return;
+    }
+
+    createBookMutation.mutate({
+      title: bookTitle,
+      author: bookAuthor,
+      description: bookDescription,
+      file: bookFile,
+      price: bookPrice,
+      cover: bookCover,
+    });
+  };
+
+  const handleCloseAddBookDialog = () => {
+    setBookTitle("");
+    setBookAuthor("");
+    setBookPrice(null);
+    setBookDescription("");
+    setBookFile(undefined);
+    setBookCover(undefined);
+    setOpenAddBookDialog(false);
+  };
+
+  const handleClickPendingBook = (requestId: number) => {
+    setSelectedBook(requestId);
+    setOpenBookDetailsDialog(true);
+  };
+
+  const handleCloseBookDetailsDialog = () => {
+    setOpenBookDetailsDialog(false);
+  };
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -417,9 +466,14 @@ function RouteComponent() {
         mb={4}
       >
         <Box>
-          <Typography variant="h4" gutterBottom>
-            출판사 관리
-          </Typography>
+          <Stack direction={"row"} spacing={2} alignItems="center">
+            <Typography variant="h4" gutterBottom>
+              출판사 관리
+            </Typography>
+            <Typography variant="subtitle1" color="textSecondary">
+              {publisherInfo.publisherName}
+            </Typography>
+          </Stack>
           <Typography variant="body1" color="textSecondary">
             출판물 관리 및 성과 분석
           </Typography>
@@ -427,7 +481,7 @@ function RouteComponent() {
         <Button
           variant="contained"
           startIcon={<Add />}
-          onClick={() => setOpenAddDialog(true)}
+          onClick={() => setOpenAddBookDialog(true)}
           size="large"
         >
           새 도서 등록
@@ -454,6 +508,11 @@ function RouteComponent() {
 
         {/* 출간 도서 탭 */}
         <TabPanel value={currentTab} index={0}>
+          <Box mb={2}>
+            <Alert severity="info">
+              현재 {publishedBooks.length}권의 도서가 등록되었습니다.
+            </Alert>
+          </Box>
           <TableContainer>
             <Table>
               <TableHead>
@@ -468,12 +527,12 @@ function RouteComponent() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {publishedBooks.map((book) => (
+                {publishedBooks?.map((book) => (
                   <TableRow key={book.id} hover>
                     <TableCell>
                       <Box display="flex" alignItems="center" gap={2}>
                         <Avatar
-                          src={book.cover}
+                          src={book.bookCoverImageURL}
                           variant="rounded"
                           sx={{ width: 40, height: 50 }}
                         />
@@ -489,22 +548,26 @@ function RouteComponent() {
                     </TableCell>
                     <TableCell align="right">
                       <Typography variant="body2" fontWeight={600}>
-                        {book.sales.toLocaleString()}
+                        {/* {book.sales.toLocaleString()} */}
+                        판매량
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
                       <Typography variant="body2" fontWeight={600}>
-                        ₩{(book.revenue / 1000).toLocaleString()}K
+                        {/* ₩{(book.revenue / 1000).toLocaleString()}K */}
+                        수익
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
                       <Typography variant="body2">
-                        {book.views.toLocaleString()}
+                        {/* {book.views.toLocaleString()} */}
+                        조회 수
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
                       <Chip
-                        label={`${book.activities}회`}
+                        // label={`${book.activities}회`}
+                        label={"활동 선정 수"}
                         size="small"
                         color="primary"
                         variant="outlined"
@@ -512,7 +575,8 @@ function RouteComponent() {
                     </TableCell>
                     <TableCell align="right">
                       <Typography variant="body2" color="textSecondary">
-                        {book.publishedAt}
+                        {/* {book.publishedAt} */}
+                        승인 일
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -549,8 +613,12 @@ function RouteComponent() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {pendingBooks.map((book) => (
-                  <TableRow key={book.id} hover>
+                {pendingBooks?.map((book) => (
+                  <TableRow
+                    key={book.requestId}
+                    onClick={() => handleClickPendingBook(book.requestId)}
+                    hover
+                  >
                     <TableCell>
                       <Typography variant="subtitle2" fontWeight={600}>
                         {book.title}
@@ -559,13 +627,16 @@ function RouteComponent() {
                     <TableCell>{book.author}</TableCell>
                     <TableCell>
                       <Typography variant="body2" color="textSecondary">
-                        {book.submittedAt}
+                        {/* {book.submittedAt} */}
+                        제출일
                       </Typography>
                     </TableCell>
                     <TableCell>
                       <Chip
-                        label={book.status}
-                        color={book.status === "심사중" ? "warning" : "error"}
+                        label={
+                          book.status === "PENDING" ? "심사중" : "보완 필요"
+                        }
+                        color={book.status === "PENDING" ? "warning" : "error"}
                         size="small"
                       />
                     </TableCell>
@@ -629,42 +700,249 @@ function RouteComponent() {
 
       {/* 도서 등록 다이얼로그 */}
       <Dialog
-        open={openAddDialog}
-        onClose={() => setOpenAddDialog(false)}
+        open={openAddBookDialog}
+        onClose={() => handleCloseAddBookDialog()}
         maxWidth="md"
         fullWidth
       >
         <DialogTitle>새 도서 등록</DialogTitle>
         <DialogContent>
-          <Stack spacing={3} sx={{ mt: 1 }}>
-            <TextField label="도서명" fullWidth />
-            <TextField label="저자명" fullWidth />
-            <TextField label="도서 소개" multiline rows={4} fullWidth />
-            <Box>
-              <Button
-                variant="outlined"
-                startIcon={<FileUpload />}
-                component="label"
-              >
-                표지 이미지 업로드
-                <input type="file" hidden accept="image/*" />
-              </Button>
-            </Box>
-            <Box>
-              <Button
-                variant="outlined"
-                startIcon={<FileUpload />}
-                component="label"
-              >
-                전자책 파일 업로드
-                <input type="file" hidden accept=".pdf,.epub" />
-              </Button>
-            </Box>
+          <Stack spacing={3} justifyContent={"flex-start"}>
+            <TextField
+              label="도서명"
+              value={bookTitle}
+              onChange={(e) => setBookTitle(e.target.value)}
+              placeholder="도서 제목을 입력하세요."
+              fullWidth
+            />
+            <Grid container spacing={2}>
+              <Grid size="grow">
+                <TextField
+                  label="저자명"
+                  value={bookAuthor}
+                  onChange={(e) => setBookAuthor(e.target.value)}
+                  placeholder="저자 이름을 입력하세요."
+                  fullWidth
+                />
+              </Grid>
+              <Grid size="grow">
+                <TextField
+                  label="가격"
+                  type="number"
+                  value={bookPrice}
+                  onChange={(e) => setBookPrice(Number(e.target.value))}
+                  placeholder="가격을 입력하세요."
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">₩</InputAdornment>
+                      ),
+                    },
+                  }}
+                  fullWidth
+                />
+              </Grid>
+            </Grid>
+            <TextField
+              label="도서 소개"
+              multiline
+              rows={4}
+              value={bookDescription}
+              onChange={(e) => setBookDescription(e.target.value)}
+              placeholder="도서에 대한 설명을 입력하세요."
+              fullWidth
+            />
+            <Grid container spacing={2} direction={"column"}>
+              <Stack direction={"row"} spacing={2}>
+                <Button
+                  variant="outlined"
+                  startIcon={<FileUpload />}
+                  component="label"
+                >
+                  표지 업로드
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    onChange={(e) =>
+                      setBookCover((e.target as HTMLInputElement).files?.[0])
+                    }
+                  />
+                </Button>
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  sx={{ flexGrow: 1, alignSelf: "center" }}
+                >
+                  {bookCover ? bookCover.name : "표지 파일을 선택하세요."}
+                </Typography>
+              </Stack>
+              <Stack direction={"row"} spacing={2}>
+                <Button
+                  variant="outlined"
+                  startIcon={<FileUpload />}
+                  component="label"
+                >
+                  전자책 업로드
+                  <input
+                    type="file"
+                    hidden
+                    accept=".epub"
+                    onChange={(e) =>
+                      setBookFile((e.target as HTMLInputElement).files?.[0])
+                    }
+                  />
+                </Button>
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  sx={{ flexGrow: 1, alignSelf: "center" }}
+                >
+                  {bookFile ? bookFile.name : "전자책 파일을 선택하세요."}
+                </Typography>
+              </Stack>
+            </Grid>
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenAddDialog(false)}>취소</Button>
-          <Button variant="contained">등록 신청</Button>
+          <Button onClick={() => handleCloseAddBookDialog()}>취소</Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              handleUploadBook();
+            }}
+            disabled={
+              !bookTitle ||
+              !bookAuthor ||
+              !bookDescription ||
+              !bookFile ||
+              !bookCover
+            }
+          >
+            등록 신청
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* 도서 등록 정보 다이얼로그 */}
+      <Dialog
+        open={openBookDetailsDialog}
+        onClose={() => handleCloseBookDetailsDialog()}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>도서 등록 정보</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} flex={1} justifyContent={"flex-start"}>
+            <Typography variant="h4">
+              {pendingBooks?.find((book) => book.requestId === selectedBook)}
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid size="grow">
+                <TextField
+                  label="저자명"
+                  value={bookAuthor}
+                  onChange={(e) => setBookAuthor(e.target.value)}
+                  placeholder="저자 이름을 입력하세요."
+                  fullWidth
+                />
+              </Grid>
+              <Grid size="grow">
+                <TextField
+                  label="가격"
+                  type="number"
+                  value={bookPrice}
+                  onChange={(e) => setBookPrice(Number(e.target.value))}
+                  placeholder="가격을 입력하세요."
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">₩</InputAdornment>
+                      ),
+                    },
+                  }}
+                  fullWidth
+                />
+              </Grid>
+            </Grid>
+            <TextField
+              label="도서 소개"
+              multiline
+              rows={4}
+              value={bookDescription}
+              onChange={(e) => setBookDescription(e.target.value)}
+              placeholder="도서에 대한 설명을 입력하세요."
+              fullWidth
+            />
+            <Grid container spacing={2} direction={"column"}>
+              <Stack direction={"row"} spacing={2}>
+                <Button
+                  variant="outlined"
+                  startIcon={<FileUpload />}
+                  component="label"
+                >
+                  표지 업로드
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    onChange={(e) =>
+                      setBookCover((e.target as HTMLInputElement).files?.[0])
+                    }
+                  />
+                </Button>
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  sx={{ flexGrow: 1, alignSelf: "center" }}
+                >
+                  {bookCover ? bookCover.name : "표지 파일을 선택하세요."}
+                </Typography>
+              </Stack>
+              <Stack direction={"row"} spacing={2}>
+                <Button
+                  variant="outlined"
+                  startIcon={<FileUpload />}
+                  component="label"
+                >
+                  전자책 업로드
+                  <input
+                    type="file"
+                    hidden
+                    accept=".epub"
+                    onChange={(e) =>
+                      setBookFile((e.target as HTMLInputElement).files?.[0])
+                    }
+                  />
+                </Button>
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  sx={{ flexGrow: 1, alignSelf: "center" }}
+                >
+                  {bookFile ? bookFile.name : "전자책 파일을 선택하세요."}
+                </Typography>
+              </Stack>
+            </Grid>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => handleCloseBookDetailsDialog()}>취소</Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              handleUploadBook();
+            }}
+            disabled={
+              !bookTitle ||
+              !bookAuthor ||
+              !bookDescription ||
+              !bookFile ||
+              !bookCover
+            }
+          >
+            등록 신청
+          </Button>
         </DialogActions>
       </Dialog>
     </Container>
