@@ -100,7 +100,7 @@ function RouteComponent() {
           groupId: parseInt(groupId),
           activityId: parseInt(activityId),
           temporalProgress: true,
-          initialPage: highlight.cfi,
+          location: highlight.cfi,
         },
       });
     }

@@ -161,7 +161,7 @@ function RouteComponent() {
                       groupId: undefined,
                       activityId: undefined,
                       temporalProgress: false,
-                      initialPage: readProgress?.cfi,
+                      location: readProgress?.cfi || null,
                     }}
                     variant="contained"
                   >

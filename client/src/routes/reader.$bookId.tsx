@@ -41,13 +41,13 @@ export const Route = createFileRoute("/reader/$bookId")({
 
     const temporalProgress = !!search.temporalProgress;
 
-    const initialPage = search.initialPage as string | undefined;
+    const location = (search.location as string | undefined) || null;
 
     return {
       activityId: !isNaN(activityId) ? activityId : undefined,
       groupId: !isNaN(groupId) ? groupId : undefined,
       temporalProgress,
-      initialPage,
+      location,
     };
   },
   params: {
@@ -74,10 +74,9 @@ type Selection = {
 
 function RouteComponent() {
   const { bookId } = Route.useParams();
-  const { groupId, activityId, temporalProgress, initialPage } =
-    Route.useSearch();
+  const { groupId, activityId, temporalProgress, location } = Route.useSearch();
+
   const theme = useTheme();
-  const [location, setLocation] = useState<string | null>(initialPage ?? null);
   const [highlightsInPage, setHighlightsInPage] = useState<Highlight[]>([]);
   const [rendition, setRendition] = useState<Rendition | undefined>(undefined);
   const [openHighlightDrawer, setOpenHighlightDrawer] = useState(false);
@@ -266,20 +265,6 @@ function RouteComponent() {
   }, [rendition, location, rendition?.book.locations.length()]);
 
   useEffect(() => {
-    if (initialPage) {
-      navigate({
-        search: {
-          initialPage: undefined,
-          activityId,
-          groupId,
-          temporalProgress,
-        },
-        replace: true,
-      });
-    }
-  }, [location]);
-
-  useEffect(() => {
     if (!focusedHighlight) {
       return;
     }
@@ -310,6 +295,18 @@ function RouteComponent() {
 
     refetchHighlights();
   };
+
+  const setLocation = (cfi: string) =>
+    navigate({
+      to: ".",
+      search: {
+        activityId,
+        groupId,
+        temporalProgress,
+        location: cfi,
+      },
+      replace: true,
+    });
 
   return (
     <Box
@@ -410,10 +407,10 @@ function RouteComponent() {
               navigate({
                 to: ".",
                 search: {
-                  initialPage,
                   activityId,
                   groupId,
                   temporalProgress: !temporalProgress,
+                  location,
                 },
                 replace: true,
               });

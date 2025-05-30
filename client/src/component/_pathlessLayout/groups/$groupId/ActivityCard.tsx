@@ -289,7 +289,7 @@ export function ActivityCard(props: { groupId: number; canCreate?: boolean }) {
                             groupId: groupId,
                             activityId: activity.activityId,
                             temporalProgress: false,
-                            initialPage: myReadProgress?.cfi,
+                            location: myReadProgress?.cfi || null,
                           }}
                         >
                           {`책 읽으러 가기${myReadProgress?.percentage ? ` (${Math.round(myReadProgress.percentage)}%)` : ""}`}
