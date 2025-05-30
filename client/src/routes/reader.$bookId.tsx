@@ -1,4 +1,4 @@
-import { ArrowBack, Close, Note, NoteAdd } from "@mui/icons-material";
+import { Cancel, Close, Note, NoteAdd } from "@mui/icons-material";
 import {
   Badge,
   Box,
@@ -371,11 +371,36 @@ function RouteComponent() {
         }}
       >
         <LinearProgress value={localReadProgress} variant="determinate" />
+        <Snackbar
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          open={readTogetherSnackbarOpen}
+          onClose={() => {
+            setReadTogetherSnackbarOpen(false);
+          }}
+          action={
+            <IconButton
+              size="small"
+              aria-label="close"
+              color="inherit"
+              onClick={() => setReadTogetherSnackbarOpen(false)}
+            >
+              <Close />
+            </IconButton>
+          }
+          message="함께읽기 활성화됨"
+          autoHideDuration={3000}
+          sx={{
+            position: "absolute",
+            top: theme.spacing(2),
+            left: "50%",
+            transform: "translateX(-50%)",
+          }}
+        />
         <Stack
-          direction="row"
-          alignItems="center"
-          justifyContent={"space-between"}
-          spacing={1}
+          direction="column"
+          alignItems="flex-end"
+          justifyContent={"flex-end"}
+          spacing={2}
           sx={{
             position: "absolute",
             top: theme.spacing(2),
@@ -390,28 +415,9 @@ function RouteComponent() {
                 router.history.back();
               }}
             >
-              <ArrowBack />
+              <Cancel />
             </Fab>
           )}
-          <Snackbar
-            anchorOrigin={{ vertical: "top", horizontal: "center" }}
-            open={readTogetherSnackbarOpen}
-            onClose={() => {
-              setReadTogetherSnackbarOpen(false);
-            }}
-            action={
-              <IconButton
-                size="small"
-                aria-label="close"
-                color="inherit"
-                onClick={() => setReadTogetherSnackbarOpen(false)}
-              >
-                <Close />
-              </IconButton>
-            }
-            message="함께읽기 활성화됨"
-            autoHideDuration={3000}
-          />
           <Fab
             size="small"
             onClick={() => {
