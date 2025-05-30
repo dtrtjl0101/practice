@@ -1,7 +1,8 @@
 import { Button, Container, Stack } from "@mui/material";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import GroupList from "../component/groupList";
+import GroupList from "../component/GroupList";
 import BookList from "../component/BookList";
+import EventCarousel from "../component/EventCarousel";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -12,13 +13,14 @@ function Home() {
 
   return (
     <Container sx={{ my: 8 }}>
-      <Stack spacing={4}>
+      <Stack spacing={8}>
+        <EventCarousel />
         <GroupList
           size="small"
           action={
             <Button onClick={() => navigate({ to: "/groups" })}>더보기</Button>
           }
-          title="인기 그룹"
+          title="인기 모임"
           key="popularGroups"
         />
         <BookList

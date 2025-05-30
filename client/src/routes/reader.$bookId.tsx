@@ -1,13 +1,17 @@
-import { ArrowBack, Close, Note, NoteAdd } from "@mui/icons-material";
+import { Close, Note, NoteAdd, Timelapse } from "@mui/icons-material";
 import {
   Badge,
   Box,
   Drawer,
   Fab,
+  FormControlLabel,
   IconButton,
-  LinearProgress,
+  Slider,
   Snackbar,
   Stack,
+  styled,
+  Switch,
+  Typography,
   useTheme,
 } from "@mui/material";
 import {
@@ -16,7 +20,7 @@ import {
   useRouter,
 } from "@tanstack/react-router";
 import { EpubCFI, Rendition } from "epubjs";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { ReactReader } from "react-reader";
 import API_CLIENT from "../api/api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
@@ -37,13 +41,13 @@ export const Route = createFileRoute("/reader/$bookId")({
 
     const temporalProgress = !!search.temporalProgress;
 
-    const initialPage = search.initialPage as string | undefined;
+    const location = (search.location as string | undefined) || null;
 
     return {
       activityId: !isNaN(activityId) ? activityId : undefined,
       groupId: !isNaN(groupId) ? groupId : undefined,
       temporalProgress,
-      initialPage,
+      location,
     };
   },
   params: {
@@ -70,10 +74,9 @@ type Selection = {
 
 function RouteComponent() {
   const { bookId } = Route.useParams();
-  const { groupId, activityId, temporalProgress, initialPage } =
-    Route.useSearch();
+  const { groupId, activityId, temporalProgress, location } = Route.useSearch();
+
   const theme = useTheme();
-  const [location, setLocation] = useState<string | null>(initialPage ?? null);
   const [highlightsInPage, setHighlightsInPage] = useState<Highlight[]>([]);
   const [rendition, setRendition] = useState<Rendition | undefined>(undefined);
   const [openHighlightDrawer, setOpenHighlightDrawer] = useState(false);
@@ -90,25 +93,15 @@ function RouteComponent() {
   );
   const [readTogetherSnackbarOpen, setReadTogetherSnackbarOpen] =
     useState(!!activityId);
-  const [lastMouseUpPosition, setLastMouseUpPosition] = useState<{
-    left: number;
-    top: number;
-  }>({
-    left: 0,
-    top: 0,
-  });
+  const [selectionRightBottomPosition, setSelectionRightBottomPosition] =
+    useState({
+      left: 0,
+      top: 0,
+    });
   const readerRef = useRef<ReactReader | null>(null);
-
-  const queryParam = activityId
-    ? {
-        me: false,
-        bookId,
-        activityId,
-      }
-    : {
-        me: true,
-        bookId,
-      };
+  const [showHighlightsOnOnlyCurrentPage, setShowAllHighlights] =
+    useState(true);
+  const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
   const spine = useMemo(() => {
     if (!location) {
@@ -123,13 +116,18 @@ function RouteComponent() {
     }
   }, [location]);
 
+  const queryParam: HighlightQueryParam = createHighlightQueryParam(
+    bookId,
+    activityId
+  );
+
   const { data: highlights, refetch: refetchHighlights } = useQuery({
-    queryKey: ["highlights", spine, queryParam],
+    queryKey: ["highlights", queryParam],
     queryFn: async () => {
+      // NOTE: 하이라이트가 100개 이상 없다고 가정
       const response = await API_CLIENT.highlightController.getHighlights({
         page: 0,
         size: 100,
-        spine,
         ...queryParam,
       });
       if (!response.isSuccessful) {
@@ -144,23 +142,15 @@ function RouteComponent() {
 
   const previousHighlightsInPage = useRef<Highlight[]>([]);
 
-  const { data: readProgressInServer, refetch: refetchReadProgressInServer } =
-    useQuery({
-      queryKey: ["readProgress", bookId],
-      queryFn: async () => {
-        if (!rendition || !location) {
-          throw new Error("Rendition or location is not available");
-        }
-        const response =
-          await API_CLIENT.readingProgressController.getMyProgress(bookId);
-        if (!response.isSuccessful) {
-          throw new Error(response.errorMessage);
-        }
-        return response.data.percentage!;
-      },
-      placeholderData: keepPreviousData,
-      enabled: !!rendition && !!location,
-    });
+  const readProgressSliderMarks = useMemo(() => {
+    if (!rendition) {
+      return [];
+    }
+    const marks: { value: number }[] = highlights.map((highlight) => ({
+      value: rendition.book.locations.percentageFromCfi(highlight.cfi) * 100,
+    }));
+    return marks;
+  }, [rendition, highlights]);
 
   useEffect(() => {
     previousHighlightsInPage.current = highlightsInPage;
@@ -254,47 +244,26 @@ function RouteComponent() {
   }, [bookId]);
 
   useEffect(() => {
-    if (temporalProgress || !rendition || !location) {
+    if (!rendition || !location || !rendition?.book.locations.length()) {
+      return;
+    }
+    const newReadProgress = Math.max(
+      Math.min(rendition.book.locations.percentageFromCfi(location) * 100, 100),
+      0
+    );
+    setLocalReadProgress(newReadProgress);
+    if (temporalProgress) {
       return;
     }
     try {
-      const newReadProgress = Math.max(
-        Math.min(
-          rendition.book.locations.percentageFromCfi(location) * 100,
-          100
-        ),
-        0
-      );
-      setLocalReadProgress(newReadProgress);
-      if (
-        typeof readProgressInServer === "number" &&
-        newReadProgress > readProgressInServer
-      ) {
-        API_CLIENT.readingProgressController
-          .saveMyProgress(bookId, {
-            percentage: newReadProgress,
-            cfi: location,
-          })
-          .then(() => refetchReadProgressInServer());
-      }
+      API_CLIENT.readingProgressController.saveMyProgress(bookId, {
+        percentage: newReadProgress,
+        cfi: location,
+      });
     } catch (e) {
       console.error("Error parsing location", e);
     }
-  }, [rendition, location]);
-
-  useEffect(() => {
-    if (initialPage) {
-      navigate({
-        search: {
-          initialPage: undefined,
-          activityId,
-          groupId,
-          temporalProgress,
-        },
-        replace: true,
-      });
-    }
-  }, [location]);
+  }, [rendition, location, rendition?.book.locations.length()]);
 
   useEffect(() => {
     if (!focusedHighlight) {
@@ -305,31 +274,6 @@ function RouteComponent() {
     }, 3000);
     return () => clearTimeout(timeout);
   }, [focusedHighlight]);
-
-  useEffect(() => {
-    if (!rendition) {
-      return;
-    }
-    rendition.on("mouseup", (e: MouseEvent) => {
-      const viewerElement =
-        readerRef.current?.readerRef.current?.viewerRef.current;
-      if (!viewerElement) {
-        return;
-      }
-      const readerIframeElement = viewerElement.querySelector("iframe");
-      if (!readerIframeElement) {
-        return;
-      }
-      const clientRect = readerIframeElement.getBoundingClientRect();
-      if (!clientRect) {
-        return;
-      }
-      setLastMouseUpPosition({
-        left: e.clientX + clientRect.left,
-        top: e.clientY + clientRect.top,
-      });
-    });
-  }, [rendition]);
 
   const addHighlight = async (props: {
     memo: string;
@@ -353,6 +297,18 @@ function RouteComponent() {
     refetchHighlights();
   };
 
+  const setLocation = (cfi: string) =>
+    navigate({
+      to: ".",
+      search: {
+        activityId,
+        groupId,
+        temporalProgress,
+        location: cfi,
+      },
+      replace: true,
+    });
+
   return (
     <Box
       sx={{
@@ -367,15 +323,57 @@ function RouteComponent() {
         sx={{
           width: "100vw",
           position: "absolute",
-          zIndex: theme.zIndex.fab,
         }}
       >
-        <LinearProgress value={localReadProgress} variant="determinate" />
+        <ReadProgressSlider
+          min={0}
+          max={100}
+          value={localReadProgress}
+          onChange={(_, value) => {
+            const percent = typeof value === "number" ? value : value[0];
+            const cfi = rendition?.book.locations.cfiFromPercentage(
+              percent / 100
+            );
+            if (!cfi) {
+              return;
+            }
+            setLocation(cfi);
+          }}
+          slots={{
+            mark: ReadProgressSliderMark,
+          }}
+          marks={readProgressSliderMarks}
+        />
+        <Snackbar
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          open={readTogetherSnackbarOpen}
+          onClose={() => {
+            setReadTogetherSnackbarOpen(false);
+          }}
+          action={
+            <IconButton
+              size="small"
+              aria-label="close"
+              color="inherit"
+              onClick={() => setReadTogetherSnackbarOpen(false)}
+            >
+              <Close />
+            </IconButton>
+          }
+          message="함께읽기 활성화됨"
+          autoHideDuration={3000}
+          sx={{
+            position: "absolute",
+            top: theme.spacing(2),
+            left: "50%",
+            transform: "translateX(-50%)",
+          }}
+        />
         <Stack
-          direction="row"
-          alignItems="center"
-          justifyContent={"space-between"}
-          spacing={1}
+          direction="column"
+          alignItems="flex-end"
+          justifyContent={"flex-end"}
+          spacing={2}
           sx={{
             position: "absolute",
             top: theme.spacing(2),
@@ -390,28 +388,9 @@ function RouteComponent() {
                 router.history.back();
               }}
             >
-              <ArrowBack />
+              <Close />
             </Fab>
           )}
-          <Snackbar
-            anchorOrigin={{ vertical: "top", horizontal: "center" }}
-            open={readTogetherSnackbarOpen}
-            onClose={() => {
-              setReadTogetherSnackbarOpen(false);
-            }}
-            action={
-              <IconButton
-                size="small"
-                aria-label="close"
-                color="inherit"
-                onClick={() => setReadTogetherSnackbarOpen(false)}
-              >
-                <Close />
-              </IconButton>
-            }
-            message="함께읽기 활성화됨"
-            autoHideDuration={3000}
-          />
           <Fab
             size="small"
             onClick={() => {
@@ -423,14 +402,31 @@ function RouteComponent() {
               <Note />
             </Badge>
           </Fab>
+          <Fab
+            size="small"
+            onClick={() => {
+              navigate({
+                to: ".",
+                search: {
+                  activityId,
+                  groupId,
+                  temporalProgress: !temporalProgress,
+                  location,
+                },
+                replace: true,
+              });
+            }}
+          >
+            <Timelapse sx={{ opacity: temporalProgress ? 0.5 : 1 }} />
+          </Fab>
         </Stack>
         {selection && (
           <Fab
             size="small"
             sx={{
               position: "absolute",
-              left: lastMouseUpPosition.left,
-              top: lastMouseUpPosition.top,
+              left: selectionRightBottomPosition.left,
+              top: selectionRightBottomPosition.top,
             }}
             onClick={() => {
               setOpenHighlightCreationModal(true);
@@ -451,21 +447,53 @@ function RouteComponent() {
         open={openHighlightDrawer}
         onClose={() => setOpenHighlightDrawer(false)}
       >
-        <Stack spacing={theme.spacing(2)} p={theme.spacing(2)} width={320}>
-          {highlightsInPage.map((highlight) => (
-            <HighlightCard
-              key={highlight.id}
-              highlight={highlight}
-              groupId={groupId}
-              activityId={activityId}
-              focused={focusedHighlight?.id === highlight.id}
-              refetchHighlights={refetchHighlights}
-              shouldFade={
-                !!focusedHighlight && focusedHighlight.id !== highlight.id
+        <Stack width={320} height={"100%"}>
+          <Stack direction={"row"} p={2}>
+            <Typography variant="h6" align="left" flexGrow={1} noWrap>
+              하이라이트
+            </Typography>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={showHighlightsOnOnlyCurrentPage}
+                  onChange={() => setShowAllHighlights((v) => !v)}
+                  size="small"
+                />
               }
-              onClick={() => setFocusedHighlight(highlight)}
+              label="현재 페이지만"
             />
-          ))}
+            <IconButton
+              onClick={() => {
+                setOpenHighlightDrawer(false);
+              }}
+            >
+              <Close />
+            </IconButton>
+          </Stack>
+          <Box height={"100%"} overflow="auto">
+            <Stack spacing={1} p={2}>
+              {(showHighlightsOnOnlyCurrentPage
+                ? highlightsInPage
+                : highlights
+              ).map((highlight) => (
+                <HighlightCard
+                  key={highlight.id}
+                  highlight={highlight}
+                  groupId={groupId}
+                  activityId={activityId}
+                  focused={focusedHighlight?.id === highlight.id}
+                  refetchHighlights={refetchHighlights}
+                  shouldFade={
+                    !!focusedHighlight && focusedHighlight.id !== highlight.id
+                  }
+                  onClick={() => {
+                    onHighlightClick(highlight);
+                    setLocation(highlight.cfi);
+                  }}
+                />
+              ))}
+            </Stack>
+          </Box>
         </Stack>
       </Drawer>
       <ReactReader
@@ -498,6 +526,33 @@ function RouteComponent() {
             { once: true }
           );
 
+          const selectionClientRect = selection
+            .getRangeAt(0)
+            .getBoundingClientRect();
+          const viewerElement =
+            readerRef.current?.readerRef.current?.viewerRef.current;
+          if (!viewerElement) {
+            return;
+          }
+          const readerIframeElement = viewerElement.querySelector("iframe");
+          if (!readerIframeElement) {
+            return;
+          }
+          const viewerClientRect = readerIframeElement.getBoundingClientRect();
+          if (!viewerClientRect) {
+            return;
+          }
+
+          setSelectionRightBottomPosition({
+            left:
+              selectionClientRect.left +
+              selectionClientRect.width +
+              viewerClientRect.left,
+            top:
+              selectionClientRect.top +
+              selectionClientRect.height * 0.5 +
+              viewerClientRect.top,
+          });
           setSelection({
             text: selection.toString(),
             epubcfi: cfiRange,
@@ -506,7 +561,7 @@ function RouteComponent() {
         showToc={false}
         getRendition={(newRendition) => {
           newRendition.once("started", async () => {
-            await loadLocations(bookId, newRendition);
+            await loadLocations(bookId, newRendition).then(forceUpdate);
           });
           setRendition(newRendition);
         }}
@@ -529,4 +584,65 @@ function diffMemos(prev: Highlight[], next: Highlight[]): HighlightDiff {
     added,
     removed,
   };
+}
+
+type HighlightQueryParam = {
+  me: boolean;
+  bookId: number;
+  activityId?: number;
+  spine?: string;
+};
+
+function createHighlightQueryParam(
+  bookId: number,
+  activityId?: number
+): HighlightQueryParam {
+  const param: HighlightQueryParam = activityId
+    ? {
+        me: false,
+        bookId,
+        activityId,
+      }
+    : {
+        me: true,
+        bookId,
+      };
+
+  return param;
+}
+
+const ReadProgressSlider = styled(Slider)(({ theme }) => ({
+  height: 5,
+  zIndex: theme.zIndex.fab,
+  "& .MuiSlider-thumb": {
+    top: 0,
+  },
+  "& .MuiSlider-track": {
+    top: 0,
+    height: 10,
+  },
+  "& .MuiSlider-rail": {
+    top: 0,
+    height: 10,
+  },
+}));
+
+function ReadProgressSliderMark(props: { style: { left: string } }) {
+  const theme = useTheme();
+  const left = props.style.left;
+
+  return (
+    <Box
+      sx={{
+        width: 10,
+        height: 10,
+        borderRadius: "50%",
+        position: "absolute",
+        transform: "translate(-50%, -50%)",
+        top: 2.5,
+        left,
+        backgroundColor: theme.palette.primary.light,
+      }}
+    />
+  );
 }

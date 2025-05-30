@@ -120,7 +120,7 @@ export default function GroupMembersCard({ groupId }: { groupId: number }) {
   };
 
   return (
-    <Card>
+    <Card variant="outlined">
       <CardHeader title="멤버 관리" />
       <CardContent>
         <Stack spacing={3}>

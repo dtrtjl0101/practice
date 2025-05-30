@@ -52,7 +52,7 @@ export default function NotificationButton() {
           horizontal: "left",
         }}
       >
-        <Stack spacing={2} padding={1} sx={{ width: 352 }}>
+        <Stack spacing={2} padding={1} sx={{ maxWidth: 352 }}>
           {notifications?.map((notification) => (
             <NotificationItem
               notification={notification}
@@ -95,7 +95,7 @@ function NotificationItem({
   const notRead = !notification.isRead;
 
   return (
-    <Card variant="elevation">
+    <Card variant="outlined">
       <LinearProgress
         value={notRead ? 100 : 0}
         variant="determinate"

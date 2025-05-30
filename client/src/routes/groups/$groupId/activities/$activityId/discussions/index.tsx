@@ -224,7 +224,7 @@ function DiscussionCard({ discussion, onClick }: DiscussionCardProps) {
       }}
     >
       <CardActionArea onClick={() => onClick(discussion.discussionId)}>
-        <Card sx={{ height: "100%" }}>
+        <Card variant="outlined" sx={{ height: "100%" }}>
           <CardContent sx={{ p: 3 }}>
             {/* 상단 영역: 제목 및 뱃지 */}
             <Stack

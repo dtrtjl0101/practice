@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Card,
   CardActions,
   CircularProgress,
   Dialog,
@@ -21,6 +22,7 @@ import { Fragment, useState } from "react";
 import { Delete, Edit, Sort } from "@mui/icons-material";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import API_CLIENT from "../api/api";
+import { setResponsiveStyleValueSm } from "../util/setResponsiveStyleValue";
 
 type HighlightFilterKind =
   | {
@@ -165,17 +167,28 @@ export default function HighlightBrowserModal(props: {
           <Paper
             sx={{
               width: "90vw",
-              height: "65vh",
-              padding: 2,
+              height: "90vh",
+              p: 2,
               maxWidth: theme.breakpoints.values.lg,
+              overflowY: "scroll",
             }}
           >
-            <Grid container spacing={1} height={"100%"}>
-              <Grid size={4} sx={{ height: "100%" }}>
-                <Paper
-                  elevation={2}
+            <Grid
+              container
+              spacing={1}
+              height={setResponsiveStyleValueSm("none", "100%")}
+            >
+              <Grid size={12} sx={{ height: 2 }}>
+                asd
+              </Grid>
+              <Grid
+                size={setResponsiveStyleValueSm(12, 4)}
+                sx={{ height: "100%" }}
+              >
+                <Card
+                  variant="outlined"
                   sx={{
-                    height: "100%",
+                    height: setResponsiveStyleValueSm("none", "100%"),
                     display: "flex",
                     flexDirection: "column",
                   }}
@@ -230,7 +243,7 @@ export default function HighlightBrowserModal(props: {
                       )}
                     </List>
                   </Stack>
-                </Paper>
+                </Card>
               </Grid>
               {selectedHighlight ? (
                 <HighlightViewer
@@ -241,7 +254,7 @@ export default function HighlightBrowserModal(props: {
                   }
                 />
               ) : (
-                <HighlightViewerPlaceholder />
+                <HighlightViewerPlaceholder onClose={onClose} />
               )}
             </Grid>
           </Paper>
@@ -293,11 +306,15 @@ function HighlightListItem(props: {
   );
 }
 
-function HighlightViewerPlaceholder() {
+function HighlightViewerPlaceholder(props: { onClose: () => void }) {
+  const { onClose } = props;
   return (
-    <Grid size={8} sx={{ height: "100%" }}>
-      <Paper
-        elevation={2}
+    <Grid
+      size={setResponsiveStyleValueSm(12, 8)}
+      sx={{ height: setResponsiveStyleValueSm("none", "100%") }}
+    >
+      <Card
+        variant="outlined"
         sx={{
           height: "100%",
           display: "flex",
@@ -305,10 +322,35 @@ function HighlightViewerPlaceholder() {
           justifyContent: "center",
         }}
       >
-        <Typography variant="body2" color="textSecondary" textAlign={"center"}>
-          하이라이트를 선택하세요
-        </Typography>
-      </Paper>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100%",
+          }}
+        >
+          <Typography
+            variant="body2"
+            color="textSecondary"
+            textAlign={"center"}
+          >
+            하이라이트를 선택하세요
+          </Typography>
+        </Box>
+
+        <CardActions
+          sx={{
+            // justifyContent: "flex-end",
+            alignSelf: "flex-end",
+            justifySelf: "flex-end",
+          }}
+        >
+          <Button variant="outlined" color="secondary" onClick={onClose}>
+            취소
+          </Button>
+        </CardActions>
+      </Card>
     </Grid>
   );
 }
@@ -321,8 +363,12 @@ function HighlightViewer(props: {
   const { highlight, onClose, onHighlightUseButtonClick } = props;
 
   return (
-    <Grid size={8} sx={{ height: "100%" }}>
-      <Paper
+    <Grid
+      size={setResponsiveStyleValueSm(12, 8)}
+      sx={{ height: setResponsiveStyleValueSm("none", "100%") }}
+    >
+      <Card
+        variant="outlined"
         elevation={2}
         sx={{
           height: "100%",
@@ -371,7 +417,7 @@ function HighlightViewer(props: {
             )}
           </CardActions>
         </Stack>
-      </Paper>
+      </Card>
     </Grid>
   );
 }

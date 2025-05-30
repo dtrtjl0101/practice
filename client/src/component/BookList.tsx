@@ -1,6 +1,7 @@
 import {
   Card,
   CardMedia,
+  Container,
   LinearProgress,
   Skeleton,
   Stack,
@@ -56,8 +57,8 @@ export default function BookList(props: {
   });
 
   return (
-    <Card>
-      <Stack spacing={2} sx={{ padding: 2 }}>
+    <Container>
+      <Stack spacing={1}>
         <Stack
           direction="row"
           justifyContent="space-between"
@@ -71,7 +72,7 @@ export default function BookList(props: {
           setPage={setPage}
           totalPages={totalPages}
         />
-        <Stack spacing={1}>
+        <Stack spacing={2}>
           {books.map((book) => (
             <BookListItem key={book?.id ?? Math.random()} book={book} />
           ))}
@@ -82,7 +83,7 @@ export default function BookList(props: {
           totalPages={totalPages}
         />
       </Stack>
-    </Card>
+    </Container>
   );
 }
 
@@ -107,7 +108,7 @@ function BookListItem(props: { book?: BookMetadata }) {
 
   if (!book) {
     return (
-      <Card elevation={3} sx={{ padding: 2 }}>
+      <Card variant="outlined" sx={{ padding: 2 }}>
         <Stack spacing={1} direction={"row"}>
           <Skeleton variant="rectangular" width={128} height={160} />
           <Stack flexGrow={1} spacing={1}>
@@ -121,9 +122,17 @@ function BookListItem(props: { book?: BookMetadata }) {
   }
 
   return (
-    <Card elevation={3} key={book.id}>
+    <Card variant="outlined" key={book.id}>
       <LinearProgress value={readProgress} variant="determinate" />
-      <Stack spacing={1} direction={"row"} sx={{ padding: 2 }}>
+      <Stack
+        spacing={1}
+        direction={{
+          xs: "column",
+          sm: "row",
+        }}
+        alignItems={"center"}
+        sx={{ padding: 2 }}
+      >
         <LinkCardActionArea
           sx={{ width: 128, height: 160 }}
           to="/books/$bookId"

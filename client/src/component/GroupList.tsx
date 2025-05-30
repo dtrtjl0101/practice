@@ -1,9 +1,9 @@
 import {
+  Box,
   Card,
   CardActionArea,
-  CardContent,
-  CardHeader,
   CardMedia,
+  Container,
   Grid,
   Skeleton,
   Stack,
@@ -15,7 +15,8 @@ import { JSX, PropsWithChildren, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import PageNavigation from "./PageNavigation";
 import { GroupInfo } from "../types/groups";
-const ITEM_HEIGHT = 384 - 20;
+const ITEM_HEIGHT = 256;
+const IMAGE_HEIGHT = 128;
 
 export enum GroupListKind {
   ALL_GROUP = "ALL_GROUP",
@@ -65,8 +66,8 @@ export default function GroupList(props: {
   });
 
   return (
-    <Card>
-      <Stack spacing={2} sx={{ padding: 2 }}>
+    <Container>
+      <Stack spacing={1}>
         <Stack
           direction="row"
           justifyContent="space-between"
@@ -95,7 +96,7 @@ export default function GroupList(props: {
           {groups?.map((group, index) =>
             group ? (
               <ItemContainer key={group.groupId}>
-                <Card sx={{ height: ITEM_HEIGHT }} elevation={3}>
+                <Card sx={{ height: ITEM_HEIGHT }} variant="outlined">
                   <CardActionArea
                     sx={{
                       height: ITEM_HEIGHT,
@@ -111,30 +112,54 @@ export default function GroupList(props: {
                       });
                     }}
                   >
-                    <CardHeader title={group.name} />
                     <CardMedia
-                      height={192}
+                      height={IMAGE_HEIGHT}
                       component={"img"}
                       image={
                         group.groupImageURL || "https://picsum.photos/192/192"
                       }
                     />
-                    <CardContent>
+                    <Box
+                      sx={{
+                        p: 1,
+                        gap: 0.5,
+                        display: "flex",
+                        flexDirection: "column",
+                        "&::after": {
+                          content: '""',
+                          position: "absolute",
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          height: "2em",
+                          pointerEvents: "none",
+                          background:
+                            "linear-gradient(to bottom, rgba(255,255,255,0) 0%, #fff 100%)",
+                        },
+                      }}
+                    >
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {group.name}
+                      </Typography>
                       <Typography
                         variant="body2"
                         color="textSecondary"
                         component={"div"}
                         sx={{
-                          textOverflow: "ellipsis",
+                          display: "-webkit-box",
                           overflow: "hidden",
-                          whiteSpace: "wrap",
-                          lineBreak: "anywhere",
-                          height: 80,
+                          whiteSpace: "normal",
                         }}
                       >
                         {group.description}
                       </Typography>
-                    </CardContent>
+                    </Box>
                   </CardActionArea>
                 </Card>
               </ItemContainer>
@@ -151,7 +176,7 @@ export default function GroupList(props: {
           totalPages={totalPages}
         />
       </Stack>
-    </Card>
+    </Container>
   );
 }
 

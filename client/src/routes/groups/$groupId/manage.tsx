@@ -87,10 +87,10 @@ function RouteComponent() {
         {/* 헤더 영역 */}
         <Box>
           <Typography variant="h4" fontWeight="bold" gutterBottom>
-            {groupName} 그룹 관리
+            {groupName} 모임 관리
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            멤버 관리, 설정 변경 및 그룹 운영을 관리하세요
+            멤버 관리, 설정 변경 및 모임 운영을 관리하세요
           </Typography>
         </Box>
 
@@ -102,7 +102,7 @@ function RouteComponent() {
           <Tabs
             value={tabValue}
             onChange={handleTabChange}
-            aria-label="그룹 관리 탭"
+            aria-label="모임 관리 탭"
             variant="scrollable"
             scrollButtons="auto"
           >
@@ -114,7 +114,7 @@ function RouteComponent() {
             <Tab icon={<GroupIcon />} label="멤버 관리" iconPosition="start" />
             <Tab
               icon={<SettingsIcon />}
-              label="그룹 설정"
+              label="모임 설정"
               iconPosition="start"
             />
             <Tab icon={<BarChartIcon />} label="통계" iconPosition="start" />
