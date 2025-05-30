@@ -38,8 +38,6 @@ export default function EventCarousel() {
     },
   };
 
-  console.log(event8);
-
   return (
     <Carousel
       swipeable={false}
