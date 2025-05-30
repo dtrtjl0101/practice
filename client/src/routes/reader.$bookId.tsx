@@ -4,10 +4,13 @@ import {
   Box,
   Drawer,
   Fab,
+  FormControlLabel,
   IconButton,
   LinearProgress,
   Snackbar,
   Stack,
+  Switch,
+  Typography,
   useTheme,
 } from "@mui/material";
 import {
@@ -96,17 +99,8 @@ function RouteComponent() {
       top: 0,
     });
   const readerRef = useRef<ReactReader | null>(null);
-
-  const queryParam = activityId
-    ? {
-        me: false,
-        bookId,
-        activityId,
-      }
-    : {
-        me: true,
-        bookId,
-      };
+  const [showHighlightsOnOnlyCurrentPage, setShowAllHighlights] =
+    useState(true);
 
   const spine = useMemo(() => {
     if (!location) {
@@ -121,13 +115,20 @@ function RouteComponent() {
     }
   }, [location]);
 
+  const queryParam: HighlightQueryParam = createHighlightQueryParam(
+    bookId,
+    showHighlightsOnOnlyCurrentPage,
+    activityId,
+    spine
+  );
+
   const { data: highlights, refetch: refetchHighlights } = useQuery({
-    queryKey: ["highlights", spine, queryParam],
+    queryKey: ["highlights", queryParam],
     queryFn: async () => {
+      // NOTE: 하이라이트가 100개 이상 없다고 가정
       const response = await API_CLIENT.highlightController.getHighlights({
         page: 0,
         size: 100,
-        spine,
         ...queryParam,
       });
       if (!response.isSuccessful) {
@@ -430,21 +431,53 @@ function RouteComponent() {
         open={openHighlightDrawer}
         onClose={() => setOpenHighlightDrawer(false)}
       >
-        <Stack spacing={theme.spacing(2)} p={theme.spacing(2)} width={320}>
-          {highlightsInPage.map((highlight) => (
-            <HighlightCard
-              key={highlight.id}
-              highlight={highlight}
-              groupId={groupId}
-              activityId={activityId}
-              focused={focusedHighlight?.id === highlight.id}
-              refetchHighlights={refetchHighlights}
-              shouldFade={
-                !!focusedHighlight && focusedHighlight.id !== highlight.id
+        <Stack width={320} height={"100%"}>
+          <Stack direction={"row"} p={2}>
+            <Typography variant="h6" align="left" flexGrow={1} noWrap>
+              하이라이트
+            </Typography>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={showHighlightsOnOnlyCurrentPage}
+                  onChange={() => setShowAllHighlights((v) => !v)}
+                  size="small"
+                />
               }
-              onClick={() => setFocusedHighlight(highlight)}
+              label="현재 페이지만"
             />
-          ))}
+            <IconButton
+              onClick={() => {
+                setOpenHighlightDrawer(false);
+              }}
+            >
+              <Close />
+            </IconButton>
+          </Stack>
+          <Box height={"100%"} overflow="auto">
+            <Stack spacing={1} p={2}>
+              {(showHighlightsOnOnlyCurrentPage
+                ? highlightsInPage
+                : highlights
+              ).map((highlight) => (
+                <HighlightCard
+                  key={highlight.id}
+                  highlight={highlight}
+                  groupId={groupId}
+                  activityId={activityId}
+                  focused={focusedHighlight?.id === highlight.id}
+                  refetchHighlights={refetchHighlights}
+                  shouldFade={
+                    !!focusedHighlight && focusedHighlight.id !== highlight.id
+                  }
+                  onClick={() => {
+                    onHighlightClick(highlight);
+                    setLocation(highlight.cfi);
+                  }}
+                />
+              ))}
+            </Stack>
+          </Box>
         </Stack>
       </Drawer>
       <ReactReader
@@ -535,4 +568,35 @@ function diffMemos(prev: Highlight[], next: Highlight[]): HighlightDiff {
     added,
     removed,
   };
+}
+
+type HighlightQueryParam = {
+  me: boolean;
+  bookId: number;
+  activityId?: number;
+  spine?: string;
+};
+
+function createHighlightQueryParam(
+  bookId: number,
+  showCurrentPageOnly: boolean,
+  activityId?: number,
+  spine?: string
+): HighlightQueryParam {
+  const param: HighlightQueryParam = activityId
+    ? {
+        me: false,
+        bookId,
+        activityId,
+      }
+    : {
+        me: true,
+        bookId,
+      };
+
+  if (showCurrentPageOnly) {
+    param.spine = spine;
+  }
+
+  return param;
 }

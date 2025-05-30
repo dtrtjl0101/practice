@@ -291,16 +291,17 @@ export default function HighlightCard({
           </Stack>
         </Popover>
       </CardActions>
-      {openComments && comments && (
+      {openComments && (
         <>
-          {comments.map((comment) => (
-            <HighlightCommentCard
-              key={comment.id}
-              comment={comment}
-              highlight={highlight}
-              refetchComments={refetchComments}
-            />
-          ))}
+          {comments &&
+            comments.map((comment) => (
+              <HighlightCommentCard
+                key={comment.id}
+                comment={comment}
+                highlight={highlight}
+                refetchComments={refetchComments}
+              />
+            ))}
           <Divider />
           <CardActions>
             <Input
