@@ -1,4 +1,4 @@
-import { Close, Note, NoteAdd } from "@mui/icons-material";
+import { Close, Note, NoteAdd, Timelapse } from "@mui/icons-material";
 import {
   Badge,
   Box,
@@ -152,24 +152,6 @@ function RouteComponent() {
     return marks;
   }, [rendition, highlights]);
 
-  const { data: readProgressInServer, refetch: refetchReadProgressInServer } =
-    useQuery({
-      queryKey: ["readProgress", bookId],
-      queryFn: async () => {
-        if (!rendition || !location) {
-          throw new Error("Rendition or location is not available");
-        }
-        const response =
-          await API_CLIENT.readingProgressController.getMyProgress(bookId);
-        if (!response.isSuccessful) {
-          throw new Error(response.errorMessage);
-        }
-        return response.data.percentage!;
-      },
-      placeholderData: keepPreviousData,
-      enabled: !!rendition && !!location,
-    });
-
   useEffect(() => {
     previousHighlightsInPage.current = highlightsInPage;
     if (!rendition || !rendition.location) {
@@ -262,33 +244,26 @@ function RouteComponent() {
   }, [bookId]);
 
   useEffect(() => {
-    if (temporalProgress || !rendition || !location) {
+    if (!rendition || !location || !rendition?.book.locations.length()) {
+      return;
+    }
+    const newReadProgress = Math.max(
+      Math.min(rendition.book.locations.percentageFromCfi(location) * 100, 100),
+      0
+    );
+    setLocalReadProgress(newReadProgress);
+    if (temporalProgress) {
       return;
     }
     try {
-      const newReadProgress = Math.max(
-        Math.min(
-          rendition.book.locations.percentageFromCfi(location) * 100,
-          100
-        ),
-        0
-      );
-      setLocalReadProgress(newReadProgress);
-      if (
-        typeof readProgressInServer === "number" &&
-        newReadProgress > readProgressInServer
-      ) {
-        API_CLIENT.readingProgressController
-          .saveMyProgress(bookId, {
-            percentage: newReadProgress,
-            cfi: location,
-          })
-          .then(() => refetchReadProgressInServer());
-      }
+      API_CLIENT.readingProgressController.saveMyProgress(bookId, {
+        percentage: newReadProgress,
+        cfi: location,
+      });
     } catch (e) {
       console.error("Error parsing location", e);
     }
-  }, [rendition, location]);
+  }, [rendition, location, rendition?.book.locations.length()]);
 
   useEffect(() => {
     if (initialPage) {
@@ -428,6 +403,23 @@ function RouteComponent() {
             <Badge badgeContent={highlightsInPage.length} color="primary">
               <Note />
             </Badge>
+          </Fab>
+          <Fab
+            size="small"
+            onClick={() => {
+              navigate({
+                to: ".",
+                search: {
+                  initialPage,
+                  activityId,
+                  groupId,
+                  temporalProgress: !temporalProgress,
+                },
+                replace: true,
+              });
+            }}
+          >
+            <Timelapse sx={{ opacity: temporalProgress ? 0.5 : 1 }} />
           </Fab>
         </Stack>
         {selection && (
