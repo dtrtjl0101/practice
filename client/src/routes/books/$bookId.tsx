@@ -92,7 +92,7 @@ function RouteComponent() {
 
   return (
     <Container sx={{ my: 8 }}>
-      <Paper sx={{ p: 4 }}>
+      <Paper sx={{ p: 4 }} variant="outlined">
         {book && (
           <Stack direction={{ xs: "column", md: "row" }} spacing={4}>
             <CardMedia
