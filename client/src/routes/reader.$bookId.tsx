@@ -341,10 +341,13 @@ function RouteComponent() {
         sx={{
           width: "100vw",
           position: "absolute",
-          zIndex: theme.zIndex.fab,
         }}
       >
-        <LinearProgress value={localReadProgress} variant="determinate" />
+        <LinearProgress
+          value={localReadProgress}
+          variant="determinate"
+          sx={{ zIndex: theme.zIndex.fab }}
+        />
         <Snackbar
           anchorOrigin={{ vertical: "top", horizontal: "center" }}
           open={readTogetherSnackbarOpen}
