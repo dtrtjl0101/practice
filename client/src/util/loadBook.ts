@@ -76,7 +76,7 @@ export default async function loadBook(bookId: number) {
 
 async function fetchBookFromServer(bookId: number): Promise<ArrayBuffer> {
   const downloadUrlResponse =
-    await API_CLIENT.ebookController.downloadFile(bookId);
+    await API_CLIENT.ebookController.getPresignedEbookUrlForUser(bookId);
   if (!downloadUrlResponse.isSuccessful) {
     throw new Error(downloadUrlResponse.errorCode);
   }

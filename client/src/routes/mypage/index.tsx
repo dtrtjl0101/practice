@@ -10,12 +10,12 @@ import {
 } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import BookList, { BookListKind } from "../component/BookList";
-import GroupCreateModal from "../component/groupCreate/GroupCreateModal";
-import GroupList, { GroupListKind } from "../component/GroupList";
-import HighlightBrowserModal from "../component/HighlightBrowserModal";
+import BookList, { BookListKind } from "../../component/BookList";
+import GroupCreateModal from "../../component/groupCreate/GroupCreateModal";
+import GroupList, { GroupListKind } from "../../component/GroupList";
+import HighlightBrowserModal from "../../component/HighlightBrowserModal";
 
-export const Route = createFileRoute("/mypage")({
+export const Route = createFileRoute("/mypage/")({
   component: RouteComponent,
 });
 

@@ -42,9 +42,14 @@ function RouteComponent() {
 
     const loggedInUser = response.data as AuthState.LoggedInUser;
     login(loggedInUser);
-    if ([Role.ROLE_PUBLISHER, Role.ROLE_ADMIN].includes(loggedInUser.role)) {
+    if (loggedInUser.role === Role.ROLE_ADMIN) {
       navigate({
-        to: "/mypage",
+        to: "/mypage/admin",
+        replace: true,
+      });
+    } else if (loggedInUser.role === Role.ROLE_PUBLISHER) {
+      navigate({
+        to: "/mypage/publisher",
         replace: true,
       });
     } else if (loggedInUser.role === Role.ROLE_USER) {

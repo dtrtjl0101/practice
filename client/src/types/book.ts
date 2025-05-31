@@ -8,3 +8,18 @@ export type BookMetadata = {
   isPurchased: boolean;
   price: number;
 };
+
+export type PublisherBook = {
+  requestId: number;
+  title: string;
+  author: string;
+  description: string;
+  size: number;
+  price: number;
+  coverImageURL: string;
+  publisherId: number;
+  publisherName: string;
+  publisherEmail: string;
+  status: string;
+  rejectReason: string;
+};
