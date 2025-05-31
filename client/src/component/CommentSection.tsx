@@ -185,7 +185,7 @@ export default function CommentSection({
       </Typography>
 
       {/* 댓글 작성 영역 */}
-      <Paper elevation={1} sx={{ p: 3, mb: 3 }}>
+      <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
         <Stack spacing={2}>
           {isDebate && (
             <StanceSelector stance={stance} onStanceChange={setStance} />
@@ -353,7 +353,7 @@ function CommentItem({
   };
 
   return (
-    <Paper elevation={isReply ? 1 : 2} sx={{ p: 3 }}>
+    <Paper variant="outlined" sx={{ p: 3 }}>
       {/* 댓글 헤더 */}
       <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
         <Box

@@ -8,6 +8,7 @@ import {
   Skeleton,
   Stack,
   Typography,
+  useTheme,
 } from "@mui/material";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../api/api";
@@ -37,6 +38,7 @@ export default function GroupList(props: {
   const [sort, _setSort] = useState<string[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const navigate = useNavigate();
+  const theme = useTheme();
 
   const pageSize = size === "small" ? 6 : 12;
   const groupType =
@@ -133,8 +135,7 @@ export default function GroupList(props: {
                           bottom: 0,
                           height: "2em",
                           pointerEvents: "none",
-                          background:
-                            "linear-gradient(to bottom, rgba(255,255,255,0) 0%, #fff 100%)",
+                          background: `linear-gradient(to bottom, rgba(255,255,255,0) 0%, ${theme.palette.background.paper} 100%)`,
                         },
                       }}
                     >

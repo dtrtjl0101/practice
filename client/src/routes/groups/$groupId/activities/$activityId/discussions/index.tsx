@@ -143,7 +143,7 @@ function RouteComponent() {
         </Box>
       ) : error ? (
         <Paper
-          elevation={0}
+          variant="outlined"
           sx={{
             p: 4,
             textAlign: "center",
@@ -159,7 +159,7 @@ function RouteComponent() {
         <Stack spacing={2}>
           {!discussions || discussions.length === 0 ? (
             <Paper
-              elevation={0}
+              variant="outlined"
               sx={{
                 p: (a) => a.spacing(6),
                 textAlign: "center",
@@ -211,95 +211,93 @@ function DiscussionCard({ discussion, onClick }: DiscussionCardProps) {
   });
 
   return (
-    <Paper
-      elevation={2}
-      sx={{
-        borderRadius: 2,
-        overflow: "hidden",
-        transition: "transform 0.2s, box-shadow 0.2s",
-        "&:hover": {
-          transform: "translateY(-4px)",
-          boxShadow: 6,
-        },
-      }}
-    >
-      <CardActionArea onClick={() => onClick(discussion.discussionId)}>
-        <Card variant="outlined" sx={{ height: "100%" }}>
-          <CardContent sx={{ p: 3 }}>
-            {/* 상단 영역: 제목 및 뱃지 */}
-            <Stack
-              direction="row"
-              alignItems="flex-start"
-              justifyContent="space-between"
-              sx={{ mb: 1.5 }}
-            >
-              <Stack direction="row" spacing={1} alignItems="center">
-                <Typography
-                  variant="h6"
-                  fontWeight="bold"
-                  sx={{ color: "text.primary" }}
-                >
-                  {discussion.title}
-                </Typography>
-              </Stack>
-              <Stack spacing={1} alignItems="center">
-                <Chip
-                  icon={<MessageIcon fontSize="small" />}
-                  label={discussion.commentCount}
-                  size="small"
-                  color="default"
-                  variant="outlined"
-                  sx={{ height: 24 }}
-                />
-                {discussion.isDebate && (
-                  <Chip
-                    label="토론"
-                    color="success"
-                    size="small"
-                    variant="outlined"
-                  />
-                )}
-              </Stack>
+    <CardActionArea onClick={() => onClick(discussion.discussionId)}>
+      <Card
+        variant="outlined"
+        sx={{
+          height: "100%",
+          transition: "transform 0.2s, box-shadow 0.2s",
+          "&:hover": {
+            transform: "translateY(-4px)",
+            boxShadow: 6,
+          },
+        }}
+      >
+        <CardContent sx={{ p: 3 }}>
+          {/* 상단 영역: 제목 및 뱃지 */}
+          <Stack
+            direction="row"
+            alignItems="flex-start"
+            justifyContent="space-between"
+            sx={{ mb: 1.5 }}
+          >
+            <Stack direction="row" spacing={1} alignItems="center">
+              <Typography
+                variant="h6"
+                fontWeight="bold"
+                sx={{ color: "text.primary" }}
+              >
+                {discussion.title}
+              </Typography>
             </Stack>
-
-            {/* 메타데이터 Chips */}
-
-            {/* 본문 미리보기 */}
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{
-                mb: 2,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                display: "-webkit-box",
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: "vertical",
-                minHeight: "2.5rem",
-                lineHeight: 1.5,
-              }}
-            >
-              {discussion.content.replace(/#\w[\w-]*/g, "메모").trim() ||
-                "내용 없음"}
-            </Typography>
-
-            {/* 하단 영역: 작성자 정보 및 메타데이터 */}
-            <Divider sx={{ mb: 2 }} />
-
-            <Stack
-              direction="row"
-              alignItems="center"
-              justifyContent="space-between"
-              color="text.secondary"
-            >
-              <Stack direction="row" spacing={1} alignItems="center">
-                <Avatar
-                  src={discussion.authorProfileImage}
-                  alt={discussion.authorName}
-                  sx={{ width: 24, height: 24 }}
+            <Stack spacing={1} alignItems="center">
+              <Chip
+                icon={<MessageIcon fontSize="small" />}
+                label={discussion.commentCount}
+                size="small"
+                color="default"
+                variant="outlined"
+                sx={{ height: 24 }}
+              />
+              {discussion.isDebate && (
+                <Chip
+                  label="토론"
+                  color="success"
+                  size="small"
+                  variant="outlined"
                 />
-                <Typography variant="body2">{discussion.authorName}</Typography>
-                {/* { 모임지기 별달아주기
+              )}
+            </Stack>
+          </Stack>
+
+          {/* 메타데이터 Chips */}
+
+          {/* 본문 미리보기 */}
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{
+              mb: 2,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              minHeight: "2.5rem",
+              lineHeight: 1.5,
+            }}
+          >
+            {discussion.content.replace(/#\w[\w-]*/g, "메모").trim() ||
+              "내용 없음"}
+          </Typography>
+
+          {/* 하단 영역: 작성자 정보 및 메타데이터 */}
+          <Divider sx={{ mb: 2 }} />
+
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+            color="text.secondary"
+          >
+            <Stack direction="row" spacing={1} alignItems="center">
+              <Avatar
+                src={discussion.authorProfileImage}
+                alt={discussion.authorName}
+                sx={{ width: 24, height: 24 }}
+              />
+              <Typography variant="body2">{discussion.authorName}</Typography>
+              {/* { 모임지기 별달아주기
                   <Chip
                     icon={<StarIcon fontSize="small" />}
                     label="모임지기"
@@ -309,15 +307,14 @@ function DiscussionCard({ discussion, onClick }: DiscussionCardProps) {
                     sx={{ height: 24 }}
                   />
                 } */}
-              </Stack>
-
-              <Stack direction="row" spacing={0.5} alignItems="center">
-                <Typography variant="caption">{formattedDate}</Typography>
-              </Stack>
             </Stack>
-          </CardContent>
-        </Card>
-      </CardActionArea>
-    </Paper>
+
+            <Stack direction="row" spacing={0.5} alignItems="center">
+              <Typography variant="caption">{formattedDate}</Typography>
+            </Stack>
+          </Stack>
+        </CardContent>
+      </Card>
+    </CardActionArea>
   );
 }

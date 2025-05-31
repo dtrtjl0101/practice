@@ -52,7 +52,7 @@ function RouteComponent() {
           groupId={groupId}
           canCreate={group?.myMemberShipStatus === GroupMembershipStatus.OWNED}
         />
-        <Paper sx={{ p: 2 }}>
+        <Paper sx={{ p: 2 }} variant="outlined">
           <Stack spacing={2}>
             <Typography variant="h4">모임 대화방</Typography>
             <Divider />

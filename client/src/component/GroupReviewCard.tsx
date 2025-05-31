@@ -364,7 +364,7 @@ export default function GroupReviewCard({
   };
 
   return (
-    <Paper sx={{ p: 3 }}>
+    <Paper sx={{ p: 3 }} variant="outlined">
       <Stack spacing={3}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h4">모임 후기 ({totalReviews})</Typography>

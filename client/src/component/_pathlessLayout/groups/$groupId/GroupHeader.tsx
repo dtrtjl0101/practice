@@ -136,15 +136,23 @@ export function GroupHeader({ group, groupId }: GroupHeaderProps) {
           </Stack>
         )}
       </Popover>
-      <Paper sx={{ p: 2 }}>
+      <Paper sx={{ p: 2 }} variant="outlined">
         <Stack spacing={2}>
           <Stack direction={"row"} spacing={2}>
             <Stack flexGrow={1}>
-              <Stack direction={"row"} spacing={2} flexGrow={1}>
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={2}
+                flexGrow={1}
+              >
                 <Stack>
                   <CardMedia
                     image={group.groupImageURL}
-                    sx={{ width: 256, height: 256 }}
+                    sx={{
+                      width: { xs: "100%", sm: 256 },
+                      height: 256,
+                      alignSelf: "center",
+                    }}
                   />
                 </Stack>
                 <Stack spacing={2} sx={{ flexGrow: 1 }}>
@@ -252,37 +260,42 @@ function GroupHeaderSkeleton() {
       <Stack spacing={2}>
         <Stack direction={"row"} spacing={2}>
           <Stack flexGrow={1}>
-            <Stack direction={"row"} spacing={2} flexGrow={1}>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={2}
+              flexGrow={1}
+            >
               <Stack>
-                <Skeleton variant="rectangular" width={256} height={256} />
+                <Skeleton
+                  variant="rectangular"
+                  width={256}
+                  height={256}
+                  sx={{
+                    minWidth: 128,
+                    maxWidth: 256,
+                    width: { xs: "100%", sm: 256 },
+                  }}
+                />
               </Stack>
-              <Stack sx={{ flexGrow: 1 }}>
-                <Stack direction={"row"} spacing={1}>
+              <Stack spacing={2} sx={{ flexGrow: 1 }}>
+                <Stack direction={"row"} spacing={1} alignItems="center">
                   <Typography variant="h3" flexGrow={1}>
                     <Skeleton variant="text" width={180} />
                   </Typography>
-                  <Typography
-                    variant="body2"
-                    color="textSecondary"
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Skeleton
-                      variant="circular"
-                      width={24}
-                      height={24}
-                      sx={{ mr: 1 }}
-                    />
-                    <Skeleton variant="text" width={40} />
-                  </Typography>
+                  <Button sx={{ ml: "auto", gap: 0.5 }} disabled>
+                    <Skeleton variant="circular" width={24} height={24} />
+                    <Skeleton variant="text" width={32} />
+                  </Button>
                   <Skeleton
                     variant="circular"
                     width={40}
                     height={40}
                     sx={{ ml: 1 }}
                   />
+                </Stack>
+                <Stack direction={"row"} spacing={1} alignItems={"center"}>
+                  <Skeleton variant="circular" width={32} height={32} />
+                  <Skeleton variant="text" width={80} />
                 </Stack>
                 <Typography variant="body1" flexGrow={1}>
                   <Skeleton variant="text" width={240} />
@@ -299,11 +312,11 @@ function GroupHeaderSkeleton() {
           </Stack>
         </Stack>
         <Divider />
-        <Grid container spacing={1}>
-          <Skeleton width={128} />
-          <Skeleton width={64} />
-          <Skeleton width={96} />
-        </Grid>
+        <Stack direction="row" spacing={1}>
+          <Skeleton width={64} height={32} variant="rectangular" />
+          <Skeleton width={64} height={32} variant="rectangular" />
+          <Skeleton width={64} height={32} variant="rectangular" />
+        </Stack>
       </Stack>
     </Paper>
   );
