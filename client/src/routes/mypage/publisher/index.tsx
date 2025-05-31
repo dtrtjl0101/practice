@@ -556,6 +556,14 @@ function RouteComponent() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Box sx={{ padding: 2 }}>
+        {publisherInfo.status === "PENDING" && (
+          <Alert severity="warning">관리자가 계정을 심사중입니다.</Alert>
+        )}
+        {publisherInfo.status === "REJECTED" && (
+          <Alert severity="warning">관리자가 계정을 거절했습니다.</Alert>
+        )}
+      </Box>
       {/* 헤더 */}
       <Box
         display="flex"
@@ -581,6 +589,7 @@ function RouteComponent() {
           startIcon={<Add />}
           onClick={handleOpenNewBookDialog}
           size="large"
+          disabled={publisherInfo.status !== "APPROVED"}
         >
           새 도서 등록
         </Button>
