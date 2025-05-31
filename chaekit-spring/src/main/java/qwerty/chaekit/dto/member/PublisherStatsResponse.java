@@ -5,6 +5,10 @@ import lombok.Builder;
 import java.time.LocalDate;
 import java.util.List;
 
+// total:           전체 기간
+// monthlyTotal:    월별
+// increased:       마지막 달 증가 수치
+
 @Builder
 public record PublisherStatsResponse(
         Long totalSalesCount,
@@ -18,25 +22,24 @@ public record PublisherStatsResponse(
 
         Long totalViewCount,
         
-        List<MonthlyTotalSales> monthlyTotalRevenueList,
-        List<SalesPerEbook> salesCountPerEbookList,
-        
+        List<MonthlyRevenue> monthlyRevenueList,
+        List<SalesCountPerEbook> increasedSalesCountsPerEbook,
         List<StatsPerEbook> statsPerEbookList
 ) {
-    public record SalesPerEbook(
+    public record SalesCountPerEbook(
             Long bookId,
             String bookName,
-            Long sales
+            Long totalSalesCount
     ) { }
     
-    public record MonthlyTotalSales(
-            LocalDate month,
-            Long sales
+    public record MonthlyRevenue(
+            String month,
+            Long monthlyRevenue
     ) { }
     
     public record StatsPerEbook(
             Long bookId,
-            String bookName,
+            String title,
             String author,
             String bookCoverImageURL,
             Long totalSalesCount,
