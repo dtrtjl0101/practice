@@ -1,7 +1,6 @@
 import { createRootRoute, Outlet, useMatches } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import AppBar from "../component/AppBar";
-import useAutoLogin from "../api/login/useAutoLogin";
 import useAutoTokenRefresh from "../api/login/useAutoTokenRefresh";
 import useInvalidateQueriesOnAuthChange from "../api/login/useInvalidateQueriesOnAuthChange";
 import { Toolbar } from "@mui/material";
@@ -18,6 +17,7 @@ import { useAtomValue } from "jotai";
 import State from "../states";
 import { Role } from "../types/role";
 import { FileRouteTypes } from "../routeTree.gen";
+import autoLogin from "../api/login/autoLogin";
 
 export const Route = createRootRoute({
   component: RouteComponent,
@@ -40,8 +40,9 @@ const adminNavigationItems: NavigationItem[] = [
   { to: "/admin/publisher", label: "출판사 관리", icon: <Badge /> },
 ];
 
+autoLogin();
+
 function RouteComponent() {
-  useAutoLogin();
   useAutoTokenRefresh();
   useInvalidateQueriesOnAuthChange();
   const user = useAtomValue(State.Auth.user);
