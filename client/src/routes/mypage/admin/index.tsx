@@ -469,7 +469,7 @@ function RouteComponent() {
             </Typography>
           </Stack>
           <Typography variant="body1" color="textSecondary">
-            출판사 및 출판물 관리
+            일반 사용자, 출판사 및 출판물 관리
           </Typography>
         </Box>
       </Box>
