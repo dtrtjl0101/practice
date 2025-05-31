@@ -189,14 +189,11 @@ function RouteComponent() {
 
   // 출판사 정보 조회
   const { data: publisherInfo } = useQuery({
-    queryKey: [
-      "publisherInfo",
-      user?.role === Role.ROLE_PUBLISHER ? user.publisherId : undefined,
-    ],
+    queryKey: ["publisherInfo", isPublisher ? user.publisherId : undefined],
     queryFn: async () => {
       const response = await API_CLIENT.publisherController.publisherInfo();
       if (!response.isSuccessful) {
-        alert(response.errorMessage);
+        console.log(response.errorMessage);
         throw new Error(response.errorMessage);
       }
       return response.data;
@@ -207,10 +204,7 @@ function RouteComponent() {
 
   // 전체 도서 목록 조회
   const { data: books } = useQuery({
-    queryKey: [
-      "publisherBooks",
-      user?.role === Role.ROLE_PUBLISHER ? user.publisherId : undefined,
-    ],
+    queryKey: ["publisherBooks", isPublisher ? user.publisherId : undefined],
     queryFn: async () => {
       const response =
         await API_CLIENT.ebookRequestController.getEbookRequests();
@@ -263,6 +257,7 @@ function RouteComponent() {
       }
       return response;
     },
+
     onSuccess: () => {
       const isResubmit = openResubmitDialog;
       alert(
@@ -556,7 +551,7 @@ function RouteComponent() {
   }
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* 헤더 */}
       <Box
         display="flex"
