@@ -71,4 +71,13 @@ public class EbookController {
     ) {
         return ApiSuccessResponse.of(ebookFileService.getPresignedEbookUrlForPublisher(publisherToken, ebookId));
     }
+    
+    @PostMapping("/{ebookId}/view")
+    @Operation(summary = "전자책 조회수 증가", description = "사용자가 전자책을 조회할 때마다 조회수를 증가시킵니다.")
+    public ApiSuccessResponse<Void> incrementEbookViewCount(
+            @Parameter(description = "조회할 전자책 ID") @PathVariable Long ebookId
+    ) {
+        ebookService.incrementEbookViewCount(ebookId);
+        return ApiSuccessResponse.of(null);
+    }
 }

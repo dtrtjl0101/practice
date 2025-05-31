@@ -17,4 +17,5 @@ public interface EbookRepository {
     boolean existsByTitle(String title);
 
     Page<Ebook> findAllByPublisher(PublisherProfile publisher, Pageable pageable);
+    void incrementViewCount(Long ebookId);
 }

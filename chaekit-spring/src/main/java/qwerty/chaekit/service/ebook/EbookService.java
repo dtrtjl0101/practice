@@ -18,12 +18,13 @@ import qwerty.chaekit.service.util.FileService;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class EbookService {
     private final EbookRepository ebookRepository;
     private final FileService fileService;
     private final EntityFinder entityFinder;
 
+    @Transactional(readOnly = true)
     public PageResponse<EbookFetchResponse> fetchBooksByQuery(UserToken userToken, Pageable pageable, String title, String author) {
         UserProfile user = userToken.isAnonymous() ? null : entityFinder.findUser(userToken.userId());
         Page<EbookFetchResponse> page = ebookRepository.findAllByTitleAndAuthor(title, author, pageable)
@@ -34,6 +35,7 @@ public class EbookService {
         return PageResponse.of(page);
     }
 
+    @Transactional(readOnly = true)
     public EbookFetchResponse fetchById(UserToken userToken, Long ebookId) {
         UserProfile user = userToken.isAnonymous() ? null : entityFinder.findUser(userToken.userId());
         Ebook ebook = entityFinder.findEbook(ebookId);
@@ -53,5 +55,10 @@ public class EbookService {
                         false
                 ));
         return PageResponse.of(page);
+    }
+
+    @Transactional
+    public void incrementEbookViewCount(Long ebookId) {
+        ebookRepository.incrementViewCount(ebookId);
     }
 }
