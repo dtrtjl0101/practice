@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import {
   Container,
   Paper,
@@ -95,8 +95,13 @@ function RouteComponent() {
   const queryClient = useQueryClient();
 
   const [currentTab, setCurrentTab] = useState(0);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("ALL");
+
+  // 각 탭별 독립적인 검색 및 필터 상태
+  const [publisherSearchTerm, setPublisherSearchTerm] = useState("");
+  const [userSearchTerm, setUserSearchTerm] = useState("");
+  const [bookSearchTerm, setBookSearchTerm] = useState("");
+  const [publisherStatusFilter, setPublisherStatusFilter] = useState("ALL");
+  const [bookStatusFilter, setBookStatusFilter] = useState("ALL");
 
   // 페이지네이션 상태
   const [publisherPage, setPublisherPage] = useState(0);
@@ -132,19 +137,6 @@ function RouteComponent() {
     initialData: [] as Publisher[],
   });
 
-  // const { data: pendingPublishers } = useQuery({
-  //   queryKey: ["adminPendingPublishers"],
-  //   queryFn: async () => {
-  //     const response = await API_CLIENT.adminController.fetchPendingList();
-  //     if (!response.isSuccessful) {
-  //       throw new Error(response.errorMessage);
-  //     }
-  //     return response.data.content as Publisher[];
-  //   },
-  //   enabled: isAdmin,
-  //   initialData: [] as Publisher[],
-  // });
-
   // 유저 목록 조회
   const { data: users } = useQuery({
     queryKey: ["adminUsers"],
@@ -179,29 +171,30 @@ function RouteComponent() {
     return publishers.filter((publisher) => {
       const matchesSearch = publisher.publisherName
         .toLowerCase()
-        .includes(searchTerm.toLowerCase());
+        .includes(publisherSearchTerm.toLowerCase());
       const matchesStatus =
-        statusFilter === "ALL" || publisher.status === statusFilter;
+        publisherStatusFilter === "ALL" ||
+        publisher.status === publisherStatusFilter;
       return matchesSearch && matchesStatus;
     });
-  }, [publishers, searchTerm, statusFilter]);
+  }, [publishers, publisherSearchTerm, publisherStatusFilter]);
 
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
-      return user.nickname.toLowerCase().includes(searchTerm.toLowerCase());
+      return user.nickname.toLowerCase().includes(userSearchTerm.toLowerCase());
     });
-  }, [users, searchTerm]);
+  }, [users, userSearchTerm]);
 
   const filteredBooks = useMemo(() => {
     return bookRequests.filter((book) => {
       const matchesSearch =
-        book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        book.author.toLowerCase().includes(searchTerm.toLowerCase());
+        book.title.toLowerCase().includes(bookSearchTerm.toLowerCase()) ||
+        book.author.toLowerCase().includes(bookSearchTerm.toLowerCase());
       const matchesStatus =
-        statusFilter === "ALL" || book.status === statusFilter;
+        bookStatusFilter === "ALL" || book.status === bookStatusFilter;
       return matchesSearch && matchesStatus;
     });
-  }, [bookRequests, searchTerm, statusFilter]);
+  }, [bookRequests, bookSearchTerm, bookStatusFilter]);
 
   // 상태별 카운트
   const publisherStats = useMemo(() => {
@@ -376,10 +369,6 @@ function RouteComponent() {
                   승인률
                 </Typography>
                 <Typography variant="h4" color="success.main">
-                  {/* {bookStats.total > 0
-                    ? Math.round((bookStats.approved / bookStats.total) * 100)
-                    : 0}
-                  % */}
                   ??
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
@@ -396,53 +385,120 @@ function RouteComponent() {
     </Grid>
   );
 
+  // 검색 핸들러들을 useCallback으로 메모이제이션
+  const handlePublisherSearchChange = useCallback((value: string) => {
+    setPublisherSearchTerm(value);
+  }, []);
+
+  const handleUserSearchChange = useCallback((value: string) => {
+    setUserSearchTerm(value);
+  }, []);
+
+  const handleBookSearchChange = useCallback((value: string) => {
+    setBookSearchTerm(value);
+  }, []);
+
+  const handlePublisherStatusChange = useCallback((value: string) => {
+    setPublisherStatusFilter(value);
+  }, []);
+
+  const handleBookStatusChange = useCallback((value: string) => {
+    setBookStatusFilter(value);
+  }, []);
+
+  // 새로고침 핸들러
+  const handleRefresh = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ["adminPublishers"] });
+    queryClient.invalidateQueries({ queryKey: ["adminUsers"] });
+    queryClient.invalidateQueries({ queryKey: ["adminBookRequests"] });
+  }, [queryClient]);
+
   // 검색 및 필터 섹션
-  const SearchAndFilter = () => (
-    <Paper sx={{ p: 2, mb: 3 }} variant="outlined">
-      <Stack
-        direction={{ xs: "column", sm: "row" }}
-        spacing={2}
-        alignItems="center"
-      >
-        <TextField
-          placeholder="검색..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          size="small"
-          sx={{ flexGrow: 1 }}
-          InputProps={{
-            startAdornment: <Search sx={{ color: "action.active", mr: 1 }} />,
-          }}
-        />
-        {(currentTab === 0 || currentTab === 2) && (
-          <FormControl size="small" sx={{ minWidth: 120 }}>
-            <InputLabel>상태</InputLabel>
-            <Select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              label="상태"
-            >
-              <MenuItem value="ALL">전체</MenuItem>
-              <MenuItem value="PENDING">대기중</MenuItem>
-              <MenuItem value="APPROVED">승인됨</MenuItem>
-              <MenuItem value="REJECTED">거부됨</MenuItem>
-            </Select>
-          </FormControl>
-        )}
-        <Button
-          variant="outlined"
-          startIcon={<Refresh />}
-          onClick={() => {
-            queryClient.invalidateQueries({ queryKey: ["adminPublishers"] });
-            queryClient.invalidateQueries({ queryKey: ["adminUsers"] });
-            queryClient.invalidateQueries({ queryKey: ["adminBookRequests"] });
-          }}
+  const SearchAndFilter = useCallback(() => {
+    let searchTerm = "";
+    let statusFilter = "ALL";
+    let onSearchChange = handlePublisherSearchChange;
+    let onStatusChange = handlePublisherStatusChange;
+    let showStatusFilter = true;
+
+    switch (currentTab) {
+      case 0:
+        searchTerm = publisherSearchTerm;
+        statusFilter = publisherStatusFilter;
+        onSearchChange = handlePublisherSearchChange;
+        onStatusChange = handlePublisherStatusChange;
+        showStatusFilter = true;
+        break;
+      case 1:
+        searchTerm = userSearchTerm;
+        onSearchChange = handleUserSearchChange;
+        showStatusFilter = false;
+        break;
+      case 2:
+        searchTerm = bookSearchTerm;
+        statusFilter = bookStatusFilter;
+        onSearchChange = handleBookSearchChange;
+        onStatusChange = handleBookStatusChange;
+        showStatusFilter = true;
+        break;
+    }
+
+    return (
+      <Paper sx={{ p: 2, mb: 3 }} variant="outlined">
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={2}
+          alignItems="center"
         >
-          새로고침
-        </Button>
-      </Stack>
-    </Paper>
-  );
+          <TextField
+            placeholder="검색..."
+            value={searchTerm}
+            onChange={(e) => onSearchChange(e.target.value)}
+            size="small"
+            sx={{ flexGrow: 1 }}
+            InputProps={{
+              startAdornment: <Search sx={{ color: "action.active", mr: 1 }} />,
+            }}
+          />
+          {showStatusFilter && (
+            <FormControl size="small" sx={{ minWidth: 120 }}>
+              <InputLabel>상태</InputLabel>
+              <Select
+                value={statusFilter}
+                onChange={(e) => onStatusChange(e.target.value)}
+                label="상태"
+              >
+                <MenuItem value="ALL">전체</MenuItem>
+                <MenuItem value="PENDING">대기중</MenuItem>
+                <MenuItem value="APPROVED">승인됨</MenuItem>
+                <MenuItem value="REJECTED">거부됨</MenuItem>
+              </Select>
+            </FormControl>
+          )}
+          <Button
+            variant="outlined"
+            startIcon={<Refresh />}
+            onClick={handleRefresh}
+          >
+            새로고침
+          </Button>
+        </Stack>
+      </Paper>
+    );
+  }, [
+    currentTab,
+    publisherSearchTerm,
+    userSearchTerm,
+    bookSearchTerm,
+    publisherStatusFilter,
+    bookStatusFilter,
+    handlePublisherSearchChange,
+    handleUserSearchChange,
+    handleBookSearchChange,
+    handlePublisherStatusChange,
+    handleBookStatusChange,
+    handleRefresh,
+  ]);
 
   if (!isAdmin) {
     return (
@@ -532,7 +588,6 @@ function RouteComponent() {
                           {publisher.publisherName}
                         </Typography>
                       </TableCell>
-                      {/* <TableCell>{publisher.publisherEmail}</TableCell> */}
                       <TableCell>이메일</TableCell>
                       <TableCell>
                         {new Date(publisher.createdAt).toLocaleDateString()}
@@ -586,7 +641,6 @@ function RouteComponent() {
                 <TableRow>
                   <TableCell>사용자명</TableCell>
                   <TableCell>이메일</TableCell>
-                  <TableCell>역할</TableCell>
                   <TableCell>등록일</TableCell>
                   <TableCell>상태</TableCell>
                   <TableCell align="center">관리</TableCell>
@@ -613,36 +667,10 @@ function RouteComponent() {
                           {user.nickname}
                         </Typography>
                       </TableCell>
-                      {/* <TableCell>{user.email}</TableCell> */}
                       <TableCell>이메일</TableCell>
+                      <TableCell>{new Date().toLocaleDateString()}</TableCell>
                       <TableCell>
-                        <Chip
-                          label={
-                            user.role === "ROLE_ADMIN"
-                              ? "관리자"
-                              : user.role === "ROLE_PUBLISHER"
-                                ? "출판사"
-                                : "사용자"
-                          }
-                          color={
-                            user.role === "ROLE_ADMIN"
-                              ? "error"
-                              : user.role === "ROLE_PUBLISHER"
-                                ? "warning"
-                                : "default"
-                          }
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        {new Date(user.registeredAt).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={user.isActive ? "활성" : "비활성"}
-                          color={user.isActive ? "success" : "default"}
-                          size="small"
-                        />
+                        <Chip label="활성" color="success" size="small" />
                       </TableCell>
                       <TableCell align="center">
                         <IconButton size="small" color="primary">
@@ -850,26 +878,12 @@ function PublisherDetailDialog({
           <Stack spacing={2}>
             <Box display="flex" alignItems="center" gap={1}>
               <Email fontSize="small" color="action" />
-              <Typography variant="body1">
-                {publisher.publisherEmail}
-              </Typography>
+              <Typography variant="body1">이메일</Typography>
             </Box>
             <Typography variant="body2" color="textSecondary">
-              등록일: {new Date(publisher.registeredAt).toLocaleDateString()}
+              등록일: {new Date(publisher.createdAt).toLocaleDateString()}
             </Typography>
           </Stack>
-
-          {publisher.description && (
-            <>
-              <Divider />
-              <Box>
-                <Typography variant="subtitle2" gutterBottom>
-                  출판사 소개
-                </Typography>
-                <Typography variant="body2">{publisher.description}</Typography>
-              </Box>
-            </>
-          )}
 
           {publisher.status === "PENDING" && (
             <>
@@ -931,32 +945,8 @@ function UserDetailDialog({
         <Stack spacing={3}>
           <Box>
             <Typography variant="h5" gutterBottom>
-              {user.username}
+              {user.nickname}
             </Typography>
-            <Stack direction="row" spacing={1}>
-              <Chip
-                label={
-                  user.role === "ROLE_ADMIN"
-                    ? "관리자"
-                    : user.role === "ROLE_PUBLISHER"
-                      ? "출판사"
-                      : "사용자"
-                }
-                color={
-                  user.role === "ROLE_ADMIN"
-                    ? "error"
-                    : user.role === "ROLE_PUBLISHER"
-                      ? "warning"
-                      : "default"
-                }
-                size="small"
-              />
-              <Chip
-                label={user.isActive ? "활성" : "비활성"}
-                color={user.isActive ? "success" : "default"}
-                size="small"
-              />
-            </Stack>
           </Box>
 
           <Divider />
@@ -964,10 +954,10 @@ function UserDetailDialog({
           <Stack spacing={2}>
             <Box display="flex" alignItems="center" gap={1}>
               <Email fontSize="small" color="action" />
-              <Typography variant="body1">{user.email}</Typography>
+              <Typography variant="body1">이메일</Typography>
             </Box>
             <Typography variant="body2" color="textSecondary">
-              등록일: {new Date(user.registeredAt).toLocaleDateString()}
+              등록일: {new Date().toLocaleDateString()}
             </Typography>
           </Stack>
         </Stack>
