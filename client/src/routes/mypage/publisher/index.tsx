@@ -69,7 +69,7 @@ import { AuthState } from "../../../states/auth";
 import { Role } from "../../../types/role";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import API_CLIENT from "../../../api/api";
-import { PublisherBook } from "../../../types/book";
+import { BookRequest } from "../../../types/book";
 
 export const Route = createFileRoute("/mypage/publisher/")({
   component: RouteComponent,
@@ -128,7 +128,7 @@ function RouteComponent() {
 
   // 재신청 관련 상태
   const [openResubmitDialog, setOpenResubmitDialog] = useState(false);
-  const [resubmitBook, setResubmitBook] = useState<PublisherBook | null>(null);
+  const [resubmitBook, setResubmitBook] = useState<BookRequest | null>(null);
 
   // 공통 폼 상태들
   const [bookTitle, setBookTitle] = useState("");
@@ -140,7 +140,7 @@ function RouteComponent() {
 
   // 도서 상세 다이얼로그 상태
   const [openBookDetailsDialog, setOpenBookDetailsDialog] = useState(false);
-  const [selectedBook, setSelectedBook] = useState<PublisherBook | null>(null);
+  const [selectedBook, setSelectedBook] = useState<BookRequest | null>(null);
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setCurrentTab(newValue);
@@ -158,7 +158,7 @@ function RouteComponent() {
   };
 
   // 재신청 핸들러
-  const handleOpenResubmitDialog = (book: PublisherBook) => {
+  const handleOpenResubmitDialog = (book: BookRequest) => {
     // 기존 책 정보로 폼 채우기
     setBookTitle(book.title);
     setBookAuthor(book.author);
@@ -212,10 +212,10 @@ function RouteComponent() {
         alert(response.errorMessage);
         throw new Error(response.errorMessage);
       }
-      return response.data.content as PublisherBook[];
+      return response.data.content as BookRequest[];
     },
     enabled: isPublisher,
-    initialData: [] as PublisherBook[],
+    initialData: [] as BookRequest[],
   });
 
   // 상태별로 필터링된 도서 목록들
@@ -309,7 +309,7 @@ function RouteComponent() {
     });
   };
 
-  const handleClickBook = (book: PublisherBook) => {
+  const handleClickBook = (book: BookRequest) => {
     setSelectedBook(book);
     setOpenBookDetailsDialog(true);
   };
@@ -323,7 +323,7 @@ function RouteComponent() {
   const SummaryCards = () => (
     <Grid container spacing={3} sx={{ mb: 4 }}>
       <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <Card>
+        <Card variant="outlined">
           <CardContent>
             <Box
               display="flex"
@@ -352,7 +352,7 @@ function RouteComponent() {
       </Grid>
 
       <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <Card>
+        <Card variant="outlined">
           <CardContent>
             <Box
               display="flex"
@@ -383,7 +383,7 @@ function RouteComponent() {
       </Grid>
 
       <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <Card>
+        <Card variant="outlined">
           <CardContent>
             <Box
               display="flex"
@@ -414,7 +414,7 @@ function RouteComponent() {
       </Grid>
 
       <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <Card>
+        <Card variant="outlined">
           <CardContent>
             <Box
               display="flex"
@@ -450,7 +450,7 @@ function RouteComponent() {
   const ChartsSection = () => (
     <Grid container spacing={3} sx={{ mb: 4 }}>
       <Grid size={{ xs: 12, lg: 8 }}>
-        <Paper sx={{ p: 3 }}>
+        <Paper sx={{ p: 3 }} variant="outlined">
           <Box
             display="flex"
             justifyContent="space-between"
@@ -495,7 +495,7 @@ function RouteComponent() {
       </Grid>
 
       <Grid size={{ xs: 12, lg: 4 }}>
-        <Paper sx={{ p: 3 }}>
+        <Paper sx={{ p: 3 }} variant="outlined">
           <Typography variant="h6" gutterBottom>
             도서 상태 분포
           </Typography>
@@ -547,7 +547,11 @@ function RouteComponent() {
   );
 
   if (!isPublisher) {
-    return <Alert>접근 권한 없음</Alert>;
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Alert severity="error">출판사 권한이 필요합니다.</Alert>
+      </Container>
+    );
   }
 
   return (
@@ -589,7 +593,7 @@ function RouteComponent() {
       <ChartsSection />
 
       {/* 탭 네비게이션 */}
-      <Paper sx={{ mb: 3 }}>
+      <Paper sx={{ mb: 3 }} variant="outlined">
         <Tabs
           value={currentTab}
           onChange={handleTabChange}
@@ -835,7 +839,7 @@ function RouteComponent() {
         <TabPanel value={currentTab} index={3}>
           <Grid container spacing={3}>
             <Grid size={{ xs: 12, md: 6 }}>
-              <Paper sx={{ p: 3 }}>
+              <Paper sx={{ p: 3 }} variant="outlined">
                 <Typography variant="h6" gutterBottom>
                   도서별 성과 비교
                 </Typography>
@@ -851,7 +855,7 @@ function RouteComponent() {
               </Paper>
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>
-              <Paper sx={{ p: 3 }}>
+              <Paper sx={{ p: 3 }} variant="outlined">
                 <Typography variant="h6" gutterBottom>
                   활동 선정 현황
                 </Typography>
@@ -935,7 +939,7 @@ function BookInfoDialog({
   onClose,
   openRequestDialog,
 }: {
-  book: PublisherBook;
+  book: BookRequest;
   open: boolean;
   onClose(): void;
   openRequestDialog(): void;

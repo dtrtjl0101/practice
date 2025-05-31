@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Container,
   Paper,
@@ -30,7 +30,6 @@ import {
   DialogActions,
   TextField,
   Alert,
-  InputAdornment,
   Divider,
   CardMedia,
   CircularProgress,
@@ -41,15 +40,12 @@ import {
   Business,
   Person,
   MenuBook,
-  Visibility,
+  MoreVert,
   Check,
   Close,
-  PendingActions,
   Download,
   Email,
-  ErrorOutline,
   Search,
-  FilterList,
   Refresh,
 } from "@mui/icons-material";
 import { createFileRoute } from "@tanstack/react-router";
@@ -58,7 +54,7 @@ import { AuthState } from "../../../states/auth";
 import { Role } from "../../../types/role";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import API_CLIENT from "../../../api/api";
-import { PublisherBook } from "../../../types/book";
+import { BookRequest } from "../../../types/book";
 
 export const Route = createFileRoute("/mypage/admin/")({
   component: RouteComponent,
@@ -66,7 +62,7 @@ export const Route = createFileRoute("/mypage/admin/")({
 
 // 타입 정의
 interface Publisher {
-  publisherId: string;
+  publisherId: number;
   publisherName: string;
   profileImageURL: string;
   status: "PENDING" | "APPROVED" | "REJECTED";
@@ -74,7 +70,7 @@ interface Publisher {
 }
 
 interface User {
-  userId: string;
+  userId: number;
   nickname: string;
   profileImageURL: string;
 }
@@ -116,61 +112,74 @@ function RouteComponent() {
   const [openUserDialog, setOpenUserDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [openBookDialog, setOpenBookDialog] = useState(false);
-  const [selectedBook, setSelectedBook] = useState<PublisherBook | null>(null);
+  const [selectedBook, setSelectedBook] = useState<BookRequest | null>(null);
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setCurrentTab(newValue);
   };
 
   // 출판사 목록 조회
-  const { data: publishers = [], isLoading: publishersLoading } = useQuery({
+  const { data: publishers } = useQuery({
     queryKey: ["adminPublishers"],
     queryFn: async () => {
-      const response = await API_CLIENT.adminController.getPublishers();
+      const response = await API_CLIENT.adminController.fetchPublishers();
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);
       }
       return response.data.content as Publisher[];
     },
     enabled: isAdmin,
+    initialData: [] as Publisher[],
   });
 
+  // const { data: pendingPublishers } = useQuery({
+  //   queryKey: ["adminPendingPublishers"],
+  //   queryFn: async () => {
+  //     const response = await API_CLIENT.adminController.fetchPendingList();
+  //     if (!response.isSuccessful) {
+  //       throw new Error(response.errorMessage);
+  //     }
+  //     return response.data.content as Publisher[];
+  //   },
+  //   enabled: isAdmin,
+  //   initialData: [] as Publisher[],
+  // });
+
   // 유저 목록 조회
-  const { data: users = [], isLoading: usersLoading } = useQuery({
+  const { data: users } = useQuery({
     queryKey: ["adminUsers"],
     queryFn: async () => {
-      const response = await API_CLIENT.adminController.getUsers();
+      const response = await API_CLIENT.adminController.fetchUsers();
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);
       }
       return response.data.content as User[];
     },
     enabled: isAdmin,
+    initialData: [] as User[],
   });
 
   // 출판물 요청 목록 조회
-  const { data: bookRequests = [], isLoading: booksLoading } = useQuery({
+  const { data: bookRequests } = useQuery({
     queryKey: ["adminBookRequests"],
     queryFn: async () => {
-      const response = await API_CLIENT.adminController.getBookRequests();
+      const response =
+        await API_CLIENT.ebookRequestController.getEbookRequests();
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);
       }
-      return response.data.content as PublisherBook[];
+      return response.data.content as BookRequest[];
     },
     enabled: isAdmin,
+    initialData: [] as BookRequest[],
   });
 
   // 필터링된 데이터
   const filteredPublishers = useMemo(() => {
     return publishers.filter((publisher) => {
-      const matchesSearch =
-        publisher.publisherName
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        publisher.publisherEmail
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase());
+      const matchesSearch = publisher.publisherName
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
       const matchesStatus =
         statusFilter === "ALL" || publisher.status === statusFilter;
       return matchesSearch && matchesStatus;
@@ -179,10 +188,7 @@ function RouteComponent() {
 
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
-      return (
-        user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      return user.nickname.toLowerCase().includes(searchTerm.toLowerCase());
     });
   }, [users, searchTerm]);
 
@@ -205,13 +211,6 @@ function RouteComponent() {
     return { pending, approved, rejected, total: publishers.length };
   }, [publishers]);
 
-  const bookStats = useMemo(() => {
-    const pending = bookRequests.filter((b) => b.status === "PENDING").length;
-    const approved = bookRequests.filter((b) => b.status === "APPROVED").length;
-    const rejected = bookRequests.filter((b) => b.status === "REJECTED").length;
-    return { pending, approved, rejected, total: bookRequests.length };
-  }, [bookRequests]);
-
   // 출판사 승인/거부 뮤테이션
   const updatePublisherMutation = useMutation({
     mutationFn: async ({
@@ -219,15 +218,16 @@ function RouteComponent() {
       action,
       reason,
     }: {
-      publisherId: string;
+      publisherId: number;
       action: "APPROVE" | "REJECT";
       reason?: string;
     }) => {
-      const response = await API_CLIENT.adminController.updatePublisherStatus(
-        publisherId,
-        action,
-        reason
-      );
+      const response =
+        action === "APPROVE"
+          ? await API_CLIENT.adminController.acceptPublisher(publisherId)
+          : await API_CLIENT.adminController.rejectPublisher(publisherId, {
+              reason: reason ?? "",
+            });
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);
       }
@@ -247,15 +247,16 @@ function RouteComponent() {
       action,
       reason,
     }: {
-      requestId: string;
+      requestId: number;
       action: "APPROVE" | "REJECT";
       reason?: string;
     }) => {
-      const response = await API_CLIENT.adminController.updateBookStatus(
-        requestId,
-        action,
-        reason
-      );
+      const response =
+        action === "APPROVE"
+          ? await API_CLIENT.ebookRequestController.approveRequest(requestId)
+          : await API_CLIENT.ebookRequestController.rejectRequest(requestId, {
+              reason: reason ?? "",
+            });
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);
       }
@@ -272,7 +273,7 @@ function RouteComponent() {
   const SummaryCards = () => (
     <Grid container spacing={3} sx={{ mb: 4 }}>
       <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <Card>
+        <Card variant="outlined">
           <CardContent>
             <Box
               display="flex"
@@ -301,7 +302,7 @@ function RouteComponent() {
       </Grid>
 
       <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <Card>
+        <Card variant="outlined">
           <CardContent>
             <Box
               display="flex"
@@ -330,7 +331,7 @@ function RouteComponent() {
       </Grid>
 
       <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <Card>
+        <Card variant="outlined">
           <CardContent>
             <Box
               display="flex"
@@ -345,9 +346,9 @@ function RouteComponent() {
                 >
                   출판물 요청
                 </Typography>
-                <Typography variant="h4">{bookStats.total}</Typography>
+                <Typography variant="h4">??</Typography>
                 <Typography variant="body2" color="warning.main">
-                  승인 대기: {bookStats.pending}
+                  승인 대기: {bookRequests.length}
                 </Typography>
               </Box>
               <Avatar sx={{ bgcolor: "info.main" }}>
@@ -359,7 +360,7 @@ function RouteComponent() {
       </Grid>
 
       <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <Card>
+        <Card variant="outlined">
           <CardContent>
             <Box
               display="flex"
@@ -375,10 +376,11 @@ function RouteComponent() {
                   승인률
                 </Typography>
                 <Typography variant="h4" color="success.main">
-                  {bookStats.total > 0
+                  {/* {bookStats.total > 0
                     ? Math.round((bookStats.approved / bookStats.total) * 100)
                     : 0}
-                  %
+                  % */}
+                  ??
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
                   출판물 기준
@@ -396,7 +398,7 @@ function RouteComponent() {
 
   // 검색 및 필터 섹션
   const SearchAndFilter = () => (
-    <Paper sx={{ p: 2, mb: 3 }}>
+    <Paper sx={{ p: 2, mb: 3 }} variant="outlined">
       <Stack
         direction={{ xs: "column", sm: "row" }}
         spacing={2}
@@ -444,14 +446,14 @@ function RouteComponent() {
 
   if (!isAdmin) {
     return (
-      <Container maxWidth="xl" sx={{ py: 4 }}>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
         <Alert severity="error">관리자 권한이 필요합니다.</Alert>
       </Container>
     );
   }
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* 헤더 */}
       <Box
         display="flex"
@@ -479,7 +481,7 @@ function RouteComponent() {
       <SearchAndFilter />
 
       {/* 탭 네비게이션 */}
-      <Paper sx={{ mb: 3 }}>
+      <Paper sx={{ mb: 3 }} variant="outlined">
         <Tabs
           value={currentTab}
           onChange={handleTabChange}
@@ -490,7 +492,10 @@ function RouteComponent() {
             label={`출판사 관리 (${publisherStats.total})`}
           />
           <Tab icon={<Person />} label={`사용자 관리 (${users.length})`} />
-          <Tab icon={<MenuBook />} label={`출판물 요청 (${bookStats.total})`} />
+          <Tab
+            icon={<MenuBook />}
+            label={`출판물 요청 (${bookRequests.length})`}
+          />
         </Tabs>
 
         {/* 출판사 관리 탭 */}
@@ -527,9 +532,10 @@ function RouteComponent() {
                           {publisher.publisherName}
                         </Typography>
                       </TableCell>
-                      <TableCell>{publisher.publisherEmail}</TableCell>
+                      {/* <TableCell>{publisher.publisherEmail}</TableCell> */}
+                      <TableCell>이메일</TableCell>
                       <TableCell>
-                        {new Date(publisher.registeredAt).toLocaleDateString()}
+                        {new Date(publisher.createdAt).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
                         <Chip
@@ -552,7 +558,7 @@ function RouteComponent() {
                       </TableCell>
                       <TableCell align="center">
                         <IconButton size="small" color="primary">
-                          <Visibility />
+                          <MoreVert />
                         </IconButton>
                       </TableCell>
                     </TableRow>
@@ -604,10 +610,11 @@ function RouteComponent() {
                     >
                       <TableCell>
                         <Typography variant="subtitle2" fontWeight={600}>
-                          {user.username}
+                          {user.nickname}
                         </Typography>
                       </TableCell>
-                      <TableCell>{user.email}</TableCell>
+                      {/* <TableCell>{user.email}</TableCell> */}
+                      <TableCell>이메일</TableCell>
                       <TableCell>
                         <Chip
                           label={
@@ -639,7 +646,7 @@ function RouteComponent() {
                       </TableCell>
                       <TableCell align="center">
                         <IconButton size="small" color="primary">
-                          <Visibility />
+                          <MoreVert />
                         </IconButton>
                       </TableCell>
                     </TableRow>
@@ -669,7 +676,6 @@ function RouteComponent() {
                   <TableCell>출판사</TableCell>
                   <TableCell align="right">가격</TableCell>
                   <TableCell>요청일</TableCell>
-                  <TableCell>상태</TableCell>
                   <TableCell align="center">관리</TableCell>
                 </TableRow>
               </TableHead>
@@ -718,36 +724,10 @@ function RouteComponent() {
                           ₩{book.price.toLocaleString()}
                         </Typography>
                       </TableCell>
-                      <TableCell>
-                        {new Date(
-                          book.createdAt || Date.now()
-                        ).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={
-                            book.status === "PENDING"
-                              ? "심사중"
-                              : book.status === "APPROVED"
-                                ? "승인됨"
-                                : "거부됨"
-                          }
-                          color={
-                            book.status === "PENDING"
-                              ? "warning"
-                              : book.status === "APPROVED"
-                                ? "success"
-                                : "error"
-                          }
-                          size="small"
-                        />
-                      </TableCell>
+                      <TableCell>{new Date().toLocaleDateString()}</TableCell>
                       <TableCell align="center">
                         <IconButton size="small" color="primary">
-                          <Visibility />
-                        </IconButton>
-                        <IconButton size="small" color="success">
-                          <Download />
+                          <MoreVert />
                         </IconButton>
                       </TableCell>
                     </TableRow>
@@ -1006,7 +986,7 @@ function BookDetailDialog({
   onClose,
   onUpdate,
 }: {
-  book: PublisherBook;
+  book: BookRequest;
   open: boolean;
   onClose(): void;
   onUpdate(action: "APPROVE" | "REJECT", reason?: string): void;
@@ -1255,50 +1235,56 @@ function BookDetailDialog({
         </Grid>
       </DialogContent>
 
-      <DialogActions>
-        {/* 승인/거부 버튼 (승인 대기 상태인 경우) */}
-        {book.status === "PENDING" && (
-          <>
-            <Button
-              variant="contained"
-              color="error"
-              startIcon={<Close />}
-              onClick={handleReject}
-            >
-              거부
-            </Button>
-            <Button
-              variant="contained"
-              color="success"
-              startIcon={<Check />}
-              onClick={handleApprove}
-            >
-              승인
-            </Button>
-          </>
-        )}
+      <DialogActions
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        {/* 왼쪽: 승인/거부 버튼 */}
+        <Stack direction="row" spacing={1}>
+          <Button
+            variant="contained"
+            color="success"
+            startIcon={<Check />}
+            onClick={handleApprove}
+          >
+            승인
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            startIcon={<Close />}
+            onClick={handleReject}
+          >
+            거부
+          </Button>
+        </Stack>
 
-        {/* 다운로드 버튼 */}
-        <Button
-          variant="contained"
-          startIcon={
-            isDownloading ? (
-              <CircularProgress size={16} color="inherit" />
-            ) : (
-              <Download />
-            )
-          }
-          onClick={downloadBook}
-          disabled={!presignedURL || isDownloading || urlLoading}
-        >
-          {isDownloading
-            ? "다운로드 중..."
-            : urlLoading
-              ? "준비 중..."
-              : "다운로드"}
-        </Button>
+        {/* 오른쪽: 다운로드 및 닫기 버튼 */}
+        <Stack direction="row" spacing={1}>
+          <Button
+            variant="contained"
+            startIcon={
+              isDownloading ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : (
+                <Download />
+              )
+            }
+            onClick={downloadBook}
+            disabled={!presignedURL || isDownloading || urlLoading}
+          >
+            {isDownloading
+              ? "다운로드 중..."
+              : urlLoading
+                ? "준비 중..."
+                : "다운로드"}
+          </Button>
 
-        <Button onClick={onClose}>닫기</Button>
+          <Button onClick={onClose}>닫기</Button>
+        </Stack>
       </DialogActions>
     </Dialog>
   );
