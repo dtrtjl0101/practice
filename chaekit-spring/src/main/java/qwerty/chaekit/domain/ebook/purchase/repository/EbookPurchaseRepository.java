@@ -17,4 +17,5 @@ public interface EbookPurchaseRepository {
     Optional<EbookPurchase> findByUserAndEbook(UserProfile user, Ebook ebook);
     boolean existsByUserIdAndEbookId(Long userId, Long ebookId);
     List<EbookPurchase> findByUserIdInAndEbook(List<Long> userIdList, Ebook ebook);
+    void saveAll(List<EbookPurchase> ebookPurchases);
 }
