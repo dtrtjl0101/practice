@@ -1,6 +1,6 @@
-package qwerty.chaekit.domain.highlight.repository.comment;
+package qwerty.chaekit.domain.highlight.comment.repository;
 
-import qwerty.chaekit.domain.highlight.entity.comment.HighlightComment;
+import qwerty.chaekit.domain.highlight.comment.HighlightComment;
 
 import java.util.List;
 import java.util.Optional;

@@ -1,10 +1,10 @@
-package qwerty.chaekit.domain.highlight.repository.comment;
+package qwerty.chaekit.domain.highlight.comment.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import qwerty.chaekit.domain.highlight.entity.comment.HighlightComment;
-import qwerty.chaekit.domain.highlight.entity.comment.QHighlightComment;;
+import qwerty.chaekit.domain.highlight.comment.HighlightComment;
+import qwerty.chaekit.domain.highlight.comment.QHighlightComment;;
 
 import java.util.List;
 import java.util.Optional;

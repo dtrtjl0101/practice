@@ -2,7 +2,7 @@ package qwerty.chaekit.domain.group.activity.discussion.highlight;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import qwerty.chaekit.domain.highlight.entity.Highlight;
+import qwerty.chaekit.domain.highlight.Highlight;
 
 import java.util.List;
 

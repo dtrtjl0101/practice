@@ -1,4 +1,4 @@
-package qwerty.chaekit.domain.highlight.entity;
+package qwerty.chaekit.domain.highlight;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -7,8 +7,8 @@ import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.group.activity.discussion.highlight.DiscussionHighlight;
 import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.group.activity.Activity;
-import qwerty.chaekit.domain.highlight.entity.comment.HighlightComment;
-import qwerty.chaekit.domain.highlight.entity.reaction.HighlightReaction;
+import qwerty.chaekit.domain.highlight.comment.HighlightComment;
+import qwerty.chaekit.domain.highlight.reaction.HighlightReaction;
 import qwerty.chaekit.domain.member.user.UserProfile;
 
 import java.util.ArrayList;

@@ -1,7 +1,7 @@
 package qwerty.chaekit.dto.highlight.reaction;
 
-import qwerty.chaekit.domain.highlight.entity.reaction.HighlightReaction;
-import qwerty.chaekit.domain.highlight.entity.reaction.ReactionType;
+import qwerty.chaekit.domain.highlight.reaction.HighlightReaction;
+import qwerty.chaekit.domain.highlight.reaction.ReactionType;
 
 import java.time.LocalDateTime;
 

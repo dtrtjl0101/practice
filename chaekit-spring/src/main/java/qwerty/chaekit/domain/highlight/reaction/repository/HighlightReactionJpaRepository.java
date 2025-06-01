@@ -1,15 +1,13 @@
-package qwerty.chaekit.domain.highlight.repository.reaction;
+package qwerty.chaekit.domain.highlight.reaction.repository;
 
-import qwerty.chaekit.domain.highlight.entity.reaction.HighlightReaction;
-import qwerty.chaekit.domain.highlight.entity.reaction.ReactionType;
+import org.springframework.data.jpa.repository.JpaRepository;
+import qwerty.chaekit.domain.highlight.reaction.HighlightReaction;
+import qwerty.chaekit.domain.highlight.reaction.ReactionType;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface HighlightReactionRepository {
-    HighlightReaction save(HighlightReaction reaction);
-    void delete(HighlightReaction reaction);
-    Optional<HighlightReaction> findById(Long id);
+public interface HighlightReactionJpaRepository extends JpaRepository<HighlightReaction, Long> {
     List<HighlightReaction> findByCommentId(Long commentId);
     List<HighlightReaction> findByCommentIdIn(List<Long> commentIds);
     List<HighlightReaction> findByHighlightId(Long highlightId);

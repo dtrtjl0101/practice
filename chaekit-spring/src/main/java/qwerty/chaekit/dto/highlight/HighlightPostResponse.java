@@ -1,7 +1,7 @@
 package qwerty.chaekit.dto.highlight;
 
 import lombok.Builder;
-import qwerty.chaekit.domain.highlight.entity.Highlight;
+import qwerty.chaekit.domain.highlight.Highlight;
 
 @Builder
 public record HighlightPostResponse(

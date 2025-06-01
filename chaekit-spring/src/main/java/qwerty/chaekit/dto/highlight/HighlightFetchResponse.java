@@ -2,7 +2,7 @@ package qwerty.chaekit.dto.highlight;
 
 import lombok.Builder;
 import qwerty.chaekit.domain.group.activity.discussion.Discussion;
-import qwerty.chaekit.domain.highlight.entity.Highlight;
+import qwerty.chaekit.domain.highlight.Highlight;
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionSummaryResponse;
 
 import java.util.List;

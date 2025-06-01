@@ -2,8 +2,8 @@ package qwerty.chaekit.mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import qwerty.chaekit.domain.highlight.entity.comment.HighlightComment;
-import qwerty.chaekit.domain.highlight.entity.reaction.HighlightReaction;
+import qwerty.chaekit.domain.highlight.comment.HighlightComment;
+import qwerty.chaekit.domain.highlight.reaction.HighlightReaction;
 import qwerty.chaekit.dto.highlight.comment.HighlightCommentResponse;
 import qwerty.chaekit.dto.highlight.reaction.HighlightReactionResponse;
 import qwerty.chaekit.service.util.FileService;
