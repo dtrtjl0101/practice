@@ -151,7 +151,7 @@ public class DummyBigDataFactory {
 
         // 선형 증가 분포를 위한 역변환 샘플링
         double u = Math.random(); // uniform(0, 1)
-        double biased = (Math.sqrt(u) + 1) / 2; // 오른쪽으로 치우친 분포
+        double biased = 0.3 * u + 0.7 * Math.sqrt(u); // 오른쪽으로 치우친 분포
 
         long offsetDays = (long) (biased * days);
         return startDate.plusDays(offsetDays).atStartOfDay();
