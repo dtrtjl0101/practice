@@ -75,6 +75,13 @@ interface User {
   profileImageURL: string;
 }
 
+interface PaginatedResponse<T> {
+  content: T[];
+  currentPage: number;
+  totalItems: number;
+  totalPages: number;
+}
+
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -123,86 +130,124 @@ function RouteComponent() {
     setCurrentTab(newValue);
   };
 
-  // 출판사 목록 조회
-  const { data: publishers } = useQuery({
-    queryKey: ["adminPublishers"],
+  // 출판사 목록 조회 (페이지네이션 적용)
+  const { data: publishersResponse } = useQuery({
+    queryKey: [
+      "adminPublishers",
+      publisherPage,
+      rowsPerPage,
+      publisherSearchTerm,
+      publisherStatusFilter,
+    ],
     queryFn: async () => {
-      const response = await API_CLIENT.adminController.fetchPublishers();
+      const response = await API_CLIENT.adminController.fetchPublishers({
+        page: publisherPage,
+        size: rowsPerPage,
+        search: publisherSearchTerm || undefined,
+        status:
+          publisherStatusFilter !== "ALL" ? publisherStatusFilter : undefined,
+      });
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);
       }
-      return response.data.content as Publisher[];
+      return response.data as PaginatedResponse<Publisher>;
     },
     enabled: isAdmin,
-    initialData: [] as Publisher[],
+    initialData: {
+      content: [] as Publisher[],
+      currentPage: 0,
+      totalItems: 0,
+      totalPages: 0,
+    },
   });
 
-  // 유저 목록 조회
-  const { data: users } = useQuery({
-    queryKey: ["adminUsers"],
+  // 유저 목록 조회 (페이지네이션 적용)
+  const { data: usersResponse } = useQuery({
+    queryKey: ["adminUsers", userPage, rowsPerPage, userSearchTerm],
     queryFn: async () => {
-      const response = await API_CLIENT.adminController.fetchUsers();
+      const response = await API_CLIENT.adminController.fetchUsers({
+        page: userPage,
+        size: rowsPerPage,
+        search: userSearchTerm || undefined,
+      });
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);
       }
-      return response.data.content as User[];
+      return response.data as PaginatedResponse<User>;
     },
     enabled: isAdmin,
-    initialData: [] as User[],
+    initialData: {
+      content: [] as User[],
+      currentPage: 0,
+      totalItems: 0,
+      totalPages: 0,
+    },
   });
 
-  // 출판물 요청 목록 조회
-  const { data: bookRequests } = useQuery({
-    queryKey: ["adminBookRequests"],
+  // 출판물 요청 목록 조회 (페이지네이션 적용)
+  const { data: bookRequestsResponse } = useQuery({
+    queryKey: [
+      "adminBookRequests",
+      bookPage,
+      rowsPerPage,
+      bookSearchTerm,
+      bookStatusFilter,
+    ],
     queryFn: async () => {
-      const response =
-        await API_CLIENT.ebookRequestController.getEbookRequests();
+      const response = await API_CLIENT.ebookRequestController.getEbookRequests(
+        {
+          page: bookPage,
+          size: rowsPerPage,
+          search: bookSearchTerm || undefined,
+          status: bookStatusFilter !== "ALL" ? bookStatusFilter : undefined,
+        }
+      );
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);
       }
-      return response.data.content as BookRequest[];
+      return response.data as PaginatedResponse<BookRequest>;
     },
     enabled: isAdmin,
-    initialData: [] as BookRequest[],
+    initialData: {
+      content: [] as BookRequest[],
+      currentPage: 0,
+      totalItems: 0,
+      totalPages: 0,
+    },
   });
 
-  // 필터링된 데이터
-  const filteredPublishers = useMemo(() => {
-    return publishers.filter((publisher) => {
-      const matchesSearch = publisher.publisherName
-        .toLowerCase()
-        .includes(publisherSearchTerm.toLowerCase());
-      const matchesStatus =
-        publisherStatusFilter === "ALL" ||
-        publisher.status === publisherStatusFilter;
-      return matchesSearch && matchesStatus;
-    });
-  }, [publishers, publisherSearchTerm, publisherStatusFilter]);
+  // 전체 통계를 위한 별도 쿼리 (첫 페이지 데이터로 전체 수량 파악)
+  const { data: publisherStatsResponse } = useQuery({
+    queryKey: ["adminPublisherStats"],
+    queryFn: async () => {
+      const response = await API_CLIENT.adminController.fetchPublishers({
+        page: 0,
+        size: 1, // 최소한의 데이터만 가져와서 총 개수 확인
+      });
+      if (!response.isSuccessful) {
+        throw new Error(response.errorMessage);
+      }
+      return response.data as PaginatedResponse<Publisher>;
+    },
+    enabled: isAdmin,
+  });
 
-  const filteredUsers = useMemo(() => {
-    return users.filter((user) => {
-      return user.nickname.toLowerCase().includes(userSearchTerm.toLowerCase());
-    });
-  }, [users, userSearchTerm]);
+  // 현재 탭의 데이터
+  const publishers = publishersResponse?.content || [];
+  const users = usersResponse?.content || [];
+  const bookRequests = bookRequestsResponse?.content || [];
 
-  const filteredBooks = useMemo(() => {
-    return bookRequests.filter((book) => {
-      const matchesSearch =
-        book.title.toLowerCase().includes(bookSearchTerm.toLowerCase()) ||
-        book.author.toLowerCase().includes(bookSearchTerm.toLowerCase());
-      const matchesStatus =
-        bookStatusFilter === "ALL" || book.status === bookStatusFilter;
-      return matchesSearch && matchesStatus;
-    });
-  }, [bookRequests, bookSearchTerm, bookStatusFilter]);
-
-  // 상태별 카운트
+  // 상태별 카운트 (통계용)
   const publisherStats = useMemo(() => {
-    const pending = publishers.filter((p) => p.status === "PENDING").length;
-    const approved = publishers.filter((p) => p.status === "APPROVED").length;
-    const rejected = publishers.filter((p) => p.status === "REJECTED").length;
-    return { pending, approved, rejected, total: publishers.length };
-  }, [publishers]);
+    const total = publisherStatsResponse?.totalItems || 0;
+    // 실제로는 각 상태별로 별도 API 호출이 필요할 수 있습니다
+    return {
+      pending: 0, // API에서 상태별 카운트를 제공하지 않는 경우 별도 구현 필요
+      approved: 0,
+      rejected: 0,
+      total,
+    };
+  }, [publisherStatsResponse]);
 
   // 출판사 승인/거부 뮤테이션
   const updatePublisherMutation = useMutation({
@@ -229,6 +274,7 @@ function RouteComponent() {
     onSuccess: () => {
       alert("출판사 상태가 업데이트되었습니다.");
       queryClient.invalidateQueries({ queryKey: ["adminPublishers"] });
+      queryClient.invalidateQueries({ queryKey: ["adminPublisherStats"] });
       setOpenPublisherDialog(false);
     },
   });
@@ -261,6 +307,65 @@ function RouteComponent() {
       setOpenBookDialog(false);
     },
   });
+
+  // 페이지 변경 핸들러들
+  const handlePublisherPageChange = useCallback((_: any, newPage: number) => {
+    setPublisherPage(newPage);
+  }, []);
+
+  const handleUserPageChange = useCallback((_: any, newPage: number) => {
+    setUserPage(newPage);
+  }, []);
+
+  const handleBookPageChange = useCallback((_: any, newPage: number) => {
+    setBookPage(newPage);
+  }, []);
+
+  const handleRowsPerPageChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const newRowsPerPage = parseInt(event.target.value, 10);
+      setRowsPerPage(newRowsPerPage);
+      // 모든 탭의 페이지를 0으로 리셋
+      setPublisherPage(0);
+      setUserPage(0);
+      setBookPage(0);
+    },
+    []
+  );
+
+  // 검색어 변경 시 페이지 리셋
+  const handlePublisherSearchChange = useCallback((value: string) => {
+    setPublisherSearchTerm(value);
+    setPublisherPage(0); // 검색 시 첫 페이지로 이동
+  }, []);
+
+  const handleUserSearchChange = useCallback((value: string) => {
+    setUserSearchTerm(value);
+    setUserPage(0); // 검색 시 첫 페이지로 이동
+  }, []);
+
+  const handleBookSearchChange = useCallback((value: string) => {
+    setBookSearchTerm(value);
+    setBookPage(0); // 검색 시 첫 페이지로 이동
+  }, []);
+
+  const handlePublisherStatusChange = useCallback((value: string) => {
+    setPublisherStatusFilter(value);
+    setPublisherPage(0); // 필터 변경 시 첫 페이지로 이동
+  }, []);
+
+  const handleBookStatusChange = useCallback((value: string) => {
+    setBookStatusFilter(value);
+    setBookPage(0); // 필터 변경 시 첫 페이지로 이동
+  }, []);
+
+  // 새로고침 핸들러
+  const handleRefresh = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ["adminPublishers"] });
+    queryClient.invalidateQueries({ queryKey: ["adminUsers"] });
+    queryClient.invalidateQueries({ queryKey: ["adminBookRequests"] });
+    queryClient.invalidateQueries({ queryKey: ["adminPublisherStats"] });
+  }, [queryClient]);
 
   // 요약 통계 카드
   const SummaryCards = () => (
@@ -310,7 +415,9 @@ function RouteComponent() {
                 >
                   총 사용자
                 </Typography>
-                <Typography variant="h4">{users.length}</Typography>
+                <Typography variant="h4">
+                  {usersResponse?.totalItems || 0}
+                </Typography>
                 <Typography variant="body2" color="textSecondary">
                   활성 사용자
                 </Typography>
@@ -339,9 +446,15 @@ function RouteComponent() {
                 >
                   출판물 요청
                 </Typography>
-                <Typography variant="h4">??</Typography>
+                <Typography variant="h4">
+                  {bookRequestsResponse?.totalItems || 0}
+                </Typography>
                 <Typography variant="body2" color="warning.main">
-                  승인 대기: {bookRequests.length}
+                  승인 대기:{" "}
+                  {
+                    bookRequests.filter((book) => book.status === "PENDING")
+                      .length
+                  }
                 </Typography>
               </Box>
               <Avatar sx={{ bgcolor: "info.main" }}>
@@ -384,34 +497,6 @@ function RouteComponent() {
       </Grid>
     </Grid>
   );
-
-  // 검색 핸들러들을 useCallback으로 메모이제이션
-  const handlePublisherSearchChange = useCallback((value: string) => {
-    setPublisherSearchTerm(value);
-  }, []);
-
-  const handleUserSearchChange = useCallback((value: string) => {
-    setUserSearchTerm(value);
-  }, []);
-
-  const handleBookSearchChange = useCallback((value: string) => {
-    setBookSearchTerm(value);
-  }, []);
-
-  const handlePublisherStatusChange = useCallback((value: string) => {
-    setPublisherStatusFilter(value);
-  }, []);
-
-  const handleBookStatusChange = useCallback((value: string) => {
-    setBookStatusFilter(value);
-  }, []);
-
-  // 새로고침 핸들러
-  const handleRefresh = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ["adminPublishers"] });
-    queryClient.invalidateQueries({ queryKey: ["adminUsers"] });
-    queryClient.invalidateQueries({ queryKey: ["adminBookRequests"] });
-  }, [queryClient]);
 
   // 검색 및 필터 섹션
   const SearchAndFilter = useCallback(() => {
@@ -545,12 +630,15 @@ function RouteComponent() {
         >
           <Tab
             icon={<Business />}
-            label={`출판사 관리 (${publisherStats.total})`}
+            label={`출판사 관리 (${publishersResponse?.totalItems || 0})`}
           />
-          <Tab icon={<Person />} label={`사용자 관리 (${users.length})`} />
+          <Tab
+            icon={<Person />}
+            label={`사용자 관리 (${usersResponse?.totalItems || 0})`}
+          />
           <Tab
             icon={<MenuBook />}
-            label={`출판물 요청 (${bookRequests.length})`}
+            label={`출판물 요청 (${bookRequestsResponse?.totalItems || 0})`}
           />
         </Tabs>
 
@@ -568,67 +656,64 @@ function RouteComponent() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredPublishers
-                  .slice(
-                    publisherPage * rowsPerPage,
-                    publisherPage * rowsPerPage + rowsPerPage
-                  )
-                  .map((publisher) => (
-                    <TableRow
-                      key={publisher.publisherId}
-                      hover
-                      sx={{ cursor: "pointer" }}
-                      onClick={() => {
-                        setSelectedPublisher(publisher);
-                        setOpenPublisherDialog(true);
-                      }}
-                    >
-                      <TableCell>
-                        <Typography variant="subtitle2" fontWeight={600}>
-                          {publisher.publisherName}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>이메일</TableCell>
-                      <TableCell>
-                        {new Date(publisher.createdAt).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={
-                            publisher.status === "PENDING"
-                              ? "대기중"
-                              : publisher.status === "APPROVED"
-                                ? "승인됨"
-                                : "거부됨"
-                          }
-                          color={
-                            publisher.status === "PENDING"
-                              ? "warning"
-                              : publisher.status === "APPROVED"
-                                ? "success"
-                                : "error"
-                          }
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <IconButton size="small" color="primary">
-                          <MoreVert />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                {publishers.map((publisher) => (
+                  <TableRow
+                    key={publisher.publisherId}
+                    hover
+                    sx={{ cursor: "pointer" }}
+                    onClick={() => {
+                      setSelectedPublisher(publisher);
+                      setOpenPublisherDialog(true);
+                    }}
+                  >
+                    <TableCell>
+                      <Typography variant="subtitle2" fontWeight={600}>
+                        {publisher.publisherName}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>이메일</TableCell>
+                    <TableCell>
+                      {new Date(publisher.createdAt).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={
+                          publisher.status === "PENDING"
+                            ? "대기중"
+                            : publisher.status === "APPROVED"
+                              ? "승인됨"
+                              : "거부됨"
+                        }
+                        color={
+                          publisher.status === "PENDING"
+                            ? "warning"
+                            : publisher.status === "APPROVED"
+                              ? "success"
+                              : "error"
+                        }
+                        size="small"
+                      />
+                    </TableCell>
+                    <TableCell align="center">
+                      <IconButton size="small" color="primary">
+                        <MoreVert />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </TableContainer>
           <TablePagination
             component="div"
-            count={filteredPublishers.length}
+            count={publishersResponse?.totalItems || 0}
             page={publisherPage}
-            onPageChange={(_, newPage) => setPublisherPage(newPage)}
+            onPageChange={handlePublisherPageChange}
             rowsPerPage={rowsPerPage}
-            onRowsPerPageChange={(e) =>
-              setRowsPerPage(parseInt(e.target.value, 10))
+            onRowsPerPageChange={handleRowsPerPageChange}
+            labelRowsPerPage="페이지당 행 수:"
+            labelDisplayedRows={({ from, to, count }) =>
+              `${from}-${to} / ${count !== -1 ? count : `${to}개 이상`}`
             }
           />
         </TabPanel>
@@ -647,49 +732,46 @@ function RouteComponent() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredUsers
-                  .slice(
-                    userPage * rowsPerPage,
-                    userPage * rowsPerPage + rowsPerPage
-                  )
-                  .map((user) => (
-                    <TableRow
-                      key={user.userId}
-                      hover
-                      sx={{ cursor: "pointer" }}
-                      onClick={() => {
-                        setSelectedUser(user);
-                        setOpenUserDialog(true);
-                      }}
-                    >
-                      <TableCell>
-                        <Typography variant="subtitle2" fontWeight={600}>
-                          {user.nickname}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>이메일</TableCell>
-                      <TableCell>{new Date().toLocaleDateString()}</TableCell>
-                      <TableCell>
-                        <Chip label="활성" color="success" size="small" />
-                      </TableCell>
-                      <TableCell align="center">
-                        <IconButton size="small" color="primary">
-                          <MoreVert />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                {users.map((user) => (
+                  <TableRow
+                    key={user.userId}
+                    hover
+                    sx={{ cursor: "pointer" }}
+                    onClick={() => {
+                      setSelectedUser(user);
+                      setOpenUserDialog(true);
+                    }}
+                  >
+                    <TableCell>
+                      <Typography variant="subtitle2" fontWeight={600}>
+                        {user.nickname}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>이메일</TableCell>
+                    <TableCell>{new Date().toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      <Chip label="활성" color="success" size="small" />
+                    </TableCell>
+                    <TableCell align="center">
+                      <IconButton size="small" color="primary">
+                        <MoreVert />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </TableContainer>
           <TablePagination
             component="div"
-            count={filteredUsers.length}
+            count={usersResponse?.totalItems || 0}
             page={userPage}
-            onPageChange={(_, newPage) => setUserPage(newPage)}
+            onPageChange={handleUserPageChange}
             rowsPerPage={rowsPerPage}
-            onRowsPerPageChange={(e) =>
-              setRowsPerPage(parseInt(e.target.value, 10))
+            onRowsPerPageChange={handleRowsPerPageChange}
+            labelRowsPerPage="페이지당 행 수:"
+            labelDisplayedRows={({ from, to, count }) =>
+              `${from}-${to} / ${count !== -1 ? count : `${to}개 이상`}`
             }
           />
         </TabPanel>
@@ -708,69 +790,66 @@ function RouteComponent() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredBooks
-                  .slice(
-                    bookPage * rowsPerPage,
-                    bookPage * rowsPerPage + rowsPerPage
-                  )
-                  .map((book) => (
-                    <TableRow
-                      key={book.requestId}
-                      hover
-                      sx={{ cursor: "pointer" }}
-                      onClick={() => {
-                        setSelectedBook(book);
-                        setOpenBookDialog(true);
-                      }}
-                    >
-                      <TableCell>
-                        <Box display="flex" alignItems="center" gap={2}>
-                          <Avatar
-                            src={book.coverImageURL}
-                            variant="rounded"
-                            sx={{ width: 40, height: 50 }}
-                          >
-                            {book.title[0]}
-                          </Avatar>
-                          <Box>
-                            <Typography variant="subtitle2" fontWeight={600}>
-                              {book.title}
-                            </Typography>
-                            <Typography variant="body2" color="textSecondary">
-                              {book.author}
-                            </Typography>
-                          </Box>
+                {bookRequests.map((book) => (
+                  <TableRow
+                    key={book.requestId}
+                    hover
+                    sx={{ cursor: "pointer" }}
+                    onClick={() => {
+                      setSelectedBook(book);
+                      setOpenBookDialog(true);
+                    }}
+                  >
+                    <TableCell>
+                      <Box display="flex" alignItems="center" gap={2}>
+                        <Avatar
+                          src={book.coverImageURL}
+                          variant="rounded"
+                          sx={{ width: 40, height: 50 }}
+                        >
+                          {book.title[0]}
+                        </Avatar>
+                        <Box>
+                          <Typography variant="subtitle2" fontWeight={600}>
+                            {book.title}
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            {book.author}
+                          </Typography>
                         </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">
-                          {book.publisherName}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="right">
-                        <Typography variant="body2" fontWeight={600}>
-                          ₩{book.price.toLocaleString()}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>{new Date().toLocaleDateString()}</TableCell>
-                      <TableCell align="center">
-                        <IconButton size="small" color="primary">
-                          <MoreVert />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2">
+                        {book.publisherName}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="right">
+                      <Typography variant="body2" fontWeight={600}>
+                        ₩{book.price.toLocaleString()}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>{new Date().toLocaleDateString()}</TableCell>
+                    <TableCell align="center">
+                      <IconButton size="small" color="primary">
+                        <MoreVert />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </TableContainer>
           <TablePagination
             component="div"
-            count={filteredBooks.length}
+            count={bookRequestsResponse?.totalItems || 0}
             page={bookPage}
-            onPageChange={(_, newPage) => setBookPage(newPage)}
+            onPageChange={handleBookPageChange}
             rowsPerPage={rowsPerPage}
-            onRowsPerPageChange={(e) =>
-              setRowsPerPage(parseInt(e.target.value, 10))
+            onRowsPerPageChange={handleRowsPerPageChange}
+            labelRowsPerPage="페이지당 행 수:"
+            labelDisplayedRows={({ from, to, count }) =>
+              `${from}-${to} / ${count !== -1 ? count : `${to}개 이상`}`
             }
           />
         </TabPanel>
@@ -1233,24 +1312,26 @@ function BookDetailDialog({
         }}
       >
         {/* 왼쪽: 승인/거부 버튼 */}
-        <Stack direction="row" spacing={1}>
-          <Button
-            variant="contained"
-            color="success"
-            startIcon={<Check />}
-            onClick={handleApprove}
-          >
-            승인
-          </Button>
-          <Button
-            variant="contained"
-            color="error"
-            startIcon={<Close />}
-            onClick={handleReject}
-          >
-            거부
-          </Button>
-        </Stack>
+        {book.status === "PENDING" && (
+          <Stack direction="row" spacing={1}>
+            <Button
+              variant="contained"
+              color="success"
+              startIcon={<Check />}
+              onClick={handleApprove}
+            >
+              승인
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              startIcon={<Close />}
+              onClick={handleReject}
+            >
+              거부
+            </Button>
+          </Stack>
+        )}
 
         {/* 오른쪽: 다운로드 및 닫기 버튼 */}
         <Stack direction="row" spacing={1}>
