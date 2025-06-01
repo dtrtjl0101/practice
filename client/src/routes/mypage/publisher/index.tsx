@@ -935,13 +935,38 @@ function RouteComponent() {
                 <ResponsiveContainer width="100%" height={350}>
                   <PieChart>
                     <Pie
-                      data={
-                        publisherStats?.statsPerEbookList?.map((book) => ({
-                          name: book.title!,
-                          value: book.activityCount,
-                          fullName: book.title,
-                        })) || []
-                      }
+                      data={(() => {
+                        const sortedData = (
+                          publisherStats?.statsPerEbookList || []
+                        ).sort((a, b) => b.activityCount! - a.activityCount!);
+
+                        const top5 = sortedData.slice(0, 5);
+                        const others = sortedData.slice(5);
+
+                        const othersSum = others.reduce(
+                          (sum, item) => sum + item.activityCount!,
+                          0
+                        );
+
+                        const result = top5.map((item) => ({
+                          name:
+                            item.title!.length > 10
+                              ? item.title!.substring(0, 10) + "..."
+                              : item.title,
+                          value: item.activityCount,
+                          fullName: item.title,
+                        }));
+
+                        if (othersSum > 0) {
+                          result.push({
+                            name: "기타",
+                            value: othersSum,
+                            fullName: `기타 ${others.length}권`,
+                          });
+                        }
+
+                        return result;
+                      })()}
                       cx="50%"
                       cy="50%"
                       labelLine={false}
@@ -952,24 +977,34 @@ function RouteComponent() {
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {(publisherStats?.statsPerEbookList || []).map(
-                        (_, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={
-                              [
-                                "#0088FE",
-                                "#00C49F",
-                                "#FFBB28",
-                                "#FF8042",
-                                "#8884D8",
-                                "#82ca9d",
-                                "#ffc658",
-                              ][index % 7]
-                            }
-                          />
-                        )
-                      )}
+                      {(() => {
+                        const colors = [
+                          "#0088FE",
+                          "#00C49F",
+                          "#FFBB28",
+                          "#FF8042",
+                          "#8884D8",
+                          "#82ca9d",
+                        ];
+                        const dataLength =
+                          Math.min(
+                            (publisherStats?.statsPerEbookList || []).length,
+                            5
+                          ) +
+                          ((publisherStats?.statsPerEbookList || []).length > 5
+                            ? 1
+                            : 0);
+
+                        return Array.from(
+                          { length: dataLength },
+                          (_, index) => (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={colors[index % colors.length]}
+                            />
+                          )
+                        );
+                      })()}
                     </Pie>
                     <Tooltip
                       formatter={(value, name, props) => [
