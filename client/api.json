@@ -1202,6 +1202,38 @@
         }
       }
     },
+    "/api/books/{ebookId}/view": {
+      "post": {
+        "tags": ["ebook-controller"],
+        "summary": "전자책 조회수 증가",
+        "description": "사용자가 전자책을 조회할 때마다 조회수를 증가시킵니다.",
+        "operationId": "incrementEbookViewCount",
+        "parameters": [
+          {
+            "name": "ebookId",
+            "in": "path",
+            "description": "조회할 전자책 ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponseVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/books/{bookId}/purchase": {
       "post": {
         "tags": ["ebook-purchase-controller"],
@@ -2350,6 +2382,24 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiSuccessResponsePageResponseReadingProgressResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/publishers/stats": {
+      "get": {
+        "tags": ["publisher-controller"],
+        "operationId": "getPublisherStats",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponsePublisherStatsResponse"
                 }
               }
             }
@@ -3833,6 +3883,9 @@
           "groupImage": {
             "type": "string",
             "format": "binary"
+          },
+          "autoApproval": {
+            "type": "boolean"
           }
         }
       },
@@ -4525,6 +4578,9 @@
           "groupImage": {
             "type": "string",
             "format": "binary"
+          },
+          "autoApproval": {
+            "type": "boolean"
           }
         }
       },
@@ -4951,6 +5007,135 @@
           "totalPages": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "ApiSuccessResponsePublisherStatsResponse": {
+        "type": "object",
+        "properties": {
+          "isSuccessful": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PublisherStatsResponse"
+          }
+        },
+        "description": "API 에러 응답을 감싸는 클래스"
+      },
+      "MonthlyRevenue": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "string"
+          },
+          "monthlyRevenue": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PublisherStatsResponse": {
+        "type": "object",
+        "properties": {
+          "totalSalesCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "increasedSalesCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalRevenue": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "increasedRevenue": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalActivityCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "increasedActivityCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalViewCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "monthlyRevenueList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonthlyRevenue"
+            }
+          },
+          "increasedSalesCountsPerEbook": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SalesCountPerEbook"
+            }
+          },
+          "statsPerEbookList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StatsPerEbook"
+            }
+          }
+        }
+      },
+      "SalesCountPerEbook": {
+        "type": "object",
+        "properties": {
+          "bookId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "bookName": {
+            "type": "string"
+          },
+          "totalSalesCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "StatsPerEbook": {
+        "type": "object",
+        "properties": {
+          "bookId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "title": {
+            "type": "string"
+          },
+          "author": {
+            "type": "string"
+          },
+          "bookCoverImageURL": {
+            "type": "string"
+          },
+          "totalSalesCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalRevenue": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "viewCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "activityCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date"
           }
         }
       },
@@ -5685,6 +5870,10 @@
         "type": "object",
         "properties": {
           "requestId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "bookId": {
             "type": "integer",
             "format": "int64"
           },
