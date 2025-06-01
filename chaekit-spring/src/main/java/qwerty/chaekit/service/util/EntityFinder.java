@@ -14,7 +14,7 @@ import qwerty.chaekit.domain.group.activity.discussion.comment.repository.Discus
 import qwerty.chaekit.domain.group.activity.discussion.repository.DiscussionRepository;
 import qwerty.chaekit.domain.group.activity.repository.ActivityRepository;
 import qwerty.chaekit.domain.group.repository.GroupRepository;
-import qwerty.chaekit.domain.highlight.entity.Highlight;
+import qwerty.chaekit.domain.highlight.Highlight;
 import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;

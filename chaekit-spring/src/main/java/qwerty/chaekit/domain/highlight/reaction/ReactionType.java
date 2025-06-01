@@ -1,4 +1,4 @@
-package qwerty.chaekit.domain.highlight.entity.reaction;
+package qwerty.chaekit.domain.highlight.reaction;
 
 public enum ReactionType{
     GREAT("👍"),

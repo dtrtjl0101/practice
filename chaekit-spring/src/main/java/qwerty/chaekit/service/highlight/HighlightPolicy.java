@@ -2,7 +2,7 @@ package qwerty.chaekit.service.highlight;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import qwerty.chaekit.domain.highlight.entity.Highlight;
+import qwerty.chaekit.domain.highlight.Highlight;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.ForbiddenException;

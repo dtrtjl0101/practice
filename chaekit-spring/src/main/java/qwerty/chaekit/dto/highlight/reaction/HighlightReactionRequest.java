@@ -1,6 +1,6 @@
 package qwerty.chaekit.dto.highlight.reaction;
 
-import qwerty.chaekit.domain.highlight.entity.reaction.ReactionType;
+import qwerty.chaekit.domain.highlight.reaction.ReactionType;
 
 public record HighlightReactionRequest(
     Long commentId,

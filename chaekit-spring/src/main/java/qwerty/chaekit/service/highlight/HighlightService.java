@@ -12,7 +12,7 @@ import qwerty.chaekit.domain.group.activity.discussion.highlight.DiscussionHighl
 import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.group.activity.discussion.Discussion;
-import qwerty.chaekit.domain.highlight.entity.Highlight;
+import qwerty.chaekit.domain.highlight.Highlight;
 import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.dto.highlight.HighlightFetchResponse;
