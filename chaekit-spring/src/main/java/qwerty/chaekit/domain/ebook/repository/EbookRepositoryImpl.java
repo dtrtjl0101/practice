@@ -72,4 +72,9 @@ public class EbookRepositoryImpl implements EbookRepository {
     public Page<Ebook> findAllByPublisher(PublisherProfile publisher, Pageable pageable) {
         return ebookJpaRepository.findAllByPublisher(publisher, pageable);
     }
+
+    @Override
+    public void incrementViewCount(Long ebookId) {
+        ebookJpaRepository.incrementViewCount(ebookId);
+    }
 }

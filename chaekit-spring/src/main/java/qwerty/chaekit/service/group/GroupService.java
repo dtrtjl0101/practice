@@ -52,6 +52,7 @@ public class GroupService {
                 .groupLeader(leader)
                 .description(request.description())
                 .groupImageKey(groupImageKey)
+                .isAutoApproval(request.autoApproval() == null || request.autoApproval())
                 .build();
         ReadingGroup savedGroup = groupRepository.save(groupEntity);
         if(request.tags() != null) {
@@ -124,6 +125,10 @@ public class GroupService {
 
         if (request.name() != null && !request.name().isBlank()) {
             group.changeName(request.name());
+        }
+
+        if (request.autoApproval() != null) {
+            group.changeAutoApproval(request.autoApproval());
         }
 
         String imageKey = fileService.uploadGroupImageIfPresent(request.groupImage());

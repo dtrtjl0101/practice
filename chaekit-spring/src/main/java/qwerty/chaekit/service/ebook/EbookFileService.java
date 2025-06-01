@@ -26,6 +26,8 @@ import qwerty.chaekit.mapper.EbookRequestMapper;
 import qwerty.chaekit.service.util.EntityFinder;
 import qwerty.chaekit.service.util.FileService;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class EbookFileService {
@@ -146,8 +148,12 @@ public class EbookFileService {
         }
 
         return PageResponse.of(
-                ebookRequestRepository.findByStatus(EbookRequestStatus.PENDING, pageable)
-                        .map(ebookRequestMapper::toFetchResponse)
+                ebookRequestRepository.findByStatusIn(
+                        List.of(
+                                EbookRequestStatus.PENDING, 
+                                EbookRequestStatus.REJECTED
+                        ), pageable
+                        ).map(ebookRequestMapper::toFetchResponse)
         );
     }
 

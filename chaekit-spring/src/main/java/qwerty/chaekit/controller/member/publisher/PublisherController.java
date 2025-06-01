@@ -12,6 +12,7 @@ import qwerty.chaekit.dto.ebook.EbookFetchResponse;
 import qwerty.chaekit.dto.member.LoginResponse;
 import qwerty.chaekit.dto.member.PublisherInfoResponse;
 import qwerty.chaekit.dto.member.PublisherJoinRequest;
+import qwerty.chaekit.dto.member.PublisherStatsResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
@@ -45,5 +46,12 @@ public class PublisherController {
             @ParameterObject Pageable pageable
     ) {
         return ApiSuccessResponse.of(ebookService.fetchBooksByPublisher(token, pageable));
+    }
+    
+    @GetMapping("/stats")
+    public ApiSuccessResponse<PublisherStatsResponse> getPublisherStats(
+            @Parameter(hidden = true) @Login PublisherToken token
+    ) {
+        return ApiSuccessResponse.of(publisherService.getPublisherStats(token));
     }
 }

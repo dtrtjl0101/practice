@@ -40,6 +40,9 @@ public class Ebook extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "publisher_id")
     private PublisherProfile publisher;
+    
+    @Column(nullable = false)
+    private long viewCount = 0L;
 
     @Builder
     public Ebook(Long id, String title, String author, String description, long size, int price, String fileKey, String coverImageKey, PublisherProfile publisher) {
@@ -57,5 +60,8 @@ public class Ebook extends BaseEntity {
     public boolean isOwnedBy(PublisherProfile publisher) {
         return this.publisher.equals(publisher);
     }
-
+    
+    public void resetViewCount(Long viewCount) {
+        this.viewCount = viewCount;
+    }
 }
