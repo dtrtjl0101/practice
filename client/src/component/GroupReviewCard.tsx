@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSnackbar } from "notistack";
 import {
   Paper,
   Stack,
@@ -76,6 +77,7 @@ export default function GroupReviewCard({
   );
   const [showAllTags, setShowAllTags] = useState(false); // 태그 통계 전체 보기 상태
   const queryClient = useQueryClient();
+  const { enqueueSnackbar } = useSnackbar();
 
   // 무한 스크롤 후기 목록 조회
   const {
@@ -132,13 +134,13 @@ export default function GroupReviewCard({
         reviewData
       );
       if (!response.isSuccessful) {
-        alert(response.errorMessage);
+        enqueueSnackbar(response.errorMessage, { variant: "error" });
         throw new Error(response.errorMessage);
       }
       return response;
     },
     onSuccess: () => {
-      alert("후기가 등록되었습니다!");
+      enqueueSnackbar("후기가 등록되었습니다!", { variant: "success" });
       queryClient.invalidateQueries({ queryKey: ["group-reviews", groupId] });
       handleCloseDialog();
     },

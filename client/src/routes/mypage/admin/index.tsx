@@ -49,6 +49,7 @@ import {
   Refresh,
 } from "@mui/icons-material";
 import { createFileRoute } from "@tanstack/react-router";
+import { useSnackbar } from "notistack";
 import { useAtomValue } from "jotai";
 import { AuthState } from "../../../states/auth";
 import { Role } from "../../../types/role";
@@ -100,6 +101,7 @@ function RouteComponent() {
   const user = useAtomValue(AuthState.user);
   const isAdmin = user && user?.role === Role.ROLE_ADMIN;
   const queryClient = useQueryClient();
+  const { enqueueSnackbar } = useSnackbar();
 
   const [currentTab, setCurrentTab] = useState(0);
 
@@ -254,7 +256,9 @@ function RouteComponent() {
       return response.data;
     },
     onSuccess: () => {
-      alert("출판사 상태가 업데이트되었습니다.");
+      enqueueSnackbar("출판사 상태가 업데이트되었습니다.", {
+        variant: "success",
+      });
       queryClient.invalidateQueries({ queryKey: ["adminPublishers"] });
       queryClient.invalidateQueries({ queryKey: ["adminPublisherStats"] });
       setOpenPublisherDialog(false);
@@ -284,7 +288,9 @@ function RouteComponent() {
       return response.data;
     },
     onSuccess: () => {
-      alert("출판물 상태가 업데이트되었습니다.");
+      enqueueSnackbar("출판물 상태가 업데이트되었습니다.", {
+        variant: "success",
+      });
       queryClient.invalidateQueries({ queryKey: ["adminBookRequests"] });
       setOpenBookDialog(false);
     },
@@ -926,6 +932,7 @@ function PublisherDetailDialog({
   onClose(): void;
   onUpdate(action: "APPROVE" | "REJECT", reason?: string): void;
 }) {
+  const { enqueueSnackbar } = useSnackbar();
   const [rejectReason, setRejectReason] = useState("");
 
   const handleApprove = () => {
@@ -934,7 +941,7 @@ function PublisherDetailDialog({
 
   const handleReject = () => {
     if (!rejectReason.trim()) {
-      alert("거부 사유를 입력해주세요.");
+      enqueueSnackbar("거부 사유를 입력해주세요.", { variant: "warning" });
       return;
     }
     onUpdate("REJECT", rejectReason);
@@ -1075,6 +1082,7 @@ function BookDetailDialog({
   onClose(): void;
   onUpdate(action: "APPROVE" | "REJECT", reason?: string): void;
 }) {
+  const { enqueueSnackbar } = useSnackbar();
   const [isDownloading, setIsDownloading] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
 
@@ -1113,7 +1121,9 @@ function BookDetailDialog({
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("다운로드 실패:", error);
-      alert("다운로드에 실패했습니다. 다시 시도해주세요.");
+      enqueueSnackbar("다운로드에 실패했습니다. 다시 시도해주세요.", {
+        variant: "error",
+      });
     } finally {
       setIsDownloading(false);
     }
@@ -1150,7 +1160,7 @@ function BookDetailDialog({
 
   const handleReject = () => {
     if (!rejectReason.trim()) {
-      alert("거부 사유를 입력해주세요.");
+      enqueueSnackbar("거부 사유를 입력해주세요.", { variant: "warning" });
       return;
     }
     onUpdate("REJECT", rejectReason);

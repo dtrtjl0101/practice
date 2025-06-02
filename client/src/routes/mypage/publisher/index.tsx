@@ -60,6 +60,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { createFileRoute } from "@tanstack/react-router";
+import { useSnackbar } from "notistack";
 import { useAtomValue } from "jotai";
 import { AuthState } from "../../../states/auth";
 import { Role } from "../../../types/role";
@@ -93,6 +94,7 @@ function RouteComponent() {
     user &&
     (user?.role === Role.ROLE_PUBLISHER || user?.role === Role.ROLE_ADMIN);
   const queryClient = useQueryClient();
+  const { enqueueSnackbar } = useSnackbar();
 
   const [currentTab, setCurrentTab] = useState(0);
 
@@ -197,7 +199,7 @@ function RouteComponent() {
       const response =
         await API_CLIENT.ebookRequestController.getEbookRequests();
       if (!response.isSuccessful) {
-        alert(response.errorMessage);
+        enqueueSnackbar(response.errorMessage, { variant: "error" });
         throw new Error(response.errorMessage);
       }
       return response.data.content as BookRequest[];
@@ -249,7 +251,7 @@ function RouteComponent() {
     mutationFn: async (bookData: any) => {
       const response = await API_CLIENT.ebookController.uploadFile(bookData);
       if (!response.isSuccessful) {
-        alert(response.errorMessage);
+        enqueueSnackbar(response.errorMessage, { variant: "error" });
         throw new Error(response.errorMessage);
       }
       return response;
@@ -257,10 +259,11 @@ function RouteComponent() {
 
     onSuccess: () => {
       const isResubmit = openResubmitDialog;
-      alert(
+      enqueueSnackbar(
         isResubmit
           ? "도서 재신청이 완료되었습니다."
-          : "도서 등록 신청이 완료되었습니다."
+          : "도서 등록 신청이 완료되었습니다.",
+        { variant: "success" }
       );
 
       // 적절한 다이얼로그 닫기
@@ -288,7 +291,7 @@ function RouteComponent() {
       !bookFile ||
       !bookCover
     ) {
-      alert("모든 필드를 입력해주세요.");
+      enqueueSnackbar("모든 필드를 입력해주세요.", { variant: "warning" });
       return;
     }
 
@@ -1371,6 +1374,7 @@ function BookInfoDialog({
   onClose(): void;
   openRequestDialog(): void;
 }) {
+  const { enqueueSnackbar } = useSnackbar();
   const [isDownloading, setIsDownloading] = useState(false);
 
   const { data: presignedURL, isLoading: urlLoading } = useQuery({
@@ -1408,7 +1412,9 @@ function BookInfoDialog({
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("다운로드 실패:", error);
-      alert("다운로드에 실패했습니다. 다시 시도해주세요.");
+      enqueueSnackbar("다운로드에 실패했습니다. 다시 시도해주세요.", {
+        variant: "error",
+      });
     } finally {
       setIsDownloading(false);
     }

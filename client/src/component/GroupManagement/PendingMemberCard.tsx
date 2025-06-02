@@ -16,6 +16,7 @@ import {
   Box,
   LinearProgress,
 } from "@mui/material";
+import { useSnackbar } from "notistack";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import API_CLIENT from "../../api/api";
@@ -28,6 +29,7 @@ import {
 } from "@mui/icons-material";
 
 export default function PendingMemberCard({ groupId }: { groupId: number }) {
+  const { enqueueSnackbar } = useSnackbar();
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedRequests, setSelectedRequests] = useState<number[]>([]);
@@ -77,7 +79,9 @@ export default function PendingMemberCard({ groupId }: { groupId: number }) {
 
     setSelectedRequests([]);
     refetch();
-    alert(`${selectedRequests.length}명의 신청이 승인되었습니다.`);
+    enqueueSnackbar(`${selectedRequests.length}명의 신청이 승인되었습니다.`, {
+      variant: "success",
+    });
   };
 
   const handleBulkReject = async () => {
@@ -90,7 +94,9 @@ export default function PendingMemberCard({ groupId }: { groupId: number }) {
 
     setSelectedRequests([]);
     refetch();
-    alert(`${selectedRequests.length}명의 신청이 거절되었습니다.`);
+    enqueueSnackbar(`${selectedRequests.length}명의 신청이 거절되었습니다.`, {
+      variant: "success",
+    });
   };
 
   const onApproveButtonClicked = async (request: any) => {
@@ -99,11 +105,11 @@ export default function PendingMemberCard({ groupId }: { groupId: number }) {
       request.userId!
     );
     if (!response.isSuccessful) {
-      alert("요청 수락에 실패했습니다.");
+      enqueueSnackbar("요청 수락에 실패했습니다.", { variant: "error" });
       return;
     }
     refetch();
-    alert("요청이 수락되었습니다.");
+    enqueueSnackbar("요청이 수락되었습니다.", { variant: "success" });
   };
 
   const onRejectButtonClicked = async (request: any) => {
@@ -112,11 +118,11 @@ export default function PendingMemberCard({ groupId }: { groupId: number }) {
       request.userId!
     );
     if (!response.isSuccessful) {
-      alert("요청 거절에 실패했습니다.");
+      enqueueSnackbar("요청 거절에 실패했습니다.", { variant: "error" });
       return;
     }
     refetch();
-    alert("요청이 거절되었습니다.");
+    enqueueSnackbar("요청이 거절되었습니다.", { variant: "success" });
   };
 
   return (

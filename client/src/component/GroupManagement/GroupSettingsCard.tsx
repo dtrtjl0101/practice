@@ -12,6 +12,7 @@ import {
   Chip,
   Alert,
 } from "@mui/material";
+import { useSnackbar } from "notistack";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import API_CLIENT from "../../api/api";
@@ -28,6 +29,7 @@ export default function GroupSettingsCard({
   groupId: number;
   onDeleteRoute: () => void;
 }) {
+  const { enqueueSnackbar } = useSnackbar();
   const [isEditing, setIsEditing] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
@@ -99,10 +101,12 @@ export default function GroupSettingsCard({
 
       setIsEditing(false);
       await refetch(); // refetch가 완료될 때까지 대기
-      alert("모임 정보가 성공적으로 수정되었습니다.");
+      enqueueSnackbar("모임 정보가 성공적으로 수정되었습니다.", {
+        variant: "success",
+      });
     } catch (error) {
       console.error("모임 수정 오류:", error);
-      alert("모임 정보 수정에 실패했습니다.");
+      enqueueSnackbar("모임 정보 수정에 실패했습니다.", { variant: "error" });
     }
   };
 
@@ -121,18 +125,21 @@ export default function GroupSettingsCard({
   };
 
   const handleDeleteGroup = () => {
-    const confirmDelete = window.confirm(
-      "정말로 이 모임을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
-    );
-    if (!confirmDelete) return;
-
-    API_CLIENT.groupController.deleteGroup(groupId).then((response) => {
-      if (!response.isSuccessful) {
-        throw new Error(response.errorMessage);
-      }
-      alert("모임이 성공적으로 삭제되었습니다.");
-      onDeleteRoute();
-    });
+    if (
+      window.confirm(
+        "정말로 이 모임을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
+      )
+    ) {
+      API_CLIENT.groupController.deleteGroup(groupId).then((response) => {
+        if (!response.isSuccessful) {
+          throw new Error(response.errorMessage);
+        }
+        enqueueSnackbar("모임이 성공적으로 삭제되었습니다.", {
+          variant: "success",
+        });
+        onDeleteRoute();
+      });
+    }
   };
 
   // 모임 데이터가 로드되면 폼 데이터 초기화

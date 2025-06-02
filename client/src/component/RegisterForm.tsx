@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { useCallback, useMemo, useState } from "react";
+import { useSnackbar } from "notistack";
 import API_CLIENT from "../api/api";
 import useLogin from "../api/login/useLogin";
 import { AuthState } from "../states/auth";
@@ -32,6 +33,7 @@ export default function RegisterForm({
   const [isCodeSent, setIsCodeSent] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
   const [profileImage, setProfileImage] = useState<File | null>(null);
+  const { enqueueSnackbar } = useSnackbar();
 
   const onVerificationCodeButtonClick = useCallback(async () => {
     const response =
@@ -39,12 +41,12 @@ export default function RegisterForm({
         email,
       });
     if (response.isSuccessful) {
-      alert("인증코드가 발송되었습니다.");
+      enqueueSnackbar("인증코드가 발송되었습니다.", { variant: "success" });
       setIsCodeSent(true);
       return;
     }
-    alert("인증코드 발송에 실패했습니다.");
-  }, [email]);
+    enqueueSnackbar("인증코드 발송에 실패했습니다.", { variant: "error" });
+  }, [email, enqueueSnackbar]);
 
   const onVerifyCodeButtonClick = useCallback(async () => {
     const response = await API_CLIENT.emailVerificationController.verifyCode({
@@ -52,16 +54,16 @@ export default function RegisterForm({
       verificationCode,
     });
     if (response.isSuccessful) {
-      alert("이메일 인증이 완료되었습니다.");
+      enqueueSnackbar("이메일 인증이 완료되었습니다.", { variant: "success" });
       setIsVerified(true);
       return;
     }
-    alert("인증코드가 올바르지 않습니다.");
-  }, [email, verificationCode]);
+    enqueueSnackbar("인증코드가 올바르지 않습니다.", { variant: "error" });
+  }, [email, verificationCode, enqueueSnackbar]);
 
   const onRegisterButtonClick = useCallback(async () => {
     if (password !== confirmPassword) {
-      alert("비밀번호가 일치하지 않습니다.");
+      enqueueSnackbar("비밀번호가 일치하지 않습니다.", { variant: "error" });
       return;
     }
 
@@ -84,12 +86,12 @@ export default function RegisterForm({
         ...(profileImage ? { profileImage } : {}),
       });
     } else {
-      alert("잘못된 회원가입 유형입니다.");
+      enqueueSnackbar("잘못된 회원가입 유형입니다.", { variant: "error" });
       return;
     }
 
     if (response.isSuccessful) {
-      alert("회원가입이 완료되었습니다.");
+      enqueueSnackbar("회원가입이 완료되었습니다.", { variant: "success" });
       const loggedInUser = response.data as AuthState.LoggedInUser;
       login(loggedInUser);
       handleBack();
@@ -99,7 +101,7 @@ export default function RegisterForm({
     // 에러 처리
     switch (response.errorCode) {
       case "NICKNAME_ALREADY_EXISTS":
-        alert("이미 존재하는 닉네임입니다.");
+        enqueueSnackbar("이미 존재하는 닉네임입니다.", { variant: "error" });
         break;
     }
   }, [
@@ -112,6 +114,7 @@ export default function RegisterForm({
     profileImage,
     login,
     handleBack,
+    enqueueSnackbar,
   ]);
 
   const profileImagePreviewUrl = useMemo(() => {

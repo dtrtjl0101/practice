@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useSnackbar } from "notistack";
 import { useState } from "react";
 import API_CLIENT from "../../api/api";
 import { BookMetadata } from "../../types/book";
@@ -30,6 +31,7 @@ export const Route = createFileRoute("/books/$bookId")({
 
 function RouteComponent() {
   const { bookId } = Route.useParams();
+  const { enqueueSnackbar } = useSnackbar();
   const [isPurchased, setIsPurchased] = useState(false);
   const [purchasing, setPurchasing] = useState(false);
   const [openCreditPurchaseModal, setOpenCreditPurchaseModal] = useState(false);
@@ -76,13 +78,13 @@ function RouteComponent() {
           break;
         }
         default: {
-          alert(response.errorMessage);
+          enqueueSnackbar(response.errorMessage, { variant: "error" });
           break;
         }
       }
       return;
     }
-    alert("구매가 완료되었습니다!");
+    enqueueSnackbar("구매가 완료되었습니다!", { variant: "success" });
     setIsPurchased(true);
   };
 

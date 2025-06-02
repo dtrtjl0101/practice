@@ -15,6 +15,7 @@ import {
   FormLabel,
   Avatar,
 } from "@mui/material";
+import { useSnackbar } from "notistack";
 import { useMemo, useState, Fragment } from "react";
 import { Comment, StanceOptions } from "../types/comment";
 import API_CLIENT from "../api/api";
@@ -32,6 +33,7 @@ export default function CommentSection({
   isDebate,
   onRefresh,
 }: CommentSectionProps) {
+  const { enqueueSnackbar } = useSnackbar();
   const [content, setContent] = useState("");
   const [replyContent, setReplyContent] = useState<Record<number, string>>({});
   const [stance, setStance] = useState<StanceOptions>("AGREE");
@@ -64,12 +66,15 @@ export default function CommentSection({
     const currentStance = isReply ? replyStance[parentId!] : stance;
 
     if (!currentContent?.trim()) {
-      alert(isReply ? "답글을 입력해주세요." : "댓글을 입력해주세요");
+      enqueueSnackbar(
+        isReply ? "답글을 입력해주세요." : "댓글을 입력해주세요",
+        { variant: "warning" }
+      );
       return;
     }
 
     if (isDebate && !currentStance) {
-      alert("의견을 선택해주세요.");
+      enqueueSnackbar("의견을 선택해주세요.", { variant: "warning" });
       return;
     }
 
@@ -92,16 +97,18 @@ export default function CommentSection({
         }
         onRefresh();
       } else {
-        alert(response.errorMessage);
+        enqueueSnackbar(response.errorMessage, { variant: "error" });
       }
     } catch (error) {
-      alert("댓글 작성 중 오류가 발생했습니다.");
+      enqueueSnackbar("댓글 작성 중 오류가 발생했습니다.", {
+        variant: "error",
+      });
     }
   };
 
   const handleEditComment = async (commentId: number) => {
     if (!editedContent.trim()) {
-      alert("수정할 내용을 입력해주세요.");
+      enqueueSnackbar("수정할 내용을 입력해주세요.", { variant: "warning" });
       return;
     }
 
@@ -114,34 +121,37 @@ export default function CommentSection({
       );
 
       if (response.isSuccessful) {
-        alert("댓글이 수정되었습니다.");
+        enqueueSnackbar("댓글이 수정되었습니다.", { variant: "success" });
         setEditingId(null);
         setEditedContent("");
         onRefresh();
       } else {
-        alert(response.errorMessage);
+        enqueueSnackbar(response.errorMessage, { variant: "error" });
       }
     } catch (error) {
-      alert("댓글 수정 중 오류가 발생했습니다.");
+      enqueueSnackbar("댓글 수정 중 오류가 발생했습니다.", {
+        variant: "error",
+      });
     }
   };
 
   const handleDeleteComment = async (commentId: number) => {
-    const confirmDelete = window.confirm("댓글을 삭제하시겠습니까?");
-    if (!confirmDelete) return;
+    if (window.confirm("댓글을 삭제하시겠습니까?")) {
+      try {
+        const response =
+          await API_CLIENT.discussionController.deleteComment1(commentId);
 
-    try {
-      const response =
-        await API_CLIENT.discussionController.deleteComment1(commentId);
-
-      if (response.isSuccessful) {
-        alert("댓글이 삭제되었습니다.");
-        onRefresh();
-      } else {
-        alert(response.errorMessage);
+        if (response.isSuccessful) {
+          enqueueSnackbar("댓글이 삭제되었습니다.", { variant: "success" });
+          onRefresh();
+        } else {
+          enqueueSnackbar(response.errorMessage, { variant: "error" });
+        }
+      } catch (error) {
+        enqueueSnackbar("댓글 삭제 중 오류가 발생했습니다.", {
+          variant: "error",
+        });
       }
-    } catch (error) {
-      alert("댓글 삭제 중 오류가 발생했습니다.");
     }
   };
 

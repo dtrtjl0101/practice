@@ -2,6 +2,7 @@ import { Container, Modal } from "@mui/material";
 import GroupEditForm, { GroupEditData } from "./GroupEditForm";
 import API_CLIENT from "../../api/api";
 import { useNavigate } from "@tanstack/react-router";
+import { useSnackbar } from "notistack";
 
 export default function GroupCreateModal(props: {
   open: boolean;
@@ -10,6 +11,7 @@ export default function GroupCreateModal(props: {
 }) {
   const { open, onClose, onCreateGroup } = props;
   const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
 
   const handleEditDone = async (data: GroupEditData) => {
     const { name, description, tags, groupImage } = data;
@@ -22,7 +24,7 @@ export default function GroupCreateModal(props: {
 
     if (!response.isSuccessful) {
       console.error(response.errorMessage);
-      alert("Failed to create group");
+      enqueueSnackbar("Failed to create group", { variant: "error" });
       return;
     }
 
