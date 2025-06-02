@@ -143,9 +143,6 @@ function RouteComponent() {
       const response = await API_CLIENT.adminController.fetchPublishers({
         page: publisherPage,
         size: rowsPerPage,
-        search: publisherSearchTerm || undefined,
-        status:
-          publisherStatusFilter !== "ALL" ? publisherStatusFilter : undefined,
       });
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);
@@ -168,7 +165,6 @@ function RouteComponent() {
       const response = await API_CLIENT.adminController.fetchUsers({
         page: userPage,
         size: rowsPerPage,
-        search: userSearchTerm || undefined,
       });
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);
@@ -198,8 +194,6 @@ function RouteComponent() {
         {
           page: bookPage,
           size: rowsPerPage,
-          search: bookSearchTerm || undefined,
-          status: bookStatusFilter !== "ALL" ? bookStatusFilter : undefined,
         }
       );
       if (!response.isSuccessful) {
