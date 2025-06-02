@@ -42,7 +42,7 @@
                 timestamp: new Date().toISOString()
             };
 
-            fetch('/api/v1/group/chat/send', {
+            fetch(`/api/groups/${groupId}/chats`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
