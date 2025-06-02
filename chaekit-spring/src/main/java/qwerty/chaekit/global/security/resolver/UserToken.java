@@ -1,6 +1,7 @@
 package qwerty.chaekit.global.security.resolver;
 
 import lombok.Builder;
+import qwerty.chaekit.domain.member.user.UserProfile;
 
 @Builder
 public record UserToken(
@@ -21,6 +22,13 @@ public record UserToken(
                 .memberId(memberId)
                 .userId(userId)
                 .email(email)
+                .build();
+    }
+    
+    public static UserToken of(UserProfile userProfile) {
+        return UserToken.builder()
+                .isAnonymous(false)
+                .userId(userProfile.getId())
                 .build();
     }
 }
