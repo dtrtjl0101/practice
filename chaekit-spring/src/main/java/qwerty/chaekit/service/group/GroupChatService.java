@@ -52,6 +52,7 @@ public class GroupChatService {
         ReadingGroup group = entityFinder.findGroup(groupId);
         Page<GroupChat> chats = groupChatRepository.findByGroupOrderByCreatedAtDesc(group, pageable);
 
+
         return PageResponse.of(chats.map(GroupChatResponse::of));
     }
 }

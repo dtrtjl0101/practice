@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>채팅 테스트</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
@@ -8,16 +10,144 @@
 <body>
     <h2>채팅 테스트</h2>
     <div>
+        <input type="text" id="email" placeholder="이메일" value="test@test.com">
+        <input type="password" id="password" placeholder="비밀번호" value="test1234">
+        <button onclick="login()">로그인</button>
+    </div>
+    <div style="margin-top: 20px;">
         <input type="text" id="groupId" placeholder="그룹 ID" value="1">
         <input type="text" id="senderId" placeholder="보내는 사람 ID" value="1">
         <input type="text" id="message" placeholder="메시지">
         <button onclick="sendMessage()">전송</button>
     </div>
+    <div style="margin-top: 20px;">
+        <button onclick="requestJoinGroup()">그룹 가입 요청</button>
+        <button onclick="checkPendingRequests()">대기 중인 요청 확인</button>
+        <button onclick="approveJoinRequest()">가입 요청 승인</button>
+    </div>
+    <div id="pendingRequests" style="margin-top: 20px;"></div>
     <div id="messages" style="margin-top: 20px;"></div>
 
     <script>
         let stompClient = null;
+        let token = null;
         const groupId = document.getElementById('groupId').value;
+
+        function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.isSuccessful) {
+                    token = data.data.accessToken;
+                    console.log('로그인 성공');
+                    connect();
+                } else {
+                    console.error('로그인 실패:', data.errorMessage);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        function requestJoinGroup() {
+            if (!token) {
+                alert('먼저 로그인해주세요.');
+                return;
+            }
+
+            const groupId = document.getElementById('groupId').value;
+            fetch(`/api/groups/${groupId}/join`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.isSuccessful) {
+                    console.log('그룹 가입 요청 성공');
+                } else {
+                    console.error('그룹 가입 요청 실패:', data.errorMessage);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        function checkPendingRequests() {
+            if (!token) {
+                alert('먼저 로그인해주세요.');
+                return;
+            }
+
+            const groupId = document.getElementById('groupId').value;
+            fetch(`/api/groups/${groupId}/members/pending?page=0&size=10`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.isSuccessful) {
+                    const pendingDiv = document.getElementById('pendingRequests');
+                    pendingDiv.innerHTML = '<h3>대기 중인 가입 요청:</h3>';
+                    data.data.content.forEach(member => {
+                        const memberDiv = document.createElement('div');
+                        memberDiv.textContent = `사용자 ID: ${member.userId}, 닉네임: ${member.nickname}`;
+                        pendingDiv.appendChild(memberDiv);
+                    });
+                } else {
+                    console.error('대기 중인 요청 조회 실패:', data.errorMessage);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        function approveJoinRequest() {
+            if (!token) {
+                alert('먼저 로그인해주세요.');
+                return;
+            }
+
+            const groupId = document.getElementById('groupId').value;
+            const userId = document.getElementById('senderId').value;
+            fetch(`/api/groups/${groupId}/members/${userId}/approve`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.isSuccessful) {
+                    console.log('가입 요청 승인 성공');
+                } else {
+                    console.error('가입 요청 승인 실패:', data.errorMessage);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
 
         function connect() {
             const socket = new SockJS('/ws');
@@ -31,6 +161,11 @@
         }
 
         function sendMessage() {
+            if (!token) {
+                alert('먼저 로그인해주세요.');
+                return;
+            }
+
             const groupId = document.getElementById('groupId').value;
             const senderId = document.getElementById('senderId').value;
             const content = document.getElementById('message').value;
@@ -45,7 +180,8 @@
             fetch(`/api/groups/${groupId}/chats`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(message)
             })
@@ -65,9 +201,6 @@
             messageElement.textContent = `${message.senderId}: ${message.content}`;
             messagesDiv.appendChild(messageElement);
         }
-
-        // 페이지 로드 시 연결
-        connect();
     </script>
 </body>
 </html> 
