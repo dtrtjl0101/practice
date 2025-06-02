@@ -23,6 +23,7 @@ import qwerty.chaekit.service.util.EntityFinder;
 public class GroupChatService {
     private final GroupChatRepository groupChatRepository;
     private final EntityFinder entityFinder;
+    private final GroupChatProducer groupChatProducer;
 
     @Transactional
     public GroupChatResponse createChat(UserToken userToken, Long groupId, GroupChatRequest request) {
@@ -39,7 +40,12 @@ public class GroupChatService {
                 .content(request.content())
                 .build();
 
-        return GroupChatResponse.of(groupChatRepository.save(chat));
+        GroupChat savedChat = groupChatRepository.save(chat);
+        GroupChatResponse response = GroupChatResponse.of(savedChat);
+
+        groupChatProducer.sendMessage(response);
+
+        return response;
     }
 
     public PageResponse<GroupChatResponse> getChats(Long groupId, Pageable pageable) {
