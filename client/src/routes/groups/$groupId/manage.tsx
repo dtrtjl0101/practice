@@ -98,7 +98,7 @@ function RouteComponent() {
         <GroupDashboard groupId={groupId} />
 
         {/* 탭 네비게이션 */}
-        <Paper elevation={0} sx={{ borderBottom: 1, borderColor: "divider" }}>
+        <Paper sx={{ mb: 3 }} variant="outlined">
           <Tabs
             value={tabValue}
             onChange={handleTabChange}

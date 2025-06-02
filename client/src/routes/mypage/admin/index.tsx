@@ -132,13 +132,7 @@ function RouteComponent() {
 
   // 출판사 목록 조회 (페이지네이션 적용)
   const { data: publishersResponse } = useQuery({
-    queryKey: [
-      "adminPublishers",
-      publisherPage,
-      rowsPerPage,
-      publisherSearchTerm,
-      publisherStatusFilter,
-    ],
+    queryKey: ["adminPublishers", publisherPage, rowsPerPage],
     queryFn: async () => {
       const response = await API_CLIENT.adminController.fetchPublishers({
         page: publisherPage,
@@ -160,7 +154,7 @@ function RouteComponent() {
 
   // 유저 목록 조회 (페이지네이션 적용)
   const { data: usersResponse } = useQuery({
-    queryKey: ["adminUsers", userPage, rowsPerPage, userSearchTerm],
+    queryKey: ["adminUsers", userPage, rowsPerPage],
     queryFn: async () => {
       const response = await API_CLIENT.adminController.fetchUsers({
         page: userPage,
@@ -182,13 +176,7 @@ function RouteComponent() {
 
   // 출판물 요청 목록 조회 (페이지네이션 적용)
   const { data: bookRequestsResponse } = useQuery({
-    queryKey: [
-      "adminBookRequests",
-      bookPage,
-      rowsPerPage,
-      bookSearchTerm,
-      bookStatusFilter,
-    ],
+    queryKey: ["adminBookRequests", bookPage, rowsPerPage],
     queryFn: async () => {
       const response = await API_CLIENT.ebookRequestController.getEbookRequests(
         {
@@ -327,31 +315,37 @@ function RouteComponent() {
     []
   );
 
-  // 검색어 변경 시 페이지 리셋
-  const handlePublisherSearchChange = useCallback((value: string) => {
-    setPublisherSearchTerm(value);
-    setPublisherPage(0); // 검색 시 첫 페이지로 이동
-  }, []);
+  const filteredPublishers = publishers.filter(
+    (publisher) =>
+      publisher.publisherName
+        .toLowerCase()
+        .includes(publisherSearchTerm.toLowerCase()) &&
+      (publisherStatusFilter == "ALL" ||
+        (publisherStatusFilter == "APPROVED" &&
+          publisher.status == "APPROVED") ||
+        (publisherStatusFilter == "PENDING" && publisher.status == "PENDING") ||
+        (publisherStatusFilter == "REJECTED" && publisher.status == "REJECTED"))
+  );
 
-  const handleUserSearchChange = useCallback((value: string) => {
-    setUserSearchTerm(value);
-    setUserPage(0); // 검색 시 첫 페이지로 이동
-  }, []);
+  const filteredUsers = users.filter((user) =>
+    user.nickname.toLowerCase().includes(userSearchTerm.toLowerCase())
+  );
 
-  const handleBookSearchChange = useCallback((value: string) => {
-    setBookSearchTerm(value);
-    setBookPage(0); // 검색 시 첫 페이지로 이동
-  }, []);
-
-  const handlePublisherStatusChange = useCallback((value: string) => {
-    setPublisherStatusFilter(value);
-    setPublisherPage(0); // 필터 변경 시 첫 페이지로 이동
-  }, []);
-
-  const handleBookStatusChange = useCallback((value: string) => {
-    setBookStatusFilter(value);
-    setBookPage(0); // 필터 변경 시 첫 페이지로 이동
-  }, []);
+  const filteredBookRequests = bookRequests.filter(
+    (bookRequest) =>
+      (bookRequest.title
+        .toLowerCase()
+        .includes(bookSearchTerm.toLocaleLowerCase()) ||
+        bookRequest.author
+          .toLowerCase()
+          .includes(bookSearchTerm.toLowerCase()) ||
+        bookRequest.publisherName
+          .toLowerCase()
+          .includes(bookSearchTerm.toLowerCase())) &&
+      (bookStatusFilter == "ALL" ||
+        (bookStatusFilter == "PENDING" && bookRequest.status == "PENDING") ||
+        (bookStatusFilter == "REJECTED" && bookRequest.status == "REJECTED"))
+  );
 
   // 새로고침 핸들러
   const handleRefresh = useCallback(() => {
@@ -473,13 +467,13 @@ function RouteComponent() {
                   gutterBottom
                   variant="overline"
                 >
-                  승인률
+                  뭐넣지
                 </Typography>
                 <Typography variant="h4" color="success.main">
-                  ??
+                  무슨내용넣을까요
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
-                  출판물 기준
+                  ???
                 </Typography>
               </Box>
               <Avatar sx={{ bgcolor: "success.main" }}>
@@ -491,93 +485,6 @@ function RouteComponent() {
       </Grid>
     </Grid>
   );
-
-  // 검색 및 필터 섹션
-  const SearchAndFilter = useCallback(() => {
-    let searchTerm = "";
-    let statusFilter = "ALL";
-    let onSearchChange = handlePublisherSearchChange;
-    let onStatusChange = handlePublisherStatusChange;
-    let showStatusFilter = true;
-
-    switch (currentTab) {
-      case 0:
-        searchTerm = publisherSearchTerm;
-        statusFilter = publisherStatusFilter;
-        onSearchChange = handlePublisherSearchChange;
-        onStatusChange = handlePublisherStatusChange;
-        showStatusFilter = true;
-        break;
-      case 1:
-        searchTerm = userSearchTerm;
-        onSearchChange = handleUserSearchChange;
-        showStatusFilter = false;
-        break;
-      case 2:
-        searchTerm = bookSearchTerm;
-        statusFilter = bookStatusFilter;
-        onSearchChange = handleBookSearchChange;
-        onStatusChange = handleBookStatusChange;
-        showStatusFilter = true;
-        break;
-    }
-
-    return (
-      <Paper sx={{ p: 2, mb: 3 }} variant="outlined">
-        <Stack
-          direction={{ xs: "column", sm: "row" }}
-          spacing={2}
-          alignItems="center"
-        >
-          <TextField
-            placeholder="검색..."
-            value={searchTerm}
-            onChange={(e) => onSearchChange(e.target.value)}
-            size="small"
-            sx={{ flexGrow: 1 }}
-            InputProps={{
-              startAdornment: <Search sx={{ color: "action.active", mr: 1 }} />,
-            }}
-          />
-          {showStatusFilter && (
-            <FormControl size="small" sx={{ minWidth: 120 }}>
-              <InputLabel>상태</InputLabel>
-              <Select
-                value={statusFilter}
-                onChange={(e) => onStatusChange(e.target.value)}
-                label="상태"
-              >
-                <MenuItem value="ALL">전체</MenuItem>
-                <MenuItem value="PENDING">대기중</MenuItem>
-                <MenuItem value="APPROVED">승인됨</MenuItem>
-                <MenuItem value="REJECTED">거부됨</MenuItem>
-              </Select>
-            </FormControl>
-          )}
-          <Button
-            variant="outlined"
-            startIcon={<Refresh />}
-            onClick={handleRefresh}
-          >
-            새로고침
-          </Button>
-        </Stack>
-      </Paper>
-    );
-  }, [
-    currentTab,
-    publisherSearchTerm,
-    userSearchTerm,
-    bookSearchTerm,
-    publisherStatusFilter,
-    bookStatusFilter,
-    handlePublisherSearchChange,
-    handleUserSearchChange,
-    handleBookSearchChange,
-    handlePublisherStatusChange,
-    handleBookStatusChange,
-    handleRefresh,
-  ]);
 
   if (!isAdmin) {
     return (
@@ -612,9 +519,6 @@ function RouteComponent() {
       {/* 요약 통계 */}
       <SummaryCards />
 
-      {/* 검색 및 필터 */}
-      <SearchAndFilter />
-
       {/* 탭 네비게이션 */}
       <Paper sx={{ mb: 3 }} variant="outlined">
         <Tabs
@@ -638,6 +542,46 @@ function RouteComponent() {
 
         {/* 출판사 관리 탭 */}
         <TabPanel value={currentTab} index={0}>
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={2}
+            alignItems="center"
+            marginLeft={2}
+            marginRight={2}
+          >
+            <TextField
+              placeholder="검색..."
+              value={publisherSearchTerm}
+              onChange={(e) => setPublisherSearchTerm(e.target.value)}
+              size="small"
+              sx={{ flexGrow: 1 }}
+              InputProps={{
+                startAdornment: (
+                  <Search sx={{ color: "action.active", mr: 1 }} />
+                ),
+              }}
+            />
+            <FormControl size="small" sx={{ minWidth: 120 }}>
+              <InputLabel>상태</InputLabel>
+              <Select
+                value={publisherStatusFilter}
+                label="상태"
+                onChange={(e) => setPublisherStatusFilter(e.target.value)}
+              >
+                <MenuItem value="ALL">전체</MenuItem>
+                <MenuItem value="APPROVED">승인됨</MenuItem>
+                <MenuItem value="PENDING">심사중</MenuItem>
+                <MenuItem value="REJECTED">거부됨</MenuItem>
+              </Select>
+            </FormControl>
+            <Button
+              variant="outlined"
+              startIcon={<Refresh />}
+              onClick={handleRefresh}
+            >
+              새로고침
+            </Button>
+          </Stack>
           <TableContainer>
             <Table>
               <TableHead>
@@ -650,7 +594,7 @@ function RouteComponent() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {publishers.map((publisher) => (
+                {filteredPublishers.map((publisher) => (
                   <TableRow
                     key={publisher.publisherId}
                     hover
@@ -673,7 +617,7 @@ function RouteComponent() {
                       <Chip
                         label={
                           publisher.status === "PENDING"
-                            ? "대기중"
+                            ? "심사중"
                             : publisher.status === "APPROVED"
                               ? "승인됨"
                               : "거부됨"
@@ -714,6 +658,34 @@ function RouteComponent() {
 
         {/* 사용자 관리 탭 */}
         <TabPanel value={currentTab} index={1}>
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={2}
+            alignItems="center"
+            marginLeft={2}
+            marginRight={2}
+          >
+            <TextField
+              placeholder="검색..."
+              value={userSearchTerm}
+              onChange={(e) => setUserSearchTerm(e.target.value)}
+              size="small"
+              sx={{ flexGrow: 1 }}
+              InputProps={{
+                startAdornment: (
+                  <Search sx={{ color: "action.active", mr: 1 }} />
+                ),
+              }}
+            />
+
+            <Button
+              variant="outlined"
+              startIcon={<Refresh />}
+              onClick={handleRefresh}
+            >
+              새로고침
+            </Button>
+          </Stack>
           <TableContainer>
             <Table>
               <TableHead>
@@ -726,7 +698,7 @@ function RouteComponent() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {users.map((user) => (
+                {filteredUsers.map((user) => (
                   <TableRow
                     key={user.userId}
                     hover
@@ -772,6 +744,45 @@ function RouteComponent() {
 
         {/* 출판물 요청 관리 탭 */}
         <TabPanel value={currentTab} index={2}>
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={2}
+            alignItems="center"
+            marginLeft={2}
+            marginRight={2}
+          >
+            <TextField
+              placeholder="검색... (도서명, 출판사)"
+              value={bookSearchTerm}
+              onChange={(e) => setBookSearchTerm(e.target.value)}
+              size="small"
+              sx={{ flexGrow: 1 }}
+              InputProps={{
+                startAdornment: (
+                  <Search sx={{ color: "action.active", mr: 1 }} />
+                ),
+              }}
+            />
+            <FormControl size="small" sx={{ minWidth: 120 }}>
+              <InputLabel>상태</InputLabel>
+              <Select
+                value={bookStatusFilter}
+                label="상태"
+                onChange={(e) => setBookStatusFilter(e.target.value)}
+              >
+                <MenuItem value="ALL">전체</MenuItem>
+                <MenuItem value="PENDING">심사중</MenuItem>
+                <MenuItem value="REJECTED">거부됨</MenuItem>
+              </Select>
+            </FormControl>
+            <Button
+              variant="outlined"
+              startIcon={<Refresh />}
+              onClick={handleRefresh}
+            >
+              새로고침
+            </Button>
+          </Stack>
           <TableContainer>
             <Table>
               <TableHead>
@@ -780,11 +791,12 @@ function RouteComponent() {
                   <TableCell>출판사</TableCell>
                   <TableCell align="right">가격</TableCell>
                   <TableCell>요청일</TableCell>
+                  <TableCell>상태</TableCell>
                   <TableCell align="center">관리</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {bookRequests.map((book) => (
+                {filteredBookRequests.map((book) => (
                   <TableRow
                     key={book.requestId}
                     hover
@@ -824,6 +836,25 @@ function RouteComponent() {
                       </Typography>
                     </TableCell>
                     <TableCell>{new Date().toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={
+                          book.status === "PENDING"
+                            ? "심사중"
+                            : book.status === "APPROVED"
+                              ? "승인됨"
+                              : "거부됨"
+                        }
+                        color={
+                          book.status === "PENDING"
+                            ? "warning"
+                            : book.status === "APPROVED"
+                              ? "success"
+                              : "error"
+                        }
+                        size="small"
+                      />
+                    </TableCell>
                     <TableCell align="center">
                       <IconButton size="small" color="primary">
                         <MoreVert />
@@ -931,7 +962,7 @@ function PublisherDetailDialog({
             <Chip
               label={
                 publisher.status === "PENDING"
-                  ? "승인 대기"
+                  ? "심사중"
                   : publisher.status === "APPROVED"
                     ? "승인됨"
                     : "거부됨"
