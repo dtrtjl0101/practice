@@ -96,6 +96,20 @@ function TabPanel({ children, value, index }: TabPanelProps) {
   );
 }
 
+// 상태별 색상 및 텍스트
+const getStatusDisplay = (status: string) => {
+  switch (status) {
+    case "PENDING":
+      return { color: "warning" as const, text: "심사중" };
+    case "APPROVED":
+      return { color: "success" as const, text: "승인됨" };
+    case "REJECTED":
+      return { color: "error" as const, text: "거부됨" };
+    default:
+      return { color: "default" as const, text: status };
+  }
+};
+
 function RouteComponent() {
   const user = useAtomValue(AuthState.user);
   const isAdmin = user && user?.role === Role.ROLE_ADMIN;
@@ -358,20 +372,6 @@ function RouteComponent() {
     queryClient.invalidateQueries({ queryKey: ["adminBookRequests"] });
     queryClient.invalidateQueries({ queryKey: ["adminPublisherStats"] });
   }, [queryClient]);
-
-  // 상태별 색상 및 텍스트
-  const getStatusDisplay = (status: string) => {
-    switch (status) {
-      case "PENDING":
-        return { color: "warning" as const, text: "심사중" };
-      case "APPROVED":
-        return { color: "success" as const, text: "승인됨" };
-      case "REJECTED":
-        return { color: "error" as const, text: "거부됨" };
-      default:
-        return { color: "default" as const, text: status };
-    }
-  };
 
   // 요약 통계 카드
   const SummaryCards = () => (
@@ -949,30 +949,16 @@ function PublisherDetailDialog({
       <DialogTitle>출판사 상세 정보</DialogTitle>
       <DialogContent>
         <Stack spacing={3}>
-          <Box>
+          <Stack direction={"row"} spacing={2}>
             <Typography variant="h5" gutterBottom>
               {publisher.publisherName}
             </Typography>
             <Chip
-              label={
-                publisher.status === "PENDING"
-                  ? "심사중"
-                  : publisher.status === "APPROVED"
-                    ? "승인됨"
-                    : "거부됨"
-              }
-              color={
-                publisher.status === "PENDING"
-                  ? "warning"
-                  : publisher.status === "APPROVED"
-                    ? "success"
-                    : "error"
-              }
+              label={getStatusDisplay(publisher.status).text}
+              color={getStatusDisplay(publisher.status).color}
             />
-          </Box>
-
+          </Stack>
           <Divider />
-
           <Stack spacing={2}>
             <Box display="flex" alignItems="center" gap={1}>
               <Email fontSize="small" color="action" />
