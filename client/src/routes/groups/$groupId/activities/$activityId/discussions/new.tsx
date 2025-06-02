@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useSnackbar } from "notistack";
 import DiscussionForm from "../../../../../../component/DiscussionForm";
 
 export const Route = createFileRoute(
@@ -10,9 +11,10 @@ export const Route = createFileRoute(
 function RouteComponent() {
   const { activityId } = Route.useParams();
   const navigate = Route.useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
   const goToDiscussion = (discussionId?: number) => {
     if (!discussionId) {
-      alert("Invalid discussion ID");
+      enqueueSnackbar("Invalid discussion ID", { variant: "error" });
       return;
     }
     navigate({

@@ -1,6 +1,7 @@
 import API_CLIENT from "../api/api";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useSnackbar } from "notistack";
 import {
   Container,
   Card,
@@ -28,6 +29,7 @@ export default function DiscussionForm({
   handlePostRoute: (discussionId?: number) => void;
   handleBack: () => void;
 }) {
+  const { enqueueSnackbar } = useSnackbar();
   const theme = useTheme();
   const isEdit = !!discussionId;
   const { data: discussion } = useQuery({
@@ -50,7 +52,7 @@ export default function DiscussionForm({
 
   const handlePostDiscussion = () => {
     if (!title.trim() || !content.trim()) {
-      alert("제목과 내용을 입력해주세요.");
+      enqueueSnackbar("제목과 내용을 입력해주세요.", { variant: "warning" });
       return;
     }
     const parts = content.split(/(#\w[\w-]*)/g); // '#'로 시작하는 단어 추출
@@ -72,10 +74,10 @@ export default function DiscussionForm({
         })
         .then((response) => {
           if (response.isSuccessful) {
-            alert("게시글이 수정되었습니다.");
+            enqueueSnackbar("게시글이 수정되었습니다.", { variant: "success" });
             handlePostRoute();
           } else {
-            alert(response.errorMessage);
+            enqueueSnackbar(response.errorMessage, { variant: "error" });
           }
         });
     } else {
@@ -89,10 +91,10 @@ export default function DiscussionForm({
         })
         .then((response) => {
           if (response.isSuccessful) {
-            alert("게시글이 작성되었습니다.");
+            enqueueSnackbar("게시글이 작성되었습니다.", { variant: "success" });
             handlePostRoute(response.data.discussionId);
           } else {
-            alert(response.errorMessage);
+            enqueueSnackbar(response.errorMessage, { variant: "error" });
           }
         });
     }
@@ -101,7 +103,7 @@ export default function DiscussionForm({
   const handleCheckbox = (event: React.ChangeEvent<HTMLInputElement>) => {
     setDebate(event.target.checked);
     if (event.target.checked) {
-      alert("토론이 체크되었습니다.");
+      enqueueSnackbar("토론이 체크되었습니다.", { variant: "info" });
     }
   };
 

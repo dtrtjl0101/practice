@@ -10,6 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
+import { useSnackbar } from "notistack";
 import API_CLIENT from "../api/api";
 import { useEffect, useState } from "react";
 import { paymentSuccessToken } from "../types/paymentSuccessMessage";
@@ -26,6 +27,7 @@ export default function CreditPurchaseModal(props: {
   const [selectedProductId, setSelectedProductId] = useState<number | null>(
     null
   );
+  const { enqueueSnackbar } = useSnackbar();
 
   const { data: myWallet, refetch: refetchMyWallet } = useQuery({
     queryKey: ["myWallet"],
@@ -56,7 +58,7 @@ export default function CreditPurchaseModal(props: {
       creditProductId,
     });
     if (!response.isSuccessful) {
-      alert(response.errorMessage);
+      enqueueSnackbar(response.errorMessage, { variant: "error" });
       setPurchasing(false);
       return;
     }
@@ -67,7 +69,7 @@ export default function CreditPurchaseModal(props: {
       "width=500,height=700"
     );
     if (!popupWindow) {
-      alert("팝업 차단을 해제해주세요.");
+      enqueueSnackbar("팝업 차단을 해제해주세요.", { variant: "warning" });
       setPurchasing(false);
       return;
     }
@@ -96,7 +98,7 @@ export default function CreditPurchaseModal(props: {
           onPurchased();
         }
         onClose();
-        alert("결제가 완료되었습니다.");
+        enqueueSnackbar("결제가 완료되었습니다.", { variant: "success" });
       }
     };
     window.addEventListener("message", listenMessage);
@@ -188,7 +190,9 @@ export default function CreditPurchaseModal(props: {
                   color="primary"
                   onClick={() => {
                     if (!selectedProductId) {
-                      alert("구매할 크레딧 상품을 선택해주세요.");
+                      enqueueSnackbar("구매할 크레딧 상품을 선택해주세요.", {
+                        variant: "warning",
+                      });
                       return;
                     }
                     onPurchaseButtonClicked(selectedProductId);

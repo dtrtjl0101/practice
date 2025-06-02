@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import { useRef } from "react";
 import { useAtomValue } from "jotai";
+import { useSnackbar } from "notistack";
 import State from "../states";
 import {
   getEmojiFromReactionType,
@@ -31,6 +32,7 @@ export default function HighlightSummaryCard({
 }) {
   const user = useAtomValue(State.Auth.user);
   const cardRef = useRef<HTMLDivElement>(null);
+  const { enqueueSnackbar } = useSnackbar();
 
   const { data: reactions, refetch: refetchReactions } = useQuery({
     queryKey: ["highlightReactions", highlightSummary.id],
@@ -69,7 +71,7 @@ export default function HighlightSummaryCard({
       reactionType: reactionType,
     });
     if (!response.isSuccessful) {
-      alert(response.errorMessage);
+      enqueueSnackbar(response.errorMessage, { variant: "error" });
     }
     refetchReactions();
   };

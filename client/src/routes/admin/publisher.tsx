@@ -23,6 +23,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
+import { useSnackbar } from "notistack";
 import API_CLIENT from "../../api/api";
 import PageNavigation from "../../component/PageNavigation";
 
@@ -139,6 +140,7 @@ function PendingPublisherCard() {
   >(null);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const { enqueueSnackbar } = useSnackbar();
   const {
     data: pendingPublishers,
     isLoading,
@@ -164,10 +166,14 @@ function PendingPublisherCard() {
 
     if (!response.isSuccessful) {
       console.error(response.errorMessage);
-      alert("승인 처리 중 오류가 발생했습니다.");
+      enqueueSnackbar("승인 처리 중 오류가 발생했습니다.", {
+        variant: "error",
+      });
     }
     refetch();
-    alert(`출판사 신청 (ID: ${id})이 승인되었습니다.`);
+    enqueueSnackbar(`출판사 신청 (ID: ${id})이 승인되었습니다.`, {
+      variant: "success",
+    });
   };
 
   const onRejectButtonClicked = async (id: number) => {
@@ -287,6 +293,7 @@ function RejectPublisherModal(props: {
 }) {
   const { open, onClose, publisherId, onReject } = props;
   const [reason, setReason] = useState<string>("");
+  const { enqueueSnackbar } = useSnackbar();
 
   const onRejectButtonClicked = async () => {
     if (!publisherId) return;
@@ -298,11 +305,15 @@ function RejectPublisherModal(props: {
     );
     if (!response.isSuccessful) {
       console.error(response.errorMessage);
-      alert("거절 처리 중 오류가 발생했습니다.");
+      enqueueSnackbar("거절 처리 중 오류가 발생했습니다.", {
+        variant: "error",
+      });
     }
     onClose();
     onReject();
-    alert(`출판사 신청 (ID: ${publisherId})이 거절되었습니다.`);
+    enqueueSnackbar(`출판사 신청 (ID: ${publisherId})이 거절되었습니다.`, {
+      variant: "info",
+    });
   };
 
   return (

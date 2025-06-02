@@ -1,5 +1,5 @@
 import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
-
+import { SnackbarProvider } from "notistack";
 import { routeTree } from "./routeTree.gen";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -37,10 +37,12 @@ export default function App() {
   return (
     <ThemeProvider theme={themes[userColorScheme]}>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <CssBaseline />
-        <QueryClientProvider client={queryClient}>
-          <RouterProvider router={router} />
-        </QueryClientProvider>
+        <SnackbarProvider>
+          <CssBaseline />
+          <QueryClientProvider client={queryClient}>
+            <RouterProvider router={router} />
+          </QueryClientProvider>
+        </SnackbarProvider>
       </LocalizationProvider>
     </ThemeProvider>
   );

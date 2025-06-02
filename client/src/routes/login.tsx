@@ -10,6 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useSnackbar } from "notistack";
 import useLogin from "../api/login/useLogin";
 import { useCallback, useState } from "react";
 import API_CLIENT from "../api/api";
@@ -25,6 +26,7 @@ function RouteComponent() {
   const theme = useTheme();
   const navigate = useNavigate();
   const { login } = useLogin();
+  const { enqueueSnackbar } = useSnackbar();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -35,7 +37,7 @@ function RouteComponent() {
     });
 
     if (!response.isSuccessful) {
-      alert("로그인에 실패했습니다.");
+      enqueueSnackbar("로그인에 실패했습니다.", { variant: "error" });
       console.error(response.errorCode);
       return;
     }
