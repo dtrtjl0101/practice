@@ -909,10 +909,10 @@ function RouteComponent() {
                     <YAxis />
                     <Tooltip
                       formatter={(value, name) => [
-                        name === "totalRevenue"
+                        name === "총 매출"
                           ? `₩${value.toLocaleString()}`
                           : value.toLocaleString(),
-                        name === "totalRevenue" ? "총 매출" : "총 판매량",
+                        name,
                       ]}
                     />
                     <Bar dataKey="totalRevenue" fill="#8884d8" name="총 매출" />
@@ -1422,22 +1422,6 @@ function BookInfoDialog({
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
-
-  // 상태별 색상 및 텍스트
-  const getStatusDisplay = (status: string) => {
-    switch (status) {
-      case "PENDING":
-        return { color: "warning" as const, text: "심사중" };
-      case "APPROVED":
-        return { color: "success" as const, text: "승인됨" };
-      case "REJECTED":
-        return { color: "error" as const, text: "거부됨" };
-      default:
-        return { color: "default" as const, text: status };
-    }
-  };
-
-  const statusDisplay = getStatusDisplay(book.status);
 
   const handleOpenRequestDialog = () => {
     openRequestDialog();

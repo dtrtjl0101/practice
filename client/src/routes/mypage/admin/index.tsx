@@ -355,6 +355,20 @@ function RouteComponent() {
     queryClient.invalidateQueries({ queryKey: ["adminPublisherStats"] });
   }, [queryClient]);
 
+  // 상태별 색상 및 텍스트
+  const getStatusDisplay = (status: string) => {
+    switch (status) {
+      case "PENDING":
+        return { color: "warning" as const, text: "심사중" };
+      case "APPROVED":
+        return { color: "success" as const, text: "승인됨" };
+      case "REJECTED":
+        return { color: "error" as const, text: "거부됨" };
+      default:
+        return { color: "default" as const, text: status };
+    }
+  };
+
   // 요약 통계 카드
   const SummaryCards = () => (
     <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -615,20 +629,8 @@ function RouteComponent() {
                     </TableCell>
                     <TableCell>
                       <Chip
-                        label={
-                          publisher.status === "PENDING"
-                            ? "심사중"
-                            : publisher.status === "APPROVED"
-                              ? "승인됨"
-                              : "거부됨"
-                        }
-                        color={
-                          publisher.status === "PENDING"
-                            ? "warning"
-                            : publisher.status === "APPROVED"
-                              ? "success"
-                              : "error"
-                        }
+                        label={getStatusDisplay(publisher.status).text}
+                        color={getStatusDisplay(publisher.status).color}
                         size="small"
                       />
                     </TableCell>
@@ -838,20 +840,8 @@ function RouteComponent() {
                     <TableCell>{new Date().toLocaleDateString()}</TableCell>
                     <TableCell>
                       <Chip
-                        label={
-                          book.status === "PENDING"
-                            ? "심사중"
-                            : book.status === "APPROVED"
-                              ? "승인됨"
-                              : "거부됨"
-                        }
-                        color={
-                          book.status === "PENDING"
-                            ? "warning"
-                            : book.status === "APPROVED"
-                              ? "success"
-                              : "error"
-                        }
+                        label={getStatusDisplay(book.status).text}
+                        color={getStatusDisplay(book.status).color}
                         size="small"
                       />
                     </TableCell>
