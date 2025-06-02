@@ -9,7 +9,7 @@ export type BookMetadata = {
   price: number;
 };
 
-export type PublisherBook = {
+export type BookRequest = {
   requestId: number;
   title: string;
   author: string;

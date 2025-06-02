@@ -226,6 +226,7 @@ export interface GroupPostRequest {
   tags?: string[];
   /** @format binary */
   groupImage?: File;
+  autoApproval?: boolean;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -561,6 +562,7 @@ export interface GroupPatchRequest {
   description?: string;
   /** @format binary */
   groupImage?: File;
+  autoApproval?: boolean;
 }
 
 export interface ActivityPatchRequest {
@@ -754,6 +756,64 @@ export interface PageResponseReadingProgressResponse {
   totalItems?: number;
   /** @format int32 */
   totalPages?: number;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponsePublisherStatsResponse {
+  isSuccessful?: boolean;
+  data?: PublisherStatsResponse;
+}
+
+export interface MonthlyRevenue {
+  month?: string;
+  /** @format int64 */
+  monthlyRevenue?: number;
+}
+
+export interface PublisherStatsResponse {
+  /** @format int64 */
+  totalSalesCount?: number;
+  /** @format int64 */
+  increasedSalesCount?: number;
+  /** @format int64 */
+  totalRevenue?: number;
+  /** @format int64 */
+  increasedRevenue?: number;
+  /** @format int64 */
+  totalActivityCount?: number;
+  /** @format int64 */
+  increasedActivityCount?: number;
+  /** @format int64 */
+  totalViewCount?: number;
+  monthlyRevenueList?: MonthlyRevenue[];
+  increasedSalesCountsPerEbook?: SalesCountPerEbook[];
+  statsPerEbookList?: StatsPerEbook[];
+}
+
+export interface SalesCountPerEbook {
+  /** @format int64 */
+  bookId?: number;
+  bookName?: string;
+  /** @format int64 */
+  totalSalesCount?: number;
+}
+
+export interface StatsPerEbook {
+  /** @format int64 */
+  bookId?: number;
+  title?: string;
+  author?: string;
+  bookCoverImageURL?: string;
+  /** @format int64 */
+  totalSalesCount?: number;
+  /** @format int64 */
+  totalRevenue?: number;
+  /** @format int64 */
+  viewCount?: number;
+  /** @format int64 */
+  activityCount?: number;
+  /** @format date */
+  createdAt?: string;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -1099,6 +1159,8 @@ export interface ApiSuccessResponsePageResponseEbookRequestFetchResponse {
 export interface EbookRequestFetchResponse {
   /** @format int64 */
   requestId?: number;
+  /** @format int64 */
+  bookId?: number;
   title?: string;
   author?: string;
   description?: string;
@@ -1718,6 +1780,22 @@ export class Api<
         body: data,
         secure: true,
         type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags publisher-controller
+     * @name GetPublisherStats
+     * @request GET:/api/publishers/stats
+     * @secure
+     */
+    getPublisherStats: (params: RequestParams = {}) =>
+      this.request<ApiSuccessResponsePublisherStatsResponse, any>({
+        path: `/api/publishers/stats`,
+        method: "GET",
+        secure: true,
         ...params,
       }),
 
@@ -3079,6 +3157,23 @@ export class Api<
         body: data,
         secure: true,
         type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * @description 사용자가 전자책을 조회할 때마다 조회수를 증가시킵니다.
+     *
+     * @tags ebook-controller
+     * @name IncrementEbookViewCount
+     * @summary 전자책 조회수 증가
+     * @request POST:/api/books/{ebookId}/view
+     * @secure
+     */
+    incrementEbookViewCount: (ebookId: number, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseVoid, any>({
+        path: `/api/books/${ebookId}/view`,
+        method: "POST",
+        secure: true,
         ...params,
       }),
 

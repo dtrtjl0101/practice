@@ -10,6 +10,7 @@ const api = new Api<undefined>({
   },
   securityWorker: async () => {
     const user = getDefaultStore().get(State.Auth.user);
+    console.log(user);
     if (!user) {
       return {};
     }

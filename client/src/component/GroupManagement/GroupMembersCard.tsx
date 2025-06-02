@@ -1,6 +1,5 @@
 import {
   Card,
-  CardHeader,
   Stack,
   CardContent,
   TextField,
@@ -121,7 +120,6 @@ export default function GroupMembersCard({ groupId }: { groupId: number }) {
 
   return (
     <Card variant="outlined">
-      <CardHeader title="멤버 관리" />
       <CardContent>
         <Stack spacing={3}>
           {/* 검색 및 필터 */}

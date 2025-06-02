@@ -152,7 +152,7 @@ export default function GroupSettingsCard({
   return (
     <Stack spacing={3}>
       {/* 모임 정보 수정 카드 */}
-      <Card variant="outlined" elevation={2}>
+      <Card variant="outlined">
         <CardHeader
           title={
             <Typography variant="h6" fontWeight="600">
@@ -366,7 +366,7 @@ export default function GroupSettingsCard({
       </Card>
 
       {/* 위험한 작업들 */}
-      <Card>
+      <Card variant="outlined">
         <CardHeader title="위험 구역" sx={{ color: "error.main" }} />
         <CardContent>
           <Stack spacing={2}>

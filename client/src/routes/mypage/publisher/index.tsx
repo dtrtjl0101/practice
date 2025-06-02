@@ -10,10 +10,6 @@ import {
   Button,
   Tabs,
   Tab,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   Table,
   TableBody,
   TableCell,
@@ -69,35 +65,11 @@ import { AuthState } from "../../../states/auth";
 import { Role } from "../../../types/role";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import API_CLIENT from "../../../api/api";
-import { PublisherBook } from "../../../types/book";
+import { BookRequest } from "../../../types/book";
 
 export const Route = createFileRoute("/mypage/publisher/")({
   component: RouteComponent,
 });
-
-// 더미 데이터
-const salesData = [
-  { name: "1월", sales: 4000, revenue: 2400000, views: 12000 },
-  { name: "2월", sales: 3000, revenue: 1800000, views: 10000 },
-  { name: "3월", sales: 5000, revenue: 3000000, views: 15000 },
-  { name: "4월", sales: 4500, revenue: 2700000, views: 13500 },
-  { name: "5월", sales: 6000, revenue: 3600000, views: 18000 },
-  { name: "6월", sales: 5500, revenue: 3300000, views: 16500 },
-];
-
-const bookSalesData = [
-  { name: "소설 A", sales: 1200, revenue: 720000, views: 4500, activities: 15 },
-  { name: "에세이 B", sales: 800, revenue: 480000, views: 3200, activities: 8 },
-  {
-    name: "자기계발 C",
-    sales: 1500,
-    revenue: 900000,
-    views: 5800,
-    activities: 22,
-  },
-  { name: "시집 D", sales: 600, revenue: 360000, views: 2100, activities: 5 },
-  { name: "소설 E", sales: 900, revenue: 540000, views: 3800, activities: 12 },
-];
 
 // const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 
@@ -117,18 +89,19 @@ function TabPanel({ children, value, index }: TabPanelProps) {
 
 function RouteComponent() {
   const user = useAtomValue(AuthState.user);
-  const isPublisher = user && user?.role === Role.ROLE_PUBLISHER;
+  const isPublisher =
+    user &&
+    (user?.role === Role.ROLE_PUBLISHER || user?.role === Role.ROLE_ADMIN);
   const queryClient = useQueryClient();
 
   const [currentTab, setCurrentTab] = useState(0);
-  const [timePeriod, setTimePeriod] = useState("month");
 
   // 새 도서 등록 관련 상태
   const [openNewBookDialog, setOpenNewBookDialog] = useState(false);
 
   // 재신청 관련 상태
   const [openResubmitDialog, setOpenResubmitDialog] = useState(false);
-  const [resubmitBook, setResubmitBook] = useState<PublisherBook | null>(null);
+  const [resubmitBook, setResubmitBook] = useState<BookRequest | null>(null);
 
   // 공통 폼 상태들
   const [bookTitle, setBookTitle] = useState("");
@@ -140,7 +113,7 @@ function RouteComponent() {
 
   // 도서 상세 다이얼로그 상태
   const [openBookDetailsDialog, setOpenBookDetailsDialog] = useState(false);
-  const [selectedBook, setSelectedBook] = useState<PublisherBook | null>(null);
+  const [selectedBook, setSelectedBook] = useState<BookRequest | null>(null);
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setCurrentTab(newValue);
@@ -158,7 +131,7 @@ function RouteComponent() {
   };
 
   // 재신청 핸들러
-  const handleOpenResubmitDialog = (book: PublisherBook) => {
+  const handleOpenResubmitDialog = (book: BookRequest) => {
     // 기존 책 정보로 폼 채우기
     setBookTitle(book.title);
     setBookAuthor(book.author);
@@ -189,14 +162,26 @@ function RouteComponent() {
 
   // 출판사 정보 조회
   const { data: publisherInfo } = useQuery({
-    queryKey: [
-      "publisherInfo",
-      user?.role === Role.ROLE_PUBLISHER ? user.publisherId : undefined,
-    ],
+    queryKey: ["publisherInfo", user?.memberId],
     queryFn: async () => {
       const response = await API_CLIENT.publisherController.publisherInfo();
       if (!response.isSuccessful) {
-        alert(response.errorMessage);
+        console.log(response.errorMessage);
+        throw new Error(response.errorMessage);
+      }
+      return response.data;
+    },
+    enabled: isPublisher,
+    initialData: {},
+  });
+
+  // 출판사 정보 조회
+  const { data: publisherStats } = useQuery({
+    queryKey: ["publisherStats", user?.memberId],
+    queryFn: async () => {
+      const response = await API_CLIENT.publisherController.getPublisherStats();
+      if (!response.isSuccessful) {
+        console.log(response.errorMessage);
         throw new Error(response.errorMessage);
       }
       return response.data;
@@ -206,11 +191,8 @@ function RouteComponent() {
   });
 
   // 전체 도서 목록 조회
-  const { data: books } = useQuery({
-    queryKey: [
-      "publisherBooks",
-      user?.role === Role.ROLE_PUBLISHER ? user.publisherId : undefined,
-    ],
+  const { data: unreleasedBooks } = useQuery({
+    queryKey: ["unreleasedBooks", user?.memberId],
     queryFn: async () => {
       const response =
         await API_CLIENT.ebookRequestController.getEbookRequests();
@@ -218,40 +200,49 @@ function RouteComponent() {
         alert(response.errorMessage);
         throw new Error(response.errorMessage);
       }
-      return response.data.content as PublisherBook[];
+      return response.data.content as BookRequest[];
     },
     enabled: isPublisher,
-    initialData: [] as PublisherBook[],
+    initialData: [] as BookRequest[],
   });
 
-  // 상태별로 필터링된 도서 목록들
-  const publishedBooks = useMemo(
-    () => books.filter((book) => book.status === "APPROVED"),
-    [books]
-  );
+  // 출판사 정보 조회
+  const { data: publishedBooks } = useQuery({
+    queryKey: ["publishedBooks", user?.memberId],
+    queryFn: async () => {
+      const response = await API_CLIENT.publisherController.getPublisherBooks();
+      if (!response.isSuccessful) {
+        console.log(response.errorMessage);
+        throw new Error(response.errorMessage);
+      }
+      return response.data.content;
+    },
+    enabled: isPublisher,
+    initialData: [],
+  });
 
   const pendingBooks = useMemo(
-    () => books.filter((book) => book.status === "PENDING"),
-    [books]
+    () => unreleasedBooks.filter((book) => book.status === "PENDING"),
+    [unreleasedBooks]
   );
 
   const rejectedBooks = useMemo(
-    () => books.filter((book) => book.status === "REJECTED"),
-    [books]
+    () => unreleasedBooks.filter((book) => book.status === "REJECTED"),
+    [unreleasedBooks]
   );
 
   // 선택된 책 정보 동기화
   useEffect(() => {
     if (!selectedBook) return;
 
-    const updatedBook = books.find(
+    const updatedBook = unreleasedBooks.find(
       (book) => book.requestId === selectedBook.requestId
     );
 
     if (updatedBook && updatedBook !== selectedBook) {
       setSelectedBook(updatedBook);
     }
-  }, [selectedBook, books]);
+  }, [selectedBook, unreleasedBooks]);
 
   // 도서 등록 뮤테이션
   const createBookMutation = useMutation({
@@ -263,6 +254,7 @@ function RouteComponent() {
       }
       return response;
     },
+
     onSuccess: () => {
       const isResubmit = openResubmitDialog;
       alert(
@@ -314,7 +306,7 @@ function RouteComponent() {
     });
   };
 
-  const handleClickBook = (book: PublisherBook) => {
+  const handleClickBook = (book: any) => {
     setSelectedBook(book);
     setOpenBookDetailsDialog(true);
   };
@@ -325,174 +317,221 @@ function RouteComponent() {
   };
 
   // 요약 통계 카드 (실제 데이터 반영)
-  const SummaryCards = () => (
-    <Grid container spacing={3} sx={{ mb: 4 }}>
-      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <Card>
-          <CardContent>
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="space-between"
-            >
-              <Box>
-                <Typography
-                  color="textSecondary"
-                  gutterBottom
-                  variant="overline"
-                >
-                  총 도서 수
-                </Typography>
-                <Typography variant="h4">{books.length}</Typography>
-                <Typography variant="body2" color="textSecondary">
-                  전체 등록 도서
-                </Typography>
-              </Box>
-              <Avatar sx={{ bgcolor: "primary.main" }}>
-                <MenuBook />
-              </Avatar>
-            </Box>
-          </CardContent>
-        </Card>
-      </Grid>
+  // 요약 통계 카드 (실제 데이터 반영)
+  const SummaryCards = () => {
+    // 헬퍼 함수: 증감 텍스트 생성
+    const getTrendText = (changeValue: any) => {
+      if (changeValue > 0) {
+        return {
+          text: `전월 대비 +${changeValue.toLocaleString()}`,
+          color: "#4caf50",
+        };
+      } else if (changeValue < 0) {
+        return {
+          text: `전월 대비 ${changeValue.toLocaleString()}`, // 이미 음수이므로 - 기호 포함됨
+          color: "#f44336",
+        };
+      } else {
+        return {
+          text: "변동 없음",
+          color: "#757575",
+        };
+      }
+    };
 
-      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <Card>
-          <CardContent>
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="space-between"
-            >
-              <Box>
-                <Typography
-                  color="textSecondary"
-                  gutterBottom
-                  variant="overline"
-                >
-                  출간 도서
-                </Typography>
-                <Typography variant="h4" color="success.main">
-                  {publishedBooks.length}
-                </Typography>
-                <Typography variant="body2" color="success.main">
-                  승인됨
-                </Typography>
-              </Box>
-              <Avatar sx={{ bgcolor: "success.main" }}>
-                <ShoppingCart />
-              </Avatar>
-            </Box>
-          </CardContent>
-        </Card>
-      </Grid>
+    // 매출 증감 텍스트 (통화 포맷)
+    const getRevenueTrendText = (changeValue: any) => {
+      if (changeValue > 0) {
+        return {
+          text: `전월 대비 +₩${changeValue.toLocaleString()}`,
+          color: "#4caf50",
+        };
+      } else if (changeValue < 0) {
+        return {
+          text: `전월 대비 -₩${Math.abs(changeValue).toLocaleString()}`,
+          color: "#f44336",
+        };
+      } else {
+        return {
+          text: "변동 없음",
+          color: "#757575",
+        };
+      }
+    };
 
-      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <Card>
-          <CardContent>
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="space-between"
-            >
-              <Box>
-                <Typography
-                  color="textSecondary"
-                  gutterBottom
-                  variant="overline"
-                >
-                  심사 대기
-                </Typography>
-                <Typography variant="h4" color="warning.main">
-                  {pendingBooks.length}
-                </Typography>
-                <Typography variant="body2" color="warning.main">
-                  검토 중
-                </Typography>
+    return (
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <Card variant="outlined">
+            <CardContent>
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+              >
+                <Box>
+                  <Typography
+                    color="textSecondary"
+                    gutterBottom
+                    variant="overline"
+                  >
+                    총 판매량
+                  </Typography>
+                  <Typography variant="h4">
+                    {(publisherStats?.totalSalesCount ?? 0).toLocaleString()}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: getTrendText(publisherStats?.increasedSalesCount)
+                        .color,
+                    }}
+                  >
+                    {getTrendText(publisherStats?.increasedSalesCount).text}
+                  </Typography>
+                </Box>
+                <Avatar sx={{ bgcolor: "primary.main" }}>
+                  <ShoppingCart />
+                </Avatar>
               </Box>
-              <Avatar sx={{ bgcolor: "warning.main" }}>
-                <PendingActions />
-              </Avatar>
-            </Box>
-          </CardContent>
-        </Card>
-      </Grid>
+            </CardContent>
+          </Card>
+        </Grid>
 
-      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <Card>
-          <CardContent>
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="space-between"
-            >
-              <Box>
-                <Typography
-                  color="textSecondary"
-                  gutterBottom
-                  variant="overline"
-                >
-                  거부된 도서
-                </Typography>
-                <Typography variant="h4" color="error.main">
-                  {rejectedBooks.length}
-                </Typography>
-                <Typography variant="body2" color="error.main">
-                  재검토 필요
-                </Typography>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <Card variant="outlined">
+            <CardContent>
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+              >
+                <Box>
+                  <Typography
+                    color="textSecondary"
+                    gutterBottom
+                    variant="overline"
+                  >
+                    총 매출
+                  </Typography>
+                  <Typography variant="h4" color="success.main">
+                    ₩{(publisherStats?.totalRevenue ?? 0).toLocaleString()}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: getRevenueTrendText(
+                        publisherStats?.increasedRevenue
+                      ).color,
+                    }}
+                  >
+                    {getRevenueTrendText(publisherStats?.increasedRevenue).text}
+                  </Typography>
+                </Box>
+                <Avatar sx={{ bgcolor: "success.main" }}>
+                  <Analytics />
+                </Avatar>
               </Box>
-              <Avatar sx={{ bgcolor: "error.main" }}>
-                <ErrorOutline />
-              </Avatar>
-            </Box>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <Card variant="outlined">
+            <CardContent>
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+              >
+                <Box>
+                  <Typography
+                    color="textSecondary"
+                    gutterBottom
+                    variant="overline"
+                  >
+                    총 조회수
+                  </Typography>
+                  <Typography variant="h4" color="info.main">
+                    {(publisherStats?.totalViewCount ?? 0).toLocaleString()}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    누적 도서 조회수
+                  </Typography>
+                </Box>
+                <Avatar sx={{ bgcolor: "info.main" }}>
+                  <Visibility />
+                </Avatar>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <Card variant="outlined">
+            <CardContent>
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+              >
+                <Box>
+                  <Typography
+                    color="textSecondary"
+                    gutterBottom
+                    variant="overline"
+                  >
+                    활동 선정
+                  </Typography>
+                  <Typography variant="h4" color="warning.main">
+                    {(publisherStats?.totalActivityCount ?? 0).toLocaleString()}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: getTrendText(
+                        publisherStats?.increasedActivityCount
+                      ).color,
+                    }}
+                  >
+                    {getTrendText(publisherStats?.increasedActivityCount).text}
+                  </Typography>
+                </Box>
+                <Avatar sx={{ bgcolor: "warning.main" }}>
+                  <PendingActions />
+                </Avatar>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
       </Grid>
-    </Grid>
-  );
+    );
+  };
 
   // 차트 섹션 (기존 유지)
   const ChartsSection = () => (
     <Grid container spacing={3} sx={{ mb: 4 }}>
       <Grid size={{ xs: 12, lg: 8 }}>
-        <Paper sx={{ p: 3 }}>
+        <Paper sx={{ p: 3 }} variant="outlined">
           <Box
             display="flex"
             justifyContent="space-between"
             alignItems="center"
             mb={2}
           >
-            <Typography variant="h6">판매 추이</Typography>
-            <FormControl size="small" sx={{ minWidth: 120 }}>
-              <InputLabel>기간</InputLabel>
-              <Select
-                value={timePeriod}
-                onChange={(e) => setTimePeriod(e.target.value)}
-                label="기간"
-              >
-                <MenuItem value="week">주간</MenuItem>
-                <MenuItem value="month">월간</MenuItem>
-                <MenuItem value="year">연간</MenuItem>
-              </Select>
-            </FormControl>
+            <Typography variant="h6">월별 매출</Typography>
           </Box>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={salesData}>
+            <LineChart data={publisherStats.monthlyRevenueList}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
+              <XAxis dataKey="month" />
               <YAxis />
               <Tooltip />
               <Line
                 type="monotone"
-                dataKey="sales"
+                dataKey="monthlyRevenue"
                 stroke="#8884d8"
-                name="판매량"
-              />
-              <Line
-                type="monotone"
-                dataKey="revenue"
-                stroke="#82ca9d"
-                name="매출"
+                name="수입"
               />
             </LineChart>
           </ResponsiveContainer>
@@ -500,7 +539,7 @@ function RouteComponent() {
       </Grid>
 
       <Grid size={{ xs: 12, lg: 4 }}>
-        <Paper sx={{ p: 3 }}>
+        <Paper sx={{ p: 3 }} variant="outlined">
           <Typography variant="h6" gutterBottom>
             도서 상태 분포
           </Typography>
@@ -510,7 +549,7 @@ function RouteComponent() {
                 data={[
                   {
                     name: "출간",
-                    value: publishedBooks.length,
+                    value: publishedBooks?.length,
                     color: "#00C49F",
                   },
                   {
@@ -552,11 +591,25 @@ function RouteComponent() {
   );
 
   if (!isPublisher) {
-    return <Alert>접근 권한 없음</Alert>;
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Alert severity="error">출판사 권한이 필요합니다.</Alert>
+      </Container>
+    );
   }
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      {publisherInfo.status === "PENDING" && (
+        <Box sx={{ padding: 2 }}>
+          <Alert severity="warning">관리자가 계정을 심사중입니다.</Alert>
+        </Box>
+      )}
+      {publisherInfo.status === "REJECTED" && (
+        <Box sx={{ padding: 2 }}>
+          <Alert severity="warning">관리자가 계정을 거절했습니다.</Alert>
+        </Box>
+      )}
       {/* 헤더 */}
       <Box
         display="flex"
@@ -582,6 +635,7 @@ function RouteComponent() {
           startIcon={<Add />}
           onClick={handleOpenNewBookDialog}
           size="large"
+          disabled={publisherInfo.status !== "APPROVED"}
         >
           새 도서 등록
         </Button>
@@ -594,7 +648,7 @@ function RouteComponent() {
       <ChartsSection />
 
       {/* 탭 네비게이션 */}
-      <Paper sx={{ mb: 3 }}>
+      <Paper sx={{ mb: 3 }} variant="outlined">
         <Tabs
           value={currentTab}
           onChange={handleTabChange}
@@ -602,7 +656,7 @@ function RouteComponent() {
         >
           <Tab
             icon={<MenuBook />}
-            label={`출간 도서 (${publishedBooks.length})`}
+            label={`출간 도서 (${publishedBooks?.length})`}
           />
           <Tab
             icon={<PendingActions />}
@@ -614,12 +668,11 @@ function RouteComponent() {
           />
           <Tab icon={<Analytics />} label="상세 분석" />
         </Tabs>
-
         {/* 출간 도서 탭 */}
         <TabPanel value={currentTab} index={0}>
           <Box mb={2}>
             <Alert severity="success">
-              현재 {publishedBooks.length}권의 도서가 출간되었습니다.
+              현재 {publishedBooks?.length}권의 도서가 출간되었습니다.
             </Alert>
           </Box>
           <TableContainer>
@@ -634,10 +687,10 @@ function RouteComponent() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {publishedBooks.length > 0 ? (
-                  publishedBooks.map((book) => (
+                {publishedBooks?.length && publishedBooks?.length > 0 ? (
+                  publishedBooks?.map((book) => (
                     <TableRow
-                      key={book.requestId}
+                      key={book.id}
                       onClick={() => handleClickBook(book)}
                       sx={{ cursor: "pointer" }}
                       hover
@@ -645,11 +698,11 @@ function RouteComponent() {
                       <TableCell>
                         <Box display="flex" alignItems="center" gap={2}>
                           <Avatar
-                            src={book.coverImageURL}
+                            src={book.bookCoverImageURL}
                             variant="rounded"
                             sx={{ width: 40, height: 50 }}
                           >
-                            {book.title[0]}
+                            {book.title![0]}
                           </Avatar>
                           <Box>
                             <Typography variant="subtitle2" fontWeight={600}>
@@ -663,17 +716,17 @@ function RouteComponent() {
                       </TableCell>
                       <TableCell>
                         <Typography variant="body2">
-                          {book.publisherName}
+                          {publisherInfo.publisherName}
                         </Typography>
                       </TableCell>
                       <TableCell align="right">
                         <Typography variant="body2" fontWeight={600}>
-                          ₩{book.price.toLocaleString()}
+                          ₩{book.price?.toLocaleString()}
                         </Typography>
                       </TableCell>
                       <TableCell align="right">
                         <Typography variant="body2">
-                          {(book.size / 1024 / 1024).toFixed(1)} MB
+                          {(book.size! / 1024 / 1024).toFixed(1)} MB
                         </Typography>
                       </TableCell>
                       <TableCell align="center">
@@ -699,7 +752,6 @@ function RouteComponent() {
             </Table>
           </TableContainer>
         </TabPanel>
-
         {/* 승인 대기 탭 */}
         <TabPanel value={currentTab} index={1}>
           <Box mb={2}>
@@ -761,7 +813,6 @@ function RouteComponent() {
             </Table>
           </TableContainer>
         </TabPanel>
-
         {/* 거부된 도서 탭 */}
         <TabPanel value={currentTab} index={2}>
           <Box mb={2}>
@@ -836,43 +887,418 @@ function RouteComponent() {
           </TableContainer>
         </TabPanel>
 
-        {/* 상세 분석 탭 */}
+        {/*상세 분석 탭*/}
         <TabPanel value={currentTab} index={3}>
           <Grid container spacing={3}>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <Paper sx={{ p: 3 }}>
+            {/* 도서별 매출 비교 */}
+            <Grid size={{ xs: 12, lg: 8 }}>
+              <Paper sx={{ p: 3 }} variant="outlined">
                 <Typography variant="h6" gutterBottom>
-                  도서별 성과 비교
+                  도서별 매출 분석
                 </Typography>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={bookSalesData}>
+                <ResponsiveContainer width="100%" height={350}>
+                  <BarChart data={publisherStats?.statsPerEbookList || []}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
+                    <XAxis
+                      dataKey="title"
+                      angle={-45}
+                      textAnchor="end"
+                      height={80}
+                      interval={0}
+                    />
                     <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="sales" fill="#8884d8" name="판매량" />
+                    <Tooltip
+                      formatter={(value, name) => [
+                        name === "총 매출"
+                          ? `₩${value.toLocaleString()}`
+                          : value.toLocaleString(),
+                        name,
+                      ]}
+                    />
+                    <Bar dataKey="totalRevenue" fill="#8884d8" name="총 매출" />
+                    <Bar
+                      dataKey="totalSalesCount"
+                      fill="#82ca9d"
+                      name="총 판매량"
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </Paper>
             </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <Paper sx={{ p: 3 }}>
+
+            {/* 도서별 활동 선정 현황 */}
+            <Grid size={{ xs: 12, lg: 4 }}>
+              <Paper sx={{ p: 3 }} variant="outlined">
                 <Typography variant="h6" gutterBottom>
                   활동 선정 현황
                 </Typography>
+                <ResponsiveContainer width="100%" height={350}>
+                  <PieChart>
+                    <Pie
+                      data={(() => {
+                        const sortedData = (
+                          publisherStats?.statsPerEbookList || []
+                        ).sort((a, b) => b.activityCount! - a.activityCount!);
+
+                        const top5 = sortedData.slice(0, 5);
+                        const others = sortedData.slice(5);
+
+                        const othersSum = others.reduce(
+                          (sum, item) => sum + item.activityCount!,
+                          0
+                        );
+
+                        const result = top5.map((item) => ({
+                          name:
+                            item.title!.length > 10
+                              ? item.title!.substring(0, 10) + "..."
+                              : item.title,
+                          value: item.activityCount,
+                          fullName: item.title,
+                        }));
+
+                        if (othersSum > 0) {
+                          result.push({
+                            name: "기타",
+                            value: othersSum,
+                            fullName: `기타 ${others.length}권`,
+                          });
+                        }
+
+                        return result;
+                      })()}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) =>
+                        `${name} ${(percent * 100).toFixed(0)}%`
+                      }
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {(() => {
+                        const colors = [
+                          "#0088FE",
+                          "#00C49F",
+                          "#FFBB28",
+                          "#FF8042",
+                          "#8884D8",
+                          "#82ca9d",
+                        ];
+                        const dataLength =
+                          Math.min(
+                            (publisherStats?.statsPerEbookList || []).length,
+                            5
+                          ) +
+                          ((publisherStats?.statsPerEbookList || []).length > 5
+                            ? 1
+                            : 0);
+
+                        return Array.from(
+                          { length: dataLength },
+                          (_, index) => (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={colors[index % colors.length]}
+                            />
+                          )
+                        );
+                      })()}
+                    </Pie>
+                    <Tooltip
+                      formatter={(value, name, props) => [
+                        value.toLocaleString(),
+                        props.payload?.fullName || name,
+                      ]}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </Paper>
+            </Grid>
+
+            {/* 도서별 조회수 vs 판매량 산점도 */}
+            <Grid size={{ xs: 12, lg: 6 }}>
+              <Paper sx={{ p: 3 }} variant="outlined">
+                <Typography variant="h6" gutterBottom>
+                  조회수 대비 판매 전환율
+                </Typography>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={bookSalesData}>
+                  <BarChart data={publisherStats?.statsPerEbookList}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
+                    <XAxis
+                      dataKey="title"
+                      angle={-45}
+                      textAnchor="end"
+                      height={80}
+                      interval={0}
+                    />
                     <YAxis />
-                    <Tooltip />
+                    <Tooltip
+                      formatter={(value, name) => [
+                        value.toLocaleString(),
+                        name,
+                      ]}
+                    />
+                    <Bar dataKey="viewCount" fill="#ffc658" name="조회수" />
                     <Bar
-                      dataKey="activities"
-                      fill="#82ca9d"
-                      name="활동 선정 수"
+                      dataKey="totalSalesCount"
+                      fill="#8dd1e1"
+                      name="판매량"
                     />
                   </BarChart>
                 </ResponsiveContainer>
+              </Paper>
+            </Grid>
+
+            {/* 월별 증가 판매량 */}
+            <Grid size={{ xs: 12, lg: 6 }}>
+              <Paper sx={{ p: 3 }} variant="outlined">
+                <Typography variant="h6" gutterBottom>
+                  최근 증가 판매량 (도서별)
+                </Typography>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={(() => {
+                        const sortedData = (
+                          publisherStats?.increasedSalesCountsPerEbook || []
+                        ).sort(
+                          (a, b) => b.totalSalesCount! - a.totalSalesCount!
+                        );
+
+                        const top5 = sortedData.slice(0, 5);
+                        const others = sortedData.slice(5);
+
+                        const othersSum = others.reduce(
+                          (sum, item) => sum + item.totalSalesCount!,
+                          0
+                        );
+
+                        const result = top5.map((item) => ({
+                          name:
+                            item.bookName!.length > 10
+                              ? item.bookName!.substring(0, 10) + "..."
+                              : item.bookName,
+                          value: item.totalSalesCount,
+                          fullName: item.bookName,
+                        }));
+
+                        if (othersSum > 0) {
+                          result.push({
+                            name: "기타",
+                            value: othersSum,
+                            fullName: `기타 ${others.length}권`,
+                          });
+                        }
+
+                        return result;
+                      })()}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) =>
+                        `${name} ${(percent * 100).toFixed(0)}%`
+                      }
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {(() => {
+                        const colors = [
+                          "#ff7300",
+                          "#00C49F",
+                          "#FFBB28",
+                          "#FF8042",
+                          "#8884D8",
+                          "#82ca9d",
+                        ];
+                        const dataLength =
+                          Math.min(
+                            (publisherStats?.increasedSalesCountsPerEbook || [])
+                              .length,
+                            5
+                          ) +
+                          ((publisherStats?.increasedSalesCountsPerEbook || [])
+                            .length > 5
+                            ? 1
+                            : 0);
+
+                        return Array.from(
+                          { length: dataLength },
+                          (_, index) => (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={colors[index % colors.length]}
+                            />
+                          )
+                        );
+                      })()}
+                    </Pie>
+                    <Tooltip
+                      formatter={(value, name, props) => [
+                        value.toLocaleString(),
+                        props.payload?.fullName || name,
+                      ]}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </Paper>
+            </Grid>
+
+            {/* 도서별 성과 레이더 차트 (상위 5개 도서) */}
+            <Grid size={{ xs: 12, lg: 8 }}>
+              <Paper sx={{ p: 3 }} variant="outlined">
+                <Typography variant="h6" gutterBottom>
+                  성과 매트릭스 (매출 기준 상위 5개 도서)
+                </Typography>
+                <ResponsiveContainer width="100%" height={350}>
+                  <LineChart
+                    data={
+                      publisherStats?.statsPerEbookList
+                        ?.sort((a, b) => b.totalRevenue! - a.totalRevenue!)
+                        ?.slice(0, 5)
+                        ?.map((book) => ({
+                          title:
+                            book.title!.length > 8
+                              ? book.title!.substring(0, 8) + "..."
+                              : book.title,
+                          매출: book.totalRevenue! / 1000, // 천원 단위
+                          판매량: book.totalSalesCount,
+                          조회수: book.viewCount,
+                          활동선정: book.activityCount,
+                        })) || []
+                    }
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="title" />
+                    <YAxis />
+                    <Tooltip
+                      formatter={(value: number, name) => [
+                        name === "매출"
+                          ? `₩${(value * 1000).toLocaleString()}`
+                          : value.toLocaleString(),
+                        name,
+                      ]}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="매출"
+                      stroke="#8884d8"
+                      strokeWidth={2}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="판매량"
+                      stroke="#82ca9d"
+                      strokeWidth={2}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="조회수"
+                      stroke="#ffc658"
+                      strokeWidth={2}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="활동선정"
+                      stroke="#ff7300"
+                      strokeWidth={2}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </Paper>
+            </Grid>
+
+            {/* 성과 요약 테이블 */}
+            <Grid size={{ xs: 12 }}>
+              <Paper sx={{ p: 3 }} variant="outlined">
+                <Typography variant="h6" gutterBottom>
+                  도서별 성과 요약
+                </Typography>
+                <TableContainer>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>도서명</TableCell>
+                        <TableCell>저자</TableCell>
+                        <TableCell align="right">총 매출</TableCell>
+                        <TableCell align="right">판매량</TableCell>
+                        <TableCell align="right">조회수</TableCell>
+                        <TableCell align="right">활동 선정</TableCell>
+                        <TableCell align="right">전환율</TableCell>
+                        <TableCell align="right">평균 단가</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {publisherStats?.statsPerEbookList
+                        ?.sort((a, b) => b.totalRevenue! - a.totalRevenue!)
+                        ?.map((book) => {
+                          const conversionRate =
+                            book.viewCount! > 0
+                              ? (book.totalSalesCount! / book.viewCount!) * 100
+                              : 0;
+                          const avgPrice =
+                            book.totalSalesCount! > 0
+                              ? book.totalRevenue! / book.totalSalesCount!
+                              : 0;
+
+                          return (
+                            <TableRow key={book.bookId} hover>
+                              <TableCell>
+                                <Box display="flex" alignItems="center" gap={1}>
+                                  <Avatar
+                                    src={book.bookCoverImageURL}
+                                    variant="rounded"
+                                    sx={{ width: 24, height: 32 }}
+                                  >
+                                    {book.title![0]}
+                                  </Avatar>
+                                  <Typography variant="body2" fontWeight={500}>
+                                    {book.title}
+                                  </Typography>
+                                </Box>
+                              </TableCell>
+                              <TableCell>{book.author}</TableCell>
+                              <TableCell
+                                align="right"
+                                sx={{ fontWeight: 600, color: "success.main" }}
+                              >
+                                ₩{book.totalRevenue!.toLocaleString()}
+                              </TableCell>
+                              <TableCell align="right">
+                                {book.totalSalesCount!.toLocaleString()}
+                              </TableCell>
+                              <TableCell align="right">
+                                {book.viewCount!.toLocaleString()}
+                              </TableCell>
+                              <TableCell align="right">
+                                {book.activityCount!.toLocaleString()}
+                              </TableCell>
+                              <TableCell align="right">
+                                <Typography
+                                  variant="body2"
+                                  color={
+                                    conversionRate > 5
+                                      ? "success.main"
+                                      : conversionRate > 1
+                                        ? "warning.main"
+                                        : "error.main"
+                                  }
+                                  fontWeight={500}
+                                >
+                                  {conversionRate.toFixed(1)}%
+                                </Typography>
+                              </TableCell>
+                              <TableCell align="right">
+                                ₩{avgPrice.toLocaleString()}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
               </Paper>
             </Grid>
           </Grid>
@@ -940,7 +1366,7 @@ function BookInfoDialog({
   onClose,
   openRequestDialog,
 }: {
-  book: PublisherBook;
+  book: BookRequest;
   open: boolean;
   onClose(): void;
   openRequestDialog(): void;
@@ -997,22 +1423,6 @@ function BookInfoDialog({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
-  // 상태별 색상 및 텍스트
-  const getStatusDisplay = (status: string) => {
-    switch (status) {
-      case "PENDING":
-        return { color: "warning" as const, text: "심사중" };
-      case "APPROVED":
-        return { color: "success" as const, text: "승인됨" };
-      case "REJECTED":
-        return { color: "error" as const, text: "거부됨" };
-      default:
-        return { color: "default" as const, text: status };
-    }
-  };
-
-  const statusDisplay = getStatusDisplay(book.status);
-
   const handleOpenRequestDialog = () => {
     openRequestDialog();
     onClose();
@@ -1053,16 +1463,6 @@ function BookInfoDialog({
             <Typography variant="subtitle1" color="textSecondary">
               {book.author}
             </Typography>
-
-            {/* 상태 표시 */}
-            <Box mt={1}>
-              <Chip
-                label={statusDisplay.text}
-                color={statusDisplay.color}
-                size="small"
-                variant="outlined"
-              />
-            </Box>
           </Box>
 
           <Divider />
