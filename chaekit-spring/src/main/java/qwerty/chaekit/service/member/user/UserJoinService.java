@@ -18,6 +18,7 @@ import qwerty.chaekit.service.member.MemberJoinHelper;
 import qwerty.chaekit.service.member.token.RefreshTokenService;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UserJoinService {
     private final MemberJoinHelper memberJoinHelper;

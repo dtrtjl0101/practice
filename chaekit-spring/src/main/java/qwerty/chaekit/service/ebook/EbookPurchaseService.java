@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.ebook.credit.usage.CreditUsageTransaction;
 import qwerty.chaekit.domain.ebook.credit.usage.CreditUsageTransactionRepository;
@@ -25,6 +26,7 @@ import qwerty.chaekit.service.util.EntityFinder;
 import qwerty.chaekit.service.util.FileService;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class EbookPurchaseService {
     private final CreditUsageTransactionRepository creditUsageTransactionRepository;
@@ -36,6 +38,7 @@ public class EbookPurchaseService {
     private final FileService fileService;
     private final EntityFinder entityFinder;
 
+    @Transactional
     public EbookPurchaseResponse purchaseEbook(Long ebookId, Long userId) {
         UserProfile buyer = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));

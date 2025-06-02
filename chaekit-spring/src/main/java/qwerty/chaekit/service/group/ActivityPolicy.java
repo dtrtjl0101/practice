@@ -3,6 +3,7 @@ package qwerty.chaekit.service.group;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.group.activity.activitymember.ActivityMemberRepository;
 import qwerty.chaekit.domain.group.activity.repository.ActivityRepository;
@@ -16,6 +17,7 @@ import qwerty.chaekit.service.ebook.EbookPolicy;
 import java.time.LocalDate;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ActivityPolicy {
     private final ActivityRepository activityRepository;

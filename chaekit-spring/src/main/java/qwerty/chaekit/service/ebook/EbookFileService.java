@@ -23,12 +23,14 @@ import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.security.resolver.PublisherToken;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.mapper.EbookRequestMapper;
+import qwerty.chaekit.service.util.EmailNotificationService;
 import qwerty.chaekit.service.util.EntityFinder;
 import qwerty.chaekit.service.util.FileService;
 
 import java.util.List;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class EbookFileService {
     private final EbookRepository ebookRepository;
@@ -37,6 +39,7 @@ public class EbookFileService {
     private final EntityFinder entityFinder;
     private final EbookRequestRepository ebookRequestRepository;
     private final EbookRequestMapper ebookRequestMapper;
+    private final EmailNotificationService emailNotificationService;
 
     @Transactional
     public EbookPostResponse uploadEbook(PublisherToken publisherToken, EbookPostRequest request) {
@@ -132,6 +135,7 @@ public class EbookFileService {
         assertRequestIsPending(request);
         
         request.reject(requestBody.reason());
+        emailNotificationService.sendEbookRejectionEmail(publisher.getMember().getEmail(), requestBody.reason());
     }
 
     @Transactional(readOnly = true)
