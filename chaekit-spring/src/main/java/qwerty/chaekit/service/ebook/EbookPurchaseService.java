@@ -26,6 +26,7 @@ import qwerty.chaekit.service.util.EntityFinder;
 import qwerty.chaekit.service.util.FileService;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class EbookPurchaseService {
     private final CreditUsageTransactionRepository creditUsageTransactionRepository;

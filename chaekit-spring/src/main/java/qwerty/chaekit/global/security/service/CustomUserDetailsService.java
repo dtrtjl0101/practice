@@ -5,6 +5,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.member.Member;
 import qwerty.chaekit.domain.member.MemberRepository;
 import qwerty.chaekit.domain.member.enums.Role;
@@ -17,6 +18,7 @@ import qwerty.chaekit.global.security.model.CustomUserDetails;
 import java.util.Objects;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
     private final MemberRepository memberRepository;

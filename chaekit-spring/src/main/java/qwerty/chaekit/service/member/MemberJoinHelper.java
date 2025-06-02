@@ -3,6 +3,7 @@ package qwerty.chaekit.service.member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import qwerty.chaekit.domain.member.Member;
 import qwerty.chaekit.domain.member.MemberRepository;
@@ -13,6 +14,7 @@ import qwerty.chaekit.service.member.verification.EmailVerificationService;
 import qwerty.chaekit.service.util.FileService;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class MemberJoinHelper {
     private final MemberRepository memberRepository;

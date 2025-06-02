@@ -30,6 +30,7 @@ import qwerty.chaekit.service.util.FileService;
 import java.util.List;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class EbookFileService {
     private final EbookRepository ebookRepository;

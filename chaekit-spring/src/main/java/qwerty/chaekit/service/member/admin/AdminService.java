@@ -26,6 +26,7 @@ import qwerty.chaekit.service.notification.NotificationService;
 import qwerty.chaekit.service.util.FileService;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class AdminService {
     private final PublisherProfileRepository publisherRepository;

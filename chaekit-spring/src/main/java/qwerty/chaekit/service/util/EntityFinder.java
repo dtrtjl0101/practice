@@ -2,6 +2,7 @@ package qwerty.chaekit.service.util;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.ebook.repository.EbookRepository;
 import qwerty.chaekit.domain.ebook.request.EbookRequest;
@@ -25,6 +26,7 @@ import qwerty.chaekit.global.exception.NotFoundException;
 import static qwerty.chaekit.global.enums.ErrorCode.*;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class EntityFinder {
 
