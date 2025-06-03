@@ -1,5 +1,5 @@
 import { getDefaultStore } from "jotai";
-import getLoggedInUserFromLocalStorage from "../../util/getLoggedInUserFromLocalStorage";
+import getLoggedInUserFromLocalStorage from "../../utils/getLoggedInUserFromLocalStorage";
 import State from "../../states";
 
 export default function autoLogin() {

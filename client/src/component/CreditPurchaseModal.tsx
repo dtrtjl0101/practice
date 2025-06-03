@@ -13,7 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../api/api";
 import { useEffect, useState } from "react";
 import { paymentSuccessToken } from "../types/paymentSuccessMessage";
-import { setResponsiveStyleValueSm } from "../util/setResponsiveStyleValue";
+import { setResponsiveStyleValueSm } from "../utils/setResponsiveStyleValue";
 
 export default function CreditPurchaseModal(props: {
   open: boolean;

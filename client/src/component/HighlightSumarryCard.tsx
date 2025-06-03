@@ -20,7 +20,7 @@ import {
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../api/api";
 import { Role } from "../types/role";
-import createReactionMap from "../util/createReactionMap";
+import createReactionMap from "../utils/createReactionMap";
 
 export default function HighlightSummaryCard({
   highlightSummary,

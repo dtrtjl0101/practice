@@ -22,7 +22,7 @@ import { Fragment, useState } from "react";
 import { Delete, Edit, Sort } from "@mui/icons-material";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import API_CLIENT from "../api/api";
-import { setResponsiveStyleValueSm } from "../util/setResponsiveStyleValue";
+import { setResponsiveStyleValueSm } from "../utils/setResponsiveStyleValue";
 
 type HighlightFilterKind =
   | {
