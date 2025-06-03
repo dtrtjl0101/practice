@@ -25,14 +25,12 @@ export interface CoachmarkStep {
 export interface CoachmarkProps {
   steps: CoachmarkStep[];
   isOpen: boolean;
-  onClose: () => void;
   onComplete: () => void;
 }
 
 export default function Coachmark({
   steps,
   isOpen,
-  onClose,
   onComplete,
 }: CoachmarkProps) {
   const theme = useTheme();
@@ -101,7 +99,7 @@ export default function Coachmark({
   };
 
   const handleSkip = () => {
-    onClose();
+    onComplete();
   };
 
   const getTooltipPosition = () => {
@@ -198,7 +196,7 @@ export default function Coachmark({
                 </Typography>
                 <IconButton
                   size="small"
-                  onClick={onClose}
+                  onClick={onComplete}
                   sx={{ mt: -1, mr: -1 }}
                 >
                   <Close fontSize="small" />
