@@ -29,6 +29,7 @@ import loadBook from "../utils/loadBook";
 import HighlightCard from "../component/HighlightCard";
 import HighlightCreationModal from "../component/HighlightCreationModal";
 import loadLocations from "../utils/loadLocations";
+import Coachmark, { useCoachmark } from "../component/Coachmark";
 
 export const Route = createFileRoute("/reader/$bookId")({
   component: RouteComponent,
@@ -102,6 +103,7 @@ function RouteComponent() {
   const [showHighlightsOnOnlyCurrentPage, setShowAllHighlights] =
     useState(true);
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
+  const { isOpen, completeCoachmark } = useCoachmark("reader");
 
   const spine = useMemo(() => {
     if (!location) {
@@ -310,263 +312,294 @@ function RouteComponent() {
     });
 
   return (
-    <Box
-      sx={{
-        maxWidth: "none",
-        width: "100vw",
-        height: "100vh",
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
+    <>
+      <Coachmark
+        steps={[
+          {
+            target: "",
+            title: "책 읽기",
+            content:
+              "여기에서 책을 읽을 수 있습니다. 텍스트를 선택하면 하이라이트를 만들 수 있어요.",
+            placement: "left",
+          },
+          {
+            target: ".coachmark-highlight-button",
+            title: "하이라이트",
+            content: "이 버튼을 클릭하면 저장된 하이라이트들을 볼 수 있습니다.",
+            placement: "left",
+          },
+          {
+            target: ".coachmark-reading-progress-button",
+            title: "읽기 진행도",
+            content:
+              "읽기 진행도를 자동으로 저장합니다. 마지막으로 읽은 곳부터 다시 읽을 수 있습니다",
+            placement: "left",
+          },
+        ]}
+        isOpen={isOpen}
+        onComplete={completeCoachmark}
+      />
       <Box
         sx={{
+          maxWidth: "none",
           width: "100vw",
-          position: "absolute",
+          height: "100vh",
+          position: "relative",
+          overflow: "hidden",
         }}
       >
-        <ReadProgressSlider
-          min={0}
-          max={100}
-          value={localReadProgress}
-          onChange={(_, value) => {
-            const percent = typeof value === "number" ? value : value[0];
-            const cfi = rendition?.book.locations.cfiFromPercentage(
-              percent / 100
-            );
-            if (!cfi) {
-              return;
-            }
-            setLocation(cfi);
-          }}
-          slots={{
-            mark: ReadProgressSliderMark,
-          }}
-          marks={readProgressSliderMarks}
-        />
-        <Snackbar
-          anchorOrigin={{ vertical: "top", horizontal: "center" }}
-          open={readTogetherSnackbarOpen}
-          onClose={() => {
-            setReadTogetherSnackbarOpen(false);
-          }}
-          action={
-            <IconButton
-              size="small"
-              aria-label="close"
-              color="inherit"
-              onClick={() => setReadTogetherSnackbarOpen(false)}
-            >
-              <Close />
-            </IconButton>
-          }
-          message="함께읽기 활성화됨"
-          autoHideDuration={3000}
+        <Box
           sx={{
+            width: "100vw",
             position: "absolute",
-            top: theme.spacing(2),
-            left: "50%",
-            transform: "translateX(-50%)",
-          }}
-        />
-        <Stack
-          direction="column"
-          alignItems="flex-end"
-          justifyContent={"flex-end"}
-          spacing={2}
-          sx={{
-            position: "absolute",
-            top: theme.spacing(2),
-            left: theme.spacing(2),
-            right: theme.spacing(2),
           }}
         >
-          {canGoBack && (
-            <Fab
-              size="small"
-              onClick={() => {
-                router.history.back();
-              }}
-            >
-              <Close />
-            </Fab>
-          )}
-          <Fab
-            size="small"
-            onClick={() => {
-              setOpenHighlightDrawer(true);
+          <ReadProgressSlider
+            min={0}
+            max={100}
+            value={localReadProgress}
+            onChange={(_, value) => {
+              const percent = typeof value === "number" ? value : value[0];
+              const cfi = rendition?.book.locations.cfiFromPercentage(
+                percent / 100
+              );
+              if (!cfi) {
+                return;
+              }
+              setLocation(cfi);
             }}
-            sx={{}}
-          >
-            <Badge badgeContent={highlightsInPage.length} color="primary">
-              <Note />
-            </Badge>
-          </Fab>
-          <Fab
-            size="small"
-            onClick={() => {
-              navigate({
-                to: ".",
-                search: {
-                  activityId,
-                  groupId,
-                  temporalProgress: !temporalProgress,
-                  location,
-                },
-                replace: true,
-              });
+            slots={{
+              mark: ReadProgressSliderMark,
             }}
-          >
-            <Timelapse sx={{ opacity: temporalProgress ? 0.5 : 1 }} />
-          </Fab>
-        </Stack>
-        {selection && (
-          <Fab
-            size="small"
+            marks={readProgressSliderMarks}
+          />
+          <Snackbar
+            anchorOrigin={{ vertical: "top", horizontal: "center" }}
+            open={readTogetherSnackbarOpen}
+            onClose={() => {
+              setReadTogetherSnackbarOpen(false);
+            }}
+            action={
+              <IconButton
+                size="small"
+                aria-label="close"
+                color="inherit"
+                onClick={() => setReadTogetherSnackbarOpen(false)}
+              >
+                <Close />
+              </IconButton>
+            }
+            message="함께읽기 활성화됨"
+            autoHideDuration={3000}
             sx={{
               position: "absolute",
-              left: selectionRightBottomPosition.left,
-              top: selectionRightBottomPosition.top,
+              top: theme.spacing(2),
+              left: "50%",
+              transform: "translateX(-50%)",
             }}
-            onClick={() => {
-              setOpenHighlightCreationModal(true);
+          />
+          <Stack
+            direction="column"
+            alignItems="flex-end"
+            justifyContent={"flex-end"}
+            spacing={2}
+            sx={{
+              position: "absolute",
+              top: theme.spacing(2),
+              left: theme.spacing(2),
+              right: theme.spacing(2),
             }}
           >
-            <NoteAdd />
-          </Fab>
-        )}
-      </Box>
-      <HighlightCreationModal
-        open={openHighlightCreationModal}
-        onClose={() => setOpenHighlightCreationModal(false)}
-        selection={selection}
-        addHighlight={addHighlight}
-      />
-      <Drawer
-        anchor="right"
-        open={openHighlightDrawer}
-        onClose={() => setOpenHighlightDrawer(false)}
-      >
-        <Stack width={320} height={"100%"}>
-          <Stack direction={"row"} p={2}>
-            <Typography variant="h6" align="left" flexGrow={1} noWrap>
-              하이라이트
-            </Typography>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={showHighlightsOnOnlyCurrentPage}
-                  onChange={() => setShowAllHighlights((v) => !v)}
-                  size="small"
-                />
-              }
-              label="현재 페이지만"
-            />
-            <IconButton
+            {canGoBack && (
+              <Fab
+                size="small"
+                onClick={() => {
+                  router.history.back();
+                }}
+              >
+                <Close />
+              </Fab>
+            )}
+            <Fab
+              className="coachmark-highlight-button"
+              size="small"
               onClick={() => {
-                setOpenHighlightDrawer(false);
+                setOpenHighlightDrawer(true);
+              }}
+              sx={{}}
+            >
+              <Badge badgeContent={highlightsInPage.length} color="primary">
+                <Note />
+              </Badge>
+            </Fab>
+            <Fab
+              className="coachmark-reading-progress-button"
+              size="small"
+              onClick={() => {
+                navigate({
+                  to: ".",
+                  search: {
+                    activityId,
+                    groupId,
+                    temporalProgress: !temporalProgress,
+                    location,
+                  },
+                  replace: true,
+                });
               }}
             >
-              <Close />
-            </IconButton>
+              <Timelapse sx={{ opacity: temporalProgress ? 0.5 : 1 }} />
+            </Fab>
           </Stack>
-          <Box height={"100%"} overflow="auto">
-            <Stack spacing={1} p={2}>
-              {(showHighlightsOnOnlyCurrentPage
-                ? highlightsInPage
-                : highlights
-              ).map((highlight) => (
-                <HighlightCard
-                  key={highlight.id}
-                  highlight={highlight}
-                  groupId={groupId}
-                  activityId={activityId}
-                  focused={focusedHighlight?.id === highlight.id}
-                  refetchHighlights={refetchHighlights}
-                  shouldFade={
-                    !!focusedHighlight && focusedHighlight.id !== highlight.id
-                  }
-                  onClick={() => {
-                    onHighlightClick(highlight);
-                    setLocation(highlight.cfi);
-                  }}
-                />
-              ))}
+          {selection && (
+            <Fab
+              size="small"
+              sx={{
+                position: "absolute",
+                left: selectionRightBottomPosition.left,
+                top: selectionRightBottomPosition.top,
+              }}
+              onClick={() => {
+                setOpenHighlightCreationModal(true);
+              }}
+            >
+              <NoteAdd />
+            </Fab>
+          )}
+        </Box>
+        <HighlightCreationModal
+          open={openHighlightCreationModal}
+          onClose={() => setOpenHighlightCreationModal(false)}
+          selection={selection}
+          addHighlight={addHighlight}
+        />
+        <Drawer
+          anchor="right"
+          open={openHighlightDrawer}
+          onClose={() => setOpenHighlightDrawer(false)}
+        >
+          <Stack width={320} height={"100%"}>
+            <Stack direction={"row"} p={2}>
+              <Typography variant="h6" align="left" flexGrow={1} noWrap>
+                하이라이트
+              </Typography>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={showHighlightsOnOnlyCurrentPage}
+                    onChange={() => setShowAllHighlights((v) => !v)}
+                    size="small"
+                  />
+                }
+                label="현재 페이지만"
+              />
+              <IconButton
+                onClick={() => {
+                  setOpenHighlightDrawer(false);
+                }}
+              >
+                <Close />
+              </IconButton>
             </Stack>
-          </Box>
-        </Stack>
-      </Drawer>
-      <ReactReader
-        ref={readerRef}
-        url={book}
-        epubOptions={{
-          spread: "none",
-        }}
-        location={location}
-        locationChanged={(epubcfi: string) => {
-          setLocation(epubcfi);
-        }}
-        handleTextSelected={(cfiRange, contents) => {
-          const window = contents.window;
-          const selection = window.getSelection();
-          if (!selection) {
-            setSelection(null);
-            return;
-          }
+            <Box height={"100%"} overflow="auto">
+              <Stack spacing={1} p={2}>
+                {(showHighlightsOnOnlyCurrentPage
+                  ? highlightsInPage
+                  : highlights
+                ).map((highlight) => (
+                  <HighlightCard
+                    key={highlight.id}
+                    highlight={highlight}
+                    groupId={groupId}
+                    activityId={activityId}
+                    focused={focusedHighlight?.id === highlight.id}
+                    refetchHighlights={refetchHighlights}
+                    shouldFade={
+                      !!focusedHighlight && focusedHighlight.id !== highlight.id
+                    }
+                    onClick={() => {
+                      onHighlightClick(highlight);
+                      setLocation(highlight.cfi);
+                    }}
+                  />
+                ))}
+              </Stack>
+            </Box>
+          </Stack>
+        </Drawer>
+        <ReactReader
+          ref={readerRef}
+          url={book}
+          epubOptions={{
+            spread: "none",
+          }}
+          location={location}
+          locationChanged={(epubcfi: string) => {
+            setLocation(epubcfi);
+          }}
+          handleTextSelected={(cfiRange, contents) => {
+            const window = contents.window;
+            const selection = window.getSelection();
+            if (!selection) {
+              setSelection(null);
+              return;
+            }
 
-          contents.document.addEventListener(
-            "selectionchange",
-            () => {
-              const selection = window.getSelection();
-              if (!selection || selection.isCollapsed) {
-                setSelection(null);
-                setFocusedHighlight(null);
-              }
-            },
-            { once: true }
-          );
+            contents.document.addEventListener(
+              "selectionchange",
+              () => {
+                const selection = window.getSelection();
+                if (!selection || selection.isCollapsed) {
+                  setSelection(null);
+                  setFocusedHighlight(null);
+                }
+              },
+              { once: true }
+            );
 
-          const selectionClientRect = selection
-            .getRangeAt(0)
-            .getBoundingClientRect();
-          const viewerElement =
-            readerRef.current?.readerRef.current?.viewerRef.current;
-          if (!viewerElement) {
-            return;
-          }
-          const readerIframeElement = viewerElement.querySelector("iframe");
-          if (!readerIframeElement) {
-            return;
-          }
-          const viewerClientRect = readerIframeElement.getBoundingClientRect();
-          if (!viewerClientRect) {
-            return;
-          }
+            const selectionClientRect = selection
+              .getRangeAt(0)
+              .getBoundingClientRect();
+            const viewerElement =
+              readerRef.current?.readerRef.current?.viewerRef.current;
+            if (!viewerElement) {
+              return;
+            }
+            const readerIframeElement = viewerElement.querySelector("iframe");
+            if (!readerIframeElement) {
+              return;
+            }
+            const viewerClientRect =
+              readerIframeElement.getBoundingClientRect();
+            if (!viewerClientRect) {
+              return;
+            }
 
-          setSelectionRightBottomPosition({
-            left:
-              selectionClientRect.left +
-              selectionClientRect.width +
-              viewerClientRect.left,
-            top:
-              selectionClientRect.top +
-              selectionClientRect.height * 0.5 +
-              viewerClientRect.top,
-          });
-          setSelection({
-            text: selection.toString(),
-            epubcfi: cfiRange,
-          });
-        }}
-        showToc={false}
-        getRendition={(newRendition) => {
-          newRendition.once("started", async () => {
-            await loadLocations(bookId, newRendition).then(forceUpdate);
-          });
-          setRendition(newRendition);
-        }}
-      />
-    </Box>
+            setSelectionRightBottomPosition({
+              left:
+                selectionClientRect.left +
+                selectionClientRect.width +
+                viewerClientRect.left,
+              top:
+                selectionClientRect.top +
+                selectionClientRect.height * 0.5 +
+                viewerClientRect.top,
+            });
+            setSelection({
+              text: selection.toString(),
+              epubcfi: cfiRange,
+            });
+          }}
+          showToc={false}
+          getRendition={(newRendition) => {
+            newRendition.once("started", async () => {
+              await loadLocations(bookId, newRendition).then(forceUpdate);
+            });
+            setRendition(newRendition);
+          }}
+        />
+      </Box>
+    </>
   );
 }
 

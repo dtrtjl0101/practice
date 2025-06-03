@@ -16,6 +16,7 @@ import {
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import BookList from "../component/BookList";
 import EventCarousel from "../component/EventCarousel";
+import Coachmark, { useCoachmark } from "../component/Coachmark";
 import {
   Groups,
   MenuBook,
@@ -327,7 +328,7 @@ function FeaturedGroupsSection() {
   ];
 
   return (
-    <Box sx={{ mb: 6 }}>
+    <Box sx={{ mb: 6 }} className="coachmark-popular-groups">
       <Stack
         direction="row"
         justifyContent="space-between"
@@ -502,6 +503,7 @@ function HowItWorksSection() {
 // Main Home Component
 function Home() {
   const navigate = useNavigate();
+  const { isOpen, completeCoachmark } = useCoachmark("home");
   const theme = useTheme();
 
   return (
@@ -513,8 +515,10 @@ function Home() {
         {/* Live Stats */}
         <StatsSection />
 
-        {/* Event Carousel */}
-        <EventCarousel />
+        <Box className="coachmark-event-carousel">
+          {/* Event Carousel */}
+          <EventCarousel />
+        </Box>
 
         {/* Featured Groups */}
         <FeaturedGroupsSection />
@@ -522,7 +526,7 @@ function Home() {
         {/* Categories */}
         <CategoriesSection />
 
-        <Box>
+        <Box className="coachmark-popular-books">
           <BookList
             size="small"
             title="🏆 이번 주 베스트셀러"
@@ -597,6 +601,32 @@ function Home() {
           </Stack>
         </Paper>
       </Stack>
+      <Coachmark
+        steps={[
+          {
+            target: ".coachmark-event-carousel",
+            title: "환영합니다! 📚",
+            content: "여기서 최신 독서 이벤트와 공지사항을 확인할 수 있습니다.",
+            placement: "bottom",
+          },
+          {
+            target: ".coachmark-popular-groups",
+            title: "인기 모임 🏆",
+            content:
+              "다른 독서 애호가들과 함께 책을 읽고 토론할 수 있는 인기 모임들입니다. '더보기'를 클릭해서 더 많은 모임을 둘러보세요!",
+            placement: "bottom",
+          },
+          {
+            target: ".coachmark-popular-books",
+            title: "인기 도서 📖",
+            content:
+              "지금 가장 인기 있는 책들을 확인하고, 새로운 읽을거리를 찾아보세요.",
+            placement: "top",
+          },
+        ]}
+        isOpen={isOpen}
+        onComplete={completeCoachmark}
+      />
     </Container>
   );
 }
