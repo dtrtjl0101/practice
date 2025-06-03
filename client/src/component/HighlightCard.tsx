@@ -39,7 +39,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../api/api";
 import HighlightCommentCard from "./HighlightCommentCard";
 import { Role } from "../types/role";
-import createReactionMap from "../util/createReactionMap";
+import createReactionMap from "../utils/createReactionMap";
 import { LinkChip } from "./LinkChip";
 
 export default function HighlightCard({

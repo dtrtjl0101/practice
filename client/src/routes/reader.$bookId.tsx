@@ -25,10 +25,10 @@ import { ReactReader } from "react-reader";
 import API_CLIENT from "../api/api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Highlight } from "../types/highlight";
-import loadBook from "../util/loadBook";
+import loadBook from "../utils/loadBook";
 import HighlightCard from "../component/HighlightCard";
 import HighlightCreationModal from "../component/HighlightCreationModal";
-import loadLocations from "../util/loadLocations";
+import loadLocations from "../utils/loadLocations";
 
 export const Route = createFileRoute("/reader/$bookId")({
   component: RouteComponent,

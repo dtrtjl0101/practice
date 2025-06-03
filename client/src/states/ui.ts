@@ -1,5 +1,5 @@
 import { atom } from "jotai";
-import getUserColorScheme from "../util/getUserColorScheme";
+import getUserColorScheme from "../utils/getUserColorScheme";
 
 export namespace UIState {
   export type UserColorScheme = "light" | "dark";

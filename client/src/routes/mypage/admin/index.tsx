@@ -97,6 +97,20 @@ function TabPanel({ children, value, index }: TabPanelProps) {
   );
 }
 
+// 상태별 색상 및 텍스트
+const getStatusDisplay = (status: string) => {
+  switch (status) {
+    case "PENDING":
+      return { color: "warning" as const, text: "심사중" };
+    case "APPROVED":
+      return { color: "success" as const, text: "승인됨" };
+    case "REJECTED":
+      return { color: "error" as const, text: "거부됨" };
+    default:
+      return { color: "default" as const, text: status };
+  }
+};
+
 function RouteComponent() {
   const user = useAtomValue(AuthState.user);
   const isAdmin = user && user?.role === Role.ROLE_ADMIN;
@@ -200,13 +214,12 @@ function RouteComponent() {
     },
   });
 
-  // 전체 통계를 위한 별도 쿼리 (첫 페이지 데이터로 전체 수량 파악)
   const { data: publisherStatsResponse } = useQuery({
     queryKey: ["adminPublisherStats"],
     queryFn: async () => {
       const response = await API_CLIENT.adminController.fetchPublishers({
-        page: 0,
-        size: 1, // 최소한의 데이터만 가져와서 총 개수 확인
+        page: publisherPage,
+        size: rowsPerPage,
       });
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);
@@ -224,11 +237,16 @@ function RouteComponent() {
   // 상태별 카운트 (통계용)
   const publisherStats = useMemo(() => {
     const total = publisherStatsResponse?.totalItems || 0;
-    // 실제로는 각 상태별로 별도 API 호출이 필요할 수 있습니다
     return {
-      pending: 0, // API에서 상태별 카운트를 제공하지 않는 경우 별도 구현 필요
-      approved: 0,
-      rejected: 0,
+      pending: publisherStatsResponse?.content.filter(
+        (res) => res.status === "PENDING"
+      ).length,
+      approved: publisherStatsResponse?.content.filter(
+        (res) => res.status === "APPROVED"
+      ).length,
+      rejected: publisherStatsResponse?.content.filter(
+        (res) => res.status === "REJECTED"
+      ).length,
       total,
     };
   }, [publisherStatsResponse]);
@@ -360,20 +378,6 @@ function RouteComponent() {
     queryClient.invalidateQueries({ queryKey: ["adminBookRequests"] });
     queryClient.invalidateQueries({ queryKey: ["adminPublisherStats"] });
   }, [queryClient]);
-
-  // 상태별 색상 및 텍스트
-  const getStatusDisplay = (status: string) => {
-    switch (status) {
-      case "PENDING":
-        return { color: "warning" as const, text: "심사중" };
-      case "APPROVED":
-        return { color: "success" as const, text: "승인됨" };
-      case "REJECTED":
-        return { color: "error" as const, text: "거부됨" };
-      default:
-        return { color: "default" as const, text: status };
-    }
-  };
 
   // 요약 통계 카드
   const SummaryCards = () => (
@@ -952,30 +956,16 @@ function PublisherDetailDialog({
       <DialogTitle>출판사 상세 정보</DialogTitle>
       <DialogContent>
         <Stack spacing={3}>
-          <Box>
+          <Stack direction={"row"} spacing={2}>
             <Typography variant="h5" gutterBottom>
               {publisher.publisherName}
             </Typography>
             <Chip
-              label={
-                publisher.status === "PENDING"
-                  ? "심사중"
-                  : publisher.status === "APPROVED"
-                    ? "승인됨"
-                    : "거부됨"
-              }
-              color={
-                publisher.status === "PENDING"
-                  ? "warning"
-                  : publisher.status === "APPROVED"
-                    ? "success"
-                    : "error"
-              }
+              label={getStatusDisplay(publisher.status).text}
+              color={getStatusDisplay(publisher.status).color}
             />
-          </Box>
-
+          </Stack>
           <Divider />
-
           <Stack spacing={2}>
             <Box display="flex" alignItems="center" gap={1}>
               <Email fontSize="small" color="action" />

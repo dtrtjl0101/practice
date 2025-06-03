@@ -23,7 +23,7 @@ import EmojiReactionButton from "./EmojiReactionButton";
 import { useAtomValue } from "jotai";
 import { useSnackbar } from "notistack";
 import State from "../states";
-import createReactionMap from "../util/createReactionMap";
+import createReactionMap from "../utils/createReactionMap";
 import { Role } from "../types/role";
 import API_CLIENT from "../api/api";
 

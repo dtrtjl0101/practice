@@ -1,3 +1,25 @@
+export type Book = {
+  // 공통 필드
+  id: number;
+  title: string;
+  author: string;
+  description: string;
+  size: number;
+  price: number;
+  coverImageURL: string;
+
+  // BookMetadata 전용 필드
+  isPurchased?: boolean;
+
+  // BookRequest 전용 필드
+  requestId?: number;
+  publisherId?: number;
+  publisherName?: string;
+  publisherEmail?: string;
+  status?: string;
+  rejectReason?: string;
+};
+
 export type BookMetadata = {
   id: number;
   title: string;
