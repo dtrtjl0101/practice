@@ -33,6 +33,9 @@ export default function AppBar(props: {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [creditPurchaseModalOpen, setCreditPurchaseModalOpen] = useState(false);
 
+  const isAdmin = user && user.role === Role.ROLE_ADMIN;
+  const isPublisher = user && user.role === Role.ROLE_PUBLISHER;
+
   const { data: myWallet } = useQuery({
     queryKey: ["myWallet"],
     queryFn: async () => {
@@ -107,7 +110,16 @@ export default function AppBar(props: {
                     onClick={() => setCreditPurchaseModalOpen(true)}
                   />
                 )}
-                <LinkButton color="inherit" to={"/mypage"}>
+                <LinkButton
+                  color="inherit"
+                  to={
+                    isAdmin
+                      ? "/mypage/admin"
+                      : isPublisher
+                        ? "/mypage/publisher"
+                        : "/mypage"
+                  }
+                >
                   <Stack
                     direction="row"
                     alignItems="center"
