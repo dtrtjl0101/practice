@@ -4,6 +4,7 @@ import API_CLIENT from "../api/api";
 import { AuthState } from "../states/auth";
 import { BookRequest, BookMetadata } from "../types/book";
 import { Role } from "../types/role";
+import { PublisherStatsData } from "../types/analytics";
 
 export const usePublisherData = () => {
   const user = useAtomValue(AuthState.user);
@@ -31,10 +32,10 @@ export const usePublisherData = () => {
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);
       }
-      return response.data;
+      return response.data as PublisherStatsData;
     },
     enabled: isPublisher,
-    initialData: {},
+    initialData: {} as PublisherStatsData,
   });
 
   const unreleasedBooks = useQuery({
