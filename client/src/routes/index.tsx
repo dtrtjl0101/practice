@@ -590,7 +590,7 @@ function Home() {
                   backgroundColor: alpha(theme.palette.common.white, 0.1),
                 },
               }}
-              onClick={() => navigate({ to: "/about" })}
+              // onClick={() => navigate({ to: "/about" })}
             >
               서비스 둘러보기
             </Button>
