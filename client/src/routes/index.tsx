@@ -11,7 +11,7 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const navigate = useNavigate();
-  const { isOpen, closeCoachmark, completeCoachmark } = useCoachmark("home");
+  const { isOpen, completeCoachmark } = useCoachmark("home");
 
   return (
     <Container sx={{ my: 8 }}>
@@ -72,7 +72,6 @@ function Home() {
           },
         ]}
         isOpen={isOpen}
-        onClose={closeCoachmark}
         onComplete={completeCoachmark}
       />
     </Container>

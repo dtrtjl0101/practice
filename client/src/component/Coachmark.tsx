@@ -247,10 +247,6 @@ export function useCoachmark(storageKey: string) {
     }
   }, [storageKey]);
 
-  const closeCoachmark = useCallback(() => {
-    setIsOpen(false);
-  }, []);
-
   const completeCoachmark = useCallback(() => {
     setIsOpen(false);
     localStorage.setItem(`coachmark_${storageKey}`, "true");
@@ -263,7 +259,6 @@ export function useCoachmark(storageKey: string) {
 
   return {
     isOpen,
-    closeCoachmark,
     completeCoachmark,
     resetCoachmark,
   };

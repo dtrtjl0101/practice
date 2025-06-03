@@ -103,7 +103,7 @@ function RouteComponent() {
   const [showHighlightsOnOnlyCurrentPage, setShowAllHighlights] =
     useState(true);
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
-  const { isOpen, closeCoachmark, completeCoachmark } = useCoachmark("reader");
+  const { isOpen, completeCoachmark } = useCoachmark("reader");
 
   const spine = useMemo(() => {
     if (!location) {
@@ -337,7 +337,6 @@ function RouteComponent() {
           },
         ]}
         isOpen={isOpen}
-        onClose={closeCoachmark}
         onComplete={completeCoachmark}
       />
       <Box
