@@ -23,6 +23,7 @@ import {
   Menu,
   Divider,
 } from "@mui/material";
+import { useSnackbar } from "notistack";
 import {
   Search as SearchIcon,
   MoreVert as MoreVertIcon,
@@ -48,6 +49,7 @@ interface Member {
 }
 
 export default function GroupMembersCard({ groupId }: { groupId: number }) {
+  const { enqueueSnackbar } = useSnackbar();
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
@@ -101,20 +103,31 @@ export default function GroupMembersCard({ groupId }: { groupId: number }) {
 
   const handleKickMember = () => {
     if (!selectedMember) return;
-    const confirmKick = window.confirm(
-      `멤버 ${selectedMember.nickname}을(를) 추방하시겠습니까?`
-    );
-    if (!confirmKick) return;
-    API_CLIENT.groupController
-      .kickGroupMember(groupId, selectedMember.userId)
-      .then((response) => {
-        if (response.isSuccessful) {
-          alert(`멤버 ${selectedMember.nickname}이(가) 추방되었습니다.`);
-          refetch();
-        } else {
-          alert(`멤버 추방에 실패했습니다: ${response.errorMessage}`);
-        }
-      });
+
+    if (
+      window.confirm(`멤버 ${selectedMember.nickname}을(를) 추방하시겠습니까?`)
+    ) {
+      API_CLIENT.groupController
+        .kickGroupMember(groupId, selectedMember.userId)
+        .then((response) => {
+          if (response.isSuccessful) {
+            enqueueSnackbar(
+              `멤버 ${selectedMember.nickname}이(가) 추방되었습니다.`,
+              {
+                variant: "success",
+              }
+            );
+            refetch();
+          } else {
+            enqueueSnackbar(
+              `멤버 추방에 실패했습니다: ${response.errorMessage}`,
+              {
+                variant: "error",
+              }
+            );
+          }
+        });
+    }
     handleMenuClose();
   };
 

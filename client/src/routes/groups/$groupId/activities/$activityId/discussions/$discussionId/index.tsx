@@ -13,6 +13,7 @@ import {
   Chip,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
+import { useSnackbar } from "notistack";
 import API_CLIENT from "../../../../../../../api/api";
 import { Discussion } from "../../../../../../../types/discussion";
 import CommentSection from "../../../../../../../component/CommentSection";
@@ -32,6 +33,7 @@ export const Route = createFileRoute(
 function RouteComponent() {
   const router = useRouter();
   const navigate = Route.useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
   const [isAuthor, setIsAuthor] = useState(false);
   const commentSectionRef = useRef<HTMLDivElement>(null);
   const { groupId, activityId, discussionId } = Route.useParams();
@@ -73,10 +75,10 @@ function RouteComponent() {
       .deleteDiscussion(parseInt(discussionId))
       .then((response) => {
         if (response.isSuccessful) {
-          alert("게시글이 삭제되었습니다.");
+          enqueueSnackbar("게시글이 삭제되었습니다.", { variant: "success" });
           handleBack();
         } else {
-          alert(response.errorMessage);
+          enqueueSnackbar(response.errorMessage, { variant: "error" });
         }
       });
   };

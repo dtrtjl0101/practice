@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { useSnackbar } from "notistack";
 import API_CLIENT from "../../api/api";
 import { Add } from "@mui/icons-material";
 
@@ -29,6 +30,7 @@ function RouteComponent() {
   const [description, setDescription] = useState("");
   const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
   const [price, setPrice] = useState<number>(0);
+  const { enqueueSnackbar } = useSnackbar();
 
   const handleUploadBookButtonClicked = async () => {
     const inputElement = document.createElement("input");
@@ -38,7 +40,9 @@ function RouteComponent() {
       const target = event.target as HTMLInputElement;
       const file = target.files?.[0];
       if (!file) {
-        alert("Please select a file to upload.");
+        enqueueSnackbar("Please select a file to upload.", {
+          variant: "warning",
+        });
         return;
       }
       const response = await API_CLIENT.ebookController.uploadFile({

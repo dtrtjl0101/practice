@@ -20,6 +20,7 @@ import { GroupInfo, GroupMembershipStatus } from "../../../../types/groups";
 import API_CLIENT from "../../../../api/api";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useSnackbar } from "notistack";
 
 const MEMBERS_SIZE = 2;
 interface GroupHeaderProps {
@@ -32,6 +33,7 @@ export function GroupHeader({ group, groupId }: GroupHeaderProps) {
   const [membersPopoverAnchorElement, setMembersPopoverAnchorElement] =
     useState<HTMLButtonElement | null>(null);
   const [hasMoreMembers, setHasMoreMembers] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
 
   const { data: members } = useQuery({
     queryKey: ["groupMembers", groupId],
@@ -55,21 +57,21 @@ export function GroupHeader({ group, groupId }: GroupHeaderProps) {
   const onJoinButtonClicked = async () => {
     const response = await API_CLIENT.groupController.requestJoinGroup(groupId);
     if (!response.isSuccessful) {
-      alert(response.errorMessage);
+      enqueueSnackbar(response.errorMessage, { variant: "error" });
       return;
     }
     setJoinGroupRequested(true);
-    alert("모임 가입 요청이 완료되었습니다.");
+    enqueueSnackbar("모임 가입 요청이 완료되었습니다.", { variant: "success" });
   };
 
   const onLeaveButtonClicked = () => {
     return async () => {
       const response = await API_CLIENT.groupController.leaveGroup(groupId);
       if (!response.isSuccessful) {
-        alert(response.errorMessage);
+        enqueueSnackbar(response.errorMessage, { variant: "error" });
         return;
       }
-      alert("모임에서 탈퇴하였습니다.");
+      enqueueSnackbar("모임에서 탈퇴하였습니다.", { variant: "success" });
       window.location.reload();
     };
   };

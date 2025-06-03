@@ -26,6 +26,7 @@ import {
 } from "@mui/icons-material";
 import { useEffect, useRef, useState } from "react";
 import { useAtomValue } from "jotai";
+import { useSnackbar } from "notistack";
 import State from "../states";
 import {
   getEmojiFromReactionType,
@@ -67,6 +68,7 @@ export default function HighlightCard({
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [emojiAnchorEl, setEmojiAnchorEl] = useState<null | HTMLElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+  const { enqueueSnackbar } = useSnackbar();
 
   const { data: reactions, refetch: refetchReactions } = useQuery({
     queryKey: ["highlightReactions", highlight.id],
@@ -128,7 +130,7 @@ export default function HighlightCard({
       }
     );
     if (!response.isSuccessful) {
-      alert(response.errorMessage);
+      enqueueSnackbar(response.errorMessage, { variant: "error" });
     }
     setAnchorEl(null);
     refetchHighlights();
@@ -145,7 +147,7 @@ export default function HighlightCard({
       reactionType: reactionType,
     });
     if (!response.isSuccessful) {
-      alert(response.errorMessage);
+      enqueueSnackbar(response.errorMessage, { variant: "error" });
     }
     setEmojiAnchorEl(null);
     refetchReactions();
@@ -160,7 +162,7 @@ export default function HighlightCard({
       }
     );
     if (!response.isSuccessful) {
-      alert(response.errorMessage);
+      enqueueSnackbar(response.errorMessage, { variant: "error" });
     }
     setCommentContent("");
     refetchComments();

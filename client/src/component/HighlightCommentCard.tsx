@@ -21,6 +21,7 @@ import {
 import { MoreVert } from "@mui/icons-material";
 import EmojiReactionButton from "./EmojiReactionButton";
 import { useAtomValue } from "jotai";
+import { useSnackbar } from "notistack";
 import State from "../states";
 import createReactionMap from "../utils/createReactionMap";
 import { Role } from "../types/role";
@@ -39,6 +40,7 @@ export default function HighlightCommentCard({
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const isAuthor =
     comment.authorId === (user?.role === "ROLE_USER" ? user.userId : undefined);
+  const { enqueueSnackbar } = useSnackbar();
 
   const reactions = useMemo(() => {
     return createReactionMap(comment.reactions);
@@ -64,7 +66,7 @@ export default function HighlightCommentCard({
       reactionType: reactionType,
     });
     if (!response.isSuccessful) {
-      alert(response.errorMessage);
+      enqueueSnackbar(response.errorMessage, { variant: "error" });
     }
     refetchComments();
   };

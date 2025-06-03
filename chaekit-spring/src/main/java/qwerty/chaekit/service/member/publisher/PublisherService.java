@@ -3,6 +3,7 @@ package qwerty.chaekit.service.member.publisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
 import qwerty.chaekit.domain.member.publisher.PublisherStatsRepository;
@@ -21,6 +22,7 @@ import java.util.List;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class PublisherService {
     private final PublisherProfileRepository publisherRepository;

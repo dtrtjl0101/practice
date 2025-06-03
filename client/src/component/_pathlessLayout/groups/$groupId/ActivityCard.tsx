@@ -31,6 +31,7 @@ import { BookMetadata } from "../../../../types/book";
 import LinkButton from "../../../LinkButton";
 import { useNavigate } from "@tanstack/react-router";
 import BookSearchInput from "../../../BookSearchInput";
+import { useSnackbar } from "notistack";
 
 export function ActivityCard(props: { groupId: number; canCreate?: boolean }) {
   const { groupId, canCreate } = props;
@@ -38,6 +39,7 @@ export function ActivityCard(props: { groupId: number; canCreate?: boolean }) {
   const [totalPages, setTotalPages] = useState(1);
   const [activityCreateModalOpen, setActivityCreateModalOpen] = useState(false);
   const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
 
   const {
     data: activity,
@@ -138,13 +140,13 @@ export function ActivityCard(props: { groupId: number; canCreate?: boolean }) {
           break;
         }
         default: {
-          alert(response.errorMessage);
+          enqueueSnackbar(response.errorMessage, { variant: "error" });
         }
       }
       return;
     }
     refetch();
-    alert("활동에 가입되었습니다.");
+    enqueueSnackbar("활동에 가입되었습니다.", { variant: "success" });
   };
 
   return (
@@ -154,7 +156,7 @@ export function ActivityCard(props: { groupId: number; canCreate?: boolean }) {
         open={activityCreateModalOpen}
         onClose={() => setActivityCreateModalOpen(false)}
         onCreate={(_activity) => {
-          alert("활동이 생성되었습니다.");
+          enqueueSnackbar("활동이 생성되었습니다.", { variant: "success" });
           refetch();
         }}
       />
@@ -486,14 +488,15 @@ export function ActivityCreateModal(props: {
     dayjs(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000))
   );
   const [book, setBook] = useState<BookMetadata | null>(null);
+  const { enqueueSnackbar } = useSnackbar();
 
   const handleCreateActivity = async () => {
     if (!book) {
-      alert("책을 선택해주세요");
+      enqueueSnackbar("책을 선택해주세요", { variant: "warning" });
       return;
     }
     if (!description) {
-      alert("설명을 입력해주세요");
+      enqueueSnackbar("설명을 입력해주세요", { variant: "warning" });
       return;
     }
     const response = await API_CLIENT.activityController.createActivity(
@@ -506,7 +509,7 @@ export function ActivityCreateModal(props: {
       }
     );
     if (!response.isSuccessful) {
-      alert(response.errorMessage);
+      enqueueSnackbar(response.errorMessage, { variant: "error" });
       return;
     }
     onCreate(response.data as Activity);
