@@ -18,7 +18,7 @@ import {
   Analytics,
 } from "@mui/icons-material";
 import { createFileRoute } from "@tanstack/react-router";
-import { Book, BookMetadata, BookRequest } from "../../../types/book";
+import { BookMetadata, BookRequest } from "../../../types/book";
 import { BookInfoDialog } from "../../../component/BookInfoDialog";
 import { BookRequestDialog } from "../../../component/BookRequestDialog";
 import { ChartsSection } from "../../../component/ChartsSection";
@@ -30,6 +30,7 @@ import { RejectedBooksTab } from "../../../component/tabs/RejectedBooksTab";
 import { TabPanel } from "../../../component/tabs/TabPanel";
 import { useBookUpload } from "../../../hooks/useBookUpload";
 import { usePublisherData } from "../../../hooks/usePublisherData";
+import { useSnackbar } from "notistack";
 
 export const Route = createFileRoute("/mypage/publisher/")({
   component: PublisherDashboard,
@@ -55,6 +56,8 @@ export function PublisherDashboard() {
     useState<BookMetadata | null>(null);
   const [selectedUnreleasedBook, setSelectedUnreleasedBook] =
     useState<BookRequest | null>(null);
+
+  const { enqueueSnackbar } = useSnackbar();
 
   const pendingBooks = useMemo(
     () => unreleasedBooks.filter((book) => book.status === "PENDING"),
@@ -147,10 +150,11 @@ export function PublisherDashboard() {
     bookUpload.actions.uploadBook();
 
     setTimeout(() => {
-      alert(
+      enqueueSnackbar(
         isResubmit
           ? "도서 재신청이 완료되었습니다."
-          : "도서 등록 신청이 완료되었습니다."
+          : "도서 등록 신청이 완료되었습니다.",
+        { variant: "success" }
       );
       if (isResubmit) {
         handleCloseResubmitDialog();

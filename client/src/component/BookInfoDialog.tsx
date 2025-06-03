@@ -19,6 +19,7 @@ import { useQuery } from "@tanstack/react-query";
 import { formatFileSize } from "../utils/bookUtils";
 import { BookMetadata, BookRequest } from "../types/book";
 import API_CLIENT from "../api/api";
+import { useSnackbar } from "notistack";
 
 interface BookInfoDialogProps {
   book: BookRequest | BookMetadata | null;
@@ -35,6 +36,8 @@ export const BookInfoDialog: React.FC<BookInfoDialogProps> = ({
 }) => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
+
+  const { enqueueSnackbar } = useSnackbar();
 
   // 타입 가드 함수
   const isBookMetadata = (book: any): book is BookMetadata => {
@@ -86,8 +89,9 @@ export const BookInfoDialog: React.FC<BookInfoDialogProps> = ({
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("다운로드 실패:", error);
-      alert("다운로드에 실패했습니다. 다시 시도해주세요.");
+      enqueueSnackbar("다운로드에 실패했습니다. 다시 시도해주세요.", {
+        variant: "error",
+      });
     } finally {
       setIsDownloading(false);
     }
@@ -104,13 +108,13 @@ export const BookInfoDialog: React.FC<BookInfoDialogProps> = ({
     if (!response.isSuccessful) {
       throw new Error(response.error);
     }
-    alert("도서 신청이 완료되었습니다.");
+    enqueueSnackbar("도서 신청이 완료되었습니다.", { variant: "success" });
     onClose();
   };
 
   const handleRejectBook = async () => {
     if (rejectReason.trim() === "") {
-      alert("거절 사유를 입력해주세요.");
+      enqueueSnackbar("거절 사유를 입력해주세요.", { variant: "warning" });
       return;
     }
     const response = await API_CLIENT.ebookRequestController.rejectRequest(
@@ -120,7 +124,7 @@ export const BookInfoDialog: React.FC<BookInfoDialogProps> = ({
     if (!response.isSuccessful) {
       throw new Error(response.error);
     }
-    alert("도서 신청이 거절되었습니다.");
+    enqueueSnackbar("도서 신청이 거절되었습니다.", { variant: "success" });
     onClose();
   };
 

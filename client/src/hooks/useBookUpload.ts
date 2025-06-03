@@ -4,6 +4,7 @@ import { useAtomValue } from "jotai";
 import API_CLIENT from "../api/api";
 import { AuthState } from "../states/auth";
 import { Role } from "../types/role";
+import { enqueueSnackbar } from "notistack";
 
 export const useBookUpload = () => {
   const user = useAtomValue(AuthState.user);
@@ -38,7 +39,7 @@ export const useBookUpload = () => {
     mutationFn: async (bookData: any) => {
       const response = await API_CLIENT.ebookController.uploadFile(bookData);
       if (!response.isSuccessful) {
-        alert(response.errorMessage);
+        enqueueSnackbar(response.errorMessage, { variant: "error" });
         throw new Error(response.errorMessage);
       }
       return response;
@@ -61,7 +62,7 @@ export const useBookUpload = () => {
       !bookFile ||
       !bookCover
     ) {
-      alert("모든 필드를 입력해주세요.");
+      enqueueSnackbar("모든 필드를 입력해주세요.", { variant: "warning" });
       return;
     }
 
