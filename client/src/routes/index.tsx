@@ -25,6 +25,8 @@ import {
   Schedule,
   EmojiEvents,
   AutoStories,
+  Workspaces,
+  People,
 } from "@mui/icons-material";
 
 export const Route = createFileRoute("/")({
@@ -57,8 +59,9 @@ function HeroSection() {
         variant="h6"
         sx={{ mb: 4, opacity: 0.9, maxWidth: 600, mx: "auto" }}
       >
-        새로운 책과 사람을 만나며 더 깊이 있는 독서를 경험해보세요. 전국
-        독서가들과 함께하는 특별한 독서 모임에 참여하세요.
+        새로운 책과 사람을 만나며 더 깊이 있는 독서를 경험해보세요.
+        <br />
+        책잇에서 전국 독서가들과 함께하는 특별한 독서 모임에 참여하세요.
       </Typography>
       <Stack
         direction={{ xs: "column", sm: "row" }}
@@ -118,13 +121,13 @@ function StatsSection() {
 
   const stats = [
     {
-      icon: <Groups />,
+      icon: <Workspaces />,
       number: "1,234",
       label: "활성 모임",
       color: theme.palette.primary.main,
     },
     {
-      icon: <MenuBook />,
+      icon: <People />,
       number: "45,678",
       label: "참여 회원",
       color: theme.palette.success.main,
@@ -153,7 +156,7 @@ function StatsSection() {
             sx={{
               textAlign: "center",
               py: 3,
-              background: `linear-gradient(135deg, ${alpha(stat.color, 0.1)} 0%, ${alpha(stat.color, 0.05)} 100%)`,
+              background: `linear-gradient(135deg, ${alpha(stat.color, 0.15)} 0%, ${alpha(stat.color, 0.05)} 100%)`,
               border: `1px solid ${alpha(stat.color, 0.2)}`,
               transition: "transform 0.3s ease",
               "&:hover": {
@@ -347,10 +350,10 @@ function FeaturedGroupsSection() {
           <Grid size={{ xs: 12, md: 6 }} key={index}>
             <Card
               sx={{
-                height: "100%",
+                height: 1,
                 cursor: "pointer",
                 transition: "all 0.3s ease",
-                borderLeft: 4,
+                borderLeft: 10,
                 borderLeftColor: "primary.main",
                 "&:hover": {
                   transform: "translateY(-4px)",
