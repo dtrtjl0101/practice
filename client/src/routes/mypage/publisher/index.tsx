@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Container,
   Alert,
@@ -68,38 +68,6 @@ export function PublisherDashboard() {
     () => unreleasedBooks.filter((book) => book.status === "REJECTED"),
     [unreleasedBooks]
   );
-
-  useEffect(() => {
-    if (!selectedPublishedBook) return;
-
-    const newSelectedPublishedBook = publishedBooks.find(
-      (book) => book.id === selectedPublishedBook.id
-    );
-
-    if (
-      !newSelectedPublishedBook ||
-      newSelectedPublishedBook === selectedPublishedBook
-    )
-      return;
-
-    setSelectedPublishedBook(newSelectedPublishedBook);
-  }, [selectedPublishedBook, publishedBooks]);
-
-  useEffect(() => {
-    if (!selectedUnreleasedBook) return;
-
-    const newSelectedUnreleasedBook = unreleasedBooks.find(
-      (book) => book.requestId === selectedUnreleasedBook.requestId
-    );
-
-    if (
-      !newSelectedUnreleasedBook ||
-      newSelectedUnreleasedBook === selectedUnreleasedBook
-    )
-      return;
-
-    setSelectedUnreleasedBook(newSelectedUnreleasedBook);
-  }, [selectedUnreleasedBook, unreleasedBooks]);
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setCurrentTab(newValue);

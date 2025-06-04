@@ -5,6 +5,7 @@ import { AuthState } from "../states/auth";
 import { BookRequest, BookMetadata } from "../types/book";
 import { Role } from "../types/role";
 import { PublisherStatsData } from "../types/analytics";
+import { enqueueSnackbar } from "notistack";
 
 export const usePublisherData = () => {
   const user = useAtomValue(AuthState.user);
@@ -44,7 +45,7 @@ export const usePublisherData = () => {
       const response =
         await API_CLIENT.ebookRequestController.getEbookRequests();
       if (!response.isSuccessful) {
-        alert(response.errorMessage);
+        enqueueSnackbar(response.errorMessage, { variant: "error" });
         throw new Error(response.errorMessage);
       }
       return response.data.content as BookRequest[];

@@ -725,6 +725,25 @@ export interface PageResponseActivityFetchResponse {
 }
 
 /** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseMainStatisticResponse {
+  isSuccessful?: boolean;
+  data?: MainStatisticResponse;
+}
+
+export interface MainStatisticResponse {
+  /** @format int64 */
+  totalGroups?: number;
+  /** @format int64 */
+  totalUsers?: number;
+  /** @format int64 */
+  totalEbooks?: number;
+  /** @format int64 */
+  totalActivities?: number;
+  /** @format int64 */
+  increasedActivities?: number;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
 export interface ApiSuccessResponseReadingProgressResponse {
   isSuccessful?: boolean;
   data?: ReadingProgressResponse;
@@ -2118,10 +2137,11 @@ export class Api<
   };
   groupController = {
     /**
-     * No description
+     * @description 모임 목록을 조회합니다. 태그로 필터링할 수 있습니다. 정렬 기준은 MEMBER_COUNT(가입자 수), CREATED_AT(최신 생성 순) 중 선택할 수 있습니다.
      *
      * @tags group-controller
      * @name GetAllGroups
+     * @summary 모임 목록 조회
      * @request GET:/api/groups
      * @secure
      */
@@ -2141,6 +2161,9 @@ export class Api<
         size?: number;
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
+        tags?: string[];
+        /** @default "MEMBER_COUNT" */
+        sortBy?: "MEMBER_COUNT" | "CREATED_AT";
       },
       params: RequestParams = {},
     ) =>
@@ -3628,6 +3651,24 @@ export class Api<
     mainApi: (params: RequestParams = {}) =>
       this.request<ApiSuccessResponseString, any>({
         path: `/api`,
+        method: "GET",
+        secure: true,
+        ...params,
+      }),
+  };
+  statisticsController = {
+    /**
+     * @description 모임의 통계 정보를 조회합니다. 총 모임 수, 총 사용자 수, 총 전자책 수, 총 활동 수, 최근 한 달간 증가한 활동 수를 포함합니다.
+     *
+     * @tags statistics-controller
+     * @name GetMainStatistics
+     * @summary 모임 통계 조회
+     * @request GET:/api/statistics
+     * @secure
+     */
+    getMainStatistics: (params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseMainStatisticResponse, any>({
+        path: `/api/statistics`,
         method: "GET",
         secure: true,
         ...params,
