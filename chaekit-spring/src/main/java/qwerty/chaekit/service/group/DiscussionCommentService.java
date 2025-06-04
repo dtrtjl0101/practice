@@ -107,11 +107,12 @@ public class DiscussionCommentService {
             throw new BadRequestException(ErrorCode.DISCUSSION_COMMENT_NOT_YOURS);
         }
 
+        if(comment.isDeleted()) {
+            throw new BadRequestException(ErrorCode.DISCUSSION_COMMENT_DELETED);
+        }
+        
         if (comment.isRootComment()) {
             if (hasReplies(comment)) {
-                if(comment.isDeleted()) {
-                    throw new BadRequestException(ErrorCode.DISCUSSION_COMMENT_DELETED);
-                }
                 comment.softDelete();
             } else {
                 removeRootComment(comment);

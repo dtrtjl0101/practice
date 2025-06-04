@@ -18,4 +18,5 @@ public interface EbookRepository {
 
     Page<Ebook> findAllByPublisher(PublisherProfile publisher, Pageable pageable);
     void incrementViewCount(Long ebookId);
+    long count();
 }

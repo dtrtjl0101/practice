@@ -47,6 +47,7 @@ import {
   Email,
   Search,
   Refresh,
+  Workspaces,
 } from "@mui/icons-material";
 import { createFileRoute } from "@tanstack/react-router";
 import { useSnackbar } from "notistack";
@@ -314,6 +315,20 @@ function RouteComponent() {
     },
   });
 
+  const { data: groupsResponse } = useQuery({
+    queryKey: ["groupsCount"],
+    queryFn: async () => {
+      const response = await API_CLIENT.groupController.getAllGroups();
+      if (!response.isSuccessful) {
+        throw new Error(response.errorCode);
+      }
+      return response.data;
+    },
+    enabled: isAdmin,
+  });
+
+  const groupsCount = groupsResponse?.totalItems;
+
   // 페이지 변경 핸들러들
   const handlePublisherPageChange = useCallback((_: any, newPage: number) => {
     setPublisherPage(newPage);
@@ -383,8 +398,15 @@ function RouteComponent() {
   const SummaryCards = () => (
     <Grid container spacing={3} sx={{ mb: 4 }}>
       <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <Card variant="outlined">
-          <CardContent>
+        <Card variant="outlined" sx={{ height: "100%" }}>
+          <CardContent
+            sx={{
+              height: "100%",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+            }}
+          >
             <Box
               display="flex"
               alignItems="center"
@@ -412,8 +434,15 @@ function RouteComponent() {
       </Grid>
 
       <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <Card variant="outlined">
-          <CardContent>
+        <Card variant="outlined" sx={{ height: "100%" }}>
+          <CardContent
+            sx={{
+              height: "100%",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+            }}
+          >
             <Box
               display="flex"
               alignItems="center"
@@ -443,8 +472,15 @@ function RouteComponent() {
       </Grid>
 
       <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <Card variant="outlined">
-          <CardContent>
+        <Card variant="outlined" sx={{ height: "100%" }}>
+          <CardContent
+            sx={{
+              height: "100%",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+            }}
+          >
             <Box
               display="flex"
               alignItems="center"
@@ -478,8 +514,15 @@ function RouteComponent() {
       </Grid>
 
       <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <Card variant="outlined">
-          <CardContent>
+        <Card variant="outlined" sx={{ height: "100%" }}>
+          <CardContent
+            sx={{
+              height: "100%",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+            }}
+          >
             <Box
               display="flex"
               alignItems="center"
@@ -491,17 +534,17 @@ function RouteComponent() {
                   gutterBottom
                   variant="overline"
                 >
-                  뭐넣지
+                  총 그룹 수
                 </Typography>
                 <Typography variant="h4" color="success.main">
-                  무슨내용넣을까요
+                  {groupsCount || 0}
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
-                  ???
+                  개설된 그룹
                 </Typography>
               </Box>
-              <Avatar sx={{ bgcolor: "success.main" }}>
-                <Check />
+              <Avatar sx={{ bgcolor: "warning.main" }}>
+                <Workspaces />
               </Avatar>
             </Box>
           </CardContent>

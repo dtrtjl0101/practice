@@ -2,7 +2,9 @@ package qwerty.chaekit.service.group;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.group.ReadingGroup;
@@ -12,6 +14,7 @@ import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.dto.group.request.GroupPatchRequest;
 import qwerty.chaekit.dto.group.request.GroupPostRequest;
+import qwerty.chaekit.dto.group.request.GroupSortType;
 import qwerty.chaekit.dto.group.response.GroupFetchResponse;
 import qwerty.chaekit.dto.group.response.GroupPostResponse;
 import qwerty.chaekit.dto.page.PageResponse;
@@ -65,13 +68,31 @@ public class GroupService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<GroupFetchResponse> getAllGroups(UserToken userToken, Pageable pageable) {
+    public PageResponse<GroupFetchResponse> getAllGroups(
+            UserToken userToken, 
+            Pageable pageable, 
+            List<String> tags,
+            GroupSortType sortBy
+    ) {
         boolean isAnonymous = userToken.isAnonymous();
         Long userId = isAnonymous ? null : userToken.userId();
 
-        Page<GroupFetchResponse> page = groupRepository.findAll(pageable)
-                .map(group -> groupMapper.toGroupFetchResponse(group, userId));
-        return PageResponse.of(page);
+        Page<ReadingGroup> page;
+        if (tags != null && !tags.isEmpty()) {
+            if (sortBy == GroupSortType.MEMBER_COUNT) {
+                page = groupRepository.findAllByTagsInOrderByMemberCountDesc(tags, pageable);
+            } else {
+                page = groupRepository.findAllByTagsIn(tags, getPageableByNewest(pageable));
+            }
+        } else { // no tags provided
+            if (sortBy == GroupSortType.MEMBER_COUNT) {
+                page = groupRepository.findAllOrderByMemberCountDesc(pageable);
+            } else {
+                page = groupRepository.findAll(getPageableByNewest(pageable));
+            }
+        }
+        Page<GroupFetchResponse> responsePage = page.map(group -> groupMapper.toGroupFetchResponse(group, userId));
+        return PageResponse.of(responsePage);
     }
 
     @Transactional(readOnly = true)
@@ -173,5 +194,13 @@ public class GroupService {
             throw new BadRequestException(ErrorCode.INVALID_TAG_LIST);
         }
         return validTags;
+    }
+
+    private static Pageable getPageableByNewest(Pageable pageable) {
+        return PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                pageable.getSort().isEmpty() ? Sort.by(Sort.Order.desc("createdAt")) : pageable.getSort()
+        );
     }
 }
