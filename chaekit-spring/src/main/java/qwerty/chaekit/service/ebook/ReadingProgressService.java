@@ -64,7 +64,7 @@ public class ReadingProgressService {
                 .map(activityMember -> activityMember.getUser().getId())
                 .stream().toList();
         List<EbookPurchase> purchaseList = ebookPurchaseRepository.findByUserIdInAndEbook(userIdList, activity.getBook());
-        Page<EbookPurchase> ebookPurchases = new PageImpl<>(purchaseList, pageable, activityMembers.getTotalElements());
+        Page<EbookPurchase> ebookPurchases = new PageImpl<>(purchaseList, pageable, purchaseList.size());
 
         return PageResponse.of(ebookPurchases.map(readingProgressMapper::toResponse));
     }
