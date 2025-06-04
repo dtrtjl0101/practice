@@ -178,9 +178,6 @@ export default function HighlightBrowserModal(props: {
               spacing={1}
               height={setResponsiveStyleValueSm("none", "100%")}
             >
-              <Grid size={12} sx={{ height: 2 }}>
-                asd
-              </Grid>
               <Grid
                 size={setResponsiveStyleValueSm(12, 4)}
                 sx={{ height: "100%" }}
@@ -270,13 +267,17 @@ function HighlightListItem(props: {
 }) {
   const { highlight, onClick } = props;
 
+  // null/undefined 체크 및 기본값 설정
+  const highlightContent = highlight.highlightContent || "";
+  const memo = highlight.memo || "";
+
   return (
     <ListItemButton onClick={() => onClick(highlight)}>
       <ListItemText
         primary={
-          highlight.highlightContent.length > 20
-            ? highlight.highlightContent.slice(0, 20) + "..."
-            : highlight.highlightContent
+          highlightContent.length > 20
+            ? highlightContent.slice(0, 20) + "..."
+            : highlightContent
         }
         secondary={
           <>
@@ -285,11 +286,7 @@ function HighlightListItem(props: {
               color="textSecondary"
               component={"span"}
             >
-              {`${
-                highlight.memo.length > 20
-                  ? highlight.memo.slice(0, 20) + "..."
-                  : highlight.memo
-              }`}
+              {memo.length > 20 ? memo.slice(0, 20) + "..." : memo}
             </Typography>
             <Typography
               variant="body2"
@@ -297,7 +294,7 @@ function HighlightListItem(props: {
               component={"span"}
               display={"block"}
             >
-              2025.04.06
+              createdAt
             </Typography>
           </>
         }
@@ -362,6 +359,10 @@ function HighlightViewer(props: {
 }) {
   const { highlight, onClose, onHighlightUseButtonClick } = props;
 
+  // null/undefined 체크 및 기본값 설정
+  const highlightContent = highlight.highlightContent || "";
+  const memo = highlight.memo || "";
+
   return (
     <Grid
       size={setResponsiveStyleValueSm(12, 8)}
@@ -395,13 +396,13 @@ function HighlightViewer(props: {
               color="textSecondary"
               textAlign={"right"}
             >
-              2025.04.06
+              createdAt
             </Typography>
             <Typography variant="body2" color="textSecondary">
-              {`${highlight.highlightContent}`}
+              {highlightContent}
             </Typography>
             <Divider />
-            <Typography variant="body1">{`${highlight.memo}`}</Typography>
+            <Typography variant="body1">{memo}</Typography>
           </Stack>
           <CardActions sx={{ justifyContent: "flex-end" }}>
             <Button variant="outlined" color="secondary" onClick={onClose}>

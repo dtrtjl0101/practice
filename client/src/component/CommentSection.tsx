@@ -19,6 +19,8 @@ import { useSnackbar } from "notistack";
 import { useMemo, useState, Fragment } from "react";
 import { Comment, StanceOptions } from "../types/comment";
 import API_CLIENT from "../api/api";
+import { useAtomValue } from "jotai";
+import { AuthState } from "../states/auth";
 
 interface CommentSectionProps {
   discussionId: number;
@@ -339,6 +341,7 @@ function CommentItem({
 }: CommentItemProps) {
   const isEditing = editingId === comment.commentId;
   const isReplying = replyTo === comment.commentId;
+  const user = useAtomValue(AuthState.user);
 
   const getStanceColor = (stance: StanceOptions) => {
     switch (stance) {
@@ -383,7 +386,7 @@ function CommentItem({
               alt={comment.authorName}
               sx={{ width: 32, height: 32 }}
             />
-            <Stack spacing={1}>
+            <Stack spacing={0.5}>
               <Stack direction="row" spacing={2} alignItems="center">
                 <Typography variant="subtitle2" fontWeight="medium">
                   {comment.authorName}
@@ -425,16 +428,20 @@ function CommentItem({
             </>
           ) : (
             <>
-              <Button size="small" onClick={() => onEditStart(comment)}>
-                수정
-              </Button>
-              <Button
-                size="small"
-                color="error"
-                onClick={() => onDelete(comment.commentId)}
-              >
-                삭제
-              </Button>
+              {user?.memberId === comment.authorId && (
+                <>
+                  <Button size="small" onClick={() => onEditStart(comment)}>
+                    수정
+                  </Button>
+                  <Button
+                    size="small"
+                    color="error"
+                    onClick={() => onDelete(comment.commentId)}
+                  >
+                    삭제
+                  </Button>
+                </>
+              )}
               {!isReply && (
                 <Button
                   size="small"
