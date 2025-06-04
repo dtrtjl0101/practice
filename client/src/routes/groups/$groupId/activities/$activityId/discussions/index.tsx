@@ -20,22 +20,12 @@ import {
   Select,
   MenuItem,
   Grid,
-  IconButton,
-  Tooltip,
-  Alert,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../../../../../../api/api";
 import { Discussion } from "../../../../../../types/discussion";
 import MessageIcon from "@mui/icons-material/Message";
-import {
-  Search,
-  FilterList,
-  Sort,
-  ArrowBack,
-  Info,
-  StickyNote2Outlined,
-} from "@mui/icons-material";
+import { Search, ArrowBack, StickyNote2Outlined } from "@mui/icons-material";
 import { useState, useMemo, useEffect } from "react";
 import StarIcon from "@mui/icons-material/Star";
 import { useAtomValue } from "jotai";
