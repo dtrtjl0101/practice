@@ -24,6 +24,7 @@ public class GroupChatService {
     private final GroupChatRepository groupChatRepository;
     private final EntityFinder entityFinder;
     private final GroupChatProducer groupChatProducer;
+    private final GroupChatConsumer groupChatConsumer;
 
     @Transactional
     public GroupChatResponse createChat(UserToken userToken, Long groupId, GroupChatRequest request) {
@@ -34,14 +35,13 @@ public class GroupChatService {
             throw new ForbiddenException(ErrorCode.MEMBER_NOT_FOUND);
         }
 
-        GroupChat chat = GroupChat.builder()
-                .group(group)
-                .author(user)
+        GroupChatResponse response = GroupChatResponse.builder()
+                .groupId(groupId)
+                .authorId(user.getId())
+                .authorName(user.getNickname())
+                .authorProfileImage(user.getProfileImageKey())
                 .content(request.content())
                 .build();
-
-        GroupChat savedChat = groupChatRepository.save(chat);
-        GroupChatResponse response = GroupChatResponse.of(savedChat);
 
         groupChatProducer.sendMessage(response);
 
@@ -50,9 +50,14 @@ public class GroupChatService {
 
     public PageResponse<GroupChatResponse> getChats(Long groupId, Pageable pageable) {
         ReadingGroup group = entityFinder.findGroup(groupId);
-        Page<GroupChat> chats = groupChatRepository.findByGroupOrderByCreatedAtDesc(group, pageable);
-
-
-        return PageResponse.of(chats.map(GroupChatResponse::of));
+        
+        // 1. DB에서 기존 메시지 조회
+        Page<GroupChat> savedChats = groupChatRepository.findByGroupOrderByCreatedAtDesc(group, pageable);
+        
+        // 2. Kafka Consumer를 통해 실시간 메시지 구독
+        groupChatConsumer.subscribeToGroupChat(groupId);
+        
+        // 3. DB 메시지와 실시간 메시지를 합쳐서 반환
+        return PageResponse.of(savedChats.map(GroupChatResponse::of));
     }
 }
