@@ -557,10 +557,7 @@ function HowItWorksSection() {
   ];
 
   return (
-    <Paper
-      elevation={0}
-      sx={{ bgcolor: "grey.50", p: 6, borderRadius: 3, mb: 6 }}
-    >
+    <Paper elevation={0} variant="outlined" sx={{ p: 6, mb: 6 }}>
       <Typography
         variant="h4"
         component="h2"
