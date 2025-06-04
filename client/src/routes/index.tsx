@@ -627,11 +627,7 @@ function Home() {
         {/* Categories */}
         <CategoriesSection />
 
-        <Box
-          className="coachmark-popular-books"
-          maxWidth={"md"}
-          alignSelf={"center"}
-        >
+        <Box className="coachmark-popular-books">
           <BookList
             size="small"
             title="🏆 이번 주 베스트셀러"
