@@ -182,17 +182,6 @@ export default function GroupReviewCard({
     return content.split("\n").length > 3 || content.length > 200;
   };
 
-  const getTruncatedContent = (content: string) => {
-    const lines = content.split("\n");
-    if (lines.length > 3) {
-      return lines.slice(0, 3).join("\n");
-    }
-    if (content.length > 150) {
-      return content.substring(0, 150) + "...";
-    }
-    return content;
-  };
-
   // 태그 통계 조회
   const { data: tagStatsData } = useQuery({
     queryKey: ["group-review-tags", groupId],
@@ -419,11 +408,21 @@ export default function GroupReviewCard({
                             }
                             sx={{
                               cursor: "pointer",
+                              // 축약된 상태일 때 ellipsis 적용
+                              ...(!expandedReviews.has(review.reviewId) && {
+                                display: "-webkit-box",
+                                WebkitLineClamp: 3,
+                                WebkitBoxOrient: "vertical",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }),
+                              // 확장된 상태일 때는 전체 내용 표시
+                              ...(expandedReviews.has(review.reviewId) && {
+                                whiteSpace: "pre-wrap", // 줄바꿈 유지
+                              }),
                             }}
                           >
-                            {expandedReviews.has(review.reviewId)
-                              ? review.content
-                              : getTruncatedContent(review.content)}
+                            {review.content}
                           </Typography>
 
                           <Button

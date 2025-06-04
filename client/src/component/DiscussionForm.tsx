@@ -1,6 +1,6 @@
 import API_CLIENT from "../api/api";
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
 import {
   Container,
@@ -32,6 +32,11 @@ export default function DiscussionForm({
   const { enqueueSnackbar } = useSnackbar();
   const theme = useTheme();
   const isEdit = !!discussionId;
+  const queryClient = useQueryClient();
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [isDebate, setDebate] = useState(false);
+
   const { data: discussion } = useQuery({
     queryKey: ["discussion", discussionId],
     enabled: isEdit,
@@ -46,9 +51,14 @@ export default function DiscussionForm({
     },
   });
 
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [isDebate, setDebate] = useState(false);
+  // useEffect를 사용하여 discussion 데이터가 로드되었을 때만 state 업데이트
+  useEffect(() => {
+    if (discussion) {
+      setTitle(discussion.title ?? "");
+      setContent(discussion.content ?? "");
+      setDebate(discussion.isDebate ?? false);
+    }
+  }, [discussion]);
 
   const handlePostDiscussion = () => {
     if (!title.trim() || !content.trim()) {
@@ -74,6 +84,9 @@ export default function DiscussionForm({
         })
         .then((response) => {
           if (response.isSuccessful) {
+            queryClient.invalidateQueries({
+              queryKey: ["discussion", discussionId],
+            });
             enqueueSnackbar("게시글이 수정되었습니다.", { variant: "success" });
             handlePostRoute();
           } else {
@@ -91,6 +104,9 @@ export default function DiscussionForm({
         })
         .then((response) => {
           if (response.isSuccessful) {
+            queryClient.invalidateQueries({
+              queryKey: ["discussion", discussionId],
+            });
             enqueueSnackbar("게시글이 작성되었습니다.", { variant: "success" });
             handlePostRoute(response.data.discussionId);
           } else {
@@ -108,13 +124,6 @@ export default function DiscussionForm({
   };
 
   const [openMemoBrowser, setOpenMemoBrowser] = useState(false);
-
-  useEffect(() => {
-    if (!discussion) return;
-    setTitle(discussion.title ?? "");
-    setContent(discussion.content ?? "");
-    setDebate(discussion.isDebate);
-  }, [discussion]);
 
   return (
     <Container

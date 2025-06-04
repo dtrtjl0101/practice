@@ -252,6 +252,9 @@ export default function HighlightCard({
                     activityId: discussion.activityId.toString(),
                     discussionId: discussion.discussionId.toString(),
                   }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
                 />
               );
             })}

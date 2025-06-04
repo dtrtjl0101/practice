@@ -23,6 +23,8 @@ import MessageIcon from "@mui/icons-material/Message";
 import StickyNote2OutlinedIcon from "@mui/icons-material/StickyNote2Outlined";
 import { HighlightSummary } from "../../../../../../../types/highlight";
 import HighlightSummaryCard from "../../../../../../../component/HighlightSumarryCard";
+import { useAtomValue } from "jotai";
+import { AuthState } from "../../../../../../../states/auth";
 
 export const Route = createFileRoute(
   "/groups/$groupId/activities/$activityId/discussions/$discussionId/"
@@ -31,10 +33,10 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
+  const user = useAtomValue(AuthState.user);
   const router = useRouter();
   const navigate = Route.useNavigate();
   const { enqueueSnackbar } = useSnackbar();
-  const [isAuthor, setIsAuthor] = useState(false);
   const commentSectionRef = useRef<HTMLDivElement>(null);
   const { groupId, activityId, discussionId } = Route.useParams();
 
@@ -51,7 +53,6 @@ function RouteComponent() {
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);
       }
-      setIsAuthor(response.data.isAuthor!);
       return response.data as Discussion;
     },
   });
@@ -251,7 +252,7 @@ function RouteComponent() {
         <Divider sx={{ my: 3 }} />
         {/* 버튼 영역 */}
         <Stack direction="row" spacing={2} justifyContent="flex-end">
-          {isAuthor && (
+          {user?.memberId === discussion.authorId && (
             <>
               <Button
                 variant="outlined"
