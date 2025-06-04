@@ -114,7 +114,7 @@ class GroupServiceTest {
     }
 
     @Test
-    void getAllGroups_success() {
+    void getAllGroups_newest_no_tags_success() {
         // Given
         UserProfile user = UserProfile.builder().id(1L).nickname("user").build();
         UserToken userToken = UserToken.of(user);
@@ -128,6 +128,77 @@ class GroupServiceTest {
 
         // When
         PageResponse<GroupFetchResponse> response = groupService.getAllGroups(userToken, pageable, null, GroupSortType.CREATED_AT);
+
+        // Then
+        assertNotNull(response);
+        assertEquals(1, response.content().size());
+        verify(groupMapper, times(1)).toGroupFetchResponse(group, 1L);
+    }
+
+    @Test
+    void getAllGroups_newest_with_tags_success() {
+        // Given
+        UserProfile user = UserProfile.builder().id(1L).nickname("user").build();
+        UserToken userToken = UserToken.of(user);
+        Pageable pageable = PageRequest.of(0, 10);
+
+        ReadingGroup group = mock(ReadingGroup.class);
+        GroupFetchResponse fetchResponse = mock(GroupFetchResponse.class);
+        Page<ReadingGroup> groupPage = new PageImpl<>(List.of(group));
+        List<String> tags = List.of("tag1", "tag2");
+        
+        when(groupRepository.findAllByTagsIn(eq(tags), any(Pageable.class))).thenReturn(groupPage);
+        when(groupMapper.toGroupFetchResponse(group, 1L)).thenReturn(fetchResponse);
+
+        // When
+        PageResponse<GroupFetchResponse> response = groupService.getAllGroups(userToken, pageable, tags, GroupSortType.CREATED_AT);
+
+        // Then
+        assertNotNull(response);
+        assertEquals(1, response.content().size());
+        verify(groupMapper, times(1)).toGroupFetchResponse(group, 1L);
+    }
+
+    @Test
+    void getAllGroups_popular_with_tags_success() {
+        // Given
+        UserProfile user = UserProfile.builder().id(1L).nickname("user").build();
+        UserToken userToken = UserToken.of(user);
+        Pageable pageable = PageRequest.of(0, 10);
+
+        ReadingGroup group = mock(ReadingGroup.class);
+        GroupFetchResponse fetchResponse = mock(GroupFetchResponse.class);
+        Page<ReadingGroup> groupPage = new PageImpl<>(List.of(group));
+        List<String> tags = List.of("tag1", "tag2");
+
+        when(groupRepository.findAllByTagsInOrderByMemberCountDesc(tags, pageable)).thenReturn(groupPage);
+        when(groupMapper.toGroupFetchResponse(group, 1L)).thenReturn(fetchResponse);
+
+        // When
+        PageResponse<GroupFetchResponse> response = groupService.getAllGroups(userToken, pageable, tags, GroupSortType.MEMBER_COUNT);
+
+        // Then
+        assertNotNull(response);
+        assertEquals(1, response.content().size());
+        verify(groupMapper, times(1)).toGroupFetchResponse(group, 1L);
+    }
+
+    @Test
+    void getAllGroups_popular_no_tags_success() {
+        // Given
+        UserProfile user = UserProfile.builder().id(1L).nickname("user").build();
+        UserToken userToken = UserToken.of(user);
+        Pageable pageable = PageRequest.of(0, 10);
+
+        ReadingGroup group = mock(ReadingGroup.class);
+        GroupFetchResponse fetchResponse = mock(GroupFetchResponse.class);
+        Page<ReadingGroup> groupPage = new PageImpl<>(List.of(group));
+
+        when(groupRepository.findAllOrderByMemberCountDesc(pageable)).thenReturn(groupPage);
+        when(groupMapper.toGroupFetchResponse(group, 1L)).thenReturn(fetchResponse);
+
+        // When
+        PageResponse<GroupFetchResponse> response = groupService.getAllGroups(userToken, pageable, null, GroupSortType.MEMBER_COUNT);
 
         // Then
         assertNotNull(response);

@@ -86,7 +86,7 @@ public class GroupService {
             }
         } else { // no tags provided
             if (sortBy == GroupSortType.MEMBER_COUNT) {
-                page = groupRepository.findAllInOrderByMemberCountDesc(pageable);
+                page = groupRepository.findAllOrderByMemberCountDesc(pageable);
             } else {
                 page = groupRepository.findAll(getPageableByNewest(pageable));
             }
