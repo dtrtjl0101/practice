@@ -123,7 +123,7 @@ class GroupServiceTest {
         ReadingGroup group = mock(ReadingGroup.class);
         GroupFetchResponse fetchResponse = mock(GroupFetchResponse.class);
         Page<ReadingGroup> groupPage = new PageImpl<>(List.of(group));
-        when(groupRepository.findAll(pageable)).thenReturn(groupPage);
+        when(groupRepository.findAll(any(Pageable.class))).thenReturn(groupPage);
         when(groupMapper.toGroupFetchResponse(group, 1L)).thenReturn(fetchResponse);
 
         // When
