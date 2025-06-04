@@ -42,7 +42,8 @@ public class GroupReview extends BaseEntity {
     private final List<GroupReviewTagRelation> tags = new ArrayList<>();
     
     @Builder
-    public GroupReview(ReadingGroup group, Activity activity, UserProfile author, String content) {
+    public GroupReview(Long id, ReadingGroup group, Activity activity, UserProfile author, String content) {
+        this.id = id;
         this.group = group;
         this.activity = activity;
         this.content = content;

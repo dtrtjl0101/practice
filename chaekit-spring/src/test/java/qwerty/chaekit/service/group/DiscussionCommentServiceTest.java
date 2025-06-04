@@ -5,12 +5,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.group.activity.discussion.Discussion;
+import qwerty.chaekit.domain.group.activity.discussion.DiscussionStance;
 import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment;
 import qwerty.chaekit.domain.group.activity.discussion.comment.repository.DiscussionCommentRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionCommentFetchResponse;
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionCommentPostRequest;
+import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.mapper.DiscussionMapper;
@@ -229,5 +232,200 @@ public class DiscussionCommentServiceTest {
 
         // then
         verify(discussionCommentRepository, times(1)).delete(comment);
+    }
+
+    @Test
+    void deleteComment_이미_삭제된_댓글_삭제시_예외() {
+        // given
+        Long commentId = 1L;
+        Long authorId = 1L;
+        UserToken userToken = UserToken.of(authorId, 1L, "test@example.com");
+        UserProfile author = UserProfile.builder().id(authorId).build();
+        DiscussionComment comment = DiscussionComment.builder()
+                .id(commentId)
+                .author(author)
+                .build();
+        comment.softDelete();
+
+        given(entityFinder.findUser(userToken.userId()))
+                .willReturn(author);
+        given(entityFinder.findDiscussionComment(commentId))
+                .willReturn(comment);
+
+        // when & then
+        BadRequestException ex = assertThrows(BadRequestException.class, () -> discussionCommentService.deleteComment(commentId, userToken));
+        assertEquals(ErrorCode.DISCUSSION_COMMENT_DELETED.getCode(), ex.getErrorCode());
+    }
+
+    @Test
+    void updateComment_success() {
+        // given
+        Long commentId = 1L;
+        Long authorId = 1L;
+        UserToken userToken = UserToken.of(authorId, 1L, "test@example.com");
+        UserProfile author = UserProfile.builder().id(authorId).build();
+        DiscussionComment comment = DiscussionComment.builder()
+                .id(commentId)
+                .author(author)
+                .content("old content")
+                .build();
+        qwerty.chaekit.dto.group.activity.discussion.DiscussionCommentPatchRequest req =
+                new qwerty.chaekit.dto.group.activity.discussion.DiscussionCommentPatchRequest("new content");
+
+        given(entityFinder.findUser(userToken.userId()))
+                .willReturn(author);
+        given(entityFinder.findDiscussionComment(commentId))
+                .willReturn(comment);
+
+        DiscussionCommentFetchResponse response = discussionCommentService.updateComment(commentId, req, userToken);
+
+        assertNotNull(response);
+        assertEquals("new content", comment.getContent());
+    }
+
+    @Test
+    void updateComment_이미_삭제된_댓글_예외() {
+        // given
+        Long commentId = 1L;
+        Long authorId = 1L;
+        UserToken userToken = UserToken.of(authorId, 1L, "test@example.com");
+        UserProfile author = UserProfile.builder().id(authorId).build();
+        DiscussionComment comment = DiscussionComment.builder()
+                .id(commentId)
+                .author(author)
+                .content("old content")
+                .build();
+        comment.softDelete();
+        qwerty.chaekit.dto.group.activity.discussion.DiscussionCommentPatchRequest req =
+                new qwerty.chaekit.dto.group.activity.discussion.DiscussionCommentPatchRequest("new content");
+
+        given(entityFinder.findUser(userToken.userId()))
+                .willReturn(author);
+        given(entityFinder.findDiscussionComment(commentId))
+                .willReturn(comment);
+
+        BadRequestException ex = assertThrows(BadRequestException.class, () -> discussionCommentService.updateComment(commentId, req, userToken));
+        assertEquals(ErrorCode.DISCUSSION_COMMENT_DELETED.getCode(), ex.getErrorCode());
+    }
+
+    @Test
+    void updateComment_작성자_아님_예외() {
+        // given
+        Long commentId = 1L;
+        Long authorId = 1L;
+        Long otherId = 2L;
+        UserToken userToken = UserToken.of(otherId, 1L, "not-author@example.com");
+        UserProfile other = UserProfile.builder().id(otherId).build();
+        DiscussionComment comment = DiscussionComment.builder()
+                .id(commentId)
+                .author(UserProfile.builder().id(authorId).build())
+                .content("old content")
+                .build();
+        qwerty.chaekit.dto.group.activity.discussion.DiscussionCommentPatchRequest req =
+                new qwerty.chaekit.dto.group.activity.discussion.DiscussionCommentPatchRequest("new content");
+
+        given(entityFinder.findUser(userToken.userId()))
+                .willReturn(other);
+        given(entityFinder.findDiscussionComment(commentId))
+                .willReturn(comment);
+
+        BadRequestException ex = assertThrows(BadRequestException.class, () -> discussionCommentService.updateComment(commentId, req, userToken));
+        assertEquals(ErrorCode.DISCUSSION_COMMENT_NOT_YOURS.getCode(), ex.getErrorCode());
+    }
+
+    @Test
+    void getComment() {
+        Long commentId = 1L;
+        Long userId = 10L;
+        Long activityId = 100L;
+        UserToken userToken = UserToken.of(userId, userId, "test@ex.com");
+        
+        Activity activity = mock(Activity.class);
+        Discussion discussion = Discussion.builder()
+                .id(1L)
+                .activity(activity)
+                .build();
+
+        DiscussionComment comment = DiscussionComment.builder()
+                .id(commentId)
+                .content("Test Comment")
+                .discussion(discussion)
+                .author(UserProfile.builder().id(userId).build())
+                .build();
+
+        when(discussionCommentRepository.findByIdWithAuthor(commentId)).thenReturn(java.util.Optional.of(comment));
+        when(activity.getId()).thenReturn(activityId);
+        doNothing().when(activityPolicy).assertJoined(userId, activityId);
+
+        // when
+        DiscussionCommentFetchResponse response = discussionCommentService.getComment(userToken, commentId);
+
+        // then
+        assertNotNull(response);
+    }
+
+    @Test
+    void addComment_답글_작성() {
+        Long discussionId = 1L;
+        Long userId = 2L;
+        Long parentId = 10L;
+        UserToken userToken = UserToken.of(userId, userId, "test@ex.com");
+        DiscussionCommentPostRequest request = new DiscussionCommentPostRequest(parentId, "reply content", null);
+        UserProfile user = UserProfile.builder().id(userId).build();
+        Discussion discussion = Discussion.builder().id(discussionId).author(UserProfile.builder().id(99L).build()).build();
+        DiscussionComment parentComment = DiscussionComment.builder().id(parentId).author(UserProfile.builder().id(3L).build()).build();
+        DiscussionComment replyComment = DiscussionComment.builder().id(100L).author(user).discussion(discussion).parent(parentComment).content("reply content").build();
+
+        when(entityFinder.findUser(userId)).thenReturn(user);
+        when(entityFinder.findDiscussion(discussionId)).thenReturn(discussion);
+        doNothing().when(activityPolicy).assertJoined(user, discussion.getActivity());
+        when(entityFinder.findDiscussionComment(parentId)).thenReturn(parentComment);
+        when(discussionCommentRepository.save(any(DiscussionComment.class))).thenReturn(replyComment);
+
+        DiscussionCommentFetchResponse response = discussionCommentService.addComment(discussionId, request, userToken);
+
+        assertNotNull(response);
+        assertEquals("reply content", response.content());
+    }
+
+    @Test
+    void addComment_답글에_답글_예외() {
+        Long discussionId = 1L;
+        Long userId = 2L;
+        Long parentId = 10L;
+        UserToken userToken = UserToken.of(userId, userId, "test@ex.com");
+        DiscussionCommentPostRequest request = new DiscussionCommentPostRequest(parentId, "reply content", null);
+        UserProfile user = UserProfile.builder().id(userId).build();
+        Discussion discussion = Discussion.builder().id(discussionId).author(UserProfile.builder().id(99L).build()).build();
+        DiscussionComment parentComment = DiscussionComment.builder().id(parentId).parent(mock(DiscussionComment.class)).author(UserProfile.builder().id(3L).build()).build();
+
+        when(entityFinder.findUser(userId)).thenReturn(user);
+        when(entityFinder.findDiscussion(discussionId)).thenReturn(discussion);
+        doNothing().when(activityPolicy).assertJoined(user, discussion.getActivity());
+        when(entityFinder.findDiscussionComment(parentId)).thenReturn(parentComment);
+
+        BadRequestException ex = assertThrows(BadRequestException.class, () -> discussionCommentService.addComment(discussionId, request, userToken));
+        assertEquals(ErrorCode.REPLY_CANNOT_HAVE_CHILD.getCode(), ex.getErrorCode());
+    }
+
+    @Test
+    void addComment_삭제된_댓글에_답글_예외() {
+        Long discussionId = 1L;
+        Long userId = 2L;
+        Long parentId = 10L;
+        UserToken userToken = UserToken.of(userId, userId, "test@ex.com");
+        DiscussionCommentPostRequest request = new DiscussionCommentPostRequest(parentId, "reply content", DiscussionStance.NEUTRAL);
+        UserProfile user = UserProfile.builder().id(userId).build();
+        Discussion discussion = Discussion.builder().id(discussionId).author(UserProfile.builder().id(99L).build()).build();
+        DiscussionComment parentComment = DiscussionComment.builder().id(parentId).author(UserProfile.builder().id(3L).build()).build();
+        parentComment.softDelete();
+        
+        when(entityFinder.findUser(userId)).thenReturn(user);
+        when(entityFinder.findDiscussion(discussionId)).thenReturn(discussion);
+        doNothing().when(activityPolicy).assertJoined(user, discussion.getActivity());
+        when(entityFinder.findDiscussionComment(parentId)).thenReturn(parentComment);
+
+        BadRequestException ex = assertThrows(BadRequestException.class, () -> discussionCommentService.addComment(discussionId, request, userToken));
+        assertEquals(ErrorCode.DISCUSSION_COMMENT_DELETED.getCode(), ex.getErrorCode());
     }
 }

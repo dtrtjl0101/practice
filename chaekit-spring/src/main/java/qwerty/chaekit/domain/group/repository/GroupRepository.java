@@ -42,7 +42,7 @@ public interface GroupRepository extends JpaRepository<ReadingGroup, Long> {
     GROUP BY g
     ORDER BY COUNT(gm) DESC
     """)
-    Page<ReadingGroup> findAllInOrderByMemberCountDesc(Pageable pageable);
+    Page<ReadingGroup> findAllOrderByMemberCountDesc(Pageable pageable);
 
     @Query("""
     SELECT g FROM ReadingGroup g

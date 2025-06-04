@@ -48,4 +48,4 @@ public class GroupChatService {
 
         return PageResponse.of(chats.map(GroupChatResponse::of));
     }
-}
+}   
