@@ -12,6 +12,8 @@ import {
   Paper,
   useTheme,
   alpha,
+  CardHeader,
+  Divider,
 } from "@mui/material";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import BookList from "../component/BookList";
@@ -27,7 +29,12 @@ import {
   AutoStories,
   Workspaces,
   People,
+  Group,
 } from "@mui/icons-material";
+import { useQuery } from "@tanstack/react-query";
+import API_CLIENT from "../api/api";
+import { HomeStatistics } from "../types/HomeStatistics";
+import { GroupInfo } from "../types/groups";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -118,73 +125,94 @@ function HeroSection() {
 // Stats Section Component
 function StatsSection() {
   const theme = useTheme();
+  const { data: homeStats } = useQuery({
+    queryKey: ["homeStats"],
+    queryFn: async () => {
+      const response =
+        await API_CLIENT.statisticsController.getMainStatistics();
+      if (!response.isSuccessful) {
+        throw new Error(response.error);
+      }
+      return response.data as HomeStatistics;
+    },
+    initialData: {} as HomeStatistics,
+  });
 
   const stats = [
     {
       icon: <Workspaces />,
-      number: "1,234",
+      number: homeStats.totalGroups,
       label: "활성 모임",
       color: theme.palette.primary.main,
     },
     {
       icon: <People />,
-      number: "45,678",
+      number: homeStats.totalUsers,
       label: "참여 회원",
       color: theme.palette.success.main,
     },
     {
       icon: <AutoStories />,
-      number: "12,345",
-      label: "완독한 책",
-      color: theme.palette.info.main,
+      number: homeStats.totalEbooks,
+      label: "등록 권 수",
+      color: theme.palette.secondary.main,
     },
     {
       icon: <TrendingUp />,
-      number: "156",
+      number: homeStats.increasedActivities,
       label: "이번 달 신규 모임",
       color: theme.palette.warning.main,
     },
   ];
 
   return (
-    <Grid container spacing={3} sx={{ mb: 6 }}>
-      {stats.map((stat) => (
-        <Grid size={{ xs: 6, md: 3 }} key={stat.label}>
-          <Card
-            elevation={0}
-            variant="outlined"
-            sx={{
-              textAlign: "center",
-              py: 3,
-              background: `linear-gradient(135deg, ${alpha(stat.color, 0.15)} 0%, ${alpha(stat.color, 0.05)} 100%)`,
-              border: `1px solid ${alpha(stat.color, 0.2)}`,
-              transition: "transform 0.3s ease",
-              "&:hover": {
-                transform: "translateY(-4px)",
-              },
-            }}
-          >
-            <Avatar
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        width: "100%",
+        mb: 6,
+      }}
+    >
+      <Grid container spacing={3} sx={{ maxWidth: "md", width: "100%" }}>
+        {stats.map((stat) => (
+          <Grid size={{ xs: 6, md: 3 }} key={stat.label}>
+            <Card
+              elevation={0}
+              variant="outlined"
               sx={{
-                bgcolor: stat.color,
-                width: 56,
-                height: 56,
-                mx: "auto",
-                mb: 2,
+                textAlign: "center",
+                py: 3,
+                background: `linear-gradient(135deg, ${alpha(stat.color, 0.15)} 0%, ${alpha(stat.color, 0.05)} 100%)`,
+                border: `1px solid ${alpha(stat.color, 0.2)}`,
+                transition: "transform 0.3s ease",
+                "&:hover": {
+                  transform: "translateY(-4px)",
+                },
               }}
             >
-              {stat.icon}
-            </Avatar>
-            <Typography variant="h4" fontWeight="bold" color={stat.color}>
-              {stat.number}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {stat.label}
-            </Typography>
-          </Card>
-        </Grid>
-      ))}
-    </Grid>
+              <Avatar
+                sx={{
+                  bgcolor: stat.color,
+                  width: 56,
+                  height: 56,
+                  mx: "auto",
+                  mb: 2,
+                }}
+              >
+                {stat.icon}
+              </Avatar>
+              <Typography variant="h4" fontWeight="bold" color={stat.color}>
+                {stat.number}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {stat.label}
+              </Typography>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+    </Box>
   );
 }
 
@@ -297,41 +325,39 @@ function CategoriesSection() {
 function FeaturedGroupsSection() {
   const navigate = useNavigate();
 
-  const featuredGroups = [
-    {
-      title: "아침 독서 모임",
-      currentBook: "사피엔스",
-      members: 24,
-      nextMeeting: "화요일 오전 7시",
-      tags: ["온라인", "인문학", "정기모임"],
-      description:
-        "매주 화요일 오전 7시, 온라인으로 만나는 아침 독서 모임입니다.",
-      isOnline: true,
+  const { data: top4Groups } = useQuery({
+    queryKey: ["top4Groups"],
+    queryFn: async () => {
+      const response = await API_CLIENT.groupController.getAllGroups({
+        sortBy: "MEMBER_COUNT",
+      });
+      if (!response.isSuccessful) {
+        throw new Error(response.error);
+      }
+      return response.data.content?.slice(0, 4) as GroupInfo[];
     },
-    {
-      title: "비즈니스 북클럽",
-      currentBook: "린 스타트업",
-      members: 18,
-      nextMeeting: "목요일 오후 7시",
-      tags: ["강남", "경영", "월 2회"],
-      description: "직장인들을 위한 경영/비즈니스 도서 모임입니다.",
-      isOnline: false,
-      location: "강남",
-    },
-    {
-      title: "소설 애호가 모임",
-      currentBook: "윤성우의 열혈 프로그래밍",
-      members: 32,
-      nextMeeting: "일요일 오후 2시",
-      tags: ["하이브리드", "소설", "주 1회"],
-      description:
-        "한국 현대소설부터 세계문학까지 다양한 소설을 함께 읽습니다.",
-      isOnline: true,
-    },
-  ];
+    initialData: [] as GroupInfo[],
+  });
+
+  // const top4Activities = top4Groups.map(async (group) => {
+  //   const response = await API_CLIENT.activityController.getActivity(
+  //     group.groupId
+  //   );
+  //   if (!response.isSuccessful) {
+  //     console.log(response.errorMessage);
+  //     throw new Error(response.error);
+  //   }
+  //   return {
+  //     activityId: response.data.activityId,
+  //     bookTitle: response.data.bookTitle,
+  //     coverImageURL: response.data.coverImageURL,
+  //     startTime: response.data.startTime,
+  //     endTime: response.data.endTime,
+  //   };
+  // });
 
   return (
-    <Box sx={{ mb: 6 }} className="coachmark-popular-groups">
+    <Box sx={{ mb: 6 }} className="coachmark-popular-groups" maxWidth={"lg"}>
       <Stack
         direction="row"
         justifyContent="space-between"
@@ -346,84 +372,158 @@ function FeaturedGroupsSection() {
         </Button>
       </Stack>
       <Grid container spacing={3}>
-        {featuredGroups.map((group, index) => (
-          <Grid size={{ xs: 12, md: 6 }} key={index}>
+        {top4Groups.map((group) => (
+          <Grid size={{ xs: 12, md: 6 }} key={group.groupId}>
             <Card
               sx={{
                 height: 1,
                 cursor: "pointer",
                 transition: "all 0.3s ease",
-                borderLeft: 10,
-                borderLeftColor: "primary.main",
                 "&:hover": {
                   transform: "translateY(-4px)",
                   boxShadow: 3,
                 },
               }}
               variant="outlined"
-              onClick={() => navigate({ to: `/groups/${index + 1}` })}
+              onClick={() => navigate({ to: `/groups/${group.groupId}` })}
             >
-              <CardContent sx={{ p: 3 }}>
-                <Stack
-                  direction="row"
-                  alignItems="center"
-                  spacing={2}
-                  sx={{ mb: 2 }}
-                >
-                  <Avatar
-                    sx={{
-                      bgcolor: "primary.main",
-                      width: 48,
-                      height: 48,
-                    }}
+              <CardContent
+                sx={{
+                  p: 0,
+                  position: "relative",
+                  overflow: "hidden",
+                  "&:last-child": { pb: 0 },
+                }}
+              >
+                {/* 배경 이미지 오버레이 */}
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: 120,
+                    backgroundImage: group.groupImageURL
+                      ? `url(${group.groupImageURL})`
+                      : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    "&::after": {
+                      content: '""',
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background:
+                        "linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 100%)",
+                    },
+                  }}
+                />
+
+                {/* 상단 헤더 영역 */}
+                <Box sx={{ position: "relative", zIndex: 2, p: 3, pb: 1 }}>
+                  <Stack
+                    direction="row"
+                    alignItems="flex-start"
+                    spacing={2}
+                    mb={1}
                   >
-                    📖
-                  </Avatar>
-                  <Box flex={1}>
-                    <Typography variant="h6" fontWeight="bold" color="primary">
-                      {group.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      현재 읽는 책: {group.currentBook} • {group.members}명 참여
+                    <Box flex={1}>
+                      <Typography
+                        variant="h5"
+                        fontWeight="bold"
+                        sx={{
+                          color: "white",
+                          textShadow: "0 2px 4px rgba(0,0,0,0.5)",
+                          mb: 1,
+                        }}
+                      >
+                        {group.name}
+                      </Typography>
+                      <Stack
+                        direction={"row"}
+                        alignItems={"center"}
+                        spacing={1}
+                      >
+                        <Avatar src={group.leaderProfileImageURL} />
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: "rgba(255,255,255,0.9)",
+                            textShadow: "0 1px 2px rgba(0,0,0,0.5)",
+                          }}
+                        >
+                          {group.leaderNickname}
+                        </Typography>
+                      </Stack>
+                    </Box>
+
+                    {/* 멤버 수 배지 */}
+                    <Chip
+                      label={`${group.memberCount}명`}
+                      size="small"
+                      sx={{
+                        bgcolor: "rgba(255,255,255,0.2)",
+                        color: "white",
+                        backdropFilter: "blur(10px)",
+                        border: "1px solid rgba(255,255,255,0.3)",
+                        fontWeight: "bold",
+                      }}
+                    />
+                  </Stack>
+                </Box>
+
+                {/* 컨텐츠 영역 */}
+                <Box sx={{ p: 3, pt: 2, bgcolor: "background.paper" }}>
+                  {/* 설명 텍스트 - 고정 높이 */}
+                  <Box sx={{ minHeight: 72 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mb: 2,
+                        display: "-webkit-box",
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        lineHeight: 1.6,
+                        color: "text.secondary",
+                      }}
+                    >
+                      {group.description}
                     </Typography>
                   </Box>
-                </Stack>
-
-                <Typography variant="body2" sx={{ mb: 2 }}>
-                  {group.description}
-                </Typography>
-
-                <Stack
-                  direction="row"
-                  alignItems="center"
-                  spacing={1}
-                  sx={{ mb: 2 }}
-                >
-                  <Schedule fontSize="small" color="action" />
-                  <Typography variant="body2" color="text.secondary">
-                    {group.nextMeeting}
-                  </Typography>
-                  {!group.isOnline && (
-                    <>
-                      <LocationOn fontSize="small" color="action" />
-                      <Typography variant="body2" color="text.secondary">
-                        {group.location}
-                      </Typography>
-                    </>
-                  )}
-                </Stack>
-
-                <Stack direction="row" spacing={1} flexWrap="wrap">
-                  {group.tags.map((tag, tagIndex) => (
-                    <Chip
-                      key={tagIndex}
-                      label={tag}
-                      size="small"
-                      variant="outlined"
-                      color="primary"
-                    />
-                  ))}
-                </Stack>
+                  <Divider sx={{ my: 2 }} />
+                  {/* 태그 섹션 - 고정 높이 */}
+                  <Box sx={{ minHeight: 40 }}>
+                    <Stack
+                      direction="row"
+                      spacing={1}
+                      flexWrap="wrap"
+                      useFlexGap
+                    >
+                      {group.tags.map((tag, tagIndex) => (
+                        <Chip
+                          key={tagIndex}
+                          label={tag}
+                          size="small"
+                          sx={{
+                            bgcolor: "primary.main",
+                            color: "white",
+                            fontWeight: 500,
+                            "&:hover": {
+                              bgcolor: "primary.dark",
+                              transform: "translateY(-1px)",
+                              boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                            },
+                            transition: "all 0.2s ease",
+                          }}
+                        />
+                      ))}
+                    </Stack>
+                  </Box>
+                </Box>
               </CardContent>
             </Card>
           </Grid>
@@ -529,7 +629,11 @@ function Home() {
         {/* Categories */}
         <CategoriesSection />
 
-        <Box className="coachmark-popular-books">
+        <Box
+          className="coachmark-popular-books"
+          maxWidth={"md"}
+          alignSelf={"center"}
+        >
           <BookList
             size="small"
             title="🏆 이번 주 베스트셀러"
