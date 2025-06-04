@@ -114,6 +114,35 @@ class GroupServiceTest {
     }
 
     @Test
+    void createGroup_invalidTags_throwsException() {
+        // Given
+        UserProfile loginUser = UserProfile.builder()
+                .id(1L)
+                .nickname("Test User")
+                .build();
+        UserToken loginUserToken = UserToken.of(loginUser);
+        // tag가 10자를 초과하는 경우
+        GroupPostRequest req = new GroupPostRequest(
+                "Test Group",
+                "desc",
+                List.of("tag1", "tagtoolong1234567890"),
+                null,
+                true
+        );
+
+        when(entityFinder.findUser(1L)).thenReturn(loginUser);
+        when(groupRepository.existsReadingGroupByName("Test Group")).thenReturn(false);
+        when(fileService.uploadGroupImageIfPresent(null)).thenReturn(null);
+
+        // When & Then
+        qwerty.chaekit.global.exception.BadRequestException ex = assertThrows(
+                qwerty.chaekit.global.exception.BadRequestException.class,
+                () -> groupService.createGroup(loginUserToken, req)
+        );
+        assertEquals(qwerty.chaekit.global.enums.ErrorCode.INVALID_TAG_LIST.getCode(), ex.getErrorCode());
+    }
+
+    @Test
     void getAllGroups_newest_no_tags_success() {
         // Given
         UserProfile user = UserProfile.builder().id(1L).nickname("user").build();
@@ -248,6 +277,26 @@ class GroupServiceTest {
         assertNotNull(response);
         assertEquals(1, response.content().size());
         verify(groupMapper, times(1)).toGroupFetchResponse(group, 3L);
+    }
+
+    @Test
+    void fetchGroup_success() {
+        // Given
+        UserProfile user = UserProfile.builder().id(100L).nickname("fetcher").build();
+        UserToken userToken = UserToken.of(user);
+        ReadingGroup group = mock(ReadingGroup.class);
+        GroupFetchResponse fetchResponse = mock(GroupFetchResponse.class);
+
+        when(groupRepository.findByIdWithTags(123L)).thenReturn(java.util.Optional.of(group));
+        when(groupMapper.toGroupFetchResponse(group, 100L)).thenReturn(fetchResponse);
+
+        // When
+        GroupFetchResponse response = groupService.fetchGroup(userToken, 123L);
+
+        // Then
+        assertNotNull(response);
+        verify(groupRepository, times(1)).findByIdWithTags(123L);
+        verify(groupMapper, times(1)).toGroupFetchResponse(group, 100L);
     }
 
     @Test

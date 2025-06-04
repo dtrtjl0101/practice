@@ -150,4 +150,118 @@ class GroupMemberServiceTest {
 
         verify(notificationService).createGroupBannedNotification(target, group);
     }
+
+    @Test
+    void getGroupMembers_success() {
+        long groupId = 100L;
+        Pageable pageable = PageRequest.of(0, 10);
+        UserProfile groupLeader = UserProfile.builder().id(5L).build();
+        GroupMember gm = new GroupMember(
+                ReadingGroup.builder().id(groupId).groupLeader(groupLeader).build(), 
+                UserProfile.builder().id(1L).build()
+        );
+        Page<GroupMember> page = new PageImpl<>(List.of(gm));
+
+        when(groupMemberRepository.findByReadingGroupId(groupId, pageable)).thenReturn(page);
+        when(fileService.convertToPublicImageURL(gm.getUser().getProfileImageKey())).thenReturn("img-url");
+
+        PageResponse<GroupMemberResponse> result = groupMemberService.getGroupMembers(groupId, pageable);
+
+        assertEquals(1, result.content().size());
+        assertEquals(1L, result.content().get(0).userId());
+    }
+
+    @Test
+    void requestGroupJoin_autoApproval_success() {
+        long userId = 1L;
+        long groupId = 10L;
+        UserToken token = UserToken.of(userId, userId, "u@b.c");
+        UserProfile user = UserProfile.builder().id(userId).build();
+        UserProfile leader = UserProfile.builder().id(2L).build();
+        ReadingGroup group = ReadingGroup.builder().id(groupId).groupLeader(leader).isAutoApproval(true).build();
+
+        when(entityFinder.findUser(userId)).thenReturn(user);
+        when(entityFinder.findGroup(groupId)).thenReturn(group);
+
+        GroupJoinResponse response = groupMemberService.requestGroupJoin(token, groupId);
+
+        assertTrue(response.isAccepted());
+        verify(notificationService).createGroupJoinApprovedNotification(user, leader, group);
+    }
+
+    @Test
+    void requestGroupJoin_alreadyJoined_throws() {
+        long userId = 1L;
+        long groupId = 10L;
+        UserToken token = UserToken.of(userId, userId, "u@b.c");
+        UserProfile user = UserProfile.builder().id(userId).build();
+        ReadingGroup group = org.mockito.Mockito.spy(ReadingGroup.builder().id(groupId).groupLeader(UserProfile.builder().id(2L).build()).isAutoApproval(true).build());
+
+        when(entityFinder.findUser(userId)).thenReturn(user);
+        when(entityFinder.findGroup(groupId)).thenReturn(group);
+        when(group.isMemberAlreadyRequested(user)).thenReturn(true);
+
+        assertThrows(ForbiddenException.class, () -> groupMemberService.requestGroupJoin(token, groupId));
+    }
+
+    @Test
+    void requestGroupJoin_requestSuccess() {
+        long userId = 1L;
+        long groupId = 10L;
+        UserToken token = UserToken.of(userId, userId, "u@b.c");
+        UserProfile user = UserProfile.builder().id(userId).build();
+        UserProfile leader = UserProfile.builder().id(2L).build();
+        ReadingGroup group = org.mockito.Mockito.spy(ReadingGroup.builder().id(groupId).groupLeader(leader).isAutoApproval(false).build());
+
+        when(entityFinder.findUser(userId)).thenReturn(user);
+        when(entityFinder.findGroup(groupId)).thenReturn(group);
+        when(group.isMemberAlreadyRequested(user)).thenReturn(false);
+        // addMember 호출 시 pending 상태로 반환
+        GroupMember gm = new GroupMember(group, user);
+        org.mockito.Mockito.doReturn(gm).when(group).addMember(user);
+
+        GroupJoinResponse response = groupMemberService.requestGroupJoin(token, groupId);
+
+        assertFalse(response.isAccepted());
+        verify(notificationService).createGroupJoinRequestNotification(leader, user, group);
+    }
+
+    @Test
+    void rejectJoinRequest_success() {
+        long leaderId = 1L;
+        long memberId = 2L;
+        long groupId = 20L;
+        UserToken token = UserToken.of(leaderId, leaderId, "l@b.c");
+        UserProfile leader = UserProfile.builder().id(leaderId).build();
+        UserProfile member = UserProfile.builder().id(memberId).build();
+        ReadingGroup group = org.mockito.Mockito.spy(ReadingGroup.builder().id(groupId).groupLeader(leader).isAutoApproval(false).build());
+
+        when(entityFinder.findUser(leaderId)).thenReturn(leader);
+        when(entityFinder.findGroup(groupId)).thenReturn(group);
+        when(entityFinder.findUser(memberId)).thenReturn(member);
+        when(group.isLeader(leader)).thenReturn(true);
+        when(group.isPendingMember(memberId)).thenReturn(true);
+
+        groupMemberService.rejectJoinRequest(token, groupId, memberId);
+
+        verify(group).rejectMember(member);
+        verify(notificationService).createGroupJoinRejectedNotification(member, leader, group);
+    }
+
+    @Test
+    void leaveGroup_success() {
+        long userId = 1L;
+        long groupId = 5L;
+        UserToken token = UserToken.of(userId, userId, "test@ex.com");
+        UserProfile user = UserProfile.builder().id(userId).build();
+        UserProfile leader = UserProfile.builder().id(99L).build();
+        ReadingGroup group = org.mockito.Mockito.spy(ReadingGroup.builder().id(groupId).groupLeader(leader).build());
+
+        when(entityFinder.findUser(userId)).thenReturn(user);
+        when(entityFinder.findGroup(groupId)).thenReturn(group);
+
+        groupMemberService.leaveGroup(token, groupId);
+
+        verify(group).removeMember(user);
+    }
 }
