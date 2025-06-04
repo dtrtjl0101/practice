@@ -26,23 +26,23 @@ public class ActivityPolicy {
     private final EbookPolicy ebookPolicy;
 
     public void assertJoinable(UserProfile user, Activity activity) {
-<span class="nc" id="L29">        groupMemberRepository.findByUserAndReadingGroupAndAcceptedTrue(user, activity.getGroup())</span>
-<span class="nc" id="L30">                .orElseThrow(() -&gt; new BadRequestException(ErrorCode.GROUP_MEMBER_ONLY));</span>
+<span class="fc" id="L29">        groupMemberRepository.findByUserAndReadingGroupAndAcceptedTrue(user, activity.getGroup())</span>
+<span class="fc" id="L30">                .orElseThrow(() -&gt; new BadRequestException(ErrorCode.GROUP_MEMBER_ONLY));</span>
 
-<span class="nc bnc" id="L32" title="All 2 branches missed.">        if (activityMemberRepository.existsByUserAndActivity(user, activity)) {</span>
-<span class="nc" id="L33">            throw new BadRequestException(ErrorCode.ACTIVITY_ALREADY_JOINED);</span>
+<span class="fc bfc" id="L32" title="All 2 branches covered.">        if (activityMemberRepository.existsByUserAndActivity(user, activity)) {</span>
+<span class="fc" id="L33">            throw new BadRequestException(ErrorCode.ACTIVITY_ALREADY_JOINED);</span>
         }
 
-<span class="nc bnc" id="L36" title="All 2 branches missed.">        if (activity.isEnded()) {</span>
-<span class="nc" id="L37">            throw new BadRequestException(ErrorCode.ACTIVITY_ALREADY_ENDED);</span>
+<span class="fc bfc" id="L36" title="All 2 branches covered.">        if (activity.isEnded()) {</span>
+<span class="fc" id="L37">            throw new BadRequestException(ErrorCode.ACTIVITY_ALREADY_ENDED);</span>
         }
 
-<span class="nc" id="L40">        ebookPolicy.assertEBookPurchased(user, activity.getBook());</span>
-<span class="nc" id="L41">    }</span>
+<span class="fc" id="L40">        ebookPolicy.assertEBookPurchased(user, activity.getBook());</span>
+<span class="fc" id="L41">    }</span>
 
     public void assertActivityPeriodValid(long groupId, @Nullable Long activityId, LocalDate startTime, LocalDate endTime) {
-<span class="pc bpc" id="L44" title="1 of 2 branches missed.">        if (startTime.isAfter(endTime)) {</span>
-<span class="nc" id="L45">            throw new BadRequestException(ErrorCode.ACTIVITY_TIME_INVALID);</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">        if (startTime.isAfter(endTime)) {</span>
+<span class="fc" id="L45">            throw new BadRequestException(ErrorCode.ACTIVITY_TIME_INVALID);</span>
         }
 
 <span class="fc" id="L48">        activityRepository.findByGroup_Id(groupId).stream()</span>
@@ -50,23 +50,23 @@ public class ActivityPolicy {
 <span class="fc" id="L50">                .forEach(a -&gt; {</span>
 <span class="fc" id="L51">                    boolean isBefore = endTime.isBefore(a.getStartTime());</span>
 <span class="fc" id="L52">                    boolean isAfter = startTime.isAfter(a.getEndTime());</span>
-<span class="pc bpc" id="L53" title="2 of 4 branches missed.">                    if (!(isBefore || isAfter)) {</span>
+<span class="fc bfc" id="L53" title="All 4 branches covered.">                    if (!(isBefore || isAfter)) {</span>
 <span class="fc" id="L54">                        throw new BadRequestException(ErrorCode.ACTIVITY_TIME_CONFLICT);</span>
                     }
-<span class="nc" id="L56">                });</span>
+<span class="fc" id="L56">                });</span>
 <span class="fc" id="L57">    }</span>
     
     public void assertJoined(UserProfile user, Activity activity) {
-<span class="nc bnc" id="L60" title="All 4 branches missed.">        if (user.getId() == null || !activityMemberRepository.existsByUserAndActivity(user, activity)) {</span>
-<span class="nc" id="L61">            throw new ForbiddenException(ErrorCode.ACTIVITY_MEMBER_ONLY);</span>
+<span class="pc bpc" id="L60" title="1 of 4 branches missed.">        if (user.getId() == null || !activityMemberRepository.existsByUserAndActivity(user, activity)) {</span>
+<span class="fc" id="L61">            throw new ForbiddenException(ErrorCode.ACTIVITY_MEMBER_ONLY);</span>
         }
-<span class="nc" id="L63">    }</span>
+<span class="fc" id="L63">    }</span>
 
     public void assertJoined(Long userId, Long activityId) {
-<span class="nc" id="L66">        UserProfile user = UserProfile.builder().id(userId).build();</span>
-<span class="nc" id="L67">        Activity activity = Activity.builder().id(activityId).build();</span>
-<span class="nc" id="L68">        assertJoined(user, activity);</span>
-<span class="nc" id="L69">    }</span>
+<span class="fc" id="L66">        UserProfile user = UserProfile.builder().id(userId).build();</span>
+<span class="fc" id="L67">        Activity activity = Activity.builder().id(activityId).build();</span>
+<span class="fc" id="L68">        assertJoined(user, activity);</span>
+<span class="fc" id="L69">    }</span>
     
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

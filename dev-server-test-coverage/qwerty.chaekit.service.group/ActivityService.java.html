@@ -70,12 +70,12 @@ public class ActivityService {
 <span class="fc" id="L70">        ReadingGroup group = entityFinder.findGroup(groupId);</span>
 <span class="fc" id="L71">        Activity activity = entityFinder.findActivity(request.activityId());</span>
 
-<span class="pc bpc" id="L73" title="1 of 2 branches missed.">        if (!activity.isFromGroup(group)) {</span>
-<span class="nc" id="L74">            throw new ForbiddenException(ErrorCode.ACTIVITY_GROUP_MISMATCH);</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">        if (!activity.isFromGroup(group)) {</span>
+<span class="fc" id="L74">            throw new ForbiddenException(ErrorCode.ACTIVITY_GROUP_MISMATCH);</span>
         }
         
-<span class="pc bpc" id="L77" title="1 of 2 branches missed.">        if (!group.isLeader(user)) {</span>
-<span class="nc" id="L78">            throw new ForbiddenException(ErrorCode.GROUP_LEADER_ONLY);</span>
+<span class="fc bfc" id="L77" title="All 2 branches covered.">        if (!group.isLeader(user)) {</span>
+<span class="fc" id="L78">            throw new ForbiddenException(ErrorCode.GROUP_LEADER_ONLY);</span>
         }
         
 <span class="fc" id="L81">        LocalDate newStartTime = Optional.ofNullable(request.startTime())</span>
@@ -105,53 +105,53 @@ public class ActivityService {
     }
     
     public void joinActivity(UserToken userToken, long activityId) {
-<span class="nc" id="L108">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
-<span class="nc" id="L109">        Activity activity = entityFinder.findActivity(activityId);</span>
+<span class="fc" id="L108">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
+<span class="fc" id="L109">        Activity activity = entityFinder.findActivity(activityId);</span>
         
-<span class="nc" id="L111">        activityPolicy.assertJoinable(user, activity);</span>
+<span class="fc" id="L111">        activityPolicy.assertJoinable(user, activity);</span>
         
-<span class="nc" id="L113">        activity.addParticipant(user);</span>
-<span class="nc" id="L114">    }</span>
+<span class="fc" id="L113">        activity.addParticipant(user);</span>
+<span class="fc" id="L114">    }</span>
  
     public void leaveActivity(UserToken userToken, long activityId) {
-<span class="nc" id="L117">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
-<span class="nc" id="L118">        Activity activity = entityFinder.findActivity(activityId);</span>
+<span class="fc" id="L117">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
+<span class="fc" id="L118">        Activity activity = entityFinder.findActivity(activityId);</span>
         
-<span class="nc bnc" id="L120" title="All 2 branches missed.">        if (!activity.isParticipant(user)) {</span>
+<span class="pc bpc" id="L120" title="1 of 2 branches missed.">        if (!activity.isParticipant(user)) {</span>
 <span class="nc" id="L121">            throw new ForbiddenException(ErrorCode.ACTIVITY_NOT_JOINED);</span>
         }
         
-<span class="nc" id="L124">        activity.removeParticipant(user);</span>
-<span class="nc" id="L125">    }</span>
+<span class="fc" id="L124">        activity.removeParticipant(user);</span>
+<span class="fc" id="L125">    }</span>
 
     @Transactional(readOnly = true)
     public ActivityFetchResponse fetchActivity(UserToken userToken, long activityId) {
-<span class="nc" id="L129">        Long userId = userToken.userId();</span>
-<span class="nc" id="L130">        Activity activity = activityRepository.findByIdWithBook(activityId)</span>
-<span class="nc" id="L131">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.ACTIVITY_NOT_FOUND));</span>
+<span class="fc" id="L129">        Long userId = userToken.userId();</span>
+<span class="fc" id="L130">        Activity activity = activityRepository.findByIdWithBook(activityId)</span>
+<span class="pc" id="L131">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.ACTIVITY_NOT_FOUND));</span>
 
-<span class="nc" id="L133">        activityPolicy.assertJoined(userId, activity.getId());</span>
+<span class="fc" id="L133">        activityPolicy.assertJoined(userId, activity.getId());</span>
 
-<span class="nc" id="L135">        return ActivityFetchResponse.of(activity, fileService.convertToPublicImageURL(activity.getBook().getCoverImageKey()), true);</span>
+<span class="fc" id="L135">        return ActivityFetchResponse.of(activity, fileService.convertToPublicImageURL(activity.getBook().getCoverImageKey()), true);</span>
     }
 
     @Transactional(readOnly = true)
     public PageResponse&lt;ActivityFetchResponse&gt; getMyActivities(UserToken userToken, Long bookId, Pageable pageable) {
-<span class="nc" id="L140">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
+<span class="fc" id="L140">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
         Page&lt;ActivityMember&gt; fetchResults;
-<span class="nc bnc" id="L142" title="All 2 branches missed.">        if (bookId == null) {</span>
-<span class="nc" id="L143">            fetchResults = activityMemberRepository.findByUser(user, pageable);</span>
+<span class="fc bfc" id="L142" title="All 2 branches covered.">        if (bookId == null) {</span>
+<span class="fc" id="L143">            fetchResults = activityMemberRepository.findByUser(user, pageable);</span>
         } else {
-<span class="nc" id="L145">            Ebook book = entityFinder.findEbook(bookId);</span>
-<span class="nc" id="L146">            fetchResults = activityMemberRepository.findByUserAndActivity_Book(user, book, pageable);</span>
+<span class="fc" id="L145">            Ebook book = entityFinder.findEbook(bookId);</span>
+<span class="fc" id="L146">            fetchResults = activityMemberRepository.findByUserAndActivity_Book(user, book, pageable);</span>
         }
-<span class="nc" id="L148">        Page&lt;ActivityFetchResponse&gt; page = fetchResults</span>
-<span class="nc" id="L149">                .map(activityMember -&gt; ActivityFetchResponse.of(</span>
-<span class="nc" id="L150">                        activityMember.getActivity(),</span>
-<span class="nc" id="L151">                        fileService.convertToPublicImageURL(activityMember.getUser().getProfileImageKey()),</span>
+<span class="fc" id="L148">        Page&lt;ActivityFetchResponse&gt; page = fetchResults</span>
+<span class="fc" id="L149">                .map(activityMember -&gt; ActivityFetchResponse.of(</span>
+<span class="fc" id="L150">                        activityMember.getActivity(),</span>
+<span class="fc" id="L151">                        fileService.convertToPublicImageURL(activityMember.getUser().getProfileImageKey()),</span>
                         true
                 ));
-<span class="nc" id="L154">        return PageResponse.of(page);</span>
+<span class="fc" id="L154">        return PageResponse.of(page);</span>
 
     }
 }

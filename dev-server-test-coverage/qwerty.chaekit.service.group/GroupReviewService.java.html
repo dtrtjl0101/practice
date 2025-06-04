@@ -37,64 +37,64 @@ public class GroupReviewService {
     public GroupReviewFetchResponse createReview(
             UserToken userToken, Long groupId, GroupReviewPostRequest request
     ) {
-<span class="nc" id="L40">        UserProfile author = entityFinder.findUser(userToken.userId());</span>
-<span class="nc" id="L41">        ReadingGroup group = entityFinder.findGroup(groupId);</span>
-<span class="nc" id="L42">        Activity activity = entityFinder.findActivity(request.activityId());</span>
+<span class="fc" id="L40">        UserProfile author = entityFinder.findUser(userToken.userId());</span>
+<span class="fc" id="L41">        ReadingGroup group = entityFinder.findGroup(groupId);</span>
+<span class="fc" id="L42">        Activity activity = entityFinder.findActivity(request.activityId());</span>
         
-<span class="nc bnc" id="L44" title="All 2 branches missed.">        if (!activity.isFromGroup(group)) {</span>
-<span class="nc" id="L45">            throw new BadRequestException(ErrorCode.ACTIVITY_GROUP_MISMATCH);</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">        if (!activity.isFromGroup(group)) {</span>
+<span class="fc" id="L45">            throw new BadRequestException(ErrorCode.ACTIVITY_GROUP_MISMATCH);</span>
         }
         
-<span class="nc" id="L48">        activityPolicy.assertJoined(author, activity);</span>
+<span class="fc" id="L48">        activityPolicy.assertJoined(author, activity);</span>
 
-<span class="nc" id="L50">        GroupReview review = groupReviewRepository.findByActivityAndAuthor(activity, author)</span>
-<span class="nc" id="L51">                .map(existing -&gt; {</span>
+<span class="fc" id="L50">        GroupReview review = groupReviewRepository.findByActivityAndAuthor(activity, author)</span>
+<span class="fc" id="L51">                .map(existing -&gt; {</span>
                     // 기존 리뷰 수정
-<span class="nc" id="L53">                    existing.setContent(request.content());</span>
-<span class="nc" id="L54">                    existing.setTags(request.tags());</span>
-<span class="nc" id="L55">                    return existing;</span>
+<span class="fc" id="L53">                    existing.setContent(request.content());</span>
+<span class="fc" id="L54">                    existing.setTags(request.tags());</span>
+<span class="fc" id="L55">                    return existing;</span>
                 })
-<span class="nc" id="L57">                .orElseGet(() -&gt; {</span>
+<span class="fc" id="L57">                .orElseGet(() -&gt; {</span>
                     // 신규 리뷰 생성
-<span class="nc" id="L59">                    GroupReview newReview = GroupReview.builder()</span>
-<span class="nc" id="L60">                            .group(group)</span>
-<span class="nc" id="L61">                            .author(author)</span>
-<span class="nc" id="L62">                            .activity(activity)</span>
-<span class="nc" id="L63">                            .content(request.content())</span>
-<span class="nc" id="L64">                            .build();</span>
-<span class="nc" id="L65">                    newReview.setTags(request.tags());</span>
-<span class="nc" id="L66">                    return newReview;</span>
+<span class="fc" id="L59">                    GroupReview newReview = GroupReview.builder()</span>
+<span class="fc" id="L60">                            .group(group)</span>
+<span class="fc" id="L61">                            .author(author)</span>
+<span class="fc" id="L62">                            .activity(activity)</span>
+<span class="fc" id="L63">                            .content(request.content())</span>
+<span class="fc" id="L64">                            .build();</span>
+<span class="fc" id="L65">                    newReview.setTags(request.tags());</span>
+<span class="fc" id="L66">                    return newReview;</span>
                 });
 
         // 저장 (기존 리뷰라면 dirty checking, 새 리뷰라면 persist)
-<span class="nc" id="L70">        groupReviewRepository.save(review);</span>
+<span class="fc" id="L70">        groupReviewRepository.save(review);</span>
 
-<span class="nc" id="L72">        return groupReviewMapper.toFetchResponse(review);</span>
+<span class="fc" id="L72">        return groupReviewMapper.toFetchResponse(review);</span>
     }
     
     public PageResponse&lt;GroupReviewFetchResponse&gt; getReviews(
             Long groupId, Pageable pageable
     ) {
-<span class="nc" id="L78">        Page&lt;GroupReviewFetchResponse&gt; reviews = groupReviewRepository.findByGroupId(groupId, pageable)</span>
-<span class="nc" id="L79">                .map(groupReviewMapper::toFetchResponse);</span>
+<span class="fc" id="L78">        Page&lt;GroupReviewFetchResponse&gt; reviews = groupReviewRepository.findByGroupId(groupId, pageable)</span>
+<span class="fc" id="L79">                .map(groupReviewMapper::toFetchResponse);</span>
         
-<span class="nc" id="L81">        return PageResponse.of(reviews);</span>
+<span class="fc" id="L81">        return PageResponse.of(reviews);</span>
     }
     
     public GroupReviewStatsResponse getReviewStats(Long groupId) {
-<span class="nc" id="L85">        ReadingGroup group = entityFinder.findGroup(groupId);</span>
+<span class="fc" id="L85">        ReadingGroup group = entityFinder.findGroup(groupId);</span>
         
-<span class="nc" id="L87">        long reviewCount = groupReviewRepository.countByGroup(group);</span>
-<span class="nc" id="L88">        List&lt;TagStatDto&gt; tagStats = groupReviewTagRepository.countTagsByGroupId(group);</span>
-<span class="nc" id="L89">        long tagCount = tagStats.stream()</span>
-<span class="nc" id="L90">                .mapToLong(TagStatDto::count)</span>
-<span class="nc" id="L91">                .sum();</span>
+<span class="fc" id="L87">        long reviewCount = groupReviewRepository.countByGroup(group);</span>
+<span class="fc" id="L88">        List&lt;TagStatDto&gt; tagStats = groupReviewTagRepository.countTagsByGroupId(group);</span>
+<span class="fc" id="L89">        long tagCount = tagStats.stream()</span>
+<span class="fc" id="L90">                .mapToLong(TagStatDto::count)</span>
+<span class="fc" id="L91">                .sum();</span>
         
-<span class="nc" id="L93">        return GroupReviewStatsResponse.builder()</span>
-<span class="nc" id="L94">                .reviewCount(reviewCount)</span>
-<span class="nc" id="L95">                .tagStats(tagStats)</span>
-<span class="nc" id="L96">                .tagCount(tagCount)</span>
-<span class="nc" id="L97">                .build();</span>
+<span class="fc" id="L93">        return GroupReviewStatsResponse.builder()</span>
+<span class="fc" id="L94">                .reviewCount(reviewCount)</span>
+<span class="fc" id="L95">                .tagStats(tagStats)</span>
+<span class="fc" id="L96">                .tagCount(tagCount)</span>
+<span class="fc" id="L97">                .build();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

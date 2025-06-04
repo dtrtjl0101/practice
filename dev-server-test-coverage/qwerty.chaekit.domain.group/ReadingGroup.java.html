@@ -79,30 +79,30 @@ public class ReadingGroup extends BaseEntity {
 <span class="nc" id="L79">    }</span>
 
     public GroupMember addMember(UserProfile user) {
-<span class="nc" id="L82">        GroupMember groupMember = new GroupMember(this, user);</span>
-<span class="nc" id="L83">        groupMembers.add(groupMember);</span>
-<span class="nc" id="L84">        return groupMember;</span>
+<span class="fc" id="L82">        GroupMember groupMember = new GroupMember(this, user);</span>
+<span class="fc" id="L83">        groupMembers.add(groupMember);</span>
+<span class="fc" id="L84">        return groupMember;</span>
     }
 
     public GroupMember approveMember(UserProfile user){
-<span class="nc" id="L88">        return groupMembers.stream()</span>
-<span class="nc" id="L89">                .filter(groupMember -&gt; groupMember.getMember().getId().equals(user.getId()))</span>
-<span class="nc" id="L90">                .findFirst()</span>
-<span class="nc" id="L91">                .map(groupMember -&gt; {groupMember.approve(); return groupMember;})</span>
-<span class="nc" id="L92">                .orElse(null);</span>
+<span class="fc" id="L88">        return groupMembers.stream()</span>
+<span class="fc" id="L89">                .filter(groupMember -&gt; groupMember.getMember().getId().equals(user.getId()))</span>
+<span class="fc" id="L90">                .findFirst()</span>
+<span class="fc" id="L91">                .map(groupMember -&gt; {groupMember.approve(); return groupMember;})</span>
+<span class="fc" id="L92">                .orElse(null);</span>
     }
 
     public void removeMember(UserProfile user) {
-<span class="nc" id="L96">        groupMembers.removeIf(member -&gt; member.getMember().getId().equals(user.getId()));</span>
-<span class="nc" id="L97">    }</span>
+<span class="fc" id="L96">        groupMembers.removeIf(member -&gt; member.getMember().getId().equals(user.getId()));</span>
+<span class="fc" id="L97">    }</span>
 
     public void rejectMember(UserProfile user) {
-<span class="nc" id="L100">        groupMembers.stream()</span>
-<span class="nc" id="L101">                .filter(member -&gt; member.getMember().getId().equals(user.getId()))</span>
-<span class="nc" id="L102">                .findFirst()</span>
-<span class="nc" id="L103">                .ifPresent(GroupMember::reject);</span>
-<span class="nc" id="L104">        removeMember(user);</span>
-<span class="nc" id="L105">    }</span>
+<span class="fc" id="L100">        groupMembers.stream()</span>
+<span class="pc" id="L101">                .filter(member -&gt; member.getMember().getId().equals(user.getId()))</span>
+<span class="fc" id="L102">                .findFirst()</span>
+<span class="fc" id="L103">                .ifPresent(GroupMember::reject);</span>
+<span class="fc" id="L104">        removeMember(user);</span>
+<span class="fc" id="L105">    }</span>
 
     public void updateDescription(String description) {
 <span class="nc" id="L108">        this.description = description;</span>
@@ -141,18 +141,18 @@ public class ReadingGroup extends BaseEntity {
     }
 
     public boolean isNotAcceptedMember(UserProfile user) {
-<span class="nc" id="L144">        return groupMembers.stream()</span>
-<span class="nc bnc" id="L145" title="All 4 branches missed.">                .noneMatch(member -&gt; member.matchesUser(user) &amp;&amp; member.isAccepted());</span>
+<span class="fc" id="L144">        return groupMembers.stream()</span>
+<span class="pc bpc" id="L145" title="2 of 4 branches missed.">                .noneMatch(member -&gt; member.matchesUser(user) &amp;&amp; member.isAccepted());</span>
     }
 
     public boolean isMemberAlreadyRequested(UserProfile user) {
-<span class="nc" id="L149">        return groupMembers.stream()</span>
-<span class="nc" id="L150">                .anyMatch(gm -&gt; gm.matchesUser(user));</span>
+<span class="fc" id="L149">        return groupMembers.stream()</span>
+<span class="pc" id="L150">                .anyMatch(gm -&gt; gm.matchesUser(user));</span>
     }
 
     public boolean isPendingMember(Long userId) {
-<span class="nc" id="L154">        return groupMembers.stream()</span>
-<span class="nc bnc" id="L155" title="All 4 branches missed.">                .anyMatch(gm -&gt; gm.matchesUserId(userId) &amp;&amp; !gm.isAccepted());</span>
+<span class="fc" id="L154">        return groupMembers.stream()</span>
+<span class="pc bpc" id="L155" title="2 of 4 branches missed.">                .anyMatch(gm -&gt; gm.matchesUserId(userId) &amp;&amp; !gm.isAccepted());</span>
     }
 
     public void changeAutoApproval(boolean autoApproval) {

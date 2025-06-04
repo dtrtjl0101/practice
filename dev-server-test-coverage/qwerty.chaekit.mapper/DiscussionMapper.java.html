@@ -51,7 +51,7 @@ public class DiscussionMapper {
 <span class="fc" id="L51">                .modifiedAt(comment.getModifiedAt())</span>
 <span class="fc" id="L52">                .isEdited(comment.isEdited())</span>
 <span class="fc" id="L53">                .stance(comment.getStance())</span>
-<span class="pc bpc" id="L54" title="1 of 2 branches missed.">                .parentId(comment.getParent() != null ? comment.getParent().getId() : null)</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">                .parentId(comment.getParent() != null ? comment.getParent().getId() : null)</span>
 <span class="fc" id="L55">                .replies(</span>
 <span class="fc" id="L56">                        comment.getReplies().stream()</span>
 <span class="fc" id="L57">                                .map(this::toCommentFetchResponse)</span>

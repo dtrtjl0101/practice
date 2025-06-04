@@ -62,9 +62,9 @@ public class DiscussionComment extends BaseEntity {
 <span class="fc" id="L62">    }</span>
 
     public void updateContent(String content) {
-<span class="nc" id="L65">        this.content = content;</span>
-<span class="nc" id="L66">        this.edited = true;</span>
-<span class="nc" id="L67">    }</span>
+<span class="fc" id="L65">        this.content = content;</span>
+<span class="fc" id="L66">        this.edited = true;</span>
+<span class="fc" id="L67">    }</span>
 
     public void softDelete() {
 <span class="fc" id="L70">        this.content = &quot;삭제된 댓글입니다.&quot;;</span>
@@ -80,7 +80,7 @@ public class DiscussionComment extends BaseEntity {
     }
     
     public boolean isReply() {
-<span class="nc bnc" id="L83" title="All 2 branches missed.">        return parent != null;</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        return parent != null;</span>
     }
     
     public boolean isRootComment() {

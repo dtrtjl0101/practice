@@ -32,10 +32,10 @@ public class DiscussionCommentService {
     private final EntityFinder entityFinder;
     
     public DiscussionCommentFetchResponse getComment(UserToken userToken, Long commentId) {
-<span class="nc" id="L35">        DiscussionComment comment = discussionCommentRepository.findByIdWithAuthor(commentId)</span>
-<span class="nc" id="L36">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.DISCUSSION_COMMENT_NOT_FOUND));</span>
-<span class="nc" id="L37">        activityPolicy.assertJoined(userToken.userId(), comment.getDiscussion().getActivity().getId());</span>
-<span class="nc" id="L38">        return discussionMapper.toCommentFetchResponse(comment);</span>
+<span class="fc" id="L35">        DiscussionComment comment = discussionCommentRepository.findByIdWithAuthor(commentId)</span>
+<span class="pc" id="L36">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.DISCUSSION_COMMENT_NOT_FOUND));</span>
+<span class="fc" id="L37">        activityPolicy.assertJoined(userToken.userId(), comment.getDiscussion().getActivity().getId());</span>
+<span class="fc" id="L38">        return discussionMapper.toCommentFetchResponse(comment);</span>
     }
 
     public DiscussionCommentFetchResponse addComment(Long discussionId, DiscussionCommentPostRequest request, UserToken userToken) {
@@ -47,14 +47,14 @@ public class DiscussionCommentService {
 <span class="fc" id="L47">        activityPolicy.assertJoined(user, discussion.getActivity());</span>
 
         DiscussionComment parentComment;
-<span class="pc bpc" id="L50" title="1 of 2 branches missed.">        boolean isReply = request.parentId() != null;</span>
-<span class="pc bpc" id="L51" title="1 of 2 branches missed.">        if (isReply) {</span>
-<span class="nc" id="L52">            parentComment = entityFinder.findDiscussionComment(request.parentId());</span>
-<span class="nc bnc" id="L53" title="All 2 branches missed.">            if (parentComment.isReply()){</span>
-<span class="nc" id="L54">                throw new BadRequestException(ErrorCode.REPLY_CANNOT_HAVE_CHILD);</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        boolean isReply = request.parentId() != null;</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">        if (isReply) {</span>
+<span class="fc" id="L52">            parentComment = entityFinder.findDiscussionComment(request.parentId());</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">            if (parentComment.isReply()){</span>
+<span class="fc" id="L54">                throw new BadRequestException(ErrorCode.REPLY_CANNOT_HAVE_CHILD);</span>
             }
-<span class="nc bnc" id="L56" title="All 2 branches missed.">            if (parentComment.isDeleted()){</span>
-<span class="nc" id="L57">                throw new BadRequestException(ErrorCode.DISCUSSION_COMMENT_DELETED);</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">            if (parentComment.isDeleted()){</span>
+<span class="fc" id="L57">                throw new BadRequestException(ErrorCode.DISCUSSION_COMMENT_DELETED);</span>
             }
         } else {
 <span class="fc" id="L60">            parentComment = null;</span>
@@ -69,8 +69,8 @@ public class DiscussionCommentService {
 <span class="fc" id="L69">                .build();</span>
 <span class="fc" id="L70">        discussionCommentRepository.save(comment);</span>
 
-<span class="pc bpc" id="L72" title="3 of 4 branches missed.">        if (parentComment != null &amp;&amp; !parentComment.isAuthor(user)) {</span>
-<span class="nc" id="L73">            notificationService.createCommentReplyNotification(parentComment.getAuthor(), user,parentComment);</span>
+<span class="pc bpc" id="L72" title="1 of 4 branches missed.">        if (parentComment != null &amp;&amp; !parentComment.isAuthor(user)) {</span>
+<span class="fc" id="L73">            notificationService.createCommentReplyNotification(parentComment.getAuthor(), user,parentComment);</span>
         } else {
 <span class="pc bpc" id="L75" title="1 of 2 branches missed.">            if (!discussion.isAuthor(user)) {</span>
 <span class="fc" id="L76">                notificationService.createDiscussionCommentNotification(discussion.getAuthor(), user, discussion);</span>
@@ -86,17 +86,17 @@ public class DiscussionCommentService {
     }
 
     public DiscussionCommentFetchResponse updateComment(Long commentId, DiscussionCommentPatchRequest request, UserToken userToken) {
-<span class="nc" id="L89">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
-<span class="nc" id="L90">        DiscussionComment comment = entityFinder.findDiscussionComment(commentId);</span>
+<span class="fc" id="L89">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
+<span class="fc" id="L90">        DiscussionComment comment = entityFinder.findDiscussionComment(commentId);</span>
 
-<span class="nc bnc" id="L92" title="All 2 branches missed.">        if (comment.isDeleted()) {</span>
-<span class="nc" id="L93">            throw new BadRequestException(ErrorCode.DISCUSSION_COMMENT_DELETED);</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">        if (comment.isDeleted()) {</span>
+<span class="fc" id="L93">            throw new BadRequestException(ErrorCode.DISCUSSION_COMMENT_DELETED);</span>
         }
-<span class="nc bnc" id="L95" title="All 2 branches missed.">        if (!comment.isAuthor(user)) {</span>
-<span class="nc" id="L96">            throw new BadRequestException(ErrorCode.DISCUSSION_COMMENT_NOT_YOURS);</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">        if (!comment.isAuthor(user)) {</span>
+<span class="fc" id="L96">            throw new BadRequestException(ErrorCode.DISCUSSION_COMMENT_NOT_YOURS);</span>
         }
-<span class="nc" id="L98">        comment.updateContent(request.content());</span>
-<span class="nc" id="L99">        return discussionMapper.toCommentFetchResponse(comment);</span>
+<span class="fc" id="L98">        comment.updateContent(request.content());</span>
+<span class="fc" id="L99">        return discussionMapper.toCommentFetchResponse(comment);</span>
     }
 
     public void deleteComment(Long commentId, UserToken userToken) {
@@ -107,34 +107,35 @@ public class DiscussionCommentService {
 <span class="fc" id="L107">            throw new BadRequestException(ErrorCode.DISCUSSION_COMMENT_NOT_YOURS);</span>
         }
 
-<span class="fc bfc" id="L110" title="All 2 branches covered.">        if (comment.isRootComment()) {</span>
-<span class="fc bfc" id="L111" title="All 2 branches covered.">            if (hasReplies(comment)) {</span>
-<span class="pc bpc" id="L112" title="1 of 2 branches missed.">                if(comment.isDeleted()) {</span>
-<span class="nc" id="L113">                    throw new BadRequestException(ErrorCode.DISCUSSION_COMMENT_DELETED);</span>
-                }
-<span class="fc" id="L115">                comment.softDelete();</span>
+<span class="fc bfc" id="L110" title="All 2 branches covered.">        if(comment.isDeleted()) {</span>
+<span class="fc" id="L111">            throw new BadRequestException(ErrorCode.DISCUSSION_COMMENT_DELETED);</span>
+        }
+        
+<span class="fc bfc" id="L114" title="All 2 branches covered.">        if (comment.isRootComment()) {</span>
+<span class="fc bfc" id="L115" title="All 2 branches covered.">            if (hasReplies(comment)) {</span>
+<span class="fc" id="L116">                comment.softDelete();</span>
             } else {
-<span class="fc" id="L117">                removeRootComment(comment);</span>
+<span class="fc" id="L118">                removeRootComment(comment);</span>
             }
         } else {
-<span class="fc" id="L120">            DiscussionComment parentComment = comment.getParent();</span>
-<span class="pc bpc" id="L121" title="2 of 4 branches missed.">            if (parentComment.isDeleted() &amp;&amp; hasLastReply(parentComment)) {</span>
-<span class="fc" id="L122">                removeRootComment(parentComment);</span>
+<span class="fc" id="L121">            DiscussionComment parentComment = comment.getParent();</span>
+<span class="pc bpc" id="L122" title="2 of 4 branches missed.">            if (parentComment.isDeleted() &amp;&amp; hasLastReply(parentComment)) {</span>
+<span class="fc" id="L123">                removeRootComment(parentComment);</span>
             }
-<span class="fc" id="L124">            parentComment.removeReply(comment);</span>
+<span class="fc" id="L125">            parentComment.removeReply(comment);</span>
         }
-<span class="fc" id="L126">    }</span>
+<span class="fc" id="L127">    }</span>
 
     private boolean hasReplies(DiscussionComment comment) {
-<span class="fc bfc" id="L129" title="All 2 branches covered.">        return discussionCommentRepository.countByParentId(comment.getId()) &gt; 0;</span>
+<span class="fc bfc" id="L130" title="All 2 branches covered.">        return discussionCommentRepository.countByParentId(comment.getId()) &gt; 0;</span>
     }
 
     private boolean hasLastReply(DiscussionComment comment) {
-<span class="pc bpc" id="L133" title="1 of 2 branches missed.">        return discussionCommentRepository.countByParentId(comment.getId()) == 1;</span>
+<span class="pc bpc" id="L134" title="1 of 2 branches missed.">        return discussionCommentRepository.countByParentId(comment.getId()) == 1;</span>
     }
 
     private void removeRootComment(DiscussionComment comment) {
-<span class="fc" id="L137">        discussionCommentRepository.delete(comment);</span>
-<span class="fc" id="L138">    }</span>
+<span class="fc" id="L138">        discussionCommentRepository.delete(comment);</span>
+<span class="fc" id="L139">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
