@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import qwerty.chaekit.domain.group.ReadingGroup;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface GroupRepository extends JpaRepository<ReadingGroup, Long> {
@@ -20,4 +21,39 @@ public interface GroupRepository extends JpaRepository<ReadingGroup, Long> {
     Page<ReadingGroup> findByGroupLeaderId(Long userId, Pageable pageable);
 
     boolean existsReadingGroupByName(@NotBlank String name);
+
+    // Querydsl을 사용하면 더 간단하게 처리할 수 있지만, 여기서는 JpaRepository를 유지하여 구현
+    @Query("""
+    SELECT g FROM ReadingGroup g
+    LEFT JOIN g.groupMembers gm WITH gm.accepted = true
+    JOIN g.groupTags t
+    WHERE t.tagName IN :tags
+    GROUP BY g
+    ORDER BY COUNT(gm) DESC
+    """)
+    Page<ReadingGroup> findAllByTagsInOrderByMemberCountDesc(
+            List<String> tags,
+            Pageable pageable
+    );
+
+    @Query("""
+    SELECT g FROM ReadingGroup g
+    LEFT JOIN g.groupMembers gm WITH gm.accepted = true
+    GROUP BY g
+    ORDER BY COUNT(gm) DESC
+    """)
+    Page<ReadingGroup> findAllInOrderByMemberCountDesc(Pageable pageable);
+
+    @Query("""
+    SELECT g FROM ReadingGroup g
+    JOIN g.groupTags t
+    WHERE t.tagName IN :tags
+    GROUP BY g
+    """)
+    Page<ReadingGroup> findAllByTagsIn(
+            List<String> tags,
+            Pageable pageable
+    );
+    
+    // Page<ReadingGroup> findAll(Pageable pageable);
 }

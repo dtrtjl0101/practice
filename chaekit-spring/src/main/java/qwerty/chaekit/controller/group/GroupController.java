@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.dto.group.request.GroupPatchRequest;
 import qwerty.chaekit.dto.group.request.GroupPostRequest;
+import qwerty.chaekit.dto.group.request.GroupSortType;
 import qwerty.chaekit.dto.group.response.GroupFetchResponse;
 import qwerty.chaekit.dto.group.response.GroupJoinResponse;
 import qwerty.chaekit.dto.group.response.GroupMemberResponse;
@@ -22,6 +23,8 @@ import qwerty.chaekit.global.security.resolver.Login;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.group.GroupMemberService;
 import qwerty.chaekit.service.group.GroupService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/groups")
@@ -38,11 +41,19 @@ public class GroupController {
         return ApiSuccessResponse.of(groupService.createGroup(userToken, groupPostRequest));
     }
 
+    @Operation(
+            summary = "모임 목록 조회",
+            description = "모임 목록을 조회합니다. 태그로 필터링할 수 있습니다. " +
+                    "정렬 기준은 MEMBER_COUNT(가입자 수), CREATED_AT(최신 생성 순) 중 선택할 수 있습니다."
+    )
     @GetMapping
     public ApiSuccessResponse<PageResponse<GroupFetchResponse>> getAllGroups(
             @Parameter(hidden = true) @Login(required = false) UserToken userToken,
-            @ParameterObject Pageable pageable) {
-        return ApiSuccessResponse.of(groupService.getAllGroups(userToken, pageable));
+            @ParameterObject Pageable pageable,
+            @RequestParam(required = false) List<String> tags,
+            @RequestParam(required = false, defaultValue = "MEMBER_COUNT") GroupSortType sortBy
+    ) {
+        return ApiSuccessResponse.of(groupService.getAllGroups(userToken, pageable, tags, sortBy));
     }
 
     @GetMapping("/my/joined")

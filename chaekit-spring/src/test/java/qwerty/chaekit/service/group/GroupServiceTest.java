@@ -17,6 +17,7 @@ import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.dto.group.request.GroupPatchRequest;
 import qwerty.chaekit.dto.group.request.GroupPostRequest;
+import qwerty.chaekit.dto.group.request.GroupSortType;
 import qwerty.chaekit.dto.group.response.GroupFetchResponse;
 import qwerty.chaekit.dto.group.response.GroupPostResponse;
 import qwerty.chaekit.dto.page.PageResponse;
@@ -122,11 +123,11 @@ class GroupServiceTest {
         ReadingGroup group = mock(ReadingGroup.class);
         GroupFetchResponse fetchResponse = mock(GroupFetchResponse.class);
         Page<ReadingGroup> groupPage = new PageImpl<>(List.of(group));
-        when(groupRepository.findAll(pageable)).thenReturn(groupPage);
+        when(groupRepository.findAll(any(Pageable.class))).thenReturn(groupPage);
         when(groupMapper.toGroupFetchResponse(group, 1L)).thenReturn(fetchResponse);
 
         // When
-        PageResponse<GroupFetchResponse> response = groupService.getAllGroups(userToken, pageable);
+        PageResponse<GroupFetchResponse> response = groupService.getAllGroups(userToken, pageable, null, GroupSortType.CREATED_AT);
 
         // Then
         assertNotNull(response);

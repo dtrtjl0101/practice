@@ -77,4 +77,9 @@ public class EbookRepositoryImpl implements EbookRepository {
     public void incrementViewCount(Long ebookId) {
         ebookJpaRepository.incrementViewCount(ebookId);
     }
+
+    @Override
+    public long count() {
+        return ebookJpaRepository.count();
+    }
 }
