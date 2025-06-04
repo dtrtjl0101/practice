@@ -47,7 +47,7 @@ public class DiscussionComment extends BaseEntity {
     @JoinColumn(name = &quot;parent_id&quot;)
     private DiscussionComment parent = null;
 
-<span class="fc" id="L50">    @OneToMany(mappedBy = &quot;parent&quot;, cascade = CascadeType.ALL)</span>
+<span class="fc" id="L50">    @OneToMany(mappedBy = &quot;parent&quot;, cascade = CascadeType.ALL, orphanRemoval = true)</span>
     @BatchSize(size = 50)
     private final List&lt;DiscussionComment&gt; replies = new ArrayList&lt;&gt;();
 
@@ -70,17 +70,21 @@ public class DiscussionComment extends BaseEntity {
 <span class="fc" id="L70">        this.content = &quot;삭제된 댓글입니다.&quot;;</span>
 <span class="fc" id="L71">        this.deleted = true;</span>
 <span class="fc" id="L72">    }</span>
+
+    public void removeReply(DiscussionComment reply) {
+<span class="fc" id="L75">        replies.remove(reply);</span>
+<span class="fc" id="L76">    }</span>
     
     public boolean isAuthor(UserProfile user) {
-<span class="fc" id="L75">        return author.getId().equals(user.getId());</span>
+<span class="fc" id="L79">        return author.getId().equals(user.getId());</span>
     }
     
     public boolean isReply() {
-<span class="nc bnc" id="L79" title="All 2 branches missed.">        return parent != null;</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        return parent != null;</span>
     }
     
     public boolean isRootComment() {
-<span class="nc bnc" id="L83" title="All 2 branches missed.">        return parent == null;</span>
+<span class="fc bfc" id="L87" title="All 2 branches covered.">        return parent == null;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

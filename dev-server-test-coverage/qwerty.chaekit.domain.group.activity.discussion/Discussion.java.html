@@ -5,9 +5,12 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import qwerty.chaekit.domain.BaseEntity;
+import qwerty.chaekit.domain.group.activity.discussion.highlight.DiscussionHighlight;
 import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment;
+import qwerty.chaekit.domain.highlight.Highlight;
 import qwerty.chaekit.domain.member.user.UserProfile;
 
 import java.util.ArrayList;
@@ -17,6 +20,7 @@ import java.util.List;
 @Getter
 @Table(name = &quot;discussion&quot;)
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
+@BatchSize(size = 20)
 public class Discussion extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,37 +40,51 @@ public class Discussion extends BaseEntity {
     @JoinColumn(name = &quot;author_id&quot;)
     private UserProfile author;
 
-<span class="fc" id="L39">    @Column(nullable = false)</span>
+<span class="fc" id="L43">    @Column(nullable = false)</span>
     private boolean isDebate = false;
 
-<span class="fc" id="L42">    @OneToMany(mappedBy = &quot;discussion&quot;)</span>
+<span class="fc" id="L46">    @OneToMany(mappedBy = &quot;discussion&quot;, cascade = CascadeType.ALL, orphanRemoval = true)</span>
+    @BatchSize(size = 20)
     private final List&lt;DiscussionComment&gt; comments = new ArrayList&lt;&gt;();
 
+<span class="fc" id="L50">    @OneToMany(mappedBy = &quot;discussion&quot;, cascade = CascadeType.ALL, orphanRemoval = true)</span>
+    @BatchSize(size = 20)
+    private final List&lt;DiscussionHighlight&gt; highlights = new ArrayList&lt;&gt;();
+
     @Builder
-<span class="fc" id="L46">    public Discussion(Long id, Activity activity, String title, String content, UserProfile author, boolean isDebate) {</span>
-<span class="fc" id="L47">        this.id = id;</span>
-<span class="fc" id="L48">        this.activity = activity;</span>
-<span class="fc" id="L49">        this.title = title;</span>
-<span class="fc" id="L50">        this.content = content;</span>
-<span class="fc" id="L51">        this.author = author;</span>
-<span class="fc" id="L52">        this.isDebate = isDebate;</span>
-<span class="fc" id="L53">    }</span>
+<span class="fc" id="L55">    public Discussion(Long id, Activity activity, String title, String content, UserProfile author, boolean isDebate) {</span>
+<span class="fc" id="L56">        this.id = id;</span>
+<span class="fc" id="L57">        this.activity = activity;</span>
+<span class="fc" id="L58">        this.title = title;</span>
+<span class="fc" id="L59">        this.content = content;</span>
+<span class="fc" id="L60">        this.author = author;</span>
+<span class="fc" id="L61">        this.isDebate = isDebate;</span>
+<span class="fc" id="L62">    }</span>
 
     public void update(String title, String content) {
-<span class="pc bpc" id="L56" title="1 of 2 branches missed.">        if(title != null) {</span>
-<span class="fc" id="L57">            this.title = title;</span>
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">        if(title != null) {</span>
+<span class="fc" id="L66">            this.title = title;</span>
         }
-<span class="pc bpc" id="L59" title="1 of 2 branches missed.">        if(content != null) {</span>
-<span class="fc" id="L60">            this.content = content;</span>
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">        if(content != null) {</span>
+<span class="fc" id="L69">            this.content = content;</span>
         }
-<span class="fc" id="L62">    }</span>
+<span class="fc" id="L71">    }</span>
     
     public boolean isAuthor(UserProfile user) {
-<span class="fc" id="L65">        return author.getId().equals(user.getId());</span>
+<span class="fc" id="L74">        return author.getId().equals(user.getId());</span>
     }
     
     public void addComment(DiscussionComment comment) {
-<span class="fc" id="L69">        comments.add(comment);</span>
-<span class="fc" id="L70">    }</span>
+<span class="fc" id="L78">        comments.add(comment);</span>
+<span class="fc" id="L79">    }</span>
+
+    public void resetHighlights() {
+<span class="fc" id="L82">        this.highlights.clear();</span>
+<span class="fc" id="L83">    }</span>
+
+    public void addHighlight(Highlight highlight) {
+<span class="nc" id="L86">        DiscussionHighlight link = new DiscussionHighlight(this, highlight);</span>
+<span class="nc" id="L87">        this.highlights.add(link);</span>
+<span class="nc" id="L88">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

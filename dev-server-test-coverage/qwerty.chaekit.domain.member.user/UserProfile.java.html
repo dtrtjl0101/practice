@@ -7,7 +7,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.BatchSize;
 import qwerty.chaekit.domain.BaseEntity;
+
+import qwerty.chaekit.domain.ebook.Ebook;
+import qwerty.chaekit.domain.ebook.purchase.EbookPurchase;
 import qwerty.chaekit.domain.member.Member;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -19,7 +25,7 @@ public class UserProfile extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = &quot;member_id&quot;, nullable = false)
     private Member member;
 
@@ -27,13 +33,29 @@ public class UserProfile extends BaseEntity {
     private String nickname;
 
     private String profileImageKey;
+    
+<span class="fc" id="L37">    @OneToMany(mappedBy = &quot;user&quot;)</span>
+    @BatchSize(size = 30)
+    private final List&lt;EbookPurchase&gt; purchaseList = new ArrayList&lt;&gt;();
 
     @Builder
-<span class="fc" id="L32">    public UserProfile(Long id, Member member, String nickname, String profileImageKey) {</span>
-<span class="fc" id="L33">        this.id = id;</span>
-<span class="fc" id="L34">        this.member = member;</span>
-<span class="fc" id="L35">        this.nickname = nickname;</span>
-<span class="fc" id="L36">        this.profileImageKey = profileImageKey;</span>
-<span class="fc" id="L37">    }</span>
+<span class="fc" id="L42">    public UserProfile(Long id, Member member, String nickname, String profileImageKey) {</span>
+<span class="fc" id="L43">        this.id = id;</span>
+<span class="fc" id="L44">        this.member = member;</span>
+<span class="fc" id="L45">        this.nickname = nickname;</span>
+<span class="fc" id="L46">        this.profileImageKey = profileImageKey;</span>
+<span class="fc" id="L47">    }</span>
+    
+    // 전자책을 조회할때마다 구매 여부를 확인하기 위해 사용하지만, 구매한 전자책이 매우 많아질 경우
+    // 성능 저하가 우려된다. 이 경우에는 구매 여부를 확인하는 쿼리를 따로 날리는 것이 좋다.
+    public boolean isPurchased(Ebook ebook) {
+<span class="nc" id="L52">        return purchaseList</span>
+<span class="nc" id="L53">                .stream()</span>
+<span class="nc" id="L54">                .anyMatch(purchase -&gt; purchase.getEbook().getId().equals(ebook.getId()));</span>
+    }
+    
+    public boolean isNotAdmin() {
+<span class="nc bnc" id="L58" title="All 2 branches missed.">        return !member.isAdmin();</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

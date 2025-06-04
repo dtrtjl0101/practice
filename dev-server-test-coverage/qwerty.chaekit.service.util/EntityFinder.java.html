@@ -2,8 +2,11 @@
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.ebook.repository.EbookRepository;
+import qwerty.chaekit.domain.ebook.request.EbookRequest;
+import qwerty.chaekit.domain.ebook.request.EbookRequestRepository;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.group.activity.discussion.Discussion;
@@ -12,8 +15,10 @@ import qwerty.chaekit.domain.group.activity.discussion.comment.repository.Discus
 import qwerty.chaekit.domain.group.activity.discussion.repository.DiscussionRepository;
 import qwerty.chaekit.domain.group.activity.repository.ActivityRepository;
 import qwerty.chaekit.domain.group.repository.GroupRepository;
-import qwerty.chaekit.domain.highlight.entity.Highlight;
+import qwerty.chaekit.domain.highlight.Highlight;
 import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
+import qwerty.chaekit.domain.member.publisher.PublisherProfile;
+import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.global.exception.NotFoundException;
@@ -21,50 +26,63 @@ import qwerty.chaekit.global.exception.NotFoundException;
 import static qwerty.chaekit.global.enums.ErrorCode.*;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class EntityFinder {
 
     private final UserProfileRepository userRepository;
+    private final PublisherProfileRepository publisherRepository;
     private final EbookRepository ebookRepository;
     private final ActivityRepository activityRepository;
     private final GroupRepository groupRepository;
     private final HighlightRepository highlightRepository;
     private final DiscussionRepository discussionRepository;
     private final DiscussionCommentRepository discussionCommentRepository;
+    private final EbookRequestRepository ebookRequestRepository;
 
     public UserProfile findUser(Long id) {
-<span class="fc" id="L36">        return userRepository.findById(id)</span>
-<span class="pc" id="L37">                .orElseThrow(() -&gt; new NotFoundException(USER_NOT_FOUND));</span>
+<span class="fc" id="L44">        return userRepository.findById(id)</span>
+<span class="pc" id="L45">                .orElseThrow(() -&gt; new NotFoundException(USER_NOT_FOUND));</span>
+    }
+
+    public PublisherProfile findPublisher(Long id) {
+<span class="nc" id="L49">        return publisherRepository.findById(id)</span>
+<span class="nc" id="L50">                .orElseThrow(() -&gt; new NotFoundException(PUBLISHER_NOT_FOUND));</span>
     }
 
     public Ebook findEbook(Long id) {
-<span class="fc" id="L41">        return ebookRepository.findById(id)</span>
-<span class="pc" id="L42">                .orElseThrow(() -&gt; new NotFoundException(EBOOK_NOT_FOUND));</span>
+<span class="fc" id="L54">        return ebookRepository.findById(id)</span>
+<span class="pc" id="L55">                .orElseThrow(() -&gt; new NotFoundException(EBOOK_NOT_FOUND));</span>
     }
 
     public Activity findActivity(Long id) {
-<span class="fc" id="L46">        return activityRepository.findById(id)</span>
-<span class="pc" id="L47">                .orElseThrow(() -&gt; new NotFoundException(ACTIVITY_NOT_FOUND));</span>
+<span class="fc" id="L59">        return activityRepository.findById(id)</span>
+<span class="pc" id="L60">                .orElseThrow(() -&gt; new NotFoundException(ACTIVITY_NOT_FOUND));</span>
     }
 
     public ReadingGroup findGroup(Long id) {
-<span class="fc" id="L51">        return groupRepository.findById(id)</span>
-<span class="pc" id="L52">                .orElseThrow(() -&gt; new NotFoundException(GROUP_NOT_FOUND));</span>
+<span class="fc" id="L64">        return groupRepository.findById(id)</span>
+<span class="pc" id="L65">                .orElseThrow(() -&gt; new NotFoundException(GROUP_NOT_FOUND));</span>
     }
     
     public Highlight findHighlight(Long id) {
-<span class="fc" id="L56">        return highlightRepository.findById(id)</span>
-<span class="pc" id="L57">                .orElseThrow(() -&gt; new NotFoundException(HIGHLIGHT_NOT_FOUND));</span>
+<span class="fc" id="L69">        return highlightRepository.findById(id)</span>
+<span class="pc" id="L70">                .orElseThrow(() -&gt; new NotFoundException(HIGHLIGHT_NOT_FOUND));</span>
     }
     
     public Discussion findDiscussion(Long id) {
-<span class="nc" id="L61">        return discussionRepository.findById(id)</span>
-<span class="nc" id="L62">                .orElseThrow(() -&gt; new NotFoundException(DISCUSSION_NOT_FOUND));</span>
+<span class="nc" id="L74">        return discussionRepository.findById(id)</span>
+<span class="nc" id="L75">                .orElseThrow(() -&gt; new NotFoundException(DISCUSSION_NOT_FOUND));</span>
     }
     
     public DiscussionComment findDiscussionComment(Long id) {
-<span class="nc" id="L66">        return discussionCommentRepository.findById(id)</span>
-<span class="nc" id="L67">                .orElseThrow(() -&gt; new NotFoundException(DISCUSSION_COMMENT_NOT_FOUND));</span>
+<span class="nc" id="L79">        return discussionCommentRepository.findById(id)</span>
+<span class="nc" id="L80">                .orElseThrow(() -&gt; new NotFoundException(DISCUSSION_COMMENT_NOT_FOUND));</span>
+    }
+    
+    public EbookRequest findEbookRequest(Long id) {
+<span class="nc" id="L84">        return ebookRequestRepository.findById(id)</span>
+<span class="nc" id="L85">                .orElseThrow(() -&gt; new NotFoundException(EBOOK_REQUEST_NOT_FOUND));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

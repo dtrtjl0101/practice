@@ -3,27 +3,76 @@
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
+import qwerty.chaekit.domain.member.publisher.PublisherStatsRepository;
+import qwerty.chaekit.domain.member.publisher.dto.PublisherMainStatsDto;
+import qwerty.chaekit.domain.member.publisher.dto.StatsPerEbookDto;
 import qwerty.chaekit.dto.member.PublisherInfoResponse;
+import qwerty.chaekit.dto.member.PublisherStatsResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.PublisherToken;
-import qwerty.chaekit.service.util.S3Service;
+import qwerty.chaekit.service.util.EntityFinder;
+import qwerty.chaekit.service.util.FileService;
 
-<span class="fc" id="L14">@Slf4j</span>
+import java.time.LocalDate;
+import java.util.List;
+
+<span class="fc" id="L23">@Slf4j</span>
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class PublisherService {
     private final PublisherProfileRepository publisherRepository;
-    private final S3Service s3Service;
+    private final FileService fileService;
+    private final EntityFinder entityFinder;
+    private final PublisherStatsRepository publisherStatsRepository;
 
     public PublisherInfoResponse getPublisherProfile(PublisherToken token) {
-<span class="nc" id="L22">        PublisherProfile publisher = publisherRepository.findById(token.publisherId())</span>
-<span class="nc" id="L23">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));</span>
-<span class="nc" id="L24">        String imageURL = s3Service.convertToPublicImageURL(publisher.getProfileImageKey());</span>
+<span class="nc" id="L34">        PublisherProfile publisher = publisherRepository.findById(token.publisherId())</span>
+<span class="nc" id="L35">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));</span>
+<span class="nc" id="L36">        String imageURL = fileService.convertToPublicImageURL(publisher.getProfileImageKey());</span>
 
-<span class="nc" id="L26">        return PublisherInfoResponse.of(publisher, imageURL);</span>
+<span class="nc" id="L38">        return PublisherInfoResponse.of(publisher, imageURL);</span>
+    }
+    
+    public PublisherStatsResponse getPublisherStats(PublisherToken token) {
+<span class="nc" id="L42">        PublisherProfile publisher = entityFinder.findPublisher(token.publisherId());</span>
+
+<span class="nc" id="L44">        PublisherMainStatsDto publisherMainStats = publisherStatsRepository.getPublisherMainStatistic(publisher.getId(), LocalDate.now());</span>
+
+<span class="nc" id="L46">        List&lt;PublisherStatsResponse.MonthlyRevenue&gt; monthlyRevenueList</span>
+<span class="nc" id="L47">                = publisherStatsRepository.getMonthlyRevenueList(publisher.getId());</span>
+<span class="nc" id="L48">        List&lt;PublisherStatsResponse.SalesCountPerEbook&gt; increasedSalesCountsPerEbook</span>
+<span class="nc" id="L49">                = publisherStatsRepository.getIncreasedSalesCountsPerEbook(publisher.getId(), LocalDate.now());</span>
+<span class="nc" id="L50">        List&lt;StatsPerEbookDto&gt; statsPerEbookList</span>
+<span class="nc" id="L51">                = publisherStatsRepository.getStatsPerEbook(publisher.getId());</span>
+
+<span class="nc" id="L53">        return PublisherStatsResponse.builder()</span>
+<span class="nc" id="L54">                .totalSalesCount(publisherMainStats.totalSalesCount())</span>
+<span class="nc" id="L55">                .totalRevenue(publisherMainStats.totalRevenue())</span>
+<span class="nc" id="L56">                .totalActivityCount(publisherMainStats.totalActivityCount())</span>
+<span class="nc" id="L57">                .totalViewCount(publisherMainStats.totalViewCount())</span>
+<span class="nc" id="L58">                .increasedSalesCount(publisherMainStats.increasedSalesCount())</span>
+<span class="nc" id="L59">                .increasedRevenue(publisherMainStats.increasedRevenue())</span>
+<span class="nc" id="L60">                .increasedActivityCount(publisherMainStats.increasedActivityCount())</span>
+<span class="nc" id="L61">                .monthlyRevenueList(monthlyRevenueList)</span>
+<span class="nc" id="L62">                .increasedSalesCountsPerEbook(increasedSalesCountsPerEbook)</span>
+<span class="nc" id="L63">                .statsPerEbookList(statsPerEbookList.stream()</span>
+<span class="nc" id="L64">                        .map(stats -&gt; new PublisherStatsResponse.StatsPerEbook(</span>
+<span class="nc" id="L65">                                stats.bookId(),</span>
+<span class="nc" id="L66">                                stats.title(),</span>
+<span class="nc" id="L67">                                stats.author(),</span>
+<span class="nc" id="L68">                                fileService.convertToPublicImageURL(stats.bookCoverImageKey()),</span>
+<span class="nc" id="L69">                                stats.totalSalesCount(),</span>
+<span class="nc" id="L70">                                stats.totalRevenue(),</span>
+<span class="nc" id="L71">                                stats.viewCount(),</span>
+<span class="nc" id="L72">                                stats.activityCount(),</span>
+<span class="nc" id="L73">                                stats.createdAt().toLocalDate()</span>
+<span class="nc" id="L74">                        )).toList())</span>
+<span class="nc" id="L75">                .build();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

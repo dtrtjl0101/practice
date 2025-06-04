@@ -22,15 +22,16 @@ import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.service.util.EmailNotificationService;
-import qwerty.chaekit.service.util.S3Service;
 import qwerty.chaekit.service.notification.NotificationService;
+import qwerty.chaekit.service.util.FileService;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class AdminService {
     private final PublisherProfileRepository publisherRepository;
     private final EmailNotificationService emailNotificationService;
-    private final S3Service s3Service;
+    private final FileService fileService;
     private final UserProfileRepository userRepository;
     private final NotificationService notificationService;
 
@@ -44,86 +45,86 @@ public class AdminService {
 
     @Transactional(readOnly = true)
     public PageResponse&lt;PublisherInfoResponse&gt; getPublishers(Pageable pageable) {
-<span class="nc" id="L47">        Pageable pageableWithSort = getPageableOrderedByCreatedAt(pageable);</span>
-<span class="nc" id="L48">        Page&lt;PublisherProfile&gt; page = publisherRepository.findAll(pageableWithSort);</span>
-<span class="nc" id="L49">        return PageResponse.of(page.map(publisher -&gt; PublisherInfoResponse.of(</span>
+<span class="fc" id="L48">        Pageable pageableWithSort = getPageableOrderedByCreatedAt(pageable);</span>
+<span class="fc" id="L49">        Page&lt;PublisherProfile&gt; page = publisherRepository.findAll(pageableWithSort);</span>
+<span class="fc" id="L50">        return PageResponse.of(page.map(publisher -&gt; PublisherInfoResponse.of(</span>
                 publisher,
-<span class="nc" id="L51">                s3Service.convertToPublicImageURL(publisher.getProfileImageKey())</span>
+<span class="fc" id="L52">                fileService.convertToPublicImageURL(publisher.getProfileImageKey())</span>
         )));
     }
 
     @Transactional(readOnly = true)
     public PageResponse&lt;UserInfoResponse&gt; getUsers(Pageable pageable) {
-<span class="nc" id="L57">        Pageable pageableWithSort = getPageableOrderedByCreatedAt(pageable);</span>
-<span class="nc" id="L58">        Page&lt;UserProfile&gt; page = userRepository.findAll(pageableWithSort);</span>
-<span class="nc" id="L59">        return PageResponse.of(page.map(user -&gt; UserInfoResponse.of(</span>
+<span class="fc" id="L58">        Pageable pageableWithSort = getPageableOrderedByCreatedAt(pageable);</span>
+<span class="fc" id="L59">        Page&lt;UserProfile&gt; page = userRepository.findAll(pageableWithSort);</span>
+<span class="fc" id="L60">        return PageResponse.of(page.map(user -&gt; UserInfoResponse.of(</span>
                 user,
-<span class="nc" id="L61">                s3Service.convertToPublicImageURL(user.getProfileImageKey())</span>
+<span class="fc" id="L62">                fileService.convertToPublicImageURL(user.getProfileImageKey())</span>
         )));
     }
 
     @Transactional(readOnly = true)
     public PageResponse&lt;PublisherInfoResponse&gt; getPendingPublishers(Pageable pageable) {
-<span class="fc" id="L67">        Pageable pageableWithSort = getPageableOrderedByCreatedAt(pageable);</span>
-<span class="fc" id="L68">        Page&lt;PublisherProfile&gt; page = publisherRepository.findByApprovalStatus(</span>
+<span class="fc" id="L68">        Pageable pageableWithSort = getPageableOrderedByCreatedAt(pageable);</span>
+<span class="fc" id="L69">        Page&lt;PublisherProfile&gt; page = publisherRepository.findByApprovalStatus(</span>
                 PublisherApprovalStatus.PENDING,
                 pageableWithSort
         );
-<span class="fc" id="L72">        return PageResponse.of(page.map(publisher -&gt; PublisherInfoResponse.of(</span>
+<span class="fc" id="L73">        return PageResponse.of(page.map(publisher -&gt; PublisherInfoResponse.of(</span>
                         publisher,
-<span class="fc" id="L74">                        s3Service.convertToPublicImageURL(publisher.getProfileImageKey())</span>
+<span class="fc" id="L75">                fileService.convertToPublicImageURL(publisher.getProfileImageKey())</span>
                 )));
     }
 
     @Transactional
     public void acceptPublisher(Long publisherId) {
-<span class="fc" id="L80">        PublisherProfile publisher = publisherRepository.findByIdWithMember(publisherId)</span>
-<span class="fc" id="L81">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));</span>
-<span class="fc" id="L82">        UserProfile admin = userRepository.findById(adminUserId).orElseThrow(</span>
-<span class="nc" id="L83">                () -&gt; new IllegalStateException(&quot;관리자 회원정보가 존재하지 않습니다&quot;)</span>
+<span class="fc" id="L81">        PublisherProfile publisher = publisherRepository.findByIdWithMember(publisherId)</span>
+<span class="fc" id="L82">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));</span>
+<span class="fc" id="L83">        UserProfile admin = userRepository.findById(adminUserId).orElseThrow(</span>
+<span class="nc" id="L84">                () -&gt; new IllegalStateException(&quot;관리자 회원정보가 존재하지 않습니다&quot;)</span>
         );
 
         // 이미 승인된 경우
-<span class="fc bfc" id="L87" title="All 2 branches covered.">        if (isPublisherApproved(publisher)) {</span>
-<span class="fc" id="L88">            throw new BadRequestException(ErrorCode.PUBLISHER_ALREADY_ACCEPTED);</span>
+<span class="fc bfc" id="L88" title="All 2 branches covered.">        if (isPublisherApproved(publisher)) {</span>
+<span class="fc" id="L89">            throw new BadRequestException(ErrorCode.PUBLISHER_ALREADY_ACCEPTED);</span>
         }
 
         // 승인 처리
-<span class="fc" id="L92">        publisher.approvePublisher();</span>
+<span class="fc" id="L93">        publisher.approvePublisher();</span>
    
-<span class="fc" id="L94">        notificationService.createPublisherApprovedNotification(publisher, admin);</span>
-<span class="fc" id="L95">        emailNotificationService.sendPublisherApprovalEmail(publisher.getMember().getEmail());</span>
-<span class="fc" id="L96">    }</span>
+<span class="fc" id="L95">        notificationService.createPublisherApprovedNotification(publisher, admin);</span>
+<span class="fc" id="L96">        emailNotificationService.sendPublisherApprovalEmail(publisher.getMember().getEmail());</span>
+<span class="fc" id="L97">    }</span>
 
     @Transactional
     public void rejectPublisher(Long publisherId, RejectPublisherRequest request) {
-<span class="nc" id="L100">        PublisherProfile publisher = publisherRepository.findByIdWithMember(publisherId)</span>
-<span class="nc" id="L101">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));</span>
+<span class="fc" id="L101">        PublisherProfile publisher = publisherRepository.findByIdWithMember(publisherId)</span>
+<span class="fc" id="L102">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));</span>
 
         // 이미 승인된 경우
-<span class="nc bnc" id="L104" title="All 2 branches missed.">        if (isPublisherApproved(publisher)) {</span>
-<span class="nc" id="L105">            throw new BadRequestException(ErrorCode.PUBLISHER_ALREADY_ACCEPTED);</span>
+<span class="fc bfc" id="L105" title="All 2 branches covered.">        if (isPublisherApproved(publisher)) {</span>
+<span class="fc" id="L106">            throw new BadRequestException(ErrorCode.PUBLISHER_ALREADY_ACCEPTED);</span>
         }
 
         // 거절 처리
-<span class="nc" id="L109">        publisher.rejectPublisher();</span>
+<span class="fc" id="L110">        publisher.rejectPublisher();</span>
 
-<span class="nc" id="L111">        UserProfile admin = userRepository.findById(adminUserId)</span>
-<span class="nc" id="L112">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
+<span class="fc" id="L112">        UserProfile admin = userRepository.findById(adminUserId)</span>
+<span class="pc" id="L113">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
       
-<span class="nc" id="L114">        emailNotificationService.sendPublisherRejectionEmail(publisher.getMember().getEmail(), request.reason());</span>
-<span class="nc" id="L115">    }</span>
+<span class="fc" id="L115">        emailNotificationService.sendPublisherRejectionEmail(publisher.getMember().getEmail(), request.reason());</span>
+<span class="fc" id="L116">    }</span>
 
     private static Pageable getPageableOrderedByCreatedAt(Pageable pageable) {
-<span class="fc" id="L118">        return PageRequest.of(</span>
-<span class="fc" id="L119">                pageable.getPageNumber(),</span>
-<span class="fc" id="L120">                pageable.getPageSize(),</span>
-<span class="pc bpc" id="L121" title="1 of 2 branches missed.">                pageable.getSort().isEmpty() ? Sort.by(Sort.Order.desc(&quot;createdAt&quot;)) : pageable.getSort()</span>
+<span class="fc" id="L119">        return PageRequest.of(</span>
+<span class="fc" id="L120">                pageable.getPageNumber(),</span>
+<span class="fc" id="L121">                pageable.getPageSize(),</span>
+<span class="pc bpc" id="L122" title="1 of 2 branches missed.">                pageable.getSort().isEmpty() ? Sort.by(Sort.Order.desc(&quot;createdAt&quot;)) : pageable.getSort()</span>
         );
     }
 
     private boolean isPublisherApproved(PublisherProfile publisher) {
-<span class="fc" id="L126">        return publisher.getApprovalStatus().equals(PublisherApprovalStatus.APPROVED);</span>
+<span class="fc" id="L127">        return publisher.getApprovalStatus().equals(PublisherApprovalStatus.APPROVED);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

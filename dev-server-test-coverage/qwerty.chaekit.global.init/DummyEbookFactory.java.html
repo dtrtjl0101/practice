@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DummyEbookFactory.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chaekit</a> &gt; <a href="index.source.html" class="el_package">qwerty.chaekit.global.init</a> &gt; <span class="el_source">DummyEbookFactory.java</span></div><h1>DummyEbookFactory.java</h1><pre class="source lang-java linenums">package qwerty.chaekit.global.init;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import qwerty.chaekit.domain.ebook.Ebook;
+import qwerty.chaekit.domain.ebook.repository.EbookRepository;
+import qwerty.chaekit.domain.member.publisher.PublisherProfile;
+import qwerty.chaekit.global.init.dummy.DummyEbook;
+import qwerty.chaekit.service.member.admin.AdminService;
+
+<span class="fc" id="L12">@Slf4j</span>
+@Component
+@RequiredArgsConstructor
+public class DummyEbookFactory {
+    private final EbookRepository ebookRepository;
+    private final AdminService adminService;
+    
+    public void saveDummyEbooks() {
+<span class="nc" id="L20">        saveDummyEbook(DummyEbook.ALICE);</span>
+<span class="nc" id="L21">        saveDummyEbook(DummyEbook.ROMEO_AND_JULIET);</span>
+<span class="nc" id="L22">        saveDummyEbook(DummyEbook.MOBY_D);</span>
+<span class="nc" id="L23">        saveDummyEbook(DummyEbook.CINDERELLA);</span>
+<span class="nc" id="L24">        saveDummyEbook(DummyEbook.FRANKENSTEIN);</span>
+<span class="nc" id="L25">    }</span>
+
+    private void saveDummyEbook(DummyEbook ebookData) {
+<span class="nc bnc" id="L28" title="All 2 branches missed.">        if (ebookRepository.existsByTitle(ebookData.getTitle())) {</span>
+<span class="nc" id="L29">            log.info(&quot;\&quot;{}\&quot;이 이미 존재합니다.&quot;, ebookData.getTitle());</span>
+<span class="nc" id="L30">            return;</span>
+        }
+<span class="nc" id="L32">        Ebook ebook = toEbook(ebookData);</span>
+<span class="nc" id="L33">        ebookRepository.save(ebook);</span>
+<span class="nc" id="L34">        log.info(&quot;\&quot;{}\&quot;이 새로 생성되었습니다.&quot;, ebookData.getTitle());</span>
+<span class="nc" id="L35">    }</span>
+
+    private Ebook toEbook(DummyEbook ebookData) {
+<span class="nc" id="L38">        return Ebook.builder()</span>
+<span class="nc" id="L39">                .title(ebookData.getTitle())</span>
+<span class="nc" id="L40">                .author(ebookData.getAuthor())</span>
+<span class="nc" id="L41">                .publisher(PublisherProfile.builder().id(adminService.getAdminPublisherId()).build())</span>
+<span class="nc" id="L42">                .description(ebookData.getDescription())</span>
+<span class="nc" id="L43">                .fileKey(ebookData.getFileKey())</span>
+<span class="nc" id="L44">                .coverImageKey(ebookData.getCoverImageKey())</span>
+<span class="nc" id="L45">                .size(ebookData.getSize())</span>
+<span class="nc" id="L46">                .price(ebookData.getPrice())</span>
+<span class="nc" id="L47">                .build();</span>
+    }
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

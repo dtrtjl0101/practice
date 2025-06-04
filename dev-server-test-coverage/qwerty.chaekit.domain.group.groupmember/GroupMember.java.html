@@ -5,14 +5,17 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.member.user.UserProfile;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Table(name = &quot;group_member&quot;)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class GroupMember {
+public class GroupMember extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,31 +28,46 @@ public class GroupMember {
     @JoinColumn(name =&quot;user_id&quot;, nullable = false)
     private UserProfile user;
 
-<span class="nc" id="L28">    @Column(name = &quot;is_accepted&quot;, nullable = false)</span>
+<span class="nc" id="L31">    @Column(name = &quot;is_accepted&quot;, nullable = false)</span>
     private boolean accepted = false;
 
+    private LocalDateTime approvedAt;
+
     @Builder
-<span class="nc" id="L32">    public GroupMember(ReadingGroup readingGroup, UserProfile user) {</span>
-<span class="nc" id="L33">        this.readingGroup = readingGroup;</span>
-<span class="nc" id="L34">        this.user = user;</span>
-<span class="nc" id="L35">        this.accepted = false;  // 초기에는 미승인 상태</span>
-<span class="nc" id="L36">    }</span>
+<span class="nc" id="L37">    public GroupMember(ReadingGroup readingGroup, UserProfile user) {</span>
+<span class="nc" id="L38">        this.readingGroup = readingGroup;</span>
+<span class="nc" id="L39">        this.user = user;</span>
+<span class="nc" id="L40">        this.accepted = false;  // 초기에는 미승인 상태</span>
+<span class="nc" id="L41">    }</span>
 
     public ReadingGroup getGroup() {
-<span class="nc" id="L39">        return this.readingGroup;</span>
+<span class="nc" id="L44">        return this.readingGroup;</span>
     }
 
     public UserProfile getMember() {
-<span class="nc" id="L43">        return this.user;</span>
+<span class="nc" id="L48">        return this.user;</span>
     }
 
     public void approve() {
-<span class="nc" id="L47">        this.accepted = true;</span>
-<span class="nc" id="L48">    }</span>
+<span class="nc" id="L52">        this.accepted = true;</span>
+<span class="nc" id="L53">        this.approvedAt = LocalDateTime.now();</span>
+<span class="nc" id="L54">    }</span>
 
     public void reject() {
-<span class="nc" id="L51">        this.accepted = false;</span>
-<span class="nc" id="L52">    }</span>
+<span class="nc" id="L57">        this.accepted = false;</span>
+<span class="nc" id="L58">    }</span>
+
+    public boolean matchesUser(UserProfile user) {
+<span class="nc" id="L61">        return matchesUserId(user.getId());</span>
+    }
+    public boolean matchesUserId(Long userId) {
+<span class="nc" id="L64">        return this.user.getId().equals(userId);</span>
+    }
+    
+    public boolean isLeader(){
+<span class="nc" id="L68">        return readingGroup.isLeader(user);</span>
+    }
+
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

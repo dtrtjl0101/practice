@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StatisticsService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chaekit</a> &gt; <a href="index.source.html" class="el_package">qwerty.chaekit.service.statistics</a> &gt; <span class="el_source">StatisticsService.java</span></div><h1>StatisticsService.java</h1><pre class="source lang-java linenums">package qwerty.chaekit.service.statistics;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import qwerty.chaekit.domain.ebook.repository.EbookRepository;
+import qwerty.chaekit.domain.group.activity.repository.ActivityRepository;
+import qwerty.chaekit.domain.group.repository.GroupRepository;
+import qwerty.chaekit.domain.member.user.UserProfileRepository;
+import qwerty.chaekit.dto.statistics.MainStatisticResponse;
+
+import java.time.LocalDateTime;
+
+@Service
+@Transactional
+@RequiredArgsConstructor
+public class StatisticsService {
+    private final ActivityRepository activityRepository;
+    private final EbookRepository ebookRepository;
+    private final UserProfileRepository userProfileRepository;
+    private final GroupRepository groupRepository;
+
+    public MainStatisticResponse getMainStatistics() {
+<span class="nc" id="L24">        long totalGroups = groupRepository.count();</span>
+<span class="nc" id="L25">        long totalUsers = userProfileRepository.count();</span>
+<span class="nc" id="L26">        long totalEbooks = ebookRepository.count();</span>
+<span class="nc" id="L27">        long totalActivities = activityRepository.count();</span>
+<span class="nc" id="L28">        long increasedActivities = activityRepository.countByCreatedAtAfter(LocalDateTime.now().minusMonths(1));</span>
+
+<span class="nc" id="L30">        return new MainStatisticResponse(</span>
+            totalGroups,
+            totalUsers,
+            totalEbooks,
+            totalActivities,
+            increasedActivities
+        );
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

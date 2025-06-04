@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DummyGroup.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chaekit</a> &gt; <a href="index.source.html" class="el_package">qwerty.chaekit.global.init.dummy</a> &gt; <span class="el_source">DummyGroup.java</span></div><h1>DummyGroup.java</h1><pre class="source lang-java linenums">package qwerty.chaekit.global.init.dummy;
+
+import lombok.Getter;
+
+import java.util.List;
+
+<span class="nc" id="L7">@Getter</span>
+public enum DummyGroup {
+<span class="nc" id="L9">    CLASSIC(</span>
+            &quot;클래식은 살아있다&quot;,
+            &quot;&quot;&quot;
+                &quot;모두가 알고 있다고 생각하지만, 제대로 읽은 사람은 많지 않은 이야기들.&quot;
+    
+                《로미오와 줄리엣》의 비극은 왜 오해와 조급함으로 가득했을까?
+                《이상한 나라의 앨리스》가 품은 무의식의 세계는 어떤 모습일까?
+                《프랑켄슈타인》의 괴물은 정말 괴물일까?
+    
+                우리는 누구나 제목은 알지만, 온전히 읽지 않았던 고전들을 다시 펼칩니다.
+                모임은 각 책의 배경, 작가의 삶, 시대적 맥락을 곁들여, 단순한 줄거리 이상의 것을 나누는 시간을 지향합니다.
+    
+                함께 읽고, 해석하고, 질문하면서
+                고전의 &quot;그 너머&quot;를 함께 탐험해요.
+                &quot;&quot;&quot;,
+            &quot;group-image/group-classic.png&quot;,
+<span class="nc" id="L25">            List.of(&quot;소설&quot;, &quot;고전&quot;, &quot;원작&quot;)</span>
+            );
+    
+    DummyGroup(
+            String name, 
+            String description,
+            String groupImageKey,
+            List&lt;String&gt; tags
+<span class="nc" id="L33">    ) {</span>
+<span class="nc" id="L34">        this.name = name;</span>
+<span class="nc" id="L35">        this.description = description;</span>
+<span class="nc" id="L36">        this.groupImageKey = groupImageKey;</span>
+<span class="nc" id="L37">        this.tags = tags;</span>
+<span class="nc" id="L38">    }</span>
+    
+    private final String name;
+    private final String description;
+    private final String groupImageKey;
+    private final List&lt;String&gt; tags;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -2,27 +2,29 @@
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import qwerty.chaekit.domain.highlight.entity.Highlight;
+import org.springframework.transaction.annotation.Transactional;
+import qwerty.chaekit.domain.highlight.Highlight;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.ForbiddenException;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class HighlightPolicy {
     public void assertUpdatable(UserProfile user, Highlight highlight) {
-<span class="fc bfc" id="L14" title="All 2 branches covered.">        if(!highlight.isAuthor(user)) {</span>
-<span class="fc" id="L15">            throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_YOURS);</span>
+<span class="fc bfc" id="L16" title="All 2 branches covered.">        if(!highlight.isAuthor(user)) {</span>
+<span class="fc" id="L17">            throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_YOURS);</span>
         }
 
-<span class="pc bpc" id="L18" title="1 of 2 branches missed.">        if (highlight.isPublic()) {</span>
-<span class="nc" id="L19">            throw new ForbiddenException(ErrorCode.HIGHLIGHT_ALREADY_PUBLIC);</span>
+<span class="pc bpc" id="L20" title="1 of 2 branches missed.">        if (highlight.isPublic()) {</span>
+<span class="nc" id="L21">            throw new ForbiddenException(ErrorCode.HIGHLIGHT_ALREADY_PUBLIC);</span>
         }
-<span class="fc" id="L21">    }</span>
+<span class="fc" id="L23">    }</span>
 
     public void assertUpdatable(Long userId, Highlight highlight) {
-<span class="nc" id="L24">        UserProfile user = UserProfile.builder().id(userId).build();</span>
-<span class="nc" id="L25">        assertUpdatable(user, highlight);</span>
-<span class="nc" id="L26">    }</span>
+<span class="nc" id="L26">        UserProfile user = UserProfile.builder().id(userId).build();</span>
+<span class="nc" id="L27">        assertUpdatable(user, highlight);</span>
+<span class="nc" id="L28">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

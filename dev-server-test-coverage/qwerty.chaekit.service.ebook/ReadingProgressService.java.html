@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReadingProgressService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chaekit</a> &gt; <a href="index.source.html" class="el_package">qwerty.chaekit.service.ebook</a> &gt; <span class="el_source">ReadingProgressService.java</span></div><h1>ReadingProgressService.java</h1><pre class="source lang-java linenums">package qwerty.chaekit.service.ebook;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import qwerty.chaekit.domain.ebook.Ebook;
+import qwerty.chaekit.domain.ebook.purchase.EbookPurchase;
+import qwerty.chaekit.domain.ebook.purchase.repository.EbookPurchaseRepository;
+import qwerty.chaekit.domain.group.activity.Activity;
+import qwerty.chaekit.domain.group.activity.activitymember.ActivityMember;
+import qwerty.chaekit.domain.group.activity.activitymember.ActivityMemberRepository;
+import qwerty.chaekit.domain.member.user.UserProfile;
+import qwerty.chaekit.dto.ebook.purchase.ReadingProgressRequest;
+import qwerty.chaekit.dto.ebook.purchase.ReadingProgressResponse;
+import qwerty.chaekit.dto.page.PageResponse;
+import qwerty.chaekit.global.enums.ErrorCode;
+import qwerty.chaekit.global.exception.ForbiddenException;
+import qwerty.chaekit.global.security.resolver.UserToken;
+import qwerty.chaekit.mapper.ReadingProgressMapper;
+import qwerty.chaekit.service.util.EntityFinder;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class ReadingProgressService {
+    
+    private final EbookPurchaseRepository ebookPurchaseRepository;
+    private final ActivityMemberRepository activityMemberRepository;
+    private final ReadingProgressMapper readingProgressMapper;
+    private final EntityFinder entityFinder;
+
+
+    @Transactional
+    public void saveMyProgress(UserToken userToken, Long bookId, ReadingProgressRequest request) {
+<span class="nc" id="L40">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
+<span class="nc" id="L41">        Ebook ebook = entityFinder.findEbook(bookId);</span>
+
+<span class="nc" id="L43">        EbookPurchase ebookPurchase = ebookPurchaseRepository.findByUserAndEbook(user, ebook)</span>
+<span class="nc" id="L44">                .orElseThrow(() -&gt; new ForbiddenException(ErrorCode.EBOOK_NOT_PURCHASED));</span>
+
+<span class="nc" id="L46">        ebookPurchase.saveProgress(request.cfi(), request.percentage());</span>
+<span class="nc" id="L47">    }</span>
+
+    public ReadingProgressResponse getMyProgress(UserToken userToken, Long bookId) {
+<span class="nc" id="L50">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
+<span class="nc" id="L51">        Ebook ebook = entityFinder.findEbook(bookId);</span>
+
+<span class="nc" id="L53">        EbookPurchase ebookPurchase = ebookPurchaseRepository.findByUserAndEbook(user,ebook)</span>
+<span class="nc" id="L54">                .orElseThrow(() -&gt; new ForbiddenException(ErrorCode.EBOOK_NOT_PURCHASED));</span>
+
+<span class="nc" id="L56">        return readingProgressMapper.toResponse(ebookPurchase);</span>
+    }
+
+    public PageResponse&lt;ReadingProgressResponse&gt; getProgressFromActivity(Long activityId, Pageable pageable) {
+<span class="nc" id="L60">        Activity activity = entityFinder.findActivity(activityId);</span>
+
+<span class="nc" id="L62">        Page&lt;ActivityMember&gt; activityMembers = activityMemberRepository.findByActivity(activity, pageable);</span>
+<span class="nc" id="L63">        List&lt;Long&gt; userIdList = activityMembers</span>
+<span class="nc" id="L64">                .map(activityMember -&gt; activityMember.getUser().getId())</span>
+<span class="nc" id="L65">                .stream().toList();</span>
+<span class="nc" id="L66">        List&lt;EbookPurchase&gt; purchaseList = ebookPurchaseRepository.findByUserIdInAndEbook(userIdList, activity.getBook());</span>
+<span class="nc" id="L67">        Page&lt;EbookPurchase&gt; ebookPurchases = new PageImpl&lt;&gt;(purchaseList, pageable, activityMembers.getTotalElements());</span>
+
+<span class="nc" id="L69">        return PageResponse.of(ebookPurchases.map(readingProgressMapper::toResponse));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

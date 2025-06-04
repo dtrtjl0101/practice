@@ -18,6 +18,7 @@ import qwerty.chaekit.service.member.MemberJoinHelper;
 import qwerty.chaekit.service.member.token.RefreshTokenService;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UserJoinService {
     private final MemberJoinHelper memberJoinHelper;
@@ -28,63 +29,63 @@ public class UserJoinService {
 
     @Transactional
     public LoginResponse join(UserJoinRequest request) {
-<span class="nc" id="L31">        String email = request.email();</span>
-<span class="nc" id="L32">        String password = request.password();</span>
-<span class="nc" id="L33">        String verificationCode = request.verificationCode();</span>
+<span class="nc" id="L32">        String email = request.email();</span>
+<span class="nc" id="L33">        String password = request.password();</span>
+<span class="nc" id="L34">        String verificationCode = request.verificationCode();</span>
 
-<span class="nc" id="L35">        String imageFileKey = memberJoinHelper.uploadProfileImage(request.profileImage());</span>
+<span class="nc" id="L36">        String imageFileKey = memberJoinHelper.uploadProfileImage(request.profileImage());</span>
 
-<span class="nc" id="L37">        validateNickname(request.nickname());</span>
-<span class="nc" id="L38">        Member member = memberJoinHelper.saveMemberWithVerificationCode(email, password, Role.ROLE_USER, verificationCode);</span>
-<span class="nc" id="L39">        UserProfile user = saveUser(request, member, imageFileKey);</span>
-<span class="nc" id="L40">        saveCreditWallet(user);</span>
+<span class="nc" id="L38">        validateNickname(request.nickname());</span>
+<span class="nc" id="L39">        Member member = memberJoinHelper.saveMemberWithVerificationCode(email, password, Role.ROLE_USER, verificationCode);</span>
+<span class="nc" id="L40">        UserProfile user = saveUser(request, member, imageFileKey);</span>
+<span class="nc" id="L41">        saveCreditWallet(user);</span>
 
-<span class="nc" id="L42">        return toResponse(member, user);</span>
+<span class="nc" id="L43">        return toResponse(member, user);</span>
     }
 
     private void validateNickname(String nickname) {
-<span class="nc bnc" id="L46" title="All 2 branches missed.">        if (userRepository.existsByNickname(nickname)) {</span>
-<span class="nc" id="L47">            throw new BadRequestException(ErrorCode.NICKNAME_ALREADY_EXISTS);</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">        if (userRepository.existsByNickname(nickname)) {</span>
+<span class="nc" id="L48">            throw new BadRequestException(ErrorCode.NICKNAME_ALREADY_EXISTS);</span>
         }
-<span class="nc" id="L49">    }</span>
+<span class="nc" id="L50">    }</span>
 
     private UserProfile saveUser(UserJoinRequest request, Member member, String imageFileKey) {
-<span class="nc" id="L52">        return userRepository.save(UserProfile.builder()</span>
-<span class="nc" id="L53">                .member(member)</span>
-<span class="nc" id="L54">                .nickname(request.nickname())</span>
-<span class="nc" id="L55">                .profileImageKey(imageFileKey)</span>
-<span class="nc" id="L56">                .build());</span>
+<span class="nc" id="L53">        return userRepository.save(UserProfile.builder()</span>
+<span class="nc" id="L54">                .member(member)</span>
+<span class="nc" id="L55">                .nickname(request.nickname())</span>
+<span class="nc" id="L56">                .profileImageKey(imageFileKey)</span>
+<span class="nc" id="L57">                .build());</span>
     }
 
     private void saveCreditWallet(UserProfile userProfile) {
-<span class="nc" id="L60">        creditWalletRepository.save(</span>
-<span class="nc" id="L61">                CreditWallet.builder()</span>
-<span class="nc" id="L62">                        .user(userProfile)</span>
-<span class="nc" id="L63">                        .build()</span>
+<span class="nc" id="L61">        creditWalletRepository.save(</span>
+<span class="nc" id="L62">                CreditWallet.builder()</span>
+<span class="nc" id="L63">                        .user(userProfile)</span>
+<span class="nc" id="L64">                        .build()</span>
         );
-<span class="nc" id="L65">    }</span>
+<span class="nc" id="L66">    }</span>
 
     private LoginResponse toResponse(Member member, UserProfile user) {
-<span class="nc" id="L68">        String accessToken = jwtUtil.createAccessToken(</span>
-<span class="nc" id="L69">                member.getId(),</span>
-<span class="nc" id="L70">                user.getId(),</span>
+<span class="nc" id="L69">        String accessToken = jwtUtil.createAccessToken(</span>
+<span class="nc" id="L70">                member.getId(),</span>
+<span class="nc" id="L71">                user.getId(),</span>
                 null,
-<span class="nc" id="L72">                member.getEmail(),</span>
-<span class="nc" id="L73">                member.getRole().name()</span>
+<span class="nc" id="L73">                member.getEmail(),</span>
+<span class="nc" id="L74">                member.getRole().name()</span>
         );
-<span class="nc" id="L75">        String refreshToken = refreshTokenService.issueRefreshToken(member.getId());</span>
-<span class="nc" id="L76">        String profileImageKey = memberJoinHelper.convertToPublicImageURL(user.getProfileImageKey());</span>
+<span class="nc" id="L76">        String refreshToken = refreshTokenService.issueRefreshToken(member.getId());</span>
+<span class="nc" id="L77">        String profileImageKey = memberJoinHelper.convertToPublicImageURL(user.getProfileImageKey());</span>
 
-<span class="nc" id="L78">        return LoginResponse.builder()</span>
-<span class="nc" id="L79">                .memberId(member.getId())</span>
-<span class="nc" id="L80">                .userId(user.getId())</span>
-<span class="nc" id="L81">                .refreshToken(refreshToken)</span>
-<span class="nc" id="L82">                .accessToken(accessToken)</span>
-<span class="nc" id="L83">                .email(member.getEmail())</span>
-<span class="nc" id="L84">                .nickname(user.getNickname())</span>
-<span class="nc" id="L85">                .profileImageURL(profileImageKey)</span>
-<span class="nc" id="L86">                .role(Role.ROLE_USER.name())</span>
-<span class="nc" id="L87">                .build();</span>
+<span class="nc" id="L79">        return LoginResponse.builder()</span>
+<span class="nc" id="L80">                .memberId(member.getId())</span>
+<span class="nc" id="L81">                .userId(user.getId())</span>
+<span class="nc" id="L82">                .refreshToken(refreshToken)</span>
+<span class="nc" id="L83">                .accessToken(accessToken)</span>
+<span class="nc" id="L84">                .email(member.getEmail())</span>
+<span class="nc" id="L85">                .nickname(user.getNickname())</span>
+<span class="nc" id="L86">                .profileImageURL(profileImageKey)</span>
+<span class="nc" id="L87">                .role(Role.ROLE_USER)</span>
+<span class="nc" id="L88">                .build();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

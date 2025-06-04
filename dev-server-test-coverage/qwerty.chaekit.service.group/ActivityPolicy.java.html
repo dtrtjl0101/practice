@@ -3,7 +3,7 @@
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import qwerty.chaekit.domain.ebook.purchase.repository.EbookPurchaseRepository;
+import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.group.activity.activitymember.ActivityMemberRepository;
 import qwerty.chaekit.domain.group.activity.repository.ActivityRepository;
@@ -12,32 +12,32 @@ import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.ForbiddenException;
+import qwerty.chaekit.service.ebook.EbookPolicy;
 
 import java.time.LocalDate;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ActivityPolicy {
     private final ActivityRepository activityRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final ActivityMemberRepository activityMemberRepository;
-    private final EbookPurchaseRepository ebookPurchaseRepository;
+    private final EbookPolicy ebookPolicy;
 
     public void assertJoinable(UserProfile user, Activity activity) {
-<span class="nc" id="L27">        groupMemberRepository.findByUserAndReadingGroupAndAcceptedTrue(user, activity.getGroup())</span>
-<span class="nc" id="L28">                .orElseThrow(() -&gt; new BadRequestException(ErrorCode.GROUP_MEMBER_ONLY));</span>
+<span class="nc" id="L29">        groupMemberRepository.findByUserAndReadingGroupAndAcceptedTrue(user, activity.getGroup())</span>
+<span class="nc" id="L30">                .orElseThrow(() -&gt; new BadRequestException(ErrorCode.GROUP_MEMBER_ONLY));</span>
 
-<span class="nc bnc" id="L30" title="All 2 branches missed.">        if (activityMemberRepository.existsByUserAndActivity(user, activity)) {</span>
-<span class="nc" id="L31">            throw new BadRequestException(ErrorCode.ACTIVITY_ALREADY_JOINED);</span>
+<span class="nc bnc" id="L32" title="All 2 branches missed.">        if (activityMemberRepository.existsByUserAndActivity(user, activity)) {</span>
+<span class="nc" id="L33">            throw new BadRequestException(ErrorCode.ACTIVITY_ALREADY_JOINED);</span>
         }
 
-<span class="nc bnc" id="L34" title="All 2 branches missed.">        if (activity.isEnded()) {</span>
-<span class="nc" id="L35">            throw new BadRequestException(ErrorCode.ACTIVITY_ALREADY_ENDED);</span>
+<span class="nc bnc" id="L36" title="All 2 branches missed.">        if (activity.isEnded()) {</span>
+<span class="nc" id="L37">            throw new BadRequestException(ErrorCode.ACTIVITY_ALREADY_ENDED);</span>
         }
 
-<span class="nc bnc" id="L38" title="All 2 branches missed.">        if (!ebookPurchaseRepository.existsByUserIdAndEbookId(user.getId(), activity.getBook().getId())) {</span>
-<span class="nc" id="L39">            throw new BadRequestException(ErrorCode.ACTIVITY_BOOK_NOT_OWNED);</span>
-        }
+<span class="nc" id="L40">        ebookPolicy.assertEBookPurchased(user, activity.getBook());</span>
 <span class="nc" id="L41">    }</span>
 
     public void assertActivityPeriodValid(long groupId, @Nullable Long activityId, LocalDate startTime, LocalDate endTime) {

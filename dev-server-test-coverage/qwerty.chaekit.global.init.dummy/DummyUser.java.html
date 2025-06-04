@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DummyUser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chaekit</a> &gt; <a href="index.source.html" class="el_package">qwerty.chaekit.global.init.dummy</a> &gt; <span class="el_source">DummyUser.java</span></div><h1>DummyUser.java</h1><pre class="source lang-java linenums">package qwerty.chaekit.global.init.dummy;
+
+import lombok.Getter;
+
+<span class="nc" id="L5">@Getter</span>
+public enum DummyUser {
+<span class="nc" id="L7">    LEADER(&quot;user1@example.com&quot;, &quot;모임지기&quot;, &quot;profile-image/user1.webp&quot;),</span>
+<span class="nc" id="L8">    USER1(&quot;user2@example.com&quot;, &quot;유저A&quot;, &quot;profile-image/user2.webp&quot;),</span>
+<span class="nc" id="L9">    USER2(&quot;user3@example.com&quot;, &quot;유저B&quot;, &quot;profile-image/user3.webp&quot;),</span>
+<span class="nc" id="L10">    USER3(&quot;user4@example.com&quot;, &quot;유저C&quot;, &quot;profile-image/user4.webp&quot;),</span>
+    ;
+    
+    DummyUser(
+            String email,
+            String nickname,
+            String profileImageKey
+<span class="nc" id="L17">    ) {</span>
+<span class="nc" id="L18">        this.email = email;</span>
+<span class="nc" id="L19">        this.nickname = nickname;</span>
+<span class="nc" id="L20">        this.profileImageKey = profileImageKey;</span>
+<span class="nc" id="L21">    }</span>
+    
+    private final String email;
+    private final String nickname;
+    private final String profileImageKey;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

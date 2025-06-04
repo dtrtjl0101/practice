@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EbookRequestMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chaekit</a> &gt; <a href="index.source.html" class="el_package">qwerty.chaekit.mapper</a> &gt; <span class="el_source">EbookRequestMapper.java</span></div><h1>EbookRequestMapper.java</h1><pre class="source lang-java linenums">package qwerty.chaekit.mapper;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+import qwerty.chaekit.domain.ebook.request.EbookRequest;
+import qwerty.chaekit.dto.ebook.request.EbookRequestFetchResponse;
+import qwerty.chaekit.service.util.FileService;
+
+@Component
+@RequiredArgsConstructor
+public class EbookRequestMapper {
+    private final FileService fileService;
+
+    public String convertToPublicImageURL(String imageKey) {
+<span class="nc" id="L15">        return fileService.convertToPublicImageURL(imageKey);</span>
+    }
+
+    public EbookRequestFetchResponse toFetchResponse(EbookRequest ebookRequest) {
+<span class="nc" id="L19">        return EbookRequestFetchResponse.builder()</span>
+<span class="nc" id="L20">                .requestId(ebookRequest.getId())</span>
+<span class="nc" id="L21">                .title(ebookRequest.getTitle())</span>
+<span class="nc" id="L22">                .author(ebookRequest.getAuthor())</span>
+<span class="nc" id="L23">                .description(ebookRequest.getDescription())</span>
+<span class="nc" id="L24">                .size(ebookRequest.getSize())</span>
+<span class="nc" id="L25">                .price(ebookRequest.getPrice())</span>
+<span class="nc" id="L26">                .coverImageURL(convertToPublicImageURL(ebookRequest.getCoverImageKey()))</span>
+<span class="nc" id="L27">                .publisherId(ebookRequest.getPublisher().getId())</span>
+<span class="nc" id="L28">                .publisherName(ebookRequest.getPublisher().getPublisherName())</span>
+<span class="nc" id="L29">                .publisherEmail(ebookRequest.getPublisher().getMember().getEmail())</span>
+<span class="nc" id="L30">                .status(ebookRequest.getStatus())</span>
+<span class="nc" id="L31">                .rejectReason(ebookRequest.getRejectReason())</span>
+<span class="nc" id="L32">                .build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

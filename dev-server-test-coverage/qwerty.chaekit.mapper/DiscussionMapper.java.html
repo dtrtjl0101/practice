@@ -7,15 +7,16 @@ import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionCommentFetchResponse;
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionDetailResponse;
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionFetchResponse;
-import qwerty.chaekit.service.util.S3Service;
+import qwerty.chaekit.dto.highlight.HighlightSummaryResponse;
+import qwerty.chaekit.service.util.FileService;
 
 @Component
 @RequiredArgsConstructor
 public class DiscussionMapper {
-    private final S3Service s3Service;
+    private final FileService fileService;
 
     public String convertToPublicImageURL(String imageKey) {
-<span class="fc" id="L18">        return s3Service.convertToPublicImageURL(imageKey);</span>
+<span class="fc" id="L19">        return fileService.convertToPublicImageURL(imageKey);</span>
     }
 
     /*
@@ -28,34 +29,35 @@ public class DiscussionMapper {
      *      - r.author (ManyToOne, batch fetch)
      */
     public DiscussionCommentFetchResponse toCommentFetchResponse(DiscussionComment comment) {
-<span class="pc bpc" id="L31" title="1 of 2 branches missed.">        if(comment.isDeleted()) {</span>
-<span class="nc" id="L32">            return DiscussionCommentFetchResponse.builder()</span>
-<span class="nc" id="L33">                    .commentId(comment.getId())</span>
-<span class="nc" id="L34">                    .replies(</span>
-<span class="nc" id="L35">                            comment.getReplies().stream()</span>
-<span class="nc" id="L36">                                    .map(this::toCommentFetchResponse)</span>
-<span class="nc" id="L37">                                    .toList()</span>
+<span class="pc bpc" id="L32" title="1 of 2 branches missed.">        if(comment.isDeleted()) {</span>
+<span class="nc" id="L33">            return DiscussionCommentFetchResponse.builder()</span>
+<span class="nc" id="L34">                    .commentId(comment.getId())</span>
+<span class="nc" id="L35">                    .content(comment.getContent())</span>
+<span class="nc" id="L36">                    .replies(</span>
+<span class="nc" id="L37">                            comment.getReplies().stream()</span>
+<span class="nc" id="L38">                                    .map(this::toCommentFetchResponse)</span>
+<span class="nc" id="L39">                                    .toList()</span>
                     )
-<span class="nc" id="L39">                    .isDeleted(true)</span>
-<span class="nc" id="L40">                    .build();</span>
+<span class="nc" id="L41">                    .isDeleted(true)</span>
+<span class="nc" id="L42">                    .build();</span>
         }
-<span class="fc" id="L42">        return DiscussionCommentFetchResponse.builder()</span>
-<span class="fc" id="L43">                .commentId(comment.getId())</span>
-<span class="fc" id="L44">                .authorId(comment.getAuthor().getId())</span>
-<span class="fc" id="L45">                .authorName(comment.getAuthor().getNickname())</span>
-<span class="fc" id="L46">                .authorProfileImageURL(convertToPublicImageURL(comment.getAuthor().getProfileImageKey()))</span>
-<span class="fc" id="L47">                .content(comment.getContent())</span>
-<span class="fc" id="L48">                .createdAt(comment.getCreatedAt())</span>
-<span class="fc" id="L49">                .modifiedAt(comment.getModifiedAt())</span>
-<span class="fc" id="L50">                .isEdited(comment.isEdited())</span>
-<span class="fc" id="L51">                .stance(comment.getStance())</span>
-<span class="pc bpc" id="L52" title="1 of 2 branches missed.">                .parentId(comment.getParent() != null ? comment.getParent().getId() : null)</span>
-<span class="fc" id="L53">                .replies(</span>
-<span class="fc" id="L54">                        comment.getReplies().stream()</span>
-<span class="fc" id="L55">                                .map(this::toCommentFetchResponse)</span>
-<span class="fc" id="L56">                                .toList()</span>
+<span class="fc" id="L44">        return DiscussionCommentFetchResponse.builder()</span>
+<span class="fc" id="L45">                .commentId(comment.getId())</span>
+<span class="fc" id="L46">                .authorId(comment.getAuthor().getId())</span>
+<span class="fc" id="L47">                .authorName(comment.getAuthor().getNickname())</span>
+<span class="fc" id="L48">                .authorProfileImageURL(convertToPublicImageURL(comment.getAuthor().getProfileImageKey()))</span>
+<span class="fc" id="L49">                .content(comment.getContent())</span>
+<span class="fc" id="L50">                .createdAt(comment.getCreatedAt())</span>
+<span class="fc" id="L51">                .modifiedAt(comment.getModifiedAt())</span>
+<span class="fc" id="L52">                .isEdited(comment.isEdited())</span>
+<span class="fc" id="L53">                .stance(comment.getStance())</span>
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">                .parentId(comment.getParent() != null ? comment.getParent().getId() : null)</span>
+<span class="fc" id="L55">                .replies(</span>
+<span class="fc" id="L56">                        comment.getReplies().stream()</span>
+<span class="fc" id="L57">                                .map(this::toCommentFetchResponse)</span>
+<span class="fc" id="L58">                                .toList()</span>
                 )
-<span class="fc" id="L58">                .build();</span>
+<span class="fc" id="L60">                .build();</span>
     }
 
     /*
@@ -66,20 +68,25 @@ public class DiscussionMapper {
      *  - Discussion.author (ManyToOne, join fetch)
      */
     public DiscussionFetchResponse toFetchResponse(Discussion discussion, Long commentCount, Long memberId) {
-<span class="fc" id="L69">        return DiscussionFetchResponse.builder()</span>
-<span class="fc" id="L70">                .discussionId(discussion.getId())</span>
-<span class="fc" id="L71">                .activityId(discussion.getActivity().getId())</span>
-<span class="fc" id="L72">                .title(discussion.getTitle())</span>
-<span class="fc" id="L73">                .content(discussion.getContent())</span>
-<span class="fc" id="L74">                .authorId(discussion.getAuthor().getId())</span>
-<span class="fc" id="L75">                .authorName(discussion.getAuthor().getNickname())</span>
-<span class="fc" id="L76">                .authorProfileImage(convertToPublicImageURL(discussion.getAuthor().getProfileImageKey()))</span>
-<span class="fc" id="L77">                .createdAt(discussion.getCreatedAt())</span>
-<span class="fc" id="L78">                .modifiedAt(discussion.getModifiedAt())</span>
-<span class="fc" id="L79">                .commentCount(commentCount)</span>
-<span class="fc" id="L80">                .isDebate(discussion.isDebate())</span>
-<span class="fc" id="L81">                .isAuthor(discussion.getAuthor().getId().equals(memberId))</span>
-<span class="fc" id="L82">                .build();</span>
+<span class="fc" id="L71">        return DiscussionFetchResponse.builder()</span>
+<span class="fc" id="L72">                .discussionId(discussion.getId())</span>
+<span class="fc" id="L73">                .activityId(discussion.getActivity().getId())</span>
+<span class="fc" id="L74">                .title(discussion.getTitle())</span>
+<span class="fc" id="L75">                .content(discussion.getContent())</span>
+<span class="fc" id="L76">                .authorId(discussion.getAuthor().getId())</span>
+<span class="fc" id="L77">                .authorName(discussion.getAuthor().getNickname())</span>
+<span class="fc" id="L78">                .authorProfileImage(convertToPublicImageURL(discussion.getAuthor().getProfileImageKey()))</span>
+<span class="fc" id="L79">                .createdAt(discussion.getCreatedAt())</span>
+<span class="fc" id="L80">                .modifiedAt(discussion.getModifiedAt())</span>
+<span class="fc" id="L81">                .commentCount(commentCount)</span>
+<span class="fc" id="L82">                .isDebate(discussion.isDebate())</span>
+<span class="fc" id="L83">                .isAuthor(discussion.getAuthor().getId().equals(memberId))</span>
+<span class="fc" id="L84">                .highlightIds(discussion.getHighlights().stream()</span>
+<span class="pc" id="L85">                        .map(discussionHighlight -&gt; discussionHighlight</span>
+<span class="nc" id="L86">                                .getHighlight()</span>
+<span class="nc" id="L87">                                .getId())</span>
+<span class="fc" id="L88">                        .toList())</span>
+<span class="fc" id="L89">                .build();</span>
     }
 
     /*
@@ -94,26 +101,34 @@ public class DiscussionMapper {
      *         - r.author (ManyToOne, batch fetch)
      */
     public DiscussionDetailResponse toDetailResponse(Discussion discussion, Long commentCount, Long memberId) {
-<span class="fc" id="L97">        return DiscussionDetailResponse.builder()</span>
-<span class="fc" id="L98">                .discussionId(discussion.getId())</span>
-<span class="fc" id="L99">                .activityId(discussion.getActivity().getId())</span>
-<span class="fc" id="L100">                .title(discussion.getTitle())</span>
-<span class="fc" id="L101">                .content(discussion.getContent())</span>
-<span class="fc" id="L102">                .authorId(discussion.getAuthor().getId())</span>
-<span class="fc" id="L103">                .authorName(discussion.getAuthor().getNickname())</span>
-<span class="fc" id="L104">                .authorProfileImage(convertToPublicImageURL(discussion.getAuthor().getProfileImageKey()))</span>
-<span class="fc" id="L105">                .createdAt(discussion.getCreatedAt())</span>
-<span class="fc" id="L106">                .modifiedAt(discussion.getModifiedAt())</span>
-<span class="fc" id="L107">                .commentCount(commentCount)</span>
-<span class="fc" id="L108">                .isDebate(discussion.isDebate())</span>
-<span class="fc" id="L109">                .isAuthor(discussion.getAuthor().getId().equals(memberId))</span>
-<span class="fc" id="L110">                .comments(</span>
-<span class="fc" id="L111">                        discussion.getComments().stream()</span>
-<span class="pc bpc" id="L112" title="1 of 2 branches missed.">                                .filter(comment -&gt; comment.getParent() == null)</span>
-<span class="fc" id="L113">                                .map(this::toCommentFetchResponse)</span>
-<span class="fc" id="L114">                                .toList()</span>
+<span class="fc" id="L104">        return DiscussionDetailResponse.builder()</span>
+<span class="fc" id="L105">                .discussionId(discussion.getId())</span>
+<span class="fc" id="L106">                .activityId(discussion.getActivity().getId())</span>
+<span class="fc" id="L107">                .title(discussion.getTitle())</span>
+<span class="fc" id="L108">                .content(discussion.getContent())</span>
+<span class="fc" id="L109">                .authorId(discussion.getAuthor().getId())</span>
+<span class="fc" id="L110">                .authorName(discussion.getAuthor().getNickname())</span>
+<span class="fc" id="L111">                .authorProfileImage(convertToPublicImageURL(discussion.getAuthor().getProfileImageKey()))</span>
+<span class="fc" id="L112">                .createdAt(discussion.getCreatedAt())</span>
+<span class="fc" id="L113">                .modifiedAt(discussion.getModifiedAt())</span>
+<span class="fc" id="L114">                .commentCount(commentCount)</span>
+<span class="fc" id="L115">                .isDebate(discussion.isDebate())</span>
+<span class="fc" id="L116">                .isAuthor(discussion.getAuthor().getId().equals(memberId))</span>
+<span class="fc" id="L117">                .comments(</span>
+<span class="fc" id="L118">                        discussion.getComments().stream()</span>
+<span class="pc bpc" id="L119" title="1 of 2 branches missed.">                                .filter(comment -&gt; comment.getParent() == null)</span>
+<span class="fc" id="L120">                                .map(this::toCommentFetchResponse)</span>
+<span class="fc" id="L121">                                .toList()</span>
                 )
-<span class="fc" id="L116">                .build();</span>
+<span class="fc" id="L123">                .linkedHighlights(</span>
+<span class="fc" id="L124">                        discussion.getHighlights().stream()</span>
+<span class="pc" id="L125">                                .map(dh-&gt; HighlightSummaryResponse.of(</span>
+<span class="nc" id="L126">                                        dh.getHighlight(),</span>
+<span class="nc" id="L127">                                        convertToPublicImageURL(dh.getHighlight().getAuthor().getProfileImageKey())</span>
+                                ))
+<span class="fc" id="L129">                                .toList()</span>
+                )
+<span class="fc" id="L131">                .build();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

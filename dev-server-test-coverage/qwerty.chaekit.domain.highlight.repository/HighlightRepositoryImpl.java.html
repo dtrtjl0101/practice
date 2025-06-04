@@ -7,8 +7,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
-import qwerty.chaekit.domain.highlight.entity.Highlight;
-import qwerty.chaekit.domain.highlight.entity.QHighlight;
+import qwerty.chaekit.domain.group.ReadingGroup;
+import qwerty.chaekit.domain.group.activity.Activity;
+import qwerty.chaekit.domain.highlight.Highlight;
+import qwerty.chaekit.domain.highlight.QHighlight;
+import qwerty.chaekit.domain.member.user.UserProfile;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,56 +24,85 @@ public class HighlightRepositoryImpl implements HighlightRepository {
 
     @Override
     public Optional&lt;Highlight&gt; findById(Long id) {
-<span class="fc" id="L24">        return highlightJpaRepository.findById(id);</span>
+<span class="fc" id="L27">        return highlightJpaRepository.findById(id);</span>
     }
 
     @Override
     public Highlight save(Highlight highlight) {
-<span class="fc" id="L29">        return highlightJpaRepository.save(highlight);</span>
+<span class="fc" id="L32">        return highlightJpaRepository.save(highlight);</span>
     }
 
     @Override
     public Page&lt;Highlight&gt; findHighlights(Pageable pageable, Long userId, Long activityId, Long bookId, String spine, boolean me) {
-<span class="fc" id="L34">        QHighlight highlight = QHighlight.highlight;</span>
-<span class="fc" id="L35">        BooleanBuilder where = new BooleanBuilder();</span>
+<span class="fc" id="L37">        QHighlight highlight = QHighlight.highlight;</span>
+<span class="fc" id="L38">        BooleanBuilder where = new BooleanBuilder();</span>
 
-<span class="pc bpc" id="L37" title="1 of 2 branches missed.">        if (bookId != null) {</span>
-<span class="fc" id="L38">            where.and(highlight.book.id.eq(bookId));</span>
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">        if (bookId != null) {</span>
+<span class="fc" id="L41">            where.and(highlight.book.id.eq(bookId));</span>
         }
-<span class="pc bpc" id="L40" title="1 of 2 branches missed.">        if (spine != null) {</span>
-<span class="fc" id="L41">            where.and(highlight.spine.eq(spine));</span>
-        }
-
-<span class="pc bpc" id="L44" title="1 of 2 branches missed.">        if (activityId != null) {</span>
-<span class="nc" id="L45">            where.and(highlight.activity.id.eq(activityId));</span>
+<span class="pc bpc" id="L43" title="1 of 2 branches missed.">        if (spine != null) {</span>
+<span class="fc" id="L44">            where.and(highlight.spine.eq(spine));</span>
         }
 
-<span class="pc bpc" id="L48" title="1 of 2 branches missed.">        if (!me) { // 내 하이라이트</span>
-<span class="nc" id="L49">            where.and(highlight.isPublic.eq(true));</span>
-        } else { // 공개된 하이라이트
-<span class="fc" id="L51">            where.and(highlight.author.id.eq(userId));</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">        if (activityId != null) {</span>
+<span class="nc" id="L48">            where.and(highlight.activity.id.eq(activityId));</span>
+        } else {
+<span class="fc" id="L50">            where.and(highlight.isPublic.eq(false));</span>
         }
 
-<span class="fc" id="L54">        List&lt;Highlight&gt; result = jpaQueryFactory</span>
-<span class="fc" id="L55">                .selectFrom(highlight)</span>
-<span class="fc" id="L56">                .leftJoin(highlight.author).fetchJoin()</span>
-<span class="fc" id="L57">                .where(where)</span>
-<span class="fc" id="L58">                .offset(pageable.getOffset())</span>
-<span class="fc" id="L59">                .limit(pageable.getPageSize())</span>
-<span class="fc" id="L60">                .fetch();</span>
+<span class="pc bpc" id="L53" title="1 of 2 branches missed.">        if (!me) {// 공개된 하이라이트</span>
+<span class="nc" id="L54">            where.and(highlight.isPublic.eq(true));</span>
+        } else { // 내 하이라이트
+<span class="fc" id="L56">            where.and(highlight.author.id.eq(userId));</span>
+        }
 
-<span class="fc" id="L62">        long total = Optional.ofNullable(jpaQueryFactory</span>
-<span class="fc" id="L63">                .select(highlight.count())</span>
-<span class="fc" id="L64">                .from(highlight)</span>
-<span class="fc" id="L65">                .where(where)</span>
-<span class="fc" id="L66">                .fetchOne()).orElse(0L);</span>
-
-<span class="fc" id="L68">        return new PageImpl&lt;&gt;(result, pageable, total);</span>
+<span class="fc" id="L59">        return getHighlightsByBooleanBuilder(pageable, highlight, where);</span>
     }
 
     @Override
     public void delete(Highlight highlight) {
-<span class="nc" id="L73">        highlightJpaRepository.delete(highlight);</span>
-<span class="nc" id="L74">    }</span>
+<span class="nc" id="L64">        highlightJpaRepository.delete(highlight);</span>
+<span class="nc" id="L65">    }</span>
+
+    @Override
+    public long countByIdsAndActivity(List&lt;Long&gt; ids, Activity activity) {
+<span class="nc" id="L69">        return highlightJpaRepository.countByIdsAndActivity(ids, activity);</span>
+    }
+
+    @Override
+    public Page&lt;Highlight&gt; findByAuthor(UserProfile user, Long bookId, Pageable pageable) {
+<span class="nc" id="L74">        QHighlight highlight = QHighlight.highlight;</span>
+
+<span class="nc" id="L76">        BooleanBuilder where = new BooleanBuilder();</span>
+<span class="nc" id="L77">        where.and(highlight.author.eq(user));</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">        if(bookId != null) {</span>
+<span class="nc" id="L79">            where.and(highlight.book.id.eq(bookId));</span>
+        }
+
+<span class="nc" id="L82">        return getHighlightsByBooleanBuilder(pageable, highlight, where);</span>
+    }
+
+    private PageImpl&lt;Highlight&gt; getHighlightsByBooleanBuilder(Pageable pageable, QHighlight highlight, BooleanBuilder where) {
+<span class="fc" id="L86">        List&lt;Highlight&gt; result = jpaQueryFactory</span>
+<span class="fc" id="L87">                .selectFrom(highlight)</span>
+<span class="fc" id="L88">                .leftJoin(highlight.author).fetchJoin()</span>
+<span class="fc" id="L89">                .where(where)</span>
+<span class="fc" id="L90">                .offset(pageable.getOffset())</span>
+<span class="fc" id="L91">                .limit(pageable.getPageSize())</span>
+<span class="fc" id="L92">                .fetch();</span>
+
+<span class="fc" id="L94">        long total = Optional.ofNullable(jpaQueryFactory</span>
+<span class="fc" id="L95">                .select(highlight.count())</span>
+<span class="fc" id="L96">                .from(highlight)</span>
+<span class="fc" id="L97">                .where(where)</span>
+<span class="fc" id="L98">                .fetchOne()).orElse(0L);</span>
+
+<span class="fc" id="L100">        return new PageImpl&lt;&gt;(result, pageable, total);</span>
+    }
+
+    @Override
+    public List&lt;Highlight&gt; findByGroup(ReadingGroup group) {
+<span class="nc" id="L105">        return highlightJpaRepository.findByActivity_Group(group);</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -2,240 +2,206 @@
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import qwerty.chaekit.domain.group.groupmember.GroupMember;
-import qwerty.chaekit.domain.group.groupmember.GroupMemberRepository;
-import qwerty.chaekit.domain.group.repository.GroupRepository;
 import qwerty.chaekit.domain.group.ReadingGroup;
+import qwerty.chaekit.domain.group.repository.GroupRepository;
+import qwerty.chaekit.domain.highlight.Highlight;
+import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
-import qwerty.chaekit.domain.member.user.UserProfileRepository;
-import qwerty.chaekit.dto.group.*;
-import qwerty.chaekit.dto.group.enums.MyMemberShipStatus;
+import qwerty.chaekit.dto.group.request.GroupPatchRequest;
+import qwerty.chaekit.dto.group.request.GroupPostRequest;
+import qwerty.chaekit.dto.group.request.GroupSortType;
+import qwerty.chaekit.dto.group.response.GroupFetchResponse;
+import qwerty.chaekit.dto.group.response.GroupPostResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
-import qwerty.chaekit.global.enums.S3Directory;
+import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
-import qwerty.chaekit.global.properties.AwsProperties;
 import qwerty.chaekit.global.security.resolver.UserToken;
-import qwerty.chaekit.service.notification.NotificationService;
-import qwerty.chaekit.service.util.EmailNotificationService;
-import qwerty.chaekit.service.util.S3Service;
+import qwerty.chaekit.mapper.GroupMapper;
+import qwerty.chaekit.service.util.EntityFinder;
+import qwerty.chaekit.service.util.FileService;
+
+import java.util.List;
+import java.util.Objects;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class GroupService {
-    private final UserProfileRepository userRepository;
-    private final GroupMemberRepository groupMemberRepository;
     private final GroupRepository groupRepository;
-    private final EmailNotificationService emailNotificationService;
-    private final S3Service s3Service;
-    private final AwsProperties awsProperties;
-    private final NotificationService notificationService;
+    private final FileService fileService;
+    private final GroupMapper groupMapper;
+    private final EntityFinder entityFinder;
+    private final HighlightRepository highlightRepository;
 
     @Transactional
     public GroupPostResponse createGroup(UserToken userToken, GroupPostRequest request) {
-<span class="nc" id="L40">        Long userId = userToken.userId();</span>
-<span class="nc bnc" id="L41" title="All 2 branches missed.">        if(!userRepository.existsById(userId)) {</span>
-<span class="nc" id="L42">            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);</span>
+<span class="fc" id="L45">        UserProfile leader = entityFinder.findUser(userToken.userId());</span>
+
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        if(groupRepository.existsReadingGroupByName(request.name())) {</span>
+<span class="fc" id="L48">            throw new ForbiddenException(ErrorCode.GROUP_NAME_DUPLICATED);</span>
         }
 
-<span class="nc bnc" id="L45" title="All 2 branches missed.">        if(groupRepository.existsReadingGroupByName(request.name())) {</span>
-<span class="nc" id="L46">            throw new ForbiddenException(ErrorCode.GROUP_NAME_DUPLICATED);</span>
+<span class="fc" id="L51">        String groupImageKey = fileService.uploadGroupImageIfPresent(request.groupImage());</span>
+
+<span class="fc" id="L53">        ReadingGroup groupEntity = ReadingGroup.builder()</span>
+<span class="fc" id="L54">                .name(request.name())</span>
+<span class="fc" id="L55">                .groupLeader(leader)</span>
+<span class="fc" id="L56">                .description(request.description())</span>
+<span class="fc" id="L57">                .groupImageKey(groupImageKey)</span>
+<span class="pc bpc" id="L58" title="2 of 4 branches missed.">                .isAutoApproval(request.autoApproval() == null || request.autoApproval())</span>
+<span class="fc" id="L59">                .build();</span>
+<span class="fc" id="L60">        ReadingGroup savedGroup = groupRepository.save(groupEntity);</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        if(request.tags() != null) {</span>
+<span class="fc" id="L62">            List&lt;String&gt; validTags = getValidTags(request.tags());</span>
+<span class="fc" id="L63">            savedGroup.addTags(validTags);</span>
         }
+<span class="fc" id="L65">        savedGroup.addMember(leader).approve();</span>
 
-<span class="nc" id="L49">        String groupImageKey = s3Service.uploadFile(</span>
-<span class="nc" id="L50">                awsProperties.imageBucketName(),</span>
-                S3Directory.GROUP_IMAGE,
-<span class="nc" id="L52">                request.groupImage(),</span>
-                false
-        );
-
-<span class="nc" id="L56">        ReadingGroup groupEntity = ReadingGroup.builder()</span>
-<span class="nc" id="L57">                .name(request.name())</span>
-<span class="nc" id="L58">                .groupLeader(userRepository.getReferenceById(userId))</span>
-<span class="nc" id="L59">                .description(request.description())</span>
-<span class="nc" id="L60">                .groupImageKey(groupImageKey)</span>
-<span class="nc" id="L61">                .build();</span>
-<span class="nc" id="L62">        ReadingGroup savedGroup = groupRepository.save(groupEntity);</span>
-<span class="nc bnc" id="L63" title="All 2 branches missed.">        if(request.tags() != null) {</span>
-<span class="nc" id="L64">            request.tags().forEach(savedGroup::addTag);</span>
-        }
-<span class="nc" id="L66">        savedGroup.addMember(userRepository.getReferenceById(userId)).approve();</span>
-
-<span class="nc" id="L68">        return GroupPostResponse.of(savedGroup, getGroupImageURL(savedGroup));</span>
+<span class="fc" id="L67">        return GroupPostResponse.of(savedGroup, getGroupImageURL(savedGroup));</span>
     }
 
     @Transactional(readOnly = true)
-    public PageResponse&lt;GroupFetchResponse&gt; fetchAllGroupList(UserToken userToken, Pageable pageable) {
-<span class="nc" id="L73">        boolean isAnonymous = userToken.isAnonymous();</span>
-<span class="nc bnc" id="L74" title="All 2 branches missed.">        Long userId = isAnonymous ? null : userToken.userId();</span>
+    public PageResponse&lt;GroupFetchResponse&gt; getAllGroups(
+            UserToken userToken, 
+            Pageable pageable, 
+            List&lt;String&gt; tags,
+            GroupSortType sortBy
+    ) {
+<span class="fc" id="L77">        boolean isAnonymous = userToken.isAnonymous();</span>
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">        Long userId = isAnonymous ? null : userToken.userId();</span>
 
-<span class="nc" id="L76">        Page&lt;GroupFetchResponse&gt; page = groupRepository.findAllWithGroupMembersAndTags(pageable)</span>
-<span class="nc" id="L77">                .map(</span>
-<span class="nc" id="L78">                        group -&gt; GroupFetchResponse.of(</span>
-                                group,
-<span class="nc" id="L80">                                getGroupImageURL(group),</span>
-<span class="nc bnc" id="L81" title="All 2 branches missed.">                                isAnonymous ? MyMemberShipStatus.NONE : group.getMemberShipStatus(userId)</span>
-                        )
-                );
-<span class="nc" id="L84">        return PageResponse.of(page);</span>
+        Page&lt;ReadingGroup&gt; page;
+<span class="pc bpc" id="L81" title="3 of 4 branches missed.">        if (tags != null &amp;&amp; !tags.isEmpty()) {</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">            if (sortBy == GroupSortType.MEMBER_COUNT) {</span>
+<span class="nc" id="L83">                page = groupRepository.findAllByTagsInOrderByMemberCountDesc(tags, pageable);</span>
+            } else {
+<span class="nc" id="L85">                page = groupRepository.findAllByTagsIn(tags, getPageableByNewest(pageable));</span>
+            }
+        } else { // no tags provided
+<span class="pc bpc" id="L88" title="1 of 2 branches missed.">            if (sortBy == GroupSortType.MEMBER_COUNT) {</span>
+<span class="nc" id="L89">                page = groupRepository.findAllInOrderByMemberCountDesc(pageable);</span>
+            } else {
+<span class="fc" id="L91">                page = groupRepository.findAll(getPageableByNewest(pageable));</span>
+            }
+        }
+<span class="fc" id="L94">        Page&lt;GroupFetchResponse&gt; responsePage = page.map(group -&gt; groupMapper.toGroupFetchResponse(group, userId));</span>
+<span class="fc" id="L95">        return PageResponse.of(responsePage);</span>
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse&lt;GroupFetchResponse&gt; getJoinedGroups(UserToken userToken, Pageable pageable) {
+<span class="fc" id="L100">        Long userId = userToken.userId();</span>
+
+<span class="fc" id="L102">        Page&lt;GroupFetchResponse&gt; page = groupRepository.findAllByUserId(userId, pageable)</span>
+<span class="fc" id="L103">                .map(group -&gt; groupMapper.toGroupFetchResponse(group, userId));</span>
+<span class="fc" id="L104">        return PageResponse.of(page);</span>
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse&lt;GroupFetchResponse&gt; getCreatedGroups(UserToken userToken, Pageable pageable) {
+<span class="fc" id="L109">        Long userId = userToken.userId();</span>
+
+<span class="fc" id="L111">        Page&lt;GroupFetchResponse&gt; page = groupRepository.findByGroupLeaderId(userId, pageable)</span>
+<span class="fc" id="L112">                .map(group -&gt; groupMapper.toGroupFetchResponse(group, userId));</span>
+
+<span class="fc" id="L114">        return PageResponse.of(page);</span>
     }
 
     @Transactional(readOnly = true)
     public GroupFetchResponse fetchGroup(UserToken userToken, long groupId) {
-<span class="nc" id="L89">        boolean isAnonymous = userToken.isAnonymous();</span>
-<span class="nc bnc" id="L90" title="All 2 branches missed.">        Long userId = isAnonymous ? null : userToken.userId();</span>
+<span class="nc" id="L119">        boolean isAnonymous = userToken.isAnonymous();</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">        Long userId = isAnonymous ? null : userToken.userId();</span>
 
-<span class="nc" id="L92">        ReadingGroup group = groupRepository.findByIdWithGroupMembersAndTags(groupId)</span>
-<span class="nc" id="L93">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.GROUP_NOT_FOUND));</span>
-<span class="nc" id="L94">        return GroupFetchResponse.of(</span>
-                group,
-<span class="nc" id="L96">                getGroupImageURL(group),</span>
-<span class="nc bnc" id="L97" title="All 2 branches missed.">                isAnonymous ? MyMemberShipStatus.NONE : group.getMemberShipStatus(userId)</span>
-        );
+<span class="nc" id="L122">        ReadingGroup group = groupRepository.findByIdWithTags(groupId)</span>
+<span class="nc" id="L123">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.GROUP_NOT_FOUND));</span>
+<span class="nc" id="L124">        return groupMapper.toGroupFetchResponse(group, userId);</span>
     }
 
     @Transactional
     public GroupPostResponse updateGroup(UserToken userToken, long groupId, GroupPatchRequest request) {
-<span class="nc" id="L103">        Long userId = userToken.userId();</span>
-<span class="nc bnc" id="L104" title="All 2 branches missed.">        if(!userRepository.existsById(userId)) {</span>
-<span class="nc" id="L105">            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);</span>
+<span class="fc" id="L129">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
+<span class="fc" id="L130">        ReadingGroup group = entityFinder.findGroup(groupId);</span>
+
+<span class="fc bfc" id="L132" title="All 2 branches covered.">        if (!group.isLeader(user)) {</span>
+<span class="fc" id="L133">            throw new ForbiddenException(ErrorCode.GROUP_UPDATE_FORBIDDEN);</span>
         }
-
-<span class="nc" id="L108">        ReadingGroup group = groupRepository.findById(groupId)</span>
-<span class="nc" id="L109">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.GROUP_NOT_FOUND));</span>
-
-<span class="nc bnc" id="L111" title="All 2 branches missed.">        if (!group.getGroupLeader().getId().equals(userId)) {</span>
-<span class="nc" id="L112">            throw new ForbiddenException(ErrorCode.GROUP_UPDATE_FORBIDDEN);</span>
-        }
-<span class="nc bnc" id="L114" title="All 2 branches missed.">        if(request.description() != null) {</span>
-<span class="nc" id="L115">            group.updateDescription(request.description());</span>
-        }
-
-<span class="nc" id="L118">        String imageKey = s3Service.uploadFile(</span>
-<span class="nc" id="L119">                awsProperties.imageBucketName(),</span>
-                S3Directory.GROUP_IMAGE,
-<span class="nc" id="L121">                request.groupImage(),</span>
-                false
-        );
-
-<span class="nc bnc" id="L125" title="All 2 branches missed.">        if(imageKey != null) {</span>
-<span class="nc" id="L126">            group.updateGroupImageKey(imageKey);</span>
-        }
-<span class="nc" id="L128">        return GroupPostResponse.of(group, getGroupImageURL(group));</span>
-    }
-
-    @Transactional
-    public GroupJoinResponse requestJoinGroup(UserToken userToken, long groupId) {
-<span class="nc" id="L133">        UserProfile userProfile = userRepository.findByIdWithMember(userToken.userId())</span>
-<span class="nc" id="L134">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
-
-<span class="nc" id="L136">        ReadingGroup group = groupRepository.findById(groupId)</span>
-<span class="nc" id="L137">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.GROUP_NOT_FOUND));</span>
-
-<span class="nc bnc" id="L139" title="All 2 branches missed.">        if (group.isMember(userProfile)) {</span>
-<span class="nc" id="L140">            throw new ForbiddenException(ErrorCode.ALREADY_JOINED_GROUP);</span>
-        }
-
-<span class="nc" id="L143">        GroupMember groupMember = group.addMember(userProfile);</span>
-
-<span class="nc" id="L145">        notificationService.createGroupJoinRequestNotification(</span>
-<span class="nc" id="L146">            group.getGroupLeader(),</span>
-            userProfile,
-            group
-        );
         
-<span class="nc" id="L151">        return GroupJoinResponse.of(groupMember);</span>
-    }
-
-    @Transactional
-    public GroupJoinResponse approveJoinRequest(UserToken userToken, long groupId, long userId) {
-<span class="nc" id="L156">        UserProfile leaderProfile = userRepository.findByIdWithMember(userToken.userId())</span>
-<span class="nc" id="L157">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
-
-<span class="nc" id="L159">        ReadingGroup group = groupRepository.findById(groupId)</span>
-<span class="nc" id="L160">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.GROUP_NOT_FOUND));</span>
-
-<span class="nc bnc" id="L162" title="All 2 branches missed.">        if (!group.getGroupLeader().getId().equals(leaderProfile.getId())) {</span>
-<span class="nc" id="L163">            throw new ForbiddenException(ErrorCode.GROUP_UPDATE_FORBIDDEN);</span>
+<span class="pc bpc" id="L136" title="1 of 2 branches missed.">        if(request.description() != null) {</span>
+<span class="fc" id="L137">            group.updateDescription(request.description());</span>
         }
 
-<span class="nc" id="L166">        UserProfile memberProfile = userRepository.findById(userId)</span>
-<span class="nc" id="L167">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
+<span class="pc bpc" id="L140" title="1 of 2 branches missed.">        if (request.tags() != null) {</span>
+<span class="fc" id="L141">            List&lt;String&gt; validTags = getValidTags(request.tags());</span>
 
-<span class="nc" id="L169">        GroupMember groupMember = group.approveMember(memberProfile);</span>
+<span class="fc" id="L143">            group.removeAllTags();</span>
+<span class="fc" id="L144">            group.addTags(validTags);</span>
+        }
 
+<span class="pc bpc" id="L147" title="2 of 4 branches missed.">        if (request.name() != null &amp;&amp; !request.name().isBlank()) {</span>
+<span class="fc" id="L148">            group.changeName(request.name());</span>
+        }
 
-<span class="nc" id="L172">        notificationService.createGroupJoinApprovedNotification(</span>
-            memberProfile,
-            leaderProfile,
-            group
-        );
+<span class="pc bpc" id="L151" title="1 of 2 branches missed.">        if (request.autoApproval() != null) {</span>
+<span class="fc" id="L152">            group.changeAutoApproval(request.autoApproval());</span>
+        }
+
+<span class="fc" id="L155">        String imageKey = fileService.uploadGroupImageIfPresent(request.groupImage());</span>
+
+<span class="pc bpc" id="L157" title="1 of 2 branches missed.">        if(imageKey != null) {</span>
+<span class="fc" id="L158">            group.updateGroupImageKey(imageKey);</span>
+        }
+<span class="fc" id="L160">        return GroupPostResponse.of(group, getGroupImageURL(group));</span>
+    }
+    
+    @Transactional
+    public void deleteGroup(UserToken userToken, Long groupId) {
+<span class="fc" id="L165">        ReadingGroup group = entityFinder.findGroup(groupId);</span>
         
-<span class="nc" id="L178">        emailNotificationService.sendReadingGroupApprovalEmail(memberProfile.getMember().getEmail());</span>
-<span class="nc" id="L179">        return GroupJoinResponse.of(groupMember);</span>
-    }
-
-    @Transactional
-    public void leaveGroup(UserToken userToken, long groupId) {
-<span class="nc" id="L184">        UserProfile userProfile = userRepository.findByMember_Id(userToken.memberId())</span>
-<span class="nc" id="L185">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
-
-<span class="nc" id="L187">        ReadingGroup group = groupRepository.findById(groupId)</span>
-<span class="nc" id="L188">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.GROUP_NOT_FOUND));</span>
-
-<span class="nc bnc" id="L190" title="All 2 branches missed.">        if (group.getGroupLeader().getId().equals(userProfile.getId())) {</span>
-<span class="nc" id="L191">            throw new ForbiddenException(ErrorCode.GROUP_LEADER_CANNOT_LEAVE);</span>
+<span class="fc bfc" id="L167" title="All 2 branches covered.">        if (!group.isLeader(userToken.userId())) {</span>
+<span class="fc" id="L168">            throw new ForbiddenException(ErrorCode.GROUP_LEADER_ONLY);</span>
         }
+        
+        // 1. 관련된 Highlight 찾아서 후처리
+<span class="fc" id="L172">        List&lt;Highlight&gt; highlights = highlightRepository.findByGroup(group);</span>
+<span class="fc bfc" id="L173" title="All 2 branches covered.">        for (Highlight highlight : highlights) {</span>
+<span class="fc" id="L174">            highlight.detachActivity();</span>
+<span class="fc" id="L175">        }</span>
 
-<span class="nc" id="L194">        group.removeMember(userProfile);</span>
-<span class="nc" id="L195">    }</span>
-
-    @Transactional
-    public void rejectJoinRequest(UserToken userToken, long groupId, long userId) {
-<span class="nc" id="L199">        UserProfile leaderProfile = userRepository.findByMember_Id(userToken.memberId())</span>
-<span class="nc" id="L200">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
-
-<span class="nc" id="L202">        ReadingGroup group = groupRepository.findById(groupId)</span>
-<span class="nc" id="L203">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.GROUP_NOT_FOUND));</span>
-
-<span class="nc bnc" id="L205" title="All 2 branches missed.">        if (!group.getGroupLeader().getId().equals(leaderProfile.getId())) {</span>
-<span class="nc" id="L206">            throw new ForbiddenException(ErrorCode.GROUP_UPDATE_FORBIDDEN);</span>
-        }
-
-<span class="nc" id="L209">        UserProfile memberProfile = userRepository.findByMember_Id(userId)</span>
-<span class="nc" id="L210">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
-
-<span class="nc" id="L212">        group.rejectMember(memberProfile);</span>
-
-<span class="nc" id="L214">        notificationService.createGroupJoinRejectedNotification(</span>
-            memberProfile,
-            leaderProfile,
-            group
-        );
-<span class="nc" id="L219">    }</span>
-
-    @Transactional
-    public PageResponse&lt;GroupPendingMemberResponse&gt; fetchPendingList(Pageable pageable, UserToken userToken, long groupId) {
-<span class="nc" id="L223">        ReadingGroup group = groupRepository.findById(groupId)</span>
-<span class="nc" id="L224">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.GROUP_NOT_FOUND));</span>
-
-<span class="nc bnc" id="L226" title="All 2 branches missed.">        if (!group.getGroupLeader().getId().equals(userToken.userId())) {</span>
-<span class="nc" id="L227">            throw new ForbiddenException(ErrorCode.GROUP_LEADER_ONLY);</span>
-        }
-
-<span class="nc" id="L230">        Page&lt;GroupMember&gt; pendingMembersPage = groupMemberRepository.findByReadingGroupAndAcceptedFalse(group, pageable);</span>
-
-<span class="nc" id="L232">        Page&lt;GroupPendingMemberResponse&gt; page = pendingMembersPage.map(GroupPendingMemberResponse::of);</span>
-
-<span class="nc" id="L234">        return PageResponse.of(page);</span>
-    }
+        // 2. Activity 삭제
+<span class="fc" id="L178">        groupRepository.delete(group);</span>
+<span class="fc" id="L179">    }</span>
 
     private String getGroupImageURL(ReadingGroup group) {
-<span class="nc" id="L238">        return s3Service.convertToPublicImageURL(group.getGroupImageKey());</span>
+<span class="fc" id="L182">        return fileService.convertToPublicImageURL(group.getGroupImageKey());</span>
+    }
+
+    private static List&lt;String&gt; getValidTags(List&lt;String&gt; tags) {
+<span class="fc" id="L186">        List&lt;String&gt; validTags = tags.stream()</span>
+<span class="fc" id="L187">                .filter(Objects::nonNull)</span>
+<span class="fc" id="L188">                .map(String::trim) // 앞 뒤 공백 제거</span>
+<span class="pc bpc" id="L189" title="2 of 4 branches missed.">                .filter(tag -&gt; !tag.isEmpty() &amp;&amp; tag.length() &lt;= 10)</span>
+<span class="fc" id="L190">                .distinct()</span>
+<span class="fc" id="L191">                .toList();</span>
+
+<span class="pc bpc" id="L193" title="1 of 2 branches missed.">        if (validTags.size() != tags.size()) {</span>
+<span class="nc" id="L194">            throw new BadRequestException(ErrorCode.INVALID_TAG_LIST);</span>
+        }
+<span class="fc" id="L196">        return validTags;</span>
+    }
+
+    private static Pageable getPageableByNewest(Pageable pageable) {
+<span class="fc" id="L200">        return PageRequest.of(</span>
+<span class="fc" id="L201">                pageable.getPageNumber(),</span>
+<span class="fc" id="L202">                pageable.getPageSize(),</span>
+<span class="pc bpc" id="L203" title="1 of 2 branches missed.">                pageable.getSort().isEmpty() ? Sort.by(Sort.Order.desc(&quot;createdAt&quot;)) : pageable.getSort()</span>
+        );
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

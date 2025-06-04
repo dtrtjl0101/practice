@@ -5,12 +5,14 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 
 @Entity
 @Getter
 @Table(name = &quot;ebook&quot;)
+@BatchSize(size = 20)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Ebook extends BaseEntity {
     @Id
@@ -38,18 +40,29 @@ public class Ebook extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = &quot;publisher_id&quot;)
     private PublisherProfile publisher;
+    
+<span class="fc" id="L44">    @Column(nullable = false)</span>
+    private long viewCount = 0L;
 
     @Builder
-<span class="fc" id="L43">    public Ebook(Long id, String title, String author, String description, long size, int price, String fileKey, String coverImageKey, PublisherProfile publisher) {</span>
-<span class="fc" id="L44">        this.id = id;</span>
-<span class="fc" id="L45">        this.title = title;</span>
-<span class="fc" id="L46">        this.author = author;</span>
-<span class="fc" id="L47">        this.description = description;</span>
-<span class="fc" id="L48">        this.size = size;</span>
-<span class="fc" id="L49">        this.price = price;</span>
-<span class="fc" id="L50">        this.fileKey = fileKey;</span>
-<span class="fc" id="L51">        this.coverImageKey = coverImageKey;</span>
-<span class="fc" id="L52">        this.publisher = publisher;</span>
-<span class="fc" id="L53">    }</span>
+<span class="fc" id="L48">    public Ebook(Long id, String title, String author, String description, long size, int price, String fileKey, String coverImageKey, PublisherProfile publisher) {</span>
+<span class="fc" id="L49">        this.id = id;</span>
+<span class="fc" id="L50">        this.title = title;</span>
+<span class="fc" id="L51">        this.author = author;</span>
+<span class="fc" id="L52">        this.description = description;</span>
+<span class="fc" id="L53">        this.size = size;</span>
+<span class="fc" id="L54">        this.price = price;</span>
+<span class="fc" id="L55">        this.fileKey = fileKey;</span>
+<span class="fc" id="L56">        this.coverImageKey = coverImageKey;</span>
+<span class="fc" id="L57">        this.publisher = publisher;</span>
+<span class="fc" id="L58">    }</span>
+    
+    public boolean isOwnedBy(PublisherProfile publisher) {
+<span class="nc" id="L61">        return this.publisher.equals(publisher);</span>
+    }
+    
+    public void resetViewCount(Long viewCount) {
+<span class="nc" id="L65">        this.viewCount = viewCount;</span>
+<span class="nc" id="L66">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

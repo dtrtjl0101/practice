@@ -26,20 +26,20 @@ public class CreditWallet extends BaseEntity {
     @JoinColumn(name = &quot;user_id&quot;, nullable = false, unique = true)
     private UserProfile user;
 
-<span class="nc" id="L29">    @Column(nullable = false)</span>
+<span class="fc" id="L29">    @Column(nullable = false)</span>
     private long balance = 0;
 
-<span class="nc" id="L32">    @OneToMany(mappedBy = &quot;wallet&quot;, cascade = CascadeType.PERSIST)</span>
+<span class="fc" id="L32">    @OneToMany(mappedBy = &quot;wallet&quot;, cascade = CascadeType.PERSIST)</span>
     private final List&lt;CreditUsageTransaction&gt; usageTransactions = new ArrayList&lt;&gt;();
 
-<span class="nc" id="L35">    @OneToMany(mappedBy = &quot;wallet&quot;, cascade = CascadeType.PERSIST)</span>
+<span class="fc" id="L35">    @OneToMany(mappedBy = &quot;wallet&quot;, cascade = CascadeType.PERSIST)</span>
     private final List&lt;CreditPaymentTransaction&gt; paymentTransactions = new ArrayList&lt;&gt;();
 
     @Builder
-<span class="nc" id="L39">    public CreditWallet(Long id, UserProfile user) {</span>
-<span class="nc" id="L40">        this.id = id;</span>
-<span class="nc" id="L41">        this.user = user;</span>
-<span class="nc" id="L42">    }</span>
+<span class="fc" id="L39">    public CreditWallet(Long id, UserProfile user) {</span>
+<span class="fc" id="L40">        this.id = id;</span>
+<span class="fc" id="L41">        this.user = user;</span>
+<span class="fc" id="L42">    }</span>
 
     public void addCredit(long amount) {
 <span class="nc" id="L45">        this.balance += amount;</span>

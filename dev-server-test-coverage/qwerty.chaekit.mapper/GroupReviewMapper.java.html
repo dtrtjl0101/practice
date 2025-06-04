@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GroupReviewMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chaekit</a> &gt; <a href="index.source.html" class="el_package">qwerty.chaekit.mapper</a> &gt; <span class="el_source">GroupReviewMapper.java</span></div><h1>GroupReviewMapper.java</h1><pre class="source lang-java linenums">package qwerty.chaekit.mapper;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+import qwerty.chaekit.domain.group.review.GroupReview;
+import qwerty.chaekit.domain.group.review.GroupReviewTagRelation;
+import qwerty.chaekit.dto.group.review.GroupReviewFetchResponse;
+import qwerty.chaekit.service.util.FileService;
+
+@Component
+@RequiredArgsConstructor
+public class GroupReviewMapper {
+    private final FileService fileService;
+    
+    public String convertToPublicImageURL(String imageKey) {
+<span class="nc" id="L16">        return fileService.convertToPublicImageURL(imageKey);</span>
+    }
+    
+    public GroupReviewFetchResponse toFetchResponse(GroupReview review) {
+<span class="nc" id="L20">        return GroupReviewFetchResponse.builder()</span>
+<span class="nc" id="L21">                .reviewId(review.getId())</span>
+<span class="nc" id="L22">                .groupId(review.getGroup().getId())</span>
+<span class="nc" id="L23">                .groupName(review.getGroup().getName())</span>
+                
+<span class="nc" id="L25">                .activityId(review.getActivity().getId())</span>
+<span class="nc" id="L26">                .activityStartTime(review.getActivity().getEndTime())</span>
+<span class="nc" id="L27">                .activityEndTime(review.getActivity().getEndTime())</span>
+                
+<span class="nc" id="L29">                .bookId(review.getActivity().getId())</span>
+<span class="nc" id="L30">                .bookTitle(review.getActivity().getBook().getTitle())</span>
+<span class="nc" id="L31">                .bookAuthor(review.getActivity().getBook().getAuthor())</span>
+<span class="nc" id="L32">                .bookCoverImageURL(convertToPublicImageURL(review.getActivity().getBook().getCoverImageKey()))</span>
+                
+<span class="nc" id="L34">                .authorId(review.getAuthor().getId())</span>
+<span class="nc" id="L35">                .authorNickname(review.getAuthor().getNickname())</span>
+<span class="nc" id="L36">                .authorProfileImageURL(convertToPublicImageURL(review.getAuthor().getProfileImageKey()))</span>
+<span class="nc" id="L37">                .content(review.getContent())</span>
+<span class="nc" id="L38">                .tags(review.getTags()</span>
+<span class="nc" id="L39">                        .stream()</span>
+<span class="nc" id="L40">                        .map(GroupReviewTagRelation::getTag)</span>
+<span class="nc" id="L41">                        .toList())</span>
+<span class="nc" id="L42">                .createdAt(review.getCreatedAt().toLocalDate())</span>
+<span class="nc" id="L43">                .build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

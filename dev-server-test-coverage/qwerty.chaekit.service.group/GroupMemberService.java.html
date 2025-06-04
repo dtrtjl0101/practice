@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GroupMemberService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chaekit</a> &gt; <a href="index.source.html" class="el_package">qwerty.chaekit.service.group</a> &gt; <span class="el_source">GroupMemberService.java</span></div><h1>GroupMemberService.java</h1><pre class="source lang-java linenums">package qwerty.chaekit.service.group;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import qwerty.chaekit.domain.group.ReadingGroup;
+import qwerty.chaekit.domain.group.groupmember.GroupMember;
+import qwerty.chaekit.domain.group.groupmember.GroupMemberRepository;
+import qwerty.chaekit.domain.member.user.UserProfile;
+import qwerty.chaekit.dto.group.response.GroupJoinResponse;
+import qwerty.chaekit.dto.group.response.GroupMemberResponse;
+import qwerty.chaekit.dto.page.PageResponse;
+import qwerty.chaekit.global.enums.ErrorCode;
+import qwerty.chaekit.global.exception.BadRequestException;
+import qwerty.chaekit.global.exception.ForbiddenException;
+import qwerty.chaekit.global.security.resolver.UserToken;
+import qwerty.chaekit.mapper.GroupMapper;
+import qwerty.chaekit.service.notification.NotificationService;
+import qwerty.chaekit.service.util.EmailNotificationService;
+import qwerty.chaekit.service.util.EntityFinder;
+import qwerty.chaekit.service.util.FileService;
+
+@Service
+@Transactional
+@RequiredArgsConstructor
+public class GroupMemberService {
+    private final GroupMemberRepository groupMemberRepository;
+    private final EmailNotificationService emailNotificationService;
+    private final NotificationService notificationService;
+    private final FileService fileService;
+    private final GroupMapper groupMapper;
+    private final EntityFinder entityFinder;
+
+    @Transactional(readOnly = true)
+    public PageResponse&lt;GroupMemberResponse&gt; getGroupMembers(long groupId, Pageable pageable) {
+
+<span class="nc" id="L39">        Page&lt;GroupMemberResponse&gt; page = groupMemberRepository.findByReadingGroupId(groupId, pageable)</span>
+<span class="nc" id="L40">                .map(</span>
+<span class="nc" id="L41">                        groupMember -&gt; GroupMemberResponse.of(</span>
+                                groupMember,
+<span class="nc" id="L43">                                fileService.convertToPublicImageURL(groupMember.getUser().getProfileImageKey())</span>
+                        )
+                );
+<span class="nc" id="L46">        return PageResponse.of(page);</span>
+    }
+
+    @Transactional
+    public GroupJoinResponse requestGroupJoin(UserToken userToken, long groupId) {
+<span class="nc" id="L51">        UserProfile userProfile = entityFinder.findUser(userToken.userId());</span>
+<span class="nc" id="L52">        ReadingGroup group = entityFinder.findGroup(groupId);</span>
+
+<span class="nc bnc" id="L54" title="All 2 branches missed.">        if (group.isMemberAlreadyRequested(userProfile)) {</span>
+<span class="nc" id="L55">            throw new ForbiddenException(ErrorCode.ALREADY_JOINED_GROUP);</span>
+        }
+
+<span class="nc" id="L58">        GroupMember groupMember = group.addMember(userProfile);</span>
+        
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        if (group.isAutoApproval()) {</span>
+<span class="nc" id="L61">            group.approveMember(userProfile);</span>
+<span class="nc" id="L62">            notificationService.createGroupJoinApprovedNotification(</span>
+                    userProfile,
+<span class="nc" id="L64">                    group.getGroupLeader(),</span>
+                    group
+            );
+<span class="nc" id="L67">            return GroupJoinResponse.of(groupMember);</span>
+        }
+
+<span class="nc" id="L70">        notificationService.createGroupJoinRequestNotification(</span>
+<span class="nc" id="L71">            group.getGroupLeader(),</span>
+            userProfile,
+            group
+        );
+        
+<span class="nc" id="L76">        return GroupJoinResponse.of(groupMember);</span>
+    }
+
+    @Transactional
+    public GroupJoinResponse approveJoinRequest(UserToken userToken, long groupId, long userId) {
+<span class="nc" id="L81">        GroupApprovalContext ctx = prepareGroupApproval(userToken, groupId, userId);</span>
+<span class="nc" id="L82">        UserProfile pendingMember = ctx.pendingMember;</span>
+<span class="nc" id="L83">        UserProfile groupLeader = ctx.leader;</span>
+<span class="nc" id="L84">        ReadingGroup group = ctx.group;</span>
+
+<span class="nc" id="L86">        GroupMember groupMember = group.approveMember(pendingMember);</span>
+
+<span class="nc" id="L88">        notificationService.createGroupJoinApprovedNotification(</span>
+            pendingMember,
+            groupLeader,
+            group
+        );
+        
+<span class="nc" id="L94">        emailNotificationService.sendReadingGroupApprovalEmail(pendingMember.getMember().getEmail());</span>
+<span class="nc" id="L95">        return GroupJoinResponse.of(groupMember);</span>
+    }
+
+    @Transactional
+    public void rejectJoinRequest(UserToken userToken, long groupId, long userId) {
+<span class="nc" id="L100">        GroupApprovalContext ctx = prepareGroupApproval(userToken, groupId, userId);</span>
+<span class="nc" id="L101">        UserProfile pendingMember = ctx.pendingMember;</span>
+<span class="nc" id="L102">        UserProfile groupLeader = ctx.leader;</span>
+<span class="nc" id="L103">        ReadingGroup group = ctx.group;</span>
+
+<span class="nc" id="L105">        group.rejectMember(pendingMember);</span>
+
+<span class="nc" id="L107">        notificationService.createGroupJoinRejectedNotification(</span>
+            pendingMember,
+            groupLeader,
+            group
+        );
+<span class="nc" id="L112">    }</span>
+
+<span class="nc" id="L114">    private record GroupApprovalContext(</span>
+            ReadingGroup group,
+            UserProfile leader,
+            UserProfile pendingMember
+    ) {}
+
+    private GroupApprovalContext prepareGroupApproval(UserToken userToken, long groupId, long userId) {
+<span class="nc" id="L121">        UserProfile leaderProfile = entityFinder.findUser(userToken.userId());</span>
+<span class="nc" id="L122">        ReadingGroup group = entityFinder.findGroup(groupId);</span>
+
+<span class="nc bnc" id="L124" title="All 2 branches missed.">        if (!group.isLeader(leaderProfile)) {</span>
+<span class="nc" id="L125">            throw new ForbiddenException(ErrorCode.GROUP_LEADER_ONLY);</span>
+        }
+
+<span class="nc bnc" id="L128" title="All 2 branches missed.">        if (!group.isPendingMember(userId)) {</span>
+<span class="nc" id="L129">            throw new ForbiddenException(ErrorCode.GROUP_MEMBER_NOT_PENDING);</span>
+        }
+
+<span class="nc" id="L132">        UserProfile memberProfile = entityFinder.findUser(userId);</span>
+<span class="nc" id="L133">        return new GroupApprovalContext(group, leaderProfile, memberProfile);</span>
+    }
+
+    @Transactional
+    public void leaveGroup(UserToken userToken, long groupId) {
+<span class="nc" id="L138">        UserProfile userProfile = entityFinder.findUser(userToken.userId());</span>
+<span class="nc" id="L139">        ReadingGroup group = entityFinder.findGroup(groupId);</span>
+
+<span class="nc bnc" id="L141" title="All 2 branches missed.">        if (group.getGroupLeader().getId().equals(userProfile.getId())) {</span>
+<span class="nc" id="L142">            throw new ForbiddenException(ErrorCode.GROUP_LEADER_CANNOT_LEAVE);</span>
+        }
+
+<span class="nc" id="L145">        group.removeMember(userProfile);</span>
+<span class="nc" id="L146">    }</span>
+
+    @Transactional(readOnly = true)
+    public PageResponse&lt;GroupMemberResponse&gt; fetchPendingList(Pageable pageable, UserToken userToken, long groupId) {
+<span class="nc" id="L150">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
+<span class="nc" id="L151">        ReadingGroup group = entityFinder.findGroup(groupId);</span>
+
+<span class="nc bnc" id="L153" title="All 2 branches missed.">        if (!group.isLeader(user)) {</span>
+<span class="nc" id="L154">            throw new ForbiddenException(ErrorCode.GROUP_LEADER_ONLY);</span>
+        }
+
+<span class="nc" id="L157">        Page&lt;GroupMember&gt; pendingMembersPage = groupMemberRepository.findByPendingMemberWithUser(group, pageable);</span>
+
+<span class="nc" id="L159">        Page&lt;GroupMemberResponse&gt; page = pendingMembersPage.map(groupMapper::toGroupMemberResponse);</span>
+
+<span class="nc" id="L161">        return PageResponse.of(page);</span>
+    }
+
+    @Transactional
+    public void kickGroupMember(UserToken userToken, Long groupId, Long userId) {
+<span class="nc" id="L166">        UserProfile loginUser = entityFinder.findUser(userToken.userId());</span>
+<span class="nc" id="L167">        UserProfile targetUser = entityFinder.findUser(userId);</span>
+<span class="nc" id="L168">        ReadingGroup group = entityFinder.findGroup(groupId);</span>
+<span class="nc bnc" id="L169" title="All 2 branches missed.">        if (!group.isLeader(loginUser)) {</span>
+<span class="nc" id="L170">            throw new ForbiddenException(ErrorCode.GROUP_LEADER_ONLY);</span>
+        }
+
+<span class="nc bnc" id="L173" title="All 2 branches missed.">        if (group.isLeader(targetUser)) {</span>
+<span class="nc" id="L174">            throw new BadRequestException(ErrorCode.GROUP_LEADER_CANNOT_LEAVE);</span>
+        }
+        
+<span class="nc bnc" id="L177" title="All 2 branches missed.">        if (group.isNotAcceptedMember(targetUser)) {</span>
+<span class="nc" id="L178">            throw new BadRequestException(ErrorCode.GROUP_MEMBER_NOT_JOINED);</span>
+        }
+<span class="nc" id="L180">        group.removeMember(targetUser);</span>
+<span class="nc" id="L181">        notificationService.createGroupBannedNotification(targetUser, group);</span>
+<span class="nc" id="L182">    }</span>
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

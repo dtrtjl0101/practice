@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PublisherStatsRepositoryImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chaekit</a> &gt; <a href="index.source.html" class="el_package">qwerty.chaekit.domain.member.publisher</a> &gt; <span class="el_source">PublisherStatsRepositoryImpl.java</span></div><h1>PublisherStatsRepositoryImpl.java</h1><pre class="source lang-java linenums">package qwerty.chaekit.domain.member.publisher;
+
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.core.types.dsl.StringTemplate;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+import qwerty.chaekit.domain.ebook.QEbook;
+import qwerty.chaekit.domain.ebook.purchase.QEbookPurchase;
+import qwerty.chaekit.domain.group.activity.QActivity;
+import qwerty.chaekit.domain.member.publisher.dto.PublisherMainStatsDto;
+import qwerty.chaekit.domain.member.publisher.dto.StatsPerEbookDto;
+import qwerty.chaekit.dto.member.PublisherStatsResponse;
+
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+@Repository
+@RequiredArgsConstructor
+public class PublisherStatsRepositoryImpl implements PublisherStatsRepository {
+    private final JPAQueryFactory query;
+
+    @Override
+    public PublisherMainStatsDto getPublisherMainStatistic(Long publisherId, LocalDate currentDate){
+<span class="nc" id="L34">        String previousMonth = YearMonth.from(currentDate).minusMonths(1).toString();</span>
+
+<span class="nc" id="L36">        QEbook ebook = QEbook.ebook;</span>
+<span class="nc" id="L37">        QEbookPurchase purchase = QEbookPurchase.ebookPurchase;</span>
+<span class="nc" id="L38">        QActivity activity = QActivity.activity;</span>
+
+        // 누적 통계
+<span class="nc" id="L41">        Long totalSalesCount = query.select(purchase.count())</span>
+<span class="nc" id="L42">                .from(purchase)</span>
+<span class="nc" id="L43">                .join(purchase.ebook, ebook)</span>
+<span class="nc" id="L44">                .where(ebook.publisher.id.eq(publisherId))</span>
+<span class="nc" id="L45">                .fetchOne();</span>
+
+<span class="nc" id="L47">        Integer totalRevenue = query.select(ebook.price.sum())</span>
+<span class="nc" id="L48">                .from(purchase)</span>
+<span class="nc" id="L49">                .join(purchase.ebook, ebook)</span>
+<span class="nc" id="L50">                .where(ebook.publisher.id.eq(publisherId))</span>
+<span class="nc" id="L51">                .fetchOne();</span>
+
+<span class="nc" id="L53">        Long totalActivityCount = query.select(activity.count())</span>
+<span class="nc" id="L54">                .from(activity)</span>
+<span class="nc" id="L55">                .join(activity.book, ebook)</span>
+<span class="nc" id="L56">                .where(ebook.publisher.id.eq(publisherId))</span>
+<span class="nc" id="L57">                .fetchOne();</span>
+
+<span class="nc" id="L59">        Long totalViewCount = query.select(ebook.viewCount.sum())</span>
+<span class="nc" id="L60">                .from(ebook)</span>
+<span class="nc" id="L61">                .where(ebook.publisher.id.eq(publisherId))</span>
+<span class="nc" id="L62">                .fetchOne();</span>
+
+        // 현재월/이전월 조건
+<span class="nc" id="L65">        BooleanExpression isPreviousMonth = Expressions.stringTemplate(&quot;DATE_FORMAT({0}, '%Y-%m')&quot;, purchase.createdAt).eq(previousMonth);</span>
+
+<span class="nc" id="L67">        Long increasedSalesCount = query.select(purchase.count())</span>
+<span class="nc" id="L68">                .from(purchase)</span>
+<span class="nc" id="L69">                .join(purchase.ebook, ebook)</span>
+<span class="nc" id="L70">                .where(ebook.publisher.id.eq(publisherId), isPreviousMonth)</span>
+<span class="nc" id="L71">                .fetchOne();</span>
+
+<span class="nc" id="L73">        Integer increasedRevenue = query.select(ebook.price.sum())</span>
+<span class="nc" id="L74">                .from(purchase)</span>
+<span class="nc" id="L75">                .join(purchase.ebook, ebook)</span>
+<span class="nc" id="L76">                .where(ebook.publisher.id.eq(publisherId), isPreviousMonth)</span>
+<span class="nc" id="L77">                .fetchOne();</span>
+
+<span class="nc" id="L79">        BooleanExpression actPreviousMonth = Expressions</span>
+<span class="nc" id="L80">                .stringTemplate(&quot;DATE_FORMAT({0}, '%Y-%m')&quot;, activity.createdAt).eq(previousMonth);</span>
+
+<span class="nc" id="L82">        Long increasedActivityCount = query.select(activity.count())</span>
+<span class="nc" id="L83">                .from(activity)</span>
+<span class="nc" id="L84">                .join(activity.book, ebook)</span>
+<span class="nc" id="L85">                .where(ebook.publisher.id.eq(publisherId), actPreviousMonth)</span>
+<span class="nc" id="L86">                .fetchOne();</span>
+
+<span class="nc" id="L88">        return new PublisherMainStatsDto(</span>
+<span class="nc" id="L89">                Optional.ofNullable(totalSalesCount).orElse(0L),</span>
+<span class="nc" id="L90">                Long.valueOf(Optional.ofNullable(totalRevenue).orElse(0)),</span>
+<span class="nc" id="L91">                Optional.ofNullable(totalActivityCount).orElse(0L),</span>
+<span class="nc" id="L92">                Optional.ofNullable(totalViewCount).orElse(0L),</span>
+                
+<span class="nc" id="L94">                Optional.ofNullable(increasedSalesCount).orElse(0L),</span>
+<span class="nc" id="L95">                Long.valueOf(Optional.ofNullable(increasedRevenue).orElse(0)),</span>
+<span class="nc" id="L96">                Optional.ofNullable(increasedActivityCount).orElse(0L)</span>
+        );
+    }
+
+    @Override
+    public List&lt;PublisherStatsResponse.MonthlyRevenue&gt; getMonthlyRevenueList(Long publisherId) {
+<span class="nc" id="L102">        QEbook ebook = QEbook.ebook;</span>
+<span class="nc" id="L103">        QEbookPurchase purchase = QEbookPurchase.ebookPurchase;</span>
+
+        // 기준일: 전월 기준
+<span class="nc" id="L106">        YearMonth baseMonth = YearMonth.from(LocalDate.now()).minusMonths(1);</span>
+<span class="nc" id="L107">        List&lt;String&gt; months = IntStream.rangeClosed(0, 11)</span>
+<span class="nc" id="L108">                .mapToObj(i -&gt; baseMonth.minusMonths(11 - i).toString()) // [&quot;2024-03&quot;, ..., &quot;2025-02&quot;]</span>
+<span class="nc" id="L109">                .toList();</span>
+
+<span class="nc" id="L111">        StringTemplate monthExpr = Expressions.stringTemplate(&quot;DATE_FORMAT({0}, '%Y-%m')&quot;, purchase.createdAt);</span>
+<span class="nc" id="L112">        NumberExpression&lt;Long&gt; revenueExpr = ebook.price.sum().castToNum(Long.class);</span>
+
+        // 1. 실제 매출 결과를 Map&lt;String month, Long revenue&gt;로 조회
+<span class="nc" id="L115">        List&lt;Tuple&gt; resultTuples = query.select(monthExpr, revenueExpr)</span>
+<span class="nc" id="L116">                .from(purchase)</span>
+<span class="nc" id="L117">                .join(purchase.ebook, ebook)</span>
+<span class="nc" id="L118">                .where(</span>
+<span class="nc" id="L119">                        ebook.publisher.id.eq(publisherId),</span>
+<span class="nc" id="L120">                        monthExpr.in(months)</span>
+                )
+<span class="nc" id="L122">                .groupBy(monthExpr)</span>
+<span class="nc" id="L123">                .fetch();</span>
+
+<span class="nc" id="L125">        Map&lt;String, Long&gt; revenueMap = resultTuples.stream()</span>
+<span class="nc" id="L126">                .collect(Collectors.toMap(</span>
+<span class="nc" id="L127">                        t -&gt; t.get(monthExpr),</span>
+<span class="nc" id="L128">                        t -&gt; Optional.ofNullable(t.get(revenueExpr)).orElse(0L)</span>
+                ));
+
+        // 2. 12개월 전체 기준으로 0포함 매출 리스트 구성
+<span class="nc" id="L132">        return months.stream()</span>
+<span class="nc" id="L133">                .map(month -&gt; new PublisherStatsResponse.MonthlyRevenue(month, revenueMap.getOrDefault(month, 0L)))</span>
+<span class="nc" id="L134">                .collect(Collectors.toList());</span>
+    }
+    
+    @Override
+    public List&lt;PublisherStatsResponse.SalesCountPerEbook&gt; getIncreasedSalesCountsPerEbook(Long publisherId, LocalDate currentDate) {
+<span class="nc" id="L139">        String previousMonth = YearMonth.from(currentDate).minusMonths(1).toString();</span>
+
+<span class="nc" id="L141">        QEbook ebook = QEbook.ebook;</span>
+<span class="nc" id="L142">        QEbookPurchase purchase = QEbookPurchase.ebookPurchase;</span>
+
+<span class="nc" id="L144">        StringTemplate purchaseMonthExpr = Expressions.stringTemplate(&quot;DATE_FORMAT({0}, '%Y-%m')&quot;, purchase.createdAt);</span>
+
+<span class="nc" id="L146">        return query.select(Projections.constructor(PublisherStatsResponse.SalesCountPerEbook.class,</span>
+                        ebook.id,
+                        ebook.title,
+<span class="nc" id="L149">                        purchase.id.count()</span>
+                ))
+<span class="nc" id="L151">                .from(ebook)</span>
+<span class="nc" id="L152">                .leftJoin(purchase).on(</span>
+<span class="nc" id="L153">                        purchase.ebook.id.eq(ebook.id),</span>
+<span class="nc" id="L154">                        purchaseMonthExpr.eq(previousMonth)</span>
+                )
+<span class="nc" id="L156">                .where(ebook.publisher.id.eq(publisherId))</span>
+<span class="nc" id="L157">                .groupBy(ebook.id)</span>
+<span class="nc" id="L158">                .fetch();</span>
+    }
+
+    @Override
+    public List&lt;StatsPerEbookDto&gt; getStatsPerEbook(Long publisherId) {
+<span class="nc" id="L163">        QActivity activity = QActivity.activity;</span>
+<span class="nc" id="L164">        QEbookPurchase purchase = QEbookPurchase.ebookPurchase;</span>
+<span class="nc" id="L165">        QEbook ebook = QEbook.ebook;</span>
+
+<span class="nc" id="L167">        return query.select(Projections.constructor(StatsPerEbookDto.class,</span>
+                        ebook.id,
+                        ebook.title,
+                        ebook.author,
+                        ebook.coverImageKey,
+<span class="nc" id="L172">                        purchase.id.count(),</span>
+<span class="nc" id="L173">                        ebook.price.multiply(purchase.id.count()).castToNum(Long.class),</span>
+                        ebook.viewCount,
+<span class="nc" id="L175">                        activity.id.count(),</span>
+                        ebook.createdAt
+                ))
+<span class="nc" id="L178">                .from(ebook)</span>
+<span class="nc" id="L179">                .leftJoin(purchase).on(purchase.ebook.id.eq(ebook.id))</span>
+<span class="nc" id="L180">                .leftJoin(activity).on(activity.book.id.eq(ebook.id))</span>
+<span class="nc" id="L181">                .where(ebook.publisher.id.eq(publisherId))</span>
+<span class="nc" id="L182">                .groupBy(ebook.id)</span>
+<span class="nc" id="L183">                .fetch();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

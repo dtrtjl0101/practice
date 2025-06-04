@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.ebook.QEbook;
+import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,55 +22,65 @@ public class EbookRepositoryImpl implements EbookRepository {
 
     @Override
     public Page&lt;Ebook&gt; findAllByTitleAndAuthor(String title, String author, Pageable pageable) {
-<span class="nc" id="L24">        QEbook ebook = QEbook.ebook;</span>
-<span class="nc" id="L25">        BooleanBuilder where = new BooleanBuilder();</span>
+<span class="nc" id="L25">        QEbook ebook = QEbook.ebook;</span>
+<span class="nc" id="L26">        BooleanBuilder where = new BooleanBuilder();</span>
 
-<span class="nc bnc" id="L27" title="All 4 branches missed.">        if (author != null &amp;&amp; !author.isBlank()) {</span>
-<span class="nc" id="L28">            where.and(ebook.author.startsWith(author));</span>
+<span class="nc bnc" id="L28" title="All 4 branches missed.">        if (author != null &amp;&amp; !author.isBlank()) {</span>
+<span class="nc" id="L29">            where.and(ebook.author.startsWith(author));</span>
         }
-<span class="nc bnc" id="L30" title="All 4 branches missed.">        if (title != null &amp;&amp; !title.isBlank()) {</span>
-<span class="nc" id="L31">            where.and(ebook.title.contains(title));</span>
+<span class="nc bnc" id="L31" title="All 4 branches missed.">        if (title != null &amp;&amp; !title.isBlank()) {</span>
+<span class="nc" id="L32">            where.and(ebook.title.contains(title));</span>
         }
 
-<span class="nc" id="L34">        List&lt;Ebook&gt; result = jpaQueryFactory</span>
-<span class="nc" id="L35">                .selectFrom(ebook)</span>
-<span class="nc" id="L36">                .where(where)</span>
-<span class="nc" id="L37">                .offset(pageable.getOffset())</span>
-<span class="nc" id="L38">                .limit(pageable.getPageSize())</span>
-<span class="nc" id="L39">                .fetch();</span>
+<span class="nc" id="L35">        List&lt;Ebook&gt; result = jpaQueryFactory</span>
+<span class="nc" id="L36">                .selectFrom(ebook)</span>
+<span class="nc" id="L37">                .where(where)</span>
+<span class="nc" id="L38">                .offset(pageable.getOffset())</span>
+<span class="nc" id="L39">                .limit(pageable.getPageSize())</span>
+<span class="nc" id="L40">                .fetch();</span>
 
-<span class="nc" id="L41">        long total = Optional.ofNullable(jpaQueryFactory</span>
-<span class="nc" id="L42">                .select(ebook.count())</span>
-<span class="nc" id="L43">                .from(ebook)</span>
-<span class="nc" id="L44">                .where(where)</span>
-<span class="nc" id="L45">                .fetchOne()).orElse(0L);</span>
+<span class="nc" id="L42">        long total = Optional.ofNullable(jpaQueryFactory</span>
+<span class="nc" id="L43">                .select(ebook.count())</span>
+<span class="nc" id="L44">                .from(ebook)</span>
+<span class="nc" id="L45">                .where(where)</span>
+<span class="nc" id="L46">                .fetchOne()).orElse(0L);</span>
 
-<span class="nc" id="L47">        return new PageImpl&lt;&gt;(result, pageable, total);</span>
+<span class="nc" id="L48">        return new PageImpl&lt;&gt;(result, pageable, total);</span>
     }
 
     @Override
     public Optional&lt;Ebook&gt; findById(Long id) {
-<span class="fc" id="L52">        return ebookJpaRepository.findById(id);</span>
+<span class="fc" id="L53">        return ebookJpaRepository.findById(id);</span>
     }
 
     @Override
     public Optional&lt;Ebook&gt; findByIdWithPublisher(Long id) {
-<span class="nc" id="L57">        return ebookJpaRepository.findByIdWithPublisher(id);</span>
+<span class="nc" id="L58">        return ebookJpaRepository.findByIdWithPublisher(id);</span>
     }
 
     @Override
     public Ebook save(Ebook ebook) {
-<span class="fc" id="L62">        return ebookJpaRepository.save(ebook);</span>
+<span class="fc" id="L63">        return ebookJpaRepository.save(ebook);</span>
     }
 
     @Override
-    public boolean existsById(Long id) {
-<span class="nc" id="L67">        return ebookJpaRepository.existsById(id);</span>
+    public boolean existsByTitle(String name) {
+<span class="nc" id="L68">        return ebookJpaRepository.existsByTitle(name);</span>
     }
 
     @Override
-    public Ebook getReferenceById(Long id) {
-<span class="nc" id="L72">        return ebookJpaRepository.getReferenceById(id);</span>
+    public Page&lt;Ebook&gt; findAllByPublisher(PublisherProfile publisher, Pageable pageable) {
+<span class="nc" id="L73">        return ebookJpaRepository.findAllByPublisher(publisher, pageable);</span>
+    }
+
+    @Override
+    public void incrementViewCount(Long ebookId) {
+<span class="nc" id="L78">        ebookJpaRepository.incrementViewCount(ebookId);</span>
+<span class="nc" id="L79">    }</span>
+
+    @Override
+    public long count() {
+<span class="nc" id="L83">        return ebookJpaRepository.count();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -4,7 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.ebook.purchase.EbookPurchase;
+import qwerty.chaekit.domain.member.user.UserProfile;
+
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -13,17 +18,32 @@ public class EbookPurchaseRepositoryImpl implements EbookPurchaseRepository {
 
     @Override
     public EbookPurchase save(EbookPurchase ebookPurchase) {
-<span class="nc" id="L16">        return ebookPurchaseJpaRepository.save(ebookPurchase);</span>
+<span class="fc" id="L21">        return ebookPurchaseJpaRepository.save(ebookPurchase);</span>
     }
 
     @Override
     public Page&lt;EbookPurchase&gt; findByUserIdWithEbook(Long userId, Pageable pageable) {
-<span class="nc" id="L21">        return ebookPurchaseJpaRepository.findByUserIdWithEbook(userId, pageable);</span>
+<span class="nc" id="L26">        return ebookPurchaseJpaRepository.findByUserIdWithEbook(userId, pageable);</span>
+    }
+
+    @Override
+    public Optional&lt;EbookPurchase&gt; findByUserAndEbook(UserProfile user, Ebook ebook) {
+<span class="nc" id="L31">        return ebookPurchaseJpaRepository.findByUserAndEbook(user, ebook);</span>
     }
 
     @Override
     public boolean existsByUserIdAndEbookId(Long userId, Long ebookId) {
-<span class="nc" id="L26">        return ebookPurchaseJpaRepository.existsByUser_IdAndEbook_Id(userId, ebookId);</span>
+<span class="fc" id="L36">        return ebookPurchaseJpaRepository.existsByUser_IdAndEbook_Id(userId, ebookId);</span>
     }
+
+    @Override
+    public List&lt;EbookPurchase&gt; findByUserIdInAndEbook(List&lt;Long&gt; userIdList, Ebook ebook) {
+<span class="nc" id="L41">        return ebookPurchaseJpaRepository.findByUserIdInAndEbook(userIdList, ebook);</span>
+    }
+
+    @Override
+    public void saveAll(List&lt;EbookPurchase&gt; ebookPurchases) {
+<span class="nc" id="L46">        ebookPurchaseJpaRepository.saveAll(ebookPurchases);</span>
+<span class="nc" id="L47">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

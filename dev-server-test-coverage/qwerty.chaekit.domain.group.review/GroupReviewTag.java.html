@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GroupReviewTag.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chaekit</a> &gt; <a href="index.source.html" class="el_package">qwerty.chaekit.domain.group.review</a> &gt; <span class="el_source">GroupReviewTag.java</span></div><h1>GroupReviewTag.java</h1><pre class="source lang-java linenums">package qwerty.chaekit.domain.group.review;
+
+import lombok.Getter;
+
+<span class="fc" id="L5">@Getter</span>
+public enum GroupReviewTag {
+
+    // 🌟 모임 분위기
+<span class="fc" id="L9">    FUNNY(&quot;😀&quot;, &quot;유쾌하고 웃음이 많아요&quot;, Category.MOOD),</span>
+<span class="fc" id="L10">    CALM(&quot;🧘&quot;, &quot;차분하고 편안해요&quot;, Category.MOOD),</span>
+<span class="fc" id="L11">    PASSIONATE(&quot;🔥&quot;, &quot;열정이 느껴졌어요&quot;, Category.MOOD),</span>
+<span class="fc" id="L12">    HEARTWARMING(&quot;🥰&quot;, &quot;따뜻한 모임이었어요&quot;, Category.MOOD),</span>
+
+    // 💬 대화 흐름
+<span class="fc" id="L15">    DEEP_THOUGHT(&quot;🤔&quot;, &quot;생각이 깊어졌어요&quot;, Category.FLOW),</span>
+<span class="fc" id="L16">    INSIGHTFUL(&quot;🧠&quot;, &quot;지식이 쌓였어요&quot;, Category.FLOW),</span>
+<span class="fc" id="L17">    DIVERSE_OPINIONS(&quot;🎭&quot;, &quot;다양한 의견을 만났어요&quot;, Category.FLOW),</span>
+<span class="fc" id="L18">    TALKATIVE(&quot;🎙️&quot;, &quot;대화가 활발해요&quot;, Category.FLOW),</span>
+<span class="fc" id="L19">    GOOD_LISTENERS(&quot;👂&quot;, &quot;잘 들어주는 분들이 많아요&quot;, Category.FLOW),</span>
+
+    // 🛠 운영 방식
+<span class="fc" id="L22">    STRUCTURED(&quot;📌&quot;, &quot;주제가 명확해요&quot;, Category.OPERATION),</span>
+<span class="fc" id="L23">    CASUAL(&quot;🌀&quot;, &quot;자유롭게 흘러가는 느낌이에요&quot;, Category.OPERATION),</span>
+<span class="fc" id="L24">    WELL_MODERATED(&quot;🧭&quot;, &quot;진행자가 잘 이끌어요&quot;, Category.OPERATION);</span>
+
+    private final String emoji;
+    private final String description;
+    private final Category category;
+
+<span class="fc" id="L30">    GroupReviewTag(String emoji, String description, Category category) {</span>
+<span class="fc" id="L31">        this.emoji = emoji;</span>
+<span class="fc" id="L32">        this.description = description;</span>
+<span class="fc" id="L33">        this.category = category;</span>
+<span class="fc" id="L34">    }</span>
+
+<span class="fc" id="L36">    public enum Category {</span>
+<span class="fc" id="L37">        MOOD,       // 모임 분위기</span>
+<span class="fc" id="L38">        FLOW,       // 대화 흐름</span>
+<span class="fc" id="L39">        OPERATION   // 운영 방식</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

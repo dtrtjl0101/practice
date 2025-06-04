@@ -8,6 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.group.activity.Activity;
+import qwerty.chaekit.domain.group.activity.activitymember.ActivityMember;
+import qwerty.chaekit.domain.group.activity.activitymember.ActivityMemberRepository;
 import qwerty.chaekit.domain.group.activity.repository.ActivityRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.dto.group.activity.ActivityFetchResponse;
@@ -19,7 +21,9 @@ import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.UserToken;
+import qwerty.chaekit.service.ebook.EbookPolicy;
 import qwerty.chaekit.service.util.EntityFinder;
+import qwerty.chaekit.service.util.FileService;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -29,97 +33,126 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ActivityService {
     private final ActivityRepository activityRepository;
+    private final ActivityMemberRepository activityMemberRepository;
 
     private final ActivityPolicy activityPolicy;
     private final EntityFinder entityFinder;
+    private final EbookPolicy ebookPolicy;
+    private final FileService fileService;
 
     public ActivityPostResponse createActivity(UserToken userToken, long groupId, ActivityPostRequest request) {
-<span class="fc" id="L37">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
-<span class="fc" id="L38">        ReadingGroup group = entityFinder.findGroup(groupId);</span>
-<span class="fc" id="L39">        Ebook ebook = entityFinder.findEbook(request.bookId());</span>
+<span class="fc" id="L44">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
+<span class="fc" id="L45">        ReadingGroup group = entityFinder.findGroup(groupId);</span>
+<span class="fc" id="L46">        Ebook ebook = entityFinder.findEbook(request.bookId());</span>
 
-<span class="fc bfc" id="L41" title="All 2 branches covered.">        if (!group.isLeader(user)) {</span>
-<span class="fc" id="L42">            throw new ForbiddenException(ErrorCode.GROUP_LEADER_ONLY);</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">        if (!group.isLeader(user)) {</span>
+<span class="fc" id="L49">            throw new ForbiddenException(ErrorCode.GROUP_LEADER_ONLY);</span>
         }
 
-<span class="fc" id="L45">        activityPolicy.assertActivityPeriodValid(groupId, null, request.startTime(), request.endTime());</span>
+<span class="fc" id="L52">        activityPolicy.assertActivityPeriodValid(groupId, null, request.startTime(), request.endTime());</span>
+<span class="fc" id="L53">        ebookPolicy.assertEBookPurchased(user, ebook);</span>
 
-<span class="fc" id="L47">        Activity saved = activityRepository.save(</span>
-<span class="fc" id="L48">                Activity.builder()</span>
-<span class="fc" id="L49">                    .group(group)</span>
-<span class="fc" id="L50">                    .book(ebook)</span>
-<span class="fc" id="L51">                    .startTime(request.startTime())</span>
-<span class="fc" id="L52">                    .endTime(request.endTime())</span>
-<span class="fc" id="L53">                    .description(request.description())</span>
-<span class="fc" id="L54">                    .build()</span>
+<span class="fc" id="L55">        Activity saved = activityRepository.save(</span>
+<span class="fc" id="L56">                Activity.builder()</span>
+<span class="fc" id="L57">                    .group(group)</span>
+<span class="fc" id="L58">                    .book(ebook)</span>
+<span class="fc" id="L59">                    .startTime(request.startTime())</span>
+<span class="fc" id="L60">                    .endTime(request.endTime())</span>
+<span class="fc" id="L61">                    .description(request.description())</span>
+<span class="fc" id="L62">                    .build()</span>
         );
-<span class="fc" id="L56">        saved.addParticipant(user);</span>
-<span class="fc" id="L57">        return ActivityPostResponse.of(saved);</span>
+<span class="fc" id="L64">        saved.addParticipant(user);</span>
+<span class="fc" id="L65">        return ActivityPostResponse.of(saved);</span>
     }
 
     public ActivityPostResponse updateActivity(UserToken userToken, long groupId, ActivityPatchRequest request) {
-<span class="fc" id="L61">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
-<span class="fc" id="L62">        ReadingGroup group = entityFinder.findGroup(groupId);</span>
-<span class="fc" id="L63">        Activity activity = entityFinder.findActivity(request.activityId());</span>
+<span class="fc" id="L69">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
+<span class="fc" id="L70">        ReadingGroup group = entityFinder.findGroup(groupId);</span>
+<span class="fc" id="L71">        Activity activity = entityFinder.findActivity(request.activityId());</span>
 
-<span class="pc bpc" id="L65" title="1 of 2 branches missed.">        if (!activity.isFromGroup(group)) {</span>
-<span class="nc" id="L66">            throw new ForbiddenException(ErrorCode.ACTIVITY_GROUP_MISMATCH);</span>
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">        if (!activity.isFromGroup(group)) {</span>
+<span class="nc" id="L74">            throw new ForbiddenException(ErrorCode.ACTIVITY_GROUP_MISMATCH);</span>
         }
         
-<span class="pc bpc" id="L69" title="1 of 2 branches missed.">        if (!group.isLeader(user)) {</span>
-<span class="nc" id="L70">            throw new ForbiddenException(ErrorCode.GROUP_LEADER_ONLY);</span>
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">        if (!group.isLeader(user)) {</span>
+<span class="nc" id="L78">            throw new ForbiddenException(ErrorCode.GROUP_LEADER_ONLY);</span>
         }
         
-<span class="fc" id="L73">        LocalDate newStartTime = Optional.ofNullable(request.startTime())</span>
-<span class="fc" id="L74">                .orElse(activity.getStartTime());</span>
-<span class="fc" id="L75">        LocalDate newEndTime = Optional.ofNullable(request.endTime())</span>
-<span class="fc" id="L76">                .orElse(activity.getEndTime());</span>
+<span class="fc" id="L81">        LocalDate newStartTime = Optional.ofNullable(request.startTime())</span>
+<span class="fc" id="L82">                .orElse(activity.getStartTime());</span>
+<span class="fc" id="L83">        LocalDate newEndTime = Optional.ofNullable(request.endTime())</span>
+<span class="fc" id="L84">                .orElse(activity.getEndTime());</span>
 
-<span class="fc" id="L78">        activityPolicy.assertActivityPeriodValid(groupId, activity.getId(), newStartTime, newEndTime);</span>
+<span class="fc" id="L86">        activityPolicy.assertActivityPeriodValid(groupId, activity.getId(), newStartTime, newEndTime);</span>
         
-<span class="fc" id="L80">        activity.updateTime(newStartTime, newEndTime);</span>
-<span class="fc" id="L81">        activity.updateDescription(request.description());</span>
+<span class="fc" id="L88">        activity.updateTime(newStartTime, newEndTime);</span>
+<span class="fc" id="L89">        activity.updateDescription(request.description());</span>
 
-<span class="fc" id="L83">        return ActivityPostResponse.of(activity);</span>
+<span class="fc" id="L91">        return ActivityPostResponse.of(activity);</span>
     }
 
     @Transactional(readOnly = true)
-    public PageResponse&lt;ActivityFetchResponse&gt; fetchAllActivities(Pageable pageable, long groupId) {
-<span class="fc" id="L88">        Page&lt;ActivityFetchResponse&gt; page = activityRepository.findByGroup_IdWithBook(groupId, pageable)</span>
-<span class="fc" id="L89">                .map(ActivityFetchResponse::of);</span>
-<span class="fc" id="L90">        return PageResponse.of(page);</span>
+    public PageResponse&lt;ActivityFetchResponse&gt; fetchAllActivities(UserToken userToken, Pageable pageable, long groupId) {
+<span class="fc" id="L96">        Long userId = userToken.userId();</span>
+<span class="fc" id="L97">        Page&lt;ActivityFetchResponse&gt; page = activityRepository.findByGroup_IdWithBook(groupId, pageable)</span>
+<span class="fc" id="L98">                .map(</span>
+<span class="fc" id="L99">                        activity -&gt; ActivityFetchResponse.of(</span>
+                                activity, 
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">                                fileService.convertToPublicImageURL(activity.getBook().getCoverImageKey()),</span>
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">                                userId != null &amp;&amp; activity.isParticipant(entityFinder.findUser(userId))</span>
+                ));
+<span class="fc" id="L104">        return PageResponse.of(page);</span>
     }
     
     public void joinActivity(UserToken userToken, long activityId) {
-<span class="nc" id="L94">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
-<span class="nc" id="L95">        Activity activity = entityFinder.findActivity(activityId);</span>
+<span class="nc" id="L108">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
+<span class="nc" id="L109">        Activity activity = entityFinder.findActivity(activityId);</span>
         
-<span class="nc" id="L97">        activityPolicy.assertJoinable(user, activity);</span>
+<span class="nc" id="L111">        activityPolicy.assertJoinable(user, activity);</span>
         
-<span class="nc" id="L99">        activity.addParticipant(user);</span>
-<span class="nc" id="L100">    }</span>
+<span class="nc" id="L113">        activity.addParticipant(user);</span>
+<span class="nc" id="L114">    }</span>
  
     public void leaveActivity(UserToken userToken, long activityId) {
-<span class="nc" id="L103">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
-<span class="nc" id="L104">        Activity activity = entityFinder.findActivity(activityId);</span>
+<span class="nc" id="L117">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
+<span class="nc" id="L118">        Activity activity = entityFinder.findActivity(activityId);</span>
         
-<span class="nc bnc" id="L106" title="All 2 branches missed.">        if (!activity.isParticipant(user)) {</span>
-<span class="nc" id="L107">            throw new ForbiddenException(ErrorCode.ACTIVITY_NOT_JOINED);</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">        if (!activity.isParticipant(user)) {</span>
+<span class="nc" id="L121">            throw new ForbiddenException(ErrorCode.ACTIVITY_NOT_JOINED);</span>
         }
         
-<span class="nc" id="L110">        activity.removeParticipant(user);</span>
-<span class="nc" id="L111">    }</span>
+<span class="nc" id="L124">        activity.removeParticipant(user);</span>
+<span class="nc" id="L125">    }</span>
 
     @Transactional(readOnly = true)
-    public ActivityFetchResponse fetchActivity(long groupId, long activityId) {
-<span class="nc" id="L115">        Activity activity = activityRepository.findByIdWithBook(activityId)</span>
-<span class="nc" id="L116">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.ACTIVITY_NOT_FOUND));</span>
+    public ActivityFetchResponse fetchActivity(UserToken userToken, long activityId) {
+<span class="nc" id="L129">        Long userId = userToken.userId();</span>
+<span class="nc" id="L130">        Activity activity = activityRepository.findByIdWithBook(activityId)</span>
+<span class="nc" id="L131">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.ACTIVITY_NOT_FOUND));</span>
 
-<span class="nc bnc" id="L118" title="All 2 branches missed.">        if (!activity.getGroup().getId().equals(groupId)) {</span>
-<span class="nc" id="L119">            throw new ForbiddenException(ErrorCode.ACTIVITY_GROUP_MISMATCH);</span>
+<span class="nc" id="L133">        activityPolicy.assertJoined(userId, activity.getId());</span>
+
+<span class="nc" id="L135">        return ActivityFetchResponse.of(activity, fileService.convertToPublicImageURL(activity.getBook().getCoverImageKey()), true);</span>
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse&lt;ActivityFetchResponse&gt; getMyActivities(UserToken userToken, Long bookId, Pageable pageable) {
+<span class="nc" id="L140">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
+        Page&lt;ActivityMember&gt; fetchResults;
+<span class="nc bnc" id="L142" title="All 2 branches missed.">        if (bookId == null) {</span>
+<span class="nc" id="L143">            fetchResults = activityMemberRepository.findByUser(user, pageable);</span>
+        } else {
+<span class="nc" id="L145">            Ebook book = entityFinder.findEbook(bookId);</span>
+<span class="nc" id="L146">            fetchResults = activityMemberRepository.findByUserAndActivity_Book(user, book, pageable);</span>
         }
+<span class="nc" id="L148">        Page&lt;ActivityFetchResponse&gt; page = fetchResults</span>
+<span class="nc" id="L149">                .map(activityMember -&gt; ActivityFetchResponse.of(</span>
+<span class="nc" id="L150">                        activityMember.getActivity(),</span>
+<span class="nc" id="L151">                        fileService.convertToPublicImageURL(activityMember.getUser().getProfileImageKey()),</span>
+                        true
+                ));
+<span class="nc" id="L154">        return PageResponse.of(page);</span>
 
-<span class="nc" id="L122">        return ActivityFetchResponse.of(activity);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

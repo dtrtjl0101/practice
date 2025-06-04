@@ -31,5 +31,9 @@ public class Member extends BaseEntity {
 <span class="fc" id="L31">        this.password = password;</span>
 <span class="fc" id="L32">        this.role = role;</span>
 <span class="fc" id="L33">    }</span>
+    
+    public boolean isAdmin() {
+<span class="nc bnc" id="L36" title="All 2 branches missed.">        return role == Role.ROLE_ADMIN;</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

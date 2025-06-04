@@ -2,25 +2,27 @@
 
 <span class="fc" id="L3">public enum NotificationType {</span>
 
-<span class="fc" id="L5">    GROUP_JOIN_REQUEST(&quot;그룹 가입 요청이 있습니다.&quot;),</span>
-<span class="fc" id="L6">    GROUP_JOIN_APPROVED(&quot;그룹 가입이 승인되었습니다.&quot;),</span>
-<span class="fc" id="L7">    GROUP_JOIN_REJECTED(&quot;그룹 가입이 거절되었습니다.&quot;),</span>
+<span class="fc" id="L5">    GROUP_JOIN_REQUEST(&quot;모임 가입 요청이 있습니다.&quot;),</span>
+<span class="fc" id="L6">    GROUP_JOIN_APPROVED(&quot;모임 가입이 승인되었습니다.&quot;),</span>
+<span class="fc" id="L7">    GROUP_JOIN_REJECTED(&quot;모임 가입이 거절되었습니다.&quot;),</span>
 <span class="fc" id="L8">    PUBLISHER_JOIN_REQUEST(&quot;출판사의 가입 요청이 있습니다.&quot;),</span>
 <span class="fc" id="L9">    PUBLISHER_APPROVED(&quot;가입이 승인되었습니다.&quot;),</span>
 <span class="fc" id="L10">    PUBLISHER_REJECTED(&quot;가입이 거절되었습니다.&quot;),</span>
 <span class="fc" id="L11">    DISCUSSION_COMMENT(&quot;새로운 댓글이 달렸습니다.&quot;),</span>
 <span class="fc" id="L12">    COMMENT_REPLY(&quot;내 댓글에 답글이 달렸습니다.&quot;),</span>
 <span class="fc" id="L13">    HIGHLIGHT_COMMENT(&quot;내 하이라이트에 댓글이 달렸습니다.&quot;),</span>
-<span class="fc" id="L14">    HIGHLIGHT_COMMENT_REPLY(&quot;내 하이라이트 댓글에 답글이 달렸습니다.&quot;);</span>
+<span class="fc" id="L14">    HIGHLIGHT_COMMENT_REPLY(&quot;내 하이라이트 댓글에 답글이 달렸습니다.&quot;),</span>
+<span class="fc" id="L15">    GROUP_BANNED(&quot;독서모임에서 추방되었습니다.&quot;)</span>
+    ;
 
     private final String description;
 
-<span class="fc" id="L18">    NotificationType(String description) {</span>
-<span class="fc" id="L19">        this.description = description;</span>
-<span class="fc" id="L20">    }</span>
+<span class="fc" id="L20">    NotificationType(String description) {</span>
+<span class="fc" id="L21">        this.description = description;</span>
+<span class="fc" id="L22">    }</span>
 
     public String getDescription() {
-<span class="nc" id="L23">        return description;</span>
+<span class="nc" id="L25">        return description;</span>
     }
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

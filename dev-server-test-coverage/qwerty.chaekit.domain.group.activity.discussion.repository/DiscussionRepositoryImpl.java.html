@@ -14,39 +14,29 @@ public class DiscussionRepositoryImpl implements DiscussionRepository {
     private final DiscussionJpaRepository jpaRepository;
 
     @Override
-    public Discussion getReferenceById(Long id) {
-<span class="nc" id="L18">        return jpaRepository.getReferenceById(id);</span>
-    }
-
-    @Override
-    public boolean existsById(Long id) {
-<span class="nc" id="L23">        return jpaRepository.existsById(id);</span>
-    }
-
-    @Override
     public Optional&lt;Discussion&gt; findById(Long id) {
-<span class="nc" id="L28">        return jpaRepository.findById(id);</span>
+<span class="nc" id="L18">        return jpaRepository.findById(id);</span>
     }
 
     @Override
     public Page&lt;Discussion&gt; findByActivityId(Long activityId, Pageable pageable) {
-<span class="nc" id="L33">        return jpaRepository.findByActivity_Id(activityId, pageable);</span>
+<span class="nc" id="L23">        return jpaRepository.findByActivity_Id(activityId, pageable);</span>
     }
 
     @Override
     public Optional&lt;Discussion&gt; findByIdWithAuthorAndComments(Long id) {
-<span class="nc" id="L38">        return jpaRepository.findByIdWithAuthorAndComments(id);</span>
+<span class="nc" id="L28">        return jpaRepository.findByIdWithAuthorAndComments(id);</span>
     }
 
     @Override
     public Discussion save(Discussion discussion) {
-<span class="nc" id="L43">        return jpaRepository.save(discussion);</span>
+<span class="nc" id="L33">        return jpaRepository.save(discussion);</span>
     }
 
     @Override
     public void delete(Discussion discussion) {
-<span class="nc" id="L48">        jpaRepository.delete(discussion);</span>
-<span class="nc" id="L49">    }</span>
+<span class="nc" id="L38">        jpaRepository.delete(discussion);</span>
+<span class="nc" id="L39">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

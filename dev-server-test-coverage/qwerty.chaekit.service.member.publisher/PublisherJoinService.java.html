@@ -11,77 +11,69 @@ import qwerty.chaekit.dto.member.LoginResponse;
 import qwerty.chaekit.dto.member.PublisherJoinRequest;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
-import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.jwt.JwtUtil;
 import qwerty.chaekit.service.member.MemberJoinHelper;
 import qwerty.chaekit.service.member.token.RefreshTokenService;
-import qwerty.chaekit.service.notification.NotificationService;
-import qwerty.chaekit.domain.member.user.UserProfile;
-import qwerty.chaekit.domain.member.user.UserProfileRepository;
-import qwerty.chaekit.service.member.admin.AdminService;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class PublisherJoinService {
     private final MemberJoinHelper memberJoinHelper;
     private final PublisherProfileRepository publisherRepository;
     private final JwtUtil jwtUtil;
     private final RefreshTokenService refreshTokenService;
-    private final NotificationService notificationService;
-    private final UserProfileRepository userProfileRepository;
-    private final AdminService adminService;
-    private final PublisherService publisherService;
 
     @Transactional
     public LoginResponse join(PublisherJoinRequest request) {
-<span class="nc" id="L37">        String email = request.email();</span>
-<span class="nc" id="L38">        String password = request.password();</span>
-<span class="nc" id="L39">        String verificationCode = request.verificationCode();</span>
+<span class="nc" id="L29">        String email = request.email();</span>
+<span class="nc" id="L30">        String password = request.password();</span>
+<span class="nc" id="L31">        String verificationCode = request.verificationCode();</span>
 
-<span class="nc" id="L41">        String imageFileKey = memberJoinHelper.uploadProfileImage(request.profileImage());</span>
+<span class="nc" id="L33">        String imageFileKey = memberJoinHelper.uploadProfileImage(request.profileImage());</span>
 
-<span class="nc" id="L43">        validatePublisherName(request.publisherName());</span>
-<span class="nc" id="L44">        Member member = memberJoinHelper.saveMemberWithVerificationCode(email, password, Role.ROLE_PUBLISHER, verificationCode);</span>
-<span class="nc" id="L45">        PublisherProfile publisher = savePublisher(request, member, imageFileKey);</span>
+<span class="nc" id="L35">        validatePublisherName(request.publisherName());</span>
+<span class="nc" id="L36">        Member member = memberJoinHelper.saveMemberWithVerificationCode(email, password, Role.ROLE_PUBLISHER, verificationCode);</span>
+<span class="nc" id="L37">        PublisherProfile publisher = savePublisher(request, member, imageFileKey);</span>
 
-<span class="nc" id="L47">        return toResponse(member, publisher);</span>
+<span class="nc" id="L39">        return toResponse(member, publisher);</span>
     }
 
     private void validatePublisherName(String name) {
-<span class="nc bnc" id="L51" title="All 2 branches missed.">        if (publisherRepository.existsByPublisherName(name)) {</span>
-<span class="nc" id="L52">            throw new BadRequestException(ErrorCode.PUBLISHER_ALREADY_EXISTS);</span>
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        if (publisherRepository.existsByPublisherName(name)) {</span>
+<span class="nc" id="L44">            throw new BadRequestException(ErrorCode.PUBLISHER_ALREADY_EXISTS);</span>
         }
-<span class="nc" id="L54">    }</span>
+<span class="nc" id="L46">    }</span>
 
     private PublisherProfile savePublisher(PublisherJoinRequest request, Member member, String imageFileKey) {
-<span class="nc" id="L57">        return publisherRepository.save(PublisherProfile.builder()</span>
-<span class="nc" id="L58">                .member(member)</span>
-<span class="nc" id="L59">                .publisherName(request.publisherName())</span>
-<span class="nc" id="L60">                .profileImageKey(imageFileKey)</span>
-<span class="nc" id="L61">                .build());</span>
+<span class="nc" id="L49">        return publisherRepository.save(PublisherProfile.builder()</span>
+<span class="nc" id="L50">                .member(member)</span>
+<span class="nc" id="L51">                .publisherName(request.publisherName())</span>
+<span class="nc" id="L52">                .profileImageKey(imageFileKey)</span>
+<span class="nc" id="L53">                .build());</span>
     }
 
     private LoginResponse toResponse(Member member, PublisherProfile publisher) {
-<span class="nc" id="L65">        String accessToken = jwtUtil.createAccessToken(</span>
-<span class="nc" id="L66">                member.getId(),</span>
+<span class="nc" id="L57">        String accessToken = jwtUtil.createAccessToken(</span>
+<span class="nc" id="L58">                member.getId(),</span>
                 null,
-<span class="nc" id="L68">                publisher.getId(),</span>
-<span class="nc" id="L69">                member.getEmail(),</span>
-<span class="nc" id="L70">                Role.ROLE_PUBLISHER.name()</span>
+<span class="nc" id="L60">                publisher.getId(),</span>
+<span class="nc" id="L61">                member.getEmail(),</span>
+<span class="nc" id="L62">                Role.ROLE_PUBLISHER.name()</span>
         );
-<span class="nc" id="L72">        String refreshToken = refreshTokenService.issueRefreshToken(member.getId());</span>
-<span class="nc" id="L73">        String profileImageUrl = memberJoinHelper.convertToPublicImageURL(publisher.getProfileImageKey());</span>
+<span class="nc" id="L64">        String refreshToken = refreshTokenService.issueRefreshToken(member.getId());</span>
+<span class="nc" id="L65">        String profileImageUrl = memberJoinHelper.convertToPublicImageURL(publisher.getProfileImageKey());</span>
 
-<span class="nc" id="L75">        return LoginResponse.builder()</span>
-<span class="nc" id="L76">                .memberId(member.getId())</span>
-<span class="nc" id="L77">                .publisherId(publisher.getId())</span>
-<span class="nc" id="L78">                .refreshToken(refreshToken)</span>
-<span class="nc" id="L79">                .accessToken(accessToken)</span>
-<span class="nc" id="L80">                .email(member.getEmail())</span>
-<span class="nc" id="L81">                .publisherName(publisher.getPublisherName())</span>
-<span class="nc" id="L82">                .profileImageURL(profileImageUrl)</span>
-<span class="nc" id="L83">                .role(Role.ROLE_USER.name())</span>
-<span class="nc" id="L84">                .build();</span>
+<span class="nc" id="L67">        return LoginResponse.builder()</span>
+<span class="nc" id="L68">                .memberId(member.getId())</span>
+<span class="nc" id="L69">                .publisherId(publisher.getId())</span>
+<span class="nc" id="L70">                .refreshToken(refreshToken)</span>
+<span class="nc" id="L71">                .accessToken(accessToken)</span>
+<span class="nc" id="L72">                .email(member.getEmail())</span>
+<span class="nc" id="L73">                .publisherName(publisher.getPublisherName())</span>
+<span class="nc" id="L74">                .profileImageURL(profileImageUrl)</span>
+<span class="nc" id="L75">                .role(Role.ROLE_USER)</span>
+<span class="nc" id="L76">                .build();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

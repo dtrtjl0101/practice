@@ -3,27 +3,29 @@
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.dto.member.UserInfoResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.UserToken;
-import qwerty.chaekit.service.util.S3Service;
+import qwerty.chaekit.service.util.FileService;
 
-<span class="fc" id="L14">@Slf4j</span>
+<span class="fc" id="L15">@Slf4j</span>
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UserService {
     private final UserProfileRepository userRepository;
-    private final S3Service s3Service;
+    private final FileService fileService;
 
     public UserInfoResponse getUserProfile(UserToken userToken) {
-<span class="nc" id="L22">        UserProfile user = userRepository.findById(userToken.userId())</span>
-<span class="nc" id="L23">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
-<span class="nc" id="L24">        String imageURL = s3Service.convertToPublicImageURL(user.getProfileImageKey());</span>
+<span class="nc" id="L24">        UserProfile user = userRepository.findById(userToken.userId())</span>
+<span class="nc" id="L25">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
+<span class="nc" id="L26">        String imageURL = fileService.convertToPublicImageURL(user.getProfileImageKey());</span>
 
-<span class="nc" id="L26">        return UserInfoResponse.of(user, imageURL);</span>
+<span class="nc" id="L28">        return UserInfoResponse.of(user, imageURL);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

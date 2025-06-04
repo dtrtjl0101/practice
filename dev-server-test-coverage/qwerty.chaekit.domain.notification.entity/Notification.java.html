@@ -2,13 +2,14 @@
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import qwerty.chaekit.domain.BaseEntity;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.group.activity.discussion.Discussion;
 import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment;
-import qwerty.chaekit.domain.highlight.entity.Highlight;
+import qwerty.chaekit.domain.highlight.Highlight;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.user.UserProfile;
 
@@ -55,21 +56,22 @@ public class Notification extends BaseEntity {
 
     private boolean isRead;
 
-<span class="nc" id="L58">    public Notification(UserProfile receiver, UserProfile sender, PublisherProfile publisher, ReadingGroup group, Highlight highlight, Discussion discussion, DiscussionComment discussionComment, NotificationType type, String message) {</span>
-<span class="nc" id="L59">        this.receiver = receiver;</span>
-<span class="nc" id="L60">        this.sender = sender;</span>
-<span class="nc" id="L61">        this.publisher = publisher;</span>
-<span class="nc" id="L62">        this.group = group;</span>
-<span class="nc" id="L63">        this.highlight = highlight;</span>
-<span class="nc" id="L64">        this.discussion = discussion;</span>
-<span class="nc" id="L65">        this.discussionComment = discussionComment;</span>
-<span class="nc" id="L66">        this.type = type;</span>
-<span class="nc" id="L67">        this.message = message;</span>
-<span class="nc" id="L68">        this.isRead = false;</span>
-<span class="nc" id="L69">    }</span>
+    @Builder
+<span class="nc" id="L60">    public Notification(UserProfile receiver, UserProfile sender, PublisherProfile publisher, ReadingGroup group, Highlight highlight, Discussion discussion, DiscussionComment discussionComment, NotificationType type, String message) {</span>
+<span class="nc" id="L61">        this.receiver = receiver;</span>
+<span class="nc" id="L62">        this.sender = sender;</span>
+<span class="nc" id="L63">        this.publisher = publisher;</span>
+<span class="nc" id="L64">        this.group = group;</span>
+<span class="nc" id="L65">        this.highlight = highlight;</span>
+<span class="nc" id="L66">        this.discussion = discussion;</span>
+<span class="nc" id="L67">        this.discussionComment = discussionComment;</span>
+<span class="nc" id="L68">        this.type = type;</span>
+<span class="nc" id="L69">        this.message = message;</span>
+<span class="nc" id="L70">        this.isRead = false;</span>
+<span class="nc" id="L71">    }</span>
 
     public void markAsRead() {
-<span class="nc" id="L72">        this.isRead = true;</span>
-<span class="nc" id="L73">    }</span>
+<span class="nc" id="L74">        this.isRead = true;</span>
+<span class="nc" id="L75">    }</span>
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

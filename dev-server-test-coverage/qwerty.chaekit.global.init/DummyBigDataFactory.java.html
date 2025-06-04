@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DummyBigDataFactory.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chaekit</a> &gt; <a href="index.source.html" class="el_package">qwerty.chaekit.global.init</a> &gt; <span class="el_source">DummyBigDataFactory.java</span></div><h1>DummyBigDataFactory.java</h1><pre class="source lang-java linenums">package qwerty.chaekit.global.init;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import qwerty.chaekit.domain.ebook.Ebook;
+import qwerty.chaekit.domain.ebook.credit.usage.CreditUsageTransaction;
+import qwerty.chaekit.domain.ebook.credit.usage.CreditUsageTransactionRepository;
+import qwerty.chaekit.domain.ebook.credit.usage.CreditUsageTransactionType;
+import qwerty.chaekit.domain.ebook.credit.wallet.CreditWallet;
+import qwerty.chaekit.domain.ebook.credit.wallet.CreditWalletRepository;
+import qwerty.chaekit.domain.ebook.purchase.EbookPurchase;
+import qwerty.chaekit.domain.ebook.purchase.repository.EbookPurchaseRepository;
+import qwerty.chaekit.domain.ebook.repository.EbookRepository;
+import qwerty.chaekit.domain.group.ReadingGroup;
+import qwerty.chaekit.domain.group.activity.Activity;
+import qwerty.chaekit.domain.group.activity.repository.ActivityRepository;
+import qwerty.chaekit.domain.group.repository.GroupRepository;
+import qwerty.chaekit.domain.member.Member;
+import qwerty.chaekit.domain.member.enums.Role;
+import qwerty.chaekit.domain.member.publisher.PublisherProfile;
+import qwerty.chaekit.domain.member.user.UserProfile;
+import qwerty.chaekit.domain.member.user.UserProfileRepository;
+import qwerty.chaekit.service.member.admin.AdminService;
+import qwerty.chaekit.service.util.EntityFinder;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.IntStream;
+
+<span class="fc" id="L38">@Slf4j</span>
+@Component
+@RequiredArgsConstructor
+public class DummyBigDataFactory {
+    private final GroupRepository groupRepository;
+    private final UserProfileRepository userProfileRepository;
+    private final EbookRepository ebookRepository;
+    private final AdminService adminService;
+    private final EntityFinder entityFinder;
+    private final EbookPurchaseRepository ebookPurchaseRepository;
+    private final CreditWalletRepository creditWalletRepository;
+    private final ActivityRepository activityRepository;
+
+    private final LocalDate startDate = LocalDate.of(2024, 6, 1);
+    private final LocalDate endDate = LocalDate.of(2025, 5, 31);
+    private final CreditUsageTransactionRepository creditUsageTransactionRepository;
+
+    @Transactional
+    public void generateDummyDataForTest() {
+        // 1. 출판물 5권 조회 (더미 도서)
+        // 출판사 ID는 관리자 서비스에서 가져옵니다.
+<span class="nc" id="L59">        Long publisherId = adminService.getAdminPublisherId();</span>
+<span class="nc" id="L60">        PublisherProfile publisher = entityFinder.findPublisher(publisherId);</span>
+<span class="nc" id="L61">        Random random = new Random();</span>
+<span class="nc" id="L62">        List&lt;Ebook&gt; ebooks = ebookRepository.findAllByPublisher(publisher, PageRequest.of(0, 5))</span>
+<span class="nc" id="L63">                .stream()</span>
+<span class="nc" id="L64">                .toList();</span>
+<span class="nc" id="L65">        log.info(&quot;더미 도서 데이터가 {}개 조회되었습니다.&quot;, ebooks.size());</span>
+<span class="nc" id="L66">        ebooks.forEach(ebook -&gt; ebook.resetViewCount(1000L + random.nextInt(2001)));</span>
+
+        // 2. 일반 사용자 100명 생성
+<span class="nc bnc" id="L69" title="All 2 branches missed.">        if (userProfileRepository.findByMember_Email(&quot;test1@dummy.com&quot;).isPresent()) {</span>
+<span class="nc" id="L70">            log.info(&quot;더미 사용자 데이터가 이미 존재합니다. 생성을 건너뜁니다.&quot;);</span>
+<span class="nc" id="L71">            return;</span>
+        }
+<span class="nc" id="L73">        List&lt;UserProfile&gt; users = IntStream.range(0, 100)</span>
+<span class="nc" id="L74">                .mapToObj(i -&gt; userProfileRepository.save(generateDummyUser(&quot;test&quot; + i)))</span>
+<span class="nc" id="L75">                .toList();</span>
+
+        // 3. 사용자별 책 3권 무작위 구매
+<span class="nc" id="L78">        CreditWallet savedWallet = creditWalletRepository.save(CreditWallet.builder()</span>
+<span class="nc" id="L79">                .user(users.get(0)) // 더미로 첫 번째 사용자에게 지갑 생성</span>
+<span class="nc" id="L80">                .build());</span>
+<span class="nc" id="L81">        savedWallet.addCredit(10000000L); // 더미 금액 추가</span>
+
+<span class="nc" id="L83">        List&lt;EbookPurchase&gt; purchases = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L84" title="All 2 branches missed.">        for (UserProfile user : users) {</span>
+<span class="nc" id="L85">            List&lt;Ebook&gt; randomBooks = getRandomSubset(ebooks, 3);</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">            for (Ebook book : randomBooks) {</span>
+<span class="nc" id="L87">                CreditUsageTransaction transaction = CreditUsageTransaction.builder()</span>
+<span class="nc" id="L88">                        .wallet(savedWallet) // 더미 금액</span>
+<span class="nc" id="L89">                        .transactionType(CreditUsageTransactionType.PURCHASE)</span>
+<span class="nc" id="L90">                        .creditAmount(book.getPrice()) // 책 가격</span>
+<span class="nc" id="L91">                        .build();</span>
+<span class="nc" id="L92">                creditUsageTransactionRepository.save(transaction);</span>
+<span class="nc" id="L93">                EbookPurchase ep = EbookPurchase.builder()</span>
+<span class="nc" id="L94">                        .ebook(book)</span>
+<span class="nc" id="L95">                        .user(user)</span>
+<span class="nc" id="L96">                        .transaction(transaction)</span>
+<span class="nc" id="L97">                        .build();</span>
+<span class="nc" id="L98">                ep.resetCreatedAt(biasedRandomDate());</span>
+<span class="nc" id="L99">                purchases.add(ep);</span>
+<span class="nc" id="L100">            }</span>
+<span class="nc" id="L101">        }</span>
+<span class="nc" id="L102">        ebookPurchaseRepository.saveAll(purchases);</span>
+
+        // 4. 사용자 중 30명을 랜덤으로 뽑아 모임 생성
+<span class="nc" id="L105">        List&lt;Activity&gt; activities = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L106">        List&lt;UserProfile&gt; leaders = getRandomSubset(users, 30);</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">        for (UserProfile leader : leaders) {</span>
+<span class="nc" id="L108">            ReadingGroup group = groupRepository.save(ReadingGroup.builder()</span>
+<span class="nc" id="L109">                    .name(leader.getNickname() + &quot;의 모임&quot;)</span>
+<span class="nc" id="L110">                    .description(&quot;더미 모임입니다.&quot;)</span>
+<span class="nc" id="L111">                    .groupLeader(leader)</span>
+<span class="nc" id="L112">                    .build());</span>
+
+            // 5. 모임장 본인이 구매한 책 중 1권으로 활동 생성
+<span class="nc" id="L115">            List&lt;Ebook&gt; leaderBooks = getRandomSubset(ebooks, 3);</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">            for( Ebook selectedBook : leaderBooks) {</span>
+<span class="nc" id="L117">                Activity ac = activityRepository.save(Activity.builder()</span>
+<span class="nc" id="L118">                        .group(group)</span>
+<span class="nc" id="L119">                        .description(&quot;이 활동은 &quot; + selectedBook.getTitle() + &quot;을 읽는 것입니다.&quot;)</span>
+<span class="nc" id="L120">                        .book(selectedBook)</span>
+<span class="nc" id="L121">                        .startTime(LocalDate.now())</span>
+<span class="nc" id="L122">                        .endTime(LocalDate.now().plusWeeks(1))</span>
+<span class="nc" id="L123">                        .build());</span>
+<span class="nc" id="L124">                ac.resetCreatedAt(biasedRandomDate());</span>
+<span class="nc" id="L125">                activities.add(ac);</span>
+<span class="nc" id="L126">            }</span>
+<span class="nc" id="L127">        }</span>
+<span class="nc" id="L128">        activityRepository.saveAll(activities);</span>
+<span class="nc" id="L129">    }</span>
+    
+    private UserProfile generateDummyUser(String username) {
+<span class="nc" id="L132">        Member account = Member.builder()</span>
+<span class="nc" id="L133">                .email(username + &quot;@dummy.com&quot;)</span>
+<span class="nc" id="L134">                .password(&quot;password&quot;) // 비밀번호는 실제로는 암호화되어야 합니다.</span>
+<span class="nc" id="L135">                .role(Role.ROLE_USER)</span>
+<span class="nc" id="L136">                .build();</span>
+<span class="nc" id="L137">        return UserProfile.builder()</span>
+<span class="nc" id="L138">                .member(account)</span>
+<span class="nc" id="L139">                .nickname(username)</span>
+<span class="nc" id="L140">                .build();</span>
+    }
+
+    private &lt;T&gt; List&lt;T&gt; getRandomSubset(List&lt;T&gt; list, int count) {
+<span class="nc" id="L144">        List&lt;T&gt; mutable = new ArrayList&lt;&gt;(list);</span>
+<span class="nc" id="L145">        Collections.shuffle(mutable);</span>
+<span class="nc" id="L146">        return mutable.stream().limit(count).toList();</span>
+    }
+    
+    private LocalDateTime biasedRandomDate() {
+<span class="nc" id="L150">        long days = ChronoUnit.DAYS.between(startDate, endDate);</span>
+
+        // 선형 증가 분포를 위한 역변환 샘플링
+<span class="nc" id="L153">        double u = Math.random(); // uniform(0, 1)</span>
+<span class="nc" id="L154">        double biased = 0.3 * u + 0.7 * Math.sqrt(u); // 오른쪽으로 치우친 분포</span>
+
+<span class="nc" id="L156">        long offsetDays = (long) (biased * days);</span>
+<span class="nc" id="L157">        return startDate.plusDays(offsetDays).atStartOfDay();</span>
+    }
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

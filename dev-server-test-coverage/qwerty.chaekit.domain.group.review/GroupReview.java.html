@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GroupReview.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chaekit</a> &gt; <a href="index.source.html" class="el_package">qwerty.chaekit.domain.group.review</a> &gt; <span class="el_source">GroupReview.java</span></div><h1>GroupReview.java</h1><pre class="source lang-java linenums">package qwerty.chaekit.domain.group.review;
+
+import jakarta.persistence.*;
+import lombok.*;
+import qwerty.chaekit.domain.BaseEntity;
+import qwerty.chaekit.domain.group.ReadingGroup;
+import qwerty.chaekit.domain.group.activity.Activity;
+import qwerty.chaekit.domain.member.user.UserProfile;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+@Entity
+@Getter
+@Table(name= &quot;group_review&quot;)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class GroupReview extends BaseEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = &quot;group_id&quot;, nullable = false)
+    private ReadingGroup group;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = &quot;activity_id&quot;, nullable = false)
+    private Activity activity;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = &quot;author_id&quot;, nullable = false)
+    private UserProfile author;
+    
+    @Setter
+    @Column(name = &quot;content&quot;, nullable = false, length = 1000)
+    private String content;
+    
+<span class="nc" id="L41">    @OneToMany(mappedBy = &quot;review&quot;, cascade = CascadeType.ALL, orphanRemoval = true)</span>
+    private final List&lt;GroupReviewTagRelation&gt; tags = new ArrayList&lt;&gt;();
+    
+    @Builder
+<span class="nc" id="L45">    public GroupReview(ReadingGroup group, Activity activity, UserProfile author, String content) {</span>
+<span class="nc" id="L46">        this.group = group;</span>
+<span class="nc" id="L47">        this.activity = activity;</span>
+<span class="nc" id="L48">        this.content = content;</span>
+<span class="nc" id="L49">        this.author = author;</span>
+<span class="nc" id="L50">    }</span>
+    
+    public void setTags(List&lt;GroupReviewTag&gt; tags) {
+<span class="nc bnc" id="L53" title="All 2 branches missed.">        if (tags == null) return;</span>
+
+<span class="nc" id="L55">        Set&lt;GroupReviewTag&gt; existing = this.tags.stream()</span>
+<span class="nc" id="L56">                .map(GroupReviewTagRelation::getTag)</span>
+<span class="nc" id="L57">                .collect(Collectors.toSet());</span>
+
+<span class="nc" id="L59">        Set&lt;GroupReviewTag&gt; incoming = new HashSet&lt;&gt;(tags);</span>
+
+<span class="nc bnc" id="L61" title="All 2 branches missed.">        if (existing.equals(incoming)) {</span>
+<span class="nc" id="L62">            return; // 동일하면 아무것도 하지 않음</span>
+        }
+
+<span class="nc" id="L65">        this.tags.clear(); // 그 외에는 기존 삭제 + 새로 등록</span>
+<span class="nc" id="L66">        this.tags.addAll(tags.stream()</span>
+<span class="nc" id="L67">                .map(tag -&gt; GroupReviewTagRelation.builder()</span>
+<span class="nc" id="L68">                        .review(this)</span>
+<span class="nc" id="L69">                        .tag(tag)</span>
+<span class="nc" id="L70">                        .build())</span>
+<span class="nc" id="L71">                .toList());</span>
+<span class="nc" id="L72">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
