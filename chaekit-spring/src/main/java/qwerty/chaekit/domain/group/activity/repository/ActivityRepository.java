@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import qwerty.chaekit.domain.group.activity.Activity;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,4 +20,6 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
 
     @Query("SELECT a FROM Activity a INNER JOIN FETCH a.book WHERE a.id = :activityId")
     Optional<Activity> findByIdWithBook(@Param("activityId") Long activityId);
+
+    long countByCreatedAtAfter(LocalDateTime createdAtAfter);
 }
