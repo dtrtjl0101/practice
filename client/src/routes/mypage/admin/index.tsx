@@ -47,7 +47,6 @@ import {
   Email,
   Search,
   Refresh,
-  EmojiEvents,
   Workspaces,
 } from "@mui/icons-material";
 import { createFileRoute } from "@tanstack/react-router";

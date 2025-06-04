@@ -12,7 +12,6 @@ import {
   Paper,
   useTheme,
   alpha,
-  CardHeader,
   Divider,
 } from "@mui/material";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -23,8 +22,6 @@ import {
   Groups,
   MenuBook,
   TrendingUp,
-  LocationOn,
-  Schedule,
   EmojiEvents,
   AutoStories,
   Workspaces,
@@ -461,7 +458,8 @@ function FeaturedGroupsSection() {
 
                     {/* 멤버 수 배지 */}
                     <Chip
-                      label={`${group.memberCount}명`}
+                      icon={<Group color="inherit" />}
+                      label={group.memberCount}
                       size="small"
                       sx={{
                         bgcolor: "rgba(255,255,255,0.2)",
