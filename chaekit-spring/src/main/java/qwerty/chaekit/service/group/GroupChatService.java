@@ -35,14 +35,27 @@ public class GroupChatService {
             throw new ForbiddenException(ErrorCode.MEMBER_NOT_FOUND);
         }
 
+        // 1. 먼저 DB에 메시지 저장
+        GroupChat chat = GroupChat.builder()
+                .group(group)
+                .author(user)
+                .content(request.content())
+                .build();
+        
+        GroupChat savedChat = groupChatRepository.save(chat);
+
+        // 2. 저장된 메시지로 응답 생성
         GroupChatResponse response = GroupChatResponse.builder()
+                .chatId(savedChat.getId())
                 .groupId(groupId)
                 .authorId(user.getId())
                 .authorName(user.getNickname())
                 .authorProfileImage(user.getProfileImageKey())
                 .content(request.content())
+                .createdAt(savedChat.getCreatedAt())
                 .build();
 
+        // 3. Kafka로 메시지 전송
         groupChatProducer.sendMessage(response);
 
         return response;
