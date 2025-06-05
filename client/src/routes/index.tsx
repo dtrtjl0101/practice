@@ -12,10 +12,10 @@ import {
   Paper,
   useTheme,
   alpha,
-  Divider,
 } from "@mui/material";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import BookList from "../component/BookList";
+import GroupList from "../component/GroupList";
 import EventCarousel from "../component/EventCarousel";
 import {
   Groups,
@@ -25,12 +25,10 @@ import {
   AutoStories,
   Workspaces,
   People,
-  Group,
 } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../api/api";
 import { HomeStatistics } from "../types/HomeStatistics";
-import { GroupInfo } from "../types/groups";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -317,219 +315,6 @@ function CategoriesSection() {
   );
 }
 
-// Featured Groups Section Component
-function FeaturedGroupsSection() {
-  const navigate = useNavigate();
-
-  const { data: top4Groups } = useQuery({
-    queryKey: ["top4Groups"],
-    queryFn: async () => {
-      const response = await API_CLIENT.groupController.getAllGroups({
-        sortBy: "MEMBER_COUNT",
-      });
-      if (!response.isSuccessful) {
-        throw new Error(response.error);
-      }
-      return response.data.content?.slice(0, 4) as GroupInfo[];
-    },
-    initialData: [] as GroupInfo[],
-  });
-
-  // const top4Activities = top4Groups.map(async (group) => {
-  //   const response = await API_CLIENT.activityController.getActivity(
-  //     group.groupId
-  //   );
-  //   if (!response.isSuccessful) {
-  //     console.log(response.errorMessage);
-  //     throw new Error(response.error);
-  //   }
-  //   return {
-  //     activityId: response.data.activityId,
-  //     bookTitle: response.data.bookTitle,
-  //     coverImageURL: response.data.coverImageURL,
-  //     startTime: response.data.startTime,
-  //     endTime: response.data.endTime,
-  //   };
-  // });
-
-  return (
-    <Box sx={{ mb: 6 }} className="coachmark-popular-groups" maxWidth={"lg"}>
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        sx={{ mb: 3 }}
-      >
-        <Typography variant="h4" component="h2">
-          🔥 지금 인기있는 독서 모임
-        </Typography>
-        <Button onClick={() => navigate({ to: "/groups" })}>
-          모든 모임 보기
-        </Button>
-      </Stack>
-      <Grid container spacing={3}>
-        {top4Groups.map((group) => (
-          <Grid size={{ xs: 12, md: 6 }} key={group.groupId}>
-            <Card
-              sx={{
-                height: 1,
-                cursor: "pointer",
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  transform: "translateY(-4px)",
-                  boxShadow: 3,
-                },
-              }}
-              variant="outlined"
-              onClick={() => navigate({ to: `/groups/${group.groupId}` })}
-            >
-              <CardContent
-                sx={{
-                  p: 0,
-                  position: "relative",
-                  overflow: "hidden",
-                  "&:last-child": { pb: 0 },
-                }}
-              >
-                {/* 배경 이미지 오버레이 */}
-                <Box
-                  sx={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: 120,
-                    backgroundImage: group.groupImageURL
-                      ? `url(${group.groupImageURL})`
-                      : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                    "&::after": {
-                      content: '""',
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      background:
-                        "linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 100%)",
-                    },
-                  }}
-                />
-
-                {/* 상단 헤더 영역 */}
-                <Box sx={{ position: "relative", zIndex: 2, p: 3, pb: 1 }}>
-                  <Stack
-                    direction="row"
-                    alignItems="flex-start"
-                    spacing={2}
-                    mb={1}
-                  >
-                    <Box flex={1}>
-                      <Typography
-                        variant="h5"
-                        fontWeight="bold"
-                        sx={{
-                          color: "white",
-                          textShadow: "0 2px 4px rgba(0,0,0,0.5)",
-                          mb: 1,
-                        }}
-                      >
-                        {group.name}
-                      </Typography>
-                      <Stack
-                        direction={"row"}
-                        alignItems={"center"}
-                        spacing={1}
-                      >
-                        <Avatar src={group.leaderProfileImageURL} />
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            color: "rgba(255,255,255,0.9)",
-                            textShadow: "0 1px 2px rgba(0,0,0,0.5)",
-                          }}
-                        >
-                          {group.leaderNickname}
-                        </Typography>
-                      </Stack>
-                    </Box>
-
-                    {/* 멤버 수 배지 */}
-                    <Chip
-                      icon={<Group color="inherit" />}
-                      label={group.memberCount}
-                      size="small"
-                      sx={{
-                        bgcolor: "rgba(255,255,255,0.2)",
-                        color: "white",
-                        backdropFilter: "blur(10px)",
-                        border: "1px solid rgba(255,255,255,0.3)",
-                        fontWeight: "bold",
-                      }}
-                    />
-                  </Stack>
-                </Box>
-
-                {/* 컨텐츠 영역 */}
-                <Box sx={{ p: 3, pt: 2, bgcolor: "background.paper" }}>
-                  {/* 설명 텍스트 - 고정 높이 */}
-                  <Box sx={{ minHeight: 72 }}>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        mb: 2,
-                        display: "-webkit-box",
-                        WebkitLineClamp: 3,
-                        WebkitBoxOrient: "vertical",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        lineHeight: 1.6,
-                        color: "text.secondary",
-                      }}
-                    >
-                      {group.description}
-                    </Typography>
-                  </Box>
-                  <Divider sx={{ my: 2 }} />
-                  {/* 태그 섹션 - 고정 높이 */}
-                  <Box sx={{ minHeight: 40 }}>
-                    <Stack
-                      direction="row"
-                      spacing={1}
-                      flexWrap="wrap"
-                      useFlexGap
-                    >
-                      {group.tags.map((tag, tagIndex) => (
-                        <Chip
-                          key={tagIndex}
-                          label={tag}
-                          size="small"
-                          sx={{
-                            bgcolor: "primary.main",
-                            color: "white",
-                            fontWeight: 500,
-                            "&:hover": {
-                              bgcolor: "primary.dark",
-                              transform: "translateY(-1px)",
-                              boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
-                            },
-                            transition: "all 0.2s ease",
-                          }}
-                        />
-                      ))}
-                    </Stack>
-                  </Box>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-    </Box>
-  );
-}
-
 // How It Works Section Component
 function HowItWorksSection() {
   const steps = [
@@ -617,7 +402,22 @@ function Home() {
         </Box>
 
         {/* Featured Groups */}
-        <FeaturedGroupsSection />
+        <Box
+          sx={{ mb: 6 }}
+          className="coachmark-popular-groups"
+          maxWidth={"lg"}
+        >
+          <GroupList
+            size="small"
+            title="🔥 지금 인기있는 독서 모임"
+            key="featuredGroups"
+            action={
+              <Button onClick={() => navigate({ to: "/groups" })}>
+                모든 모임 보기
+              </Button>
+            }
+          />
+        </Box>
 
         {/* Categories */}
         <CategoriesSection />
