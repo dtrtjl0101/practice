@@ -8,7 +8,7 @@ spring:
     driver-class-name: ${DB_DRIVER_CLASS}
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     properties:
       hibernate:
         dialect: ${JPA_DIALECT}
