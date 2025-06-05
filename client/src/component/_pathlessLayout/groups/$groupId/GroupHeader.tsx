@@ -13,6 +13,8 @@ import {
   Card,
   Avatar,
   Box,
+  useTheme,
+  alpha,
 } from "@mui/material";
 import { Group, Settings } from "@mui/icons-material";
 import { LinkIconButton } from "../../../../component/_pathlessLayout/groups/$groupId/LinkIconButton";
@@ -22,7 +24,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
 
-const MEMBERS_SIZE = 2;
+const MEMBERS_SIZE = 5;
 interface GroupHeaderProps {
   group: GroupInfo | undefined;
   groupId: number;
@@ -34,6 +36,7 @@ export function GroupHeader({ group, groupId }: GroupHeaderProps) {
     useState<HTMLButtonElement | null>(null);
   const [hasMoreMembers, setHasMoreMembers] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
+  const theme = useTheme();
 
   const { data: members } = useQuery({
     queryKey: ["groupMembers", groupId],
@@ -138,7 +141,20 @@ export function GroupHeader({ group, groupId }: GroupHeaderProps) {
           </Stack>
         )}
       </Popover>
-      <Paper sx={{ p: 2 }} variant="outlined">
+      <Paper
+        variant="outlined"
+        sx={{
+          background: group?.groupImageURL
+            ? `rgba(255, 255, 255, 0.1)`
+            : `linear-gradient(145deg, ${theme.palette.background.paper} 0%, ${alpha(theme.palette.background.paper, 0.9)} 100%)`,
+          backdropFilter: group?.groupImageURL ? "blur(20px)" : "blur(10px)",
+          border: `1px solid ${alpha(theme.palette.divider, group?.groupImageURL ? 0.2 : 0.1)}`,
+          p: group?.groupImageURL ? 3 : 0,
+          ...(group?.groupImageURL && {
+            boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.1)}`,
+          }),
+        }}
+      >
         <Stack spacing={2}>
           <Stack direction={"row"} spacing={2}>
             <Stack flexGrow={1}>

@@ -3,6 +3,7 @@ import { Activity } from "../../../../types/activity";
 import API_CLIENT from "../../../../api/api";
 import { useEffect, useState } from "react";
 import {
+  alpha,
   Avatar,
   Box,
   Button,
@@ -211,7 +212,7 @@ export function ActivityCard(props: { groupId: number; canCreate?: boolean }) {
         <Stack spacing={2}>
           <Box sx={{ display: "flex", flexDirection: "row" }}>
             <Typography variant="h4" sx={{ mr: "auto" }}>
-              활동
+              모임 활동
             </Typography>
             {canCreate && (
               <IconButton onClick={() => setActivityCreateModalOpen(true)}>
@@ -394,13 +395,15 @@ export function BookInfo(props: { activity: Activity }) {
         <CardMedia
           image={activity.coverImageURL}
           sx={{
-            height: 256,
-            width: 192,
+            height: 200,
+            width: 150,
             borderRadius: 2,
+            flexShrink: 0,
+            bgcolor: alpha("#000", 0.05),
           }}
         />
       </CardActionArea>
-      <Stack spacing={1}>
+      <Stack spacing={1} sx={{ flex: 1 }}>
         <CardActionArea
           sx={{
             width: "100%",
@@ -409,7 +412,7 @@ export function BookInfo(props: { activity: Activity }) {
             borderRadius: 2,
           }}
         >
-          <Typography variant="body2" color="textPrimary">
+          <Typography variant="h6" color="text.primary">
             {activity.bookTitle}
           </Typography>
         </CardActionArea>
@@ -421,7 +424,7 @@ export function BookInfo(props: { activity: Activity }) {
             borderRadius: 2,
           }}
         >
-          <Typography variant="body2" color="textSecondary">
+          <Typography variant="body2" color="text.secondary">
             {activity.bookAuthor}
           </Typography>
         </CardActionArea>
