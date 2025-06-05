@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Activity } from "../../../../types/activity";
 import API_CLIENT from "../../../../api/api";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   alpha,
   Avatar,
@@ -10,6 +10,7 @@ import {
   Card,
   CardActionArea,
   CardMedia,
+  Chip,
   Container,
   Divider,
   Grid,
@@ -33,6 +34,33 @@ import LinkButton from "../../../LinkButton";
 import { useNavigate } from "@tanstack/react-router";
 import BookSearchInput from "../../../BookSearchInput";
 import { useSnackbar } from "notistack";
+
+export function DayStatusChip(props: { startTime: string; endTime: string }) {
+  const { startTime, endTime } = props;
+
+  const { label, color }: { label: string; color: "info" | "secondary" } =
+    useMemo(() => {
+      const now = new Date();
+      const start = new Date(startTime);
+      const end = new Date(endTime);
+
+      if (now < start) {
+        return { label: `시작전`, color: "secondary" };
+      } else if (now <= end) {
+        const daysToEnd = Math.ceil(
+          (end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+        );
+        return {
+          label: `D-${daysToEnd === 0 ? "day" : daysToEnd}`,
+          color: "info",
+        };
+      } else {
+        return { label: "종료됨", color: "secondary" };
+      }
+    }, [startTime, endTime]);
+
+  return <Chip label={label} color={color} icon={<Timelapse />} size="small" />;
+}
 
 export function ActivityCard(props: { groupId: number; canCreate?: boolean }) {
   const { groupId, canCreate } = props;
@@ -229,18 +257,20 @@ export function ActivityCard(props: { groupId: number; canCreate?: boolean }) {
               <Stack spacing={1} sx={{ flexGrow: 1 }}>
                 <Stack spacing={1}>
                   <Typography variant="h5">{activity.bookTitle}</Typography>
-                  <Stack direction={"row"}>
+                  <Stack direction={"row"} alignItems={"center"} spacing={2}>
                     <Typography
                       variant="body2"
                       color="textSecondary"
                       sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
                     >
-                      <Icon>
-                        <Timelapse />
-                      </Icon>
+                      <DayStatusChip
+                        startTime={activity.startTime}
+                        endTime={activity.endTime}
+                      />
                       {new Date(activity.startTime).toLocaleDateString()} ~{" "}
                       {new Date(activity.endTime).toLocaleDateString()}
                     </Typography>
+
                     <Button
                       sx={{ ml: "auto", gap: 0.5 }}
                       onClick={handleProgressPopoverOpen}
