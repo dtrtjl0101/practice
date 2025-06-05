@@ -18,35 +18,16 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class GroupChatConsumer {
     private final SimpMessagingTemplate messagingTemplate;
-    private final GroupChatRepository groupChatRepository;
-    private final EntityFinder entityFinder;
     private static final String TOPIC = "group-chat";
-    
-    // 실시간 메시지를 저장할 맵
     private final Map<Long, GroupChatResponse> realtimeMessages = new ConcurrentHashMap<>();
 
     @KafkaListener(topics = TOPIC, groupId = "group-chat-group")
     public void consume(GroupChatResponse message) {
-        // 1. 실시간 메시지 맵에 저장
         realtimeMessages.put(message.chatId(), message);
-
-        // 2. WebSocket을 통해 실시간 전송
-        messagingTemplate.convertAndSend("/topic/group/" + message.groupId(), message);
+        messagingTemplate.convertAndSend("/topic/group/" + message.groupId(), message);//웹소켓으로 보내는것.
     }
 
-    // 특정 그룹의 실시간 메시지 구독
-    public void subscribeToGroupChat(Long groupId) {
-        // WebSocket 구독 설정
-        messagingTemplate.convertAndSend("/topic/group/" + groupId + "/subscribe", "subscribed");
-    }
-
-    // 실시간 메시지 조회
-    public GroupChatResponse getRealtimeMessage(Long chatId) {
-        return realtimeMessages.get(chatId);
-    }
-
-    // 실시간 메시지 맵 초기화
-    public void clearRealtimeMessages() {
-        realtimeMessages.clear();
-    }
+    //public void subscribeToGroupChat(Long groupId) {
+    //    messagingTemplate.convertAndSend("/topic/group/" + groupId + "/subscribe", "subscribed");
+    //}
 } 

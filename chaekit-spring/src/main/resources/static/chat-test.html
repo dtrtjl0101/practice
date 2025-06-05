@@ -107,7 +107,7 @@
         </div>
 
         <div id="pendingRequests"></div>
-        
+        <div id="notificationArea" style="margin:10px 0;"></div>
         <div id="messages" class="chat-messages"></div>
         
         <div class="input-area">
@@ -139,6 +139,11 @@
             .then(data => {
                 if (data.isSuccessful) {
                     token = data.data.accessToken;
+                    // userId를 senderId input에 세팅 및 localStorage 저장
+                    if (data.data.userId) {
+                        document.getElementById('senderId').value = data.data.userId;
+                        localStorage.setItem('chaekit_userId', data.data.userId);
+                    }
                     console.log('로그인 성공');
                     connect();
                 } else {
@@ -149,6 +154,14 @@
                 console.error('Error:', error);
             });
         }
+
+        // 페이지 로드 시 localStorage에서 userId 복원
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedUserId = localStorage.getItem('chaekit_userId');
+            if (savedUserId) {
+                document.getElementById('senderId').value = savedUserId;
+            }
+        });
 
         function requestJoinGroup() {
             if (!token) {
@@ -267,6 +280,14 @@
                 stompClient.subscribe('/topic/group/' + groupId, function(message) {
                     showMessage(JSON.parse(message.body));
                 });
+                // 내 userId로 알림 구독
+                const myId = localStorage.getItem('chaekit_userId');
+                if (myId) {
+                    stompClient.subscribe('/topic/notification/' + myId, function(message) {
+                        const notification = JSON.parse(message.body);
+                        showNotification(notification);
+                    });
+                }
                 // 채팅방 입장 시 과거 메시지 불러오기
                 loadChatHistory();
             });
@@ -316,13 +337,12 @@
         function showMessage(message) {
             const messagesDiv = document.getElementById('messages');
             const messageElement = document.createElement('div');
-            // authorId(서버) 또는 senderId(프론트) 비교
-            const myId = document.getElementById('senderId').value;
+            // localStorage에서 내 userId를 가져옴
+            const myId = localStorage.getItem('chaekit_userId');
+            // 메시지의 authorId(없으면 senderId)와 비교
             const senderKey = message.authorId !== undefined ? message.authorId : message.senderId;
-            const isSent = String(senderKey) === myId;
-            
+            const isSent = String(senderKey) === String(myId);
             messageElement.className = `message ${isSent ? 'sent' : 'received'}`;
-            
             const messageInfo = document.createElement('div');
             messageInfo.className = 'message-info';
             // createdAt(서버) 또는 timestamp(프론트) 지원
@@ -338,17 +358,27 @@
                 timeStr = '';
             }
             messageInfo.textContent = `${senderKey ?? ''} • ${timeStr}`;
-            
             const messageContent = document.createElement('div');
             messageContent.className = 'message-content';
             messageContent.textContent = message.content;
-            
             messageElement.appendChild(messageInfo);
             messageElement.appendChild(messageContent);
             messagesDiv.appendChild(messageElement);
-            
             // 스크롤을 최하단으로 이동
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // 알림 표시 함수
+        function showNotification(notification) {
+            const area = document.getElementById('notificationArea');
+            const div = document.createElement('div');
+            div.style.background = '#e6f7ff';
+            div.style.border = '1px solid #91d5ff';
+            div.style.padding = '8px 12px';
+            div.style.marginBottom = '5px';
+            div.style.borderRadius = '6px';
+            div.textContent = notification.message;
+            area.prepend(div);
         }
 
         // 그룹ID가 바뀔 때도 채팅 내역 불러오기
