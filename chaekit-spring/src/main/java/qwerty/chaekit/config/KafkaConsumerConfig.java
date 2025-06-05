@@ -10,6 +10,7 @@ import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import qwerty.chaekit.dto.group.chat.GroupChatResponse;
+import qwerty.chaekit.dto.notification.NotificationResponse;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +30,16 @@ public class KafkaConsumerConfig {
         configProps.put(JsonDeserializer.TRUSTED_PACKAGES, "qwerty.chaekit.dto.group.chat");//신뢰할수있는 패키지 지정
         return new DefaultKafkaConsumerFactory<>(configProps);
     }
+    @Bean
+    public ConsumerFactory<String, NotificationResponse> consumerNotificationFactory() {
+        Map<String, Object> configProps = new HashMap<>();
+        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);//kafka서버 주소설정
+        configProps.put(ConsumerConfig.GROUP_ID_CONFIG, "notification-group");//Consumer GroupID값 설정
+        configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);//키 직렬화 방식
+        configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);//값 역 직렬화 방식
+        configProps.put(JsonDeserializer.TRUSTED_PACKAGES, "qwerty.chaekit.dto.notification");//신뢰할수있는 패키지 지정
+        return new DefaultKafkaConsumerFactory<>(configProps);
+    }
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, GroupChatResponse> kafkaListenerContainerFactory() {
@@ -36,4 +47,11 @@ public class KafkaConsumerConfig {
         factory.setConsumerFactory(consumerFactory());
         return factory;
     }
-} 
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, NotificationResponse> kafkaListenerContainerFactoryNotification() {
+        ConcurrentKafkaListenerContainerFactory<String, NotificationResponse> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerNotificationFactory());
+        return factory;
+    }
+
+}

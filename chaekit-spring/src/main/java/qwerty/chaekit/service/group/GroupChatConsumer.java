@@ -19,15 +19,15 @@ import java.util.concurrent.ConcurrentHashMap;
 public class GroupChatConsumer {
     private final SimpMessagingTemplate messagingTemplate;
     private static final String TOPIC = "group-chat";
-    private final Map<Long, GroupChatResponse> realtimeMessages = new ConcurrentHashMap<>();
+    //private final Map<Long, GroupChatResponse> realtimeMessages = new ConcurrentHashMap<>();
 
     @KafkaListener(topics = TOPIC, groupId = "group-chat-group")
     public void consume(GroupChatResponse message) {
-        realtimeMessages.put(message.chatId(), message);
+        //realtimeMessages.put(message.chatId(), message);
         messagingTemplate.convertAndSend("/topic/group/" + message.groupId(), message);//웹소켓으로 보내는것.
     }
 
     //public void subscribeToGroupChat(Long groupId) {
     //    messagingTemplate.convertAndSend("/topic/group/" + groupId + "/subscribe", "subscribed");
     //}
-} 
+}

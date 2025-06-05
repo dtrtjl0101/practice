@@ -30,8 +30,7 @@ import qwerty.chaekit.global.security.resolver.UserToken;
 public class NotificationService {
     private final NotificationJpaRepository notificationJpaRepository;
     private final UserProfileRepository userProfileRepository;
-    private final KafkaTemplate<String, NotificationResponse> kafkaTemplate;
-    private static final String NOTIFICATION_TOPIC = "notification-topic";
+    private final NotificationProducer notificationProducer;
 
     @Transactional
     public void createGroupJoinRequestNotification(UserProfile receiver, UserProfile sender, ReadingGroup group) {
@@ -39,7 +38,7 @@ public class NotificationService {
         Notification notification = new Notification(receiver, sender, null,group, null,null,null,NotificationType.GROUP_JOIN_REQUEST, message);
         notificationJpaRepository.save(notification);
         NotificationResponse response = NotificationResponse.of(notification);
-        kafkaTemplate.send(NOTIFICATION_TOPIC, receiver.getId().toString(), response);
+        notificationProducer.sendNotification(response, receiver.getId().toString());
     }
 
     @Transactional
@@ -49,7 +48,7 @@ public class NotificationService {
         notificationJpaRepository.save(notification);
         if (receiver != null) {
             NotificationResponse response = NotificationResponse.of(notification);
-            kafkaTemplate.send(NOTIFICATION_TOPIC, receiver.getId().toString(), response);
+            notificationProducer.sendNotification(response, receiver.getId().toString());
         }
     }
 
@@ -60,7 +59,7 @@ public class NotificationService {
         notificationJpaRepository.save(notification);
         if (receiver != null) {
             NotificationResponse response = NotificationResponse.of(notification);
-            kafkaTemplate.send(NOTIFICATION_TOPIC, receiver.getId().toString(), response);
+            notificationProducer.sendNotification(response, receiver.getId().toString());
         }
     }
 
@@ -92,7 +91,7 @@ public class NotificationService {
         notificationJpaRepository.save(notification);
         if (receiver != null) {
             NotificationResponse response = NotificationResponse.of(notification);
-            kafkaTemplate.send(NOTIFICATION_TOPIC, receiver.getId().toString(), response);
+            notificationProducer.sendNotification(response, receiver.getId().toString());
         }
     }
 
@@ -103,7 +102,7 @@ public class NotificationService {
         notificationJpaRepository.save(notification);
         if (receiver != null) {
             NotificationResponse response = NotificationResponse.of(notification);
-            kafkaTemplate.send(NOTIFICATION_TOPIC, receiver.getId().toString(), response);
+            notificationProducer.sendNotification(response, receiver.getId().toString());
         }
     }
 
@@ -116,7 +115,7 @@ public class NotificationService {
         notificationJpaRepository.save(notification);
         if (receiver != null) {
             NotificationResponse response = NotificationResponse.of(notification);
-            kafkaTemplate.send(NOTIFICATION_TOPIC, receiver.getId().toString(), response);
+            notificationProducer.sendNotification(response, receiver.getId().toString());
         }
     }
 
@@ -129,7 +128,7 @@ public class NotificationService {
         notificationJpaRepository.save(notification);
         if (receiver != null) {
             NotificationResponse response = NotificationResponse.of(notification);
-            kafkaTemplate.send(NOTIFICATION_TOPIC, receiver.getId().toString(), response);
+            notificationProducer.sendNotification(response, receiver.getId().toString());
         }
     }
     
@@ -145,7 +144,7 @@ public class NotificationService {
         notificationJpaRepository.save(notification);
         if (receiver != null) {
             NotificationResponse response = NotificationResponse.of(notification);
-            kafkaTemplate.send(NOTIFICATION_TOPIC, receiver.getId().toString(), response);
+            notificationProducer.sendNotification(response, receiver.getId().toString());
         }
     }
 

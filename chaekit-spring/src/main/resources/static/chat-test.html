@@ -119,6 +119,7 @@
     <script>
         let stompClient = null;
         let token = null;
+        let isConnected = false;
         const groupId = document.getElementById('groupId').value;
 
         function login() {
@@ -272,9 +273,21 @@
         }
 
         function connect() {
+            // 기존 연결이 있으면 끊기
+            if (stompClient && stompClient.connected) {
+                stompClient.disconnect(() => {
+                    doConnect();
+                });
+            } else {
+                doConnect();
+            }
+        }
+
+        function doConnect() {
             const socket = new SockJS('/ws');
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function(frame) {
+                isConnected = true;
                 console.log('Connected: ' + frame);
                 const groupId = document.getElementById('groupId').value;
                 stompClient.subscribe('/topic/group/' + groupId, function(message) {
@@ -288,7 +301,6 @@
                         showNotification(notification);
                     });
                 }
-                // 채팅방 입장 시 과거 메시지 불러오기
                 loadChatHistory();
             });
         }
