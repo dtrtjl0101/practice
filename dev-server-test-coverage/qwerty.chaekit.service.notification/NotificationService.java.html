@@ -3,6 +3,7 @@
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.group.ReadingGroup;
@@ -29,116 +30,147 @@ import qwerty.chaekit.global.security.resolver.UserToken;
 public class NotificationService {
     private final NotificationJpaRepository notificationJpaRepository;
     private final UserProfileRepository userProfileRepository;
+    private final NotificationProducer notificationProducer;
 
     @Transactional
     public void createGroupJoinRequestNotification(UserProfile receiver, UserProfile sender, ReadingGroup group) {
-<span class="nc" id="L35">        String message = String.format(&quot;%s님이 %s 그룹에 가입을 요청했습니다.&quot;, sender.getNickname(), group.getName());</span>
-<span class="nc" id="L36">        Notification notification = new Notification(receiver, sender, null,group, null,null,null,NotificationType.GROUP_JOIN_REQUEST, message);</span>
-<span class="nc" id="L37">        notificationJpaRepository.save(notification);</span>
-<span class="nc" id="L38">    }</span>
+<span class="nc" id="L37">        String message = String.format(&quot;%s님이 %s 그룹에 가입을 요청했습니다.&quot;, sender.getNickname(), group.getName());</span>
+<span class="nc" id="L38">        Notification notification = new Notification(receiver, sender, null,group, null,null,null,NotificationType.GROUP_JOIN_REQUEST, message);</span>
+<span class="nc" id="L39">        notificationJpaRepository.save(notification);</span>
+<span class="nc" id="L40">        NotificationResponse response = NotificationResponse.of(notification);</span>
+<span class="nc" id="L41">        notificationProducer.sendNotification(response, receiver.getId().toString());</span>
+<span class="nc" id="L42">    }</span>
 
     @Transactional
     public void createGroupJoinApprovedNotification(UserProfile receiver, UserProfile sender, ReadingGroup group) {
-<span class="nc" id="L42">        String message = String.format(&quot;%s 그룹의 가입 요청이 승인되었습니다.&quot;, group.getName());</span>
-<span class="nc" id="L43">        Notification notification = new Notification(receiver, sender, null,group, null,null,null,NotificationType.GROUP_JOIN_APPROVED, message);</span>
-<span class="nc" id="L44">        notificationJpaRepository.save(notification);</span>
-<span class="nc" id="L45">    }</span>
+<span class="nc" id="L46">        String message = String.format(&quot;%s 그룹의 가입 요청이 승인되었습니다.&quot;, group.getName());</span>
+<span class="nc" id="L47">        Notification notification = new Notification(receiver, sender, null,group, null,null,null,NotificationType.GROUP_JOIN_APPROVED, message);</span>
+<span class="nc" id="L48">        notificationJpaRepository.save(notification);</span>
+<span class="nc bnc" id="L49" title="All 2 branches missed.">        if (receiver != null) {</span>
+<span class="nc" id="L50">            NotificationResponse response = NotificationResponse.of(notification);</span>
+<span class="nc" id="L51">            notificationProducer.sendNotification(response, receiver.getId().toString());</span>
+        }
+<span class="nc" id="L53">    }</span>
 
     @Transactional
     public void createGroupJoinRejectedNotification(UserProfile receiver, UserProfile sender, ReadingGroup group) {
-<span class="nc" id="L49">        String message = String.format(&quot;%s 그룹의 가입 요청이 거절되었습니다.&quot;, group.getName());</span>
-<span class="nc" id="L50">        Notification notification = new Notification(receiver, sender,null, group, null,null,null,NotificationType.GROUP_JOIN_REJECTED, message);</span>
-<span class="nc" id="L51">        notificationJpaRepository.save(notification);</span>
-<span class="nc" id="L52">    }</span>
+<span class="nc" id="L57">        String message = String.format(&quot;%s 그룹의 가입 요청이 거절되었습니다.&quot;, group.getName());</span>
+<span class="nc" id="L58">        Notification notification = new Notification(receiver, sender,null, group, null,null,null,NotificationType.GROUP_JOIN_REJECTED, message);</span>
+<span class="nc" id="L59">        notificationJpaRepository.save(notification);</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        if (receiver != null) {</span>
+<span class="nc" id="L61">            NotificationResponse response = NotificationResponse.of(notification);</span>
+<span class="nc" id="L62">            notificationProducer.sendNotification(response, receiver.getId().toString());</span>
+        }
+<span class="nc" id="L64">    }</span>
 
     @Transactional
     public void createPublisherJoinRequestNotification(UserProfile admin, PublisherProfile publisher) {
-<span class="nc" id="L56">        String message = String.format(&quot;%s님이 출판사 가입을 요청했습니다.&quot;, publisher.getPublisherName());</span>
-<span class="nc" id="L57">        Notification notification = new Notification(null,admin, publisher, null, null,null,null,NotificationType.PUBLISHER_JOIN_REQUEST, message);</span>
-<span class="nc" id="L58">        notificationJpaRepository.save(notification);</span>
-<span class="nc" id="L59">    }</span>
+<span class="nc" id="L68">        String message = String.format(&quot;%s님이 출판사 가입을 요청했습니다.&quot;, publisher.getPublisherName());</span>
+<span class="nc" id="L69">        Notification notification = new Notification(null,admin, publisher, null, null,null,null,NotificationType.PUBLISHER_JOIN_REQUEST, message);</span>
+<span class="nc" id="L70">        notificationJpaRepository.save(notification);</span>
+<span class="nc" id="L71">    }</span>
 
     @Transactional
     public void createPublisherApprovedNotification(PublisherProfile publisher, UserProfile admin) {
-<span class="nc" id="L63">        String message = &quot;출판사 가입이 승인되었습니다.&quot;;</span>
-<span class="nc" id="L64">        Notification notification = new Notification(admin,null,publisher, null,null, null,null,NotificationType.PUBLISHER_APPROVED, message);</span>
-<span class="nc" id="L65">        notificationJpaRepository.save(notification);</span>
-<span class="nc" id="L66">    }</span>
+<span class="nc" id="L75">        String message = &quot;출판사 가입이 승인되었습니다.&quot;;</span>
+<span class="nc" id="L76">        Notification notification = new Notification(admin,null,publisher, null,null, null,null,NotificationType.PUBLISHER_APPROVED, message);</span>
+<span class="nc" id="L77">        notificationJpaRepository.save(notification);</span>
+<span class="nc" id="L78">    }</span>
 
     @Transactional
     public void createPublisherRejectedNotification(PublisherProfile publisher, UserProfile admin) {
-<span class="nc" id="L70">        String message = &quot;출판사 가입이 거절되었습니다.&quot;;</span>
-<span class="nc" id="L71">        Notification notification = new Notification(null, admin, publisher,null, null,null,null,NotificationType.PUBLISHER_REJECTED, message);</span>
-<span class="nc" id="L72">        notificationJpaRepository.save(notification);</span>
-<span class="nc" id="L73">    }</span>
+<span class="nc" id="L82">        String message = &quot;출판사 가입이 거절되었습니다.&quot;;</span>
+<span class="nc" id="L83">        Notification notification = new Notification(null, admin, publisher,null, null,null,null,NotificationType.PUBLISHER_REJECTED, message);</span>
+<span class="nc" id="L84">        notificationJpaRepository.save(notification);</span>
+<span class="nc" id="L85">    }</span>
 
     @Transactional
     public void createDiscussionCommentNotification(UserProfile receiver, UserProfile sender, Discussion discussion) {
-<span class="nc" id="L77">        String message = String.format(&quot;%s님이 %s 토론에 댓글을 달았습니다.&quot;, sender.getNickname(), discussion.getTitle());</span>
-<span class="nc" id="L78">        Notification notification = new Notification(receiver, sender, null, null,null,discussion ,null,NotificationType.DISCUSSION_COMMENT, message);</span>
-<span class="nc" id="L79">        notificationJpaRepository.save(notification);</span>
-<span class="nc" id="L80">    }</span>
-
-    @Transactional
-    public void createCommentReplyNotification(UserProfile receiver, UserProfile sender, DiscussionComment comment) {
-<span class="nc" id="L84">        String message = String.format(&quot;%s님이 내 토론 댓글에 답글을 달았습니다.&quot;, sender.getNickname());</span>
-<span class="nc" id="L85">        Notification notification = new Notification(receiver, sender, null, null,null,comment.getDiscussion(),comment,NotificationType.COMMENT_REPLY, message);</span>
-<span class="nc" id="L86">        notificationJpaRepository.save(notification);</span>
-<span class="nc" id="L87">    }</span>
-
-    @Transactional
-    public void createHighlightCommentNotification(UserProfile receiver, UserProfile sender, Highlight highlight) {
-<span class="nc" id="L91">        String message = String.format(&quot;%s님이 내 하이라이트에 댓글을 달았습니다.\n하이라이트 내용: %s&quot;, </span>
-<span class="nc" id="L92">            sender.getNickname(), </span>
-<span class="nc" id="L93">            highlight.getMemo());</span>
-<span class="nc" id="L94">        Notification notification = new Notification(receiver, sender, null, null, highlight,null, null,NotificationType.HIGHLIGHT_COMMENT, message);</span>
-<span class="nc" id="L95">        notificationJpaRepository.save(notification);</span>
+<span class="nc" id="L89">        String message = String.format(&quot;%s님이 %s 토론에 댓글을 달았습니다.&quot;, sender.getNickname(), discussion.getTitle());</span>
+<span class="nc" id="L90">        Notification notification = new Notification(receiver, sender, null, null,null,discussion ,null,NotificationType.DISCUSSION_COMMENT, message);</span>
+<span class="nc" id="L91">        notificationJpaRepository.save(notification);</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">        if (receiver != null) {</span>
+<span class="nc" id="L93">            NotificationResponse response = NotificationResponse.of(notification);</span>
+<span class="nc" id="L94">            notificationProducer.sendNotification(response, receiver.getId().toString());</span>
+        }
 <span class="nc" id="L96">    }</span>
 
     @Transactional
+    public void createCommentReplyNotification(UserProfile receiver, UserProfile sender, DiscussionComment comment) {
+<span class="nc" id="L100">        String message = String.format(&quot;%s님이 내 토론 댓글에 답글을 달았습니다.&quot;, sender.getNickname());</span>
+<span class="nc" id="L101">        Notification notification = new Notification(receiver, sender, null, null,null,comment.getDiscussion(),comment,NotificationType.COMMENT_REPLY, message);</span>
+<span class="nc" id="L102">        notificationJpaRepository.save(notification);</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">        if (receiver != null) {</span>
+<span class="nc" id="L104">            NotificationResponse response = NotificationResponse.of(notification);</span>
+<span class="nc" id="L105">            notificationProducer.sendNotification(response, receiver.getId().toString());</span>
+        }
+<span class="nc" id="L107">    }</span>
+
+    @Transactional
+    public void createHighlightCommentNotification(UserProfile receiver, UserProfile sender, Highlight highlight) {
+<span class="nc" id="L111">        String message = String.format(&quot;%s님이 내 하이라이트에 댓글을 달았습니다.\n하이라이트 내용: %s&quot;, </span>
+<span class="nc" id="L112">            sender.getNickname(), </span>
+<span class="nc" id="L113">            highlight.getMemo());</span>
+<span class="nc" id="L114">        Notification notification = new Notification(receiver, sender, null, null, highlight,null, null,NotificationType.HIGHLIGHT_COMMENT, message);</span>
+<span class="nc" id="L115">        notificationJpaRepository.save(notification);</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">        if (receiver != null) {</span>
+<span class="nc" id="L117">            NotificationResponse response = NotificationResponse.of(notification);</span>
+<span class="nc" id="L118">            notificationProducer.sendNotification(response, receiver.getId().toString());</span>
+        }
+<span class="nc" id="L120">    }</span>
+
+    @Transactional
     public void createHighlightCommentReplyNotification(UserProfile receiver, UserProfile sender, HighlightComment comment) {
-<span class="nc" id="L100">        String message = String.format(&quot;%s님이 내 하이라이트 댓글에 답글을 달았습니다.\n하이라이트 내용: %s&quot;, </span>
-<span class="nc" id="L101">            sender.getNickname(),</span>
-<span class="nc" id="L102">            comment.getHighlight().getMemo());</span>
-<span class="nc" id="L103">        Notification notification = new Notification(receiver, sender, null, null, comment.getHighlight(),null,null, NotificationType.HIGHLIGHT_COMMENT_REPLY, message);</span>
-<span class="nc" id="L104">        notificationJpaRepository.save(notification);</span>
-<span class="nc" id="L105">    }</span>
+<span class="nc" id="L124">        String message = String.format(&quot;%s님이 내 하이라이트 댓글에 답글을 달았습니다.\n하이라이트 내용: %s&quot;, </span>
+<span class="nc" id="L125">            sender.getNickname(),</span>
+<span class="nc" id="L126">            comment.getHighlight().getMemo());</span>
+<span class="nc" id="L127">        Notification notification = new Notification(receiver, sender, null, null, comment.getHighlight(),null,null, NotificationType.HIGHLIGHT_COMMENT_REPLY, message);</span>
+<span class="nc" id="L128">        notificationJpaRepository.save(notification);</span>
+<span class="nc bnc" id="L129" title="All 2 branches missed.">        if (receiver != null) {</span>
+<span class="nc" id="L130">            NotificationResponse response = NotificationResponse.of(notification);</span>
+<span class="nc" id="L131">            notificationProducer.sendNotification(response, receiver.getId().toString());</span>
+        }
+<span class="nc" id="L133">    }</span>
     
     @Transactional
     public void createGroupBannedNotification(UserProfile receiver, ReadingGroup group) {
-<span class="nc" id="L109">        String message = String.format(&quot;%s에서 추방되었습니다.&quot;, group.getName());</span>
-<span class="nc" id="L110">        Notification notification = Notification.builder()</span>
-<span class="nc" id="L111">                .receiver(receiver)</span>
-<span class="nc" id="L112">                .group(group)</span>
-<span class="nc" id="L113">                .type(NotificationType.GROUP_BANNED)</span>
-<span class="nc" id="L114">                .message(message)</span>
-<span class="nc" id="L115">                .build();</span>
-<span class="nc" id="L116">        notificationJpaRepository.save(notification);</span>
-<span class="nc" id="L117">    }</span>
+<span class="nc" id="L137">        String message = String.format(&quot;%s에서 추방되었습니다.&quot;, group.getName());</span>
+<span class="nc" id="L138">        Notification notification = Notification.builder()</span>
+<span class="nc" id="L139">                .receiver(receiver)</span>
+<span class="nc" id="L140">                .group(group)</span>
+<span class="nc" id="L141">                .type(NotificationType.GROUP_BANNED)</span>
+<span class="nc" id="L142">                .message(message)</span>
+<span class="nc" id="L143">                .build();</span>
+<span class="nc" id="L144">        notificationJpaRepository.save(notification);</span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">        if (receiver != null) {</span>
+<span class="nc" id="L146">            NotificationResponse response = NotificationResponse.of(notification);</span>
+<span class="nc" id="L147">            notificationProducer.sendNotification(response, receiver.getId().toString());</span>
+        }
+<span class="nc" id="L149">    }</span>
 
     public PageResponse&lt;NotificationResponse&gt; getNotifications(UserToken userToken, Pageable pageable) {
-<span class="nc" id="L120">        UserProfile userProfile = userProfileRepository.findById(userToken.userId())</span>
-<span class="nc" id="L121">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
+<span class="nc" id="L152">        UserProfile userProfile = userProfileRepository.findById(userToken.userId())</span>
+<span class="nc" id="L153">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
 
-<span class="nc" id="L123">        Page&lt;Notification&gt; notifications = notificationJpaRepository.findByReceiverOrderByCreatedAtDesc(userProfile, pageable);</span>
-<span class="nc" id="L124">        Page&lt;NotificationResponse&gt; responsePage = notifications.map(NotificationResponse::of);</span>
+<span class="nc" id="L155">        Page&lt;Notification&gt; notifications = notificationJpaRepository.findByReceiverOrderByCreatedAtDesc(userProfile, pageable);</span>
+<span class="nc" id="L156">        Page&lt;NotificationResponse&gt; responsePage = notifications.map(NotificationResponse::of);</span>
         
-<span class="nc" id="L126">        return PageResponse.of(responsePage);</span>
+<span class="nc" id="L158">        return PageResponse.of(responsePage);</span>
     }
 
     @Transactional
     public void markAsRead(UserToken userToken, Long notificationId) {
-<span class="nc" id="L131">        UserProfile userProfile = userProfileRepository.findById(userToken.userId())</span>
-<span class="nc" id="L132">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
+<span class="nc" id="L163">        UserProfile userProfile = userProfileRepository.findById(userToken.userId())</span>
+<span class="nc" id="L164">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
 
-<span class="nc" id="L134">        Notification notification = notificationJpaRepository.findById(notificationId)</span>
-<span class="nc" id="L135">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.NOTIFICATION_NOT_FOUND));</span>
+<span class="nc" id="L166">        Notification notification = notificationJpaRepository.findById(notificationId)</span>
+<span class="nc" id="L167">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.NOTIFICATION_NOT_FOUND));</span>
 
-<span class="nc bnc" id="L137" title="All 2 branches missed.">        if (!notification.getReceiver().getId().equals(userProfile.getId())) {</span>
-<span class="nc" id="L138">            throw new ForbiddenException(ErrorCode.NOTIFICATION_NOT_YOURS);</span>
+<span class="nc bnc" id="L169" title="All 2 branches missed.">        if (!notification.getReceiver().getId().equals(userProfile.getId())) {</span>
+<span class="nc" id="L170">            throw new ForbiddenException(ErrorCode.NOTIFICATION_NOT_YOURS);</span>
         }
 
-<span class="nc" id="L141">        notification.markAsRead();</span>
-<span class="nc" id="L142">    }</span>
+<span class="nc" id="L173">        notification.markAsRead();</span>
+<span class="nc" id="L174">    }</span>
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
