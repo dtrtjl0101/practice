@@ -22,6 +22,7 @@ import {
 import { EpubCFI, Rendition } from "epubjs";
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { ReactReader } from "react-reader";
+
 import API_CLIENT from "../api/api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Highlight } from "../types/highlight";
@@ -30,6 +31,7 @@ import HighlightCard from "../component/HighlightCard";
 import HighlightCreationModal from "../component/HighlightCreationModal";
 import loadLocations from "../utils/loadLocations";
 import Coachmark, { useCoachmark } from "../component/Coachmark";
+import useThrottle from "../utils/useThrottle";
 
 export const Route = createFileRoute("/reader/$bookId")({
   component: RouteComponent,
@@ -104,6 +106,8 @@ function RouteComponent() {
     useState(true);
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
   const { isOpen, completeCoachmark } = useCoachmark("reader");
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragProgress, setDragProgress] = useState<number>(0);
 
   const spine = useMemo(() => {
     if (!location) {
@@ -311,6 +315,8 @@ function RouteComponent() {
       replace: true,
     });
 
+  const throttledSetLocation = useThrottle(setLocation, 500);
+
   return (
     <>
       <Coachmark
@@ -357,9 +363,22 @@ function RouteComponent() {
           <ReadProgressSlider
             min={0}
             max={100}
-            value={localReadProgress}
+            value={isDragging ? dragProgress : localReadProgress}
             onChange={(_, value) => {
               const percent = typeof value === "number" ? value : value[0];
+              setDragProgress(percent);
+              setIsDragging(true);
+              const cfi = rendition?.book.locations.cfiFromPercentage(
+                percent / 100
+              );
+              if (!cfi) {
+                return;
+              }
+              throttledSetLocation(cfi);
+            }}
+            onChangeCommitted={(_, value) => {
+              const percent = typeof value === "number" ? value : value[0];
+              setIsDragging(false);
               const cfi = rendition?.book.locations.cfiFromPercentage(
                 percent / 100
               );
@@ -649,6 +668,7 @@ const ReadProgressSlider = styled(Slider)(({ theme }) => ({
   zIndex: theme.zIndex.fab,
   "& .MuiSlider-thumb": {
     top: 0,
+    transition: "all 0.3s",
   },
   "& .MuiSlider-track": {
     top: 0,
@@ -657,6 +677,7 @@ const ReadProgressSlider = styled(Slider)(({ theme }) => ({
   "& .MuiSlider-rail": {
     top: 0,
     height: 10,
+    transition: "all 0.3s",
   },
 }));
 

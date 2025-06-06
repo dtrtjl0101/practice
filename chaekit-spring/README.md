@@ -101,6 +101,9 @@ CORS_ALLOWED_ORIGINS=http://localhost:5173,https://chaekit.com,https://*.chaekit
 # Local Server Port
 LOCAL_SERVER_PORT=8080
 
+# Kafka
+KAFKA_BOOTSTRAP_SERVERS=localhost:9092
+
 ```
 
 ### H2
