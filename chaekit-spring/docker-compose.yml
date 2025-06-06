@@ -103,6 +103,7 @@ services:
     environment:
         ZOOKEEPER_CLIENT_PORT: 2181
         ZOOKEEPER_TICK_TIME: 2000
+        KAFKA_HEAP_OPTS: "-Xmx128M -Xms64M"
     ports:
         - "2181:2181"
     healthcheck:
@@ -123,6 +124,7 @@ services:
         KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://chaekit-kafka:9092
         KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
         KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+        KAFKA_HEAP_OPTS: "-Xmx256M -Xms128M"
       healthcheck:
         test: [ "CMD", "nc", "-z", "localhost", "9092" ]
         interval: 5s
