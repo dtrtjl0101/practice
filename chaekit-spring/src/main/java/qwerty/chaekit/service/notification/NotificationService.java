@@ -3,6 +3,7 @@ package qwerty.chaekit.service.notification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.group.ReadingGroup;
@@ -29,12 +30,15 @@ import qwerty.chaekit.global.security.resolver.UserToken;
 public class NotificationService {
     private final NotificationJpaRepository notificationJpaRepository;
     private final UserProfileRepository userProfileRepository;
+    private final NotificationProducer notificationProducer;
 
     @Transactional
     public void createGroupJoinRequestNotification(UserProfile receiver, UserProfile sender, ReadingGroup group) {
         String message = String.format("%s님이 %s 그룹에 가입을 요청했습니다.", sender.getNickname(), group.getName());
         Notification notification = new Notification(receiver, sender, null,group, null,null,null,NotificationType.GROUP_JOIN_REQUEST, message);
         notificationJpaRepository.save(notification);
+        NotificationResponse response = NotificationResponse.of(notification);
+        notificationProducer.sendNotification(response, receiver.getId().toString());
     }
 
     @Transactional
@@ -42,6 +46,10 @@ public class NotificationService {
         String message = String.format("%s 그룹의 가입 요청이 승인되었습니다.", group.getName());
         Notification notification = new Notification(receiver, sender, null,group, null,null,null,NotificationType.GROUP_JOIN_APPROVED, message);
         notificationJpaRepository.save(notification);
+        if (receiver != null) {
+            NotificationResponse response = NotificationResponse.of(notification);
+            notificationProducer.sendNotification(response, receiver.getId().toString());
+        }
     }
 
     @Transactional
@@ -49,6 +57,10 @@ public class NotificationService {
         String message = String.format("%s 그룹의 가입 요청이 거절되었습니다.", group.getName());
         Notification notification = new Notification(receiver, sender,null, group, null,null,null,NotificationType.GROUP_JOIN_REJECTED, message);
         notificationJpaRepository.save(notification);
+        if (receiver != null) {
+            NotificationResponse response = NotificationResponse.of(notification);
+            notificationProducer.sendNotification(response, receiver.getId().toString());
+        }
     }
 
     @Transactional
@@ -77,6 +89,10 @@ public class NotificationService {
         String message = String.format("%s님이 %s 토론에 댓글을 달았습니다.", sender.getNickname(), discussion.getTitle());
         Notification notification = new Notification(receiver, sender, null, null,null,discussion ,null,NotificationType.DISCUSSION_COMMENT, message);
         notificationJpaRepository.save(notification);
+        if (receiver != null) {
+            NotificationResponse response = NotificationResponse.of(notification);
+            notificationProducer.sendNotification(response, receiver.getId().toString());
+        }
     }
 
     @Transactional
@@ -84,6 +100,10 @@ public class NotificationService {
         String message = String.format("%s님이 내 토론 댓글에 답글을 달았습니다.", sender.getNickname());
         Notification notification = new Notification(receiver, sender, null, null,null,comment.getDiscussion(),comment,NotificationType.COMMENT_REPLY, message);
         notificationJpaRepository.save(notification);
+        if (receiver != null) {
+            NotificationResponse response = NotificationResponse.of(notification);
+            notificationProducer.sendNotification(response, receiver.getId().toString());
+        }
     }
 
     @Transactional
@@ -93,6 +113,10 @@ public class NotificationService {
             highlight.getMemo());
         Notification notification = new Notification(receiver, sender, null, null, highlight,null, null,NotificationType.HIGHLIGHT_COMMENT, message);
         notificationJpaRepository.save(notification);
+        if (receiver != null) {
+            NotificationResponse response = NotificationResponse.of(notification);
+            notificationProducer.sendNotification(response, receiver.getId().toString());
+        }
     }
 
     @Transactional
@@ -102,6 +126,10 @@ public class NotificationService {
             comment.getHighlight().getMemo());
         Notification notification = new Notification(receiver, sender, null, null, comment.getHighlight(),null,null, NotificationType.HIGHLIGHT_COMMENT_REPLY, message);
         notificationJpaRepository.save(notification);
+        if (receiver != null) {
+            NotificationResponse response = NotificationResponse.of(notification);
+            notificationProducer.sendNotification(response, receiver.getId().toString());
+        }
     }
     
     @Transactional
@@ -114,6 +142,10 @@ public class NotificationService {
                 .message(message)
                 .build();
         notificationJpaRepository.save(notification);
+        if (receiver != null) {
+            NotificationResponse response = NotificationResponse.of(notification);
+            notificationProducer.sendNotification(response, receiver.getId().toString());
+        }
     }
 
     public PageResponse<NotificationResponse> getNotifications(UserToken userToken, Pageable pageable) {

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>채팅 테스트</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        .chat-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+        }
+        .chat-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        .message.sent {
+            align-items: flex-end;
+        }
+        .message.received {
+            align-items: flex-start;
+        }
+        .message-content {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            margin: 5px 0;
+        }
+        .sent .message-content {
+            background-color: #FFE812;
+        }
+        .received .message-content {
+            background-color: white;
+        }
+        .message-info {
+            font-size: 12px;
+            color: #666;
+            margin: 2px 5px;
+        }
+        .input-area {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .input-area input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .input-area button {
+            padding: 10px 20px;
+            background-color: #FFE812;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .control-panel {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .control-panel input {
+            margin-right: 10px;
+            padding: 5px;
+        }
+        .control-panel button {
+            margin-right: 10px;
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h2>채팅 테스트</h2>
+        </div>
+        
+        <div class="control-panel">
+            <input type="text" id="email" placeholder="이메일" value="test@test.com">
+            <input type="password" id="password" placeholder="비밀번호" value="test1234">
+            <button onclick="login()">로그인</button>
+            <br><br>
+            <input type="text" id="groupId" placeholder="그룹 ID" value="1">
+            <input type="text" id="senderId" placeholder="보내는 사람 ID" value="1">
+            <button onclick="requestJoinGroup()">그룹 가입 요청</button>
+            <button onclick="checkPendingRequests()">대기 중인 요청 확인</button>
+            <button onclick="approveJoinRequest()">가입 요청 승인</button>
+        </div>
+
+        <div id="pendingRequests"></div>
+        <div id="notificationArea" style="margin:10px 0;"></div>
+        <div id="messages" class="chat-messages"></div>
+        
+        <div class="input-area">
+            <input type="text" id="message" placeholder="메시지를 입력하세요" onkeypress="handleKeyPress(event)">
+            <button onclick="sendMessage()">전송</button>
+        </div>
+    </div>
+
+    <script>
+        let stompClient = null;
+        let token = null;
+        let isConnected = false;
+        const groupId = document.getElementById('groupId').value;
+
+        function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.isSuccessful) {
+                    token = data.data.accessToken;
+                    // userId를 senderId input에 세팅 및 localStorage 저장
+                    if (data.data.userId) {
+                        document.getElementById('senderId').value = data.data.userId;
+                        localStorage.setItem('chaekit_userId', data.data.userId);
+                    }
+                    console.log('로그인 성공');
+                    connect();
+                } else {
+                    console.error('로그인 실패:', data.errorMessage);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        // 페이지 로드 시 localStorage에서 userId 복원
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedUserId = localStorage.getItem('chaekit_userId');
+            if (savedUserId) {
+                document.getElementById('senderId').value = savedUserId;
+            }
+        });
+
+        function requestJoinGroup() {
+            if (!token) {
+                alert('먼저 로그인해주세요.');
+                return;
+            }
+
+            const groupId = document.getElementById('groupId').value;
+            fetch(`/api/groups/${groupId}/join`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.isSuccessful) {
+                    console.log('그룹 가입 요청 성공');
+                } else {
+                    console.error('그룹 가입 요청 실패:', data.errorMessage);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        function checkPendingRequests() {
+            if (!token) {
+                alert('먼저 로그인해주세요.');
+                return;
+            }
+
+            const groupId = document.getElementById('groupId').value;
+            fetch(`/api/groups/${groupId}/members/pending?page=0&size=10`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.isSuccessful) {
+                    const pendingDiv = document.getElementById('pendingRequests');
+                    pendingDiv.innerHTML = '<h3>대기 중인 가입 요청:</h3>';
+                    data.data.content.forEach(member => {
+                        const memberDiv = document.createElement('div');
+                        memberDiv.textContent = `사용자 ID: ${member.userId}, 닉네임: ${member.nickname}`;
+                        pendingDiv.appendChild(memberDiv);
+                    });
+                } else {
+                    console.error('대기 중인 요청 조회 실패:', data.errorMessage);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        function approveJoinRequest() {
+            if (!token) {
+                alert('먼저 로그인해주세요.');
+                return;
+            }
+
+            const groupId = document.getElementById('groupId').value;
+            const userId = document.getElementById('senderId').value;
+            fetch(`/api/groups/${groupId}/members/${userId}/approve`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.isSuccessful) {
+                    console.log('가입 요청 승인 성공');
+                } else {
+                    console.error('가입 요청 승인 실패:', data.errorMessage);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        function loadChatHistory() {
+            const groupId = document.getElementById('groupId').value;
+            if (!token) return;
+            fetch(`/api/groups/${groupId}/chats?page=0&size=100`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.isSuccessful) {
+                    // 기존 메시지 영역 비우기
+                    document.getElementById('messages').innerHTML = '';
+                    // 시간순 정렬 (최신이 아래로)
+                    const messages = data.data.content.reverse();
+                    messages.forEach(showMessage);
+                }
+            });
+        }
+
+        function connect() {
+            // 기존 연결이 있으면 끊기
+            if (stompClient && stompClient.connected) {
+                stompClient.disconnect(() => {
+                    doConnect();
+                });
+            } else {
+                doConnect();
+            }
+        }
+
+        function doConnect() {
+            const socket = new SockJS('/ws');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function(frame) {
+                isConnected = true;
+                console.log('Connected: ' + frame);
+                const groupId = document.getElementById('groupId').value;
+                stompClient.subscribe('/topic/group/' + groupId, function(message) {
+                    showMessage(JSON.parse(message.body));
+                });
+                // 내 userId로 알림 구독
+                const myId = localStorage.getItem('chaekit_userId');
+                if (myId) {
+                    stompClient.subscribe('/topic/notification/' + myId, function(message) {
+                        const notification = JSON.parse(message.body);
+                        showNotification(notification);
+                    });
+                }
+                loadChatHistory();
+            });
+        }
+
+        function sendMessage() {
+            if (!token) {
+                alert('먼저 로그인해주세요.');
+                return;
+            }
+
+            const groupId = document.getElementById('groupId').value;
+            const senderId = document.getElementById('senderId').value;
+            const content = document.getElementById('message').value;
+
+            if (!content.trim()) {
+                alert('메시지를 입력해주세요.');
+                return;
+            }
+
+            fetch(`/api/groups/${groupId}/chats`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ content: content })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.isSuccessful) {
+                    console.error('메시지 전송 실패:', data.errorMessage);
+                }
+                document.getElementById('message').value = '';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function showMessage(message) {
+            const messagesDiv = document.getElementById('messages');
+            const messageElement = document.createElement('div');
+            // localStorage에서 내 userId를 가져옴
+            const myId = localStorage.getItem('chaekit_userId');
+            // 메시지의 authorId(없으면 senderId)와 비교
+            const senderKey = message.authorId !== undefined ? message.authorId : message.senderId;
+            const isSent = String(senderKey) === String(myId);
+            messageElement.className = `message ${isSent ? 'sent' : 'received'}`;
+            const messageInfo = document.createElement('div');
+            messageInfo.className = 'message-info';
+            // createdAt(서버) 또는 timestamp(프론트) 지원
+            let time = message.createdAt || message.timestamp;
+            let timeStr = '';
+            if (time) {
+                try {
+                    timeStr = new Date(time).toLocaleTimeString();
+                } catch (e) {
+                    timeStr = time;
+                }
+            } else {
+                timeStr = '';
+            }
+            messageInfo.textContent = `${senderKey ?? ''} • ${timeStr}`;
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.textContent = message.content;
+            messageElement.appendChild(messageInfo);
+            messageElement.appendChild(messageContent);
+            messagesDiv.appendChild(messageElement);
+            // 스크롤을 최하단으로 이동
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // 알림 표시 함수
+        function showNotification(notification) {
+            const area = document.getElementById('notificationArea');
+            const div = document.createElement('div');
+            div.style.background = '#e6f7ff';
+            div.style.border = '1px solid #91d5ff';
+            div.style.padding = '8px 12px';
+            div.style.marginBottom = '5px';
+            div.style.borderRadius = '6px';
+            div.textContent = notification.message;
+            area.prepend(div);
+        }
+
+        // 그룹ID가 바뀔 때도 채팅 내역 불러오기
+        document.getElementById('groupId').addEventListener('change', function() {
+            if (token) {
+                connect(); // 새로 소켓 연결 및 구독
+            }
+        });
+    </script>
+</body>
+</html> 

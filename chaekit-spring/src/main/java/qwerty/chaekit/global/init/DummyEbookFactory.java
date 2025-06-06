@@ -38,7 +38,7 @@ public class DummyEbookFactory {
         return Ebook.builder()
                 .title(ebookData.getTitle())
                 .author(ebookData.getAuthor())
-                .publisher(PublisherProfile.builder().id(adminService.getAdminPublisherId()).build())
+                .publisher(PublisherProfile.builder().id(2L).build())
                 .description(ebookData.getDescription())
                 .fileKey(ebookData.getFileKey())
                 .coverImageKey(ebookData.getCoverImageKey())
