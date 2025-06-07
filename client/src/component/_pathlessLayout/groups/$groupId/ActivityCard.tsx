@@ -258,15 +258,15 @@ export function ActivityCard(props: { groupId: number; canCreate?: boolean }) {
                 <Stack spacing={1}>
                   <Typography variant="h5">{activity.bookTitle}</Typography>
                   <Stack direction={"row"} alignItems={"center"} spacing={2}>
+                    <DayStatusChip
+                      startTime={activity.startTime}
+                      endTime={activity.endTime}
+                    />
                     <Typography
                       variant="body2"
                       color="textSecondary"
                       sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
                     >
-                      <DayStatusChip
-                        startTime={activity.startTime}
-                        endTime={activity.endTime}
-                      />
                       {new Date(activity.startTime).toLocaleDateString()} ~{" "}
                       {new Date(activity.endTime).toLocaleDateString()}
                     </Typography>
