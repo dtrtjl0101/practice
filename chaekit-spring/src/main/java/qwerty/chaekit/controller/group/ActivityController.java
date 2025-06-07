@@ -8,17 +8,22 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.dto.group.activity.*;
+import qwerty.chaekit.dto.highlight.HighlightSummaryResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.group.ActivityService;
+import qwerty.chaekit.service.highlight.HighlightService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping
 @RequiredArgsConstructor
 public class ActivityController {
     private final ActivityService activityService;
+    private final HighlightService highlightService;
 
     @PostMapping("/api/groups/{groupId}/activities")
     public ApiSuccessResponse<ActivityPostResponse> createActivity(@Login UserToken userToken,
@@ -87,5 +92,16 @@ public class ActivityController {
             @PathVariable long activityId
     ) {
         return ApiSuccessResponse.of(activityService.getActivityTop5Scores(activityId));
+    }
+
+    @Operation(
+            summary = "최근 메모 조회",
+            description = "특정 활동에 등록된 최신 하이라이트 5개를 조회합니다."
+    )
+    @GetMapping("/api/activities/{activityId}/highlights/recent")
+    public ApiSuccessResponse<List<HighlightSummaryResponse>> getRecentHighlights(
+            @PathVariable long activityId
+    ) {
+        return ApiSuccessResponse.of(highlightService.getActivityRecentHighlights(activityId));
     }
 }
