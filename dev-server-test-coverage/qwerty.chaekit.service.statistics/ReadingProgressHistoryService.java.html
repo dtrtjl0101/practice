@@ -75,7 +75,7 @@ public class ReadingProgressHistoryService {
 <span class="nc" id="L75">                        start.atStartOfDay(), end.plusDays(1).atStartOfDay());</span>
 
 <span class="nc" id="L77">        Map&lt;LocalDate, List&lt;ReadingProgressHistory&gt;&gt; map = histories.stream()</span>
-<span class="nc" id="L78">                .collect(Collectors.groupingBy(h -&gt; h.getCreatedAt().toLocalDate()));</span>
+<span class="nc" id="L78">                .collect(Collectors.groupingBy(h -&gt; h.getCreatedAt().toLocalDate().minusDays(1)));</span>
 
 <span class="nc" id="L80">        List&lt;LocalDate&gt; days = start.datesUntil(end.plusDays(1)).toList();</span>
 <span class="nc" id="L81">        List&lt;ReadingProgressHistoryResponse&gt; responses = new ArrayList&lt;&gt;();</span>
