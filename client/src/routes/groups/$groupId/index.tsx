@@ -14,9 +14,10 @@ import {
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../../../api/api";
-import { ActivityCard } from "../../../component/_pathlessLayout/groups/$groupId/ActivityCard";
+import { PastActivityCard } from "../../../component/_pathlessLayout/groups/$groupId/PastActivityCard";
 import { GroupHeader } from "../../../component/_pathlessLayout/groups/$groupId/GroupHeader";
 import GroupReviewCard from "../../../component/GroupReviewCard";
+import { CurrentActivityCard } from "../../../component/_pathlessLayout/groups/$groupId/CurrentActivityCard";
 
 export const Route = createFileRoute("/groups/$groupId/")({
   component: RouteComponent,
@@ -163,7 +164,7 @@ function RouteComponent() {
             <Stack spacing={4}>
               {/* Activity Section with Enhanced Design */}
 
-              <ActivityCard groupId={groupId} canCreate={isOwner} />
+              <CurrentActivityCard groupId={groupId} canCreate={isOwner} />
 
               {/* Chat Room Section with Modern Design */}
               <Paper
@@ -242,9 +243,37 @@ function RouteComponent() {
               </Paper>
             </Stack>
           </Grid>
-
           {/* Right Column - Reviews */}
           <Grid size={{ xs: 12, lg: 4 }}>
+            <Stack spacing={4}>
+              <Paper
+                variant="outlined"
+                sx={{
+                  border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+                  backdropFilter: "blur(10px)",
+                  p: 4,
+                  position: "relative",
+                }}
+              >
+                <Typography>진행률 그래프</Typography>
+              </Paper>
+              <Paper
+                variant="outlined"
+                sx={{
+                  border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+                  backdropFilter: "blur(10px)",
+                  p: 4,
+                  position: "relative",
+                }}
+              >
+                <Typography>활동 랭킹</Typography>
+              </Paper>
+            </Stack>
+          </Grid>
+          <Grid size={{ xs: 12, lg: 6 }}>
+            <PastActivityCard groupId={groupId} canCreate={isOwner} />
+          </Grid>
+          <Grid size={{ xs: 12, lg: 6 }}>
             <GroupReviewCard groupId={groupId} canWriteReview={true} />
           </Grid>
         </Grid>
