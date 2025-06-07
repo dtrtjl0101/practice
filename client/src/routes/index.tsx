@@ -410,7 +410,7 @@ function Home() {
           <GroupList
             size="small"
             title="🔥 지금 인기있는 독서 모임"
-            key="featuredGroups"
+            keyPrefix="featuredGroups"
             action={
               <Button onClick={() => navigate({ to: "/groups" })}>
                 모든 모임 보기

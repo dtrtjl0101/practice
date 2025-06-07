@@ -61,7 +61,7 @@ function GroupsCards() {
       />
       <GroupList
         kind={GroupListKind.MY_GROUP}
-        key="myGroups"
+        keyPrefix="myGroups"
         size="small"
         title="내가 만든 모임"
         action={
@@ -72,7 +72,7 @@ function GroupsCards() {
       />
       <GroupList
         kind={GroupListKind.JOINED_GROUP}
-        key="participantGroups"
+        keyPrefix="participantGroups"
         size="small"
         title="가입된 모임"
         action={

@@ -10,7 +10,7 @@ function RouteComponent() {
   return (
     <Container sx={{ my: 8 }}>
       <Stack spacing={2}>
-        <GroupList size="large" key="allGroups" title="모든 모임" />
+        <GroupList size="large" keyPrefix="allGroups" title="모든 모임" />
       </Stack>
     </Container>
   );

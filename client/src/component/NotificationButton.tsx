@@ -12,12 +12,20 @@ import {
 } from "@mui/material";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../api/api";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Notification } from "../types/notification";
 import LinkButton from "./LinkButton";
+import { Client } from "@stomp/stompjs";
+import { ENV } from "../env";
+import { useAtomValue } from "jotai";
+import State from "../states";
+import { Role } from "../types/role";
 
 export default function NotificationButton() {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const clientRef = useRef<Client | null>(null);
+  const user = useAtomValue(State.Auth.user);
+  const userId = user?.role === Role.ROLE_USER && user.userId;
 
   const { data: notifications, refetch: refetchNotifications } = useQuery({
     queryKey: ["notifications"],
@@ -37,8 +45,31 @@ export default function NotificationButton() {
         (notification) => notification.isRead === false
       );
     },
-    refetchInterval: 3000,
     placeholderData: keepPreviousData,
+    enabled: !!userId,
+  });
+
+  const { data: _client } = useQuery({
+    queryKey: ["notificationClient", userId],
+    queryFn: async () => {
+      if (clientRef.current) {
+        clientRef.current.deactivate();
+      }
+      const client = new Client({
+        brokerURL: `${ENV.CHAEKIT_API_ENDPOINT}/ws`,
+        onConnect: () => {
+          client.subscribe(`/topic/notification/${userId}`, function (message) {
+            const notification = JSON.parse(message.body);
+            console.log(notification);
+            refetchNotifications();
+          });
+        },
+      });
+      client.activate();
+      clientRef.current = client;
+      return client;
+    },
+    enabled: !!userId,
   });
 
   return (
