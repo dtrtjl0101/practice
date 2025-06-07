@@ -16,6 +16,7 @@ import qwerty.chaekit.domain.highlight.Highlight;
 import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.dto.highlight.HighlightFetchResponse;
+import qwerty.chaekit.dto.highlight.HighlightSummaryResponse;
 import qwerty.chaekit.dto.highlight.HighlightPostRequest;
 import qwerty.chaekit.dto.highlight.HighlightPostResponse;
 import qwerty.chaekit.dto.highlight.HighlightPutRequest;
@@ -138,6 +139,19 @@ public class HighlightService {
                         dh -> dh.getHighlight().getId(),
                         Collectors.mapping(DiscussionHighlight::getDiscussion, Collectors.toList())
                 ));
+    }
+
+    @Transactional(readOnly = true)
+    public List<HighlightSummaryResponse> getActivityRecentHighlights(Long activityId) {
+        Activity activity = entityFinder.findActivity(activityId);
+        List<Highlight> highlights = highlightRepository.findRecentByActivity(activity);
+
+        return highlights.stream()
+                .map(highlight -> HighlightSummaryResponse.of(
+                        highlight,
+                        fileService.convertToPublicImageURL(highlight.getAuthor().getProfileImageKey())
+                ))
+                .toList();
     }
 
     @Transactional
