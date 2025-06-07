@@ -33,6 +33,7 @@ export default function AppBar(props: {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [creditPurchaseModalOpen, setCreditPurchaseModalOpen] = useState(false);
 
+  const isUser = user && user.role === Role.ROLE_USER;
   const isAdmin = user && user.role === Role.ROLE_ADMIN;
   const isPublisher = user && user.role === Role.ROLE_PUBLISHER;
 
@@ -45,7 +46,7 @@ export default function AppBar(props: {
       }
       return response.data;
     },
-    enabled: !!user,
+    enabled: isUser,
   });
 
   const onColorSchemeChangeButtonClicked = () => {
