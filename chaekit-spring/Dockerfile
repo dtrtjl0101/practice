@@ -20,4 +20,4 @@ COPY src/ src/
 # 5. 실제 빌드 (한 번만)
 RUN ./gradlew clean build -x test
 
-CMD ["java", "-Xms64m", "-Xmx128m", "-XX:+UseSerialGC", "-XX:MaxMetaspaceSize=64m", "-XX:+ExitOnOutOfMemoryError", "-jar", "build/libs/chaekit-0.0.1-SNAPSHOT.jar"]
+CMD ["java", "-Xms64m", "-Xmx128m", "-XX:+UseSerialGC", "-XX:MaxMetaspaceSize=256m", "-XX:+ExitOnOutOfMemoryError", "-jar", "build/libs/chaekit-0.0.1-SNAPSHOT.jar"]
