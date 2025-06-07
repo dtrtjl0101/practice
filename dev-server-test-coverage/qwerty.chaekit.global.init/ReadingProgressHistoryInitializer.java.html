@@ -47,8 +47,8 @@ public class ReadingProgressHistoryInitializer implements ApplicationRunner {
 <span class="nc" id="L47">                boolean alreadyExists = historyRepository.existsByActivityAndUserAndCreatedAtBetween(</span>
                         activity,
 <span class="nc" id="L49">                        member.getUser(),</span>
-<span class="nc" id="L50">                        yesterday.atStartOfDay(),</span>
-<span class="nc" id="L51">                        yesterday.plusDays(1).atStartOfDay()</span>
+<span class="nc" id="L50">                        yesterday.plusDays(1).atStartOfDay(),</span>
+<span class="nc" id="L51">                        yesterday.plusDays(2).atStartOfDay()</span>
                 );
 
 <span class="nc bnc" id="L54" title="All 2 branches missed.">                if (!alreadyExists) {</span>
