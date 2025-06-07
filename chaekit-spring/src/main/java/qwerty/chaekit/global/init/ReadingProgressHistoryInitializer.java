@@ -47,8 +47,8 @@ public class ReadingProgressHistoryInitializer implements ApplicationRunner {
                 boolean alreadyExists = historyRepository.existsByActivityAndUserAndCreatedAtBetween(
                         activity,
                         member.getUser(),
-                        yesterday.atStartOfDay(),
-                        yesterday.plusDays(1).atStartOfDay()
+                        yesterday.plusDays(1).atStartOfDay(),
+                        yesterday.plusDays(2).atStartOfDay()
                 );
 
                 if (!alreadyExists) {
