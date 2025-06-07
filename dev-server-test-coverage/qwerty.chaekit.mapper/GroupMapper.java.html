@@ -38,7 +38,8 @@ public class GroupMapper {
 <span class="nc" id="L38">                .leaderNickname(group.getGroupLeader().getNickname())</span>
 <span class="nc" id="L39">                .leaderProfileImageURL(convertToPublicImageURL(group.getGroupLeader().getProfileImageKey()))</span>
 <span class="nc" id="L40">                .memberCount((int) group.memberCount())</span>
-<span class="nc" id="L41">                .build();</span>
+<span class="nc" id="L41">                .isAutoApproval(group.isAutoApproval())</span>
+<span class="nc" id="L42">                .build();</span>
     }
 
     /*
@@ -47,13 +48,13 @@ public class GroupMapper {
      *   - GroupMember.group
      */
     public GroupMemberResponse toGroupMemberResponse(GroupMember groupMember) {
-<span class="nc" id="L50">        return GroupMemberResponse.builder()</span>
-<span class="nc" id="L51">                .userId(groupMember.getUser().getId())</span>
-<span class="nc" id="L52">                .nickname(groupMember.getUser().getNickname())</span>
-<span class="nc" id="L53">                .profileImageURL(convertToPublicImageURL(groupMember.getMember().getProfileImageKey()))</span>
-<span class="nc" id="L54">                .createdAt(groupMember.getCreatedAt())</span>
-<span class="nc" id="L55">                .approvedAt(groupMember.getApprovedAt())</span>
-<span class="nc" id="L56">                .build();</span>
+<span class="nc" id="L51">        return GroupMemberResponse.builder()</span>
+<span class="nc" id="L52">                .userId(groupMember.getUser().getId())</span>
+<span class="nc" id="L53">                .nickname(groupMember.getUser().getNickname())</span>
+<span class="nc" id="L54">                .profileImageURL(convertToPublicImageURL(groupMember.getMember().getProfileImageKey()))</span>
+<span class="nc" id="L55">                .createdAt(groupMember.getCreatedAt())</span>
+<span class="nc" id="L56">                .approvedAt(groupMember.getApprovedAt())</span>
+<span class="nc" id="L57">                .build();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -104,5 +104,10 @@ public class HighlightRepositoryImpl implements HighlightRepository {
     public List&lt;Highlight&gt; findByGroup(ReadingGroup group) {
 <span class="nc" id="L105">        return highlightJpaRepository.findByActivity_Group(group);</span>
     }
+
+    @Override
+    public List&lt;Highlight&gt; findRecentByActivity(Activity activity) {
+<span class="nc" id="L110">        return highlightJpaRepository.findTop5ByActivityOrderByCreatedAtDesc(activity);</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
