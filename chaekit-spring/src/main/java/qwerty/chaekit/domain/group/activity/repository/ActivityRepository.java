@@ -45,13 +45,13 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
             SELECT d2.id FROM Discussion d2 WHERE d2.activity.id = :activityId
         )
     WHERE am.activity.id = :activityId
-    GROUP BY u.id
+    GROUP BY u
     ORDER BY
         COALESCE(COUNT(DISTINCT h.id), 0) * 3 +
         COALESCE(COUNT(DISTINCT hc.id), 0) * 1 +
         COALESCE(COUNT(DISTINCT d.id), 0) * 5 +
         COALESCE(COUNT(DISTINCT dc.id), 0) * 2 DESC
     """)
-    Page<ActivityScoreDto> calculateActivityScores(Long activityId, Pageable pageable);
+    List<ActivityScoreDto> calculateTop5Scores(@Param("activityId") Long activityId, Pageable pageable);
 
 }

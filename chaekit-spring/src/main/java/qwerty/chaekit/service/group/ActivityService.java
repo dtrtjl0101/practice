@@ -24,6 +24,7 @@ import qwerty.chaekit.service.util.EntityFinder;
 import qwerty.chaekit.service.util.FileService;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -154,17 +155,16 @@ public class ActivityService {
     }
     
     @Transactional(readOnly = true)
-    public PageResponse<ActivityScoreResponse> getActivityTop5Scores(long activityId) {
-        Page<ActivityScoreResponse> page = activityRepository.calculateActivityScores(
+    public List<ActivityScoreResponse> getActivityTop5Scores(long activityId) {
+
+        return activityRepository.calculateTop5Scores(
                 activityId, PageRequest.of(0, 5))
-                .map(score -> ActivityScoreResponse.builder()
+                .stream().map(score -> ActivityScoreResponse.builder()
                         .userId(score.user().getId())
                         .score(score.score())
                         .userProfileImageURL(fileService.convertToPublicImageURL(score.user().getProfileImageKey()))
                         .userNickname(score.user().getNickname())
                         .build()
-                );
-        
-        return PageResponse.of(page);
+                ).toList();
     }
 }

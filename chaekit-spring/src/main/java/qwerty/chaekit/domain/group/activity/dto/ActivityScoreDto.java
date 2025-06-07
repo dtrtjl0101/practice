@@ -4,5 +4,5 @@ import qwerty.chaekit.domain.member.user.UserProfile;
 
 public record ActivityScoreDto(
         UserProfile user,
-        int score
+        long score
 ) { }

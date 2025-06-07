@@ -8,7 +8,7 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.dto.group.activity.*;
-import qwerty.chaekit.dto.highlight.HighlightSummaryResponse;
+import qwerty.chaekit.dto.highlight.HighlightPreviewResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
@@ -88,7 +88,7 @@ public class ActivityController {
                     "하이라이트는 3점, 하이라이트 댓글은 1점, 토론은 5점, 토론 댓글은 2점입니다."
     )
     @GetMapping("/api/activities/{activityId}/scores")
-    public ApiSuccessResponse<PageResponse<ActivityScoreResponse>> getActivityTop5Scores(
+    public ApiSuccessResponse<List<ActivityScoreResponse>> getActivityTop5Scores(
             @PathVariable long activityId
     ) {
         return ApiSuccessResponse.of(activityService.getActivityTop5Scores(activityId));
@@ -99,7 +99,7 @@ public class ActivityController {
             description = "특정 활동에 등록된 최신 하이라이트 5개를 조회합니다."
     )
     @GetMapping("/api/activities/{activityId}/highlights/recent")
-    public ApiSuccessResponse<List<HighlightSummaryResponse>> getRecentHighlights(
+    public ApiSuccessResponse<List<HighlightPreviewResponse>> getRecentHighlights(
             @PathVariable long activityId
     ) {
         return ApiSuccessResponse.of(highlightService.getActivityRecentHighlights(activityId));
