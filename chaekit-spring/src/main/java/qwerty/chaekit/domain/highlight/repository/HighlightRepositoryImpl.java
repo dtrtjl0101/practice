@@ -104,4 +104,9 @@ public class HighlightRepositoryImpl implements HighlightRepository {
     public List<Highlight> findByGroup(ReadingGroup group) {
         return highlightJpaRepository.findByActivity_Group(group);
     }
+
+    @Override
+    public List<Highlight> findRecentByActivity(Activity activity) {
+        return highlightJpaRepository.findTop5ByActivityOrderByCreatedAtDesc(activity);
+    }
 }

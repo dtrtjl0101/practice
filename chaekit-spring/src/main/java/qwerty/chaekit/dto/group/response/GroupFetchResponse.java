@@ -16,5 +16,6 @@ public record GroupFetchResponse(
         String leaderNickname,
         String leaderProfileImageURL,
         MyMemberShipStatus myMemberShipStatus,
+        boolean isAutoApproval,
         int memberCount
 ) { }
