@@ -30,10 +30,10 @@ export default function GroupList(props: {
   size: "small" | "large";
   action?: JSX.Element;
   title: string;
-  key: string;
+  keyPrefix: string;
   kind?: GroupListKind;
 }) {
-  const { size, action, title, key } = props;
+  const { size, action, title, keyPrefix } = props;
 
   const [page, setPage] = useState(0);
   const [sort, _setSort] = useState<string[]>([]);
@@ -45,7 +45,7 @@ export default function GroupList(props: {
     props.kind === undefined ? GroupListKind.ALL_GROUP : props.kind;
 
   const { data: groups } = useQuery({
-    queryKey: [key, groupType, page, sort, pageSize],
+    queryKey: [keyPrefix, groupType, page, sort, pageSize],
     queryFn: async () => {
       const response = await getFetchFunction(groupType)({
         page,
