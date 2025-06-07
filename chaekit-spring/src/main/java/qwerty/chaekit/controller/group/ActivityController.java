@@ -7,10 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-import qwerty.chaekit.dto.group.activity.ActivityFetchResponse;
-import qwerty.chaekit.dto.group.activity.ActivityPatchRequest;
-import qwerty.chaekit.dto.group.activity.ActivityPostRequest;
-import qwerty.chaekit.dto.group.activity.ActivityPostResponse;
+import qwerty.chaekit.dto.group.activity.*;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
@@ -79,4 +76,16 @@ public class ActivityController {
         return ApiSuccessResponse.emptyResponse();
     }
 
+    @Operation(
+            summary = "상위 5명의 활동 점수 조회",
+            description = "활동에 참여한 유저들의 활동 점수를 조회합니다. " +
+                    "점수는 하이라이트, 하이라이트 댓글, 토론, 토론 댓글의 개수에 따라 계산됩니다. " +
+                    "하이라이트는 3점, 하이라이트 댓글은 1점, 토론은 5점, 토론 댓글은 2점입니다."
+    )
+    @GetMapping("/api/activities/{activityId}/scores")
+    public ApiSuccessResponse<PageResponse<ActivityScoreResponse>> getActivityTop5Scores(
+            @PathVariable long activityId
+    ) {
+        return ApiSuccessResponse.of(activityService.getActivityTop5Scores(activityId));
+    }
 }

@@ -2,6 +2,7 @@ package qwerty.chaekit.service.group;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,10 +13,7 @@ import qwerty.chaekit.domain.group.activity.activitymember.ActivityMember;
 import qwerty.chaekit.domain.group.activity.activitymember.ActivityMemberRepository;
 import qwerty.chaekit.domain.group.activity.repository.ActivityRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
-import qwerty.chaekit.dto.group.activity.ActivityFetchResponse;
-import qwerty.chaekit.dto.group.activity.ActivityPatchRequest;
-import qwerty.chaekit.dto.group.activity.ActivityPostRequest;
-import qwerty.chaekit.dto.group.activity.ActivityPostResponse;
+import qwerty.chaekit.dto.group.activity.*;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.ForbiddenException;
@@ -153,5 +151,20 @@ public class ActivityService {
                 ));
         return PageResponse.of(page);
 
+    }
+    
+    @Transactional(readOnly = true)
+    public PageResponse<ActivityScoreResponse> getActivityTop5Scores(long activityId) {
+        Page<ActivityScoreResponse> page = activityRepository.calculateActivityScores(
+                activityId, PageRequest.of(0, 5))
+                .map(score -> ActivityScoreResponse.builder()
+                        .userId(score.user().getId())
+                        .score(score.score())
+                        .userProfileImageURL(fileService.convertToPublicImageURL(score.user().getProfileImageKey()))
+                        .userNickname(score.user().getNickname())
+                        .build()
+                );
+        
+        return PageResponse.of(page);
     }
 }
