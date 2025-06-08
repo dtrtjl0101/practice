@@ -1,0 +1,20 @@
+ALTER TABLE ebook
+    MODIFY description VARCHAR(10000) DEFAULT NULL;
+
+ALTER TABLE activity
+    MODIFY description VARCHAR(5000) DEFAULT NULL;
+
+ALTER TABLE reading_group
+    MODIFY description VARCHAR(5000) DEFAULT NULL;
+
+ALTER TABLE discussion 
+    MODIFY content VARCHAR(5000) DEFAULT NULL;
+
+ALTER TABLE discussion_comment
+    MODIFY content VARCHAR(1000) DEFAULT NULL;
+
+ALTER TABLE highlight
+    MODIFY memo VARCHAR(1000) DEFAULT NULL;
+
+ALTER TABLE highlight_comment
+    MODIFY content VARCHAR(1000) DEFAULT NULL;

@@ -1,12 +1,11 @@
 package qwerty.chaekit.global.exception;
 
 import lombok.Getter;
+import qwerty.chaekit.global.enums.ErrorCode;
 
 @Getter
-public class BadRequestException extends RuntimeException {
-    private final String errorCode;
-    public BadRequestException(String errorCode, String message) {
-        super(message);
-        this.errorCode = errorCode;
+public class BadRequestException extends CustomException {
+    public BadRequestException(ErrorCode errorCode) {
+        super(errorCode);
     }
 }

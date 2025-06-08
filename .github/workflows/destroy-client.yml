@@ -1,0 +1,63 @@
+name: destroy-client
+on: delete
+env:
+  AWS_DEFAULT_REGION: ap-northeast-2
+  DOMAIN_NAME: chaekit.com
+  BRANCH_NAME: "" # Should be set in the job
+  STACK_NAME: "" # Should be set in the job
+  ZONE_ID: ${{ secrets.ZONE_ID }}
+  VITE_CHAEKIT_API_ENDPOINT: ${{ vars.CHAEKIT_API_ENDPOINT }}
+jobs:
+  destroy-client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: set BRANCH_NAME, STACK_NAME
+        run: |
+          export BRANCH_NAME=$(echo "${{ github.event.ref }}" | tr "[:upper:]" "[:lower:]" | sed -e "s#refs/heads/##g" -e 's/\//-/g' -e 's/|/-/g')
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          export STACK_NAME=$(echo $BRANCH_NAME | tr "[:upper:]" "[:lower:]" | tr -cd '[:alnum:]')
+          echo "STACK_NAME=$STACK_NAME" >> $GITHUB_ENV
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Cache bun dependencies
+        id: cache-bun
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun
+          key: ${{ runner.os }}-bun-${{ hashFiles('client/bun.lock', 'client/cdk/bun.lock') }}
+
+      - name: Install client bun dependencies
+        working-directory: client
+        run: bun install --frozen-lockfile
+
+      - name: Build client
+        working-directory: client
+        run: bun run build
+
+      - name: Install cdk bun dependencies
+        working-directory: client/cdk
+        run: bun install --frozen-lockfile
+
+      - name: Login to AWS
+        uses: aws-actions/configure-aws-credentials@v4.1.0
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_DEFAULT_REGION }}
+
+      - name: Bootstrap cdk
+        working-directory: client/cdk
+        run: bunx cdk bootstrap
+
+      - name: Destroy client
+        working-directory: client/cdk
+        run: |
+          bunx cdk destroy --all \
+            --ci true \
+            --force

@@ -4,31 +4,91 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import qwerty.chaekit.domain.Member.Member;
-import qwerty.chaekit.domain.Member.enums.Role;
-import qwerty.chaekit.global.exception.BadRequestException;
+import org.springframework.transaction.annotation.Transactional;
+import qwerty.chaekit.domain.ebook.credit.wallet.CreditWallet;
+import qwerty.chaekit.domain.ebook.credit.wallet.CreditWalletRepository;
+import qwerty.chaekit.domain.member.Member;
+import qwerty.chaekit.domain.member.MemberRepository;
+import qwerty.chaekit.domain.member.enums.Role;
+import qwerty.chaekit.domain.member.publisher.PublisherProfile;
+import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
+import qwerty.chaekit.domain.member.user.UserProfile;
+import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.global.properties.AdminProperties;
-import qwerty.chaekit.service.MemberJoinHelper;
+import qwerty.chaekit.service.member.MemberJoinHelper;
+import qwerty.chaekit.service.member.admin.AdminService;
+
+import java.util.Optional;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@Order(1)
 public class AdminInitializer implements ApplicationRunner {
     private final AdminProperties adminProperties;
     private final MemberJoinHelper memberJoinHelper;
+    private final PublisherProfileRepository publisherProfileRepository;
+    private final AdminService adminService;
+    private final MemberRepository memberRepository;
+    private final UserProfileRepository userProfileRepository;
+    private final CreditWalletRepository creditWalletRepository;
+
 
     @Override
+    @Transactional
     public void run(ApplicationArguments args) {
-        String username = adminProperties.username();
-        String password = adminProperties.password();
+        String adminName = adminProperties.name();
+        String adminEmail = adminProperties.email();
+        String adminPassword = adminProperties.password();
         Role adminRole = Role.ROLE_ADMIN;
 
-        try {
-            Member savedAdmin = memberJoinHelper.saveMember(username, password, adminRole);
-            log.info("관리자가 생성되었습니다. memberId = {}", savedAdmin.getId());
-        } catch (BadRequestException e) {
-            log.info("관리자가 이미 존재합니다.");
-        }
+        Member adminMember = memberRepository.findByEmail(adminEmail).orElseGet(
+                () -> {
+                    // 관리자가 없으면 생성
+                    Member newMember = memberJoinHelper.saveMember(adminEmail, adminPassword, adminRole);
+                    log.info("관리자가 생성되었습니다. memberId = {}", newMember.getId());
+                    return newMember;
+                }
+        );
+
+        Optional<PublisherProfile> publisher = publisherProfileRepository.findByMember_Email(adminEmail);
+        PublisherProfile adminPublisher = publisher.orElseGet(() -> {
+            PublisherProfile newProfile = publisherProfileRepository.save(
+                    PublisherProfile.builder()
+                            .member(adminMember)
+                            .publisherName(adminName)
+                            .build()
+            );
+            newProfile.approvePublisher();
+            log.info("관리자 출판사 프로필이 추가되었습니다.");
+            return newProfile;
+        });
+
+        Optional<UserProfile> user = userProfileRepository.findByMember_Email(adminEmail);
+        UserProfile adminUser = user.orElseGet(() -> {
+            UserProfile newProfile = userProfileRepository.save(
+                    UserProfile.builder()
+                            .member(adminMember)
+                            .nickname(adminName)
+                            .profileImageKey("profile-image/logo.png")
+                            .build()
+            );
+            log.info("관리자 사용자 프로필이 추가되었습니다.");
+            return newProfile;
+        });
+        CreditWallet wallet = creditWalletRepository.findByUser_Id(adminUser.getId())
+                .orElseGet(() -> creditWalletRepository.save(
+                        CreditWallet.builder()
+                                .user(adminUser)
+                                .build()
+                ));
+
+        adminService.setAdminPublisherId(adminPublisher.getId());
+        adminService.setAdminUserId(adminUser.getId());
+        log.info("관리자 설정이 완료되었습니다. email = {}, memberId = {}, publisherId = {}, userId = {}, walletId = {}",
+                adminEmail, adminMember.getId(), adminPublisher.getId(), adminUser.getId(), wallet.getId()
+        );
     }
 }

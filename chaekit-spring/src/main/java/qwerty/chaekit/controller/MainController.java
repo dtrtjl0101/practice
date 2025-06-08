@@ -1,12 +1,15 @@
 package qwerty.chaekit.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import qwerty.chaekit.global.response.ApiSuccessResponse;
 
+@Slf4j
 @RestController
 public class MainController {
     @GetMapping("/api")
-    public String mainApi() {
-        return "Welcome to Chaekit";
+    public ApiSuccessResponse<String> mainApi() {
+        return ApiSuccessResponse.of("Welcome to Chaekit");
     }
 }
