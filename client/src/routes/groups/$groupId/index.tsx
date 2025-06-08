@@ -204,7 +204,10 @@ function RouteComponent() {
 
                   <Divider />
 
-                  <GroupChat groupId={groupId} />
+                  <GroupChat
+                    groupId={groupId}
+                    groupMembershipStatus={group?.myMemberShipStatus}
+                  />
                 </Stack>
               </Paper>
             </Stack>

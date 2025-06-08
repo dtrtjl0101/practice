@@ -6,24 +6,14 @@
     "version": "1.0"
   },
   "servers": [
-    {
-      "url": "http://localhost:8080",
-      "description": "Local Server"
-    },
+    { "url": "http://localhost:8080", "description": "Local Server" },
     {
       "url": "https://dev.api.chaekit.com",
       "description": "Development Server"
     },
-    {
-      "url": "https://api.chaekit.com",
-      "description": "Production Server"
-    }
+    { "url": "https://api.chaekit.com", "description": "Production Server" }
   ],
-  "security": [
-    {
-      "BearerAuth": []
-    }
-  ],
+  "security": [{ "BearerAuth": [] }],
   "paths": {
     "/api/users/join": {
       "post": {
@@ -34,9 +24,7 @@
         "requestBody": {
           "content": {
             "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/UserJoinRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/UserJoinRequest" }
             }
           }
         },
@@ -63,9 +51,7 @@
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RefreshTokenRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/RefreshTokenRequest" }
             }
           },
           "required": true
@@ -93,10 +79,7 @@
             "name": "bookId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "requestBody": {
@@ -130,9 +113,7 @@
         "requestBody": {
           "content": {
             "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/PublisherJoinRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/PublisherJoinRequest" }
             }
           }
         },
@@ -159,9 +140,7 @@
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RefreshTokenRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/RefreshTokenRequest" }
             }
           },
           "required": true
@@ -189,9 +168,7 @@
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/LoginRequest" }
             }
           },
           "required": true
@@ -220,68 +197,45 @@
             "in": "query",
             "description": "Zero-based page index (0..N)",
             "required": false,
-            "schema": {
-              "minimum": 0,
-              "type": "integer",
-              "default": 0
-            }
+            "schema": { "minimum": 0, "type": "integer", "default": 0 }
           },
           {
             "name": "size",
             "in": "query",
             "description": "The size of the page to be returned",
             "required": false,
-            "schema": {
-              "minimum": 1,
-              "type": "integer",
-              "default": 20
-            }
+            "schema": { "minimum": 1, "type": "integer", "default": 20 }
           },
           {
             "name": "sort",
             "in": "query",
             "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
             "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+            "schema": { "type": "array", "items": { "type": "string" } }
           },
           {
             "name": "activityId",
             "in": "query",
             "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           },
           {
             "name": "bookId",
             "in": "query",
             "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           },
           {
             "name": "spine",
             "in": "query",
             "required": false,
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           },
           {
             "name": "me",
             "in": "query",
             "required": true,
-            "schema": {
-              "type": "boolean"
-            }
+            "schema": { "type": "boolean" }
           }
         ],
         "responses": {
@@ -304,9 +258,7 @@
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/HighlightPostRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/HighlightPostRequest" }
             }
           },
           "required": true
@@ -334,10 +286,7 @@
             "name": "highlightId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -361,10 +310,7 @@
             "name": "highlightId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "requestBody": {
@@ -400,10 +346,7 @@
             "name": "highlightId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -427,10 +370,7 @@
             "name": "highlightId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "requestBody": {
@@ -469,45 +409,27 @@
             "in": "query",
             "description": "Zero-based page index (0..N)",
             "required": false,
-            "schema": {
-              "minimum": 0,
-              "type": "integer",
-              "default": 0
-            }
+            "schema": { "minimum": 0, "type": "integer", "default": 0 }
           },
           {
             "name": "size",
             "in": "query",
             "description": "The size of the page to be returned",
             "required": false,
-            "schema": {
-              "minimum": 1,
-              "type": "integer",
-              "default": 20
-            }
+            "schema": { "minimum": 1, "type": "integer", "default": 20 }
           },
           {
             "name": "sort",
             "in": "query",
             "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
             "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+            "schema": { "type": "array", "items": { "type": "string" } }
           },
           {
             "name": "tags",
             "in": "query",
             "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+            "schema": { "type": "array", "items": { "type": "string" } }
           },
           {
             "name": "sortBy",
@@ -539,9 +461,7 @@
         "requestBody": {
           "content": {
             "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/GroupPostRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/GroupPostRequest" }
             }
           }
         },
@@ -570,44 +490,28 @@
             "name": "groupId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           },
           {
             "name": "page",
             "in": "query",
             "description": "Zero-based page index (0..N)",
             "required": false,
-            "schema": {
-              "minimum": 0,
-              "type": "integer",
-              "default": 0
-            }
+            "schema": { "minimum": 0, "type": "integer", "default": 0 }
           },
           {
             "name": "size",
             "in": "query",
             "description": "The size of the page to be returned",
             "required": false,
-            "schema": {
-              "minimum": 1,
-              "type": "integer",
-              "default": 20
-            }
+            "schema": { "minimum": 1, "type": "integer", "default": 20 }
           },
           {
             "name": "sort",
             "in": "query",
             "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
             "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+            "schema": { "type": "array", "items": { "type": "string" } }
           }
         ],
         "responses": {
@@ -633,10 +537,7 @@
             "name": "groupId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "requestBody": {
@@ -674,19 +575,13 @@
             "name": "groupId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           },
           {
             "name": "userId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -732,10 +627,7 @@
             "name": "groupId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -763,44 +655,28 @@
             "name": "groupId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           },
           {
             "name": "page",
             "in": "query",
             "description": "Zero-based page index (0..N)",
             "required": false,
-            "schema": {
-              "minimum": 0,
-              "type": "integer",
-              "default": 0
-            }
+            "schema": { "minimum": 0, "type": "integer", "default": 0 }
           },
           {
             "name": "size",
             "in": "query",
             "description": "The size of the page to be returned",
             "required": false,
-            "schema": {
-              "minimum": 1,
-              "type": "integer",
-              "default": 20
-            }
+            "schema": { "minimum": 1, "type": "integer", "default": 20 }
           },
           {
             "name": "sort",
             "in": "query",
             "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
             "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+            "schema": { "type": "array", "items": { "type": "string" } }
           }
         ],
         "responses": {
@@ -826,18 +702,13 @@
             "name": "groupId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GroupChatRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/GroupChatRequest" }
             }
           },
           "required": true
@@ -866,43 +737,27 @@
             "in": "query",
             "description": "Zero-based page index (0..N)",
             "required": false,
-            "schema": {
-              "minimum": 0,
-              "type": "integer",
-              "default": 0
-            }
+            "schema": { "minimum": 0, "type": "integer", "default": 0 }
           },
           {
             "name": "size",
             "in": "query",
             "description": "The size of the page to be returned",
             "required": false,
-            "schema": {
-              "minimum": 1,
-              "type": "integer",
-              "default": 20
-            }
+            "schema": { "minimum": 1, "type": "integer", "default": 20 }
           },
           {
             "name": "sort",
             "in": "query",
             "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
             "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+            "schema": { "type": "array", "items": { "type": "string" } }
           },
           {
             "name": "groupId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -926,18 +781,13 @@
             "name": "groupId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ActivityPostRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/ActivityPostRequest" }
             }
           },
           "required": true
@@ -963,18 +813,13 @@
             "name": "groupId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ActivityPatchRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/ActivityPatchRequest" }
             }
           },
           "required": true
@@ -1004,9 +849,7 @@
             "name": "email",
             "in": "query",
             "required": true,
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           }
         ],
         "responses": {
@@ -1034,10 +877,7 @@
             "name": "discussionId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "requestBody": {
@@ -1075,9 +915,7 @@
             "name": "pg_token",
             "in": "query",
             "required": true,
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           }
         ],
         "responses": {
@@ -1136,52 +974,35 @@
             "in": "query",
             "description": "Zero-based page index (0..N)",
             "required": false,
-            "schema": {
-              "minimum": 0,
-              "type": "integer",
-              "default": 0
-            }
+            "schema": { "minimum": 0, "type": "integer", "default": 0 }
           },
           {
             "name": "size",
             "in": "query",
             "description": "The size of the page to be returned",
             "required": false,
-            "schema": {
-              "minimum": 1,
-              "type": "integer",
-              "default": 20
-            }
+            "schema": { "minimum": 1, "type": "integer", "default": 20 }
           },
           {
             "name": "sort",
             "in": "query",
             "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
             "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+            "schema": { "type": "array", "items": { "type": "string" } }
           },
           {
             "name": "title",
             "in": "query",
             "description": "책 제목",
             "required": false,
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           },
           {
             "name": "author",
             "in": "query",
             "description": "작가명",
             "required": false,
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           }
         ],
         "responses": {
@@ -1205,9 +1026,7 @@
         "requestBody": {
           "content": {
             "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/EbookPostRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/EbookPostRequest" }
             }
           }
         },
@@ -1237,10 +1056,7 @@
             "in": "path",
             "description": "조회할 전자책 ID",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -1269,10 +1085,7 @@
             "in": "path",
             "description": "전자책 ID",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -1301,10 +1114,7 @@
             "in": "path",
             "description": "승인할 출판물 요청 ID",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "requestBody": {
@@ -1343,10 +1153,7 @@
             "in": "path",
             "description": "승인할 출판물 요청 ID",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -1374,10 +1181,7 @@
             "name": "publisherId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "requestBody": {
@@ -1415,10 +1219,7 @@
             "name": "publisherId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -1446,10 +1247,7 @@
             "name": "activityId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -1477,10 +1275,7 @@
             "name": "activityId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -1509,43 +1304,27 @@
             "in": "query",
             "description": "Zero-based page index (0..N)",
             "required": false,
-            "schema": {
-              "minimum": 0,
-              "type": "integer",
-              "default": 0
-            }
+            "schema": { "minimum": 0, "type": "integer", "default": 0 }
           },
           {
             "name": "size",
             "in": "query",
             "description": "The size of the page to be returned",
             "required": false,
-            "schema": {
-              "minimum": 1,
-              "type": "integer",
-              "default": 20
-            }
+            "schema": { "minimum": 1, "type": "integer", "default": 20 }
           },
           {
             "name": "sort",
             "in": "query",
             "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
             "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+            "schema": { "type": "array", "items": { "type": "string" } }
           },
           {
             "name": "activityId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -1571,18 +1350,13 @@
             "name": "activityId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DiscussionPostRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/DiscussionPostRequest" }
             }
           },
           "required": true
@@ -1611,10 +1385,7 @@
             "name": "notificationId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -1641,10 +1412,7 @@
             "name": "notificationId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -1670,10 +1438,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -1697,10 +1462,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -1724,18 +1486,13 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/HighlightPutRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/HighlightPutRequest" }
             }
           },
           "required": true
@@ -1763,10 +1520,7 @@
             "name": "commentId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -1790,10 +1544,7 @@
             "name": "commentId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "requestBody": {
@@ -1831,10 +1582,7 @@
             "name": "groupId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -1868,18 +1616,13 @@
             "name": "groupId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "requestBody": {
           "content": {
             "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/GroupPatchRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/GroupPatchRequest" }
             }
           }
         },
@@ -1906,19 +1649,13 @@
             "name": "groupId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           },
           {
             "name": "userId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -1944,19 +1681,13 @@
             "name": "groupId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           },
           {
             "name": "userId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -1984,10 +1715,7 @@
             "name": "discussionId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -2013,10 +1741,7 @@
             "name": "discussionId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -2042,10 +1767,7 @@
             "name": "discussionId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "requestBody": {
@@ -2083,10 +1805,7 @@
             "name": "commentId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -2112,10 +1831,7 @@
             "name": "commentId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -2141,10 +1857,7 @@
             "name": "commentId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "requestBody": {
@@ -2222,43 +1935,27 @@
             "in": "query",
             "description": "Zero-based page index (0..N)",
             "required": false,
-            "schema": {
-              "minimum": 0,
-              "type": "integer",
-              "default": 0
-            }
+            "schema": { "minimum": 0, "type": "integer", "default": 0 }
           },
           {
             "name": "size",
             "in": "query",
             "description": "The size of the page to be returned",
             "required": false,
-            "schema": {
-              "minimum": 1,
-              "type": "integer",
-              "default": 20
-            }
+            "schema": { "minimum": 1, "type": "integer", "default": 20 }
           },
           {
             "name": "sort",
             "in": "query",
             "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
             "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+            "schema": { "type": "array", "items": { "type": "string" } }
           },
           {
             "name": "bookId",
             "in": "query",
             "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -2286,9 +1983,7 @@
             "name": "pageable",
             "in": "query",
             "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/Pageable"
-            }
+            "schema": { "$ref": "#/components/schemas/Pageable" }
           }
         ],
         "responses": {
@@ -2316,18 +2011,13 @@
             "name": "bookId",
             "in": "query",
             "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           },
           {
             "name": "pageable",
             "in": "query",
             "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/Pageable"
-            }
+            "schema": { "$ref": "#/components/schemas/Pageable" }
           }
         ],
         "responses": {
@@ -2373,10 +2063,7 @@
             "name": "bookId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -2404,18 +2091,13 @@
             "name": "activityId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           },
           {
             "name": "pageable",
             "in": "query",
             "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/Pageable"
-            }
+            "schema": { "$ref": "#/components/schemas/Pageable" }
           }
         ],
         "responses": {
@@ -2425,6 +2107,32 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiSuccessResponsePageResponseReadingProgressResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reading-progress/activities/{activityId}/history": {
+      "get": {
+        "tags": ["reading-progress-controller"],
+        "operationId": "getProgressHistory",
+        "parameters": [
+          {
+            "name": "activityId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponseListReadingProgressHistoryResponse"
                 }
               }
             }
@@ -2508,34 +2216,21 @@
             "in": "query",
             "description": "Zero-based page index (0..N)",
             "required": false,
-            "schema": {
-              "minimum": 0,
-              "type": "integer",
-              "default": 0
-            }
+            "schema": { "minimum": 0, "type": "integer", "default": 0 }
           },
           {
             "name": "size",
             "in": "query",
             "description": "The size of the page to be returned",
             "required": false,
-            "schema": {
-              "minimum": 1,
-              "type": "integer",
-              "default": 20
-            }
+            "schema": { "minimum": 1, "type": "integer", "default": 20 }
           },
           {
             "name": "sort",
             "in": "query",
             "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
             "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+            "schema": { "type": "array", "items": { "type": "string" } }
           }
         ],
         "responses": {
@@ -2562,9 +2257,7 @@
             "name": "pageable",
             "in": "query",
             "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/Pageable"
-            }
+            "schema": { "$ref": "#/components/schemas/Pageable" }
           }
         ],
         "responses": {
@@ -2591,9 +2284,7 @@
             "name": "pageable",
             "in": "query",
             "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/Pageable"
-            }
+            "schema": { "$ref": "#/components/schemas/Pageable" }
           }
         ],
         "responses": {
@@ -2621,10 +2312,7 @@
             "name": "groupId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -2652,44 +2340,28 @@
             "name": "groupId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           },
           {
             "name": "page",
             "in": "query",
             "description": "Zero-based page index (0..N)",
             "required": false,
-            "schema": {
-              "minimum": 0,
-              "type": "integer",
-              "default": 0
-            }
+            "schema": { "minimum": 0, "type": "integer", "default": 0 }
           },
           {
             "name": "size",
             "in": "query",
             "description": "The size of the page to be returned",
             "required": false,
-            "schema": {
-              "minimum": 1,
-              "type": "integer",
-              "default": 20
-            }
+            "schema": { "minimum": 1, "type": "integer", "default": 20 }
           },
           {
             "name": "sort",
             "in": "query",
             "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
             "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+            "schema": { "type": "array", "items": { "type": "string" } }
           }
         ],
         "responses": {
@@ -2716,43 +2388,27 @@
             "in": "query",
             "description": "Zero-based page index (0..N)",
             "required": false,
-            "schema": {
-              "minimum": 0,
-              "type": "integer",
-              "default": 0
-            }
+            "schema": { "minimum": 0, "type": "integer", "default": 0 }
           },
           {
             "name": "size",
             "in": "query",
             "description": "The size of the page to be returned",
             "required": false,
-            "schema": {
-              "minimum": 1,
-              "type": "integer",
-              "default": 20
-            }
+            "schema": { "minimum": 1, "type": "integer", "default": 20 }
           },
           {
             "name": "sort",
             "in": "query",
             "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
             "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+            "schema": { "type": "array", "items": { "type": "string" } }
           },
           {
             "name": "groupId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -2778,10 +2434,7 @@
             "name": "groupId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -2810,34 +2463,21 @@
             "in": "query",
             "description": "Zero-based page index (0..N)",
             "required": false,
-            "schema": {
-              "minimum": 0,
-              "type": "integer",
-              "default": 0
-            }
+            "schema": { "minimum": 0, "type": "integer", "default": 0 }
           },
           {
             "name": "size",
             "in": "query",
             "description": "The size of the page to be returned",
             "required": false,
-            "schema": {
-              "minimum": 1,
-              "type": "integer",
-              "default": 20
-            }
+            "schema": { "minimum": 1, "type": "integer", "default": 20 }
           },
           {
             "name": "sort",
             "in": "query",
             "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
             "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+            "schema": { "type": "array", "items": { "type": "string" } }
           }
         ],
         "responses": {
@@ -2866,34 +2506,21 @@
             "in": "query",
             "description": "Zero-based page index (0..N)",
             "required": false,
-            "schema": {
-              "minimum": 0,
-              "type": "integer",
-              "default": 0
-            }
+            "schema": { "minimum": 0, "type": "integer", "default": 0 }
           },
           {
             "name": "size",
             "in": "query",
             "description": "The size of the page to be returned",
             "required": false,
-            "schema": {
-              "minimum": 1,
-              "type": "integer",
-              "default": 20
-            }
+            "schema": { "minimum": 1, "type": "integer", "default": 20 }
           },
           {
             "name": "sort",
             "in": "query",
             "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
             "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+            "schema": { "type": "array", "items": { "type": "string" } }
           }
         ],
         "responses": {
@@ -2921,17 +2548,13 @@
             "name": "email",
             "in": "query",
             "required": true,
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           },
           {
             "name": "verificationCode",
             "in": "query",
             "required": true,
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           }
         ],
         "responses": {
@@ -3000,34 +2623,21 @@
             "in": "query",
             "description": "Zero-based page index (0..N)",
             "required": false,
-            "schema": {
-              "minimum": 0,
-              "type": "integer",
-              "default": 0
-            }
+            "schema": { "minimum": 0, "type": "integer", "default": 0 }
           },
           {
             "name": "size",
             "in": "query",
             "description": "The size of the page to be returned",
             "required": false,
-            "schema": {
-              "minimum": 1,
-              "type": "integer",
-              "default": 20
-            }
+            "schema": { "minimum": 1, "type": "integer", "default": 20 }
           },
           {
             "name": "sort",
             "in": "query",
             "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
             "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+            "schema": { "type": "array", "items": { "type": "string" } }
           }
         ],
         "responses": {
@@ -3056,10 +2666,7 @@
             "in": "path",
             "description": "조회할 전자책 ID",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -3088,10 +2695,7 @@
             "in": "path",
             "description": "다운로드할 전자책 ID",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -3120,10 +2724,7 @@
             "in": "path",
             "description": "다운로드할 전자책 ID",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -3152,34 +2753,21 @@
             "in": "query",
             "description": "Zero-based page index (0..N)",
             "required": false,
-            "schema": {
-              "minimum": 0,
-              "type": "integer",
-              "default": 0
-            }
+            "schema": { "minimum": 0, "type": "integer", "default": 0 }
           },
           {
             "name": "size",
             "in": "query",
             "description": "The size of the page to be returned",
             "required": false,
-            "schema": {
-              "minimum": 1,
-              "type": "integer",
-              "default": 20
-            }
+            "schema": { "minimum": 1, "type": "integer", "default": 20 }
           },
           {
             "name": "sort",
             "in": "query",
             "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
             "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+            "schema": { "type": "array", "items": { "type": "string" } }
           }
         ],
         "responses": {
@@ -3208,34 +2796,21 @@
             "in": "query",
             "description": "Zero-based page index (0..N)",
             "required": false,
-            "schema": {
-              "minimum": 0,
-              "type": "integer",
-              "default": 0
-            }
+            "schema": { "minimum": 0, "type": "integer", "default": 0 }
           },
           {
             "name": "size",
             "in": "query",
             "description": "The size of the page to be returned",
             "required": false,
-            "schema": {
-              "minimum": 1,
-              "type": "integer",
-              "default": 20
-            }
+            "schema": { "minimum": 1, "type": "integer", "default": 20 }
           },
           {
             "name": "sort",
             "in": "query",
             "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
             "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+            "schema": { "type": "array", "items": { "type": "string" } }
           }
         ],
         "responses": {
@@ -3264,10 +2839,7 @@
             "in": "path",
             "description": "승인할 출판물 요청 ID",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -3296,34 +2868,21 @@
             "in": "query",
             "description": "Zero-based page index (0..N)",
             "required": false,
-            "schema": {
-              "minimum": 0,
-              "type": "integer",
-              "default": 0
-            }
+            "schema": { "minimum": 0, "type": "integer", "default": 0 }
           },
           {
             "name": "size",
             "in": "query",
             "description": "The size of the page to be returned",
             "required": false,
-            "schema": {
-              "minimum": 1,
-              "type": "integer",
-              "default": 20
-            }
+            "schema": { "minimum": 1, "type": "integer", "default": 20 }
           },
           {
             "name": "sort",
             "in": "query",
             "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
             "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+            "schema": { "type": "array", "items": { "type": "string" } }
           }
         ],
         "responses": {
@@ -3352,34 +2911,21 @@
             "in": "query",
             "description": "Zero-based page index (0..N)",
             "required": false,
-            "schema": {
-              "minimum": 0,
-              "type": "integer",
-              "default": 0
-            }
+            "schema": { "minimum": 0, "type": "integer", "default": 0 }
           },
           {
             "name": "size",
             "in": "query",
             "description": "The size of the page to be returned",
             "required": false,
-            "schema": {
-              "minimum": 1,
-              "type": "integer",
-              "default": 20
-            }
+            "schema": { "minimum": 1, "type": "integer", "default": 20 }
           },
           {
             "name": "sort",
             "in": "query",
             "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
             "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+            "schema": { "type": "array", "items": { "type": "string" } }
           }
         ],
         "responses": {
@@ -3408,34 +2954,21 @@
             "in": "query",
             "description": "Zero-based page index (0..N)",
             "required": false,
-            "schema": {
-              "minimum": 0,
-              "type": "integer",
-              "default": 0
-            }
+            "schema": { "minimum": 0, "type": "integer", "default": 0 }
           },
           {
             "name": "size",
             "in": "query",
             "description": "The size of the page to be returned",
             "required": false,
-            "schema": {
-              "minimum": 1,
-              "type": "integer",
-              "default": 20
-            }
+            "schema": { "minimum": 1, "type": "integer", "default": 20 }
           },
           {
             "name": "sort",
             "in": "query",
             "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
             "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+            "schema": { "type": "array", "items": { "type": "string" } }
           }
         ],
         "responses": {
@@ -3461,10 +2994,7 @@
             "name": "activityId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -3474,6 +3004,62 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiSuccessResponseActivityFetchResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/activities/{activityId}/scores": {
+      "get": {
+        "tags": ["activity-controller"],
+        "summary": "상위 5명의 활동 점수 조회",
+        "description": "활동에 참여한 유저들의 활동 점수를 조회합니다. 점수는 하이라이트, 하이라이트 댓글, 토론, 토론 댓글의 개수에 따라 계산됩니다. 하이라이트는 3점, 하이라이트 댓글은 1점, 토론은 5점, 토론 댓글은 2점입니다.",
+        "operationId": "getActivityTop5Scores",
+        "parameters": [
+          {
+            "name": "activityId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponseListActivityScoreResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/activities/{activityId}/highlights/recent": {
+      "get": {
+        "tags": ["activity-controller"],
+        "summary": "최근 메모 조회",
+        "description": "특정 활동에 등록된 최신 하이라이트 5개를 조회합니다.",
+        "operationId": "getRecentHighlights",
+        "parameters": [
+          {
+            "name": "activityId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponseListHighlightPreviewResponse"
                 }
               }
             }
@@ -3552,10 +3138,7 @@
             "name": "reactionId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -3581,10 +3164,7 @@
             "name": "groupId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -3608,33 +3188,18 @@
         "required": ["email", "nickname", "password", "verificationCode"],
         "type": "object",
         "properties": {
-          "email": {
-            "type": "string"
-          },
-          "password": {
-            "type": "string"
-          },
-          "nickname": {
-            "type": "string"
-          },
-          "profileImage": {
-            "type": "string",
-            "format": "binary"
-          },
-          "verificationCode": {
-            "type": "string"
-          }
+          "email": { "type": "string" },
+          "password": { "type": "string" },
+          "nickname": { "type": "string" },
+          "profileImage": { "type": "string", "format": "binary" },
+          "verificationCode": { "type": "string" }
         }
       },
       "ApiSuccessResponseLoginResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/LoginResponse"
-          }
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/LoginResponse" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
@@ -3707,56 +3272,35 @@
       "RefreshTokenRequest": {
         "required": ["refreshToken"],
         "type": "object",
-        "properties": {
-          "refreshToken": {
-            "type": "string"
-          }
-        }
+        "properties": { "refreshToken": { "type": "string" } }
       },
       "ApiSuccessResponseRefreshTokenResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/RefreshTokenResponse"
-          }
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/RefreshTokenResponse" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
       "RefreshTokenResponse": {
         "type": "object",
         "properties": {
-          "refreshToken": {
-            "type": "string"
-          },
-          "accessToken": {
-            "type": "string"
-          }
+          "refreshToken": { "type": "string" },
+          "accessToken": { "type": "string" }
         }
       },
       "ReadingProgressRequest": {
         "type": "object",
         "properties": {
-          "cfi": {
-            "type": "string"
-          },
-          "percentage": {
-            "type": "integer",
-            "format": "int64"
-          }
+          "cfi": { "type": "string" },
+          "percentage": { "type": "integer", "format": "int64" }
         }
       },
       "ApiSuccessResponseVoid": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
-          "data": {
-            "type": "object"
-          }
+          "isSuccessful": { "type": "boolean" },
+          "data": { "type": "object" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
@@ -3764,109 +3308,56 @@
         "required": ["email", "password", "publisherName", "verificationCode"],
         "type": "object",
         "properties": {
-          "publisherName": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          },
-          "password": {
-            "type": "string"
-          },
-          "profileImage": {
-            "type": "string",
-            "format": "binary"
-          },
-          "verificationCode": {
-            "type": "string"
-          }
+          "publisherName": { "type": "string" },
+          "email": { "type": "string" },
+          "password": { "type": "string" },
+          "profileImage": { "type": "string", "format": "binary" },
+          "verificationCode": { "type": "string" }
         }
       },
       "LoginRequest": {
         "required": ["email", "password"],
         "type": "object",
         "properties": {
-          "email": {
-            "type": "string"
-          },
-          "password": {
-            "type": "string"
-          }
+          "email": { "type": "string" },
+          "password": { "type": "string" }
         }
       },
       "HighlightPostRequest": {
         "type": "object",
         "properties": {
-          "bookId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "spine": {
-            "type": "string"
-          },
-          "cfi": {
-            "type": "string"
-          },
-          "activityId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "memo": {
-            "type": "string"
-          },
-          "highlightContent": {
-            "type": "string"
-          }
+          "bookId": { "type": "integer", "format": "int64" },
+          "spine": { "type": "string" },
+          "cfi": { "type": "string" },
+          "activityId": { "type": "integer", "format": "int64" },
+          "memo": { "type": "string" },
+          "highlightContent": { "type": "string" }
         }
       },
       "ApiSuccessResponseHighlightPostResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/HighlightPostResponse"
-          }
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/HighlightPostResponse" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
       "HighlightPostResponse": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "bookId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "spine": {
-            "type": "string"
-          },
-          "cfi": {
-            "type": "string"
-          },
-          "memo": {
-            "type": "string"
-          },
-          "activityId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "highlightContent": {
-            "type": "string"
-          }
+          "id": { "type": "integer", "format": "int64" },
+          "bookId": { "type": "integer", "format": "int64" },
+          "spine": { "type": "string" },
+          "cfi": { "type": "string" },
+          "memo": { "type": "string" },
+          "activityId": { "type": "integer", "format": "int64" },
+          "highlightContent": { "type": "string" }
         }
       },
       "HighlightReactionRequest": {
         "type": "object",
         "properties": {
-          "commentId": {
-            "type": "integer",
-            "format": "int64"
-          },
+          "commentId": { "type": "integer", "format": "int64" },
           "reactionType": {
             "type": "string",
             "enum": [
@@ -3884,29 +3375,17 @@
       "ApiSuccessResponseHighlightReactionResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/HighlightReactionResponse"
-          }
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/HighlightReactionResponse" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
       "HighlightReactionResponse": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "authorId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "authorName": {
-            "type": "string"
-          },
+          "id": { "type": "integer", "format": "int64" },
+          "authorId": { "type": "integer", "format": "int64" },
+          "authorName": { "type": "string" },
           "reactionType": {
             "type": "string",
             "enum": [
@@ -3919,76 +3398,39 @@
               "SURPRISED"
             ]
           },
-          "emoji": {
-            "type": "string"
-          },
-          "commentId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          }
+          "emoji": { "type": "string" },
+          "commentId": { "type": "integer", "format": "int64" },
+          "createdAt": { "type": "string", "format": "date-time" }
         }
       },
       "HighlightCommentRequest": {
         "type": "object",
         "properties": {
-          "content": {
-            "type": "string"
-          },
-          "parentId": {
-            "type": "integer",
-            "format": "int64"
-          }
+          "content": { "type": "string" },
+          "parentId": { "type": "integer", "format": "int64" }
         }
       },
       "ApiSuccessResponseHighlightCommentResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/HighlightCommentResponse"
-          }
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/HighlightCommentResponse" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
       "HighlightCommentResponse": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "authorId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "authorName": {
-            "type": "string"
-          },
-          "authorProfileImageURL": {
-            "type": "string"
-          },
-          "content": {
-            "type": "string"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
+          "id": { "type": "integer", "format": "int64" },
+          "authorId": { "type": "integer", "format": "int64" },
+          "authorName": { "type": "string" },
+          "authorProfileImageURL": { "type": "string" },
+          "content": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" },
           "replies": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/HighlightCommentResponse"
-            }
+            "items": { "$ref": "#/components/schemas/HighlightCommentResponse" }
           },
           "reactions": {
             "type": "array",
@@ -4002,73 +3444,36 @@
         "required": ["description", "name"],
         "type": "object",
         "properties": {
-          "name": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "tags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "groupImage": {
-            "type": "string",
-            "format": "binary"
-          },
-          "autoApproval": {
-            "type": "boolean"
-          }
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "groupImage": { "type": "string", "format": "binary" },
+          "autoApproval": { "type": "boolean" }
         }
       },
       "ApiSuccessResponseGroupPostResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/GroupPostResponse"
-          }
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/GroupPostResponse" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
       "GroupPostResponse": {
         "type": "object",
         "properties": {
-          "groupId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "name": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "groupImageURL": {
-            "type": "string"
-          },
-          "tags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
+          "groupId": { "type": "integer", "format": "int64" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "groupImageURL": { "type": "string" },
+          "tags": { "type": "array", "items": { "type": "string" } }
         }
       },
       "GroupReviewPostRequest": {
         "type": "object",
         "properties": {
-          "activityId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "content": {
-            "type": "string"
-          },
+          "activityId": { "type": "integer", "format": "int64" },
+          "content": { "type": "string" },
           "tags": {
             "type": "array",
             "items": {
@@ -4094,67 +3499,28 @@
       "ApiSuccessResponseGroupReviewFetchResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/GroupReviewFetchResponse"
-          }
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/GroupReviewFetchResponse" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
       "GroupReviewFetchResponse": {
         "type": "object",
         "properties": {
-          "reviewId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "groupId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "groupName": {
-            "type": "string"
-          },
-          "activityId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "activityStartTime": {
-            "type": "string",
-            "format": "date"
-          },
-          "activityEndTime": {
-            "type": "string",
-            "format": "date"
-          },
-          "bookId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "bookTitle": {
-            "type": "string"
-          },
-          "bookAuthor": {
-            "type": "string"
-          },
-          "bookCoverImageURL": {
-            "type": "string"
-          },
-          "content": {
-            "type": "string"
-          },
-          "authorId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "authorNickname": {
-            "type": "string"
-          },
-          "authorProfileImageURL": {
-            "type": "string"
-          },
+          "reviewId": { "type": "integer", "format": "int64" },
+          "groupId": { "type": "integer", "format": "int64" },
+          "groupName": { "type": "string" },
+          "activityId": { "type": "integer", "format": "int64" },
+          "activityStartTime": { "type": "string", "format": "date" },
+          "activityEndTime": { "type": "string", "format": "date" },
+          "bookId": { "type": "integer", "format": "int64" },
+          "bookTitle": { "type": "string" },
+          "bookAuthor": { "type": "string" },
+          "bookCoverImageURL": { "type": "string" },
+          "content": { "type": "string" },
+          "authorId": { "type": "integer", "format": "int64" },
+          "authorNickname": { "type": "string" },
+          "authorProfileImageURL": { "type": "string" },
           "tags": {
             "type": "array",
             "items": {
@@ -4175,164 +3541,85 @@
               ]
             }
           },
-          "createdAt": {
-            "type": "string",
-            "format": "date"
-          },
-          "modifiedAt": {
-            "type": "string",
-            "format": "date"
-          }
+          "createdAt": { "type": "string", "format": "date" },
+          "modifiedAt": { "type": "string", "format": "date" }
         }
       },
       "ApiSuccessResponseGroupJoinResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/GroupJoinResponse"
-          }
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/GroupJoinResponse" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
       "GroupJoinResponse": {
         "type": "object",
         "properties": {
-          "groupId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "memberId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "memberName": {
-            "type": "string"
-          },
-          "isAccepted": {
-            "type": "boolean"
-          }
+          "groupId": { "type": "integer", "format": "int64" },
+          "memberId": { "type": "integer", "format": "int64" },
+          "memberName": { "type": "string" },
+          "isAccepted": { "type": "boolean" }
         }
       },
       "GroupChatRequest": {
         "required": ["content"],
         "type": "object",
-        "properties": {
-          "content": {
-            "type": "string"
-          }
-        }
+        "properties": { "content": { "type": "string" } }
       },
       "ApiSuccessResponseGroupChatResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/GroupChatResponse"
-          }
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/GroupChatResponse" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
       "GroupChatResponse": {
         "type": "object",
         "properties": {
-          "chatId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "groupId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "authorId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "authorName": {
-            "type": "string"
-          },
-          "authorProfileImage": {
-            "type": "string"
-          },
-          "content": {
-            "type": "string"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          }
+          "chatId": { "type": "integer", "format": "int64" },
+          "groupId": { "type": "integer", "format": "int64" },
+          "authorId": { "type": "integer", "format": "int64" },
+          "authorName": { "type": "string" },
+          "authorProfileImage": { "type": "string" },
+          "content": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" }
         }
       },
       "ActivityPostRequest": {
         "required": ["bookId", "endTime", "startTime"],
         "type": "object",
         "properties": {
-          "bookId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "startTime": {
-            "type": "string",
-            "format": "date"
-          },
-          "endTime": {
-            "type": "string",
-            "format": "date"
-          },
-          "description": {
-            "type": "string"
-          }
+          "bookId": { "type": "integer", "format": "int64" },
+          "startTime": { "type": "string", "format": "date" },
+          "endTime": { "type": "string", "format": "date" },
+          "description": { "type": "string" }
         }
       },
       "ActivityPostResponse": {
         "type": "object",
         "properties": {
-          "activityId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "bookId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "startTime": {
-            "type": "string",
-            "format": "date"
-          },
-          "endTime": {
-            "type": "string",
-            "format": "date"
-          },
-          "description": {
-            "type": "string"
-          }
+          "activityId": { "type": "integer", "format": "int64" },
+          "bookId": { "type": "integer", "format": "int64" },
+          "startTime": { "type": "string", "format": "date" },
+          "endTime": { "type": "string", "format": "date" },
+          "description": { "type": "string" }
         }
       },
       "ApiSuccessResponseActivityPostResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/ActivityPostResponse"
-          }
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/ActivityPostResponse" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
       "ApiSuccessResponseString": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
-          "data": {
-            "type": "string"
-          }
+          "isSuccessful": { "type": "boolean" },
+          "data": { "type": "string" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
@@ -4340,13 +3627,8 @@
         "required": ["content", "stance"],
         "type": "object",
         "properties": {
-          "parentId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "content": {
-            "type": "string"
-          },
+          "parentId": { "type": "integer", "format": "int64" },
+          "content": { "type": "string" },
           "stance": {
             "type": "string",
             "enum": ["AGREE", "DISAGREE", "NEUTRAL"]
@@ -4356,9 +3638,7 @@
       "ApiSuccessResponseDiscussionCommentFetchResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
+          "isSuccessful": { "type": "boolean" },
           "data": {
             "$ref": "#/components/schemas/DiscussionCommentFetchResponse"
           }
@@ -4368,45 +3648,20 @@
       "DiscussionCommentFetchResponse": {
         "type": "object",
         "properties": {
-          "commentId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "authorId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "authorName": {
-            "type": "string"
-          },
-          "authorProfileImageURL": {
-            "type": "string"
-          },
-          "content": {
-            "type": "string"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "modifiedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "isEdited": {
-            "type": "boolean"
-          },
-          "isDeleted": {
-            "type": "boolean"
-          },
+          "commentId": { "type": "integer", "format": "int64" },
+          "authorId": { "type": "integer", "format": "int64" },
+          "authorName": { "type": "string" },
+          "authorProfileImageURL": { "type": "string" },
+          "content": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "modifiedAt": { "type": "string", "format": "date-time" },
+          "isEdited": { "type": "boolean" },
+          "isDeleted": { "type": "boolean" },
           "stance": {
             "type": "string",
             "enum": ["AGREE", "DISAGREE", "NEUTRAL"]
           },
-          "parentId": {
-            "type": "integer",
-            "format": "int64"
-          },
+          "parentId": { "type": "integer", "format": "int64" },
           "replies": {
             "type": "array",
             "items": {
@@ -4418,9 +3673,7 @@
       "ApiSuccessResponseCreditPaymentApproveResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
+          "isSuccessful": { "type": "boolean" },
           "data": {
             "$ref": "#/components/schemas/CreditPaymentApproveResponse"
           }
@@ -4430,36 +3683,18 @@
       "CreditPaymentApproveResponse": {
         "type": "object",
         "properties": {
-          "orderId": {
-            "type": "string"
-          },
-          "creditProductId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "creditProductName": {
-            "type": "string"
-          },
-          "paymentMethod": {
-            "type": "string"
-          },
-          "paymentAmount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "approvedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
+          "orderId": { "type": "string" },
+          "creditProductId": { "type": "integer", "format": "int32" },
+          "creditProductName": { "type": "string" },
+          "paymentMethod": { "type": "string" },
+          "paymentAmount": { "type": "integer", "format": "int32" },
+          "approvedAt": { "type": "string", "format": "date-time" }
         }
       },
       "CreditPaymentReadyRequest": {
         "type": "object",
         "properties": {
-          "creditProductId": {
-            "type": "integer",
-            "format": "int64"
-          }
+          "creditProductId": { "type": "integer", "format": "int64" }
         }
       },
       "EbookPostRequest": {
@@ -4481,323 +3716,169 @@
             "description": "책 설명",
             "example": "《이상한 나라의 앨리스》는 영국의 수학자이자 작가인 찰스 루트위지 도지슨이 루이스 캐럴이라는 필명으로 1865년에 발표한 소설이다."
           },
-          "file": {
-            "type": "string",
-            "format": "binary"
-          },
+          "file": { "type": "string", "format": "binary" },
           "price": {
             "type": "integer",
             "description": "책 가격",
             "format": "int32",
             "example": 10000
           },
-          "coverImageFile": {
-            "type": "string",
-            "format": "binary"
-          }
+          "coverImageFile": { "type": "string", "format": "binary" }
         },
         "description": "전자책 업로드 요청 데이터"
       },
       "ApiSuccessResponseEbookPostResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/EbookPostResponse"
-          }
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/EbookPostResponse" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
       "EbookPostResponse": {
         "type": "object",
         "properties": {
-          "requestId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "bookId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "title": {
-            "type": "string"
-          },
-          "author": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "coverImageURL": {
-            "type": "string"
-          }
+          "requestId": { "type": "integer", "format": "int64" },
+          "bookId": { "type": "integer", "format": "int64" },
+          "title": { "type": "string" },
+          "author": { "type": "string" },
+          "description": { "type": "string" },
+          "coverImageURL": { "type": "string" }
         }
       },
       "ApiSuccessResponseEbookPurchaseResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/EbookPurchaseResponse"
-          }
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/EbookPurchaseResponse" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
       "EbookPurchaseResponse": {
         "type": "object",
         "properties": {
-          "userId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "transactionId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "creditAmount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "bookId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "title": {
-            "type": "string"
-          },
-          "author": {
-            "type": "string"
-          },
-          "presignedDownloadURL": {
-            "type": "string"
-          }
+          "userId": { "type": "integer", "format": "int64" },
+          "transactionId": { "type": "integer", "format": "int64" },
+          "creditAmount": { "type": "integer", "format": "int32" },
+          "bookId": { "type": "integer", "format": "int64" },
+          "title": { "type": "string" },
+          "author": { "type": "string" },
+          "presignedDownloadURL": { "type": "string" }
         }
       },
       "EbookRequestRejectRequest": {
         "type": "object",
-        "properties": {
-          "reason": {
-            "type": "string"
-          }
-        }
+        "properties": { "reason": { "type": "string" } }
       },
       "RejectPublisherRequest": {
         "required": ["reason"],
         "type": "object",
-        "properties": {
-          "reason": {
-            "type": "string"
-          }
-        }
+        "properties": { "reason": { "type": "string" } }
       },
       "DiscussionPostRequest": {
         "required": ["content", "isDebate", "title"],
         "type": "object",
         "properties": {
-          "title": {
-            "type": "string"
-          },
-          "content": {
-            "type": "string"
-          },
-          "isDebate": {
-            "type": "boolean"
-          },
+          "title": { "type": "string" },
+          "content": { "type": "string" },
+          "isDebate": { "type": "boolean" },
           "highlightIds": {
             "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "items": { "type": "integer", "format": "int64" }
           }
         }
       },
       "ApiSuccessResponseDiscussionFetchResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/DiscussionFetchResponse"
-          }
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/DiscussionFetchResponse" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
       "DiscussionFetchResponse": {
         "type": "object",
         "properties": {
-          "discussionId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "activityId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "title": {
-            "type": "string"
-          },
-          "content": {
-            "type": "string"
-          },
-          "authorId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "authorName": {
-            "type": "string"
-          },
-          "authorProfileImage": {
-            "type": "string"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "modifiedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "commentCount": {
-            "type": "integer",
-            "format": "int64"
-          },
+          "discussionId": { "type": "integer", "format": "int64" },
+          "activityId": { "type": "integer", "format": "int64" },
+          "title": { "type": "string" },
+          "content": { "type": "string" },
+          "authorId": { "type": "integer", "format": "int64" },
+          "authorName": { "type": "string" },
+          "authorProfileImage": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "modifiedAt": { "type": "string", "format": "date-time" },
+          "commentCount": { "type": "integer", "format": "int64" },
           "highlightIds": {
             "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "items": { "type": "integer", "format": "int64" }
           },
-          "isDebate": {
-            "type": "boolean"
-          },
-          "isAuthor": {
-            "type": "boolean"
-          }
+          "isDebate": { "type": "boolean" },
+          "isAuthor": { "type": "boolean" }
         }
       },
       "HighlightPutRequest": {
         "type": "object",
         "properties": {
-          "activityId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "memo": {
-            "type": "string"
-          }
+          "activityId": { "type": "integer", "format": "int64" },
+          "memo": { "type": "string" }
         }
       },
       "GroupPatchRequest": {
         "type": "object",
         "properties": {
-          "name": {
-            "type": "string"
-          },
-          "tags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "description": {
-            "type": "string"
-          },
-          "groupImage": {
-            "type": "string",
-            "format": "binary"
-          },
-          "autoApproval": {
-            "type": "boolean"
-          }
+          "name": { "type": "string" },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "description": { "type": "string" },
+          "groupImage": { "type": "string", "format": "binary" },
+          "autoApproval": { "type": "boolean" }
         }
       },
       "ActivityPatchRequest": {
         "required": ["activityId"],
         "type": "object",
         "properties": {
-          "activityId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "startTime": {
-            "type": "string",
-            "format": "date"
-          },
-          "endTime": {
-            "type": "string",
-            "format": "date"
-          },
-          "description": {
-            "type": "string"
-          }
+          "activityId": { "type": "integer", "format": "int64" },
+          "startTime": { "type": "string", "format": "date" },
+          "endTime": { "type": "string", "format": "date" },
+          "description": { "type": "string" }
         }
       },
       "DiscussionPatchRequest": {
         "type": "object",
         "properties": {
-          "title": {
-            "type": "string"
-          },
-          "content": {
-            "type": "string"
-          },
+          "title": { "type": "string" },
+          "content": { "type": "string" },
           "highlightIds": {
             "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "items": { "type": "integer", "format": "int64" }
           }
         }
       },
       "DiscussionCommentPatchRequest": {
         "type": "object",
-        "properties": {
-          "content": {
-            "type": "string"
-          }
-        }
+        "properties": { "content": { "type": "string" } }
       },
       "ApiSuccessResponseUserInfoResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/UserInfoResponse"
-          }
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/UserInfoResponse" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
       "UserInfoResponse": {
         "type": "object",
         "properties": {
-          "userId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "nickname": {
-            "type": "string"
-          },
-          "profileImageURL": {
-            "type": "string"
-          }
+          "userId": { "type": "integer", "format": "int64" },
+          "nickname": { "type": "string" },
+          "profileImageURL": { "type": "string" }
         }
       },
       "ApiSuccessResponsePageResponseHighlightFetchResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
+          "isSuccessful": { "type": "boolean" },
           "data": {
             "$ref": "#/components/schemas/PageResponseHighlightFetchResponse"
           }
@@ -4807,69 +3888,32 @@
       "DiscussionSummaryResponse": {
         "type": "object",
         "properties": {
-          "discussionId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "activityId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "title": {
-            "type": "string"
-          },
-          "authorId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "authorName": {
-            "type": "string"
-          }
+          "discussionId": { "type": "integer", "format": "int64" },
+          "activityId": { "type": "integer", "format": "int64" },
+          "title": { "type": "string" },
+          "authorId": { "type": "integer", "format": "int64" },
+          "authorName": { "type": "string" }
         }
       },
       "HighlightFetchResponse": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "bookId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "authorId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "authorName": {
-            "type": "string"
-          },
-          "authorProfileImageURL": {
-            "type": "string"
-          },
-          "spine": {
-            "type": "string"
-          },
-          "cfi": {
-            "type": "string"
-          },
-          "memo": {
-            "type": "string"
-          },
-          "activityId": {
-            "type": "integer",
-            "format": "int64"
-          },
+          "id": { "type": "integer", "format": "int64" },
+          "bookId": { "type": "integer", "format": "int64" },
+          "authorId": { "type": "integer", "format": "int64" },
+          "authorName": { "type": "string" },
+          "authorProfileImageURL": { "type": "string" },
+          "spine": { "type": "string" },
+          "cfi": { "type": "string" },
+          "memo": { "type": "string" },
+          "activityId": { "type": "integer", "format": "int64" },
           "linkedDiscussions": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/DiscussionSummaryResponse"
             }
           },
-          "highlightContent": {
-            "type": "string"
-          }
+          "highlightContent": { "type": "string" }
         }
       },
       "PageResponseHighlightFetchResponse": {
@@ -4877,51 +3921,25 @@
         "properties": {
           "content": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/HighlightFetchResponse"
-            }
+            "items": { "$ref": "#/components/schemas/HighlightFetchResponse" }
           },
-          "currentPage": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalItems": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          }
+          "currentPage": { "type": "integer", "format": "int32" },
+          "totalItems": { "type": "integer", "format": "int64" },
+          "totalPages": { "type": "integer", "format": "int32" }
         }
       },
       "Pageable": {
         "type": "object",
         "properties": {
-          "page": {
-            "minimum": 0,
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "minimum": 1,
-            "type": "integer",
-            "format": "int32"
-          },
-          "sort": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
+          "page": { "minimum": 0, "type": "integer", "format": "int32" },
+          "size": { "minimum": 1, "type": "integer", "format": "int32" },
+          "sort": { "type": "array", "items": { "type": "string" } }
         }
       },
       "ApiSuccessResponsePageResponseGroupFetchResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
+          "isSuccessful": { "type": "boolean" },
           "data": {
             "$ref": "#/components/schemas/PageResponseGroupFetchResponse"
           }
@@ -4931,41 +3949,17 @@
       "GroupFetchResponse": {
         "type": "object",
         "properties": {
-          "groupId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "name": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "tags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "groupImageURL": {
-            "type": "string"
-          },
-          "leaderId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "leaderNickname": {
-            "type": "string"
-          },
-          "leaderProfileImageURL": {
-            "type": "string"
-          },
+          "groupId": { "type": "integer", "format": "int64" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "groupImageURL": { "type": "string" },
+          "leaderId": { "type": "integer", "format": "int64" },
+          "leaderNickname": { "type": "string" },
+          "leaderProfileImageURL": { "type": "string" },
           "myMemberShipStatus": {
             "type": "string",
             "enum": ["OWNED", "PENDING", "JOINED", "NONE"]
-          },
-          "isAutoApproval": {
-            "type": "boolean"
           },
           "memberCount": {
             "type": "integer",
@@ -4978,73 +3972,33 @@
         "properties": {
           "content": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GroupFetchResponse"
-            }
+            "items": { "$ref": "#/components/schemas/GroupFetchResponse" }
           },
-          "currentPage": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalItems": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          }
+          "currentPage": { "type": "integer", "format": "int32" },
+          "totalItems": { "type": "integer", "format": "int64" },
+          "totalPages": { "type": "integer", "format": "int32" }
         }
       },
       "ActivityFetchResponse": {
         "type": "object",
         "properties": {
-          "activityId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "groupId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "bookId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "bookTitle": {
-            "type": "string"
-          },
-          "bookAuthor": {
-            "type": "string"
-          },
-          "coverImageURL": {
-            "type": "string"
-          },
-          "bookDescription": {
-            "type": "string"
-          },
-          "startTime": {
-            "type": "string",
-            "format": "date"
-          },
-          "endTime": {
-            "type": "string",
-            "format": "date"
-          },
-          "description": {
-            "type": "string"
-          },
-          "isParticipant": {
-            "type": "boolean"
-          }
+          "activityId": { "type": "integer", "format": "int64" },
+          "groupId": { "type": "integer", "format": "int64" },
+          "bookId": { "type": "integer", "format": "int64" },
+          "bookTitle": { "type": "string" },
+          "bookAuthor": { "type": "string" },
+          "coverImageURL": { "type": "string" },
+          "bookDescription": { "type": "string" },
+          "startTime": { "type": "string", "format": "date" },
+          "endTime": { "type": "string", "format": "date" },
+          "description": { "type": "string" },
+          "isParticipant": { "type": "boolean" }
         }
       },
       "ApiSuccessResponsePageResponseActivityFetchResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
+          "isSuccessful": { "type": "boolean" },
           "data": {
             "$ref": "#/components/schemas/PageResponseActivityFetchResponse"
           }
@@ -5056,105 +4010,54 @@
         "properties": {
           "content": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ActivityFetchResponse"
-            }
+            "items": { "$ref": "#/components/schemas/ActivityFetchResponse" }
           },
-          "currentPage": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalItems": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          }
+          "currentPage": { "type": "integer", "format": "int32" },
+          "totalItems": { "type": "integer", "format": "int64" },
+          "totalPages": { "type": "integer", "format": "int32" }
         }
       },
       "ApiSuccessResponseMainStatisticResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/MainStatisticResponse"
-          }
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/MainStatisticResponse" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
       "MainStatisticResponse": {
         "type": "object",
         "properties": {
-          "totalGroups": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalUsers": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalEbooks": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalActivities": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "increasedActivities": {
-            "type": "integer",
-            "format": "int64"
-          }
+          "totalGroups": { "type": "integer", "format": "int64" },
+          "totalUsers": { "type": "integer", "format": "int64" },
+          "totalEbooks": { "type": "integer", "format": "int64" },
+          "totalActivities": { "type": "integer", "format": "int64" },
+          "increasedActivities": { "type": "integer", "format": "int64" }
         }
       },
       "ApiSuccessResponseReadingProgressResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/ReadingProgressResponse"
-          }
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/ReadingProgressResponse" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
       "ReadingProgressResponse": {
         "type": "object",
         "properties": {
-          "bookId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "userId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "userNickname": {
-            "type": "string"
-          },
-          "userProfileImageURL": {
-            "type": "string"
-          },
-          "cfi": {
-            "type": "string"
-          },
-          "percentage": {
-            "type": "integer",
-            "format": "int64"
-          }
+          "bookId": { "type": "integer", "format": "int64" },
+          "userId": { "type": "integer", "format": "int64" },
+          "userNickname": { "type": "string" },
+          "userProfileImageURL": { "type": "string" },
+          "cfi": { "type": "string" },
+          "percentage": { "type": "integer", "format": "int64" }
         }
       },
       "ApiSuccessResponsePageResponseReadingProgressResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
+          "isSuccessful": { "type": "boolean" },
           "data": {
             "$ref": "#/components/schemas/PageResponseReadingProgressResponse"
           }
@@ -5166,22 +4069,32 @@
         "properties": {
           "content": {
             "type": "array",
+            "items": { "$ref": "#/components/schemas/ReadingProgressResponse" }
+          },
+          "currentPage": { "type": "integer", "format": "int32" },
+          "totalItems": { "type": "integer", "format": "int64" },
+          "totalPages": { "type": "integer", "format": "int32" }
+        }
+      },
+      "ApiSuccessResponseListReadingProgressHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "isSuccessful": { "type": "boolean" },
+          "data": {
+            "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ReadingProgressResponse"
+              "$ref": "#/components/schemas/ReadingProgressHistoryResponse"
             }
-          },
-          "currentPage": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalItems": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
           }
+        },
+        "description": "API 에러 응답을 감싸는 클래스"
+      },
+      "ReadingProgressHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "date": { "type": "string", "format": "date" },
+          "myPercentage": { "type": "integer", "format": "int64" },
+          "averagePercentage": { "type": "number", "format": "double" }
         }
       },
       "ApiSuccessResponseListReadingProgressHistoryResponse": {
@@ -5219,172 +4132,86 @@
       "ApiSuccessResponsePublisherStatsResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/PublisherStatsResponse"
-          }
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/PublisherStatsResponse" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
       "MonthlyRevenue": {
         "type": "object",
         "properties": {
-          "month": {
-            "type": "string"
-          },
-          "monthlyRevenue": {
-            "type": "integer",
-            "format": "int64"
-          }
+          "month": { "type": "string" },
+          "monthlyRevenue": { "type": "integer", "format": "int64" }
         }
       },
       "PublisherStatsResponse": {
         "type": "object",
         "properties": {
-          "totalSalesCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "increasedSalesCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalRevenue": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "increasedRevenue": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalActivityCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "increasedActivityCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalViewCount": {
-            "type": "integer",
-            "format": "int64"
-          },
+          "totalSalesCount": { "type": "integer", "format": "int64" },
+          "increasedSalesCount": { "type": "integer", "format": "int64" },
+          "totalRevenue": { "type": "integer", "format": "int64" },
+          "increasedRevenue": { "type": "integer", "format": "int64" },
+          "totalActivityCount": { "type": "integer", "format": "int64" },
+          "increasedActivityCount": { "type": "integer", "format": "int64" },
+          "totalViewCount": { "type": "integer", "format": "int64" },
           "monthlyRevenueList": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MonthlyRevenue"
-            }
+            "items": { "$ref": "#/components/schemas/MonthlyRevenue" }
           },
           "increasedSalesCountsPerEbook": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SalesCountPerEbook"
-            }
+            "items": { "$ref": "#/components/schemas/SalesCountPerEbook" }
           },
           "statsPerEbookList": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/StatsPerEbook"
-            }
+            "items": { "$ref": "#/components/schemas/StatsPerEbook" }
           }
         }
       },
       "SalesCountPerEbook": {
         "type": "object",
         "properties": {
-          "bookId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "bookName": {
-            "type": "string"
-          },
-          "totalSalesCount": {
-            "type": "integer",
-            "format": "int64"
-          }
+          "bookId": { "type": "integer", "format": "int64" },
+          "bookName": { "type": "string" },
+          "totalSalesCount": { "type": "integer", "format": "int64" }
         }
       },
       "StatsPerEbook": {
         "type": "object",
         "properties": {
-          "bookId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "title": {
-            "type": "string"
-          },
-          "author": {
-            "type": "string"
-          },
-          "bookCoverImageURL": {
-            "type": "string"
-          },
-          "totalSalesCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalRevenue": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "viewCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "activityCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date"
-          }
+          "bookId": { "type": "integer", "format": "int64" },
+          "title": { "type": "string" },
+          "author": { "type": "string" },
+          "bookCoverImageURL": { "type": "string" },
+          "totalSalesCount": { "type": "integer", "format": "int64" },
+          "totalRevenue": { "type": "integer", "format": "int64" },
+          "viewCount": { "type": "integer", "format": "int64" },
+          "activityCount": { "type": "integer", "format": "int64" },
+          "createdAt": { "type": "string", "format": "date" }
         }
       },
       "ApiSuccessResponsePublisherInfoResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/PublisherInfoResponse"
-          }
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/PublisherInfoResponse" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
       "PublisherInfoResponse": {
         "type": "object",
         "properties": {
-          "publisherId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "publisherName": {
-            "type": "string"
-          },
-          "profileImageURL": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          }
+          "publisherId": { "type": "integer", "format": "int64" },
+          "publisherName": { "type": "string" },
+          "profileImageURL": { "type": "string" },
+          "status": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" }
         }
       },
       "ApiSuccessResponsePageResponseEbookFetchResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
+          "isSuccessful": { "type": "boolean" },
           "data": {
             "$ref": "#/components/schemas/PageResponseEbookFetchResponse"
           }
@@ -5394,33 +4221,14 @@
       "EbookFetchResponse": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "title": {
-            "type": "string"
-          },
-          "bookCoverImageURL": {
-            "type": "string"
-          },
-          "author": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "isPurchased": {
-            "type": "boolean"
-          },
-          "price": {
-            "type": "integer",
-            "format": "int32"
-          }
+          "id": { "type": "integer", "format": "int64" },
+          "title": { "type": "string" },
+          "bookCoverImageURL": { "type": "string" },
+          "author": { "type": "string" },
+          "description": { "type": "string" },
+          "size": { "type": "integer", "format": "int64" },
+          "isPurchased": { "type": "boolean" },
+          "price": { "type": "integer", "format": "int32" }
         }
       },
       "PageResponseEbookFetchResponse": {
@@ -5428,30 +4236,17 @@
         "properties": {
           "content": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/EbookFetchResponse"
-            }
+            "items": { "$ref": "#/components/schemas/EbookFetchResponse" }
           },
-          "currentPage": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalItems": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          }
+          "currentPage": { "type": "integer", "format": "int32" },
+          "totalItems": { "type": "integer", "format": "int64" },
+          "totalPages": { "type": "integer", "format": "int32" }
         }
       },
       "ApiSuccessResponsePageResponseNotificationResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
+          "isSuccessful": { "type": "boolean" },
           "data": {
             "$ref": "#/components/schemas/PageResponseNotificationResponse"
           }
@@ -5461,13 +4256,8 @@
       "NotificationResponse": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "message": {
-            "type": "string"
-          },
+          "id": { "type": "integer", "format": "int64" },
+          "message": { "type": "string" },
           "type": {
             "type": "string",
             "enum": [
@@ -5484,48 +4274,18 @@
               "GROUP_BANNED"
             ]
           },
-          "isRead": {
-            "type": "boolean"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "senderId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "senderNickname": {
-            "type": "string"
-          },
-          "groupId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "groupName": {
-            "type": "string"
-          },
-          "highlightId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "highlightComments": {
-            "type": "string"
-          },
-          "discussionId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "discussionContents": {
-            "type": "string"
-          },
-          "discussionCommentsId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "discussionCommentsContents": {
-            "type": "string"
-          }
+          "isRead": { "type": "boolean" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "senderId": { "type": "integer", "format": "int64" },
+          "senderNickname": { "type": "string" },
+          "groupId": { "type": "integer", "format": "int64" },
+          "groupName": { "type": "string" },
+          "highlightId": { "type": "integer", "format": "int64" },
+          "highlightComments": { "type": "string" },
+          "discussionId": { "type": "integer", "format": "int64" },
+          "discussionContents": { "type": "string" },
+          "discussionCommentsId": { "type": "integer", "format": "int64" },
+          "discussionCommentsContents": { "type": "string" }
         }
       },
       "PageResponseNotificationResponse": {
@@ -5533,42 +4293,25 @@
         "properties": {
           "content": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NotificationResponse"
-            }
+            "items": { "$ref": "#/components/schemas/NotificationResponse" }
           },
-          "currentPage": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalItems": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          }
+          "currentPage": { "type": "integer", "format": "int32" },
+          "totalItems": { "type": "integer", "format": "int64" },
+          "totalPages": { "type": "integer", "format": "int32" }
         }
       },
       "ApiSuccessResponseHighlightFetchResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/HighlightFetchResponse"
-          }
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/HighlightFetchResponse" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
       "ApiSuccessResponseListHighlightReactionResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
+          "isSuccessful": { "type": "boolean" },
           "data": {
             "type": "array",
             "items": {
@@ -5581,14 +4324,10 @@
       "ApiSuccessResponseListHighlightCommentResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
+          "isSuccessful": { "type": "boolean" },
           "data": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/HighlightCommentResponse"
-            }
+            "items": { "$ref": "#/components/schemas/HighlightCommentResponse" }
           }
         },
         "description": "API 에러 응답을 감싸는 클래스"
@@ -5596,9 +4335,7 @@
       "ApiSuccessResponsePageResponseGroupReviewFetchResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
+          "isSuccessful": { "type": "boolean" },
           "data": {
             "$ref": "#/components/schemas/PageResponseGroupReviewFetchResponse"
           }
@@ -5610,52 +4347,29 @@
         "properties": {
           "content": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GroupReviewFetchResponse"
-            }
+            "items": { "$ref": "#/components/schemas/GroupReviewFetchResponse" }
           },
-          "currentPage": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalItems": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          }
+          "currentPage": { "type": "integer", "format": "int32" },
+          "totalItems": { "type": "integer", "format": "int64" },
+          "totalPages": { "type": "integer", "format": "int32" }
         }
       },
       "ApiSuccessResponseGroupReviewStatsResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/GroupReviewStatsResponse"
-          }
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/GroupReviewStatsResponse" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
       "GroupReviewStatsResponse": {
         "type": "object",
         "properties": {
-          "reviewCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "tagCount": {
-            "type": "integer",
-            "format": "int64"
-          },
+          "reviewCount": { "type": "integer", "format": "int64" },
+          "tagCount": { "type": "integer", "format": "int64" },
           "tagStats": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TagStatDto"
-            }
+            "items": { "$ref": "#/components/schemas/TagStatDto" }
           }
         }
       },
@@ -5679,18 +4393,13 @@
               "WELL_MODERATED"
             ]
           },
-          "count": {
-            "type": "integer",
-            "format": "int64"
-          }
+          "count": { "type": "integer", "format": "int64" }
         }
       },
       "ApiSuccessResponsePageResponseGroupMemberResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
+          "isSuccessful": { "type": "boolean" },
           "data": {
             "$ref": "#/components/schemas/PageResponseGroupMemberResponse"
           }
@@ -5700,30 +4409,13 @@
       "GroupMemberResponse": {
         "type": "object",
         "properties": {
-          "userId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "nickname": {
-            "type": "string"
-          },
-          "profileImageURL": {
-            "type": "string"
-          },
-          "isApproved": {
-            "type": "boolean"
-          },
-          "isLeader": {
-            "type": "boolean"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "approvedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
+          "userId": { "type": "integer", "format": "int64" },
+          "nickname": { "type": "string" },
+          "profileImageURL": { "type": "string" },
+          "isApproved": { "type": "boolean" },
+          "isLeader": { "type": "boolean" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "approvedAt": { "type": "string", "format": "date-time" }
         }
       },
       "PageResponseGroupMemberResponse": {
@@ -5731,42 +4423,25 @@
         "properties": {
           "content": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GroupMemberResponse"
-            }
+            "items": { "$ref": "#/components/schemas/GroupMemberResponse" }
           },
-          "currentPage": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalItems": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          }
+          "currentPage": { "type": "integer", "format": "int32" },
+          "totalItems": { "type": "integer", "format": "int64" },
+          "totalPages": { "type": "integer", "format": "int32" }
         }
       },
       "ApiSuccessResponseGroupFetchResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/GroupFetchResponse"
-          }
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/GroupFetchResponse" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
       "ApiSuccessResponsePageResponseGroupChatResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
+          "isSuccessful": { "type": "boolean" },
           "data": {
             "$ref": "#/components/schemas/PageResponseGroupChatResponse"
           }
@@ -5778,86 +4453,39 @@
         "properties": {
           "content": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GroupChatResponse"
-            }
+            "items": { "$ref": "#/components/schemas/GroupChatResponse" }
           },
-          "currentPage": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalItems": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          }
+          "currentPage": { "type": "integer", "format": "int32" },
+          "totalItems": { "type": "integer", "format": "int64" },
+          "totalPages": { "type": "integer", "format": "int32" }
         }
       },
       "ApiSuccessResponseDiscussionDetailResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/DiscussionDetailResponse"
-          }
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/DiscussionDetailResponse" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
       "DiscussionDetailResponse": {
         "type": "object",
         "properties": {
-          "discussionId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "activityId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "title": {
-            "type": "string"
-          },
-          "content": {
-            "type": "string"
-          },
-          "authorId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "authorName": {
-            "type": "string"
-          },
-          "authorProfileImage": {
-            "type": "string"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "modifiedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "commentCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "isDebate": {
-            "type": "boolean"
-          },
-          "isAuthor": {
-            "type": "boolean"
-          },
+          "discussionId": { "type": "integer", "format": "int64" },
+          "activityId": { "type": "integer", "format": "int64" },
+          "title": { "type": "string" },
+          "content": { "type": "string" },
+          "authorId": { "type": "integer", "format": "int64" },
+          "authorName": { "type": "string" },
+          "authorProfileImage": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "modifiedAt": { "type": "string", "format": "date-time" },
+          "commentCount": { "type": "integer", "format": "int64" },
+          "isDebate": { "type": "boolean" },
+          "isAuthor": { "type": "boolean" },
           "linkedHighlights": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/HighlightSummaryResponse"
-            }
+            "items": { "$ref": "#/components/schemas/HighlightSummaryResponse" }
           },
           "comments": {
             "type": "array",
@@ -5899,19 +4527,13 @@
           },
           "highlightContent": {
             "type": "string"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
           }
         }
       },
       "ApiSuccessResponseListCreditProductInfoResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
+          "isSuccessful": { "type": "boolean" },
           "data": {
             "type": "array",
             "items": {
@@ -5924,51 +4546,30 @@
       "CreditProductInfoResponse": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "creditAmount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "price": {
-            "type": "integer",
-            "format": "int32"
-          }
+          "id": { "type": "integer", "format": "int32" },
+          "creditAmount": { "type": "integer", "format": "int32" },
+          "price": { "type": "integer", "format": "int32" }
         }
       },
       "ApiSuccessResponseCreditWalletResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/CreditWalletResponse"
-          }
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/CreditWalletResponse" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
       "CreditWalletResponse": {
         "type": "object",
         "properties": {
-          "walletId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "balance": {
-            "type": "integer",
-            "format": "int64"
-          }
+          "walletId": { "type": "integer", "format": "int64" },
+          "balance": { "type": "integer", "format": "int64" }
         }
       },
       "ApiSuccessResponsePageResponseCreditTransactionResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
+          "isSuccessful": { "type": "boolean" },
           "data": {
             "$ref": "#/components/schemas/PageResponseCreditTransactionResponse"
           }
@@ -5978,35 +4579,14 @@
       "CreditTransactionResponse": {
         "type": "object",
         "properties": {
-          "orderId": {
-            "type": "string"
-          },
-          "productId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "productName": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string",
-            "enum": ["CHARGE", "REFUND"]
-          },
-          "creditAmount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "paymentAmount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "description": {
-            "type": "string"
-          },
-          "approvedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
+          "orderId": { "type": "string" },
+          "productId": { "type": "integer", "format": "int32" },
+          "productName": { "type": "string" },
+          "type": { "type": "string", "enum": ["CHARGE", "REFUND"] },
+          "creditAmount": { "type": "integer", "format": "int32" },
+          "paymentAmount": { "type": "integer", "format": "int32" },
+          "description": { "type": "string" },
+          "approvedAt": { "type": "string", "format": "date-time" }
         }
       },
       "PageResponseCreditTransactionResponse": {
@@ -6018,58 +4598,35 @@
               "$ref": "#/components/schemas/CreditTransactionResponse"
             }
           },
-          "currentPage": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalItems": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          }
+          "currentPage": { "type": "integer", "format": "int32" },
+          "totalItems": { "type": "integer", "format": "int64" },
+          "totalPages": { "type": "integer", "format": "int32" }
         }
       },
       "ApiSuccessResponseEbookFetchResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/EbookFetchResponse"
-          }
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/EbookFetchResponse" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
       "ApiSuccessResponseEbookDownloadResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/EbookDownloadResponse"
-          }
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/EbookDownloadResponse" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
       "EbookDownloadResponse": {
         "type": "object",
-        "properties": {
-          "presignedUrl": {
-            "type": "string"
-          }
-        }
+        "properties": { "presignedUrl": { "type": "string" } }
       },
       "ApiSuccessResponsePageResponseEbookRequestFetchResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
+          "isSuccessful": { "type": "boolean" },
           "data": {
             "$ref": "#/components/schemas/PageResponseEbookRequestFetchResponse"
           }
@@ -6079,51 +4636,22 @@
       "EbookRequestFetchResponse": {
         "type": "object",
         "properties": {
-          "requestId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "bookId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "title": {
-            "type": "string"
-          },
-          "author": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "price": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "coverImageURL": {
-            "type": "string"
-          },
-          "publisherId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "publisherName": {
-            "type": "string"
-          },
-          "publisherEmail": {
-            "type": "string"
-          },
+          "requestId": { "type": "integer", "format": "int64" },
+          "bookId": { "type": "integer", "format": "int64" },
+          "title": { "type": "string" },
+          "author": { "type": "string" },
+          "description": { "type": "string" },
+          "size": { "type": "integer", "format": "int64" },
+          "price": { "type": "integer", "format": "int32" },
+          "coverImageURL": { "type": "string" },
+          "publisherId": { "type": "integer", "format": "int64" },
+          "publisherName": { "type": "string" },
+          "publisherEmail": { "type": "string" },
           "status": {
             "type": "string",
             "enum": ["PENDING", "APPROVED", "REJECTED"]
           },
-          "rejectReason": {
-            "type": "string"
-          }
+          "rejectReason": { "type": "string" }
         }
       },
       "PageResponseEbookRequestFetchResponse": {
@@ -6135,26 +4663,15 @@
               "$ref": "#/components/schemas/EbookRequestFetchResponse"
             }
           },
-          "currentPage": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalItems": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          }
+          "currentPage": { "type": "integer", "format": "int32" },
+          "totalItems": { "type": "integer", "format": "int64" },
+          "totalPages": { "type": "integer", "format": "int32" }
         }
       },
       "ApiSuccessResponsePageResponseUserInfoResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
+          "isSuccessful": { "type": "boolean" },
           "data": {
             "$ref": "#/components/schemas/PageResponseUserInfoResponse"
           }
@@ -6166,30 +4683,17 @@
         "properties": {
           "content": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UserInfoResponse"
-            }
+            "items": { "$ref": "#/components/schemas/UserInfoResponse" }
           },
-          "currentPage": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalItems": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          }
+          "currentPage": { "type": "integer", "format": "int32" },
+          "totalItems": { "type": "integer", "format": "int64" },
+          "totalPages": { "type": "integer", "format": "int32" }
         }
       },
       "ApiSuccessResponsePageResponsePublisherInfoResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
+          "isSuccessful": { "type": "boolean" },
           "data": {
             "$ref": "#/components/schemas/PageResponsePublisherInfoResponse"
           }
@@ -6201,66 +4705,37 @@
         "properties": {
           "content": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PublisherInfoResponse"
-            }
+            "items": { "$ref": "#/components/schemas/PublisherInfoResponse" }
           },
-          "currentPage": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalItems": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          }
+          "currentPage": { "type": "integer", "format": "int32" },
+          "totalItems": { "type": "integer", "format": "int64" },
+          "totalPages": { "type": "integer", "format": "int32" }
         }
       },
       "ApiSuccessResponseActivityFetchResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/ActivityFetchResponse"
-          }
+          "isSuccessful": { "type": "boolean" },
+          "data": { "$ref": "#/components/schemas/ActivityFetchResponse" }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
       "ActivityScoreResponse": {
         "type": "object",
         "properties": {
-          "userId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "userProfileImageURL": {
-            "type": "string"
-          },
-          "userNickname": {
-            "type": "string"
-          },
-          "score": {
-            "type": "integer",
-            "format": "int64"
-          }
+          "userId": { "type": "integer", "format": "int64" },
+          "userProfileImageURL": { "type": "string" },
+          "userNickname": { "type": "string" },
+          "score": { "type": "integer", "format": "int64" }
         }
       },
       "ApiSuccessResponseListActivityScoreResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
+          "isSuccessful": { "type": "boolean" },
           "data": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ActivityScoreResponse"
-            }
+            "items": { "$ref": "#/components/schemas/ActivityScoreResponse" }
           }
         },
         "description": "API 에러 응답을 감싸는 클래스"
@@ -6268,53 +4743,30 @@
       "ApiSuccessResponseListHighlightPreviewResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
+          "isSuccessful": { "type": "boolean" },
           "data": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/HighlightPreviewResponse"
-            }
+            "items": { "$ref": "#/components/schemas/HighlightPreviewResponse" }
           }
         },
         "description": "API 에러 응답을 감싸는 클래스"
       },
-      "HighlightPreviewResponse": {
+      "ApiSuccessResponsePageResponseDiscussionFetchResponse": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "authorId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "authorName": {
-            "type": "string"
-          },
-          "authorProfileImageURL": {
-            "type": "string"
-          },
-          "spine": {
-            "type": "string"
-          },
-          "cfi": {
-            "type": "string"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          }
+          "id": { "type": "integer", "format": "int64" },
+          "authorId": { "type": "integer", "format": "int64" },
+          "authorName": { "type": "string" },
+          "authorProfileImageURL": { "type": "string" },
+          "spine": { "type": "string" },
+          "cfi": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" }
         }
       },
       "ApiSuccessResponsePageResponseDiscussionFetchResponse": {
         "type": "object",
         "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
+          "isSuccessful": { "type": "boolean" },
           "data": {
             "$ref": "#/components/schemas/PageResponseDiscussionFetchResponse"
           }
@@ -6326,22 +4778,11 @@
         "properties": {
           "content": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DiscussionFetchResponse"
-            }
+            "items": { "$ref": "#/components/schemas/DiscussionFetchResponse" }
           },
-          "currentPage": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalItems": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          }
+          "currentPage": { "type": "integer", "format": "int32" },
+          "totalItems": { "type": "integer", "format": "int64" },
+          "totalPages": { "type": "integer", "format": "int32" }
         }
       }
     },
