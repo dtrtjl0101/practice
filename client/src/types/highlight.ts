@@ -96,3 +96,13 @@ export type HighlightSummary = {
   memo: string;
   highlightContent: string;
 };
+
+export type HighlightNotification = {
+  id: number;
+  authorId: number;
+  authorName: string;
+  authorProfileImageURL: string;
+  spine: string;
+  cfi: string;
+  createdAt: string;
+};

@@ -13,10 +13,13 @@ import {
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../../../api/api";
-import { ActivityCard } from "../../../component/_pathlessLayout/groups/$groupId/ActivityCard";
+import { PastActivityCard } from "../../../component/_pathlessLayout/groups/$groupId/PastActivityCard";
 import { GroupHeader } from "../../../component/_pathlessLayout/groups/$groupId/GroupHeader";
 import GroupReviewCard from "../../../component/GroupReviewCard";
+import { CurrentActivityCard } from "../../../component/_pathlessLayout/groups/$groupId/CurrentActivityCard";
 import GroupChat from "../../../component/GroupChat";
+import { ActivityRanking } from "../../../component/_pathlessLayout/groups/$groupId/ActivityRanking";
+import { ReadingProgressChart } from "../../../component/_pathlessLayout/groups/$groupId/ReadingProgressChart";
 
 export const Route = createFileRoute("/groups/$groupId/")({
   component: RouteComponent,
@@ -50,6 +53,26 @@ function RouteComponent() {
   });
 
   const isOwner = group?.myMemberShipStatus === GroupMembershipStatus.OWNED;
+
+  const { data: currentActivity } = useQuery({
+    queryKey: ["currentActivityId", groupId],
+    queryFn: async () => {
+      const response = await API_CLIENT.activityController.getAllActivities(
+        groupId,
+        { sort: ["createdAt,desc"] }
+      );
+      if (!response.isSuccessful) {
+        throw new Error(response.errorMessage);
+      }
+      const currentActivity = response.data.content?.slice(0, 1)[0];
+      if (!currentActivity) {
+        return null;
+      }
+
+      return currentActivity;
+    },
+    initialData: null,
+  });
 
   return (
     <Box
@@ -163,57 +186,46 @@ function RouteComponent() {
             <Stack spacing={4}>
               {/* Activity Section with Enhanced Design */}
 
-              <ActivityCard groupId={groupId} canCreate={isOwner} />
+              <CurrentActivityCard groupId={groupId} canCreate={isOwner} />
 
               {/* Chat Room Section with Modern Design */}
               <Paper
                 variant="outlined"
                 sx={{
-                  border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-                  backdropFilter: "blur(10px)",
-                  overflow: "hidden",
-                  position: "relative",
+                  p: 2,
                 }}
               >
-                <Box sx={{ p: 4 }}>
-                  <Stack spacing={3}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                      <Box
-                        sx={{
-                          width: 6,
-                          height: 32,
-                          borderRadius: 3,
-                          background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                        }}
-                      />
-                      <Typography
-                        variant="h5"
-                        sx={{
-                          fontWeight: 700,
-                          background: `linear-gradient(135deg, ${theme.palette.text.primary}, ${theme.palette.primary.main})`,
-                          backgroundClip: "text",
-                          WebkitBackgroundClip: "text",
-                          WebkitTextFillColor: "transparent",
-                        }}
-                      >
-                        모임 대화방
-                      </Typography>
-                    </Box>
+                <Stack spacing={3}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    <Typography variant="h4" sx={{ mr: "auto" }}>
+                      모임 대화방
+                    </Typography>
+                  </Box>
 
-                    <Divider sx={{ opacity: 0.3 }} />
+                  <Divider />
 
-                    <GroupChat
-                      groupId={groupId}
-                      groupMembershipStatus={group?.myMemberShipStatus}
-                    />
-                  </Stack>
-                </Box>
+                  <GroupChat
+                    groupId={groupId}
+                    groupMembershipStatus={group?.myMemberShipStatus}
+                  />
+                </Stack>
               </Paper>
             </Stack>
           </Grid>
-
           {/* Right Column - Reviews */}
           <Grid size={{ xs: 12, lg: 4 }}>
+            <Stack spacing={4}>
+              <ReadingProgressChart
+                activityId={currentActivity?.activityId!}
+                bookId={currentActivity?.bookId!}
+              />
+              <ActivityRanking activityId={currentActivity?.activityId!} />
+            </Stack>
+          </Grid>
+          <Grid size={{ xs: 12, lg: 6 }}>
+            <PastActivityCard groupId={groupId} canCreate={isOwner} />
+          </Grid>
+          <Grid size={{ xs: 12, lg: 6 }}>
             <GroupReviewCard groupId={groupId} canWriteReview={true} />
           </Grid>
         </Grid>
