@@ -675,6 +675,7 @@ export interface GroupFetchResponse {
   leaderNickname?: string;
   leaderProfileImageURL?: string;
   myMemberShipStatus?: "OWNED" | "PENDING" | "JOINED" | "NONE";
+  isAutoApproval?: boolean;
   /** @format int32 */
   memberCount?: number;
 }
@@ -775,6 +776,21 @@ export interface PageResponseReadingProgressResponse {
   totalItems?: number;
   /** @format int32 */
   totalPages?: number;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseListReadingProgressHistoryResponse {
+  isSuccessful?: boolean;
+  data?: ReadingProgressHistoryResponse[];
+}
+
+export interface ReadingProgressHistoryResponse {
+  /** @format date */
+  date?: string;
+  /** @format int64 */
+  myPercentage?: number;
+  /** @format double */
+  averagePercentage?: number;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -1092,6 +1108,8 @@ export interface HighlightSummaryResponse {
   cfi?: string;
   memo?: string;
   highlightContent?: string;
+  /** @format date-time */
+  createdAt?: string;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -1242,6 +1260,40 @@ export interface PageResponsePublisherInfoResponse {
 export interface ApiSuccessResponseActivityFetchResponse {
   isSuccessful?: boolean;
   data?: ActivityFetchResponse;
+}
+
+export interface ActivityScoreResponse {
+  /** @format int64 */
+  userId?: number;
+  userProfileImageURL?: string;
+  userNickname?: string;
+  /** @format int64 */
+  score?: number;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseListActivityScoreResponse {
+  isSuccessful?: boolean;
+  data?: ActivityScoreResponse[];
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseListHighlightPreviewResponse {
+  isSuccessful?: boolean;
+  data?: HighlightPreviewResponse[];
+}
+
+export interface HighlightPreviewResponse {
+  /** @format int64 */
+  id?: number;
+  /** @format int64 */
+  authorId?: number;
+  authorName?: string;
+  authorProfileImageURL?: string;
+  spine?: string;
+  cfi?: string;
+  /** @format date-time */
+  createdAt?: string;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -1779,6 +1831,22 @@ export class Api<
         path: `/api/reading-progress/activities/${activityId}`,
         method: "GET",
         query: query,
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags reading-progress-controller
+     * @name GetProgressHistory
+     * @request GET:/api/reading-progress/activities/{activityId}/history
+     * @secure
+     */
+    getProgressHistory: (activityId: number, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseListReadingProgressHistoryResponse, any>({
+        path: `/api/reading-progress/activities/${activityId}/history`,
+        method: "GET",
         secure: true,
         ...params,
       }),
@@ -2753,6 +2821,40 @@ export class Api<
     getActivity: (activityId: number, params: RequestParams = {}) =>
       this.request<ApiSuccessResponseActivityFetchResponse, any>({
         path: `/api/activities/${activityId}`,
+        method: "GET",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description 활동에 참여한 유저들의 활동 점수를 조회합니다. 점수는 하이라이트, 하이라이트 댓글, 토론, 토론 댓글의 개수에 따라 계산됩니다. 하이라이트는 3점, 하이라이트 댓글은 1점, 토론은 5점, 토론 댓글은 2점입니다.
+     *
+     * @tags activity-controller
+     * @name GetActivityTop5Scores
+     * @summary 상위 5명의 활동 점수 조회
+     * @request GET:/api/activities/{activityId}/scores
+     * @secure
+     */
+    getActivityTop5Scores: (activityId: number, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseListActivityScoreResponse, any>({
+        path: `/api/activities/${activityId}/scores`,
+        method: "GET",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description 특정 활동에 등록된 최신 하이라이트 5개를 조회합니다.
+     *
+     * @tags activity-controller
+     * @name GetRecentHighlights
+     * @summary 최근 메모 조회
+     * @request GET:/api/activities/{activityId}/highlights/recent
+     * @secure
+     */
+    getRecentHighlights: (activityId: number, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseListHighlightPreviewResponse, any>({
+        path: `/api/activities/${activityId}/highlights/recent`,
         method: "GET",
         secure: true,
         ...params,
