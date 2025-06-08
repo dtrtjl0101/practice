@@ -8,19 +8,22 @@ import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.dto.ebook.purchase.ReadingProgressRequest;
 import qwerty.chaekit.dto.ebook.purchase.ReadingProgressResponse;
 import qwerty.chaekit.dto.page.PageResponse;
+import qwerty.chaekit.dto.statistics.ReadingProgressHistoryResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.ebook.ReadingProgressService;
+import qwerty.chaekit.service.statistics.ReadingProgressHistoryService;
 
+import java.util.List;
 
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/reading-progress")
 public class ReadingProgressController {
-
     private final ReadingProgressService readingProgressService;
+    private final ReadingProgressHistoryService readingProgressHistoryService;
 
     @PostMapping("/{bookId}/save")
     public ApiSuccessResponse<Void> saveMyProgress(
@@ -50,5 +53,13 @@ public class ReadingProgressController {
             Pageable pageable
     ) {
         return ApiSuccessResponse.of(readingProgressService.getProgressFromActivity(activityId, pageable));
+    }
+
+    @GetMapping("/activities/{activityId}/history")
+    public ApiSuccessResponse<List<ReadingProgressHistoryResponse>> getProgressHistory(
+            @Parameter(hidden = true) @Login UserToken userToken,
+            @PathVariable Long activityId
+    ) {
+        return ApiSuccessResponse.of(readingProgressHistoryService.getHistory(userToken, activityId));
     }
 }

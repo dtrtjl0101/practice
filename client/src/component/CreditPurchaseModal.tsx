@@ -15,12 +15,15 @@ import API_CLIENT from "../api/api";
 import { useEffect, useState } from "react";
 import { paymentSuccessToken } from "../types/paymentSuccessMessage";
 import { setResponsiveStyleValueSm } from "../utils/setResponsiveStyleValue";
+import { useAtomValue } from "jotai";
+import State from "../states";
 
 export default function CreditPurchaseModal(props: {
   open: boolean;
   onClose: () => void;
   onPurchased?: () => void;
 }) {
+  const user = useAtomValue(State.Auth.user);
   const { open, onClose, onPurchased } = props;
   const [purchasing, setPurchasing] = useState(false);
   const [popup, setPopup] = useState<Window | null>(null);
@@ -28,6 +31,8 @@ export default function CreditPurchaseModal(props: {
     null
   );
   const { enqueueSnackbar } = useSnackbar();
+
+  const isUser = user && user.role === "ROLE_USER";
 
   const { data: myWallet, refetch: refetchMyWallet } = useQuery({
     queryKey: ["myWallet"],
@@ -38,6 +43,7 @@ export default function CreditPurchaseModal(props: {
       }
       return response.data;
     },
+    enabled: isUser,
   });
 
   const { data: creditProducts } = useQuery({

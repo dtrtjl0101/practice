@@ -6,7 +6,6 @@ import {
   Divider,
   Grid,
   Paper,
-  Skeleton,
   Stack,
   Typography,
   useTheme,
@@ -18,6 +17,7 @@ import { PastActivityCard } from "../../../component/_pathlessLayout/groups/$gro
 import { GroupHeader } from "../../../component/_pathlessLayout/groups/$groupId/GroupHeader";
 import GroupReviewCard from "../../../component/GroupReviewCard";
 import { CurrentActivityCard } from "../../../component/_pathlessLayout/groups/$groupId/CurrentActivityCard";
+import GroupChat from "../../../component/GroupChat";
 
 export const Route = createFileRoute("/groups/$groupId/")({
   component: RouteComponent,
@@ -203,41 +203,7 @@ function RouteComponent() {
 
                     <Divider sx={{ opacity: 0.3 }} />
 
-                    <Box
-                      sx={{
-                        position: "relative",
-                        borderRadius: 2,
-                        overflow: "hidden",
-                        background: alpha(theme.palette.action.hover, 0.3),
-                      }}
-                    >
-                      <Skeleton
-                        variant="rectangular"
-                        width="100%"
-                        height={250}
-                        sx={{
-                          borderRadius: 2,
-                          transform: "scale(1)",
-                          "&::after": {
-                            background: `linear-gradient(90deg, transparent, ${alpha(theme.palette.common.white, 0.4)}, transparent)`,
-                          },
-                        }}
-                      />
-                      <Box
-                        sx={{
-                          position: "absolute",
-                          top: "50%",
-                          left: "50%",
-                          transform: "translate(-50%, -50%)",
-                          textAlign: "center",
-                          color: alpha(theme.palette.text.secondary, 0.6),
-                        }}
-                      >
-                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                          대화방 준비 중...
-                        </Typography>
-                      </Box>
-                    </Box>
+                    <GroupChat groupId={groupId} />
                   </Stack>
                 </Box>
               </Paper>
