@@ -19,6 +19,7 @@ import GroupReviewCard from "../../../component/GroupReviewCard";
 import { CurrentActivityCard } from "../../../component/_pathlessLayout/groups/$groupId/CurrentActivityCard";
 import GroupChat from "../../../component/GroupChat";
 import { ActivityRanking } from "../../../component/_pathlessLayout/groups/$groupId/ActivityRanking";
+import { ReadingProgressChart } from "../../../component/_pathlessLayout/groups/$groupId/ReadingProgressChart";
 
 export const Route = createFileRoute("/groups/$groupId/")({
   component: RouteComponent,
@@ -56,8 +57,10 @@ function RouteComponent() {
   const { data: currentActivityId } = useQuery({
     queryKey: ["currentActivityId", groupId],
     queryFn: async () => {
-      const response =
-        await API_CLIENT.activityController.getAllActivities(groupId);
+      const response = await API_CLIENT.activityController.getAllActivities(
+        groupId,
+        { sort: ["createdAt,desc"] }
+      );
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);
       }
@@ -208,17 +211,7 @@ function RouteComponent() {
           {/* Right Column - Reviews */}
           <Grid size={{ xs: 12, lg: 4 }}>
             <Stack spacing={4}>
-              <Paper
-                variant="outlined"
-                sx={{
-                  border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-                  backdropFilter: "blur(10px)",
-                  p: 4,
-                  position: "relative",
-                }}
-              >
-                <Typography>진행률 그래프</Typography>
-              </Paper>
+              <ReadingProgressChart activityId={currentActivityId!} />
               <ActivityRanking activityId={currentActivityId!} />
             </Stack>
           </Grid>
