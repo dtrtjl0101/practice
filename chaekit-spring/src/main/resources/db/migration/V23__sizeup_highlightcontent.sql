@@ -1,1 +1,0 @@
-ALTER TABLE highlight MODIFY COLUMN highlightcontent VARCHAR(1000); 
