@@ -85,6 +85,9 @@ public class HighlightService {
                 highlight -> HighlightFetchResponse.of(
                         highlight,
                         fileService.convertToPublicImageURL(highlight.getAuthor().getProfileImageKey()),
+                        fileService.convertToPublicImageURL(highlight.getBook().getCoverImageKey()),
+                        highlight.getActivity() != null ?
+                            fileService.convertToPublicImageURL(highlight.getActivity().getGroup().getGroupImageKey()) : null,
                         relatedDiscussionMap.getOrDefault(highlight.getId(), List.of())
                 )
         ));
@@ -115,6 +118,9 @@ public class HighlightService {
                 highlight -> HighlightFetchResponse.of(
                         highlight,
                         fileService.convertToPublicImageURL(highlight.getAuthor().getProfileImageKey()),
+                        fileService.convertToPublicImageURL(highlight.getBook().getCoverImageKey()),
+                        highlight.getActivity() != null ?
+                                fileService.convertToPublicImageURL(highlight.getActivity().getGroup().getGroupImageKey()) : null,
                         relatedDiscussionMap.getOrDefault(highlight.getId(), List.of())
                 )
         ));
@@ -190,6 +196,9 @@ public class HighlightService {
                 .stream()
                 .map(DiscussionHighlight::getDiscussion).toList();
         String authorProfileImageURL = fileService.convertToPublicImageURL(highlight.getAuthor().getProfileImageKey());
-        return HighlightFetchResponse.of(highlight, authorProfileImageURL, discussionLinks);
+        String bookCoverImageURL = fileService.convertToPublicImageURL(highlight.getBook().getCoverImageKey());
+        String groupImageURL = highlight.getActivity() != null ?
+                fileService.convertToPublicImageURL(highlight.getActivity().getGroup().getGroupImageKey()) : null;
+        return HighlightFetchResponse.of(highlight, authorProfileImageURL, bookCoverImageURL, groupImageURL, discussionLinks);
     }
 }
