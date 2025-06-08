@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Activity } from "../../../../types/activity";
 import API_CLIENT from "../../../../api/api";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   alpha,
   Avatar,
@@ -11,36 +11,18 @@ import {
   CardActionArea,
   CardMedia,
   Chip,
-  Container,
   Divider,
-  Grid,
-  Icon,
-  IconButton,
   LinearProgress,
-  Modal,
   Pagination,
   Paper,
   Skeleton,
   Stack,
-  TextField,
   Typography,
 } from "@mui/material";
-import {
-  Add,
-  Cancel,
-  Check,
-  Timelapse,
-  Group,
-  StickyNote2,
-  CoPresent,
-} from "@mui/icons-material";
+import { Timelapse, Group, StickyNote2, CoPresent } from "@mui/icons-material";
 import Popover from "@mui/material/Popover";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import dayjs, { Dayjs } from "dayjs";
-import { BookMetadata } from "../../../../types/book";
 import LinkButton from "../../../LinkButton";
 import { useNavigate } from "@tanstack/react-router";
-import BookSearchInput from "../../../BookSearchInput";
 import { useSnackbar } from "notistack";
 
 export function DayStatusChip(props: { startTime: string; endTime: string }) {
@@ -74,10 +56,9 @@ export function PastActivityCard(props: {
   groupId: number;
   canCreate?: boolean;
 }) {
-  const { groupId, canCreate } = props;
+  const { groupId } = props;
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const [activityCreateModalOpen, setActivityCreateModalOpen] = useState(false);
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -253,11 +234,9 @@ export function PastActivityCard(props: {
       </Popover>
       <Paper sx={{ p: 2 }} variant="outlined">
         <Stack spacing={2}>
-          <Box sx={{ display: "flex", flexDirection: "row" }}>
-            <Typography variant="h4" sx={{ mr: "auto" }}>
-              지난 활동
-            </Typography>
-          </Box>
+          <Typography variant="h4" sx={{ mr: "auto" }}>
+            지난 활동
+          </Typography>
           <Divider />
           {isFetching ? (
             <ActivityPlaceHolder />

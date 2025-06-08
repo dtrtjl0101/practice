@@ -18,6 +18,7 @@ import { GroupHeader } from "../../../component/_pathlessLayout/groups/$groupId/
 import GroupReviewCard from "../../../component/GroupReviewCard";
 import { CurrentActivityCard } from "../../../component/_pathlessLayout/groups/$groupId/CurrentActivityCard";
 import GroupChat from "../../../component/GroupChat";
+import { ActivityRanking } from "../../../component/_pathlessLayout/groups/$groupId/ActivityRanking";
 
 export const Route = createFileRoute("/groups/$groupId/")({
   component: RouteComponent,
@@ -51,6 +52,23 @@ function RouteComponent() {
   });
 
   const isOwner = group?.myMemberShipStatus === GroupMembershipStatus.OWNED;
+
+  const { data: currentActivityId } = useQuery({
+    queryKey: ["currentActivityId", groupId],
+    queryFn: async () => {
+      const response =
+        await API_CLIENT.activityController.getAllActivities(groupId);
+      if (!response.isSuccessful) {
+        throw new Error(response.errorMessage);
+      }
+      const currentActivity = response.data.content?.slice(0, 1)[0];
+      if (!currentActivity) {
+        return null;
+      }
+
+      return currentActivity.activityId as number;
+    },
+  });
 
   return (
     <Box
@@ -201,17 +219,7 @@ function RouteComponent() {
               >
                 <Typography>진행률 그래프</Typography>
               </Paper>
-              <Paper
-                variant="outlined"
-                sx={{
-                  border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-                  backdropFilter: "blur(10px)",
-                  p: 4,
-                  position: "relative",
-                }}
-              >
-                <Typography>활동 랭킹</Typography>
-              </Paper>
+              <ActivityRanking activityId={currentActivityId!} />
             </Stack>
           </Grid>
           <Grid size={{ xs: 12, lg: 6 }}>

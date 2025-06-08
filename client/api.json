@@ -2432,6 +2432,35 @@
         }
       }
     },
+    "/api/reading-progress/activities/{activityId}/history": {
+      "get": {
+        "tags": ["reading-progress-controller"],
+        "operationId": "getProgressHistory",
+        "parameters": [
+          {
+            "name": "activityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponseListReadingProgressHistoryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/publishers/stats": {
       "get": {
         "tags": ["publisher-controller"],
@@ -3445,6 +3474,68 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiSuccessResponseActivityFetchResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/activities/{activityId}/scores": {
+      "get": {
+        "tags": ["activity-controller"],
+        "summary": "상위 5명의 활동 점수 조회",
+        "description": "활동에 참여한 유저들의 활동 점수를 조회합니다. 점수는 하이라이트, 하이라이트 댓글, 토론, 토론 댓글의 개수에 따라 계산됩니다. 하이라이트는 3점, 하이라이트 댓글은 1점, 토론은 5점, 토론 댓글은 2점입니다.",
+        "operationId": "getActivityTop5Scores",
+        "parameters": [
+          {
+            "name": "activityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponseListActivityScoreResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/activities/{activityId}/highlights/recent": {
+      "get": {
+        "tags": ["activity-controller"],
+        "summary": "최근 메모 조회",
+        "description": "특정 활동에 등록된 최신 하이라이트 5개를 조회합니다.",
+        "operationId": "getRecentHighlights",
+        "parameters": [
+          {
+            "name": "activityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponseListHighlightPreviewResponse"
                 }
               }
             }
@@ -4873,6 +4964,9 @@
             "type": "string",
             "enum": ["OWNED", "PENDING", "JOINED", "NONE"]
           },
+          "isAutoApproval": {
+            "type": "boolean"
+          },
           "memberCount": {
             "type": "integer",
             "format": "int32"
@@ -5087,6 +5181,38 @@
           "totalPages": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "ApiSuccessResponseListReadingProgressHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "isSuccessful": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReadingProgressHistoryResponse"
+            }
+          }
+        },
+        "description": "API 에러 응답을 감싸는 클래스"
+      },
+      "ReadingProgressHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "myPercentage": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "averagePercentage": {
+            "type": "number",
+            "format": "double"
           }
         }
       },
@@ -5773,6 +5899,10 @@
           },
           "highlightContent": {
             "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -6100,6 +6230,84 @@
           }
         },
         "description": "API 에러 응답을 감싸는 클래스"
+      },
+      "ActivityScoreResponse": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "userProfileImageURL": {
+            "type": "string"
+          },
+          "userNickname": {
+            "type": "string"
+          },
+          "score": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ApiSuccessResponseListActivityScoreResponse": {
+        "type": "object",
+        "properties": {
+          "isSuccessful": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActivityScoreResponse"
+            }
+          }
+        },
+        "description": "API 에러 응답을 감싸는 클래스"
+      },
+      "ApiSuccessResponseListHighlightPreviewResponse": {
+        "type": "object",
+        "properties": {
+          "isSuccessful": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HighlightPreviewResponse"
+            }
+          }
+        },
+        "description": "API 에러 응답을 감싸는 클래스"
+      },
+      "HighlightPreviewResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "authorId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "authorName": {
+            "type": "string"
+          },
+          "authorProfileImageURL": {
+            "type": "string"
+          },
+          "spine": {
+            "type": "string"
+          },
+          "cfi": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
       },
       "ApiSuccessResponsePageResponseDiscussionFetchResponse": {
         "type": "object",
