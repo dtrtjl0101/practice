@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Activity } from "../../../../types/activity";
 import API_CLIENT from "../../../../api/api";
-import { useEffect, useMemo, useState } from "react";
+import { act, useEffect, useMemo, useState } from "react";
 import {
   alpha,
   Avatar,
@@ -13,12 +13,10 @@ import {
   Chip,
   Container,
   Divider,
-  Grid,
   Icon,
   IconButton,
   LinearProgress,
   Modal,
-  Pagination,
   Paper,
   Skeleton,
   Stack,
@@ -42,6 +40,8 @@ import LinkButton from "../../../LinkButton";
 import { useNavigate } from "@tanstack/react-router";
 import BookSearchInput from "../../../BookSearchInput";
 import { useSnackbar } from "notistack";
+import { Highlight } from "../../../../types/highlight";
+import { ActivityNotificationSection } from "./ActivityNotification";
 
 export function DayStatusChip(props: { startTime: string; endTime: string }) {
   const { startTime, endTime } = props;
@@ -472,10 +472,10 @@ export function CurrentActivityCard(props: {
                 </Stack>
               </Stack>
               <Divider />
-
-              <Typography variant="h4" color="textSecondary" align="center">
-                활동 알림칸
-              </Typography>
+              <ActivityNotificationSection
+                activityId={activity.activityId}
+                groupId={groupId}
+              />
             </Stack>
           ) : (
             <Typography variant="body1" sx={{ mt: 2 }} color="textSecondary">
