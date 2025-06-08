@@ -170,42 +170,20 @@ function RouteComponent() {
               <Paper
                 variant="outlined"
                 sx={{
-                  border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-                  backdropFilter: "blur(10px)",
-                  overflow: "hidden",
-                  position: "relative",
+                  p: 2,
                 }}
               >
-                <Box sx={{ p: 4 }}>
-                  <Stack spacing={3}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                      <Box
-                        sx={{
-                          width: 6,
-                          height: 32,
-                          borderRadius: 3,
-                          background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                        }}
-                      />
-                      <Typography
-                        variant="h5"
-                        sx={{
-                          fontWeight: 700,
-                          background: `linear-gradient(135deg, ${theme.palette.text.primary}, ${theme.palette.primary.main})`,
-                          backgroundClip: "text",
-                          WebkitBackgroundClip: "text",
-                          WebkitTextFillColor: "transparent",
-                        }}
-                      >
-                        모임 대화방
-                      </Typography>
-                    </Box>
+                <Stack spacing={3}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    <Typography variant="h4" sx={{ mr: "auto" }}>
+                      모임 대화방
+                    </Typography>
+                  </Box>
 
-                    <Divider sx={{ opacity: 0.3 }} />
+                  <Divider />
 
-                    <GroupChat groupId={groupId} />
-                  </Stack>
-                </Box>
+                  <GroupChat groupId={groupId} />
+                </Stack>
               </Paper>
             </Stack>
           </Grid>
