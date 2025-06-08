@@ -1,11 +1,12 @@
 package qwerty.chaekit.global.exception;
 
 import lombok.Getter;
-import qwerty.chaekit.global.enums.ErrorCode;
 
 @Getter
-public class ForbiddenException extends CustomException {
-    public ForbiddenException(ErrorCode errorCode) {
-        super(errorCode);
+public class ForbiddenException extends RuntimeException {
+    private final String errorCode;
+    public ForbiddenException(String errorCode, String message) {
+        super(message);
+        this.errorCode = errorCode;
     }
 }

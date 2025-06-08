@@ -1,112 +1,42 @@
 package qwerty.chaekit.global.security.resolver;
 
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import qwerty.chaekit.domain.member.enums.Role;
-import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.ForbiddenException;
-import qwerty.chaekit.global.exception.UnauthorizedException;
-import qwerty.chaekit.global.jwt.TokenStatus;
 import qwerty.chaekit.global.security.model.CustomUserDetails;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        Class<?> parameterType = parameter.getParameterType();
-        return parameter.hasParameterAnnotation(Login.class)
-                && (parameterType.equals(UserToken.class) || parameterType.equals(PublisherToken.class));
+        return parameter.hasParameterAnnotation(Login.class) && parameter.getParameterType().equals(LoginMember.class);
     }
 
     @Override
-    public Object resolveArgument(@NonNull MethodParameter parameter, ModelAndViewContainer mavContainer,
-                                  @NonNull NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
-        Login loginAnnotation = parameter.getParameterAnnotation(Login.class);
-        boolean isRequired = loginAnnotation != null && loginAnnotation.required();
-
-        if(isRequired) {
-            throwIfAccessTokenInvalid(webRequest);
-        }
-
-        Role requiredRole = determineRequiredRole(parameter.getParameterType());
-        CustomUserDetails userDetails = getAuthenticatedUserDetails();
-
-        return resolveToken(requiredRole, userDetails, isRequired);
-    }
-
-    private void throwIfAccessTokenInvalid(NativeWebRequest webRequest) {
-        Object statusObj = webRequest.getAttribute("TOKEN_STATUS", RequestAttributes.SCOPE_REQUEST);
-        if(statusObj == null) {
-            throw new UnauthorizedException(ErrorCode.LOGIN_REQUIRED);
-        }
-        TokenStatus tokenStatus = TokenStatus.valueOf(statusObj.toString());
-        switch (tokenStatus) {
-            case EXPIRED -> throw new UnauthorizedException(ErrorCode.EXPIRED_ACCESS_TOKEN);
-            case INVALID -> throw new UnauthorizedException(ErrorCode.INVALID_ACCESS_TOKEN);
-        }
-    }
-
-    private Role determineRequiredRole(Class<?> parameterType) {
-        if (parameterType.equals(UserToken.class)) {
-            return Role.ROLE_USER;
-        } else if (parameterType.equals(PublisherToken.class)) {
-            return Role.ROLE_PUBLISHER;
-        } else {
-            throw new IllegalArgumentException("Unsupported parameter type: " + parameterType);
-        }
-    }
-
-    private CustomUserDetails getAuthenticatedUserDetails() {
+    public Object resolveArgument(@NotNull MethodParameter parameter, ModelAndViewContainer mavContainer,
+                                  @NotNull NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) {
-            throw new IllegalStateException("SecurityContext에 인증 정보가 없습니다.");
+            throw new ForbiddenException("NO_VALID_TOKEN", "Token is needed");
         }
-        if (!(auth.getPrincipal() instanceof CustomUserDetails details)) {
-            return CustomUserDetails.anonymous();
+        if(!(auth.getPrincipal() instanceof CustomUserDetails userDetails)){
+            throw new IllegalStateException("Invalid authentication principal");
         }
-        return details;
-    }
 
-    private Object resolveToken(Role requiredRole, CustomUserDetails userDetails, boolean isRequired) {
-        if (requiredRole == Role.ROLE_USER) {
-            return resolveUserToken(userDetails, isRequired);
-        } else { // Role.ROLE_PUBLISHER
-            return resolvePublisherToken(userDetails);
-        }
+        return LoginMember.builder()
+                .memberId(userDetails.getMemberId())
+                .username(userDetails.getUsername())
+                .role(userDetails.getAuthorities().iterator().next().getAuthority())
+                .build();
     }
-
-    private Object resolveUserToken(CustomUserDetails userDetails, boolean isRequired) {
-        if (userDetails.user() == null) {
-            return handleNoUserRole(isRequired);
-        }
-        return UserToken.of(userDetails.member().getId(), userDetails.user().getId(), userDetails.member().getEmail());
-    }
-
-    private Object handleNoUserRole(boolean isRequired) {
-        if (isRequired) {
-            throw new ForbiddenException(ErrorCode.ONLY_USER);
-        }
-        return UserToken.anonymous();
-    }
-
-    private Object resolvePublisherToken(CustomUserDetails userDetails) {
-        if (userDetails.publisher() == null) {
-            throw new ForbiddenException(ErrorCode.ONLY_PUBLISHER);
-        }
-        return PublisherToken.of(userDetails.member().getId(), userDetails.publisher().getId(), userDetails.member().getEmail());
-    }
-
 }
