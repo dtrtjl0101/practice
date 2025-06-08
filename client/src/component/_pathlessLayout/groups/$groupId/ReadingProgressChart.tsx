@@ -47,10 +47,6 @@ function CustomTooltip({ active, payload, label }: any) {
         }}
       >
         <Typography variant="subtitle2" sx={{ mb: 1 }}>
-          {/* {new Date(label).toLocaleDateString("ko-KR", {
-            month: "long",
-            day: "numeric",
-          })} */}
           {label}
         </Typography>
         {payload.map((entry: any, index: number) => (
@@ -67,7 +63,7 @@ function CustomTooltip({ active, payload, label }: any) {
               }}
             />
             <Typography variant="body2" color="text.secondary">
-              {entry.dataKey === "myPercentage" ? "내 진행도" : "평균 진행도"}:{" "}
+              {entry.dataKey === "myPercentage" ? "내 진행도" : "모임 평균"}:{" "}
               {entry.value}%
             </Typography>
           </Box>
@@ -78,7 +74,13 @@ function CustomTooltip({ active, payload, label }: any) {
   return null;
 }
 
-export function ReadingProgressChart({ activityId }: { activityId: number }) {
+export function ReadingProgressChart({
+  activityId,
+  bookId,
+}: {
+  activityId: number;
+  bookId: number;
+}) {
   const theme = useTheme();
 
   const { data: readingProgressHistory, isLoading } = useQuery({
@@ -96,22 +98,57 @@ export function ReadingProgressChart({ activityId }: { activityId: number }) {
     initialData: [] as ReadingProgressData[],
   });
 
-  // 데이터 가공
-  const chartData = readingProgressHistory.map((item) => ({
-    ...item,
-    date: new Date(item.date).toLocaleDateString("ko-KR", {
-      month: "short",
-      day: "numeric",
-    }),
-    fullDate: item.date,
-  }));
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  const chartData = readingProgressHistory
+    .filter((item) => {
+      const itemDate = new Date(item.date);
+      return itemDate <= yesterday;
+    })
+    .map((item) => ({
+      ...item,
+      date: new Date(item.date),
+      dateString: new Date(item.date).toLocaleDateString("ko-KR", {
+        month: "short",
+        day: "numeric",
+      }),
+    }));
+
+  const todayMyReadingProgress = useQuery({
+    queryKey: ["todayReadingProgress", bookId],
+    queryFn: async () => {
+      const response =
+        await API_CLIENT.readingProgressController.getMyProgress(bookId);
+      if (!response.isSuccessful) {
+        throw new Error(response.error);
+      }
+      return response.data;
+    },
+    initialData: null,
+  });
+
+  // 오늘 데이터 추가 (안전하게 처리)
+  if (todayMyReadingProgress.data?.percentage !== undefined) {
+    const lastData = chartData[chartData.length - 1]; // 마지막 데이터 (어제)
+
+    chartData.push({
+      date: new Date(),
+      dateString: new Date().toLocaleDateString("ko-KR", {
+        month: "short",
+        day: "numeric",
+      }),
+      myPercentage: todayMyReadingProgress.data.percentage,
+      averagePercentage: lastData?.averagePercentage || 0, // 안전한 접근
+    });
+  }
 
   // 통계 계산
-  const latestData = readingProgressHistory[readingProgressHistory.length - 1];
-  const firstData = readingProgressHistory[0];
+  const latestData = chartData[chartData.length - 1];
+  const firstData = chartData[0];
   const myProgress = latestData?.myPercentage || 0;
   const avgProgress = latestData?.averagePercentage || 0;
-  const totalDays = readingProgressHistory.length;
+  const totalDays = chartData.length;
   const myGrowth =
     latestData && firstData
       ? latestData.myPercentage - firstData.myPercentage
@@ -220,7 +257,7 @@ export function ReadingProgressChart({ activityId }: { activityId: number }) {
               </Box>
               <Box>
                 <Typography variant="body2" color="text.secondary">
-                  평균 진행도
+                  모임 평균
                 </Typography>
                 <Typography
                   variant="h6"
@@ -251,11 +288,11 @@ export function ReadingProgressChart({ activityId }: { activityId: number }) {
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={chartData}
-              margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+              margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
             >
               <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
               <XAxis
-                dataKey="date"
+                dataKey="dateString"
                 axisLine={false}
                 tickLine={false}
                 tick={{ fontSize: 12, fill: theme.palette.text.secondary }}
@@ -306,7 +343,7 @@ export function ReadingProgressChart({ activityId }: { activityId: number }) {
                   stroke: theme.palette.secondary.main,
                   strokeWidth: 2,
                 }}
-                name="평균 진행도"
+                name="모임 평균"
               />
             </LineChart>
           </ResponsiveContainer>

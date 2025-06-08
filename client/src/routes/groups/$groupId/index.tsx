@@ -54,7 +54,7 @@ function RouteComponent() {
 
   const isOwner = group?.myMemberShipStatus === GroupMembershipStatus.OWNED;
 
-  const { data: currentActivityId } = useQuery({
+  const { data: currentActivity } = useQuery({
     queryKey: ["currentActivityId", groupId],
     queryFn: async () => {
       const response = await API_CLIENT.activityController.getAllActivities(
@@ -69,8 +69,9 @@ function RouteComponent() {
         return null;
       }
 
-      return currentActivity.activityId as number;
+      return currentActivity;
     },
+    initialData: null,
   });
 
   return (
@@ -211,8 +212,11 @@ function RouteComponent() {
           {/* Right Column - Reviews */}
           <Grid size={{ xs: 12, lg: 4 }}>
             <Stack spacing={4}>
-              <ReadingProgressChart activityId={currentActivityId!} />
-              <ActivityRanking activityId={currentActivityId!} />
+              <ReadingProgressChart
+                activityId={currentActivity?.activityId!}
+                bookId={currentActivity?.bookId!}
+              />
+              <ActivityRanking activityId={currentActivity?.activityId!} />
             </Stack>
           </Grid>
           <Grid size={{ xs: 12, lg: 6 }}>
