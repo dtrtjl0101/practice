@@ -4,7 +4,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "admin")
 public record AdminProperties(
-        String name,
-        String email,
+        String username,
         String password
 ) {}

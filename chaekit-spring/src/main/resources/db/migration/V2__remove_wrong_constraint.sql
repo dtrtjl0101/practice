@@ -1,2 +1,0 @@
-ALTER TABLE ebook
-DROP FOREIGN KEY FKfxsj468a7v1h63gc6jdbwhovu;

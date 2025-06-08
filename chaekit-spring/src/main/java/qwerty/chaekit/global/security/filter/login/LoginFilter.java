@@ -1,6 +1,5 @@
 package qwerty.chaekit.global.security.filter.login;
 
-import jakarta.annotation.Nullable;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -10,19 +9,17 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import qwerty.chaekit.domain.member.Member;
-import qwerty.chaekit.domain.member.enums.Role;
-import qwerty.chaekit.domain.member.publisher.PublisherProfile;
-import qwerty.chaekit.domain.member.user.UserProfile;
-import qwerty.chaekit.dto.member.LoginRequest;
-import qwerty.chaekit.dto.member.LoginResponse;
-import qwerty.chaekit.global.jwt.JwtUtil;
 import qwerty.chaekit.global.security.model.CustomUserDetails;
+import qwerty.chaekit.dto.LoginRequest;
+import qwerty.chaekit.global.jwt.JwtUtil;
 import qwerty.chaekit.global.util.SecurityRequestReader;
 import qwerty.chaekit.global.util.SecurityResponseSender;
-import qwerty.chaekit.service.member.token.RefreshTokenService;
-import qwerty.chaekit.service.util.FileService;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
@@ -30,97 +27,54 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final SecurityRequestReader requestReader;
     private final SecurityResponseSender responseSender;
-    private final FileService fileService;
-    private final RefreshTokenService refreshTokenService;
 
     public LoginFilter(String loginUrl,
                        JwtUtil jwtUtil,
                        AuthenticationManager authManager,
                        SecurityRequestReader reader,
-                       SecurityResponseSender sender,
-                       FileService fileService,
-                       RefreshTokenService refreshTokenService
-    ) {
+                       SecurityResponseSender sender) {
         this.jwtUtil = jwtUtil;
         this.authenticationManager = authManager;
         this.requestReader = reader;
         this.responseSender = sender;
-        this.fileService = fileService;
-        this.refreshTokenService = refreshTokenService;
 
         setAuthenticationManager(authManager);
         setFilterProcessesUrl(loginUrl);
     }
 
     @Override
-    public Authentication attemptAuthentication(
-            HttpServletRequest request,
-            HttpServletResponse response
-    ) throws AuthenticationException {
-
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         LoginRequest loginRequest = requestReader.read(request, LoginRequest.class);
-        String email = loginRequest.email();
+        String username = loginRequest.username();
         String password = loginRequest.password();
-        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(email, password, null);
+        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password, null);
 
         return authenticationManager.authenticate(authToken);
     }
 
     @Override
-    protected void successfulAuthentication(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain chain, Authentication authentication
-    ) {
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
+                                            FilterChain chain, Authentication authentication) {
 
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
-        Member member = customUserDetails.member();
-        UserProfile user = customUserDetails.user();
-        PublisherProfile publisher = customUserDetails.publisher();
-        String profileImageKey = null;
-        Long memberId = member.getId();
-        Long publisherId = null;
-        Long userId = null;
-        if(publisher != null){
-            profileImageKey = publisher.getProfileImageKey();
-            publisherId = publisher.getId();
-        }
-        if(user != null) {
-            profileImageKey = user.getProfileImageKey();
-            userId = user.getId();
-        }
+        Long memberId = customUserDetails.getMemberId();
+        String username = customUserDetails.getUsername();
 
-        String profileImageURL = fileService.convertToPublicImageURL(profileImageKey);
-        Role role = customUserDetails.member().getRole();
-
-        String refreshToken = refreshTokenService.issueRefreshToken(memberId);
-        String accessToken = jwtUtil.createAccessToken(memberId, userId, publisherId, member.getEmail(), role.name());
-        sendSuccessResponse(response, refreshToken, accessToken, member, user, publisher, profileImageURL, role);
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        authorities.stream().findFirst().map(GrantedAuthority::getAuthority).ifPresentOrElse(
+                (role)-> {
+                    String token = jwtUtil.createJwt(memberId, username, role);
+                    sendSuccessResponse(response, token, memberId, role);
+                }, ()-> responseSender.sendError(response, 500, "INVALID_ROLE", "권한 정보가 존재하지 않습니다.")
+        );
     }
 
-    private void sendSuccessResponse(
-            HttpServletResponse response,
-            String refreshToken,
-            String accessToken,
-            Member member,
-            @Nullable UserProfile user,
-            @Nullable PublisherProfile publisher,
-            String profileImageURL,
-            Role role
-    ) {
-        LoginResponse loginResponse = LoginResponse.builder()
-                .refreshToken(refreshToken)
-                .accessToken(accessToken)
-                .memberId(member.getId())
-                .email(member.getEmail())
-                .userId(user != null ? user.getId() : null)
-                .nickname(user != null ? user.getNickname() : null)
-                .publisherId(publisher != null ? publisher.getId() : null)
-                .publisherName(publisher != null ? publisher.getPublisherName() : null)
-                .profileImageURL(profileImageURL)
-                .role(role)
-                .build();
-        responseSender.sendSuccess(response, loginResponse);
+    private void sendSuccessResponse(HttpServletResponse response, String token, Long memberId, String role) {
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("accessToken", "Bearer " + token);
+        responseData.put("id", memberId);
+        responseData.put("role", role);
+        responseSender.sendSuccess(response, responseData);
     }
 
     @Override
