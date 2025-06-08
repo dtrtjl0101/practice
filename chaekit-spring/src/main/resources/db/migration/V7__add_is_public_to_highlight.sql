@@ -1,0 +1,2 @@
+ALTER TABLE highlight
+    ADD COLUMN is_public BOOLEAN NOT NULL DEFAULT FALSE; 
