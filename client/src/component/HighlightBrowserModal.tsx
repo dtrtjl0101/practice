@@ -9,6 +9,8 @@ import {
   Grid,
   IconButton,
   List,
+  ListItem,
+  ListItemAvatar,
   ListItemButton,
   ListItemText,
   Menu,
@@ -28,7 +30,7 @@ import {
   Visibility,
   VisibilityOff,
 } from "@mui/icons-material";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../api/api";
 import { setResponsiveStyleValueSm } from "../utils/setResponsiveStyleValue";
 import ActivitySelectModal from "./ActivitySelectModal";
@@ -411,6 +413,21 @@ function HighlightViewer(props: {
     setVisibilityOverwrite(false);
   }, [highlight]);
 
+  const { data: bookData } = useQuery({
+    queryKey: ["book", highlight.bookId],
+    queryFn: async () => {
+      const response = await API_CLIENT.ebookController.getBook(
+        highlight.bookId
+      );
+      if (!response.isSuccessful) {
+        console.error(response.errorCode);
+        throw new Error(response.errorCode);
+      }
+      return response.data;
+    },
+    enabled: !!highlight.bookId,
+  });
+
   return (
     <>
       <ActivitySelectModal
@@ -477,7 +494,7 @@ function HighlightViewer(props: {
                 alignSelf={"flex-end"}
               >
                 <Avatar src={highlight.authorProfileImageURL} />
-                <Typography component="span">{highlight.authorName}</Typography>
+                <Typography noWrap>{highlight.authorName}</Typography>
               </Stack>
               <Typography variant="body2" color="textSecondary">
                 {highlightContent}
@@ -485,6 +502,17 @@ function HighlightViewer(props: {
               <Divider />
               <Typography variant="body1">{memo}</Typography>
             </Stack>
+            {bookData && (
+              <ListItem>
+                <ListItemAvatar>
+                  <Avatar variant="rounded" src={bookData.bookCoverImageURL} />
+                </ListItemAvatar>
+                <ListItemText
+                  primary={bookData.title}
+                  secondary={bookData.author}
+                />
+              </ListItem>
+            )}
             <CardActions sx={{ justifyContent: "flex-end" }}>
               <Button variant="outlined" color="secondary" onClick={onClose}>
                 취소
