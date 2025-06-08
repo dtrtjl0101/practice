@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Activity } from "../../../../types/activity";
 import API_CLIENT from "../../../../api/api";
-import { act, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   alpha,
   Avatar,
@@ -40,7 +40,6 @@ import LinkButton from "../../../LinkButton";
 import { useNavigate } from "@tanstack/react-router";
 import BookSearchInput from "../../../BookSearchInput";
 import { useSnackbar } from "notistack";
-import { Highlight } from "../../../../types/highlight";
 import { ActivityNotificationSection } from "./ActivityNotification";
 
 export function DayStatusChip(props: { startTime: string; endTime: string }) {

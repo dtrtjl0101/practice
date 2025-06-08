@@ -8,12 +8,10 @@ import {
   Card,
   CardContent,
   Avatar,
-  Chip,
   alpha,
   useTheme,
   Skeleton,
 } from "@mui/material";
-import { HighlightAlt, AccessTime } from "@mui/icons-material";
 import {
   HighlightSummary,
   HighlightNotification,
@@ -117,9 +115,6 @@ export function ActivityNotificationSection({
 
   const isLoading = propIsLoading || notificationsLoading;
   const latestNotification = recentNotifications[0];
-  const latestHighlight = recentHighlights?.find(
-    (h) => h.id === latestNotification?.id
-  );
 
   // 호버된 하이라이트 찾기
   const hoveredHighlight = useMemo(
