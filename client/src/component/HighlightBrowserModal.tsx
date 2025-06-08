@@ -4,13 +4,14 @@ import {
   Card,
   CardActions,
   CircularProgress,
-  Dialog,
   Divider,
   Grid,
   IconButton,
   List,
   ListItemButton,
   ListItemText,
+  Menu,
+  MenuItem,
   Modal,
   Paper,
   Stack,
@@ -23,6 +24,7 @@ import { Delete, Edit, Sort } from "@mui/icons-material";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import API_CLIENT from "../api/api";
 import { setResponsiveStyleValueSm } from "../utils/setResponsiveStyleValue";
+import ActivitySelectModal from "./ActivitySelectModal";
 
 type HighlightFilterKind =
   | {
@@ -31,6 +33,11 @@ type HighlightFilterKind =
   | {
       kind: "ActivityHighlights";
       activityId: number;
+    }
+  | {
+      kind: "OtherActivityHighlights";
+      activityId: number;
+      activityName: string;
     };
 
 export default function HighlightBrowserModal(props: {
@@ -46,9 +53,11 @@ export default function HighlightBrowserModal(props: {
   const [selectedHighlight, setSelectedHighlight] = useState<Highlight | null>(
     null
   );
-  const [openFilterDialog, setOpenFilterDialog] = useState(false);
+  const [filterMenuAnchorElement, setFilterMenuAnchorElement] =
+    useState<HTMLElement | null>(null);
   const [highlightFilterKind, setHighlightFilterKind] =
     useState<HighlightFilterKind>({ kind: "MyHighlights" });
+  const [activitySelectModalOpen, setActivitySelectModalOpen] = useState(false);
 
   const {
     data: highlightPages,
@@ -58,7 +67,11 @@ export default function HighlightBrowserModal(props: {
   } = useInfiniteQuery({
     queryKey: ["highlights", highlightFilterKind],
     queryFn: async ({ pageParam }) => {
-      const response = await API_CLIENT.highlightController.getHighlights({
+      const fetchFunction =
+        highlightFilterKind.kind === "MyHighlights"
+          ? API_CLIENT.userController.getMyHighlights
+          : API_CLIENT.highlightController.getHighlights;
+      const response = await fetchFunction({
         page: pageParam,
         size: 30,
         ...getHighlightFilter(highlightFilterKind),
@@ -101,61 +114,56 @@ export default function HighlightBrowserModal(props: {
       }}
     >
       <>
-        <Dialog
-          open={openFilterDialog}
-          onClose={() => setOpenFilterDialog(false)}
+        <ActivitySelectModal
+          open={activitySelectModalOpen}
+          onClose={() => setActivitySelectModalOpen(false)}
+          onSelect={(activity) => {
+            setHighlightFilterKind({
+              kind: "OtherActivityHighlights",
+              activityId: activity.id,
+              activityName: activity.name,
+            });
+            setActivitySelectModalOpen(false);
+            setFilterMenuAnchorElement(null);
+          }}
+        />
+        <Menu
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "center",
+          }}
+          open={!!filterMenuAnchorElement}
+          anchorEl={filterMenuAnchorElement}
+          onClose={() => setFilterMenuAnchorElement(null)}
         >
-          <Box sx={{ padding: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              필터 선택
-            </Typography>
-            <List>
-              <ListItemButton
-                onClick={() => {
-                  setHighlightFilterKind({ kind: "MyHighlights" });
-                  setOpenFilterDialog(false);
-                }}
-              >
-                <ListItemText primary="내 모든 하이라이트" />
-              </ListItemButton>
-              <ListItemButton
-                onClick={() => {
-                  setHighlightFilterKind({
-                    kind: "ActivityHighlights",
-                    activityId: activityId!,
-                  });
-                  setOpenFilterDialog(false);
-                }}
-              >
-                <ListItemText primary="현재 활동의 하이라이트" />
-              </ListItemButton>
-
-              {/*<ListItemButton
-                onClick={() => {
-                  console.log("특정 활동에서 공개된 내 하이라이트 목록");
-                  setOpenFilterDialog(false);
-                }}
-              >
-                <ListItemText primary="특정 활동에서 공개된 내 하이라이트 목록" />
-              </ListItemButton>
-              <ListItemButton
-                onClick={() => {
-                  console.log("특정 활동에서 공개된 모든 하이라이트 조회");
-                  setOpenFilterDialog(false);
-                }}
-              >
-                <ListItemText primary="특정 활동에서 공개된 모든 하이라이트 조회" />
-              </ListItemButton> */}
-            </List>
-            <Box
-              sx={{ display: "flex", justifyContent: "flex-end", marginTop: 2 }}
+          <MenuItem
+            onClick={() => {
+              setHighlightFilterKind({ kind: "MyHighlights" });
+              setFilterMenuAnchorElement(null);
+            }}
+          >
+            {getHighlightFilterLabel({ kind: "MyHighlights" })}
+          </MenuItem>
+          {activityId && (
+            <MenuItem
+              onClick={() => {
+                setHighlightFilterKind({
+                  kind: "ActivityHighlights",
+                  activityId,
+                });
+                setFilterMenuAnchorElement(null);
+              }}
             >
-              <Button variant="text" onClick={() => setOpenFilterDialog(false)}>
-                닫기
-              </Button>
-            </Box>
-          </Box>
-        </Dialog>
+              {getHighlightFilterLabel({
+                kind: "ActivityHighlights",
+                activityId,
+              })}
+            </MenuItem>
+          )}
+          <MenuItem onClick={() => setActivitySelectModalOpen(true)}>
+            다른 활동의 하이라이트
+          </MenuItem>
+        </Menu>
         <Box
           sx={{
             position: "absolute",
@@ -191,14 +199,21 @@ export default function HighlightBrowserModal(props: {
                   }}
                 >
                   <Stack spacing={1} sx={{ flexGrow: 1, overflow: "hidden" }}>
-                    <Box
-                      padding={1}
-                      sx={{ display: "flex", justifyContent: "flex-end" }}
+                    <Button
+                      sx={{
+                        justifyContent: "space-between",
+                        p: 2,
+                        whiteSpace: "pretty",
+                      }}
+                      size="large"
+                      color="inherit"
+                      onClick={(e) =>
+                        setFilterMenuAnchorElement(e.currentTarget)
+                      }
+                      endIcon={<Sort />}
                     >
-                      <IconButton onClick={() => setOpenFilterDialog(true)}>
-                        <Sort />
-                      </IconButton>
-                    </Box>
+                      {getHighlightFilterLabel(highlightFilterKind)}
+                    </Button>
                     <Divider />
                     <List sx={{ flexGrow: 1, overflowY: "auto" }}>
                       {highlightPages &&
@@ -439,5 +454,21 @@ function getHighlightFilter(kind: HighlightFilterKind): HighlightFilter {
         me: true,
         activityId: kind.activityId,
       };
+    case "OtherActivityHighlights":
+      return {
+        me: true,
+        activityId: kind.activityId,
+      };
+  }
+}
+
+function getHighlightFilterLabel(kind: HighlightFilterKind): string {
+  switch (kind.kind) {
+    case "MyHighlights":
+      return "내 모든 하이라이트";
+    case "ActivityHighlights":
+      return "현재 활동의 하이라이트";
+    case "OtherActivityHighlights":
+      return `${kind.activityName}의 하이라이트`;
   }
 }
