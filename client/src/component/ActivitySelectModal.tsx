@@ -9,6 +9,7 @@ import {
   ListItemAvatar,
   ListItemButton,
   Menu,
+  Typography,
 } from "@mui/material";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../api/api";
@@ -17,11 +18,12 @@ import { useMemo, useState } from "react";
 import { ExpandMore } from "@mui/icons-material";
 
 export default function ActivitySelectModal(props: {
+  description?: string;
   open: boolean;
   onClose: () => void;
   onSelect?: (activity: { id: number; name: string }) => void;
 }) {
-  const { open, onClose } = props;
+  const { open, onClose, description, onSelect } = props;
   const [selectMenuAnchor, setSelectMenuAnchor] = useState<
     (EventTarget & HTMLDivElement) | null
   >(null);
@@ -38,7 +40,6 @@ export default function ActivitySelectModal(props: {
   } = useInfiniteQuery({
     queryKey: ["myActivities"],
     queryFn: async ({ pageParam }) => {
-      console.log("asdasd", pageParam);
       const response = await API_CLIENT.userController.getMyActivities({
         pageable: {
           page: pageParam,
@@ -80,6 +81,7 @@ export default function ActivitySelectModal(props: {
     >
       <DialogTitle>활동 선택</DialogTitle>
       <DialogContent>
+        {description && <Typography>{description}</Typography>}
         <Menu
           open={!!selectMenuAnchor}
           anchorEl={selectMenuAnchor}
@@ -129,8 +131,8 @@ export default function ActivitySelectModal(props: {
           variant="contained"
           disabled={!selectedActivity}
           onClick={() => {
-            if (props.onSelect && selectedActivity) {
-              props.onSelect(selectedActivity);
+            if (onSelect && selectedActivity) {
+              onSelect(selectedActivity);
             }
             onClose();
           }}

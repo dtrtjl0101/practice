@@ -1,4 +1,5 @@
 import {
+  Avatar,
   Box,
   Button,
   Card,
@@ -19,12 +20,19 @@ import {
   useTheme,
 } from "@mui/material";
 import { Highlight } from "../types/highlight";
-import { Fragment, useState } from "react";
-import { Delete, Edit, Sort } from "@mui/icons-material";
+import { Fragment, useEffect, useState } from "react";
+import {
+  Delete,
+  Edit,
+  Sort,
+  Visibility,
+  VisibilityOff,
+} from "@mui/icons-material";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import API_CLIENT from "../api/api";
 import { setResponsiveStyleValueSm } from "../utils/setResponsiveStyleValue";
 import ActivitySelectModal from "./ActivitySelectModal";
+import { useSnackbar } from "notistack";
 
 type HighlightFilterKind =
   | {
@@ -309,7 +317,7 @@ function HighlightListItem(props: {
               component={"span"}
               display={"block"}
             >
-              createdAt
+              {highlight.authorName}
             </Typography>
           </>
         }
@@ -373,68 +381,127 @@ function HighlightViewer(props: {
   onHighlightUseButtonClick?: (highlight: Highlight) => void;
 }) {
   const { highlight, onClose, onHighlightUseButtonClick } = props;
+  const [activitySelectModalOpen, setActivitySelectModalOpen] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
+  const [visibilityOverwrite, setVisibilityOverwrite] = useState(false);
 
   // null/undefined 체크 및 기본값 설정
   const highlightContent = highlight.highlightContent || "";
   const memo = highlight.memo || "";
 
+  const handlePublishHighlight = async (activityId: number) => {
+    const response = await API_CLIENT.highlightController.updateHighlight(
+      highlight.id,
+      {
+        activityId,
+      }
+    );
+
+    if (!response.isSuccessful) {
+      enqueueSnackbar(response.errorMessage, { variant: "error" });
+      setActivitySelectModalOpen(false);
+      return;
+    }
+    enqueueSnackbar("하이라이트가 공개되었습니다.", { variant: "success" });
+    setActivitySelectModalOpen(false);
+    setVisibilityOverwrite(true);
+  };
+
+  useEffect(() => {
+    setVisibilityOverwrite(false);
+  }, [highlight]);
+
   return (
-    <Grid
-      size={setResponsiveStyleValueSm(12, 8)}
-      sx={{ height: setResponsiveStyleValueSm("none", "100%") }}
-    >
-      <Card
-        variant="outlined"
-        elevation={2}
-        sx={{
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
+    <>
+      <ActivitySelectModal
+        open={activitySelectModalOpen}
+        onClose={() => setActivitySelectModalOpen(false)}
+        onSelect={({ id }) => {
+          handlePublishHighlight(id);
         }}
+        description="하이라이트를 공개할 활동을 선택하세요. 한번 공개한 하이라이트는 활동을 변경할 수 없습니다."
+      />
+      <Grid
+        size={setResponsiveStyleValueSm(12, 8)}
+        sx={{ height: setResponsiveStyleValueSm("none", "100%") }}
       >
-        <Stack spacing={1} sx={{ flexGrow: 1, overflow: "hidden" }}>
-          <Box padding={1} sx={{ display: "flex", justifyContent: "flex-end" }}>
-            <IconButton color="secondary">
-              <Edit />
-            </IconButton>
-            <IconButton color="error">
-              <Delete />
-            </IconButton>
-          </Box>
-          <Divider />
-          <Stack
-            spacing={1}
-            sx={{ flexGrow: 1, overflowY: "auto", padding: 2 }}
-          >
-            <Typography
-              variant="body2"
-              color="textSecondary"
-              textAlign={"right"}
+        <Card
+          variant="outlined"
+          elevation={2}
+          sx={{
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <Stack spacing={1} sx={{ flexGrow: 1, overflow: "hidden" }}>
+            <Box
+              padding={1}
+              sx={{ display: "flex", justifyContent: "flex-end" }}
             >
-              createdAt
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              {highlightContent}
-            </Typography>
-            <Divider />
-            <Typography variant="body1">{memo}</Typography>
-          </Stack>
-          <CardActions sx={{ justifyContent: "flex-end" }}>
-            <Button variant="outlined" color="secondary" onClick={onClose}>
-              취소
-            </Button>
-            {onHighlightUseButtonClick && (
-              <Button
-                variant="contained"
-                onClick={() => onHighlightUseButtonClick(highlight)}
+              <IconButton
+                color="secondary"
+                onClick={() => {
+                  if (visibilityOverwrite || highlight.activityId) {
+                    enqueueSnackbar(
+                      "한번 공개한 하이라이트는 활동을 변경할 수 없습니다.",
+                      { variant: "warning" }
+                    );
+                    return;
+                  }
+                  setActivitySelectModalOpen(true);
+                }}
               >
-                선택
+                {visibilityOverwrite || highlight.activityId ? (
+                  <Visibility />
+                ) : (
+                  <VisibilityOff />
+                )}
+              </IconButton>
+              <IconButton color="secondary">
+                <Edit />
+              </IconButton>
+              <IconButton color="error">
+                <Delete />
+              </IconButton>
+            </Box>
+            <Divider />
+            <Stack
+              spacing={1}
+              sx={{ flexGrow: 1, overflowY: "auto", padding: 2 }}
+            >
+              <Stack
+                direction="row"
+                spacing={0.5}
+                alignItems="center"
+                alignSelf={"flex-end"}
+              >
+                <Avatar src={highlight.authorProfileImageURL} />
+                <Typography component="span">{highlight.authorName}</Typography>
+              </Stack>
+              <Typography variant="body2" color="textSecondary">
+                {highlightContent}
+              </Typography>
+              <Divider />
+              <Typography variant="body1">{memo}</Typography>
+            </Stack>
+            <CardActions sx={{ justifyContent: "flex-end" }}>
+              <Button variant="outlined" color="secondary" onClick={onClose}>
+                취소
               </Button>
-            )}
-          </CardActions>
-        </Stack>
-      </Card>
-    </Grid>
+              {onHighlightUseButtonClick && (
+                <Button
+                  variant="contained"
+                  onClick={() => onHighlightUseButtonClick(highlight)}
+                >
+                  선택
+                </Button>
+              )}
+            </CardActions>
+          </Stack>
+        </Card>
+      </Grid>
+    </>
   );
 }
 
