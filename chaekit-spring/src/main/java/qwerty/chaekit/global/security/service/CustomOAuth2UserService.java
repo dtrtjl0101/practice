@@ -1,12 +1,14 @@
 package qwerty.chaekit.global.security.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.member.Member;
 import qwerty.chaekit.domain.member.MemberRepository;
 import qwerty.chaekit.domain.member.enums.Role;
@@ -16,7 +18,9 @@ import qwerty.chaekit.global.security.model.CustomUserDetails;
 
 import java.util.Map;
 
+@Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
     private final MemberRepository memberRepository;
@@ -50,6 +54,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                             .nickname(nickname)
                             .profileImageKey("oauth2-profile-image/" + profileImageUrl)
                             .build();
+                    log.info("OAuth2 User Profile Created: {}", userProfile);
                     userProfileRepository.save(userProfile);
 
                     return newMember;

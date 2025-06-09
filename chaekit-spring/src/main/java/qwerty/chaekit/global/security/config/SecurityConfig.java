@@ -11,9 +11,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
@@ -27,6 +24,10 @@ import qwerty.chaekit.global.security.filter.CustomExceptionHandlingFilter;
 import qwerty.chaekit.global.security.filter.login.LoginFilter;
 import qwerty.chaekit.global.security.handler.CustomAccessDeniedHandler;
 import qwerty.chaekit.global.security.handler.CustomAuthenticationEntryPoint;
+import qwerty.chaekit.global.security.handler.OAuth2LoginFailureHandler;
+import qwerty.chaekit.global.security.handler.OAuth2LoginSuccessHandler;
+import qwerty.chaekit.global.security.service.CustomOAuth2UserService;
+import qwerty.chaekit.global.security.util.LoginResponseFactory;
 import qwerty.chaekit.global.util.SecurityRequestReader;
 import qwerty.chaekit.global.util.SecurityResponseSender;
 import qwerty.chaekit.service.member.token.RefreshTokenService;
@@ -47,7 +48,8 @@ public class SecurityConfig {
     private final SecurityResponseSender responseSender;
     private final SecurityRequestReader requestReader;
     private final FileService fileService;
-    private final OAuth2UserService<OAuth2UserRequest, OAuth2User> customOAuth2UserService;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {//비밀번호 안전하게 암호화하는 클래스
@@ -68,17 +70,17 @@ public class SecurityConfig {
     public AccessTokenFilter jwtFilter() {
         return new AccessTokenFilter(jwtUtil);
     }
-
+    
     @Bean
-    public LoginFilter loginFilter(AuthenticationManager authManager, RefreshTokenService refreshTokenService) {
-        return new LoginFilter("/api/login", jwtUtil, authManager, requestReader, responseSender, fileService, refreshTokenService);
+    public LoginFilter loginFilter(AuthenticationManager authManager, RefreshTokenService refreshTokenService, LoginResponseFactory loginResponseFactory) {
+        return new LoginFilter("/api/login", jwtUtil, authManager, requestReader, responseSender, fileService, refreshTokenService, loginResponseFactory);
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http,
                                            LoginFilter loginFilter,
                                            AccessTokenFilter accessTokenFilter,
-                                           CustomExceptionHandlingFilter exceptionHandlingFilter) throws Exception {
+                                           CustomExceptionHandlingFilter exceptionHandlingFilter, OAuth2LoginFailureHandler oAuth2LoginFailureHandler) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable);
 
@@ -123,6 +125,8 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         )
+                        .successHandler(oAuth2LoginSuccessHandler)
+                        .failureHandler(oAuth2LoginFailureHandler)
                 );
 
         http
