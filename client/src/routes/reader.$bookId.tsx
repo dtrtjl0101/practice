@@ -216,7 +216,7 @@ function RouteComponent() {
 
     setHighlightsInPage(newMemosInPage);
     return;
-  }, [highlights, rendition, location, setHighlightsInPage]);
+  }, [highlights, rendition?.location, location, setHighlightsInPage]);
 
   const onHighlightClick = (highlight: Highlight) => {
     if (!openHighlightDrawer) {
@@ -682,6 +682,9 @@ function RouteComponent() {
           getRendition={(newRendition) => {
             newRendition.once("started", async () => {
               await loadLocations(bookId, newRendition).then(forceUpdate);
+            });
+            newRendition.on("rendered", () => {
+              forceUpdate();
             });
             setRendition(newRendition);
           }}
