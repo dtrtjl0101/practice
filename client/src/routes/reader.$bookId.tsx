@@ -1,5 +1,6 @@
 import { Close, Note, NoteAdd, Timelapse } from "@mui/icons-material";
 import {
+  Avatar,
   Badge,
   Box,
   Drawer,
@@ -31,6 +32,9 @@ import HighlightCreationModal from "../component/HighlightCreationModal";
 import loadLocations from "../utils/loadLocations";
 import Coachmark, { useCoachmark } from "../component/Coachmark";
 import useThrottle from "../utils/useThrottle";
+import { useAtomValue } from "jotai";
+import State from "../states";
+import { Role } from "../types/role";
 
 export const Route = createFileRoute("/reader/$bookId")({
   component: RouteComponent,
@@ -78,6 +82,7 @@ function RouteComponent() {
   const { bookId } = Route.useParams();
   const { groupId, activityId, temporalProgress, location } = Route.useSearch();
 
+  const user = useAtomValue(State.Auth.user);
   const theme = useTheme();
   const [highlightsInPage, setHighlightsInPage] = useState<Highlight[]>([]);
   const [rendition, setRendition] = useState<Rendition | undefined>(undefined);
@@ -144,16 +149,6 @@ function RouteComponent() {
   });
 
   const previousHighlightsInPage = useRef<Highlight[]>([]);
-
-  const readProgressSliderMarks = useMemo(() => {
-    if (!rendition) {
-      return [];
-    }
-    const marks: { value: number }[] = highlights.map((highlight) => ({
-      value: rendition.book.locations.percentageFromCfi(highlight.cfi) * 100,
-    }));
-    return marks;
-  }, [rendition, highlights]);
 
   useEffect(() => {
     previousHighlightsInPage.current = highlightsInPage;
@@ -313,6 +308,57 @@ function RouteComponent() {
     });
 
   const throttledSetLocation = useThrottle(setLocation, 500);
+
+  const { data: members } = useQuery({
+    queryKey: ["activityReadProgresses", activityId],
+    queryFn: async () => {
+      const response =
+        await API_CLIENT.readingProgressController.getProgressFromActivity(
+          activityId!,
+          {
+            pageable: {
+              page: 0,
+              size: 100,
+            },
+          }
+        );
+      if (!response.isSuccessful) {
+        throw new Error(response.errorMessage);
+      }
+      return response.data.content || [];
+    },
+    initialData: [],
+    enabled: !!activityId,
+    refetchInterval: 1000 * 10,
+  });
+
+  const readProgressSliderMarks = useMemo(() => {
+    if (!rendition) {
+      return [];
+    }
+    const marks: ReaderProgressSliderMark[] = [
+      ...highlights.map((highlight) => {
+        return {
+          type: "memo",
+          value:
+            rendition.book.locations.percentageFromCfi(highlight.cfi) * 100,
+        } as ReaderProgressSliderMark;
+      }),
+      ...members
+        .filter((member) =>
+          user?.role === Role.ROLE_USER ? member.userId !== user.userId : true
+        )
+        .map((member) => {
+          return {
+            type: "member",
+            value: member.percentage || 0,
+            memberName: member.userNickname,
+            profileImageUrl: member.userProfileImageURL || "",
+          } as ReaderProgressSliderMark;
+        }),
+    ];
+    return marks;
+  }, [rendition, highlights, members]);
 
   return (
     <>
@@ -653,9 +699,72 @@ const ReadProgressSlider = styled(Slider)(({ theme }) => ({
   },
 }));
 
-function ReadProgressSliderMark(props: { style: { left: string } }) {
+function ReadProgressSliderMark(props: {
+  "data-index": number;
+  style: { left: string };
+  ownerState: {
+    marks: ReaderProgressSliderMark[];
+  };
+}) {
   const theme = useTheme();
   const left = props.style.left;
+  const mark = props.ownerState.marks[props["data-index"]];
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  if (mark.type === "member") {
+    return (
+      <Box
+        sx={{
+          position: "absolute",
+          left,
+          top: 20,
+          transform: "translate(-50%, -50%)",
+        }}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
+        <Avatar
+          src={mark.profileImageUrl}
+          sx={{
+            width: 24,
+            height: 24,
+            borderRadius: "50% 0 50% 50%",
+            transform: "rotate(-45deg)",
+            transition: "all 0.3s",
+          }}
+        />
+        {showTooltip && (
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: -40,
+              left: "50%",
+              transform: "translateX(-50%)",
+              backgroundColor: "rgba(0, 0, 0, 0.8)",
+              color: "white",
+              padding: "4px 8px",
+              borderRadius: "4px",
+              fontSize: "12px",
+              whiteSpace: "nowrap",
+              zIndex: theme.zIndex.tooltip,
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: -4,
+                left: "50%",
+                transform: "translateX(-50%)",
+                borderLeft: "4px solid transparent",
+                borderRight: "4px solid transparent",
+                borderBottom: "4px solid rgba(0, 0, 0, 0.8)",
+              },
+            }}
+          >
+            {mark.memberName}
+          </Box>
+        )}
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -672,3 +781,14 @@ function ReadProgressSliderMark(props: { style: { left: string } }) {
     />
   );
 }
+
+type ReaderProgressSliderMark = { value: number } & (
+  | {
+      type: "memo";
+    }
+  | {
+      type: "member";
+      profileImageUrl: string;
+      memberName: string;
+    }
+);
