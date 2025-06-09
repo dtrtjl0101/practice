@@ -11,6 +11,7 @@ import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.group.activity.activitymember.ActivityMember;
 import qwerty.chaekit.domain.group.activity.activitymember.ActivityMemberRepository;
+import qwerty.chaekit.domain.group.activity.dto.ActivityWithCountsResponse;
 import qwerty.chaekit.domain.group.activity.repository.ActivityRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.dto.group.activity.*;
@@ -93,12 +94,14 @@ public class ActivityService {
     @Transactional(readOnly = true)
     public PageResponse<ActivityFetchResponse> fetchAllActivities(UserToken userToken, Pageable pageable, long groupId) {
         Long userId = userToken.userId();
-        Page<ActivityFetchResponse> page = activityRepository.findByGroup_IdWithBook(groupId, pageable)
+        Page<ActivityFetchResponse> page = activityRepository.findByGroupIdWithCounts(groupId, pageable)
                 .map(
-                        activity -> ActivityFetchResponse.of(
-                                activity, 
-                                fileService.convertToPublicImageURL(activity.getBook().getCoverImageKey()),
-                                userId != null && activity.isParticipant(entityFinder.findUser(userId))
+                        response -> ActivityFetchResponse.of(
+                                response.activity(),
+                                fileService.convertToPublicImageURL(response.activity().getBook().getCoverImageKey()),
+                                userId != null && response.activity().isParticipant(entityFinder.findUser(userId)),
+                                response.highlightCount(),
+                                response.discussionCount()
                 ));
         return PageResponse.of(page);
     }
@@ -126,12 +129,19 @@ public class ActivityService {
     @Transactional(readOnly = true)
     public ActivityFetchResponse fetchActivity(UserToken userToken, long activityId) {
         Long userId = userToken.userId();
-        Activity activity = activityRepository.findByIdWithBook(activityId)
+        ActivityWithCountsResponse response = activityRepository.findByIdWithCounts(activityId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.ACTIVITY_NOT_FOUND));
-
+        Activity activity = response.activity();
+        
         activityPolicy.assertJoined(userId, activity.getId());
 
-        return ActivityFetchResponse.of(activity, fileService.convertToPublicImageURL(activity.getBook().getCoverImageKey()), true);
+        return ActivityFetchResponse.of(
+                activity, 
+                fileService.convertToPublicImageURL(activity.getBook().getCoverImageKey()), 
+                true, 
+                response.highlightCount(), 
+                response.discussionCount()
+        );
     }
 
     @Transactional(readOnly = true)
@@ -148,7 +158,7 @@ public class ActivityService {
                 .map(activityMember -> ActivityFetchResponse.of(
                         activityMember.getActivity(),
                         fileService.convertToPublicImageURL(activityMember.getUser().getProfileImageKey()),
-                        true
+                        true, -1L, -1L
                 ));
         return PageResponse.of(page);
 

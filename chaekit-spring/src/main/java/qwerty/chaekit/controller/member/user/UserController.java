@@ -71,7 +71,7 @@ public class UserController {
 
     @Operation(
             summary = "내 활동 조회",
-            description = "내가 가입한 모든 활동을 조회합니다."
+            description = "내가 가입한 모든 활동을 조회합니다. 여기서 하이라이트 수, 토론 수는 -1로 표시됩니다"
     )
     @GetMapping("/me/activities")
     public ApiSuccessResponse<PageResponse<ActivityFetchResponse>> getMyActivities(
