@@ -218,23 +218,22 @@ export function ReadingProgressChart({
   // 통계 계산 (null이 아닌 데이터만 사용)
   const validData = chartData.filter((item) => item.myPercentage !== null);
   const latestData = validData[validData.length - 1];
-  const firstData = validData[0];
   const myProgress = latestData?.myPercentage || 0;
   const avgProgress = latestData?.averagePercentage || 0;
   const targetProgress = latestData?.targetPercentage || 0;
   const totalDays = chartData.length;
-  const myGrowth =
-    latestData && firstData
-      ? latestData.myPercentage - firstData.myPercentage
-      : 0;
+
+  if (!activityInfo?.isParticipant) {
+    return <ProgressChartSkeleton message={"모임에 가입해야합니다."} />;
+  }
 
   if (isLoading) {
-    return <ProgressChartSkeleton />;
+    return <ProgressChartSkeleton message={"로딩중..."} />;
   }
 
   if (readingProgressHistory.length === 0) {
     return (
-      <Card elevation={0} sx={{ border: `1px solid ${theme.palette.divider}` }}>
+      <Card variant="outlined">
         <CardContent sx={{ p: 3 }}>
           <Stack
             direction="row"
@@ -242,12 +241,18 @@ export function ReadingProgressChart({
             alignItems="center"
             sx={{ mb: 3 }}
           >
-            <Typography variant="h4" sx={{ mb: 2 }}>
-              진행도
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              전일 기준
-            </Typography>
+            <Stack direction="row" spacing={2}>
+              <Typography variant="h4" sx={{ mb: 2 }}>
+                진행도
+              </Typography>
+              <Typography
+                alignSelf="end"
+                variant="subtitle1"
+                color="text.secondary"
+              >
+                전일 기준
+              </Typography>
+            </Stack>
           </Stack>
           <Box
             sx={{
@@ -366,18 +371,6 @@ export function ReadingProgressChart({
           </Box>
         </Stack>
 
-        {/* 성장률 표시 */}
-        {myGrowth !== 0 && (
-          <Box sx={{ mb: 3 }}>
-            <Chip
-              label={`${myGrowth > 0 ? "+" : ""}${myGrowth.toFixed(1)}% 성장`}
-              size="small"
-              color={myGrowth > 0 ? "success" : "error"}
-              sx={{ fontWeight: 600 }}
-            />
-          </Box>
-        )}
-
         {/* 차트 */}
         <Box sx={{ height: 300, width: "100%" }}>
           <ResponsiveContainer width="100%" height="100%">
@@ -491,9 +484,10 @@ export function ReadingProgressChart({
 }
 
 // 로딩 스켈레톤
-function ProgressChartSkeleton() {
+function ProgressChartSkeleton({ message }: { message: string }) {
+  const theme = useTheme();
   return (
-    <Card elevation={0} sx={{ border: "1px solid #e0e0e0" }}>
+    <Card variant="outlined">
       <CardContent sx={{ p: 3 }}>
         <Stack
           direction="row"
@@ -501,7 +495,18 @@ function ProgressChartSkeleton() {
           alignItems="center"
           sx={{ mb: 3 }}
         >
-          <Typography variant="h4">진행도</Typography>
+          <Stack direction="row" spacing={2}>
+            <Typography variant="h4" sx={{ mb: 2 }}>
+              진행도
+            </Typography>
+            <Typography
+              alignSelf="end"
+              variant="subtitle1"
+              color="text.secondary"
+            >
+              전일 기준
+            </Typography>
+          </Stack>
           <Skeleton
             variant="rectangular"
             width={80}
@@ -521,14 +526,24 @@ function ProgressChartSkeleton() {
             height={80}
             sx={{ flex: 1, borderRadius: 2 }}
           />
-          <Skeleton
-            variant="rectangular"
-            height={80}
-            sx={{ flex: 1, borderRadius: 2 }}
-          />
         </Stack>
 
-        <Skeleton variant="rectangular" height={300} sx={{ borderRadius: 2 }} />
+        <Box
+          sx={{
+            textAlign: "center",
+            py: 4,
+            color: "text.secondary",
+            bgcolor: alpha(theme.palette.text.primary, 0.1),
+            borderRadius: 2,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Timeline sx={{ fontSize: 48, mb: 1, opacity: 0.3 }} />
+          <Typography variant="body2">{message}</Typography>
+        </Box>
       </CardContent>
     </Card>
   );
