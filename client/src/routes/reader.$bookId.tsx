@@ -554,6 +554,7 @@ function RouteComponent() {
           onClose={() => setOpenHighlightCreationModal(false)}
           selection={selection}
           addHighlight={addHighlight}
+          currentActivityId={activityId}
         />
         <Drawer
           anchor="right"
