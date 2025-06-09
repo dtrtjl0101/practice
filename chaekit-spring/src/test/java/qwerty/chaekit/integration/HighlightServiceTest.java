@@ -104,7 +104,8 @@ class HighlightServiceTest {
                 null,
                 dummyEbook.getId(),
                 "spine1",
-                true
+                true,
+                null
         );
 
         // Then

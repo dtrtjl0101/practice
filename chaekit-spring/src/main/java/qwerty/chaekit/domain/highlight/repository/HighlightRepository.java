@@ -14,10 +14,10 @@ import java.util.Optional;
 public interface HighlightRepository {
     Optional<Highlight> findById(Long id);
     Highlight save(Highlight highlight);
-    Page<Highlight> findHighlights(Pageable pageable, Long userId, Long activityId, Long bookId, String spine, boolean me);
+    Page<Highlight> findHighlights(Pageable pageable, Long userId, Long activityId, Long bookId, String spine, boolean me, String keyword);
     void delete(Highlight highlight);
     long countByIdsAndActivity(List<Long> ids, Activity activity);
-    Page<Highlight> findByAuthor(UserProfile user, @Nullable Long bookId, Pageable pageable);
+    Page<Highlight> findByAuthor(UserProfile user, @Nullable Long bookId, String keyword, Pageable pageable);
     List<Highlight> findByGroup(ReadingGroup group);
 
     /**

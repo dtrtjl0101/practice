@@ -63,9 +63,10 @@ public class UserController {
     public ApiSuccessResponse<PageResponse<HighlightFetchResponse>> getMyHighlights(
             @Login UserToken userToken,
             @ParameterObject Pageable pageable,
-            @RequestParam(required = false) Long bookId
+            @RequestParam(required = false) Long bookId,
+            @RequestParam(required = false) String keyword
     ) {
-        return ApiSuccessResponse.of(highlightService.getMyHighlights(userToken, bookId, pageable));
+        return ApiSuccessResponse.of(highlightService.getMyHighlights(userToken, bookId, keyword, pageable));
     }
 
     @Operation(

@@ -33,7 +33,7 @@ public class HighlightRepositoryImpl implements HighlightRepository {
     }
 
     @Override
-    public Page<Highlight> findHighlights(Pageable pageable, Long userId, Long activityId, Long bookId, String spine, boolean me) {
+    public Page<Highlight> findHighlights(Pageable pageable, Long userId, Long activityId, Long bookId, String spine, boolean me, String keyword) {
         QHighlight highlight = QHighlight.highlight;
         BooleanBuilder where = new BooleanBuilder();
 
@@ -55,6 +55,10 @@ public class HighlightRepositoryImpl implements HighlightRepository {
         } else { // 내 하이라이트
             where.and(highlight.author.id.eq(userId));
         }
+        
+        if (keyword != null && !keyword.isBlank()) {
+            where.and(highlight.memo.containsIgnoreCase(keyword));
+        }
 
         return getHighlightsByBooleanBuilder(pageable, highlight, where);
     }
@@ -70,13 +74,17 @@ public class HighlightRepositoryImpl implements HighlightRepository {
     }
 
     @Override
-    public Page<Highlight> findByAuthor(UserProfile user, Long bookId, Pageable pageable) {
+    public Page<Highlight> findByAuthor(UserProfile user, Long bookId, String keyword, Pageable pageable) {
         QHighlight highlight = QHighlight.highlight;
 
         BooleanBuilder where = new BooleanBuilder();
         where.and(highlight.author.eq(user));
         if(bookId != null) {
             where.and(highlight.book.id.eq(bookId));
+        }
+        
+        if (keyword != null && !keyword.isBlank()) {
+            where.and(highlight.memo.containsIgnoreCase(keyword));
         }
 
         return getHighlightsByBooleanBuilder(pageable, highlight, where);
