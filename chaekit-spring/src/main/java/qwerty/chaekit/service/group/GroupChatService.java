@@ -50,7 +50,7 @@ public class GroupChatService {
                 .groupId(groupId)
                 .authorId(user.getId())
                 .authorName(user.getNickname())
-                .authorProfileImage(user.getProfileImageKey())
+                .authorProfileImage(fileService.convertToPublicImageURL(user.getProfileImageKey()))
                 .content(request.content())
                 .createdAt(savedChat.getCreatedAt())
                 .build();
