@@ -36,6 +36,7 @@ import { useAtomValue } from "jotai";
 import State from "../states";
 import { Role } from "../types/role";
 import { enqueueSnackbar } from "notistack";
+import generateUserColor from "../utils/generateUserColor";
 
 export const Route = createFileRoute("/reader/$bookId")({
   component: RouteComponent,
@@ -215,7 +216,7 @@ function RouteComponent() {
 
     setHighlightsInPage(newMemosInPage);
     return;
-  }, [highlights, rendition, location, setHighlightsInPage]);
+  }, [highlights, rendition?.location, location, setHighlightsInPage]);
 
   const onHighlightClick = (highlight: Highlight) => {
     if (!openHighlightDrawer) {
@@ -247,6 +248,7 @@ function RouteComponent() {
         {
           transition: "all 0.3s ease-out",
           opacity: shouldFade ? 0 : 0.7,
+          fill: generateUserColor(highlight.authorId),
         }
       );
     });
@@ -399,11 +401,12 @@ function RouteComponent() {
             value: member.percentage || 0,
             memberName: member.userNickname,
             profileImageUrl: member.userProfileImageURL || "",
+            memberId: member.userId || 0,
           } as ReaderProgressSliderMark;
         }),
     ];
     return marks;
-  }, [rendition, highlights, members]);
+  }, [rendition?.book.locations, highlights, members]);
 
   return (
     <>
@@ -682,6 +685,9 @@ function RouteComponent() {
             newRendition.once("started", async () => {
               await loadLocations(bookId, newRendition).then(forceUpdate);
             });
+            newRendition.on("rendered", () => {
+              forceUpdate();
+            });
             setRendition(newRendition);
           }}
         />
@@ -756,6 +762,7 @@ function ReadProgressSliderMark(props: {
             borderRadius: "50% 0 50% 50%",
             transform: "rotate(-45deg)",
             transition: "all 0.3s",
+            border: `2px solid ${generateUserColor(mark.memberId)}`,
           }}
         />
         {showTooltip && (
@@ -815,5 +822,6 @@ type ReaderProgressSliderMark = { value: number } & (
       type: "member";
       profileImageUrl: string;
       memberName: string;
+      memberId: number;
     }
 );
