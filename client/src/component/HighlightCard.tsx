@@ -15,6 +15,7 @@ import {
   InputAdornment,
   Chip,
   Grid,
+  LinearProgress,
 } from "@mui/material";
 import {
   Comment,
@@ -43,6 +44,7 @@ import { Role } from "../types/role";
 import createReactionMap from "../utils/createReactionMap";
 import { LinkChip } from "./LinkChip";
 import ActivitySelectModal from "./ActivitySelectModal";
+import generateUserColor from "../utils/generateUserColor";
 
 export default function HighlightCard({
   highlight,
@@ -181,6 +183,15 @@ export default function HighlightCard({
       variant="outlined"
       onClick={onClick}
     >
+      <LinearProgress
+        value={100}
+        variant="determinate"
+        sx={{
+          ".MuiLinearProgress-bar": {
+            backgroundColor: generateUserColor(highlight.authorId),
+          },
+        }}
+      />
       <ActivitySelectModal
         open={activitySelectModalOpen}
         onClose={() => setActivitySelectModalOpen(false)}

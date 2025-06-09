@@ -36,6 +36,7 @@ import { useAtomValue } from "jotai";
 import State from "../states";
 import { Role } from "../types/role";
 import { enqueueSnackbar } from "notistack";
+import generateUserColor from "../utils/generateUserColor";
 
 export const Route = createFileRoute("/reader/$bookId")({
   component: RouteComponent,
@@ -247,6 +248,7 @@ function RouteComponent() {
         {
           transition: "all 0.3s ease-out",
           opacity: shouldFade ? 0 : 0.7,
+          fill: generateUserColor(highlight.authorId),
         }
       );
     });
@@ -399,6 +401,7 @@ function RouteComponent() {
             value: member.percentage || 0,
             memberName: member.userNickname,
             profileImageUrl: member.userProfileImageURL || "",
+            memberId: member.userId || 0,
           } as ReaderProgressSliderMark;
         }),
     ];
@@ -754,6 +757,7 @@ function ReadProgressSliderMark(props: {
             borderRadius: "50% 0 50% 50%",
             transform: "rotate(-45deg)",
             transition: "all 0.3s",
+            border: `2px solid ${generateUserColor(mark.memberId)}`,
           }}
         />
         {showTooltip && (
@@ -813,5 +817,6 @@ type ReaderProgressSliderMark = { value: number } & (
       type: "member";
       profileImageUrl: string;
       memberName: string;
+      memberId: number;
     }
 );
