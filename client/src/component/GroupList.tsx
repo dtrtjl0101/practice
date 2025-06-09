@@ -48,8 +48,6 @@ export default function GroupList(props: {
 }) {
   const { size, action, title, keyPrefix, initialSearchTerms = [] } = props;
 
-  console.log("Valid initial search terms:", initialSearchTerms);
-
   const [page, setPage] = useState(0);
   const [sort, _setSort] = useState<string[]>([]);
   const [searchTerms, setSearchTerms] = useState<string[]>(initialSearchTerms);
@@ -290,12 +288,6 @@ export default function GroupList(props: {
           </Box>
         )}
 
-        <PageNavigation
-          pageZeroBased={page}
-          setPage={handlePageChange}
-          totalPages={totalPages}
-        />
-
         <Grid container spacing={2}>
           {displayGroups.length === 0 && !isLoading && (
             <Grid size={12} textAlign={"center"}>
@@ -405,7 +397,7 @@ export default function GroupList(props: {
                           </Stack>
                         </Box>
                         <Stack direction="row" spacing={1}>
-                          {group.isAutoApproval && (
+                          {group.isAutoApproval && size === "large" && (
                             <Chip
                               label="자동 가입"
                               size="small"
@@ -496,11 +488,13 @@ export default function GroupList(props: {
           )}
         </Grid>
 
-        <PageNavigation
-          pageZeroBased={page}
-          setPage={handlePageChange}
-          totalPages={totalPages}
-        />
+        {size === "large" && (
+          <PageNavigation
+            pageZeroBased={page}
+            setPage={handlePageChange}
+            totalPages={totalPages}
+          />
+        )}
       </Stack>
     </Container>
   );

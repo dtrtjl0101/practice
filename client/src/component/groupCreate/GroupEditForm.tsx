@@ -1,4 +1,4 @@
-import { Add, Delete } from "@mui/icons-material";
+import { Add, CheckBox, Delete } from "@mui/icons-material";
 import {
   Button,
   CardMedia,
@@ -11,7 +11,10 @@ import {
   Stack,
   TextField,
   Box,
+  Checkbox,
+  FormControlLabel,
 } from "@mui/material";
+import { enqueueSnackbar } from "notistack";
 import { useEffect, useMemo, useState } from "react";
 
 export type GroupEditData = {
@@ -19,8 +22,9 @@ export type GroupEditData = {
   description: string;
   tags: string[];
   groupImage?: File;
-  groupImageURL?: string; // 기존 이미지 URL 추가
-  imageAction?: "keep" | "update" | "remove"; // 이미지 액션 구분
+  groupImageURL?: string;
+  imageAction?: "keep" | "update" | "remove";
+  autoApproval?: boolean;
 };
 
 export default function GroupEditForm(props: {
@@ -39,13 +43,15 @@ export default function GroupEditForm(props: {
   const [imageAction, setImageAction] = useState<"keep" | "update" | "remove">(
     "keep"
   );
+  const [autoApproval, setAutoApproval] = useState(false);
 
   const handleEditDoneButtonClicked = () => {
     const editData: GroupEditData = {
-      name,
-      description,
+      name: name.trim(),
+      description: description.trim(),
       tags,
       imageAction,
+      autoApproval, // 명시적으로 boolean 값 전달
     };
 
     // 이미지 액션에 따라 데이터 설정
@@ -54,7 +60,6 @@ export default function GroupEditForm(props: {
     } else if (imageAction === "keep" && currentImageURL) {
       editData.groupImageURL = currentImageURL;
     }
-
     onEditDone(editData);
   };
 
@@ -105,23 +110,50 @@ export default function GroupEditForm(props: {
     return null;
   }, [groupImage, currentImageURL, imageAction]);
 
+  const handleCheckbox = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = event.target.checked;
+    setAutoApproval(newValue);
+
+    if (newValue) {
+      enqueueSnackbar("자동 승인이 활성화되었습니다.", { variant: "info" });
+    } else {
+      enqueueSnackbar("자동 승인이 비활성화되었습니다.", { variant: "info" });
+    }
+  };
+
+  // 초기 데이터 설정
+  // GroupEditForm.tsx - useEffect 수정
   useEffect(() => {
     if (props.groupEditData) {
-      const { name, description, tags, groupImage, groupImageURL } =
-        props.groupEditData;
-      setName(name);
-      setDescription(description);
-      setTags(tags);
+      const {
+        name,
+        description,
+        tags,
+        groupImage,
+        groupImageURL,
+        autoApproval,
+      } = props.groupEditData;
+
+      setName(name || "");
+      setDescription(description || "");
+      setTags(tags || []);
       setGroupImage(groupImage);
       setCurrentImageURL(groupImageURL || "");
       setImageAction("keep");
+      // boolean 값 명시적 처리 - undefined일 경우 false로 기본값 설정
+      setAutoApproval(Boolean(autoApproval));
     }
   }, [props.groupEditData]);
+
+  // 폼 유효성 검사
+  const isFormValid = useMemo(() => {
+    return name.trim().length > 0 && description.trim().length > 0;
+  }, [name, description]);
 
   return (
     <Paper sx={{ width: "100%", height: "100%", padding: 2 }}>
       <Stack spacing={2} sx={{ height: "100%", overflowY: "auto", padding: 2 }}>
-        {/* 이미지 업로드 영역 - CardActionArea 제거하고 Box로 변경 */}
+        {/* 이미지 업로드 영역 */}
         <Box
           onClick={handleImageUpload}
           sx={{
@@ -132,6 +164,7 @@ export default function GroupEditForm(props: {
             cursor: "pointer",
             borderRadius: 2,
             padding: 2,
+            border: "2px dashed #ddd",
             "&:hover": {
               borderColor: "#999",
               backgroundColor: "rgba(0,0,0,0.02)",
@@ -174,9 +207,12 @@ export default function GroupEditForm(props: {
                 alignItems: "center",
                 justifyContent: "center",
                 color: "#ccc",
+                flexDirection: "column",
+                gap: 1,
               }}
             >
               <Add sx={{ fontSize: 64 }} />
+              <span>이미지 업로드</span>
             </Box>
           )}
         </Box>
@@ -187,7 +223,9 @@ export default function GroupEditForm(props: {
           fullWidth
           value={name}
           onChange={(e) => setName(e.target.value)}
+          required
         />
+
         <TextField
           placeholder="모임 설명"
           variant="outlined"
@@ -197,13 +235,16 @@ export default function GroupEditForm(props: {
           maxRows={10}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          required
         />
+
         <OutlinedInput
           placeholder="태그를 입력하세요"
           value={tag}
           onChange={(e) => setTag(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
+              e.preventDefault();
               handleTagAddButtonClicked();
             }
           }}
@@ -215,6 +256,7 @@ export default function GroupEditForm(props: {
             </InputAdornment>
           }
         />
+
         <Grid
           container
           direction={"row"}
@@ -228,17 +270,44 @@ export default function GroupEditForm(props: {
                 label={tag}
                 onDelete={() => handleTagDeleteButtonClicked(tag)}
                 deleteIcon={<Delete />}
+                sx={{ marginBottom: 1 }}
               />
             );
           })}
         </Grid>
-        <Stack direction="row" spacing={2} sx={{ justifyContent: "flex-end" }}>
-          <Button color="secondary" onClick={onCancel}>
-            취소
-          </Button>
-          <Button variant="contained" onClick={handleEditDoneButtonClicked}>
-            완료
-          </Button>
+
+        <Stack spacing={2}>
+          {/* 자동 승인 체크박스 */}
+          <FormControlLabel
+            label="자동 승인"
+            control={
+              <Checkbox
+                name="autoApproval"
+                checked={autoApproval}
+                onChange={handleCheckbox}
+                color="primary"
+              />
+            }
+            sx={{
+              "& .MuiFormControlLabel-label": {
+                fontWeight: 500,
+              },
+            }}
+          />
+
+          {/* 버튼 영역 */}
+          <Stack direction="row" spacing={2} justifyContent="flex-end">
+            <Button color="secondary" onClick={onCancel} variant="outlined">
+              취소
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleEditDoneButtonClicked}
+              disabled={!isFormValid}
+            >
+              완료
+            </Button>
+          </Stack>
         </Stack>
       </Stack>
     </Paper>
