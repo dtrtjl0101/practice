@@ -684,7 +684,6 @@ export interface GroupFetchResponse {
   leaderNickname?: string;
   leaderProfileImageURL?: string;
   myMemberShipStatus?: "OWNED" | "PENDING" | "JOINED" | "NONE";
-  isAutoApproval?: boolean;
   /** @format int32 */
   memberCount?: number;
 }
@@ -1117,8 +1116,6 @@ export interface HighlightSummaryResponse {
   cfi?: string;
   memo?: string;
   highlightContent?: string;
-  /** @format date-time */
-  createdAt?: string;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -1289,20 +1286,7 @@ export interface ApiSuccessResponseListActivityScoreResponse {
 /** API 에러 응답을 감싸는 클래스 */
 export interface ApiSuccessResponseListHighlightPreviewResponse {
   isSuccessful?: boolean;
-  data?: HighlightPreviewResponse[];
-}
-
-export interface HighlightPreviewResponse {
-  /** @format int64 */
-  id?: number;
-  /** @format int64 */
-  authorId?: number;
-  authorName?: string;
-  authorProfileImageURL?: string;
-  spine?: string;
-  cfi?: string;
-  /** @format date-time */
-  createdAt?: string;
+  data?: any[];
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -1477,7 +1461,11 @@ export class HttpClient<SecurityDataType = unknown> {
           formData.append(key, JSON.stringify(property));
           return formData;
         }
-        if (typeof property === "number" || typeof property === "string") {
+        if (
+          typeof property === "number" ||
+          typeof property === "string" ||
+          typeof property === "boolean"
+        ) {
           formData.append(key, `${property}`);
           return formData;
         }

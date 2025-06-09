@@ -35,7 +35,6 @@ function formatTimeAgo(dateString: string): string {
   const diffInMinutes = Math.floor(
     (now.getTime() - createdAt.getTime()) / (1000 * 60)
   );
-  console.log("diffInMinutes:", diffInMinutes);
 
   if (diffInMinutes < 1) return "방금 전";
   if (diffInMinutes < 60) return `${diffInMinutes}분 전`;
