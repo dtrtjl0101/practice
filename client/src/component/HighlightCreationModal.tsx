@@ -26,6 +26,7 @@ export default function HighlightCreationModal({
   selection,
   currentActivityId,
   addHighlight,
+  bookId,
 }: {
   open: boolean;
   onClose: () => void;
@@ -37,6 +38,7 @@ export default function HighlightCreationModal({
     highlightContent: string;
     activityId?: number;
   }) => void;
+  bookId: number;
 }) {
   const [content, setContent] = useState("");
   const [targetActivity, setTargetActivity] = useState<TargetActivity>({
@@ -86,6 +88,7 @@ export default function HighlightCreationModal({
             setActivitySelectModalOpen(false);
             setTargetActivityMenuAnchorElement(null);
           }}
+          bookId={bookId}
         />
         <Card variant="outlined" sx={{ p: 2 }}>
           <Stack spacing={2}>

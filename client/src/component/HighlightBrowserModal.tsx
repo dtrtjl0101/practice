@@ -522,6 +522,7 @@ function HighlightViewer(props: {
           handlePublishHighlight(id);
         }}
         description="하이라이트를 공개할 활동을 선택하세요. 한번 공개한 하이라이트는 활동을 변경할 수 없습니다."
+        bookId={highlight.bookId}
       />
       <Grid
         size={setResponsiveStyleValueSm(12, 8)}

@@ -555,6 +555,7 @@ function RouteComponent() {
           selection={selection}
           addHighlight={addHighlight}
           currentActivityId={activityId}
+          bookId={bookId}
         />
         <Drawer
           anchor="right"

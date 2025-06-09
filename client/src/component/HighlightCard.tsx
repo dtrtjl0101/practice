@@ -188,6 +188,7 @@ export default function HighlightCard({
           setActivitySelectModalOpen(false);
           handleShareToGroup(activity.id);
         }}
+        bookId={highlight.bookId}
       />
       <Menu
         anchorEl={anchorEl}
