@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.group.activity.discussion.Discussion;
 import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment;
+import qwerty.chaekit.domain.group.activity.discussion.comment.dto.DiscussionCommentCountDto;
 import qwerty.chaekit.domain.group.activity.discussion.comment.repository.DiscussionCommentRepository;
 import qwerty.chaekit.domain.group.activity.discussion.repository.DiscussionRepository;
 import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
@@ -96,7 +97,7 @@ class DiscussionServiceTest {
                 .willReturn(new PageImpl<>(List.of(discussion)));
 
         given(discussionCommentRepository.countCommentsByDiscussionIds(List.of(1L)))
-                .willReturn(Map.of(1L, 5L));
+                .willReturn(Map.of(1L, DiscussionCommentCountDto.ofSingle(5)));
 
         // when
         PageResponse<DiscussionFetchResponse> response = discussionService.getDiscussions(userToken, pageable, activityId);
