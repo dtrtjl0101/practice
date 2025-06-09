@@ -3,6 +3,7 @@ package qwerty.chaekit.mapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import qwerty.chaekit.domain.group.activity.discussion.Discussion;
+import qwerty.chaekit.domain.group.activity.discussion.DiscussionStance;
 import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment;
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionCommentFetchResponse;
 import qwerty.chaekit.dto.group.activity.discussion.DiscussionDetailResponse;
@@ -67,7 +68,7 @@ public class DiscussionMapper {
      * required:
      *  - Discussion.author (ManyToOne, join fetch)
      */
-    public DiscussionFetchResponse toFetchResponse(Discussion discussion, Long commentCount, Long memberId) {
+    public DiscussionFetchResponse toFetchResponse(Discussion discussion, Long commentCount, Long memberId, Long agreeCount, Long disagreeCount, Long neutralCount) {
         return DiscussionFetchResponse.builder()
                 .discussionId(discussion.getId())
                 .activityId(discussion.getActivity().getId())
@@ -86,6 +87,9 @@ public class DiscussionMapper {
                                 .getHighlight()
                                 .getId())
                         .toList())
+                .agreeCount(agreeCount)
+                .disagreeCount(disagreeCount)
+                .neutralCount(neutralCount)
                 .build();
     }
 
@@ -128,6 +132,9 @@ public class DiscussionMapper {
                                 ))
                                 .toList()
                 )
+                .agreeCount(discussion.getComments().stream().filter(comment -> comment.getStance() == DiscussionStance.AGREE).count())
+                .disagreeCount(discussion.getComments().stream().filter(comment -> comment.getStance() == DiscussionStance.DISAGREE).count())
+                .neutralCount(discussion.getComments().stream().filter(comment -> comment.getStance() == DiscussionStance.NEUTRAL).count())
                 .build();
     }
 }

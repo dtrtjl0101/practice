@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.group.activity.discussion.Discussion;
+import qwerty.chaekit.domain.group.activity.discussion.comment.dto.DiscussionCommentCountDto;
 import qwerty.chaekit.domain.group.activity.discussion.comment.repository.DiscussionCommentRepository;
 import qwerty.chaekit.domain.group.activity.discussion.repository.DiscussionRepository;
 import qwerty.chaekit.domain.highlight.Highlight;
@@ -45,16 +46,36 @@ public class DiscussionService {
 
         activityPolicy.assertJoined(userId, activityId);
         Page<Discussion> discussions = discussionRepository.findByActivityId(activityId, pageable);
-        List<Long> discussionIdList = discussions.stream()
+        List<Long> debateIds = discussions.stream()
+                .filter(Discussion::isDebate)
                 .map(Discussion::getId)
                 .toList();
-
+        
+        List<Long> nonDebateIds = discussions.stream()
+                .filter(d -> !d.isDebate())
+                .map(Discussion::getId)
+                .toList();
+        
         // Get the count of comments for each discussion
-        Map<Long, Long> counts = discussionCommentRepository.countCommentsByDiscussionIds(discussionIdList);
+        // 찬반 토론: stance별로
+        Map<Long, DiscussionCommentCountDto> debateCounts = discussionCommentRepository.countStanceCommentsByDiscussionIds(debateIds);
+
+        // 일반 토론: 전체 count만
+        Map<Long, DiscussionCommentCountDto> nonDebateCounts = discussionCommentRepository.countCommentsByDiscussionIds(nonDebateIds);
 
         return PageResponse.of(discussions.map(discussion -> {
-            Long commentCount = counts.getOrDefault(discussion.getId(), 0L);
-            return discussionMapper.toFetchResponse(discussion, commentCount, userId);
+            DiscussionCommentCountDto dto = discussion.isDebate()
+                    ? debateCounts.getOrDefault(discussion.getId(), new DiscussionCommentCountDto(0, 0, 0, 0))
+                    : nonDebateCounts.getOrDefault(discussion.getId(), new DiscussionCommentCountDto(0, 0, 0, 0));
+
+            return discussionMapper.toFetchResponse(
+                    discussion,
+                    dto.totalCount(),
+                    userId,
+                    dto.agreeCount(),
+                    dto.disagreeCount(),
+                    dto.neutralCount()
+            );
         }));
     }
 
@@ -79,7 +100,7 @@ public class DiscussionService {
 
         discussionRepository.save(discussion);
 
-        return discussionMapper.toFetchResponse(discussion, 0L, user.getId());
+        return discussionMapper.toFetchResponse(discussion, 0L, user.getId(), 0L, 0L, 0L);
     }
 
     @Transactional(readOnly = true)
@@ -107,7 +128,7 @@ public class DiscussionService {
 
         setDiscussionHighlightLinks(highlightIds, discussion);
 
-        return discussionMapper.toFetchResponse(discussion, commentCount, userId);
+        return discussionMapper.toFetchResponse(discussion, commentCount, userId, -1L, -1L, -1L);
     }
 
     public void deleteDiscussion(UserToken userToken, Long discussionId) {
