@@ -13,8 +13,14 @@ import {
   Stack,
   TextField,
   Typography,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  ListItemSecondaryAction,
+  Button,
 } from "@mui/material";
-import { Group, Search, Clear } from "@mui/icons-material";
+import { Group, Search, Clear, PersonOutline } from "@mui/icons-material";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../api/api";
 import {
@@ -39,7 +45,7 @@ export enum GroupListKind {
 }
 
 export default function GroupList(props: {
-  size: "small" | "large";
+  size: "small" | "medium" | "large";
   action?: JSX.Element;
   title: string;
   keyPrefix: string;
@@ -56,7 +62,8 @@ export default function GroupList(props: {
     useState<string[]>(initialSearchTerms);
   const navigate = useNavigate();
 
-  const pageSize = size === "small" ? 4 : 12;
+  const pageSize =
+    size === "small" ? 6 : size === "medium" ? 4 : size === "large" ? 12 : 4;
   const groupType =
     props.kind === undefined ? GroupListKind.ALL_GROUP : props.kind;
   const hasSearchTerms = debouncedSearchTerms.length > 0;
@@ -195,6 +202,205 @@ export default function GroupList(props: {
     setCurrentInput("");
   }, []);
 
+  // small size일 때는 카드 형태로 렌더링
+  if (size === "small") {
+    return (
+      <Card variant="outlined">
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          px={3}
+          py={2}
+          borderBottom="1px solid"
+          borderColor="divider"
+        >
+          <Typography variant="h6">{title}</Typography>
+          {action}
+        </Box>
+        <CardContent sx={{ pt: 0 }}>
+          {displayGroups.length === 0 && !isLoading ? (
+            <Box
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+              py={4}
+              color="text.secondary"
+            >
+              <Group sx={{ fontSize: 48, opacity: 0.5, m: 2 }} />
+              <Typography variant="body2">
+                {groupType === GroupListKind.MY_GROUP
+                  ? "아직 생성한 모임이 없습니다"
+                  : groupType === GroupListKind.JOINED_GROUP
+                    ? "아직 가입한 모임이 없습니다"
+                    : "아직 모임이 없습니다"}
+              </Typography>
+              {groupType === GroupListKind.JOINED_GROUP && (
+                <Button
+                  onClick={() => {
+                    navigate({ to: "/groups", search: { searchTerms: [] } });
+                  }}
+                  variant="outlined"
+                  sx={{ mt: 2, textTransform: "none" }}
+                  startIcon={<Search />}
+                >
+                  모임 찾기
+                </Button>
+              )}
+            </Box>
+          ) : (
+            <List disablePadding>
+              {displayGroups.map((group, index) =>
+                group ? (
+                  <Box key={group.groupId}>
+                    <ListItem
+                      sx={{
+                        px: 0,
+                        py: 1.5,
+                        cursor: "pointer",
+                        borderRadius: 1,
+                        "&:hover": {
+                          bgcolor: "action.hover",
+                          "& .group-actions": { opacity: 1 },
+                        },
+                      }}
+                      onClick={() => {
+                        navigate({
+                          to: "/groups/$groupId",
+                          params: { groupId: group.groupId! },
+                        });
+                      }}
+                    >
+                      <ListItemAvatar>
+                        <Avatar
+                          src={group.groupImageURL}
+                          sx={{
+                            bgcolor:
+                              groupType === GroupListKind.MY_GROUP
+                                ? "primary.main"
+                                : "secondary.main",
+                            width: 40,
+                            height: 40,
+                          }}
+                        >
+                          {group.name?.charAt(0)}
+                        </Avatar>
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={
+                          <Stack
+                            spacing={1}
+                            direction="row"
+                            alignItems={"center"}
+                          >
+                            <Typography
+                              variant="subtitle2"
+                              fontWeight={600}
+                              noWrap
+                            >
+                              {group.name}
+                            </Typography>
+                            <Chip
+                              icon={<PersonOutline />}
+                              label={group.memberCount}
+                              size="small"
+                              variant="outlined"
+                              sx={{ height: 20, fontSize: "0.75rem" }}
+                            />
+                          </Stack>
+                        }
+                        secondary={
+                          <Box>
+                            {groupType === GroupListKind.JOINED_GROUP && (
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                display="block"
+                              >
+                                모임지기: {group.leaderNickname}
+                              </Typography>
+                            )}
+                            <Box
+                              display="flex"
+                              alignItems="center"
+                              gap={1}
+                              mt={0.5}
+                            >
+                              {group.tags?.slice(0, 2).map((tag, tagIndex) => (
+                                <Chip
+                                  key={tagIndex}
+                                  label={tag}
+                                  size="small"
+                                  sx={{
+                                    height: 20,
+                                    fontSize: "0.75rem",
+                                    bgcolor:
+                                      groupType === GroupListKind.MY_GROUP
+                                        ? "primary.main"
+                                        : "secondary.main",
+                                    color: "white",
+                                  }}
+                                />
+                              ))}
+                              {group.tags && group.tags.length > 2 && (
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                >
+                                  +{group.tags.length - 2}
+                                </Typography>
+                              )}
+                            </Box>
+                          </Box>
+                        }
+                      />
+                      <ListItemSecondaryAction>
+                        <Box
+                          className="group-actions"
+                          sx={{ opacity: 0, transition: "opacity 0.2s" }}
+                        >
+                          {groupType === GroupListKind.MY_GROUP ? (
+                            <Chip
+                              label="리더"
+                              size="small"
+                              color="success"
+                              variant="outlined"
+                              sx={{ fontSize: "0.75rem" }}
+                            />
+                          ) : group.isAutoApproval ? (
+                            <Chip
+                              label="자동가입"
+                              size="small"
+                              color="info"
+                              variant="outlined"
+                              sx={{ fontSize: "0.75rem" }}
+                            />
+                          ) : null}
+                        </Box>
+                      </ListItemSecondaryAction>
+                    </ListItem>
+                    {index < displayGroups.length - 1 && <Divider />}
+                  </Box>
+                ) : (
+                  <ListItem key={`skeleton-${index}`} sx={{ px: 0 }}>
+                    <ListItemAvatar>
+                      <Skeleton variant="circular" width={40} height={40} />
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={<Skeleton width="60%" />}
+                      secondary={<Skeleton width="80%" />}
+                    />
+                  </ListItem>
+                )
+              )}
+            </List>
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // medium, large size일 때는 기존 형태 유지
   return (
     <Container>
       <Stack spacing={2}>
