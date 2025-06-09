@@ -35,6 +35,7 @@ import useThrottle from "../utils/useThrottle";
 import { useAtomValue } from "jotai";
 import State from "../states";
 import { Role } from "../types/role";
+import { enqueueSnackbar } from "notistack";
 
 export const Route = createFileRoute("/reader/$bookId")({
   component: RouteComponent,
@@ -124,25 +125,63 @@ function RouteComponent() {
     }
   }, [location]);
 
-  const queryParam: HighlightQueryParam = createHighlightQueryParam(
+  const queryParam = {
     bookId,
-    activityId
-  );
+    activityId,
+  };
 
   const { data: highlights, refetch: refetchHighlights } = useQuery({
     queryKey: ["highlights", queryParam],
     queryFn: async () => {
       // NOTE: 하이라이트가 100개 이상 없다고 가정
-      const response = await API_CLIENT.highlightController.getHighlights({
-        page: 0,
-        size: 100,
-        ...queryParam,
-      });
-      if (!response.isSuccessful) {
-        throw new Error(response.errorMessage);
-      }
 
-      return response.data.content!.map((highlight) => highlight as Highlight);
+      const highlights = queryParam.activityId
+        ? await (async () => {
+            const [responsePrivate, responsePublic] = await Promise.all([
+              API_CLIENT.highlightController.getHighlights({
+                page: 0,
+                size: 100,
+                me: false,
+                bookId: queryParam.bookId,
+                activityId: queryParam.activityId,
+              }),
+              API_CLIENT.highlightController.getHighlights({
+                page: 0,
+                size: 100,
+                me: true,
+                bookId: queryParam.bookId,
+              }),
+            ]);
+            if (!responsePrivate.isSuccessful) {
+              throw new Error(responsePrivate.errorMessage);
+            }
+            if (!responsePublic.isSuccessful) {
+              throw new Error(responsePublic.errorMessage);
+            }
+
+            const highlights = [
+              ...(responsePrivate.data.content || []),
+              ...(responsePublic.data.content || []),
+            ];
+            return highlights as Highlight[];
+          })()
+        : await (async () => {
+            const response = await API_CLIENT.userController.getMyHighlights({
+              page: 0,
+              size: 100,
+              bookId: queryParam.bookId,
+            });
+            if (!response.isSuccessful) {
+              throw new Error(response.errorMessage);
+            }
+            return response.data.content || [];
+          })();
+
+      return highlights.sort((a, b) => {
+        const aCreatedAtt = new Date(a.createdAt || "");
+        const bCreatedAt = new Date(b.createdAt || "");
+        return bCreatedAt.getTime() - aCreatedAtt.getTime();
+      }) as Highlight[];
     },
     placeholderData: keepPreviousData,
     initialData: [],
@@ -277,8 +316,9 @@ function RouteComponent() {
     memo: string;
     cfi: string;
     highlightContent: string;
+    activityId?: number;
   }) => {
-    const { cfi, memo, highlightContent } = props;
+    const { cfi, memo, highlightContent, activityId } = props;
     const response = await API_CLIENT.highlightController.createHighlight({
       memo,
       cfi,
@@ -289,9 +329,14 @@ function RouteComponent() {
     });
 
     if (!response.isSuccessful) {
-      throw new Error(response.errorMessage);
+      enqueueSnackbar(response.errorMessage, {
+        variant: "error",
+      });
     }
 
+    enqueueSnackbar("하이라이트가 저장되었습니다.", {
+      variant: "success",
+    });
     refetchHighlights();
   };
 
@@ -516,10 +561,20 @@ function RouteComponent() {
           onClose={() => setOpenHighlightDrawer(false)}
         >
           <Stack width={320} height={"100%"}>
-            <Stack direction={"row"} p={2}>
+            <Stack direction={"row"} p={2} pb={0}>
               <Typography variant="h6" align="left" flexGrow={1} noWrap>
                 하이라이트
               </Typography>
+
+              <IconButton
+                onClick={() => {
+                  setOpenHighlightDrawer(false);
+                }}
+              >
+                <Close />
+              </IconButton>
+            </Stack>
+            <Box p={2} pt={0} alignSelf={"end"}>
               <FormControlLabel
                 control={
                   <Switch
@@ -530,14 +585,7 @@ function RouteComponent() {
                 }
                 label="현재 페이지만"
               />
-              <IconButton
-                onClick={() => {
-                  setOpenHighlightDrawer(false);
-                }}
-              >
-                <Close />
-              </IconButton>
-            </Stack>
+            </Box>
             <Box height={"100%"} overflow="auto">
               <Stack spacing={1} p={2}>
                 {(showHighlightsOnOnlyCurrentPage
@@ -654,31 +702,6 @@ function diffMemos(prev: Highlight[], next: Highlight[]): HighlightDiff {
     added,
     removed,
   };
-}
-
-type HighlightQueryParam = {
-  me: boolean;
-  bookId: number;
-  activityId?: number;
-  spine?: string;
-};
-
-function createHighlightQueryParam(
-  bookId: number,
-  activityId?: number
-): HighlightQueryParam {
-  const param: HighlightQueryParam = activityId
-    ? {
-        me: false,
-        bookId,
-        activityId,
-      }
-    : {
-        me: true,
-        bookId,
-      };
-
-  return param;
 }
 
 const ReadProgressSlider = styled(Slider)(({ theme }) => ({

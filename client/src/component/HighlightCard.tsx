@@ -21,7 +21,8 @@ import {
   CommentOutlined,
   EmojiEmotions,
   Link,
-  MoreVert,
+  Public,
+  PublicOff,
   Send,
 } from "@mui/icons-material";
 import { useEffect, useRef, useState } from "react";
@@ -41,6 +42,7 @@ import HighlightCommentCard from "./HighlightCommentCard";
 import { Role } from "../types/role";
 import createReactionMap from "../utils/createReactionMap";
 import { LinkChip } from "./LinkChip";
+import ActivitySelectModal from "./ActivitySelectModal";
 
 export default function HighlightCard({
   highlight,
@@ -69,6 +71,7 @@ export default function HighlightCard({
   const [emojiAnchorEl, setEmojiAnchorEl] = useState<null | HTMLElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const { enqueueSnackbar } = useSnackbar();
+  const [activitySelectModalOpen, setActivitySelectModalOpen] = useState(false);
 
   const { data: reactions, refetch: refetchReactions } = useQuery({
     queryKey: ["highlightReactions", highlight.id],
@@ -122,7 +125,7 @@ export default function HighlightCard({
     return reacted;
   };
 
-  const onShareToGroupClicked = async () => {
+  const handleShareToGroup = async (activityId: number) => {
     const response = await API_CLIENT.highlightController.updateHighlight(
       highlight.id,
       {
@@ -132,6 +135,9 @@ export default function HighlightCard({
     if (!response.isSuccessful) {
       enqueueSnackbar(response.errorMessage, { variant: "error" });
     }
+    enqueueSnackbar("하이라이트가 활동에 공유되었습니다.", {
+      variant: "success",
+    });
     setAnchorEl(null);
     refetchHighlights();
   };
@@ -175,17 +181,38 @@ export default function HighlightCard({
       variant="outlined"
       onClick={onClick}
     >
+      <ActivitySelectModal
+        open={activitySelectModalOpen}
+        onClose={() => setActivitySelectModalOpen(false)}
+        onSelect={(activity) => {
+          setActivitySelectModalOpen(false);
+          handleShareToGroup(activity.id);
+        }}
+      />
       <Menu
         anchorEl={anchorEl}
         open={!!anchorEl}
         onClose={() => setAnchorEl(null)}
       >
         <MenuItem
-          disabled={!!highlight.activityId}
-          onClick={onShareToGroupClicked}
-          value="group"
+          disabled={!activityId || !!highlight.activityId}
+          onClick={() => {
+            if (!activityId) {
+              enqueueSnackbar("활동이 선택되지 않았습니다.", {
+                variant: "error",
+              });
+              return;
+            }
+            handleShareToGroup(activityId);
+          }}
         >
-          모임 공개
+          현재 활동에 공유하기
+        </MenuItem>
+        <MenuItem
+          disabled={!!highlight.activityId}
+          onClick={() => setActivitySelectModalOpen(true)}
+        >
+          활동에 공유하기
         </MenuItem>
       </Menu>
       <CardContent sx={{ pt: 1 }}>
@@ -193,15 +220,6 @@ export default function HighlightCard({
           <Stack spacing={1} direction={"row"} alignItems={"center"}>
             <Avatar src={highlight.authorProfileImageURL} />
             <Typography variant="body1">{highlight.authorName}</Typography>
-            {isAuthor && (
-              <IconButton
-                onClick={(e) => {
-                  setAnchorEl(e.currentTarget);
-                }}
-              >
-                <MoreVert />
-              </IconButton>
-            )}
           </Stack>
           <Typography variant="body2" color="textSecondary">
             {highlight.highlightContent}
@@ -262,6 +280,15 @@ export default function HighlightCard({
         </Stack>
       </CardContent>
       <CardActions sx={{ justifyContent: "flex-end" }}>
+        {isAuthor && (
+          <IconButton
+            onClick={(e) => {
+              setAnchorEl(e.currentTarget);
+            }}
+          >
+            {highlight.activityId ? <Public /> : <PublicOff />}
+          </IconButton>
+        )}
         <IconButton size="small" onClick={() => setOpenComments(!openComments)}>
           <Badge badgeContent={comments?.length} color="primary">
             {openComments ? <Comment /> : <CommentOutlined />}
