@@ -21,7 +21,8 @@ import {
   CommentOutlined,
   EmojiEmotions,
   Link,
-  MoreVert,
+  Public,
+  PublicOff,
   Send,
 } from "@mui/icons-material";
 import { useEffect, useRef, useState } from "react";
@@ -219,15 +220,6 @@ export default function HighlightCard({
           <Stack spacing={1} direction={"row"} alignItems={"center"}>
             <Avatar src={highlight.authorProfileImageURL} />
             <Typography variant="body1">{highlight.authorName}</Typography>
-            {isAuthor && (
-              <IconButton
-                onClick={(e) => {
-                  setAnchorEl(e.currentTarget);
-                }}
-              >
-                <MoreVert />
-              </IconButton>
-            )}
           </Stack>
           <Typography variant="body2" color="textSecondary">
             {highlight.highlightContent}
@@ -288,6 +280,15 @@ export default function HighlightCard({
         </Stack>
       </CardContent>
       <CardActions sx={{ justifyContent: "flex-end" }}>
+        {isAuthor && (
+          <IconButton
+            onClick={(e) => {
+              setAnchorEl(e.currentTarget);
+            }}
+          >
+            {highlight.activityId ? <Public /> : <PublicOff />}
+          </IconButton>
+        )}
         <IconButton size="small" onClick={() => setOpenComments(!openComments)}>
           <Badge badgeContent={comments?.length} color="primary">
             {openComments ? <Comment /> : <CommentOutlined />}
