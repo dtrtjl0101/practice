@@ -9,7 +9,6 @@ import {
   Grid,
   IconButton,
   List,
-  ListItem,
   ListItemAvatar,
   ListItemButton,
   ListItemText,
@@ -23,12 +22,21 @@ import {
 } from "@mui/material";
 import { Highlight } from "../types/highlight";
 import { Fragment, useEffect, useState } from "react";
-import { Delete, Edit, Public, PublicOff, Sort } from "@mui/icons-material";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import {
+  Delete,
+  Edit,
+  Preview,
+  Public,
+  PublicOff,
+  Sort,
+} from "@mui/icons-material";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import API_CLIENT from "../api/api";
 import { setResponsiveStyleValueSm } from "../utils/setResponsiveStyleValue";
 import ActivitySelectModal from "./ActivitySelectModal";
 import { useSnackbar } from "notistack";
+import LinkListItemButton from "./LinkListItemButton";
+import { LinkIconButton } from "./_pathlessLayout/groups/$groupId/LinkIconButton";
 
 type HighlightFilterKind =
   | {
@@ -301,7 +309,7 @@ function HighlightListItem(props: {
         secondary={
           <>
             <Typography
-              variant="body2"
+              variant="body1"
               color="textSecondary"
               component={"span"}
             >
@@ -310,10 +318,26 @@ function HighlightListItem(props: {
             <Typography
               variant="body2"
               color="textSecondary"
+              component="span"
+              display="block"
+              noWrap
+            >
+              {highlight.groupName
+                ? `${highlight.groupName} - ${highlight.bookTitle}`
+                : highlight.bookTitle}
+            </Typography>
+            <Typography
+              variant="body2"
+              color="textSecondary"
               component={"span"}
               display={"block"}
+              textAlign={"right"}
             >
-              {highlight.authorName}
+              {new Date(highlight.createdAt).toLocaleDateString("ko-KR", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+              })}
             </Typography>
           </>
         }
@@ -414,21 +438,6 @@ function HighlightViewer(props: {
     setVisibilityOverwrite(false);
   }, [highlight]);
 
-  const { data: bookData } = useQuery({
-    queryKey: ["book", highlight.bookId],
-    queryFn: async () => {
-      const response = await API_CLIENT.ebookController.getBook(
-        highlight.bookId
-      );
-      if (!response.isSuccessful) {
-        console.error(response.errorCode);
-        throw new Error(response.errorCode);
-      }
-      return response.data;
-    },
-    enabled: !!highlight.bookId,
-  });
-
   return (
     <>
       <ActivitySelectModal
@@ -457,6 +466,21 @@ function HighlightViewer(props: {
               padding={1}
               sx={{ display: "flex", justifyContent: "flex-end" }}
             >
+              <LinkIconButton
+                color="secondary"
+                to={"/reader/$bookId"}
+                params={{
+                  bookId: highlight.bookId,
+                }}
+                search={{
+                  activityId: highlight.activityId,
+                  groupId: highlight.groupId,
+                  location: highlight.cfi,
+                  temporalProgress: true,
+                }}
+              >
+                <Preview />
+              </LinkIconButton>
               <IconButton
                 color="secondary"
                 onClick={() => {
@@ -489,13 +513,26 @@ function HighlightViewer(props: {
               sx={{ flexGrow: 1, overflowY: "auto", padding: 2 }}
             >
               <Stack
+                justifyContent={"space-between"}
+                alignItems={"flex-end"}
                 direction="row"
-                spacing={0.5}
-                alignItems="center"
-                alignSelf={"flex-end"}
               >
-                <Avatar src={highlight.authorProfileImageURL} />
-                <Typography noWrap>{highlight.authorName}</Typography>
+                <Stack direction="row" spacing={0.5} alignItems="center">
+                  <Avatar src={highlight.authorProfileImageURL} />
+                  <Typography noWrap>{highlight.authorName}</Typography>
+                </Stack>
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  noWrap
+                  component={"span"}
+                >
+                  {new Date(highlight.createdAt).toLocaleDateString("ko-KR", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  })}
+                </Typography>
               </Stack>
               <Typography variant="body2" color="textSecondary">
                 {highlightContent}
@@ -503,17 +540,33 @@ function HighlightViewer(props: {
               <Divider />
               <Typography variant="body1">{memo}</Typography>
             </Stack>
-            {bookData && (
-              <ListItem>
+            {highlight.groupName && highlight.groupId && (
+              <LinkListItemButton
+                to={"/groups/$groupId"}
+                params={{
+                  groupId: highlight.groupId,
+                }}
+                sx={{ flexGrow: 0 }}
+              >
                 <ListItemAvatar>
-                  <Avatar variant="rounded" src={bookData.bookCoverImageURL} />
+                  <Avatar variant="rounded" src={highlight.groupImageURL} />
                 </ListItemAvatar>
-                <ListItemText
-                  primary={bookData.title}
-                  secondary={bookData.author}
-                />
-              </ListItem>
+                <ListItemText primary={<>{highlight.groupName}</>} />
+              </LinkListItemButton>
             )}
+            <LinkListItemButton
+              to={"/books/$bookId"}
+              params={{ bookId: highlight.bookId }}
+              sx={{ flexGrow: 0 }}
+            >
+              <ListItemAvatar>
+                <Avatar variant="rounded" src={highlight.bookCoverImageURL} />
+              </ListItemAvatar>
+              <ListItemText
+                primary={highlight.bookTitle}
+                secondary={highlight.bookAuthor}
+              />
+            </LinkListItemButton>
             <CardActions sx={{ justifyContent: "flex-end" }}>
               <Button variant="outlined" color="secondary" onClick={onClose}>
                 취소
