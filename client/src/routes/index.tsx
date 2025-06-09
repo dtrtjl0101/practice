@@ -85,7 +85,9 @@ function HeroSection() {
               transform: "translateY(-2px)",
             },
           }}
-          onClick={() => navigate({ to: "/groups" })}
+          onClick={() =>
+            navigate({ to: "/groups", search: { searchTerms: [] as string[] } })
+          }
         >
           모임 찾기
         </Button>
@@ -218,38 +220,44 @@ function CategoriesSection() {
     {
       icon: "📖",
       title: "문학/소설",
-      description: "한국문학, 세계문학, 추리소설",
+      description: "문학, 고전, 소설",
       count: "234개 모임",
+      tags: ["문학", "고전", "소설"],
     },
     {
       icon: "💪",
       title: "자기계발",
       description: "성공, 습관, 자기관리",
       count: "189개 모임",
+      tags: ["문학", "고전", "소설"],
     },
     {
       icon: "💼",
       title: "경영/비즈니스",
       description: "경영전략, 마케팅, 투자",
       count: "156개 모임",
+      tags: ["문학", "고전", "소설"],
     },
     {
       icon: "🧠",
       title: "인문학",
       description: "철학, 역사, 심리학",
       count: "98개 모임",
+      tags: ["문학", "고전", "소설"],
     },
     {
       icon: "🔬",
       title: "과학/기술",
       description: "IT, 과학, 의학",
       count: "87개 모임",
+      tags: ["문학", "고전", "소설"],
     },
     {
       icon: "✍️",
       title: "에세이",
       description: "일상, 여행, 라이프스타일",
       count: "76개 모임",
+      tags: ["문학", "고전", "소설"],
     },
   ];
 
@@ -282,7 +290,7 @@ function CategoriesSection() {
               onClick={() =>
                 navigate({
                   to: "/groups",
-                  search: { category: category.title },
+                  search: { searchTerms: [...category.tags] },
                 })
               }
             >
@@ -412,7 +420,14 @@ function Home() {
             title="🔥 지금 인기있는 독서 모임"
             keyPrefix="featuredGroups"
             action={
-              <Button onClick={() => navigate({ to: "/groups" })}>
+              <Button
+                onClick={() =>
+                  navigate({
+                    to: "/groups",
+                    search: { searchTerms: [] as string[] },
+                  })
+                }
+              >
                 모든 모임 보기
               </Button>
             }
