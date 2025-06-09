@@ -124,25 +124,66 @@ function RouteComponent() {
     }
   }, [location]);
 
-  const queryParam: HighlightQueryParam = createHighlightQueryParam(
+  const queryParam = {
     bookId,
-    activityId
-  );
+    activityId,
+  };
 
   const { data: highlights, refetch: refetchHighlights } = useQuery({
     queryKey: ["highlights", queryParam],
     queryFn: async () => {
       // NOTE: 하이라이트가 100개 이상 없다고 가정
-      const response = await API_CLIENT.highlightController.getHighlights({
-        page: 0,
-        size: 100,
-        ...queryParam,
-      });
-      if (!response.isSuccessful) {
-        throw new Error(response.errorMessage);
-      }
 
-      return response.data.content!.map((highlight) => highlight as Highlight);
+      const highlights = queryParam.activityId
+        ? await (async () => {
+            const [responsePrivate, responsePublic] = await Promise.all([
+              API_CLIENT.highlightController.getHighlights({
+                page: 0,
+                size: 100,
+                me: false,
+                bookId: queryParam.bookId,
+                activityId: queryParam.activityId,
+              }),
+              API_CLIENT.highlightController.getHighlights({
+                page: 0,
+                size: 100,
+                me: true,
+                bookId: queryParam.bookId,
+              }),
+            ]);
+            if (!responsePrivate.isSuccessful) {
+              throw new Error(responsePrivate.errorMessage);
+            }
+            if (!responsePublic.isSuccessful) {
+              throw new Error(responsePublic.errorMessage);
+            }
+
+            const highlights = [
+              ...(responsePrivate.data.content || []),
+              ...(responsePublic.data.content || []),
+            ];
+            return highlights as Highlight[];
+          })()
+        : await (async () => {
+            const response = await API_CLIENT.highlightController.getHighlights(
+              {
+                page: 0,
+                size: 100,
+                me: true,
+                ...queryParam,
+              }
+            );
+            if (!response.isSuccessful) {
+              throw new Error(response.errorMessage);
+            }
+            return response.data.content || [];
+          })();
+
+      return highlights.sort((a, b) => {
+        const aCreatedAtt = new Date(a.createdAt || "");
+        const bCreatedAt = new Date(b.createdAt || "");
+        return bCreatedAt.getTime() - aCreatedAtt.getTime();
+      }) as Highlight[];
     },
     placeholderData: keepPreviousData,
     initialData: [],
@@ -654,31 +695,6 @@ function diffMemos(prev: Highlight[], next: Highlight[]): HighlightDiff {
     added,
     removed,
   };
-}
-
-type HighlightQueryParam = {
-  me: boolean;
-  bookId: number;
-  activityId?: number;
-  spine?: string;
-};
-
-function createHighlightQueryParam(
-  bookId: number,
-  activityId?: number
-): HighlightQueryParam {
-  const param: HighlightQueryParam = activityId
-    ? {
-        me: false,
-        bookId,
-        activityId,
-      }
-    : {
-        me: true,
-        bookId,
-      };
-
-  return param;
 }
 
 const ReadProgressSlider = styled(Slider)(({ theme }) => ({
