@@ -8,6 +8,7 @@ import {
   Divider,
   Grid,
   IconButton,
+  Input,
   List,
   ListItemAvatar,
   ListItemButton,
@@ -29,6 +30,7 @@ import {
   Preview,
   Public,
   PublicOff,
+  Search,
   Sort,
 } from "@mui/icons-material";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -38,6 +40,7 @@ import ActivitySelectModal from "./ActivitySelectModal";
 import { useSnackbar } from "notistack";
 import LinkListItemButton from "./LinkListItemButton";
 import { LinkIconButton } from "./_pathlessLayout/groups/$groupId/LinkIconButton";
+import useThrottle from "../utils/useThrottle";
 
 type HighlightFilterKind =
   | {
@@ -71,6 +74,8 @@ export default function HighlightBrowserModal(props: {
   const [highlightFilterKind, setHighlightFilterKind] =
     useState<HighlightFilterKind>({ kind: "MyHighlights" });
   const [activitySelectModalOpen, setActivitySelectModalOpen] = useState(false);
+  const [keyword, setKeyword] = useState("");
+  const [keywordToSearch, setKeywordToSearch] = useState("");
 
   const {
     data: highlightPages,
@@ -79,7 +84,7 @@ export default function HighlightBrowserModal(props: {
     fetchNextPage,
     refetch,
   } = useInfiniteQuery({
-    queryKey: ["highlights", highlightFilterKind],
+    queryKey: ["highlights", highlightFilterKind, keywordToSearch],
     queryFn: async ({ pageParam }) => {
       const fetchFunction =
         highlightFilterKind.kind === "MyHighlights"
@@ -89,6 +94,7 @@ export default function HighlightBrowserModal(props: {
         page: pageParam,
         size: 30,
         ...getHighlightFilter(highlightFilterKind),
+        keyword: keywordToSearch || undefined,
       });
       if (!response.isSuccessful) {
         console.error(response.errorCode);
@@ -104,6 +110,8 @@ export default function HighlightBrowserModal(props: {
       return undefined;
     },
   });
+
+  const setKeywordToSearchWithThreshold = useThrottle(setKeywordToSearch, 500);
 
   const onHighlightClick = (highlight: Highlight) => {
     setSelectedHighlight(highlight);
@@ -213,21 +221,33 @@ export default function HighlightBrowserModal(props: {
                   }}
                 >
                   <Stack spacing={1} sx={{ flexGrow: 1, overflow: "hidden" }}>
-                    <Button
-                      sx={{
-                        justifyContent: "space-between",
-                        p: 2,
-                        whiteSpace: "pretty",
-                      }}
-                      size="large"
-                      color="inherit"
-                      onClick={(e) =>
-                        setFilterMenuAnchorElement(e.currentTarget)
-                      }
-                      endIcon={<Sort />}
-                    >
-                      {getHighlightFilterLabel(highlightFilterKind)}
-                    </Button>
+                    <Box sx={{ px: 2, py: 1 }}>
+                      <Input
+                        value={keyword}
+                        onChange={(e) => {
+                          setKeyword(e.target.value);
+                          setKeywordToSearchWithThreshold(e.target.value);
+                        }}
+                        placeholder="하이라이트 검색"
+                        fullWidth
+                        size="small"
+                        startAdornment={
+                          <IconButton edge="start" disabled>
+                            <Search />
+                          </IconButton>
+                        }
+                        endAdornment={
+                          <IconButton
+                            edge="end"
+                            onClick={(e) =>
+                              setFilterMenuAnchorElement(e.currentTarget)
+                            }
+                          >
+                            <Sort />
+                          </IconButton>
+                        }
+                      />
+                    </Box>
                     <Divider />
                     <List sx={{ flexGrow: 1, overflowY: "auto" }}>
                       {highlightPages &&
