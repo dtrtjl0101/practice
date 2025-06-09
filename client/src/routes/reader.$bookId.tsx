@@ -165,14 +165,11 @@ function RouteComponent() {
             return highlights as Highlight[];
           })()
         : await (async () => {
-            const response = await API_CLIENT.highlightController.getHighlights(
-              {
-                page: 0,
-                size: 100,
-                me: true,
-                ...queryParam,
-              }
-            );
+            const response = await API_CLIENT.userController.getMyHighlights({
+              page: 0,
+              size: 100,
+              bookId: queryParam.bookId,
+            });
             if (!response.isSuccessful) {
               throw new Error(response.errorMessage);
             }
