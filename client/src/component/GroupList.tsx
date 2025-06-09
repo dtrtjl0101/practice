@@ -393,20 +393,34 @@ export default function GroupList(props: {
                             </Typography>
                           </Stack>
                         </Box>
-
-                        {/* 멤버 수 배지 */}
-                        <Chip
-                          icon={<Group color="inherit" />}
-                          label={group.memberCount}
-                          size="small"
-                          sx={{
-                            bgcolor: "rgba(255,255,255,0.2)",
-                            color: "white",
-                            backdropFilter: "blur(10px)",
-                            border: "1px solid rgba(255,255,255,0.3)",
-                            fontWeight: "bold",
-                          }}
-                        />
+                        <Stack direction="row" spacing={1}>
+                          {group.isAutoApproval && (
+                            <Chip
+                              label="자동 가입"
+                              size="small"
+                              sx={{
+                                bgcolor: "rgba(255,255,255,0.2)",
+                                color: "white",
+                                backdropFilter: "blur(10px)",
+                                border: "1px solid rgba(255,255,255,0.3)",
+                                fontWeight: "bold",
+                              }}
+                            />
+                          )}
+                          {/* 멤버 수 배지 */}
+                          <Chip
+                            icon={<Group color="inherit" />}
+                            label={group.memberCount}
+                            size="small"
+                            sx={{
+                              bgcolor: "rgba(255,255,255,0.2)",
+                              color: "white",
+                              backdropFilter: "blur(10px)",
+                              border: "1px solid rgba(255,255,255,0.3)",
+                              fontWeight: "bold",
+                            }}
+                          />
+                        </Stack>
                       </Stack>
                     </Box>
 
