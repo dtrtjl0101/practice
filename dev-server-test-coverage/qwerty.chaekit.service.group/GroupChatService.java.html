@@ -16,6 +16,7 @@ import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.util.EntityFinder;
+import qwerty.chaekit.service.util.FileService;
 
 @Service
 @RequiredArgsConstructor
@@ -25,44 +26,49 @@ public class GroupChatService {
     private final EntityFinder entityFinder;
     private final GroupChatProducer groupChatProducer;
     private final GroupChatConsumer groupChatConsumer;
+    private final FileService fileService;
 
     @Transactional
     public GroupChatResponse createChat(UserToken userToken, Long groupId, GroupChatRequest request) {
-<span class="nc" id="L31">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
-<span class="nc" id="L32">        ReadingGroup group = entityFinder.findGroup(groupId);</span>
+<span class="nc" id="L33">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
+<span class="nc" id="L34">        ReadingGroup group = entityFinder.findGroup(groupId);</span>
 
-<span class="nc bnc" id="L34" title="All 2 branches missed.">        if (group.isNotAcceptedMember(user)) {</span>
-<span class="nc" id="L35">            throw new ForbiddenException(ErrorCode.MEMBER_NOT_FOUND);</span>
+<span class="nc bnc" id="L36" title="All 2 branches missed.">        if (group.isNotAcceptedMember(user)) {</span>
+<span class="nc" id="L37">            throw new ForbiddenException(ErrorCode.MEMBER_NOT_FOUND);</span>
         }
 
-<span class="nc" id="L38">        GroupChat chat = GroupChat.builder()</span>
-<span class="nc" id="L39">                .group(group)</span>
-<span class="nc" id="L40">                .author(user)</span>
-<span class="nc" id="L41">                .content(request.content())</span>
-<span class="nc" id="L42">                .build();</span>
+<span class="nc" id="L40">        GroupChat chat = GroupChat.builder()</span>
+<span class="nc" id="L41">                .group(group)</span>
+<span class="nc" id="L42">                .author(user)</span>
+<span class="nc" id="L43">                .content(request.content())</span>
+<span class="nc" id="L44">                .build();</span>
         
-<span class="nc" id="L44">        GroupChat savedChat = groupChatRepository.save(chat);</span>
+<span class="nc" id="L46">        GroupChat savedChat = groupChatRepository.save(chat);</span>
 
-<span class="nc" id="L46">        GroupChatResponse response = GroupChatResponse.builder()</span>
-<span class="nc" id="L47">                .chatId(savedChat.getId())</span>
-<span class="nc" id="L48">                .groupId(groupId)</span>
-<span class="nc" id="L49">                .authorId(user.getId())</span>
-<span class="nc" id="L50">                .authorName(user.getNickname())</span>
-<span class="nc" id="L51">                .authorProfileImage(user.getProfileImageKey())</span>
-<span class="nc" id="L52">                .content(request.content())</span>
-<span class="nc" id="L53">                .createdAt(savedChat.getCreatedAt())</span>
-<span class="nc" id="L54">                .build();</span>
+<span class="nc" id="L48">        GroupChatResponse response = GroupChatResponse.builder()</span>
+<span class="nc" id="L49">                .chatId(savedChat.getId())</span>
+<span class="nc" id="L50">                .groupId(groupId)</span>
+<span class="nc" id="L51">                .authorId(user.getId())</span>
+<span class="nc" id="L52">                .authorName(user.getNickname())</span>
+<span class="nc" id="L53">                .authorProfileImage(fileService.convertToPublicImageURL(user.getProfileImageKey()))</span>
+<span class="nc" id="L54">                .content(request.content())</span>
+<span class="nc" id="L55">                .createdAt(savedChat.getCreatedAt())</span>
+<span class="nc" id="L56">                .build();</span>
 
-<span class="nc" id="L56">        groupChatProducer.sendMessage(response);</span>
+<span class="nc" id="L58">        groupChatProducer.sendMessage(response);</span>
 
-<span class="nc" id="L58">        return response;</span>
+<span class="nc" id="L60">        return response;</span>
     }
 
     public PageResponse&lt;GroupChatResponse&gt; getChats(Long groupId, Pageable pageable) {//과거메세지 받아오는용도
-<span class="nc" id="L62">        ReadingGroup group = entityFinder.findGroup(groupId);</span>
-<span class="nc" id="L63">        Page&lt;GroupChat&gt; savedChats = groupChatRepository.findByGroupOrderByCreatedAtDesc(group, pageable);</span>
+<span class="nc" id="L64">        ReadingGroup group = entityFinder.findGroup(groupId);</span>
+<span class="nc" id="L65">        Page&lt;GroupChat&gt; savedChats = groupChatRepository.findByGroupOrderByCreatedAtDesc(group, pageable);</span>
         //groupChatConsumer.subscribeToGroupChat(groupId);
-<span class="nc" id="L65">        return PageResponse.of(savedChats.map(GroupChatResponse::of));</span>
+        
+<span class="nc" id="L68">        return PageResponse.of(savedChats.map(chat -&gt; GroupChatResponse.of(</span>
+                chat, 
+<span class="nc" id="L70">                fileService.convertToPublicImageURL(chat.getAuthor().getProfileImageKey()))</span>
+        ));
     }
 }   
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
