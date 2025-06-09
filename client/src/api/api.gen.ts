@@ -579,6 +579,29 @@ export interface UserInfoResponse {
   role?: string;
 }
 
+export interface UserPatchRequest {
+  nickname?: string;
+  /** @format binary */
+  profileImage?: File;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseUserInfoResponse {
+  isSuccessful?: boolean;
+  data?: UserInfoResponse;
+}
+
+export interface UserInfoResponse {
+  /** @format int64 */
+  memberId?: number;
+  email?: string;
+  /** @format int64 */
+  userId?: number;
+  nickname?: string;
+  profileImageURL?: string;
+  role?: string;
+}
+
 export interface HighlightPutRequest {
   /** @format int64 */
   activityId?: number;

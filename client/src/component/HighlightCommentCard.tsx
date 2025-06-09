@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   Avatar,
   Card,
@@ -7,8 +7,6 @@ import {
   Chip,
   Divider,
   Grid,
-  IconButton,
-  Menu,
   Stack,
   Typography,
 } from "@mui/material";
@@ -18,7 +16,6 @@ import {
   type HighlightComment,
   type HighlightReactionType,
 } from "../types/highlight";
-import { MoreVert } from "@mui/icons-material";
 import EmojiReactionButton from "./EmojiReactionButton";
 import { useAtomValue } from "jotai";
 import { useSnackbar } from "notistack";
@@ -37,9 +34,6 @@ export default function HighlightCommentCard({
   refetchComments: () => void;
 }) {
   const user = useAtomValue(State.Auth.user);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const isAuthor =
-    comment.authorId === (user?.role === "ROLE_USER" ? user.userId : undefined);
   const { enqueueSnackbar } = useSnackbar();
 
   const reactions = useMemo(() => {
@@ -75,33 +69,11 @@ export default function HighlightCommentCard({
     <Card variant="outlined">
       <>
         <Divider />
-        <Menu
-          anchorEl={anchorEl}
-          open={!!anchorEl}
-          onClose={() => setAnchorEl(null)}
-        >
-          {/* <MenuItem
-          disabled={!!comment.activityId}
-          onClick={onShareToGroupClicked}
-          value="group"
-        >
-          모임 공개
-        </MenuItem> */}
-        </Menu>
         <CardContent sx={{ pt: 1 }}>
           <Stack spacing={1}>
             <Stack spacing={1} direction={"row"} alignItems={"center"}>
               <Avatar src={comment.authorProfileImageURL} />
               <Typography variant="body1">{comment.authorName}</Typography>
-              {isAuthor && (
-                <IconButton
-                  onClick={(e) => {
-                    setAnchorEl(e.currentTarget);
-                  }}
-                >
-                  <MoreVert />
-                </IconButton>
-              )}
             </Stack>
             <Typography variant="body1">{comment.content}</Typography>
             <Grid

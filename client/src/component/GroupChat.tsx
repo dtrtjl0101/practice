@@ -32,7 +32,6 @@ export default function GroupChat(props: {
   const [autoScroll, setAutoScroll] = useState(true);
   const { enqueueSnackbar } = useSnackbar();
   const clientRef = useRef<Client | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
 
   const sendable =
@@ -109,7 +108,15 @@ export default function GroupChat(props: {
   }, [chatsData, newChats]);
 
   const scrollToBottom = () => {
-    // messagesEndRef.current?.scrollIntoView();
+    const element = messagesContainerRef.current;
+    if (!element) {
+      return;
+    }
+
+    element.scroll({
+      top: element.scrollHeight,
+      behavior: "smooth",
+    });
   };
 
   const isScrolledToBottom = () => {
@@ -268,8 +275,6 @@ export default function GroupChat(props: {
             </Stack>
           );
         })}
-
-        <div ref={messagesEndRef} />
       </MessagesContainer>
 
       <InputArea>
@@ -288,7 +293,7 @@ export default function GroupChat(props: {
               handleSendMessage();
             }
           }}
-          disabled={isSending || !sendable}
+          disabled={!sendable}
         />
         <IconButton
           onClick={handleSendMessage}

@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import qwerty.chaekit.domain.member.Member;
+import qwerty.chaekit.domain.member.enums.Role;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
 import qwerty.chaekit.domain.member.publisher.enums.PublisherApprovalStatus;
@@ -202,13 +203,19 @@ class AdminServiceTest {
     void testGetUsers() {
         // given
         Pageable pageable = PageRequest.of(0, 5);
-        UserProfile user1 = UserProfile.builder().id(1L).nickname("user1").profileImageKey("img1").build();
-        UserProfile user2 = UserProfile.builder().id(2L).nickname("user2").profileImageKey("img2").build();
+        UserProfile user1 = UserProfile.builder()
+                .id(1L)
+                .member(member)
+                .nickname("user1").profileImageKey("img1").build();
+        UserProfile user2 = UserProfile.builder()
+                .id(2L)
+                .member(member).nickname("user2").profileImageKey("img2").build();
         List<UserProfile> userList = List.of(user1, user2);
         Page<UserProfile> pageResult = new PageImpl<>(userList);
 
         given(userRepository.findAll(any(Pageable.class))).willReturn(pageResult);
         given(fileService.convertToPublicImageURL(anyString())).willReturn("https://dummy-url.com/userimg");
+        given(member.getRole()).willReturn(Role.ROLE_USER);
 
         // when
         PageResponse<UserInfoResponse> result = adminService.getUsers(pageable);
