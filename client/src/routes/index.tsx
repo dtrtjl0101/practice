@@ -156,7 +156,7 @@ function StatsSection() {
     {
       icon: <TrendingUp />,
       number: homeStats.increasedActivities,
-      label: "이번 달 신규 모임",
+      label: "이번 달 신규 활동",
       color: theme.palette.warning.main,
     },
   ];
