@@ -24,11 +24,26 @@ import {
 import { TrendingUp, MenuBook, Timeline } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../../../../api/api";
+import { useMemo } from "react";
 
 interface ReadingProgressData {
   date: string;
-  myPercentage: number;
-  averagePercentage: number;
+  myPercentage?: number;
+  averagePercentage?: number;
+}
+
+interface ActivityInfo {
+  activityId: number;
+  groupId: number;
+  bookId: number;
+  bookTitle: string;
+  bookAuthor: string;
+  coverImageURL: string;
+  bookDescription: string;
+  startTime: string;
+  endTime: string;
+  description: string;
+  isParticipant: boolean;
 }
 
 // 커스텀 툴팁 컴포넌트
@@ -62,8 +77,12 @@ function CustomTooltip({ active, payload, label }: any) {
               }}
             />
             <Typography variant="body2" color="text.secondary">
-              {entry.dataKey === "myPercentage" ? "내 진행도" : "모임 평균"}:{" "}
-              {entry.value}%
+              {entry.dataKey === "myPercentage"
+                ? "내 진행도"
+                : entry.dataKey === "averagePercentage"
+                  ? "모임 평균"
+                  : "목표 독서율"}
+              : {entry.value}%
             </Typography>
           </Box>
         ))}
@@ -75,12 +94,24 @@ function CustomTooltip({ active, payload, label }: any) {
 
 export function ReadingProgressChart({
   activityId,
-  bookId,
 }: {
   activityId: number;
   bookId: number;
 }) {
   const theme = useTheme();
+
+  // Activity 정보 가져오기
+  const { data: activityInfo } = useQuery({
+    queryKey: ["activityInfo", activityId],
+    queryFn: async () => {
+      const response =
+        await API_CLIENT.activityController.getActivity(activityId);
+      if (!response.isSuccessful) {
+        throw new Error(response.error);
+      }
+      return response.data as ActivityInfo;
+    },
+  });
 
   const { data: readingProgressHistory, isLoading } = useQuery({
     queryKey: ["readingProgressHistory", activityId],
@@ -97,56 +128,100 @@ export function ReadingProgressChart({
     initialData: [] as ReadingProgressData[],
   });
 
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
+  // 차트 데이터 생성
+  const chartData = useMemo(() => {
+    if (!activityInfo) return [];
 
-  const chartData = readingProgressHistory
-    .filter((item) => {
-      const itemDate = new Date(item.date);
-      return itemDate <= yesterday;
-    })
-    .map((item) => ({
-      ...item,
-      date: new Date(item.date),
-      dateString: new Date(item.date).toLocaleDateString("ko-KR", {
-        month: "short",
-        day: "numeric",
-      }),
-    }));
+    const startDate = new Date(activityInfo.startTime);
+    const endDate = new Date(activityInfo.endTime);
+    const today = new Date();
 
-  const todayMyReadingProgress = useQuery({
-    queryKey: ["todayReadingProgress", bookId],
-    queryFn: async () => {
-      const response =
-        await API_CLIENT.readingProgressController.getMyProgress(bookId);
-      if (!response.isSuccessful) {
-        throw new Error(response.error);
-      }
-      return response.data;
-    },
-    initialData: null,
-  });
+    // 모든 날짜 범위 생성 (startDate부터 endDate까지)
+    const dateRange = [];
+    for (
+      let d = new Date(startDate);
+      d <= endDate;
+      d.setDate(d.getDate() + 1)
+    ) {
+      dateRange.push(new Date(d));
+    }
 
-  // 오늘 데이터 추가 (안전하게 처리)
-  if (todayMyReadingProgress.data?.percentage !== undefined) {
-    const lastData = chartData[chartData.length - 1]; // 마지막 데이터 (어제)
-
-    chartData.push({
-      date: new Date(),
-      dateString: new Date().toLocaleDateString("ko-KR", {
-        month: "short",
-        day: "numeric",
-      }),
-      myPercentage: todayMyReadingProgress.data.percentage,
-      averagePercentage: lastData?.averagePercentage || 0, // 안전한 접근
+    // 기존 진행도 데이터를 Map으로 변환 (빠른 조회를 위해)
+    const progressMap = new Map();
+    readingProgressHistory.forEach((item) => {
+      const dateKey = new Date(item.date).toDateString();
+      progressMap.set(dateKey, item);
     });
-  }
 
-  // 통계 계산
-  const latestData = chartData[chartData.length - 1];
-  const firstData = chartData[0];
+    const result = dateRange.map((date, _) => {
+      const dateKey = date.toDateString();
+      const isToday = date.toDateString() === today.toDateString();
+      const isFuture = date > today;
+
+      // 목표 독서율 계산 (startTime: 0%, endTime: 100%의 직선)
+      const totalDays = Math.ceil(
+        (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      const currentDay = Math.ceil(
+        (date.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      const targetPercentage = Math.min(
+        100,
+        Math.max(0, (currentDay / totalDays) * 100)
+      );
+
+      // 기존 데이터가 있는 경우
+      if (progressMap.has(dateKey) && !isFuture && !isToday) {
+        const data = progressMap.get(dateKey);
+        return {
+          date,
+          dateString: date.toLocaleDateString("ko-KR", {
+            month: "short",
+            day: "numeric",
+          }),
+          myPercentage: data.myPercentage,
+          averagePercentage: data.averagePercentage,
+          targetPercentage: Math.round(targetPercentage * 10) / 10,
+        };
+      }
+
+      // 미래 날짜인 경우 - null로 처리해서 라인을 끊음
+      if (isToday || isFuture) {
+        return {
+          date,
+          dateString: date.toLocaleDateString("ko-KR", {
+            month: "short",
+            day: "numeric",
+          }),
+          myPercentage: null, // 미래 데이터는 null로 처리
+          averagePercentage: null, // 미래 데이터는 null로 처리
+          targetPercentage: Math.round(targetPercentage * 10) / 10, // 목표선은 계속 표시
+        };
+      }
+
+      // 과거 날짜이지만 데이터가 없는 경우 (기본값 0으로 처리)
+      return {
+        date,
+        dateString: date.toLocaleDateString("ko-KR", {
+          month: "short",
+          day: "numeric",
+        }),
+        myPercentage: 0,
+        averagePercentage: 0,
+        targetPercentage: Math.round(targetPercentage * 10) / 10,
+      };
+    });
+
+    return result.filter((item) => item !== undefined);
+  }, [activityInfo, readingProgressHistory]);
+
+  // 통계 계산 (null이 아닌 데이터만 사용)
+  const validData = chartData.filter((item) => item.myPercentage !== null);
+  const latestData = validData[validData.length - 1];
+  const firstData = validData[0];
   const myProgress = latestData?.myPercentage || 0;
   const avgProgress = latestData?.averagePercentage || 0;
+  const targetProgress = latestData?.targetPercentage || 0;
   const totalDays = chartData.length;
   const myGrowth =
     latestData && firstData
@@ -161,9 +236,19 @@ export function ReadingProgressChart({
     return (
       <Card elevation={0} sx={{ border: `1px solid ${theme.palette.divider}` }}>
         <CardContent sx={{ p: 3 }}>
-          <Typography variant="h4" sx={{ mb: 2 }}>
-            진행도
-          </Typography>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            sx={{ mb: 3 }}
+          >
+            <Typography variant="h4" sx={{ mb: 2 }}>
+              진행도
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              전일 기준
+            </Typography>
+          </Stack>
           <Box
             sx={{
               textAlign: "center",
@@ -191,7 +276,18 @@ export function ReadingProgressChart({
           alignItems="center"
           sx={{ mb: 3 }}
         >
-          <Typography variant="h4">진행도</Typography>
+          <Stack direction="row" spacing={2}>
+            <Typography variant="h4" sx={{ mb: 2 }}>
+              진행도
+            </Typography>
+            <Typography
+              alignSelf="end"
+              variant="subtitle1"
+              color="text.secondary"
+            >
+              전일 기준
+            </Typography>
+          </Stack>
           <Chip
             icon={<MenuBook />}
             label={`${totalDays}일간`}
@@ -295,6 +391,7 @@ export function ReadingProgressChart({
                 axisLine={false}
                 tickLine={false}
                 tick={{ fontSize: 12, fill: theme.palette.text.secondary }}
+                interval="preserveStartEnd"
               />
               <YAxis
                 domain={[0, 100]}
@@ -313,6 +410,25 @@ export function ReadingProgressChart({
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend wrapperStyle={{ paddingTop: "20px" }} iconType="circle" />
+
+              {/* 목표 독서율 라인 */}
+              <Line
+                type="monotone"
+                dataKey="targetPercentage"
+                stroke={theme.palette.warning.main}
+                strokeWidth={2}
+                strokeDasharray="8 4"
+                dot={false}
+                activeDot={{
+                  r: 6,
+                  stroke: theme.palette.warning.main,
+                  strokeWidth: 2,
+                }}
+                name="목표 독서율"
+                connectNulls={false} // null 값에서 라인을 끊지 않음 (목표선은 계속 표시)
+              />
+
+              {/* 내 진행도 라인 */}
               <Line
                 type="monotone"
                 dataKey="myPercentage"
@@ -325,7 +441,10 @@ export function ReadingProgressChart({
                   strokeWidth: 2,
                 }}
                 name="내 진행도"
+                connectNulls={true} // null 값에서 라인을 끊음
               />
+
+              {/* 모임 평균 라인 */}
               <Line
                 type="monotone"
                 dataKey="averagePercentage"
@@ -343,6 +462,7 @@ export function ReadingProgressChart({
                   strokeWidth: 2,
                 }}
                 name="모임 평균"
+                connectNulls={true} // null 값에서 라인을 끊음
               />
             </LineChart>
           </ResponsiveContainer>
@@ -358,11 +478,11 @@ export function ReadingProgressChart({
           }}
         >
           <Typography variant="body2" color="text.secondary">
-            {myProgress > avgProgress
-              ? `평균보다 ${(myProgress - avgProgress).toFixed(1)}% 앞서고 있습니다! 🎉`
-              : myProgress < avgProgress
-                ? `평균보다 ${(avgProgress - myProgress).toFixed(1)}% 뒤처져 있습니다. 화이팅! 💪`
-                : "평균과 동일한 진행도입니다! 👍"}
+            {myProgress > targetProgress
+              ? `목표보다 ${(myProgress - targetProgress).toFixed(1)}% 앞서고 있습니다! 🎉`
+              : myProgress < targetProgress
+                ? `목표보다 ${(targetProgress - myProgress).toFixed(1)}% 뒤처져 있습니다. 화이팅! 💪`
+                : "목표와 동일한 진행도입니다! 👍"}
           </Typography>
         </Box>
       </Stack>
@@ -391,6 +511,11 @@ function ProgressChartSkeleton() {
         </Stack>
 
         <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
+          <Skeleton
+            variant="rectangular"
+            height={80}
+            sx={{ flex: 1, borderRadius: 2 }}
+          />
           <Skeleton
             variant="rectangular"
             height={80}
