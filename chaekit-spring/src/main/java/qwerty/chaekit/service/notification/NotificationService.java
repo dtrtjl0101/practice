@@ -77,12 +77,12 @@ public class NotificationService {
         notificationJpaRepository.save(notification);
     }
 
-    @Transactional
-    public void createPublisherRejectedNotification(PublisherProfile publisher, UserProfile admin) {
-        String message = "출판사 가입이 거절되었습니다.";
-        Notification notification = new Notification(null, admin, publisher,null, null,null,null,NotificationType.PUBLISHER_REJECTED, message);
-        notificationJpaRepository.save(notification);
-    }
+//    @Transactional
+//    public void createPublisherRejectedNotification(PublisherProfile publisher, UserProfile admin) {
+//        String message = "출판사 가입이 거절되었습니다.";
+//        Notification notification = new Notification(null, admin, publisher,null, null,null,null,NotificationType.PUBLISHER_REJECTED, message);
+//        notificationJpaRepository.save(notification);
+//    }
 
     @Transactional
     public void createDiscussionCommentNotification(UserProfile receiver, UserProfile sender, Discussion discussion) {

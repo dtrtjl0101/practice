@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 @Transactional
 @RequiredArgsConstructor
 public class HighlightReactionService {
-    private final HighlightRepository highlightRepository;
+    //private final HighlightRepository highlightRepository;
     private final HighlightCommentRepository commentRepository;
     private final HighlightReactionRepository reactionRepository;
     private final UserProfileRepository userRepository;

@@ -24,7 +24,7 @@ public class GroupChatService {
     private final GroupChatRepository groupChatRepository;
     private final EntityFinder entityFinder;
     private final GroupChatProducer groupChatProducer;
-    private final GroupChatConsumer groupChatConsumer;
+    //private final GroupChatConsumer groupChatConsumer;
 
     @Transactional
     public GroupChatResponse createChat(UserToken userToken, Long groupId, GroupChatRequest request) {
