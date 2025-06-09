@@ -35,6 +35,7 @@ import useThrottle from "../utils/useThrottle";
 import { useAtomValue } from "jotai";
 import State from "../states";
 import { Role } from "../types/role";
+import { enqueueSnackbar } from "notistack";
 
 export const Route = createFileRoute("/reader/$bookId")({
   component: RouteComponent,
@@ -328,9 +329,14 @@ function RouteComponent() {
     });
 
     if (!response.isSuccessful) {
-      throw new Error(response.errorMessage);
+      enqueueSnackbar(response.errorMessage, {
+        variant: "error",
+      });
     }
 
+    enqueueSnackbar("하이라이트가 저장되었습니다.", {
+      variant: "success",
+    });
     refetchHighlights();
   };
 
