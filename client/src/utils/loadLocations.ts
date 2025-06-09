@@ -1,4 +1,5 @@
 import { Rendition } from "epubjs";
+import { ENV } from "../env";
 
 class LocationsStorage {
   private db: Promise<IDBDatabase>;
@@ -29,7 +30,7 @@ class LocationsStorage {
       const request = db
         .transaction("locations", "readonly")
         .objectStore("locations")
-        .get(bookId);
+        .get(getLocationsKey(bookId));
 
       request.onsuccess = (event) => {
         const result = (event.target as IDBRequest).result;
@@ -51,7 +52,7 @@ class LocationsStorage {
       const request = db
         .transaction("locations", "readwrite")
         .objectStore("locations")
-        .put({ id: bookId, locations });
+        .put({ id: getLocationsKey(bookId), locations });
       request.onsuccess = () => {
         resolve();
       };
@@ -81,4 +82,8 @@ export default async function loadLocations(
   }
   await rendition.book.locations.generate(1000);
   await locationsStorage.setLocations(bookId, rendition.book.locations.save());
+}
+
+function getLocationsKey(bookId: number): string {
+  return `${ENV.CHAEKIT_API_ENDPOINT}-${bookId}`;
 }
