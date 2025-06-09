@@ -555,10 +555,20 @@ function RouteComponent() {
           onClose={() => setOpenHighlightDrawer(false)}
         >
           <Stack width={320} height={"100%"}>
-            <Stack direction={"row"} p={2}>
+            <Stack direction={"row"} p={2} pb={0}>
               <Typography variant="h6" align="left" flexGrow={1} noWrap>
                 하이라이트
               </Typography>
+
+              <IconButton
+                onClick={() => {
+                  setOpenHighlightDrawer(false);
+                }}
+              >
+                <Close />
+              </IconButton>
+            </Stack>
+            <Box p={2} pt={0} alignSelf={"end"}>
               <FormControlLabel
                 control={
                   <Switch
@@ -569,14 +579,7 @@ function RouteComponent() {
                 }
                 label="현재 페이지만"
               />
-              <IconButton
-                onClick={() => {
-                  setOpenHighlightDrawer(false);
-                }}
-              >
-                <Close />
-              </IconButton>
-            </Stack>
+            </Box>
             <Box height={"100%"} overflow="auto">
               <Stack spacing={1} p={2}>
                 {(showHighlightsOnOnlyCurrentPage
