@@ -21,7 +21,6 @@ import {
   Skeleton,
   Stack,
   TextField,
-  Tooltip,
   Typography,
 } from "@mui/material";
 import {
@@ -371,12 +370,6 @@ export function CurrentActivityCard(props: {
                         }}
                         onClick={(e) => e}
                       >
-                        <Tooltip
-                          children={(e) => {
-                            e;
-                          }}
-                          title={"asd"}
-                        />
                         <CoPresent fontSize="small" />
                         <Typography variant="body2" fontWeight={500}>
                           {activity.discussionCount ?? 0}
