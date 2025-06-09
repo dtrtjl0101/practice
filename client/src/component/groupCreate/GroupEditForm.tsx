@@ -1,4 +1,4 @@
-import { Add, CheckBox, Delete } from "@mui/icons-material";
+import { Add, Delete } from "@mui/icons-material";
 import {
   Button,
   CardMedia,
