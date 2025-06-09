@@ -14,6 +14,9 @@ export type Discussion = {
   isDebate: boolean;
   comments: Comment[]; // 서버에서 자동으로 기록
   linkedHighlights: HighlightSummary[]; // 서버에서 자동으로 기록
+  agreeCount?: number;
+  disagreeCount?: number;
+  neutralCount?: number;
 };
 
 export type DiscussionSummary = {
