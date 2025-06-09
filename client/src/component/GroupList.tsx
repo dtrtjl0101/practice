@@ -52,7 +52,6 @@ export default function GroupList(props: {
 
   const [page, setPage] = useState(0);
   const [sort, _setSort] = useState<string[]>([]);
-  const [totalPages, setTotalPages] = useState(1);
   const [searchTerms, setSearchTerms] = useState<string[]>(initialSearchTerms);
   const [currentInput, setCurrentInput] = useState("");
   const [debouncedSearchTerms, setDebouncedSearchTerms] =
@@ -62,23 +61,32 @@ export default function GroupList(props: {
   const pageSize = size === "small" ? 4 : 12;
   const groupType =
     props.kind === undefined ? GroupListKind.ALL_GROUP : props.kind;
+  const hasSearchTerms = debouncedSearchTerms.length > 0;
 
   // 검색어 디바운싱
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchTerms(searchTerms);
+      // 검색어가 변경될 때마다 첫 페이지로 리셋
       setPage(0);
     }, SEARCH_DEBOUNCE_DELAY);
 
     return () => clearTimeout(timer);
   }, [searchTerms]);
 
-  // 데이터 가져오기
-  const { data: allGroups } = useQuery({
-    queryKey: [keyPrefix, groupType, sort],
+  // 데이터 가져오기 - 검색 여부에 따라 다른 전략 사용
+  const { data: queryData, isLoading } = useQuery({
+    queryKey: [
+      keyPrefix,
+      groupType,
+      sort,
+      hasSearchTerms ? "search" : "normal",
+      hasSearchTerms ? 0 : page,
+    ],
     queryFn: async () => {
-      const requestPageSize = debouncedSearchTerms.length > 0 ? 1000 : pageSize;
-      const requestPage = debouncedSearchTerms.length > 0 ? 0 : page;
+      // 검색 시에는 모든 데이터를 가져오고, 일반 상태에서는 페이지별로 가져옴
+      const requestPageSize = hasSearchTerms ? 1000 : pageSize;
+      const requestPage = hasSearchTerms ? 0 : page;
 
       const response = await getFetchFunction(groupType)({
         page: requestPage,
@@ -104,16 +112,15 @@ export default function GroupList(props: {
     placeholderData: keepPreviousData,
   });
 
-  // 클라이언트 사이드 검색
+  // 클라이언트 사이드 검색 필터링
   const filteredGroups = useMemo(() => {
-    if (!allGroups?.content) return [];
+    if (!queryData?.content) return [];
 
-    let filtered = allGroups.content.filter(Boolean) as GroupInfo[];
+    let filtered = queryData.content.filter(Boolean) as GroupInfo[];
 
-    if (debouncedSearchTerms.length > 0) {
+    if (hasSearchTerms) {
       filtered = filtered.filter((group) => {
         return debouncedSearchTerms.some((searchTerm) => {
-          // 문자열 타입 체크 추가
           if (typeof searchTerm !== "string" || !searchTerm) return false;
 
           const termLower = searchTerm.toLowerCase();
@@ -128,35 +135,39 @@ export default function GroupList(props: {
     }
 
     return filtered;
-  }, [allGroups?.content, debouncedSearchTerms]);
+  }, [queryData?.content, debouncedSearchTerms, hasSearchTerms]);
 
-  // 페이지네이션
-  const paginatedGroups = useMemo(() => {
-    const startIndex = page * pageSize;
-    const endIndex = startIndex + pageSize;
-    return filteredGroups.slice(startIndex, endIndex);
-  }, [filteredGroups, page, pageSize]);
+  // 페이지네이션 처리
+  const { displayGroups, totalPages } = useMemo(() => {
+    if (hasSearchTerms) {
+      // 검색 시: 클라이언트 사이드 페이지네이션
+      const startIndex = page * pageSize;
+      const endIndex = startIndex + pageSize;
+      const paginatedGroups = filteredGroups.slice(startIndex, endIndex);
+      const calculatedTotalPages = Math.max(
+        1,
+        Math.ceil(filteredGroups.length / pageSize)
+      );
 
-  // 총 페이지 수 계산
-  const calculatedTotalPages = useMemo(() => {
-    return Math.max(1, Math.ceil(filteredGroups.length / pageSize));
-  }, [filteredGroups.length, pageSize]);
-
-  // 총 페이지 수 업데이트
-  useEffect(() => {
-    if (debouncedSearchTerms.length > 0) {
-      setTotalPages(calculatedTotalPages);
+      return {
+        displayGroups: paginatedGroups,
+        totalPages: calculatedTotalPages,
+      };
     } else {
-      setTotalPages(allGroups?.totalPages || 1);
+      // 일반 상태: 서버 사이드 페이지네이션
+      return {
+        displayGroups: filteredGroups,
+        totalPages: queryData?.totalPages || 1,
+      };
     }
-  }, [debouncedSearchTerms, calculatedTotalPages, allGroups?.totalPages]);
+  }, [hasSearchTerms, filteredGroups, page, pageSize, queryData?.totalPages]);
 
-  const groups =
-    debouncedSearchTerms.length > 0
-      ? paginatedGroups
-      : allGroups?.content || [];
+  // 페이지 변경 핸들러
+  const handlePageChange = useCallback((newPage: number) => {
+    setPage(newPage);
+  }, []);
 
-  // 검색 이벤트 핸들러
+  // 검색 이벤트 핸들러들
   const handleInputChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       setCurrentInput(event.target.value);
@@ -281,15 +292,15 @@ export default function GroupList(props: {
 
         <PageNavigation
           pageZeroBased={page}
-          setPage={setPage}
+          setPage={handlePageChange}
           totalPages={totalPages}
         />
 
         <Grid container spacing={2}>
-          {groups.length === 0 && (
+          {displayGroups.length === 0 && !isLoading && (
             <Grid size={12} textAlign={"center"}>
               <Typography variant="body1" color="textSecondary">
-                {debouncedSearchTerms.length > 0
+                {hasSearchTerms
                   ? `"${debouncedSearchTerms.join(", ")}"에 대한 검색 결과가 없습니다.`
                   : groupType === GroupListKind.MY_GROUP
                     ? "아직 생성한 모임이 없습니다."
@@ -299,7 +310,7 @@ export default function GroupList(props: {
               </Typography>
             </Grid>
           )}
-          {groups?.map((group, index) =>
+          {displayGroups?.map((group, index) =>
             group ? (
               <ItemContainer key={group.groupId}>
                 <Card
@@ -484,9 +495,10 @@ export default function GroupList(props: {
             )
           )}
         </Grid>
+
         <PageNavigation
           pageZeroBased={page}
-          setPage={setPage}
+          setPage={handlePageChange}
           totalPages={totalPages}
         />
       </Stack>
