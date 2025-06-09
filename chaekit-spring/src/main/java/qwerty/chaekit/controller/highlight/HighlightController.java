@@ -33,9 +33,10 @@ public class HighlightController {
                                                                                   @RequestParam(required = false) Long activityId,
                                                                                   @RequestParam(required = false) Long bookId,
                                                                                   @RequestParam(required = false) String spine,
-                                                                                  @RequestParam boolean me
+                                                                                  @RequestParam boolean me,
+                                                                                  @RequestParam(required = false) String keyword
     ) {
-        return ApiSuccessResponse.of(highlightService.fetchHighlights(userToken, pageable, activityId, bookId, spine, me));
+        return ApiSuccessResponse.of(highlightService.fetchHighlights(userToken, pageable, activityId, bookId, spine, me, keyword));
     }
 
     @GetMapping("/{id}")
