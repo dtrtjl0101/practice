@@ -14,36 +14,43 @@ public class FileService {
 
     // convert
     public String convertToPublicImageURL(String fileKey) {
-<span class="pc bpc" id="L17" title="1 of 2 branches missed.">        return fileKey == null ? null : &quot;https://&quot; + awsProperties.imageBucketName() + &quot;.s3.amazonaws.com/&quot; + fileKey;</span>
+<span class="pc bpc" id="L17" title="3 of 4 branches missed.">        if(fileKey == null || fileKey.isEmpty()) {</span>
+<span class="fc" id="L18">            return null;</span>
+        }
+        
+<span class="nc bnc" id="L21" title="All 2 branches missed.">        if (fileKey.startsWith(&quot;oauth2-profile-image/&quot;)) {</span>
+<span class="nc" id="L22">            return fileKey.substring(&quot;oauth2-profile-image/&quot;.length());</span>
+        }
+<span class="nc" id="L24">        return &quot;https://&quot; + awsProperties.imageBucketName() + &quot;.s3.amazonaws.com/&quot; + fileKey;</span>
     }
 
     // download
     public String getEbookDownloadUrl(String fileKey) {
-<span class="nc" id="L22">        return s3Service.getPresignedDownloadUrl(awsProperties.ebookBucketName(), fileKey, awsProperties.presignedUrlExpirationTime());</span>
+<span class="nc" id="L29">        return s3Service.getPresignedDownloadUrl(awsProperties.ebookBucketName(), fileKey, awsProperties.presignedUrlExpirationTime());</span>
     }
 
     // upload
     public String uploadProfileImageIfPresent(MultipartFile file) {
-<span class="nc" id="L27">        return uploadIfPresent(awsProperties.imageBucketName(), S3Directory.PROFILE_IMAGE, file);</span>
+<span class="nc" id="L34">        return uploadIfPresent(awsProperties.imageBucketName(), S3Directory.PROFILE_IMAGE, file);</span>
     }
 
     public String uploadGroupImageIfPresent(MultipartFile file) {
-<span class="nc" id="L31">        return uploadIfPresent(awsProperties.imageBucketName(), S3Directory.GROUP_IMAGE, file);</span>
+<span class="nc" id="L38">        return uploadIfPresent(awsProperties.imageBucketName(), S3Directory.GROUP_IMAGE, file);</span>
     }
 
     public String uploadEbookCoverImageIfPresent(MultipartFile file) {
-<span class="nc" id="L35">        return uploadIfPresent(awsProperties.imageBucketName(), S3Directory.EBOOK_COVER_IMAGE, file);</span>
+<span class="nc" id="L42">        return uploadIfPresent(awsProperties.imageBucketName(), S3Directory.EBOOK_COVER_IMAGE, file);</span>
     }
 
     public String uploadEbook(MultipartFile file) {
-<span class="nc" id="L39">        return s3Service.uploadFile(awsProperties.ebookBucketName(), S3Directory.EBOOK, file);</span>
+<span class="nc" id="L46">        return s3Service.uploadFile(awsProperties.ebookBucketName(), S3Directory.EBOOK, file);</span>
     }
 
     public String uploadIfPresent(String bucket, S3Directory s3Directory, MultipartFile file) {
-<span class="nc bnc" id="L43" title="All 2 branches missed.">        if (s3Service.isFileMissing(file)) {</span>
-<span class="nc" id="L44">           return null;</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        if (s3Service.isFileMissing(file)) {</span>
+<span class="nc" id="L51">           return null;</span>
         }
-<span class="nc" id="L46">        return s3Service.uploadFile(bucket, s3Directory, file);</span>
+<span class="nc" id="L53">        return s3Service.uploadFile(bucket, s3Directory, file);</span>
     }
 
 }

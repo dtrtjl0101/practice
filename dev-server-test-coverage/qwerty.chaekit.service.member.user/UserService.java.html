@@ -7,12 +7,14 @@ import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.dto.member.UserInfoResponse;
+import qwerty.chaekit.dto.member.UserPatchRequest;
 import qwerty.chaekit.global.enums.ErrorCode;
+import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.util.FileService;
 
-<span class="fc" id="L15">@Slf4j</span>
+<span class="fc" id="L17">@Slf4j</span>
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -21,11 +23,31 @@ public class UserService {
     private final FileService fileService;
 
     public UserInfoResponse getUserProfile(UserToken userToken) {
-<span class="nc" id="L24">        UserProfile user = userRepository.findById(userToken.userId())</span>
-<span class="nc" id="L25">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
-<span class="nc" id="L26">        String imageURL = fileService.convertToPublicImageURL(user.getProfileImageKey());</span>
+<span class="nc" id="L26">        UserProfile user = userRepository.findById(userToken.userId())</span>
+<span class="nc" id="L27">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
+<span class="nc" id="L28">        String imageURL = fileService.convertToPublicImageURL(user.getProfileImageKey());</span>
 
-<span class="nc" id="L28">        return UserInfoResponse.of(user, imageURL);</span>
+<span class="nc" id="L30">        return UserInfoResponse.of(user, imageURL);</span>
+    }
+    
+    public UserInfoResponse updateUserProfile(UserToken userToken, UserPatchRequest request) {
+<span class="nc" id="L34">        UserProfile user = userRepository.findById(userToken.userId())</span>
+<span class="nc" id="L35">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
+        
+<span class="nc bnc" id="L37" title="All 4 branches missed.">        if(request.nickname() != null &amp;&amp; !request.nickname().isBlank()) {</span>
+<span class="nc bnc" id="L38" title="All 2 branches missed.">            if (userRepository.existsByNickname(request.nickname())) {</span>
+<span class="nc" id="L39">                throw new BadRequestException(ErrorCode.NICKNAME_ALREADY_EXISTS);</span>
+            }
+<span class="nc" id="L41">            user.updateNickname(request.nickname());</span>
+        }
+        
+<span class="nc bnc" id="L44" title="All 2 branches missed.">        if (request.profileImage() != null) {</span>
+<span class="nc" id="L45">            String profileImageKey = fileService.uploadProfileImageIfPresent(request.profileImage());</span>
+<span class="nc" id="L46">            user.updateProfileImageKey(profileImageKey);</span>
+        }
+        
+<span class="nc" id="L49">        String imageURL = fileService.convertToPublicImageURL(user.getProfileImageKey());</span>
+<span class="nc" id="L50">        return UserInfoResponse.of(user, imageURL);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
