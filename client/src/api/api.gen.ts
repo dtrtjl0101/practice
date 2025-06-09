@@ -620,6 +620,9 @@ export interface HighlightFetchResponse {
   id?: number;
   /** @format int64 */
   bookId?: number;
+  bookTitle?: string;
+  bookAuthor?: string;
+  bookCoverImageURL?: string;
   /** @format int64 */
   authorId?: number;
   authorName?: string;
@@ -629,8 +632,14 @@ export interface HighlightFetchResponse {
   memo?: string;
   /** @format int64 */
   activityId?: number;
+  /** @format int64 */
+  groupId?: number;
+  groupName?: string;
+  groupImageURL?: string;
   linkedDiscussions?: DiscussionSummaryResponse[];
   highlightContent?: string;
+  /** @format date-time */
+  createdAt?: string;
 }
 
 export interface PageResponseHighlightFetchResponse {

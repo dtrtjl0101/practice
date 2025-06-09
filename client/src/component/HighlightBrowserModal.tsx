@@ -9,7 +9,6 @@ import {
   Grid,
   IconButton,
   List,
-  ListItem,
   ListItemAvatar,
   ListItemButton,
   ListItemText,
@@ -18,6 +17,7 @@ import {
   Modal,
   Paper,
   Stack,
+  TextField,
   Typography,
   useTheme,
 } from "@mui/material";
@@ -26,15 +26,18 @@ import { Fragment, useEffect, useState } from "react";
 import {
   Delete,
   Edit,
+  Preview,
+  Public,
+  PublicOff,
   Sort,
-  Visibility,
-  VisibilityOff,
 } from "@mui/icons-material";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import API_CLIENT from "../api/api";
 import { setResponsiveStyleValueSm } from "../utils/setResponsiveStyleValue";
 import ActivitySelectModal from "./ActivitySelectModal";
 import { useSnackbar } from "notistack";
+import LinkListItemButton from "./LinkListItemButton";
+import { LinkIconButton } from "./_pathlessLayout/groups/$groupId/LinkIconButton";
 
 type HighlightFilterKind =
   | {
@@ -74,6 +77,7 @@ export default function HighlightBrowserModal(props: {
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
+    refetch,
   } = useInfiniteQuery({
     queryKey: ["highlights", highlightFilterKind],
     queryFn: async ({ pageParam }) => {
@@ -274,6 +278,10 @@ export default function HighlightBrowserModal(props: {
                   onHighlightUseButtonClick={
                     onUseHighlight && onHighlightUseButtonClick
                   }
+                  onEditHighlight={(highlight) => {
+                    setSelectedHighlight(highlight || null);
+                    refetch();
+                  }}
                 />
               ) : (
                 <HighlightViewerPlaceholder onClose={onClose} />
@@ -307,7 +315,7 @@ function HighlightListItem(props: {
         secondary={
           <>
             <Typography
-              variant="body2"
+              variant="body1"
               color="textSecondary"
               component={"span"}
             >
@@ -316,14 +324,37 @@ function HighlightListItem(props: {
             <Typography
               variant="body2"
               color="textSecondary"
+              component="span"
+              display="block"
+              noWrap
+            >
+              {highlight.groupName
+                ? `${highlight.groupName} - ${highlight.bookTitle}`
+                : highlight.bookTitle}
+            </Typography>
+            <Typography
+              variant="body2"
+              color="textSecondary"
               component={"span"}
               display={"block"}
+              textAlign={"right"}
             >
-              {highlight.authorName}
+              {new Date(highlight.createdAt).toLocaleDateString("ko-KR", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+              })}
             </Typography>
           </>
         }
       />
+      <IconButton size="small" sx={{ ml: 1 }} disabled>
+        {highlight.activityId ? (
+          <Public fontSize="small" color="action" />
+        ) : (
+          <PublicOff fontSize="small" color="disabled" />
+        )}
+      </IconButton>
     </ListItemButton>
   );
 }
@@ -381,15 +412,17 @@ function HighlightViewer(props: {
   highlight: Highlight;
   onClose: () => void;
   onHighlightUseButtonClick?: (highlight: Highlight) => void;
+  onEditHighlight: (highlight?: Highlight) => void;
 }) {
-  const { highlight, onClose, onHighlightUseButtonClick } = props;
+  const { highlight, onClose, onHighlightUseButtonClick, onEditHighlight } =
+    props;
   const [activitySelectModalOpen, setActivitySelectModalOpen] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
-  const [visibilityOverwrite, setVisibilityOverwrite] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [memo, setMemo] = useState(highlight.memo || "");
 
   // null/undefined 체크 및 기본값 설정
   const highlightContent = highlight.highlightContent || "";
-  const memo = highlight.memo || "";
 
   const handlePublishHighlight = async (activityId: number) => {
     const response = await API_CLIENT.highlightController.updateHighlight(
@@ -406,27 +439,59 @@ function HighlightViewer(props: {
     }
     enqueueSnackbar("하이라이트가 공개되었습니다.", { variant: "success" });
     setActivitySelectModalOpen(false);
-    setVisibilityOverwrite(true);
+    onEditHighlight({ ...highlight, activityId });
+  };
+
+  const onEditButtonClicked = () => {
+    if (highlight.activityId) {
+      enqueueSnackbar("한번 공개한 하이라이트는 활동을 변경할 수 없습니다.", {
+        variant: "warning",
+      });
+      return;
+    }
+    setIsEditing(true);
+  };
+
+  const onDeleteButtonClicked = async () => {
+    if (highlight.activityId) {
+      enqueueSnackbar("한번 공개한 하이라이트는 삭제할 수 없습니다.", {
+        variant: "warning",
+      });
+      return;
+    }
+
+    const response = await API_CLIENT.highlightController.deleteHighlight(
+      highlight.id
+    );
+
+    if (!response.isSuccessful) {
+      enqueueSnackbar(response.errorMessage, { variant: "error" });
+      return;
+    }
+    enqueueSnackbar("하이라이트가 삭제되었습니다.", { variant: "success" });
+    onEditHighlight();
+  };
+
+  const onEditComplete = async () => {
+    const response = await API_CLIENT.highlightController.updateHighlight(
+      highlight.id,
+      {
+        memo: memo,
+      }
+    );
+
+    if (!response.isSuccessful) {
+      enqueueSnackbar(response.errorMessage, { variant: "error" });
+      return;
+    }
+    enqueueSnackbar("하이라이트가 수정되었습니다.", { variant: "success" });
+    setIsEditing(false);
+    onEditHighlight({ ...highlight, memo });
   };
 
   useEffect(() => {
-    setVisibilityOverwrite(false);
+    setMemo(highlight.memo || "");
   }, [highlight]);
-
-  const { data: bookData } = useQuery({
-    queryKey: ["book", highlight.bookId],
-    queryFn: async () => {
-      const response = await API_CLIENT.ebookController.getBook(
-        highlight.bookId
-      );
-      if (!response.isSuccessful) {
-        console.error(response.errorCode);
-        throw new Error(response.errorCode);
-      }
-      return response.data;
-    },
-    enabled: !!highlight.bookId,
-  });
 
   return (
     <>
@@ -456,10 +521,25 @@ function HighlightViewer(props: {
               padding={1}
               sx={{ display: "flex", justifyContent: "flex-end" }}
             >
+              <LinkIconButton
+                color="secondary"
+                to={"/reader/$bookId"}
+                params={{
+                  bookId: highlight.bookId,
+                }}
+                search={{
+                  activityId: highlight.activityId,
+                  groupId: highlight.groupId,
+                  location: highlight.cfi,
+                  temporalProgress: true,
+                }}
+              >
+                <Preview />
+              </LinkIconButton>
               <IconButton
                 color="secondary"
                 onClick={() => {
-                  if (visibilityOverwrite || highlight.activityId) {
+                  if (highlight.activityId) {
                     enqueueSnackbar(
                       "한번 공개한 하이라이트는 활동을 변경할 수 없습니다.",
                       { variant: "warning" }
@@ -469,16 +549,12 @@ function HighlightViewer(props: {
                   setActivitySelectModalOpen(true);
                 }}
               >
-                {visibilityOverwrite || highlight.activityId ? (
-                  <Visibility />
-                ) : (
-                  <VisibilityOff />
-                )}
+                {highlight.activityId ? <Public /> : <PublicOff />}
               </IconButton>
-              <IconButton color="secondary">
+              <IconButton color="secondary" onClick={onEditButtonClicked}>
                 <Edit />
               </IconButton>
-              <IconButton color="error">
+              <IconButton color="error" onClick={onDeleteButtonClicked}>
                 <Delete />
               </IconButton>
             </Box>
@@ -488,42 +564,109 @@ function HighlightViewer(props: {
               sx={{ flexGrow: 1, overflowY: "auto", padding: 2 }}
             >
               <Stack
+                justifyContent={"space-between"}
+                alignItems={"flex-end"}
                 direction="row"
-                spacing={0.5}
-                alignItems="center"
-                alignSelf={"flex-end"}
               >
-                <Avatar src={highlight.authorProfileImageURL} />
-                <Typography noWrap>{highlight.authorName}</Typography>
+                <Stack direction="row" spacing={0.5} alignItems="center">
+                  <Avatar src={highlight.authorProfileImageURL} />
+                  <Typography noWrap>{highlight.authorName}</Typography>
+                </Stack>
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  noWrap
+                  component={"span"}
+                >
+                  {new Date(highlight.createdAt).toLocaleDateString("ko-KR", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  })}
+                </Typography>
               </Stack>
               <Typography variant="body2" color="textSecondary">
                 {highlightContent}
               </Typography>
               <Divider />
-              <Typography variant="body1">{memo}</Typography>
-            </Stack>
-            {bookData && (
-              <ListItem>
-                <ListItemAvatar>
-                  <Avatar variant="rounded" src={bookData.bookCoverImageURL} />
-                </ListItemAvatar>
-                <ListItemText
-                  primary={bookData.title}
-                  secondary={bookData.author}
+              {isEditing ? (
+                <TextField
+                  multiline
+                  fullWidth
+                  minRows={3}
+                  value={memo}
+                  onChange={(e) => setMemo(e.target.value)}
                 />
-              </ListItem>
+              ) : (
+                <Typography variant="body1">{memo}</Typography>
+              )}
+            </Stack>
+            {highlight.groupName && highlight.groupId && (
+              <LinkListItemButton
+                to={"/groups/$groupId"}
+                params={{
+                  groupId: highlight.groupId,
+                }}
+                sx={{ flexGrow: 0 }}
+              >
+                <ListItemAvatar>
+                  <Avatar variant="rounded" src={highlight.groupImageURL} />
+                </ListItemAvatar>
+                <ListItemText primary={<>{highlight.groupName}</>} />
+              </LinkListItemButton>
             )}
+            <LinkListItemButton
+              to={"/books/$bookId"}
+              params={{ bookId: highlight.bookId }}
+              sx={{ flexGrow: 0 }}
+            >
+              <ListItemAvatar>
+                <Avatar variant="rounded" src={highlight.bookCoverImageURL} />
+              </ListItemAvatar>
+              <ListItemText
+                primary={highlight.bookTitle}
+                secondary={highlight.bookAuthor}
+              />
+            </LinkListItemButton>
             <CardActions sx={{ justifyContent: "flex-end" }}>
-              <Button variant="outlined" color="secondary" onClick={onClose}>
-                취소
-              </Button>
-              {onHighlightUseButtonClick && (
-                <Button
-                  variant="contained"
-                  onClick={() => onHighlightUseButtonClick(highlight)}
-                >
-                  선택
-                </Button>
+              {isEditing ? (
+                <>
+                  <Button
+                    variant="outlined"
+                    color="secondary"
+                    onClick={() => {
+                      setIsEditing(false);
+                      setMemo(highlight.memo || "");
+                    }}
+                  >
+                    취소
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={onEditComplete}
+                  >
+                    수정 완료
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="outlined"
+                    color="secondary"
+                    onClick={onClose}
+                  >
+                    취소
+                  </Button>
+                  {onHighlightUseButtonClick && (
+                    <Button
+                      variant="contained"
+                      onClick={() => onHighlightUseButtonClick(highlight)}
+                    >
+                      선택
+                    </Button>
+                  )}
+                </>
               )}
             </CardActions>
           </Stack>

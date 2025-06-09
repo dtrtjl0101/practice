@@ -7,7 +7,6 @@ import {
   FormControlLabel,
   IconButton,
   Slider,
-  Snackbar,
   Stack,
   styled,
   Switch,
@@ -94,8 +93,6 @@ function RouteComponent() {
   const [focusedHighlight, setFocusedHighlight] = useState<Highlight | null>(
     null
   );
-  const [readTogetherSnackbarOpen, setReadTogetherSnackbarOpen] =
-    useState(!!activityId);
   const [selectionRightBottomPosition, setSelectionRightBottomPosition] =
     useState({
       left: 0,
@@ -391,31 +388,6 @@ function RouteComponent() {
               mark: ReadProgressSliderMark,
             }}
             marks={readProgressSliderMarks}
-          />
-          <Snackbar
-            anchorOrigin={{ vertical: "top", horizontal: "center" }}
-            open={readTogetherSnackbarOpen}
-            onClose={() => {
-              setReadTogetherSnackbarOpen(false);
-            }}
-            action={
-              <IconButton
-                size="small"
-                aria-label="close"
-                color="inherit"
-                onClick={() => setReadTogetherSnackbarOpen(false)}
-              >
-                <Close />
-              </IconButton>
-            }
-            message="함께읽기 활성화됨"
-            autoHideDuration={3000}
-            sx={{
-              position: "absolute",
-              top: theme.spacing(2),
-              left: "50%",
-              transform: "translateX(-50%)",
-            }}
           />
           <Stack
             direction="column"
