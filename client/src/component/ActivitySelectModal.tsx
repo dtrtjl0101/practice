@@ -19,11 +19,12 @@ import { ExpandMore } from "@mui/icons-material";
 
 export default function ActivitySelectModal(props: {
   description?: string;
+  bookId?: number;
   open: boolean;
   onClose: () => void;
   onSelect?: (activity: { id: number; name: string }) => void;
 }) {
-  const { open, onClose, description, onSelect } = props;
+  const { bookId, open, onClose, description, onSelect } = props;
   const [selectMenuAnchor, setSelectMenuAnchor] = useState<
     (EventTarget & HTMLDivElement) | null
   >(null);
@@ -38,9 +39,10 @@ export default function ActivitySelectModal(props: {
     hasNextPage,
     fetchNextPage,
   } = useInfiniteQuery({
-    queryKey: ["myActivities"],
+    queryKey: ["myActivities", bookId],
     queryFn: async ({ pageParam }) => {
       const response = await API_CLIENT.userController.getMyActivities({
+        bookId,
         pageable: {
           page: pageParam,
           size: 10,
@@ -87,6 +89,11 @@ export default function ActivitySelectModal(props: {
           anchorEl={selectMenuAnchor}
           onClose={() => setSelectMenuAnchor(null)}
         >
+          {activities.length === 0 && (
+            <ListItemButton disabled>
+              <Typography color="textSecondary">활동이 없습니다</Typography>
+            </ListItemButton>
+          )}
           {activities.map((activity) => (
             <ActivityMenuItem
               key={activity.activityId}
