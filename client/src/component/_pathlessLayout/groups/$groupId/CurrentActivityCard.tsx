@@ -347,7 +347,7 @@ export function CurrentActivityCard(props: {
                       >
                         <StickyNote2 fontSize="small" />
                         <Typography variant="body2" fontWeight={500}>
-                          {0}
+                          {activity.highlightCount ?? 0}
                         </Typography>
                       </Box>
 
@@ -372,7 +372,7 @@ export function CurrentActivityCard(props: {
                       >
                         <CoPresent fontSize="small" />
                         <Typography variant="body2" fontWeight={500}>
-                          {0}
+                          {activity.discussionCount ?? 0}
                         </Typography>
                       </Box>
                     </Stack>
