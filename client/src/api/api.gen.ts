@@ -550,6 +550,25 @@ export interface DiscussionFetchResponse {
   isAuthor?: boolean;
 }
 
+export interface UserPatchRequest {
+  nickname?: string;
+  /** @format binary */
+  profileImage?: File;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseUserInfoResponse {
+  isSuccessful?: boolean;
+  data?: UserInfoResponse;
+}
+
+export interface UserInfoResponse {
+  /** @format int64 */
+  userId?: number;
+  nickname?: string;
+  profileImageURL?: string;
+}
+
 export interface HighlightPutRequest {
   /** @format int64 */
   activityId?: number;
@@ -583,19 +602,6 @@ export interface DiscussionPatchRequest {
 
 export interface DiscussionCommentPatchRequest {
   content?: string;
-}
-
-/** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponseUserInfoResponse {
-  isSuccessful?: boolean;
-  data?: UserInfoResponse;
-}
-
-export interface UserInfoResponse {
-  /** @format int64 */
-  userId?: number;
-  nickname?: string;
-  profileImageURL?: string;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -684,6 +690,7 @@ export interface GroupFetchResponse {
   leaderNickname?: string;
   leaderProfileImageURL?: string;
   myMemberShipStatus?: "OWNED" | "PENDING" | "JOINED" | "NONE";
+  isAutoApproval?: boolean;
   /** @format int32 */
   memberCount?: number;
 }
@@ -1116,6 +1123,8 @@ export interface HighlightSummaryResponse {
   cfi?: string;
   memo?: string;
   highlightContent?: string;
+  /** @format date-time */
+  createdAt?: string;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -1286,7 +1295,20 @@ export interface ApiSuccessResponseListActivityScoreResponse {
 /** API 에러 응답을 감싸는 클래스 */
 export interface ApiSuccessResponseListHighlightPreviewResponse {
   isSuccessful?: boolean;
-  data?: any[];
+  data?: HighlightPreviewResponse[];
+}
+
+export interface HighlightPreviewResponse {
+  /** @format int64 */
+  id?: number;
+  /** @format int64 */
+  authorId?: number;
+  authorName?: string;
+  authorProfileImageURL?: string;
+  spine?: string;
+  cfi?: string;
+  /** @format date-time */
+  createdAt?: string;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -1642,6 +1664,25 @@ export class Api<
       }),
 
     /**
+     * @description 사용자 정보를 수정합니다. 프로필 이미지, 닉네임을 포함할 수 있습니다.
+     *
+     * @tags user-controller
+     * @name UpdateUserInfo
+     * @summary 사용자 정보 수정
+     * @request PATCH:/api/users/me
+     * @secure
+     */
+    updateUserInfo: (data: UserPatchRequest, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseUserInfoResponse, any>({
+        path: `/api/users/me`,
+        method: "PATCH",
+        body: data,
+        secure: true,
+        type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
      * @description 내가 작성한 하이라이트를 조회합니다.
      *
      * @tags user-controller
@@ -1668,6 +1709,7 @@ export class Api<
         sort?: string[];
         /** @format int64 */
         bookId?: number;
+        keyword?: string;
       },
       params: RequestParams = {},
     ) =>
@@ -1936,11 +1978,11 @@ export class Api<
   };
   loginFilterController = {
     /**
-     * @description Spring Security가 처리하는 로그인 API
+     * @description Spring Security가 처리하는 이메일 인증 로그인 API
      *
      * @tags login-filter-controller
      * @name Login
-     * @summary 로그인
+     * @summary 이메일 인증 로그인
      * @request POST:/api/login
      * @secure
      */
@@ -1951,6 +1993,23 @@ export class Api<
         body: data,
         secure: true,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description Spring Security가 처리하는 Google OAuth2 로그인 API. 성공 시, {baseUrl}/oauth2/success?accessToken={accessToken}&refreshToken={refreshToken} 으로 리다이렉트됩니다. 실패 시, {baseUrl}/oauth2/failure?error={error} 으로 리다이렉트됩니다. baseUrl은 application.properties의 kakao.pay.redirect-base-url로 설정된 값입니다.
+     *
+     * @tags login-filter-controller
+     * @name Oauth2Login
+     * @summary Google OAuth2 로그인
+     * @request GET:/oauth2/authorization/google
+     * @secure
+     */
+    oauth2Login: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/oauth2/authorization/google`,
+        method: "GET",
+        secure: true,
         ...params,
       }),
   };
@@ -1985,6 +2044,7 @@ export class Api<
         bookId?: number;
         spine?: string;
         me: boolean;
+        keyword?: string;
       },
       params: RequestParams = {},
     ) =>
