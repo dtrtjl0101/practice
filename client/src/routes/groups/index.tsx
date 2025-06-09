@@ -1,4 +1,4 @@
-import { Button, Container, IconButton, Stack } from "@mui/material";
+import { Button, Container, Stack } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
 import GroupList from "../../component/GroupList";
 import GroupCreateModal from "../../component/groupCreate/GroupCreateModal";

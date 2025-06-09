@@ -2,12 +2,8 @@ import {
   GroupAdd,
   ShoppingCart,
   Edit,
-  CameraAlt,
   AutoStories,
   TrendingUp,
-  Schedule,
-  Group,
-  PersonOutline,
   Add,
 } from "@mui/icons-material";
 import {
@@ -22,15 +18,8 @@ import {
   Typography,
   Box,
   Grid,
-  Chip,
-  Divider,
   Paper,
-  Badge,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  ListItemSecondaryAction,
+  Alert,
 } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
@@ -38,39 +27,28 @@ import BookList, { BookListKind } from "../../component/BookList";
 import GroupCreateModal from "../../component/groupCreate/GroupCreateModal";
 import GroupList, { GroupListKind } from "../../component/GroupList";
 import HighlightBrowserModal from "../../component/HighlightBrowserModal";
+import { useAtomValue } from "jotai";
+import { AuthState } from "../../states/auth";
+import { useQuery } from "@tanstack/react-query";
+import API_CLIENT from "../../api/api";
+import UserProfileEditModal from "../../component/UserProfileEditModal";
 
 export const Route = createFileRoute("/mypage/")({
   component: RouteComponent,
 });
 
-// 임시 사용자 데이터 (API 연동 전)
-const mockUserData = {
-  nickname: "독서러버",
-  email: "reader@example.com",
-  profileImage: null, // null이면 기본 아바타
-  joinDate: "2024-01-15",
-  stats: {
-    highlightCount: 127,
-    purchasedBookCount: 23,
-    readBookCount: 18,
-    joinedGroupCount: 5,
-  },
-};
-
-const mockRecentActivities = [
-  {
-    id: 1,
-    type: "group_join",
-    title: "클래식 문학 읽기 모임",
-    date: "2024-06-08",
-  },
-  { id: 2, type: "book_purchase", title: "데미안", date: "2024-06-05" },
-  { id: 3, type: "group_join", title: "SF 소설 토론회", date: "2024-06-01" },
-];
-
 function RouteComponent() {
   const [openHighlightBrowserModal, setOpenHighlightBrowserModal] =
     useState(false);
+  const user = useAtomValue(AuthState.user);
+
+  if (!user) {
+    return (
+      <Container sx={{ my: 4 }}>
+        <Alert severity="error">로그인 후 이용할 수 있습니다.</Alert>
+      </Container>
+    );
+  }
 
   return (
     <>
@@ -81,10 +59,10 @@ function RouteComponent() {
       <Container sx={{ my: 4 }}>
         <Stack spacing={4}>
           {/* 프로필 섹션 */}
-          <ProfileSection />
+          <ProfileSection userId={user?.memberId} />
 
           {/* 통계 카드들 */}
-          <StatsSection />
+          <StatsSection userId={user?.memberId} />
 
           {/* 최근 활동 */}
           <RecentActivitySection />
@@ -102,95 +80,157 @@ function RouteComponent() {
   );
 }
 
-function ProfileSection() {
-  const [isEditingNickname, setIsEditingNickname] = useState(false);
+function ProfileSection({ userId }: { userId: number }) {
+  const [openProfileEditModal, setOpenProfileEditModal] = useState(false);
 
-  const handleProfileImageChange = () => {
-    // TODO: 프로필 이미지 변경 로직
-    console.log("프로필 이미지 변경");
-  };
-
-  const handleNicknameEdit = () => {
-    // TODO: 닉네임 수정 로직
-    setIsEditingNickname(!isEditingNickname);
-  };
+  const { data: userProfile } = useQuery({
+    queryKey: ["userProfile", userId],
+    queryFn: async () => {
+      const response = await API_CLIENT.userController.userInfo();
+      if (!response.isSuccessful) {
+        throw new Error(response.error);
+      }
+      const formattedUserData = {
+        nickname: response.data?.nickname || "",
+        profileImageURL: response.data?.profileImageURL || "",
+        email: response.data?.email || "",
+        role: response.data?.role || "ROLE_USER",
+      };
+      return formattedUserData;
+    },
+  });
 
   return (
-    <Card variant="outlined">
-      <CardContent>
-        <Box display="flex" alignItems="center" gap={3}>
-          <Box position="relative">
-            <Avatar
-              src={mockUserData.profileImage ?? undefined}
-              sx={{ width: 80, height: 80 }}
-            >
-              {mockUserData.nickname.charAt(0)}
-            </Avatar>
-            <IconButton
-              size="small"
-              sx={{
-                position: "absolute",
-                bottom: -4,
-                right: -4,
-                bgcolor: "primary.main",
-                color: "white",
-                "&:hover": { bgcolor: "primary.dark" },
-                width: 28,
-                height: 28,
-              }}
-              onClick={handleProfileImageChange}
-            >
-              <CameraAlt fontSize="small" />
-            </IconButton>
-          </Box>
+    <>
+      <UserProfileEditModal
+        open={openProfileEditModal}
+        onClose={() => setOpenProfileEditModal(false)}
+        userData={userProfile}
+        userId={userId}
+      />
 
-          <Box flex={1}>
-            <Box display="flex" alignItems="center" gap={1} mb={1}>
-              <Typography variant="h5" component="h1">
-                {mockUserData.nickname}
-              </Typography>
-              <IconButton size="small" onClick={handleNicknameEdit}>
-                <Edit fontSize="small" />
-              </IconButton>
+      <Card variant="outlined">
+        <CardContent>
+          <Box display="flex" alignItems="center" gap={3}>
+            <Box position="relative">
+              <Avatar
+                src={userProfile?.profileImageURL}
+                sx={{ width: 80, height: 80 }}
+              >
+                {userProfile?.nickname?.charAt(0)}
+              </Avatar>
             </Box>
-            <Typography variant="body2" color="text.secondary" mb={1}>
-              {mockUserData.email}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              가입일:{" "}
-              {new Date(mockUserData.joinDate).toLocaleDateString("ko-KR")}
-            </Typography>
+
+            <Box flex={1}>
+              <Box display="flex" alignItems="center" gap={1} mb={1}>
+                <Typography variant="h5" component="h1">
+                  {userProfile?.nickname}
+                </Typography>
+              </Box>
+              <Typography variant="body2" color="text.secondary" mb={1}>
+                {userProfile?.email}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                역할:{" "}
+                {userProfile?.role === "ROLE_ADMIN"
+                  ? "관리자"
+                  : userProfile?.role === "ROLE_PUBLISHER"
+                    ? "출판사"
+                    : "유저"}
+              </Typography>
+            </Box>
+
+            {/* 프로필 편집 버튼 */}
+            <Box>
+              <Button
+                variant="outlined"
+                startIcon={<Edit />}
+                onClick={() => setOpenProfileEditModal(true)}
+                sx={{ borderRadius: 2 }}
+                disabled={true} // API 준비 전까지 비활성화
+              >
+                프로필 편집
+              </Button>
+            </Box>
           </Box>
-        </Box>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </>
   );
 }
 
-function StatsSection() {
+function StatsSection({ userId }: { userId: number }) {
+  const { data: highlightCount } = useQuery({
+    queryKey: ["highlightCount", userId],
+    queryFn: async () => {
+      const response = await API_CLIENT.userController.getMyHighlights();
+      if (!response.isSuccessful) {
+        throw new Error(response.error);
+      }
+      return response.data.totalItems;
+    },
+  });
+
+  const { data: joinedActivityCount } = useQuery({
+    queryKey: ["joinedActivityCount", userId],
+    queryFn: async () => {
+      const response = await API_CLIENT.userController.getMyActivities({
+        pageable: { page: 0, size: 0 },
+      });
+      if (!response.isSuccessful) {
+        throw new Error(response.error);
+      }
+      return response.data.totalItems;
+    },
+  });
+
+  const { data: purchasedBookCount } = useQuery({
+    queryKey: ["purchasedBookCount", userId],
+    queryFn: async () => {
+      const response = await API_CLIENT.ebookPurchaseController.getMyBooks();
+      if (!response.isSuccessful) {
+        throw new Error(response.error);
+      }
+      return response.data.totalItems;
+    },
+  });
+
+  const { data: joinedGroupCount } = useQuery({
+    queryKey: ["joinedGroupCount", userId],
+    queryFn: async () => {
+      const response = await API_CLIENT.userController.getMyGroups({
+        pageable: { page: 0, size: 0 },
+      });
+      if (!response.isSuccessful) {
+        throw new Error(response.error);
+      }
+      return response.data.totalItems;
+    },
+  });
+
   const stats = [
     {
       icon: <TrendingUp />,
       title: "등록한 하이라이트",
-      count: mockUserData.stats.highlightCount,
+      count: highlightCount,
       color: "primary",
     },
     {
       icon: <AutoStories />,
-      title: "읽은 책",
-      count: mockUserData.stats.readBookCount,
+      title: "가입한 활동",
+      count: joinedActivityCount,
       color: "success",
     },
     {
       icon: <ShoppingCart />,
       title: "구매한 책",
-      count: mockUserData.stats.purchasedBookCount,
+      count: purchasedBookCount,
       color: "info",
     },
     {
       icon: <GroupAdd />,
       title: "가입한 모임",
-      count: mockUserData.stats.joinedGroupCount,
+      count: joinedGroupCount,
       color: "warning",
     },
   ];
@@ -226,59 +266,12 @@ function StatsSection() {
 }
 
 function RecentActivitySection() {
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case "group_join":
-        return <GroupAdd fontSize="small" />;
-      case "book_purchase":
-        return <ShoppingCart fontSize="small" />;
-      default:
-        return <Schedule fontSize="small" />;
-    }
-  };
-
-  const getActivityColor = (type: string) => {
-    switch (type) {
-      case "group_join":
-        return "primary";
-      case "book_purchase":
-        return "success";
-      default:
-        return "default";
-    }
-  };
-
   return (
     <Card variant="outlined">
       <CardHeader title="최근 활동" titleTypographyProps={{ variant: "h6" }} />
       <CardContent>
         <Stack spacing={2}>
-          {mockRecentActivities.map((activity, index) => (
-            <Box key={activity.id}>
-              <Box display="flex" alignItems="center" gap={2}>
-                <Box color={`${getActivityColor(activity.type)}.main`}>
-                  {getActivityIcon(activity.type)}
-                </Box>
-                <Box flex={1}>
-                  <Typography variant="body2">{activity.title}</Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {new Date(activity.date).toLocaleDateString("ko-KR")}
-                  </Typography>
-                </Box>
-                <Chip
-                  label={
-                    activity.type === "group_join" ? "모임 가입" : "도서 구매"
-                  }
-                  size="small"
-                  color={getActivityColor(activity.type) as any}
-                  variant="outlined"
-                />
-              </Box>
-              {index < mockRecentActivities.length - 1 && (
-                <Divider sx={{ mt: 2 }} />
-              )}
-            </Box>
-          ))}
+          <Alert severity="info">구현 예정입니다...</Alert>
         </Stack>
       </CardContent>
     </Card>
