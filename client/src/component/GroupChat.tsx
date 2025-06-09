@@ -109,7 +109,7 @@ export default function GroupChat(props: {
   }, [chatsData, newChats]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView();
+    // messagesEndRef.current?.scrollIntoView();
   };
 
   const isScrolledToBottom = () => {
