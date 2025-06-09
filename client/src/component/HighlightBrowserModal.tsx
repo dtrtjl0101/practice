@@ -23,13 +23,7 @@ import {
 } from "@mui/material";
 import { Highlight } from "../types/highlight";
 import { Fragment, useEffect, useState } from "react";
-import {
-  Delete,
-  Edit,
-  Sort,
-  Visibility,
-  VisibilityOff,
-} from "@mui/icons-material";
+import { Delete, Edit, Public, PublicOff, Sort } from "@mui/icons-material";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../api/api";
 import { setResponsiveStyleValueSm } from "../utils/setResponsiveStyleValue";
@@ -324,6 +318,13 @@ function HighlightListItem(props: {
           </>
         }
       />
+      <IconButton size="small" sx={{ ml: 1 }} disabled>
+        {highlight.activityId ? (
+          <Public fontSize="small" color="action" />
+        ) : (
+          <PublicOff fontSize="small" color="disabled" />
+        )}
+      </IconButton>
     </ListItemButton>
   );
 }
@@ -470,9 +471,9 @@ function HighlightViewer(props: {
                 }}
               >
                 {visibilityOverwrite || highlight.activityId ? (
-                  <Visibility />
+                  <Public />
                 ) : (
-                  <VisibilityOff />
+                  <PublicOff />
                 )}
               </IconButton>
               <IconButton color="secondary">
