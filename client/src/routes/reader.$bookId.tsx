@@ -406,7 +406,7 @@ function RouteComponent() {
         }),
     ];
     return marks;
-  }, [rendition, highlights, members]);
+  }, [rendition?.book.locations, highlights, members]);
 
   return (
     <>
