@@ -13,6 +13,11 @@ services:
     build: .
     volumes:
       - gradle-cache:/root/.gradle
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     environment:
       # DB
       DB_URL: jdbc:mysql://chaekit-mysql:3306/chaekit?serverTimezone=Asia/Seoul
