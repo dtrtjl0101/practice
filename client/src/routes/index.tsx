@@ -26,7 +26,7 @@ import {
   Workspaces,
   People,
 } from "@mui/icons-material";
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../api/api";
 import { HomeStatistics } from "../types/HomeStatistics";
 
@@ -85,7 +85,9 @@ function HeroSection() {
               transform: "translateY(-2px)",
             },
           }}
-          onClick={() => navigate({ to: "/groups" })}
+          onClick={() =>
+            navigate({ to: "/groups", search: { searchTerms: [] as string[] } })
+          }
         >
           모임 찾기
         </Button>
@@ -218,40 +220,98 @@ function CategoriesSection() {
     {
       icon: "📖",
       title: "문학/소설",
-      description: "한국문학, 세계문학, 추리소설",
-      count: "234개 모임",
+      description: "문학, 고전, 소설",
+      tags: ["문학", "고전", "소설"],
     },
     {
       icon: "💪",
       title: "자기계발",
       description: "성공, 습관, 자기관리",
-      count: "189개 모임",
+      tags: ["자기계발", "성공", "습관"],
     },
     {
       icon: "💼",
       title: "경영/비즈니스",
       description: "경영전략, 마케팅, 투자",
-      count: "156개 모임",
+      tags: ["경영", "마케팅", "투자"],
     },
     {
       icon: "🧠",
       title: "인문학",
       description: "철학, 역사, 심리학",
-      count: "98개 모임",
+      tags: ["철학", "역사", "심리학"],
     },
     {
       icon: "🔬",
       title: "과학/기술",
       description: "IT, 과학, 의학",
-      count: "87개 모임",
+      tags: ["IT", "과학", "의학"],
     },
     {
       icon: "✍️",
       title: "에세이",
       description: "일상, 여행, 라이프스타일",
-      count: "76개 모임",
+      tags: ["에세이", "여행", "라이프"],
     },
   ];
+
+  // 각 카테고리별 그룹 수를 가져오는 쿼리들
+  const categoryQueries = useQueries({
+    queries: categories.map((category, index) => ({
+      queryKey: ["groups", "categories", index, category.tags],
+      queryFn: async () => {
+        // 각 태그별로 검색해서 총 그룹 수 계산
+        const promises = category.tags.map((tag) =>
+          API_CLIENT.groupController.getAllGroups({
+            size: 0, // 최소한의 데이터만 가져오고 totalItems만 사용
+            tags: [...tag],
+          })
+        );
+
+        const responses = await Promise.all(promises);
+
+        // 모든 응답이 성공적인지 확인
+        const successfulResponses = responses.filter(
+          (response) => response.isSuccessful
+        );
+
+        if (successfulResponses.length === 0) {
+          return 0;
+        }
+
+        // 각 태그에 해당하는 그룹들을 모두 가져와서 중복 제거
+        const allGroupsPromises = category.tags.map(async (tag) => {
+          const response = await API_CLIENT.groupController.getAllGroups({
+            size: 0, // 충분히 큰 수로 모든 데이터 가져오기
+          });
+
+          if (response.isSuccessful) {
+            // 클라이언트에서 태그 필터링
+            const filteredGroups =
+              response.data.content?.filter((group) =>
+                group.tags?.some((groupTag) =>
+                  groupTag.toLowerCase().includes(tag.toLowerCase())
+                )
+              ) || [];
+            return filteredGroups;
+          }
+          return [];
+        });
+
+        const allGroupsArrays = await Promise.all(allGroupsPromises);
+
+        // 모든 그룹을 하나의 배열로 합치고 중복 제거 (groupId 기준)
+        const uniqueGroups = new Map();
+        allGroupsArrays.flat().forEach((group) => {
+          uniqueGroups.set(group.groupId, group);
+        });
+
+        return uniqueGroups.size;
+      },
+      staleTime: 5 * 60 * 1000, // 5분간 캐시
+      retry: 1,
+    })),
+  });
 
   return (
     <Box sx={{ mb: 6 }}>
@@ -265,51 +325,64 @@ function CategoriesSection() {
         📚 관심 분야별 모임 찾기
       </Typography>
       <Grid container spacing={3}>
-        {categories.map((category, index) => (
-          <Grid size={{ xs: 6, md: 4, lg: 2 }} key={index}>
-            <Card
-              sx={{
-                textAlign: "center",
-                cursor: "pointer",
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  transform: "translateY(-8px)",
-                  boxShadow: 3,
-                },
-                height: 1,
-              }}
-              variant="outlined"
-              onClick={() =>
-                navigate({
-                  to: "/groups",
-                  search: { category: category.title },
-                })
-              }
-            >
-              <CardContent sx={{ py: 3 }}>
-                <Typography variant="h3" sx={{ mb: 2 }}>
-                  {category.icon}
-                </Typography>
-                <Typography variant="h6" fontWeight="bold" gutterBottom>
-                  {category.title}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ mb: 1 }}
-                >
-                  {category.description}
-                </Typography>
-                <Chip
-                  label={category.count}
-                  size="small"
-                  color="primary"
-                  variant="outlined"
-                />
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
+        {categories.map((category, index) => {
+          const query = categoryQueries[index];
+          const groupCount = query.data || 0;
+          const isLoading = query.isLoading;
+          const isError = query.isError;
+
+          return (
+            <Grid size={{ xs: 6, md: 4, lg: 2 }} key={index}>
+              <Card
+                sx={{
+                  textAlign: "center",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    transform: "translateY(-8px)",
+                    boxShadow: 3,
+                  },
+                  height: 1,
+                }}
+                variant="outlined"
+                onClick={() =>
+                  navigate({
+                    to: "/groups",
+                    search: { searchTerms: [...category.tags] },
+                  })
+                }
+              >
+                <CardContent sx={{ py: 3 }}>
+                  <Typography variant="h3" sx={{ mb: 2 }}>
+                    {category.icon}
+                  </Typography>
+                  <Typography variant="h6" fontWeight="bold" gutterBottom>
+                    {category.title}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mb: 1 }}
+                  >
+                    {category.description}
+                  </Typography>
+                  <Chip
+                    label={
+                      isLoading
+                        ? "로딩 중..."
+                        : isError
+                          ? "오류"
+                          : `${groupCount}개 모임`
+                    }
+                    size="small"
+                    color={isError ? "error" : "primary"}
+                    variant="outlined"
+                  />
+                </CardContent>
+              </Card>
+            </Grid>
+          );
+        })}
       </Grid>
     </Box>
   );
@@ -412,7 +485,14 @@ function Home() {
             title="🔥 지금 인기있는 독서 모임"
             keyPrefix="featuredGroups"
             action={
-              <Button onClick={() => navigate({ to: "/groups" })}>
+              <Button
+                onClick={() =>
+                  navigate({
+                    to: "/groups",
+                    search: { searchTerms: [] as string[] },
+                  })
+                }
+              >
                 모든 모임 보기
               </Button>
             }

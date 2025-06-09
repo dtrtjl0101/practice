@@ -4,13 +4,34 @@ import GroupList from "../../component/GroupList";
 
 export const Route = createFileRoute("/groups/")({
   component: RouteComponent,
+  validateSearch: (search) => {
+    // 단일 문자열 또는 문자열 배열 모두 허용
+    const terms = search.searchTerms;
+    const normalized =
+      typeof terms === "string"
+        ? [terms]
+        : Array.isArray(terms)
+          ? terms
+          : ([] as string[]);
+
+    return {
+      searchTerms: normalized,
+    };
+  },
 });
 
 function RouteComponent() {
+  const { searchTerms } = Route.useSearch();
+
   return (
     <Container sx={{ my: 8 }}>
       <Stack spacing={2}>
-        <GroupList size="large" keyPrefix="allGroups" title="모든 모임" />
+        <GroupList
+          size="large"
+          keyPrefix="allGroups"
+          title="모든 모임"
+          initialSearchTerms={searchTerms}
+        />
       </Stack>
     </Container>
   );

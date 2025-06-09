@@ -23,6 +23,7 @@ import API_CLIENT from "../../../../api/api";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
+import { useNavigate } from "@tanstack/react-router";
 
 const MEMBERS_SIZE = 5;
 interface GroupHeaderProps {
@@ -37,6 +38,7 @@ export function GroupHeader({ group, groupId }: GroupHeaderProps) {
   const [hasMoreMembers, setHasMoreMembers] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
   const theme = useTheme();
+  const navigate = useNavigate();
 
   const { data: members } = useQuery({
     queryKey: ["groupMembers", groupId],
@@ -257,9 +259,12 @@ export function GroupHeader({ group, groupId }: GroupHeaderProps) {
                   <Chip
                     key={tag}
                     label={tag}
-                    onClick={() => {
-                      // TODO: move to search page with tag
-                    }}
+                    onClick={() =>
+                      navigate({
+                        to: "/groups",
+                        search: { searchTerms: [tag] },
+                      })
+                    }
                   />
                 );
               })
