@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.group.activity.dto.ActivityScoreDto;
+import qwerty.chaekit.domain.group.activity.dto.ActivityWithCountsResponse;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,11 +17,27 @@ import java.util.Optional;
 public interface ActivityRepository extends JpaRepository<Activity, Long> {
     List<Activity> findByGroup_Id(Long groupId);
 
-    @Query("SELECT a FROM Activity a inner JOIN FETCH a.book WHERE a.group.id = :groupId")
-    Page<Activity> findByGroup_IdWithBook(@Param("groupId") Long groupId, Pageable pageable);
+    @Query("""
+    SELECT new qwerty.chaekit.domain.group.activity.dto.ActivityWithCountsResponse(
+      a,
+      (SELECT COUNT(d) FROM Discussion d WHERE d.activity.id = a.id),
+      (SELECT COUNT(h) FROM Highlight h WHERE h.activity.id = a.id)
+    )
+    FROM Activity a
+    WHERE a.group.id = :groupId
+    """)
+    Page<ActivityWithCountsResponse> findByGroupIdWithCounts(Long groupId, Pageable pageable);
 
-    @Query("SELECT a FROM Activity a INNER JOIN FETCH a.book WHERE a.id = :activityId")
-    Optional<Activity> findByIdWithBook(@Param("activityId") Long activityId);
+    @Query("""
+    SELECT new qwerty.chaekit.domain.group.activity.dto.ActivityWithCountsResponse(
+      a,
+      (SELECT COUNT(d) FROM Discussion d WHERE d.activity.id = a.id),
+      (SELECT COUNT(h) FROM Highlight h WHERE h.activity.id = a.id)
+    )
+    FROM Activity a
+    WHERE a.id = :activityId
+    """)
+    Optional<ActivityWithCountsResponse> findByIdWithCounts(Long activityId);
 
     long countByCreatedAtAfter(LocalDateTime createdAtAfter);
 

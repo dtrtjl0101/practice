@@ -16,6 +16,7 @@ import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.util.EntityFinder;
+import qwerty.chaekit.service.util.FileService;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +26,7 @@ public class GroupChatService {
     private final EntityFinder entityFinder;
     private final GroupChatProducer groupChatProducer;
     private final GroupChatConsumer groupChatConsumer;
+    private final FileService fileService;
 
     @Transactional
     public GroupChatResponse createChat(UserToken userToken, Long groupId, GroupChatRequest request) {
@@ -48,7 +50,7 @@ public class GroupChatService {
                 .groupId(groupId)
                 .authorId(user.getId())
                 .authorName(user.getNickname())
-                .authorProfileImage(user.getProfileImageKey())
+                .authorProfileImage(fileService.convertToPublicImageURL(user.getProfileImageKey()))
                 .content(request.content())
                 .createdAt(savedChat.getCreatedAt())
                 .build();
@@ -62,6 +64,10 @@ public class GroupChatService {
         ReadingGroup group = entityFinder.findGroup(groupId);
         Page<GroupChat> savedChats = groupChatRepository.findByGroupOrderByCreatedAtDesc(group, pageable);
         //groupChatConsumer.subscribeToGroupChat(groupId);
-        return PageResponse.of(savedChats.map(GroupChatResponse::of));
+        
+        return PageResponse.of(savedChats.map(chat -> GroupChatResponse.of(
+                chat, 
+                fileService.convertToPublicImageURL(chat.getAuthor().getProfileImageKey()))
+        ));
     }
 }   

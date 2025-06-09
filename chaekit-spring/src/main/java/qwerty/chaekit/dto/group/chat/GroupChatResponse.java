@@ -15,13 +15,13 @@ public record GroupChatResponse(
         String content,
         LocalDateTime createdAt
 ) {
-    public static GroupChatResponse of(GroupChat chat) {
+    public static GroupChatResponse of(GroupChat chat, String authorProfileImageURL) {
         return GroupChatResponse.builder()
                 .chatId(chat.getId())
                 .groupId(chat.getGroup().getId())
                 .authorId(chat.getAuthor().getId())
                 .authorName(chat.getAuthor().getNickname())
-                .authorProfileImage(chat.getAuthor().getProfileImageKey())
+                .authorProfileImage(authorProfileImageURL)
                 .content(chat.getContent())
                 .createdAt(chat.getCreatedAt())
                 .build();
