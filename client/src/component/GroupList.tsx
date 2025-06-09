@@ -235,6 +235,18 @@ export default function GroupList(props: {
                     ? "아직 가입한 모임이 없습니다"
                     : "아직 모임이 없습니다"}
               </Typography>
+              {groupType === GroupListKind.JOINED_GROUP && (
+                <Button
+                  onClick={() => {
+                    navigate({ to: "/groups", search: { searchTerms: [] } });
+                  }}
+                  variant="outlined"
+                  sx={{ mt: 2, textTransform: "none" }}
+                  startIcon={<Search />}
+                >
+                  모임 찾기
+                </Button>
+              )}
             </Box>
           ) : (
             <List disablePadding>
@@ -445,7 +457,7 @@ export default function GroupList(props: {
                 onChange={handleInputChange}
                 onKeyPress={handleInputKeyPress}
                 variant="outlined"
-                size="small"
+                size="medium"
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">

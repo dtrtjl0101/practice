@@ -35,6 +35,7 @@ function RouteComponent() {
       />
       <Stack spacing={2}>
         <GroupList
+          key="allGroups-large"
           size="large"
           keyPrefix="allGroups"
           title="모든 모임"

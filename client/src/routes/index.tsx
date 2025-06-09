@@ -481,6 +481,7 @@ function Home() {
           maxWidth={"lg"}
         >
           <GroupList
+            key="featuredGroups-medium"
             size="medium"
             title="🔥 지금 인기있는 독서 모임"
             keyPrefix="featuredGroups"

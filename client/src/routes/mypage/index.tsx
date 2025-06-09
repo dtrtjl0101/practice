@@ -326,33 +326,19 @@ function GroupsSection() {
       />
       <Stack spacing={3}>
         <GroupList
+          key={"myGroups-small"}
           kind={GroupListKind.MY_GROUP}
           title={"내가 만든 모임"}
           size="small"
           keyPrefix="myGroups"
           action={
-            <Button
-              variant="contained"
-              startIcon={<Add />}
-              onClick={() => setOpenGroupCreateModal(true)}
-              sx={{
-                borderRadius: 2,
-                px: 3,
-                py: 1,
-                fontWeight: 600,
-                boxShadow: 2,
-                "&:hover": {
-                  boxShadow: 4,
-                  transform: "translateY(-1px)",
-                },
-                transition: "all 0.2s ease",
-              }}
-            >
-              모임 만들기
-            </Button>
+            <IconButton onClick={() => setOpenGroupCreateModal(true)}>
+              <Add />
+            </IconButton>
           }
         />
         <GroupList
+          key={"joinedGroups-small"}
           kind={GroupListKind.JOINED_GROUP}
           title={"가입한 모임"}
           size="small"
