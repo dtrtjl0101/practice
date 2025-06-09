@@ -315,8 +315,9 @@ function RouteComponent() {
     memo: string;
     cfi: string;
     highlightContent: string;
+    activityId?: number;
   }) => {
-    const { cfi, memo, highlightContent } = props;
+    const { cfi, memo, highlightContent, activityId } = props;
     const response = await API_CLIENT.highlightController.createHighlight({
       memo,
       cfi,
