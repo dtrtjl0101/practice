@@ -33,7 +33,7 @@ public class HighlightRepositoryImpl implements HighlightRepository {
     }
 
     @Override
-    public Page&lt;Highlight&gt; findHighlights(Pageable pageable, Long userId, Long activityId, Long bookId, String spine, boolean me) {
+    public Page&lt;Highlight&gt; findHighlights(Pageable pageable, Long userId, Long activityId, Long bookId, String spine, boolean me, String keyword) {
 <span class="fc" id="L37">        QHighlight highlight = QHighlight.highlight;</span>
 <span class="fc" id="L38">        BooleanBuilder where = new BooleanBuilder();</span>
 
@@ -55,59 +55,67 @@ public class HighlightRepositoryImpl implements HighlightRepository {
         } else { // 내 하이라이트
 <span class="fc" id="L56">            where.and(highlight.author.id.eq(userId));</span>
         }
+        
+<span class="pc bpc" id="L59" title="3 of 4 branches missed.">        if (keyword != null &amp;&amp; !keyword.isBlank()) {</span>
+<span class="nc" id="L60">            where.and(highlight.memo.containsIgnoreCase(keyword));</span>
+        }
 
-<span class="fc" id="L59">        return getHighlightsByBooleanBuilder(pageable, highlight, where);</span>
+<span class="fc" id="L63">        return getHighlightsByBooleanBuilder(pageable, highlight, where);</span>
     }
 
     @Override
     public void delete(Highlight highlight) {
-<span class="nc" id="L64">        highlightJpaRepository.delete(highlight);</span>
-<span class="nc" id="L65">    }</span>
+<span class="nc" id="L68">        highlightJpaRepository.delete(highlight);</span>
+<span class="nc" id="L69">    }</span>
 
     @Override
     public long countByIdsAndActivity(List&lt;Long&gt; ids, Activity activity) {
-<span class="nc" id="L69">        return highlightJpaRepository.countByIdsAndActivity(ids, activity);</span>
+<span class="nc" id="L73">        return highlightJpaRepository.countByIdsAndActivity(ids, activity);</span>
     }
 
     @Override
-    public Page&lt;Highlight&gt; findByAuthor(UserProfile user, Long bookId, Pageable pageable) {
-<span class="nc" id="L74">        QHighlight highlight = QHighlight.highlight;</span>
+    public Page&lt;Highlight&gt; findByAuthor(UserProfile user, Long bookId, String keyword, Pageable pageable) {
+<span class="nc" id="L78">        QHighlight highlight = QHighlight.highlight;</span>
 
-<span class="nc" id="L76">        BooleanBuilder where = new BooleanBuilder();</span>
-<span class="nc" id="L77">        where.and(highlight.author.eq(user));</span>
-<span class="nc bnc" id="L78" title="All 2 branches missed.">        if(bookId != null) {</span>
-<span class="nc" id="L79">            where.and(highlight.book.id.eq(bookId));</span>
+<span class="nc" id="L80">        BooleanBuilder where = new BooleanBuilder();</span>
+<span class="nc" id="L81">        where.and(highlight.author.eq(user));</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        if(bookId != null) {</span>
+<span class="nc" id="L83">            where.and(highlight.book.id.eq(bookId));</span>
+        }
+        
+<span class="nc bnc" id="L86" title="All 4 branches missed.">        if (keyword != null &amp;&amp; !keyword.isBlank()) {</span>
+<span class="nc" id="L87">            where.and(highlight.memo.containsIgnoreCase(keyword));</span>
         }
 
-<span class="nc" id="L82">        return getHighlightsByBooleanBuilder(pageable, highlight, where);</span>
+<span class="nc" id="L90">        return getHighlightsByBooleanBuilder(pageable, highlight, where);</span>
     }
 
     private PageImpl&lt;Highlight&gt; getHighlightsByBooleanBuilder(Pageable pageable, QHighlight highlight, BooleanBuilder where) {
-<span class="fc" id="L86">        List&lt;Highlight&gt; result = jpaQueryFactory</span>
-<span class="fc" id="L87">                .selectFrom(highlight)</span>
-<span class="fc" id="L88">                .leftJoin(highlight.author).fetchJoin()</span>
-<span class="fc" id="L89">                .where(where)</span>
-<span class="fc" id="L90">                .offset(pageable.getOffset())</span>
-<span class="fc" id="L91">                .limit(pageable.getPageSize())</span>
-<span class="fc" id="L92">                .fetch();</span>
-
-<span class="fc" id="L94">        long total = Optional.ofNullable(jpaQueryFactory</span>
-<span class="fc" id="L95">                .select(highlight.count())</span>
-<span class="fc" id="L96">                .from(highlight)</span>
+<span class="fc" id="L94">        List&lt;Highlight&gt; result = jpaQueryFactory</span>
+<span class="fc" id="L95">                .selectFrom(highlight)</span>
+<span class="fc" id="L96">                .leftJoin(highlight.author).fetchJoin()</span>
 <span class="fc" id="L97">                .where(where)</span>
-<span class="fc" id="L98">                .fetchOne()).orElse(0L);</span>
+<span class="fc" id="L98">                .offset(pageable.getOffset())</span>
+<span class="fc" id="L99">                .limit(pageable.getPageSize())</span>
+<span class="fc" id="L100">                .fetch();</span>
 
-<span class="fc" id="L100">        return new PageImpl&lt;&gt;(result, pageable, total);</span>
+<span class="fc" id="L102">        long total = Optional.ofNullable(jpaQueryFactory</span>
+<span class="fc" id="L103">                .select(highlight.count())</span>
+<span class="fc" id="L104">                .from(highlight)</span>
+<span class="fc" id="L105">                .where(where)</span>
+<span class="fc" id="L106">                .fetchOne()).orElse(0L);</span>
+
+<span class="fc" id="L108">        return new PageImpl&lt;&gt;(result, pageable, total);</span>
     }
 
     @Override
     public List&lt;Highlight&gt; findByGroup(ReadingGroup group) {
-<span class="nc" id="L105">        return highlightJpaRepository.findByActivity_Group(group);</span>
+<span class="nc" id="L113">        return highlightJpaRepository.findByActivity_Group(group);</span>
     }
 
     @Override
     public List&lt;Highlight&gt; findRecentByActivity(Activity activity) {
-<span class="nc" id="L110">        return highlightJpaRepository.findTop5ByActivityOrderByCreatedAtDesc(activity);</span>
+<span class="nc" id="L118">        return highlightJpaRepository.findTop5ByActivityOrderByCreatedAtDesc(activity);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
