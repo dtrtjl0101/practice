@@ -78,6 +78,10 @@ ADMIN_PASSWORD=0000
 GMAIL_ADDRESS={gmail 주소}
 GMAIL_PASSWORD={gmail 비밀번호}
 
+# Oauth2
+GOOGLE_CLIENT_ID={구글 클라이언트 아이디}
+GOOGLE_CLIENT_SECRET={구글 클라이언트 시크릿}
+
 # Kakao Pay
 KAKAO_PAY_REDIRECT_BASE_URL=https://dev.chaekit.com
 KAKAO_PAY_CID=TC0ONETIME

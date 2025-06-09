@@ -14,7 +14,14 @@ public class FileService {
 
     // convert
     public String convertToPublicImageURL(String fileKey) {
-        return fileKey == null ? null : "https://" + awsProperties.imageBucketName() + ".s3.amazonaws.com/" + fileKey;
+        if(fileKey == null || fileKey.isEmpty()) {
+            return null;
+        }
+        
+        if (fileKey.startsWith("oauth2-profile-image/")) {
+            return fileKey.substring("oauth2-profile-image/".length());
+        }
+        return "https://" + awsProperties.imageBucketName() + ".s3.amazonaws.com/" + fileKey;
     }
 
     // download

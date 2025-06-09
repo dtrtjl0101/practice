@@ -15,12 +15,12 @@ import qwerty.chaekit.dto.highlight.HighlightFetchResponse;
 import qwerty.chaekit.dto.member.LoginResponse;
 import qwerty.chaekit.dto.member.UserInfoResponse;
 import qwerty.chaekit.dto.member.UserJoinRequest;
+import qwerty.chaekit.dto.member.UserPatchRequest;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.group.ActivityService;
-import qwerty.chaekit.service.group.DiscussionService;
 import qwerty.chaekit.service.group.GroupService;
 import qwerty.chaekit.service.highlight.HighlightService;
 import qwerty.chaekit.service.member.user.UserJoinService;
@@ -91,5 +91,17 @@ public class UserController {
             Pageable pageable
     ) {
         return ApiSuccessResponse.of(groupService.getJoinedGroups(userToken, pageable));
+    }
+    
+    @Operation(
+            summary = "사용자 정보 수정",
+            description = "사용자 정보를 수정합니다. 프로필 이미지, 닉네임을 포함할 수 있습니다."
+    )
+    @PatchMapping(value = "/me", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiSuccessResponse<UserInfoResponse> updateUserInfo(
+            @Parameter(hidden = true) @Login UserToken userToken,
+            @ModelAttribute @Valid UserPatchRequest updateRequest
+    ) {
+        return ApiSuccessResponse.of(userService.updateUserProfile(userToken, updateRequest));
     }
 }

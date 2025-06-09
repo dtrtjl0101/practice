@@ -24,6 +24,10 @@ import qwerty.chaekit.global.security.filter.CustomExceptionHandlingFilter;
 import qwerty.chaekit.global.security.filter.login.LoginFilter;
 import qwerty.chaekit.global.security.handler.CustomAccessDeniedHandler;
 import qwerty.chaekit.global.security.handler.CustomAuthenticationEntryPoint;
+import qwerty.chaekit.global.security.handler.OAuth2LoginFailureHandler;
+import qwerty.chaekit.global.security.handler.OAuth2LoginSuccessHandler;
+import qwerty.chaekit.global.security.service.CustomOAuth2UserService;
+import qwerty.chaekit.global.security.util.LoginResponseFactory;
 import qwerty.chaekit.global.util.SecurityRequestReader;
 import qwerty.chaekit.global.util.SecurityResponseSender;
 import qwerty.chaekit.service.member.token.RefreshTokenService;
@@ -44,6 +48,8 @@ public class SecurityConfig {
     private final SecurityResponseSender responseSender;
     private final SecurityRequestReader requestReader;
     private final FileService fileService;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {//비밀번호 안전하게 암호화하는 클래스
@@ -64,17 +70,17 @@ public class SecurityConfig {
     public AccessTokenFilter jwtFilter() {
         return new AccessTokenFilter(jwtUtil);
     }
-
+    
     @Bean
-    public LoginFilter loginFilter(AuthenticationManager authManager, RefreshTokenService refreshTokenService) {
-        return new LoginFilter("/api/login", jwtUtil, authManager, requestReader, responseSender, fileService, refreshTokenService);
+    public LoginFilter loginFilter(AuthenticationManager authManager, RefreshTokenService refreshTokenService, LoginResponseFactory loginResponseFactory) {
+        return new LoginFilter("/api/login", jwtUtil, authManager, requestReader, responseSender, fileService, refreshTokenService, loginResponseFactory);
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http,
                                            LoginFilter loginFilter,
                                            AccessTokenFilter accessTokenFilter,
-                                           CustomExceptionHandlingFilter exceptionHandlingFilter) throws Exception {
+                                           CustomExceptionHandlingFilter exceptionHandlingFilter, OAuth2LoginFailureHandler oAuth2LoginFailureHandler) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable);
 
@@ -101,6 +107,8 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/", "/login/**", "/css/**", "/js/**")
+                        .permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**", "/webjars/**")
                         .permitAll()
                         .requestMatchers("/api/admin/**").hasAuthority(Role.ROLE_ADMIN.name())
@@ -111,6 +119,14 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler)
+                );
+        http
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
+                        .successHandler(oAuth2LoginSuccessHandler)
+                        .failureHandler(oAuth2LoginFailureHandler)
                 );
 
         http
