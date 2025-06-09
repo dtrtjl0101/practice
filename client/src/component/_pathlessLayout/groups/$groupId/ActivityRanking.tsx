@@ -106,7 +106,7 @@ export function ActivityRanking({ activityId }: { activityId: number }) {
     <Paper sx={{ p: 2 }} variant="outlined">
       <Stack spacing={2}>
         <Stack spacing={2} direction={"row"}>
-          <Typography variant="h4" sx={{ mb: 3 }}>
+          <Typography variant="h4" sx={{ mb: 2 }}>
             활동 랭킹
           </Typography>
           <Typography
