@@ -293,7 +293,7 @@ export default function GroupChat(props: {
               handleSendMessage();
             }
           }}
-          disabled={isSending || !sendable}
+          disabled={!sendable}
         />
         <IconButton
           onClick={handleSendMessage}
