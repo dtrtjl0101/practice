@@ -22,7 +22,7 @@ import {
   useTheme,
 } from "@mui/material";
 import { Highlight } from "../types/highlight";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import {
   Delete,
   Edit,
@@ -488,6 +488,10 @@ function HighlightViewer(props: {
     setIsEditing(false);
     onEditHighlight({ ...highlight, memo });
   };
+
+  useEffect(() => {
+    setMemo(highlight.memo || "");
+  }, [highlight]);
 
   return (
     <>
