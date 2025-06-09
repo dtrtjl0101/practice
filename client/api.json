@@ -2050,7 +2050,7 @@
       "get": {
         "tags": ["user-controller"],
         "summary": "내 활동 조회",
-        "description": "내가 가입한 모든 활동을 조회합니다.",
+        "description": "내가 가입한 모든 활동을 조회합니다. 여기서 하이라이트 수, 토론 수는 -1로 표시됩니다",
         "operationId": "getMyActivities",
         "parameters": [
           {
@@ -3790,9 +3790,12 @@
       "UserInfoResponse": {
         "type": "object",
         "properties": {
+          "memberId": { "type": "integer", "format": "int64" },
+          "email": { "type": "string" },
           "userId": { "type": "integer", "format": "int64" },
           "nickname": { "type": "string" },
-          "profileImageURL": { "type": "string" }
+          "profileImageURL": { "type": "string" },
+          "role": { "type": "string" }
         }
       },
       "HighlightPutRequest": {
@@ -3959,7 +3962,9 @@
           "startTime": { "type": "string", "format": "date" },
           "endTime": { "type": "string", "format": "date" },
           "description": { "type": "string" },
-          "isParticipant": { "type": "boolean" }
+          "isParticipant": { "type": "boolean" },
+          "highlightCount": { "type": "integer", "format": "int64" },
+          "discussionCount": { "type": "integer", "format": "int64" }
         }
       },
       "ApiSuccessResponsePageResponseActivityFetchResponse": {

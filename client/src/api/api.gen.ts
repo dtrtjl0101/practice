@@ -564,9 +564,13 @@ export interface ApiSuccessResponseUserInfoResponse {
 
 export interface UserInfoResponse {
   /** @format int64 */
+  memberId?: number;
+  email?: string;
+  /** @format int64 */
   userId?: number;
   nickname?: string;
   profileImageURL?: string;
+  role?: string;
 }
 
 export interface HighlightPutRequest {
@@ -722,6 +726,10 @@ export interface ActivityFetchResponse {
   endTime?: string;
   description?: string;
   isParticipant?: boolean;
+  /** @format int64 */
+  highlightCount?: number;
+  /** @format int64 */
+  discussionCount?: number;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -1745,7 +1753,7 @@ export class Api<
       }),
 
     /**
-     * @description 내가 가입한 모든 활동을 조회합니다.
+     * @description 내가 가입한 모든 활동을 조회합니다. 여기서 하이라이트 수, 토론 수는 -1로 표시됩니다
      *
      * @tags user-controller
      * @name GetMyActivities
