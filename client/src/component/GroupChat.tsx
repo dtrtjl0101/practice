@@ -17,17 +17,26 @@ import API_CLIENT from "../api/api";
 import { Client } from "@stomp/stompjs";
 import { GroupMessage } from "../types/groupMessage";
 import { GroupChatResponse } from "../api/api.gen";
+import { useSnackbar } from "notistack";
+import { GroupMembershipStatus } from "../types/groups";
 
-export default function GroupChat(props: { groupId: number }) {
-  const { groupId } = props;
+export default function GroupChat(props: {
+  groupId: number;
+  groupMembershipStatus?: GroupMembershipStatus;
+}) {
+  const { groupId, groupMembershipStatus } = props;
 
   const [message, setMessage] = useState("");
   const [newChats, setNewChats] = useState<GroupMessage[]>([]);
   const [isSending, setIsSending] = useState(false);
   const [autoScroll, setAutoScroll] = useState(true);
+  const { enqueueSnackbar } = useSnackbar();
   const clientRef = useRef<Client | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
+
+  const sendable =
+    groupMembershipStatus === GroupMembershipStatus.OWNED ||
+    groupMembershipStatus === GroupMembershipStatus.JOINED;
 
   const {
     data: chatsData,
@@ -99,7 +108,15 @@ export default function GroupChat(props: { groupId: number }) {
   }, [chatsData, newChats]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView();
+    const element = messagesContainerRef.current;
+    if (!element) {
+      return;
+    }
+
+    element.scroll({
+      top: element.scrollHeight,
+      behavior: "smooth",
+    });
   };
 
   const isScrolledToBottom = () => {
@@ -116,19 +133,14 @@ export default function GroupChat(props: { groupId: number }) {
   }, []);
 
   const sendMessage = async (content: string) => {
-    try {
-      const response = await API_CLIENT.groupChatController.createChat(
-        groupId,
-        { content }
-      );
-      if (!response.isSuccessful) {
-        throw new Error(response.errorMessage);
-      }
-      return response.data;
-    } catch (error) {
-      console.error("Failed to send message:", error);
-      throw error;
+    const response = await API_CLIENT.groupChatController.createChat(groupId, {
+      content,
+    });
+    if (!response.isSuccessful) {
+      enqueueSnackbar(response.errorMessage, { variant: "error" });
+      return;
     }
+    return response.data;
   };
 
   const { data: _client } = useQuery({
@@ -263,8 +275,6 @@ export default function GroupChat(props: { groupId: number }) {
             </Stack>
           );
         })}
-
-        <div ref={messagesEndRef} />
       </MessagesContainer>
 
       <InputArea>
@@ -274,17 +284,20 @@ export default function GroupChat(props: { groupId: number }) {
           maxRows={3}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="모임 대화방에 메시지 보내기"
+          placeholder={
+            sendable ? "모임 대화방에 메시지 보내기" : "권한이 없습니다"
+          }
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
               handleSendMessage();
             }
           }}
+          disabled={!sendable}
         />
         <IconButton
           onClick={handleSendMessage}
-          disabled={!message.trim() || isSending}
+          disabled={!message.trim() || isSending || !sendable}
         >
           {isSending ? <CircularProgress size={16} /> : <SendIcon />}
         </IconButton>

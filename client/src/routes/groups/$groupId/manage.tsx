@@ -78,7 +78,7 @@ function RouteComponent() {
   const groupName = groupData?.name;
 
   const handleRouteGroups = () => {
-    navigate({ to: "/groups" });
+    navigate({ to: "/groups", search: { searchTerms: [] } });
   };
 
   return (

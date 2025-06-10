@@ -6,7 +6,7 @@ export default function useThrottle<T extends (...args: any[]) => any>(
 ): T {
   const throttledCallbackRef = useRef<T>(callback);
   const lastCallTimeRef = useRef<number>(0);
-  const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     throttledCallbackRef.current = callback;

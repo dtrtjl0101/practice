@@ -144,7 +144,7 @@ export class HttpClient<SecurityDataType = unknown> {
                     formData.append(key, JSON.stringify(property));
                     return formData;
                 }
-                if (typeof property === "number" || typeof property === "string") {
+                if (typeof property === "number" || typeof property === "string"||typeof property === "boolean" ) {
                     formData.append(key, `${property}`);
                     return formData;
                 }

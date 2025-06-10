@@ -75,9 +75,9 @@ public class HighlightService {
         return HighlightPostResponse.of(highlightRepository.save(highlight));
     }
 
-    public PageResponse<HighlightFetchResponse> getMyHighlights(UserToken userToken, @Nullable Long bookId, Pageable pageable) {
+    public PageResponse<HighlightFetchResponse> getMyHighlights(UserToken userToken, @Nullable Long bookId, String keyword, Pageable pageable) {
         UserProfile user = entityFinder.findUser(userToken.userId());
-        Page<Highlight> highlights = highlightRepository.findByAuthor(user, bookId, pageable);
+        Page<Highlight> highlights = highlightRepository.findByAuthor(user, bookId, keyword, pageable);
 
         Map<Long, List<Discussion>> relatedDiscussionMap = getRelatedDiscussionMap(highlights);
 
@@ -85,12 +85,22 @@ public class HighlightService {
                 highlight -> HighlightFetchResponse.of(
                         highlight,
                         fileService.convertToPublicImageURL(highlight.getAuthor().getProfileImageKey()),
+                        fileService.convertToPublicImageURL(highlight.getBook().getCoverImageKey()),
+                        highlight.getActivity() != null ?
+                            fileService.convertToPublicImageURL(highlight.getActivity().getGroup().getGroupImageKey()) : null,
                         relatedDiscussionMap.getOrDefault(highlight.getId(), List.of())
                 )
         ));
     }
 
-    public PageResponse<HighlightFetchResponse> fetchHighlights(UserToken userToken, Pageable pageable, Long activityId, Long bookId, String spine, boolean me) {
+    public PageResponse<HighlightFetchResponse> fetchHighlights(UserToken userToken, 
+                                                                Pageable pageable, 
+                                                                Long activityId, 
+                                                                Long bookId, 
+                                                                String spine, 
+                                                                boolean me, 
+                                                                String keyword
+    ) {
         boolean isFetchingByActivity = activityId != null;
         boolean isFetchingBySpineButBookIdIsNull = spine != null && bookId == null;
         boolean isFetchingPublicHighlight = !me;
@@ -107,7 +117,7 @@ public class HighlightService {
 
         // 조회 조건에 맞는 하이라이트를 가져옴
 
-        Page<Highlight> highlights = highlightRepository.findHighlights(pageable, userToken.userId(), activityId, bookId, spine, me);
+        Page<Highlight> highlights = highlightRepository.findHighlights(pageable, userToken.userId(), activityId, bookId, spine, me, keyword);
 
         Map<Long, List<Discussion>> relatedDiscussionMap = getRelatedDiscussionMap(highlights);
 
@@ -115,6 +125,9 @@ public class HighlightService {
                 highlight -> HighlightFetchResponse.of(
                         highlight,
                         fileService.convertToPublicImageURL(highlight.getAuthor().getProfileImageKey()),
+                        fileService.convertToPublicImageURL(highlight.getBook().getCoverImageKey()),
+                        highlight.getActivity() != null ?
+                                fileService.convertToPublicImageURL(highlight.getActivity().getGroup().getGroupImageKey()) : null,
                         relatedDiscussionMap.getOrDefault(highlight.getId(), List.of())
                 )
         ));
@@ -190,6 +203,9 @@ public class HighlightService {
                 .stream()
                 .map(DiscussionHighlight::getDiscussion).toList();
         String authorProfileImageURL = fileService.convertToPublicImageURL(highlight.getAuthor().getProfileImageKey());
-        return HighlightFetchResponse.of(highlight, authorProfileImageURL, discussionLinks);
+        String bookCoverImageURL = fileService.convertToPublicImageURL(highlight.getBook().getCoverImageKey());
+        String groupImageURL = highlight.getActivity() != null ?
+                fileService.convertToPublicImageURL(highlight.getActivity().getGroup().getGroupImageKey()) : null;
+        return HighlightFetchResponse.of(highlight, authorProfileImageURL, bookCoverImageURL, groupImageURL, discussionLinks);
     }
 }

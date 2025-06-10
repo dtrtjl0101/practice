@@ -1,6 +1,5 @@
 package qwerty.chaekit.global.security.filter.login;
 
-import jakarta.annotation.Nullable;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,14 +10,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import qwerty.chaekit.domain.member.Member;
-import qwerty.chaekit.domain.member.enums.Role;
-import qwerty.chaekit.domain.member.publisher.PublisherProfile;
-import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.dto.member.LoginRequest;
 import qwerty.chaekit.dto.member.LoginResponse;
 import qwerty.chaekit.global.jwt.JwtUtil;
 import qwerty.chaekit.global.security.model.CustomUserDetails;
+import qwerty.chaekit.global.security.util.LoginResponseFactory;
 import qwerty.chaekit.global.util.SecurityRequestReader;
 import qwerty.chaekit.global.util.SecurityResponseSender;
 import qwerty.chaekit.service.member.token.RefreshTokenService;
@@ -32,6 +28,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final SecurityResponseSender responseSender;
     private final FileService fileService;
     private final RefreshTokenService refreshTokenService;
+    private final LoginResponseFactory loginResponseFactory;
 
     public LoginFilter(String loginUrl,
                        JwtUtil jwtUtil,
@@ -39,7 +36,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
                        SecurityRequestReader reader,
                        SecurityResponseSender sender,
                        FileService fileService,
-                       RefreshTokenService refreshTokenService
+                       RefreshTokenService refreshTokenService,
+                       LoginResponseFactory loginResponseFactory
     ) {
         this.jwtUtil = jwtUtil;
         this.authenticationManager = authManager;
@@ -47,6 +45,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         this.responseSender = sender;
         this.fileService = fileService;
         this.refreshTokenService = refreshTokenService;
+        this.loginResponseFactory = loginResponseFactory;
 
         setAuthenticationManager(authManager);
         setFilterProcessesUrl(loginUrl);
@@ -72,54 +71,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             HttpServletResponse response,
             FilterChain chain, Authentication authentication
     ) {
-
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
-        Member member = customUserDetails.member();
-        UserProfile user = customUserDetails.user();
-        PublisherProfile publisher = customUserDetails.publisher();
-        String profileImageKey = null;
-        Long memberId = member.getId();
-        Long publisherId = null;
-        Long userId = null;
-        if(publisher != null){
-            profileImageKey = publisher.getProfileImageKey();
-            publisherId = publisher.getId();
-        }
-        if(user != null) {
-            profileImageKey = user.getProfileImageKey();
-            userId = user.getId();
-        }
-
-        String profileImageURL = fileService.convertToPublicImageURL(profileImageKey);
-        Role role = customUserDetails.member().getRole();
-
-        String refreshToken = refreshTokenService.issueRefreshToken(memberId);
-        String accessToken = jwtUtil.createAccessToken(memberId, userId, publisherId, member.getEmail(), role.name());
-        sendSuccessResponse(response, refreshToken, accessToken, member, user, publisher, profileImageURL, role);
-    }
-
-    private void sendSuccessResponse(
-            HttpServletResponse response,
-            String refreshToken,
-            String accessToken,
-            Member member,
-            @Nullable UserProfile user,
-            @Nullable PublisherProfile publisher,
-            String profileImageURL,
-            Role role
-    ) {
-        LoginResponse loginResponse = LoginResponse.builder()
-                .refreshToken(refreshToken)
-                .accessToken(accessToken)
-                .memberId(member.getId())
-                .email(member.getEmail())
-                .userId(user != null ? user.getId() : null)
-                .nickname(user != null ? user.getNickname() : null)
-                .publisherId(publisher != null ? publisher.getId() : null)
-                .publisherName(publisher != null ? publisher.getPublisherName() : null)
-                .profileImageURL(profileImageURL)
-                .role(role)
-                .build();
+        LoginResponse loginResponse = loginResponseFactory.createLoginResponse(customUserDetails);
         responseSender.sendSuccess(response, loginResponse);
     }
 

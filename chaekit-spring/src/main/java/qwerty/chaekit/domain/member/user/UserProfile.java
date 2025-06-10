@@ -57,4 +57,12 @@ public class UserProfile extends BaseEntity {
     public boolean isNotAdmin() {
         return !member.isAdmin();
     }
+    
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
+    
+    public void updateProfileImageKey(String profileImageKey) {
+        this.profileImageKey = profileImageKey;
+    }
 }

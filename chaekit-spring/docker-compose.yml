@@ -13,6 +13,11 @@ services:
     build: .
     volumes:
       - gradle-cache:/root/.gradle
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     environment:
       # DB
       DB_URL: jdbc:mysql://chaekit-mysql:3306/chaekit?serverTimezone=Asia/Seoul
@@ -42,6 +47,10 @@ services:
       KAKAO_PAY_REDIRECT_BASE_URL: ${KAKAO_PAY_REDIRECT_BASE_URL}
       KAKAO_PAY_CID: ${KAKAO_PAY_CID}
       KAKAO_PAY_SECRET_KEY: ${KAKAO_PAY_SECRET_KEY}
+      
+      # Google OAuth
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
 
       # Spring
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}

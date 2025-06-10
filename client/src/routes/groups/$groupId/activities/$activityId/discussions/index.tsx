@@ -512,7 +512,6 @@ function RouteComponent() {
                   />
                 ))}
               </Stack>
-
               {/* Pagination Controls */}
 
               <Paper sx={{ p: 3, mt: 4 }} variant="outlined">
@@ -598,6 +597,12 @@ interface DiscussionCardProps {
   onClick: (id: number) => void;
 }
 
+interface DiscussionCardProps {
+  isLeader: boolean;
+  discussion: Discussion;
+  onClick: (discussionId: number) => void;
+}
+
 function DiscussionCard({
   isLeader,
   discussion,
@@ -613,6 +618,92 @@ function DiscussionCard({
     minute: "2-digit",
     hour12: false,
   });
+
+  // 토론 통계 계산
+  const debateStats = useMemo(() => {
+    if (!discussion.isDebate) return null;
+
+    const agree = discussion.agreeCount || 0;
+    const disagree = discussion.disagreeCount || 0;
+    const neutral = discussion.neutralCount || 0;
+    const total = agree + disagree + neutral;
+
+    if (total === 0) {
+      return {
+        agreePercent: 0,
+        disagreePercent: 0,
+        neutralPercent: 0,
+        total: 0,
+        dominantType: "neutral" as const,
+      };
+    }
+
+    const agreePercent = (agree / total) * 100;
+    const disagreePercent = (disagree / total) * 100;
+    const neutralPercent = (neutral / total) * 100;
+
+    // 가장 높은 비율 확인
+    let dominantType: "agree" | "disagree" | "neutral" = "neutral";
+    if (agreePercent > disagreePercent && agreePercent > neutralPercent) {
+      dominantType = "agree";
+    } else if (
+      disagreePercent > agreePercent &&
+      disagreePercent > neutralPercent
+    ) {
+      dominantType = "disagree";
+    }
+
+    return {
+      agreePercent,
+      disagreePercent,
+      neutralPercent,
+      total,
+      dominantType,
+      agree,
+      disagree,
+      neutral,
+    };
+  }, [
+    discussion.isDebate,
+    discussion.agreeCount,
+    discussion.disagreeCount,
+    discussion.neutralCount,
+  ]);
+
+  // 토론 카드의 배경 그라데이션 생성
+  const getDebateCardStyle = useMemo(() => {
+    if (!discussion.isDebate || !debateStats || debateStats.total === 0) {
+      return {};
+    }
+
+    const { agreePercent, neutralPercent, dominantType } = debateStats;
+
+    // 그라데이션 색상 정의
+    const colors = {
+      agree: "rgba(76, 175, 80, 0.1)", // 초록색 (찬성)
+      disagree: "rgba(244, 67, 54, 0.1)", // 빨간색 (반대)
+      neutral: "rgba(158, 158, 158, 0.1)", // 회색 (중립)
+    };
+
+    // 보더 색상
+    const borderColors = {
+      agree: "rgba(76, 175, 80, 0.3)",
+      disagree: "rgba(244, 67, 54, 0.3)",
+      neutral: "rgba(158, 158, 158, 0.3)",
+    };
+
+    return {
+      background: `linear-gradient(135deg, 
+        ${colors.agree} 0%, 
+        ${colors.agree} ${agreePercent}%, 
+        ${colors.neutral} ${agreePercent}%, 
+        ${colors.neutral} ${agreePercent + neutralPercent}%, 
+        ${colors.disagree} ${agreePercent + neutralPercent}%, 
+        ${colors.disagree} 100%)`,
+      borderColor: borderColors[dominantType],
+      borderWidth: "2px",
+    };
+  }, [discussion.isDebate, debateStats]);
 
   // 해시태그를 컴포넌트로 변환하는 함수
   const parseContentWithHashtags = useMemo(() => {
@@ -671,14 +762,20 @@ function DiscussionCard({
         sx={{
           height: "100%",
           transition: "all 0.3s ease",
+          position: "relative",
+          overflow: "hidden",
+          ...getDebateCardStyle,
           "&:hover": {
             transform: "translateY(-2px)",
             boxShadow: 4,
-            borderColor: "primary.main",
+            borderColor:
+              discussion.isDebate && debateStats?.total
+                ? getDebateCardStyle.borderColor
+                : "primary.main",
           },
         }}
       >
-        <CardContent sx={{ p: 3 }}>
+        <CardContent sx={{ p: 3, position: "relative", zIndex: 1 }}>
           {/* Header: Title and Badges */}
           <Stack
             direction="row"
@@ -723,6 +820,87 @@ function DiscussionCard({
               )}
             </Stack>
           </Stack>
+
+          {/* 토론 통계 표시 */}
+          {discussion.isDebate && debateStats && debateStats.total > 0 && (
+            <Box sx={{ mb: 2 }}>
+              <Stack
+                direction="row"
+                spacing={2}
+                alignItems="center"
+                sx={{ mb: 1 }}
+              >
+                <Stack direction="row" spacing={0.5} alignItems="center">
+                  <Chip
+                    label={`찬성 ${debateStats.agree}`}
+                    color={"primary"}
+                    size="small"
+                    variant="outlined"
+                  />
+                </Stack>
+                <Stack direction="row" spacing={0.5} alignItems="center">
+                  <Chip
+                    label={`중립 ${debateStats.neutral}`}
+                    color={"default"}
+                    size="small"
+                    variant="outlined"
+                  />
+                </Stack>
+                <Stack direction="row" spacing={0.5} alignItems="center">
+                  <Chip
+                    label={`반대 ${debateStats.disagree}`}
+                    color={"error"}
+                    size="small"
+                    variant="outlined"
+                  />
+                </Stack>
+              </Stack>
+
+              {/* 투표 비율 바 */}
+              <Box
+                sx={{
+                  position: "relative",
+                  height: 6,
+                  borderRadius: 3,
+                  overflow: "hidden",
+                  bgcolor: "grey.200",
+                }}
+              >
+                <Box
+                  sx={{
+                    position: "absolute",
+                    left: 0,
+                    top: 0,
+                    height: "100%",
+                    width: `${debateStats.agreePercent}%`,
+                    bgcolor: "success.main",
+                    borderRadius: "3px 0 0 3px",
+                  }}
+                />
+                <Box
+                  sx={{
+                    position: "absolute",
+                    left: `${debateStats.agreePercent}%`,
+                    top: 0,
+                    height: "100%",
+                    width: `${debateStats.neutralPercent}%`,
+                    bgcolor: "grey.400",
+                  }}
+                />
+                <Box
+                  sx={{
+                    position: "absolute",
+                    right: 0,
+                    top: 0,
+                    height: "100%",
+                    width: `${debateStats.disagreePercent}%`,
+                    bgcolor: "error.main",
+                    borderRadius: "0 3px 3px 0",
+                  }}
+                />
+              </Box>
+            </Box>
+          )}
 
           {/* Content Preview */}
           <Typography
@@ -787,3 +965,5 @@ function DiscussionCard({
     </CardActionArea>
   );
 }
+
+export default DiscussionCard;

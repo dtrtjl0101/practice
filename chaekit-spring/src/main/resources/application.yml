@@ -20,6 +20,8 @@ spring:
       port: 6379
       ssl:
         enabled: false
+  jackson:
+    time-zone: Asia/Seoul
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     producer:
@@ -31,7 +33,7 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.json.trusted.packages: qwerty.chaekit.dto.group.chat
+        spring.json.trusted.packages: qwerty.chaekit.dto.group.chat,qwerty.chaekit.dto.notification
 
   flyway:
     enabled: true
@@ -46,6 +48,16 @@ spring:
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - profile
+              - email
   config:
     import: optional:file:.env[.properties]
 

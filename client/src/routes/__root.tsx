@@ -27,6 +27,8 @@ export const Route = createRootRoute({
 const navigationShellHidePathIds: FileRouteTypes["id"][] = [
   "/reader/$bookId",
   "/credits/payment/success",
+  "/oauth2/success",
+  "/oauth2/failure",
 ];
 
 const defaultNavigationItems: NavigationItem[][] = [

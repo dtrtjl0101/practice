@@ -19,6 +19,9 @@ public record DiscussionFetchResponse(
         Long commentCount,
         List<Long> highlightIds,
         boolean isDebate,
-        boolean isAuthor
+        boolean isAuthor,
+        Long agreeCount,
+        Long disagreeCount,
+        Long neutralCount
 ) {
 }

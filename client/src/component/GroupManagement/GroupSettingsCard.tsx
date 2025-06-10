@@ -22,6 +22,7 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
 } from "@mui/icons-material";
+import { GroupInfo } from "../../types/groups";
 export default function GroupSettingsCard({
   groupId,
   onDeleteRoute,
@@ -40,12 +41,14 @@ export default function GroupSettingsCard({
     tags: string[];
     groupImage?: File;
     groupImageURL?: string;
+    autoApproval?: boolean;
   }>({
     name: "",
     description: "",
     tags: [],
     groupImage: undefined,
     groupImageURL: "",
+    autoApproval: false,
   });
 
   // 모임 데이터 가져오기
@@ -56,7 +59,7 @@ export default function GroupSettingsCard({
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);
       }
-      return response.data;
+      return response.data as GroupInfo;
     },
   });
 
@@ -69,44 +72,76 @@ export default function GroupSettingsCard({
         tags?: string[];
         description?: string;
         groupImage?: File;
+        autoApproval?: boolean;
       } = {};
 
+      // 변경 감지 및 로깅
+      const nameChanged = editedData.name !== groupData?.name;
+      const tagsChanged =
+        JSON.stringify(editedData.tags?.sort()) !==
+        JSON.stringify(groupData?.tags?.sort());
+      const descriptionChanged =
+        editedData.description !== groupData?.description;
+      const imageChanged =
+        editedData.imageAction === "update" &&
+        editedData.groupImage instanceof File;
+      const autoApprovalChanged =
+        editedData.autoApproval !== groupData?.isAutoApproval;
+
       // 변경된 필드만 포함
-      if (editedData.name !== groupData?.name) {
-        updateData.name = editedData.name;
+      if (nameChanged) {
+        updateData.name = editedData.name.trim();
       }
-      if (JSON.stringify(editedData.tags) !== JSON.stringify(groupData?.tags)) {
+
+      if (tagsChanged) {
         updateData.tags = editedData.tags;
       }
-      if (editedData.description !== groupData?.description) {
-        updateData.description = editedData.description;
+
+      if (descriptionChanged) {
+        updateData.description = editedData.description.trim();
       }
 
       // 이미지 처리: 새로운 파일이 업로드된 경우만 포함
-      if (
-        editedData.imageAction === "update" &&
-        editedData.groupImage instanceof File
-      ) {
+      if (imageChanged) {
         updateData.groupImage = editedData.groupImage;
       }
 
+      // autoApproval 처리 - 명시적으로 boolean 타입 보장
+      if (autoApprovalChanged) {
+        updateData.autoApproval = editedData.autoApproval;
+      }
+
+      // 업데이트할 데이터가 없는 경우 체크
+      if (Object.keys(updateData).length === 0) {
+        enqueueSnackbar("변경된 내용이 없습니다.", { variant: "info" });
+        setIsEditing(false);
+        return;
+      }
+
+      // API 호출 - 원본 객체 사용 (API 클라이언트가 자동으로 FormData 처리)
       const response = await API_CLIENT.groupController.updateGroup(
         groupId,
         updateData
       );
 
       if (!response.isSuccessful) {
-        throw new Error(response.errorMessage);
+        throw new Error(response.error);
       }
 
       setIsEditing(false);
       await refetch(); // refetch가 완료될 때까지 대기
+
       enqueueSnackbar("모임 정보가 성공적으로 수정되었습니다.", {
         variant: "success",
       });
     } catch (error) {
-      console.error("모임 수정 오류:", error);
-      enqueueSnackbar("모임 정보 수정에 실패했습니다.", { variant: "error" });
+      console.error("handleSave - 모임 수정 오류:", error);
+      enqueueSnackbar(
+        error instanceof Error
+          ? error.message
+          : "모임 정보 수정에 실패했습니다.",
+        { variant: "error" }
+      );
     }
   };
 
@@ -118,6 +153,7 @@ export default function GroupSettingsCard({
         tags: groupData.tags || [],
         groupImage: undefined, // 새로 업로드된 파일은 초기화
         groupImageURL: groupData.groupImageURL || "", // 기존 이미지 URL은 유지
+        autoApproval: groupData.isAutoApproval || false,
       });
       setPreviewImage(groupData.groupImageURL || null);
     }
@@ -142,7 +178,6 @@ export default function GroupSettingsCard({
     }
   };
 
-  // 모임 데이터가 로드되면 폼 데이터 초기화
   useEffect(() => {
     if (groupData) {
       setFormData({
@@ -151,6 +186,8 @@ export default function GroupSettingsCard({
         tags: groupData.tags || [],
         groupImage: undefined, // 편집 전에는 업로드된 파일이 없으므로 undefined
         groupImageURL: groupData.groupImageURL || "",
+        // GET에서는 isAutoApproval이지만 폼에서는 autoApproval로 사용
+        autoApproval: groupData.isAutoApproval || false,
       });
       setPreviewImage(groupData.groupImageURL || null); // 이미지 미리보기 URL 따로 저장
     }
@@ -210,6 +247,7 @@ export default function GroupSettingsCard({
                 tags: formData.tags,
                 groupImage: formData.groupImage,
                 groupImageURL: formData.groupImageURL,
+                autoApproval: formData.autoApproval ?? false,
               }}
               onEditDone={handleSave}
               onCancel={handleCancel}
@@ -343,7 +381,30 @@ export default function GroupSettingsCard({
                 )}
               </Box>
             </Box>
-
+            {/* 모임 자동가입 여부 (읽기 전용) */}
+            <Box>
+              <Typography
+                variant="subtitle1"
+                fontWeight="600"
+                color="text.primary"
+                gutterBottom
+              >
+                모임 자동가입 여부
+              </Typography>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{
+                  mt: 1,
+                  p: 1.5,
+                  borderRadius: 1,
+                  fontFamily: "monospace",
+                  fontSize: "0.875rem",
+                }}
+              >
+                {groupData?.isAutoApproval ? "자동가입 허용" : "자동가입 불가"}
+              </Typography>
+            </Box>
             {/* 모임 ID (읽기 전용) */}
             <Box>
               <Typography

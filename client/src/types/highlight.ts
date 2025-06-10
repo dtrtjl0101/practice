@@ -12,6 +12,13 @@ export type Highlight = {
   activityId?: number;
   linkedDiscussions: DiscussionSummary[];
   highlightContent: string;
+  bookTitle: string;
+  bookAuthor: string;
+  bookCoverImageURL: string;
+  groupId?: number;
+  groupName?: string;
+  groupImageURL?: string;
+  createdAt: string;
 };
 
 export type HighlightReactionType =
@@ -95,4 +102,14 @@ export type HighlightSummary = {
   cfi: string;
   memo: string;
   highlightContent: string;
+};
+
+export type HighlightNotification = {
+  id: number;
+  authorId: number;
+  authorName: string;
+  authorProfileImageURL: string;
+  spine: string;
+  cfi: string;
+  createdAt: string;
 };
