@@ -15,8 +15,6 @@ spring:
       enabled: true
   flyway:
     enabled: false
-  kafka:
-    bootstrap-servers: dummy-kafka:9092
 
 jwt:
   secret: dummy_secret

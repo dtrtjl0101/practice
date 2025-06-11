@@ -1,4 +1,4 @@
-package qwerty.chaekit.config;
+package qwerty.chaekit.global.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
