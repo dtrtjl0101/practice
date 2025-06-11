@@ -28,7 +28,7 @@ export default function CreditPurchaseModal(props: {
   const [purchasing, setPurchasing] = useState(false);
   const [popup, setPopup] = useState<Window | null>(null);
   const [selectedProductId, setSelectedProductId] = useState<number | null>(
-    null
+    null,
   );
   const { enqueueSnackbar } = useSnackbar();
 
@@ -72,7 +72,7 @@ export default function CreditPurchaseModal(props: {
     const popupWindow = window.open(
       purchaseUrl,
       "_blank",
-      "width=500,height=700"
+      "width=500,height=700",
     );
     if (!popupWindow) {
       enqueueSnackbar("팝업 차단을 해제해주세요.", { variant: "warning" });
@@ -149,6 +149,10 @@ export default function CreditPurchaseModal(props: {
               <Grid container spacing={1} justifyContent="center">
                 {creditProducts.map((product) => {
                   const selected = selectedProductId === product.id;
+                  const bonus = isUser && user.firstPaymentBenefit ? 1.1 : 1;
+                  const creditAmountWithBonus = Math.floor(
+                    (product.creditAmount || 0) * bonus,
+                  );
                   return (
                     <Grid
                       key={product.id}
@@ -167,7 +171,7 @@ export default function CreditPurchaseModal(props: {
                             fontWeight={700}
                             noWrap
                           >
-                            {(product.creditAmount || 0).toLocaleString()}
+                            {creditAmountWithBonus.toLocaleString()}
                             크레딧
                           </Typography>
                           <Typography
@@ -184,6 +188,16 @@ export default function CreditPurchaseModal(props: {
                   );
                 })}
               </Grid>
+              {isUser && user.firstPaymentBenefit && (
+                <Typography
+                  variant="subtitle1"
+                  color="warning.main"
+                  fontWeight={600}
+                >
+                  첫 결제 프로모션 적용: 크레딧 10% 추가 제공!
+                </Typography>
+              )}
+
               <Stack
                 direction="row"
                 justifyContent="space-between"

@@ -1,6 +1,7 @@
 import { atom } from "jotai";
 import { Role } from "../types/role";
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace AuthState {
   export type LoggedInUser = {
     memberId: number;
@@ -14,6 +15,7 @@ export namespace AuthState {
         userId: number;
         nickname: string;
         role: Role.ROLE_USER;
+        firstPaymentBenefit: boolean;
       }
     | {
         publisherId: number;
@@ -22,6 +24,7 @@ export namespace AuthState {
       }
     | {
         role: Role.ROLE_ADMIN;
+        firstPaymentBenefit: boolean;
       }
   );
   export const user = atom<LoggedInUser | undefined>();
