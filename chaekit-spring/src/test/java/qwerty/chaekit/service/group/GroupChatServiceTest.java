@@ -118,24 +118,39 @@ class GroupChatServiceTest {
     @DisplayName("그룹 채팅 목록 조회 성공")
     void getChatsSuccess() {
         // given
+        Long userId = 1L;
         Long groupId = 1L;
-        ReadingGroup group = mock(ReadingGroup.class);
         UserProfile user = mock(UserProfile.class);
+        UserToken userToken = mock(UserToken.class);
+        ReadingGroup group = mock(ReadingGroup.class);
         GroupChat chat = mock(GroupChat.class);
-        Pageable pageable = PageRequest.of(0, 10);
+        UserProfile author = mock(UserProfile.class);
         Page<GroupChat> chatPage = new PageImpl<>(List.of(chat));
+        Pageable pageable = PageRequest.of(0, 20);
+        LocalDateTime now = LocalDateTime.now();
 
+        when(userToken.userId()).thenReturn(userId);
+        when(entityFinder.findUser(userId)).thenReturn(user);
         when(entityFinder.findGroup(groupId)).thenReturn(group);
         when(groupChatRepository.findByGroupOrderByCreatedAtDesc(group, pageable)).thenReturn(chatPage);
-        when(chat.getAuthor()).thenReturn(user);
-        when(user.getProfileImageKey()).thenReturn("profileImageKey");
-        when(fileService.convertToPublicImageURL("profileImageKey")).thenReturn("profileImageURL");
+        when(chat.getAuthor()).thenReturn(author);
+        when(chat.getGroup()).thenReturn(group);
+        when(chat.getCreatedAt()).thenReturn(now);
+        when(author.getId()).thenReturn(userId);
+        when(author.getNickname()).thenReturn("testUser");
+        when(author.getProfileImageKey()).thenReturn("profile.jpg");
+        when(fileService.convertToPublicImageURL("profile.jpg")).thenReturn("presigned-profile.jpg");
 
         // when
-        PageResponse<GroupChatResponse> response = groupChatService.getChats(groupId, pageable);
+        PageResponse<GroupChatResponse> result = groupChatService.getChats(groupId, pageable);
 
         // then
-        assertThat(response).isNotNull();
+        assertThat(result).isNotNull();
+        assertThat(result.content()).hasSize(1);
+        GroupChatResponse response = result.content().get(0);
+        assertThat(response.authorId()).isEqualTo(userId);
+        assertThat(response.authorName()).isEqualTo("testUser");
+        assertThat(response.authorProfileImage()).isEqualTo("presigned-profile.jpg");
         verify(groupChatRepository).findByGroupOrderByCreatedAtDesc(group, pageable);
     }
 }

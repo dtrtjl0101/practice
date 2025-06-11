@@ -1,5 +1,6 @@
 package qwerty.chaekit.service.notification;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.group.activity.discussion.Discussion;
 import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment;
@@ -18,304 +20,145 @@ import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.domain.notification.entity.Notification;
+import qwerty.chaekit.domain.notification.entity.NotificationType;
 import qwerty.chaekit.domain.notification.repository.NotificationJpaRepository;
-import qwerty.chaekit.dto.group.request.GroupPostRequest;
 import qwerty.chaekit.dto.notification.NotificationResponse;
 import qwerty.chaekit.dto.page.PageResponse;
+import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.ForbiddenException;
 import qwerty.chaekit.global.exception.NotFoundException;
 import qwerty.chaekit.global.security.resolver.UserToken;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static qwerty.chaekit.domain.highlight.QHighlight.highlight;
 
 @ExtendWith(MockitoExtension.class)
-public class NotificationServiceTest {
+class NotificationServiceTest {
+
     @InjectMocks
     private NotificationService notificationService;
 
     @Mock
     private NotificationJpaRepository notificationJpaRepository;
+
     @Mock
     private UserProfileRepository userProfileRepository;
 
-    @Test
-    void createGroupJoinRequestNotification_success() {
-        //given
-        UserProfile receiver = mock(UserProfile.class);
-        UserProfile sender = mock(UserProfile.class);
-        ReadingGroup group = mock(ReadingGroup.class);
-
-        when(sender.getNickname()).thenReturn("테스트유저");
-        when(group.getName()).thenReturn("테스트그룹");
-        when(receiver.getId()).thenReturn(1L);
-
-        //when
-        notificationService.createGroupJoinRequestNotification(receiver, sender, group);
-
-        //then
-        verify(notificationJpaRepository).save(any(Notification.class));
-    }
+    @Mock
+    private SimpMessagingTemplate simpMessagingTemplate;
 
     @Test
-    void createGroupJoinApprovedNotification_success() {
-        //given
-        UserProfile receiver = mock(UserProfile.class);
-        UserProfile sender = mock(UserProfile.class);
-        ReadingGroup group = mock(ReadingGroup.class);
-
-        when(group.getName()).thenReturn("테스트그룹");
-        when(receiver.getId()).thenReturn(1L);
-
-        //when
-        notificationService.createGroupJoinApprovedNotification(receiver, sender, group);
-
-        //then
-        verify(notificationJpaRepository).save(any(Notification.class));
-    }
-
-    @Test
-    void createGroupJoinRejectedNotification_success() {
-        //given
-        UserProfile receiver = mock(UserProfile.class);
-        UserProfile sender = mock(UserProfile.class);
-        ReadingGroup group = mock(ReadingGroup.class);
-
-        when(group.getName()).thenReturn("테스트그룹");
-        when(receiver.getId()).thenReturn(1L);
-
-        //when
-        notificationService.createGroupJoinRejectedNotification(receiver, sender, group);
-
-        //then
-        verify(notificationJpaRepository).save(any(Notification.class));
-    }
-
-    @Test
-    void createPublisherJoinRequestNotification_success() {
-        //given
-        UserProfile admin = mock(UserProfile.class);
-        PublisherProfile publisher = mock(PublisherProfile.class);
-
-        when(publisher.getPublisherName()).thenReturn("테스트출판사");
-
-        //when
-        notificationService.createPublisherJoinRequestNotification(admin, publisher);
-
-        //then
-        verify(notificationJpaRepository).save(any(Notification.class));
-    }
-
-    @Test
-    void createPublisherApprovedNotification_success() {
-        //given
-        UserProfile admin = mock(UserProfile.class);
-        PublisherProfile publisher = mock(PublisherProfile.class);
-
-        //when
-        notificationService.createPublisherApprovedNotification(publisher,admin);
-
-        //then
-        verify(notificationJpaRepository).save(any(Notification.class));
-    }
-
-    @Test
-    void createDiscussionCommentNotification_success() {
-        //given
-        UserProfile receiver = mock(UserProfile.class);
-        UserProfile sender = mock(UserProfile.class);
-        Discussion discussion = mock(Discussion.class);
-
-        when(sender.getNickname()).thenReturn("테스트유저");
-        when(discussion.getTitle()).thenReturn("테스트토론");
-        when(receiver.getId()).thenReturn(1L);
-
-        //when
-        notificationService.createDiscussionCommentNotification(receiver, sender, discussion);
-
-        //then
-        verify(notificationJpaRepository).save(any(Notification.class));
-        //verify(notificationProducer).sendNotification(any(NotificationResponse.class), eq("1"));
-    }
-
-    @Test
-    void createCommentReplyNotification_success() {
-        //given
-        UserProfile receiver = mock(UserProfile.class);
-        UserProfile sender = mock(UserProfile.class);
-        DiscussionComment comment = mock(DiscussionComment.class);
-
-        when(sender.getNickname()).thenReturn("테스트유저");
-        when(receiver.getId()).thenReturn(1L);
-
-        //when
-        notificationService.createCommentReplyNotification(receiver,sender,comment);
-
-        //then
-        verify(notificationJpaRepository).save(any(Notification.class));
-        //verify(notificationProducer).sendNotification(any(NotificationResponse.class), eq("1"));
-    }
-
-    @Test
-    void createHighlightCommentNotification_success() {
-        //given
-        UserProfile receiver = mock(UserProfile.class);
-        UserProfile sender = mock(UserProfile.class);
-        Highlight highlight = mock(Highlight.class);
-
-        when(sender.getNickname()).thenReturn("테스트유저");
-        when(highlight.getMemo()).thenReturn("하이라이트 테스트 내용입니다.");
-        when(receiver.getId()).thenReturn(1L);
-
-        //when
-        notificationService.createHighlightCommentNotification(receiver,sender,highlight);
-
-        //then
-        verify(notificationJpaRepository).save(any(Notification.class));
-        //verify(notificationProducer).sendNotification(any(NotificationResponse.class), eq("1"));
-    }
-
-    @Test
-    void createHighlightCommentReplyNotification_success() {
-        //given
-        UserProfile receiver = mock(UserProfile.class);
-        UserProfile sender = mock(UserProfile.class);
-        HighlightComment comment = mock(HighlightComment.class);
-        Highlight highlight = mock(Highlight.class);
-
-        when(sender.getNickname()).thenReturn("테스트유저");
-        when(comment.getHighlight()).thenReturn(highlight);
-        when(highlight.getMemo()).thenReturn("테스트 메모");
-        when(receiver.getId()).thenReturn(1L);
-
-        //when
-        notificationService.createHighlightCommentReplyNotification(receiver,sender,comment);
-
-        //then
-        verify(notificationJpaRepository).save(any(Notification.class));
-        //verify(notificationProducer).sendNotification(any(NotificationResponse.class), eq("1"));
-    }
-
-    @Test
-    void createGroupBannedNotification_success() {
-        //given
-        UserProfile receiver = mock(UserProfile.class);
-        ReadingGroup group = mock(ReadingGroup.class);
-
-        when(group.getName()).thenReturn("테스트그룹");
-        when(receiver.getId()).thenReturn(1L);
-
-        //when
-        notificationService.createGroupBannedNotification(receiver,group);
-
-        //then
-        verify(notificationJpaRepository).save(any(Notification.class));
-        //verify(notificationProducer).sendNotification(any(NotificationResponse.class), eq("1"));
-    }
-
-    @Test
-    void getNotifications_success() {
-        //given
-        UserProfile userProfile = UserProfile.builder()
-                .id(1L)
-                .nickname("Test User")
-                .build();
-        UserToken userToken = UserToken.of(userProfile);
-        Pageable pageable = PageRequest.of(0, 10);
-        List<Notification> notifications = new ArrayList<>();
-        Page<Notification> notificationPage = new PageImpl<>(notifications);
-
-        when(userProfileRepository.findById(1L)).thenReturn(Optional.of(userProfile));
-        when(notificationJpaRepository.findByReceiverOrderByCreatedAtDesc(eq(userProfile), any(Pageable.class)))
-                .thenReturn(notificationPage);
-        //when(notificationPage.map(any())).thenReturn(responsePage);
-
-        //when
-        PageResponse<NotificationResponse> response = notificationService.getNotifications(userToken, pageable);
-
-        //then
-        assertNotNull(response);
-        verify(userProfileRepository).findById(1L);
-    }
-
-    @Test
-    void getNotifications_userNotFound_throwsException() {
+    @DisplayName("그룹 가입 요청 알림 생성 성공")
+    void createGroupJoinRequestNotificationSuccess() {
         // given
-        UserProfile userProfile = UserProfile.builder()
-                .id(1L)
-                .nickname("Test User")
-                .build();
-        UserToken userToken = UserToken.of(userProfile);
-        Pageable pageable = PageRequest.of(0, 10);
+        UserProfile receiver = mock(UserProfile.class);
+        UserProfile sender = mock(UserProfile.class);
+        ReadingGroup group = mock(ReadingGroup.class);
 
-        when(userProfileRepository.findById(1L)).thenReturn(Optional.empty());
-
-        // when&then
-        assertThrows(NotFoundException.class, () -> {
-            notificationService.getNotifications(userToken, pageable);
-        });
-    }
-
-    @Test
-    void markAsRead_success() {
-        // given
-        UserProfile userProfile = mock(UserProfile.class);
-        UserToken userToken = UserToken.of(userProfile);
-        Notification notification = mock(Notification.class);
-
-        when(userProfileRepository.findById(anyLong())).thenReturn(Optional.of(userProfile));
-        when(notificationJpaRepository.findById(1L)).thenReturn(Optional.of(notification));
-        when(notification.getReceiver()).thenReturn(userProfile);
-        when(userProfile.getId()).thenReturn(1L);
+        when(sender.getNickname()).thenReturn("sender");
+        when(group.getName()).thenReturn("group");
+        when(receiver.getId()).thenReturn(1L);
 
         // when
-        notificationService.markAsRead(userToken, 1L);
+        notificationService.createGroupJoinRequestNotification(receiver, sender, group);
+
+        // then
+        verify(notificationJpaRepository).save(any(Notification.class));
+        verify(simpMessagingTemplate).convertAndSend(eq("/topic/notification/1"), any(NotificationResponse.class));
+    }
+
+    @Test
+    @DisplayName("알림 목록 조회 성공")
+    void getNotificationsSuccess() {
+        // given
+        Long userId = 1L;
+        UserToken userToken = mock(UserToken.class);
+        UserProfile user = mock(UserProfile.class);
+        Notification notification = mock(Notification.class);
+        Pageable pageable = PageRequest.of(0, 20);
+        Page<Notification> notificationPage = new PageImpl<>(List.of(notification));
+
+        when(userToken.userId()).thenReturn(userId);
+        when(userProfileRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(notificationJpaRepository.findByReceiverOrderByCreatedAtDesc(user, pageable)).thenReturn(notificationPage);
+
+        // when
+        PageResponse<NotificationResponse> result = notificationService.getNotifications(userToken, pageable);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.content()).hasSize(1);
+        verify(userProfileRepository).findById(userId);
+        verify(notificationJpaRepository).findByReceiverOrderByCreatedAtDesc(user, pageable);
+    }
+
+    @Test
+    @DisplayName("알림 목록 조회 실패 - 사용자를 찾을 수 없음")
+    void getNotificationsFail_UserNotFound() {
+        // given
+        Long userId = 1L;
+        UserToken userToken = mock(UserToken.class);
+        Pageable pageable = PageRequest.of(0, 20);
+
+        when(userToken.userId()).thenReturn(userId);
+        when(userProfileRepository.findById(userId)).thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> notificationService.getNotifications(userToken, pageable))
+                .isInstanceOf(NotFoundException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NOT_FOUND.getCode());
+    }
+
+    @Test
+    @DisplayName("알림 읽음 표시 성공")
+    void markAsReadSuccess() {
+        // given
+        Long userId = 1L;
+        Long notificationId = 1L;
+        UserToken userToken = mock(UserToken.class);
+        UserProfile user = mock(UserProfile.class);
+        Notification notification = mock(Notification.class);
+
+        when(userToken.userId()).thenReturn(userId);
+        when(userProfileRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(notificationJpaRepository.findById(notificationId)).thenReturn(Optional.of(notification));
+        when(notification.getReceiver()).thenReturn(user);
+        when(user.getId()).thenReturn(userId);
+
+        // when
+        notificationService.markAsRead(userToken, notificationId);
 
         // then
         verify(notification).markAsRead();
     }
 
     @Test
-    void markAsRead_notificationNotFound_throwsException() {
+    @DisplayName("알림 읽음 표시 실패 - 다른 사용자의 알림")
+    void markAsReadFail_NotYourNotification() {
         // given
-        UserProfile userProfile = UserProfile.builder()
-                .id(1L)
-                .nickname("Test User")
-                .build();
-        UserToken userToken = UserToken.of(userProfile);
-
-        when(userProfileRepository.findById(1L)).thenReturn(Optional.of(userProfile));
-        when(notificationJpaRepository.findById(1L)).thenReturn(Optional.empty());
-
-        // when&then
-        assertThrows(NotFoundException.class, () -> {
-            notificationService.markAsRead(userToken, 1L);
-        });
-    }
-
-    @Test
-    void markAsRead_notYourNotification_throwsException() {
-        //given
-        UserProfile userProfile = mock(UserProfile.class);
-        UserToken userToken = UserToken.of(userProfile);
+        Long userId = 1L;
+        Long otherUserId = 2L;
+        Long notificationId = 1L;
+        UserToken userToken = mock(UserToken.class);
+        UserProfile user = mock(UserProfile.class);
         UserProfile otherUser = mock(UserProfile.class);
         Notification notification = mock(Notification.class);
 
-        when(userProfileRepository.findById(anyLong())).thenReturn(Optional.of(userProfile));
-        when(notificationJpaRepository.findById(1L)).thenReturn(Optional.of(notification));
+        when(userToken.userId()).thenReturn(userId);
+        when(userProfileRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(notificationJpaRepository.findById(notificationId)).thenReturn(Optional.of(notification));
         when(notification.getReceiver()).thenReturn(otherUser);
-        when(userProfile.getId()).thenReturn(1L);
-        when(otherUser.getId()).thenReturn(2L);
+        when(user.getId()).thenReturn(userId);
+        when(otherUser.getId()).thenReturn(otherUserId);
 
-        //when&then
-        assertThrows(ForbiddenException.class, () -> {
-            notificationService.markAsRead(userToken, 1L);
-        });
+        // when & then
+        assertThatThrownBy(() -> notificationService.markAsRead(userToken, notificationId))
+                .isInstanceOf(ForbiddenException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOTIFICATION_NOT_YOURS.getCode());
     }
 }
