@@ -10,7 +10,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import { createLink } from "@tanstack/react-router";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtom } from "jotai";
 import { AuthState } from "../states/auth";
 import { Role } from "../types/role";
 import useLogout from "../api/login/useLogout";
@@ -18,7 +18,7 @@ import LinkButton from "./LinkButton";
 import NotificationButton from "./NotificationButton";
 import State from "../states";
 import { Menu, Nightlight, Sunny } from "@mui/icons-material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SideNavigationBar, { NavigationItem } from "./SideNavigatorBar";
 import { useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../api/api";
@@ -28,7 +28,7 @@ export default function AppBar(props: {
   sideNavigationBarItemsWithGroups: NavigationItem[][];
 }) {
   const { sideNavigationBarItemsWithGroups } = props;
-  const user = useAtomValue(AuthState.user);
+  const [user, setUser] = useAtom(AuthState.user);
   const [colorScheme, setColorScheme] = useAtom(State.UI.userColorScheme);
   const { logout } = useLogout();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -49,6 +49,21 @@ export default function AppBar(props: {
     },
     enabled: isUser,
   });
+
+  useEffect(() => {
+    if (!myWallet) return;
+
+    if (myWallet.balance == null || myWallet.balance > 0) {
+      setUser((prev) => {
+        if (!prev || prev.role !== Role.ROLE_USER || !prev.firstPaymentBenefit)
+          return prev;
+        return {
+          ...prev,
+          firstPaymentBenefit: false,
+        };
+      });
+    }
+  }, [myWallet, setUser]);
 
   const onColorSchemeChangeButtonClicked = () => {
     setColorScheme((prev) => {
