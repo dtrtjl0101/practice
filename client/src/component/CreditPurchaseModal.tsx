@@ -149,7 +149,7 @@ export default function CreditPurchaseModal(props: {
               <Grid container spacing={1} justifyContent="center">
                 {creditProducts.map((product) => {
                   const selected = selectedProductId === product.id;
-                  const bonus = user?.firstPaymentBenefit ? 1.1 : 1;
+                  const bonus = isUser && user.firstPaymentBenefit ? 1.1 : 1;
                   const creditAmountWithBonus = Math.floor(
                     (product.creditAmount || 0) * bonus,
                   );
@@ -188,7 +188,7 @@ export default function CreditPurchaseModal(props: {
                   );
                 })}
               </Grid>
-              {user?.firstPaymentBenefit && (
+              {isUser && user.firstPaymentBenefit && (
                 <Typography
                   variant="subtitle1"
                   color="warning.main"

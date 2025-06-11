@@ -5,6 +5,7 @@ import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import { paymentSuccessToken } from "../types/paymentSuccessMessage";
 import State from "../states";
 import { useAtom } from "jotai";
+import { Role } from "../types/role";
 
 export const Route = createFileRoute("/credits/payment/success")({
   component: RouteComponent,
@@ -23,6 +24,8 @@ function RouteComponent() {
   const { pgToken } = Route.useSearch();
   const [loggedInUser, setLoggedInUser] = useAtom(State.Auth.user);
 
+  const isUser = loggedInUser && loggedInUser.role === Role.ROLE_USER;
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["kakaoPaySuccess", pgToken],
     queryFn: async () => {
@@ -40,7 +43,7 @@ function RouteComponent() {
         const opener = window.opener as Window;
         opener.postMessage(paymentSuccessToken);
       }
-      if (loggedInUser?.firstPaymentBenefit == true) {
+      if (isUser && loggedInUser.firstPaymentBenefit == true) {
         setLoggedInUser((prev) => {
           // firstPaymentBenefit 해제
           if (!prev) return prev;
