@@ -1,9 +1,10 @@
-package qwerty.chaekit.service.notification;
+package qwerty.chaekit.service.util;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -36,7 +37,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -46,16 +46,13 @@ import static org.mockito.Mockito.*;
 class NotificationServiceTest {
 
     @InjectMocks
-    private NotificationService notificationService;
+    private EmailNotificationService emailNotificationService;
 
     @Mock
-    private NotificationJpaRepository notificationJpaRepository;
+    private JavaMailSender javaMailSender;
 
     @Mock
-    private UserProfileRepository userProfileRepository;
-
-    @Mock
-    private SimpMessagingTemplate simpMessagingTemplate;
+    private MimeMessage mimeMessage;
 
     private UserProfile receiver;
     private UserProfile sender;
@@ -96,11 +93,10 @@ class NotificationServiceTest {
         when(notificationJpaRepository.save(any(Notification.class))).thenReturn(notification);
 
         // when
-        notificationService.createGroupJoinRequestNotification(receiver, sender, group);
+        emailNotificationService.sendVerificationEmail(toEmail, verificationCode);
 
         // then
-        verify(notificationJpaRepository).save(any(Notification.class));
-        verify(simpMessagingTemplate).convertAndSend(eq("/topic/notification/1"), any(NotificationResponse.class));
+        verify(javaMailSender).send(any(MimeMessage.class));
     }
 
     @Test
@@ -228,7 +224,7 @@ class NotificationServiceTest {
             .thenReturn(notificationPage);
 
         // when
-        PageResponse<NotificationResponse> result = notificationService.getNotifications(userToken, pageable);
+        emailNotificationService.sendReadingGroupApprovalEmail(toEmail);
 
         // then
         assertThat(result.content()).hasSize(1);
@@ -252,8 +248,7 @@ class NotificationServiceTest {
     }
 
     @Test
-    @DisplayName("알림 읽음 표시 성공")
-    void markAsReadSuccess() {
+    void sendEbookRejectionEmail_성공() throws MessagingException {
         // given
         UserToken userToken = new UserToken(false, 1L, 1L, "test@test.com");
         Long notificationId = 1L;
@@ -264,10 +259,10 @@ class NotificationServiceTest {
         when(receiver.getId()).thenReturn(1L);
 
         // when
-        notificationService.markAsRead(userToken, notificationId);
+        emailNotificationService.sendEbookRejectionEmail(toEmail, reason);
 
         // then
-        verify(notification).markAsRead();
+        verify(javaMailSender).send(any(MimeMessage.class));
     }
 
     @Test
@@ -320,4 +315,4 @@ class NotificationServiceTest {
             .isInstanceOf(ForbiddenException.class)
             .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOTIFICATION_NOT_YOURS.getCode());
     }
-}
+} 

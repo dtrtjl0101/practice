@@ -18,6 +18,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class EmailNotificationServiceTest{
 
+
     @InjectMocks
     private EmailNotificationService emailNotificationService;
 
