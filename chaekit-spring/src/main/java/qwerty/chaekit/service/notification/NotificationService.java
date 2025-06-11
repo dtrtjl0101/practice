@@ -63,12 +63,12 @@ public class NotificationService {
         }
     }
 
-    @Transactional
-    public void createPublisherJoinRequestNotification(UserProfile admin, PublisherProfile publisher) {
-        String message = String.format("%s님이 출판사 가입을 요청했습니다.", publisher.getPublisherName());
-        Notification notification = new Notification(null,admin, publisher, null, null,null,null,NotificationType.PUBLISHER_JOIN_REQUEST, message);
-        notificationJpaRepository.save(notification);
-    }
+//    @Transactional
+//    public void createPublisherJoinRequestNotification(UserProfile admin, PublisherProfile publisher) {
+//        String message = String.format("%s님이 출판사 가입을 요청했습니다.", publisher.getPublisherName());
+//        Notification notification = new Notification(null,admin, publisher, null, null,null,null,NotificationType.PUBLISHER_JOIN_REQUEST, message);
+//        notificationJpaRepository.save(notification);
+//    }
 
     @Transactional
     public void createPublisherApprovedNotification(PublisherProfile publisher, UserProfile admin) {
