@@ -59,16 +59,15 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                             .build();
                     log.info("OAuth2 User Profile Created: {}", userProfile);
                     userProfileRepository.save(userProfile);
-
+                    creditWalletRepository.save(
+                            CreditWallet.builder()
+                                    .user(userProfile)
+                                    .build()
+                    );
                     return newMember;
                 });
 
         UserProfile userProfile = userProfileRepository.findByMember_Id(member.getId()).orElse(null);
-        creditWalletRepository.save(
-                CreditWallet.builder()
-                        .user(userProfile)
-                        .build()
-        );
         return new CustomUserDetails(member, userProfile, null, attributes);
     }
 
