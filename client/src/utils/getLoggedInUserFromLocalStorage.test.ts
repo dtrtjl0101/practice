@@ -41,6 +41,7 @@ describe("getLoggedInUserFromLocalStorage", () => {
       accessToken: "access-token",
       userId: 123,
       nickname: "testUser",
+      firstPaymentBenefit: false,
     };
 
     localStorageMock.getItem.mockReturnValue(JSON.stringify(userData));
@@ -87,6 +88,7 @@ describe("getLoggedInUserFromLocalStorage", () => {
       profileImageURL: "admin.jpg",
       refreshToken: "admin-refresh-token",
       accessToken: "admin-access-token",
+      firstPaymentBenefit: false,
     };
 
     localStorageMock.getItem.mockReturnValue(JSON.stringify(adminData));
@@ -108,7 +110,7 @@ describe("getLoggedInUserFromLocalStorage", () => {
     expect(localStorageMock.removeItem).toHaveBeenCalledWith("loggedInUser");
     expect(consoleSpy).toHaveBeenCalledWith(
       "Error parsing loggedInUser from localStorage",
-      expect.any(SyntaxError)
+      expect.any(SyntaxError),
     );
 
     consoleSpy.mockRestore();
@@ -153,7 +155,7 @@ describe("getLoggedInUserFromLocalStorage", () => {
     expect(result).toBeUndefined();
     expect(consoleSpy).toHaveBeenCalledWith(
       "Error parsing loggedInUser from localStorage",
-      expect.any(Error)
+      expect.any(Error),
     );
 
     consoleSpy.mockRestore();
