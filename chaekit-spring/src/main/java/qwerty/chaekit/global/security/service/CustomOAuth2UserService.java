@@ -9,6 +9,8 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import qwerty.chaekit.domain.ebook.credit.wallet.CreditWallet;
+import qwerty.chaekit.domain.ebook.credit.wallet.CreditWalletRepository;
 import qwerty.chaekit.domain.member.Member;
 import qwerty.chaekit.domain.member.MemberRepository;
 import qwerty.chaekit.domain.member.enums.Role;
@@ -25,6 +27,7 @@ import java.util.Map;
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
     private final MemberRepository memberRepository;
     private final UserProfileRepository userProfileRepository;
+    private final CreditWalletRepository creditWalletRepository;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest request) throws OAuth2AuthenticationException {
@@ -61,6 +64,11 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                 });
 
         UserProfile userProfile = userProfileRepository.findByMember_Id(member.getId()).orElse(null);
+        creditWalletRepository.save(
+                CreditWallet.builder()
+                        .user(userProfile)
+                        .build()
+        );
         return new CustomUserDetails(member, userProfile, null, attributes);
     }
 

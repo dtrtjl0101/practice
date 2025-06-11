@@ -62,6 +62,7 @@ public class AdminService {
                 fileService.convertToPublicImageURL(user.getProfileImageKey()),
                 null, // 최근 활동 ID는 여기서 처리하지 않음
                 null, // 최근 활동 책 이미지 URL은 여기서 처리하지 않음
+                null,
                 null
         )));
     }

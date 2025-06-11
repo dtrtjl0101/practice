@@ -2,6 +2,7 @@ package qwerty.chaekit.global.security.util;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import qwerty.chaekit.domain.ebook.credit.wallet.CreditWalletRepository;
 import qwerty.chaekit.domain.member.Member;
 import qwerty.chaekit.domain.member.enums.Role;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
@@ -18,6 +19,7 @@ public class LoginResponseFactory {
     private final JwtUtil jwtUtil;
     private final RefreshTokenService refreshTokenService;
     private final FileService fileService;
+    private final CreditWalletRepository creditWalletRepository;
 
     public LoginResponse createLoginResponse(CustomUserDetails customUserDetails) {
         Member member = customUserDetails.member();
@@ -45,6 +47,7 @@ public class LoginResponseFactory {
 
         String refreshToken = refreshTokenService.issueRefreshToken(memberId);
         String accessToken = jwtUtil.createAccessToken(memberId, userId, publisherId, member.getEmail(), role.name());
+        boolean firstPaymentBenefit = creditWalletRepository.existsByUserAndPaymentTransactionsEmpty(user);
 
         return LoginResponse.builder()
                 .refreshToken(refreshToken)
@@ -57,6 +60,7 @@ public class LoginResponseFactory {
                 .publisherName(publisher != null ? publisher.getPublisherName() : null)
                 .profileImageURL(profileImageURL)
                 .role(role)
+                .firstPaymentBenefit(firstPaymentBenefit)
                 .build();
     }
 }
