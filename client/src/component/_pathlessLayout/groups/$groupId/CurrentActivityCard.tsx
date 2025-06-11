@@ -54,7 +54,7 @@ export function DayStatusChip(props: { startTime: string; endTime: string }) {
       if (now < start) {
         return { label: `시작전`, color: "secondary" };
       } else if (now <= end) {
-        const daysToEnd = Math.ceil(
+        const daysToEnd = Math.floor(
           (end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
         );
         return {
