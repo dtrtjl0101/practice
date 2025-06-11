@@ -49,7 +49,7 @@ export function DayStatusChip(props: { startTime: string; endTime: string }) {
     useMemo(() => {
       const now = new Date();
       const start = new Date(`${startTime}T00:00:00+09:00`);
-      const end = new Date(`${endTime}T00:00:00+09:00`);
+      const end = new Date(`${endTime}T23:59:59+09:00`);
 
       if (now < start) {
         return { label: `시작전`, color: "secondary" };
