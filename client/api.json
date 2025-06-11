@@ -183,8 +183,10 @@
     "/api/login": {
       "post": {
         "tags": ["login-filter-controller"],
-        "summary": "로그인",
-        "description": "Spring Security가 처리하는 로그인 API",
+        "summary": "이메일 인증 로그인",
+        "description": "Spring Security가 처리하는 이메일 인증 로그인 API",
+        "summary": "이메일 인증 로그인",
+        "description": "Spring Security가 처리하는 이메일 인증 로그인 API",
         "operationId": "login",
         "requestBody": {
           "content": {
@@ -281,6 +283,14 @@
             "required": true,
             "schema": {
               "type": "boolean"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -1601,6 +1611,54 @@
         }
       }
     },
+    "/api/users/me": {
+      "get": {
+        "tags": ["user-controller"],
+        "summary": "내 계정 정보 조회",
+        "description": "내 계정 정보를 조회합니다.",
+        "operationId": "userInfo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponseUserInfoResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["user-controller"],
+        "summary": "사용자 정보 수정",
+        "description": "사용자 정보를 수정합니다. 프로필 이미지, 닉네임을 포함할 수 있습니다.",
+        "operationId": "updateUserInfo",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UserPatchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponseUserInfoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/publisher/notifications/{notificationId}/read": {
       "patch": {
         "tags": ["publisher-notification-controller"],
@@ -2171,6 +2229,19 @@
         }
       }
     },
+    "/oauth2/authorization/google": {
+      "get": {
+        "tags": ["login-filter-controller"],
+        "summary": "Google OAuth2 로그인",
+        "description": "Spring Security가 처리하는 Google OAuth2 로그인 API.\n성공 시, {baseUrl}/oauth2/success?accessToken={accessToken}&refreshToken={refreshToken} 으로 리다이렉트됩니다.\n실패 시, {baseUrl}/oauth2/failure?error={error} 으로 리다이렉트됩니다.\nbaseUrl은 application.properties의 kakao.pay.redirect-base-url로 설정된 값입니다.",
+        "operationId": "oauth2Login",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api": {
       "get": {
         "tags": ["main-controller"],
@@ -2182,27 +2253,6 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiSuccessResponseString"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/users/me": {
-      "get": {
-        "tags": ["user-controller"],
-        "summary": "내 계정 정보 조회",
-        "description": "내 계정 정보를 조회합니다.",
-        "operationId": "userInfo",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiSuccessResponseUserInfoResponse"
                 }
               }
             }
@@ -2259,6 +2309,14 @@
               "type": "integer",
               "format": "int64"
             }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -2309,7 +2367,8 @@
       "get": {
         "tags": ["user-controller"],
         "summary": "내 활동 조회",
-        "description": "내가 가입한 모든 활동을 조회합니다.",
+        "description": "내가 가입한 모든 활동을 조회합니다. 여기서 하이라이트 수, 토론 수는 -1로 표시됩니다",
+        "description": "내가 가입한 모든 활동을 조회합니다. 여기서 하이라이트 수, 토론 수는 -1로 표시됩니다",
         "operationId": "getMyActivities",
         "parameters": [
           {
@@ -2425,6 +2484,35 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiSuccessResponsePageResponseReadingProgressResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reading-progress/activities/{activityId}/history": {
+      "get": {
+        "tags": ["reading-progress-controller"],
+        "operationId": "getProgressHistory",
+        "parameters": [
+          {
+            "name": "activityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponseListReadingProgressHistoryResponse"
                 }
               }
             }
@@ -3445,6 +3533,68 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiSuccessResponseActivityFetchResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/activities/{activityId}/scores": {
+      "get": {
+        "tags": ["activity-controller"],
+        "summary": "상위 5명의 활동 점수 조회",
+        "description": "활동에 참여한 유저들의 활동 점수를 조회합니다. 점수는 하이라이트, 하이라이트 댓글, 토론, 토론 댓글의 개수에 따라 계산됩니다. 하이라이트는 3점, 하이라이트 댓글은 1점, 토론은 5점, 토론 댓글은 2점입니다.",
+        "operationId": "getActivityTop5Scores",
+        "parameters": [
+          {
+            "name": "activityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponseListActivityScoreResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/activities/{activityId}/highlights/recent": {
+      "get": {
+        "tags": ["activity-controller"],
+        "summary": "최근 메모 조회",
+        "description": "특정 활동에 등록된 최신 하이라이트 5개를 조회합니다.",
+        "operationId": "getRecentHighlights",
+        "parameters": [
+          {
+            "name": "activityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccessResponseListHighlightPreviewResponse"
                 }
               }
             }
@@ -4588,6 +4738,67 @@
           },
           "isAuthor": {
             "type": "boolean"
+          },
+          "agreeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "disagreeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "neutralCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "UserPatchRequest": {
+        "type": "object",
+        "properties": {
+          "nickname": {
+            "type": "string"
+          },
+          "profileImage": {
+            "type": "string",
+            "format": "binary"
+          }
+        }
+      },
+      "ApiSuccessResponseUserInfoResponse": {
+        "type": "object",
+        "properties": {
+          "isSuccessful": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/UserInfoResponse"
+          }
+        },
+        "description": "API 에러 응답을 감싸는 클래스"
+      },
+      "UserInfoResponse": {
+        "type": "object",
+        "properties": {
+          "memberId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "email": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "profileImageURL": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
           }
         }
       },
@@ -4674,33 +4885,6 @@
           }
         }
       },
-      "ApiSuccessResponseUserInfoResponse": {
-        "type": "object",
-        "properties": {
-          "isSuccessful": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/UserInfoResponse"
-          }
-        },
-        "description": "API 에러 응답을 감싸는 클래스"
-      },
-      "UserInfoResponse": {
-        "type": "object",
-        "properties": {
-          "userId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "nickname": {
-            "type": "string"
-          },
-          "profileImageURL": {
-            "type": "string"
-          }
-        }
-      },
       "ApiSuccessResponsePageResponseHighlightFetchResponse": {
         "type": "object",
         "properties": {
@@ -4747,6 +4931,15 @@
             "type": "integer",
             "format": "int64"
           },
+          "bookTitle": {
+            "type": "string"
+          },
+          "bookAuthor": {
+            "type": "string"
+          },
+          "bookCoverImageURL": {
+            "type": "string"
+          },
           "authorId": {
             "type": "integer",
             "format": "int64"
@@ -4770,6 +4963,16 @@
             "type": "integer",
             "format": "int64"
           },
+          "groupId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "groupName": {
+            "type": "string"
+          },
+          "groupImageURL": {
+            "type": "string"
+          },
           "linkedDiscussions": {
             "type": "array",
             "items": {
@@ -4778,6 +4981,10 @@
           },
           "highlightContent": {
             "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -4873,6 +5080,9 @@
             "type": "string",
             "enum": ["OWNED", "PENDING", "JOINED", "NONE"]
           },
+          "isAutoApproval": {
+            "type": "boolean"
+          },
           "memberCount": {
             "type": "integer",
             "format": "int32"
@@ -4942,6 +5152,14 @@
           },
           "isParticipant": {
             "type": "boolean"
+          },
+          "highlightCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "discussionCount": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -5087,6 +5305,38 @@
           "totalPages": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "ApiSuccessResponseListReadingProgressHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "isSuccessful": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReadingProgressHistoryResponse"
+            }
+          }
+        },
+        "description": "API 에러 응답을 감싸는 클래스"
+      },
+      "ReadingProgressHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "myPercentage": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "averagePercentage": {
+            "type": "number",
+            "format": "double"
           }
         }
       },
@@ -5738,6 +5988,18 @@
             "items": {
               "$ref": "#/components/schemas/DiscussionCommentFetchResponse"
             }
+          },
+          "agreeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "disagreeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "neutralCount": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -5773,6 +6035,10 @@
           },
           "highlightContent": {
             "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -6100,6 +6366,84 @@
           }
         },
         "description": "API 에러 응답을 감싸는 클래스"
+      },
+      "ActivityScoreResponse": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "userProfileImageURL": {
+            "type": "string"
+          },
+          "userNickname": {
+            "type": "string"
+          },
+          "score": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ApiSuccessResponseListActivityScoreResponse": {
+        "type": "object",
+        "properties": {
+          "isSuccessful": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActivityScoreResponse"
+            }
+          }
+        },
+        "description": "API 에러 응답을 감싸는 클래스"
+      },
+      "ApiSuccessResponseListHighlightPreviewResponse": {
+        "type": "object",
+        "properties": {
+          "isSuccessful": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HighlightPreviewResponse"
+            }
+          }
+        },
+        "description": "API 에러 응답을 감싸는 클래스"
+      },
+      "HighlightPreviewResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "authorId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "authorName": {
+            "type": "string"
+          },
+          "authorProfileImageURL": {
+            "type": "string"
+          },
+          "spine": {
+            "type": "string"
+          },
+          "cfi": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
       },
       "ApiSuccessResponsePageResponseDiscussionFetchResponse": {
         "type": "object",

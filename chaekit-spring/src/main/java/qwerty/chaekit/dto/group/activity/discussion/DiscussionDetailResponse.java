@@ -21,6 +21,9 @@ public record DiscussionDetailResponse(
         boolean isDebate,
         boolean isAuthor,
         List<HighlightSummaryResponse> linkedHighlights,
-        List<DiscussionCommentFetchResponse> comments
+        List<DiscussionCommentFetchResponse> comments,
+        Long agreeCount,
+        Long disagreeCount,
+        Long neutralCount
 ) {
 }

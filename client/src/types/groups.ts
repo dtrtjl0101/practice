@@ -15,5 +15,6 @@ export type GroupInfo = {
   leaderNickname: string;
   leaderProfileImageURL: string;
   myMemberShipStatus: GroupMembershipStatus;
+  isAutoApproval: boolean;
   memberCount: number;
 };

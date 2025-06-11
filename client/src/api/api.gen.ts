@@ -548,6 +548,58 @@ export interface DiscussionFetchResponse {
   highlightIds?: number[];
   isDebate?: boolean;
   isAuthor?: boolean;
+  /** @format int64 */
+  agreeCount?: number;
+  /** @format int64 */
+  disagreeCount?: number;
+  /** @format int64 */
+  neutralCount?: number;
+}
+
+export interface UserPatchRequest {
+  nickname?: string;
+  /** @format binary */
+  profileImage?: File;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseUserInfoResponse {
+  isSuccessful?: boolean;
+  data?: UserInfoResponse;
+}
+
+export interface UserInfoResponse {
+  /** @format int64 */
+  memberId?: number;
+  email?: string;
+  /** @format int64 */
+  userId?: number;
+  nickname?: string;
+  profileImageURL?: string;
+  role?: string;
+}
+
+export interface UserPatchRequest {
+  nickname?: string;
+  /** @format binary */
+  profileImage?: File;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseUserInfoResponse {
+  isSuccessful?: boolean;
+  data?: UserInfoResponse;
+}
+
+export interface UserInfoResponse {
+  /** @format int64 */
+  memberId?: number;
+  email?: string;
+  /** @format int64 */
+  userId?: number;
+  nickname?: string;
+  profileImageURL?: string;
+  role?: string;
 }
 
 export interface HighlightPutRequest {
@@ -586,19 +638,6 @@ export interface DiscussionCommentPatchRequest {
 }
 
 /** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponseUserInfoResponse {
-  isSuccessful?: boolean;
-  data?: UserInfoResponse;
-}
-
-export interface UserInfoResponse {
-  /** @format int64 */
-  userId?: number;
-  nickname?: string;
-  profileImageURL?: string;
-}
-
-/** API 에러 응답을 감싸는 클래스 */
 export interface ApiSuccessResponsePageResponseHighlightFetchResponse {
   isSuccessful?: boolean;
   data?: PageResponseHighlightFetchResponse;
@@ -620,6 +659,9 @@ export interface HighlightFetchResponse {
   id?: number;
   /** @format int64 */
   bookId?: number;
+  bookTitle?: string;
+  bookAuthor?: string;
+  bookCoverImageURL?: string;
   /** @format int64 */
   authorId?: number;
   authorName?: string;
@@ -629,8 +671,14 @@ export interface HighlightFetchResponse {
   memo?: string;
   /** @format int64 */
   activityId?: number;
+  /** @format int64 */
+  groupId?: number;
+  groupName?: string;
+  groupImageURL?: string;
   linkedDiscussions?: DiscussionSummaryResponse[];
   highlightContent?: string;
+  /** @format date-time */
+  createdAt?: string;
 }
 
 export interface PageResponseHighlightFetchResponse {
@@ -675,6 +723,7 @@ export interface GroupFetchResponse {
   leaderNickname?: string;
   leaderProfileImageURL?: string;
   myMemberShipStatus?: "OWNED" | "PENDING" | "JOINED" | "NONE";
+  isAutoApproval?: boolean;
   /** @format int32 */
   memberCount?: number;
 }
@@ -706,6 +755,10 @@ export interface ActivityFetchResponse {
   endTime?: string;
   description?: string;
   isParticipant?: boolean;
+  /** @format int64 */
+  highlightCount?: number;
+  /** @format int64 */
+  discussionCount?: number;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -775,6 +828,21 @@ export interface PageResponseReadingProgressResponse {
   totalItems?: number;
   /** @format int32 */
   totalPages?: number;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseListReadingProgressHistoryResponse {
+  isSuccessful?: boolean;
+  data?: ReadingProgressHistoryResponse[];
+}
+
+export interface ReadingProgressHistoryResponse {
+  /** @format date */
+  date?: string;
+  /** @format int64 */
+  myPercentage?: number;
+  /** @format double */
+  averagePercentage?: number;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -1077,6 +1145,12 @@ export interface DiscussionDetailResponse {
   isAuthor?: boolean;
   linkedHighlights?: HighlightSummaryResponse[];
   comments?: DiscussionCommentFetchResponse[];
+  /** @format int64 */
+  agreeCount?: number;
+  /** @format int64 */
+  disagreeCount?: number;
+  /** @format int64 */
+  neutralCount?: number;
 }
 
 export interface HighlightSummaryResponse {
@@ -1092,6 +1166,8 @@ export interface HighlightSummaryResponse {
   cfi?: string;
   memo?: string;
   highlightContent?: string;
+  /** @format date-time */
+  createdAt?: string;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -1242,6 +1318,40 @@ export interface PageResponsePublisherInfoResponse {
 export interface ApiSuccessResponseActivityFetchResponse {
   isSuccessful?: boolean;
   data?: ActivityFetchResponse;
+}
+
+export interface ActivityScoreResponse {
+  /** @format int64 */
+  userId?: number;
+  userProfileImageURL?: string;
+  userNickname?: string;
+  /** @format int64 */
+  score?: number;
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseListActivityScoreResponse {
+  isSuccessful?: boolean;
+  data?: ActivityScoreResponse[];
+}
+
+/** API 에러 응답을 감싸는 클래스 */
+export interface ApiSuccessResponseListHighlightPreviewResponse {
+  isSuccessful?: boolean;
+  data?: HighlightPreviewResponse[];
+}
+
+export interface HighlightPreviewResponse {
+  /** @format int64 */
+  id?: number;
+  /** @format int64 */
+  authorId?: number;
+  authorName?: string;
+  authorProfileImageURL?: string;
+  spine?: string;
+  cfi?: string;
+  /** @format date-time */
+  createdAt?: string;
 }
 
 /** API 에러 응답을 감싸는 클래스 */
@@ -1416,7 +1526,11 @@ export class HttpClient<SecurityDataType = unknown> {
           formData.append(key, JSON.stringify(property));
           return formData;
         }
-        if (typeof property === "number" || typeof property === "string") {
+        if (
+          typeof property === "number" ||
+          typeof property === "string" ||
+          typeof property === "boolean"
+        ) {
           formData.append(key, `${property}`);
           return formData;
         }
@@ -1593,6 +1707,25 @@ export class Api<
       }),
 
     /**
+     * @description 사용자 정보를 수정합니다. 프로필 이미지, 닉네임을 포함할 수 있습니다.
+     *
+     * @tags user-controller
+     * @name UpdateUserInfo
+     * @summary 사용자 정보 수정
+     * @request PATCH:/api/users/me
+     * @secure
+     */
+    updateUserInfo: (data: UserPatchRequest, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseUserInfoResponse, any>({
+        path: `/api/users/me`,
+        method: "PATCH",
+        body: data,
+        secure: true,
+        type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
      * @description 내가 작성한 하이라이트를 조회합니다.
      *
      * @tags user-controller
@@ -1619,6 +1752,7 @@ export class Api<
         sort?: string[];
         /** @format int64 */
         bookId?: number;
+        keyword?: string;
       },
       params: RequestParams = {},
     ) =>
@@ -1654,7 +1788,7 @@ export class Api<
       }),
 
     /**
-     * @description 내가 가입한 모든 활동을 조회합니다.
+     * @description 내가 가입한 모든 활동을 조회합니다. 여기서 하이라이트 수, 토론 수는 -1로 표시됩니다
      *
      * @tags user-controller
      * @name GetMyActivities
@@ -1782,6 +1916,22 @@ export class Api<
         secure: true,
         ...params,
       }),
+
+    /**
+     * No description
+     *
+     * @tags reading-progress-controller
+     * @name GetProgressHistory
+     * @request GET:/api/reading-progress/activities/{activityId}/history
+     * @secure
+     */
+    getProgressHistory: (activityId: number, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseListReadingProgressHistoryResponse, any>({
+        path: `/api/reading-progress/activities/${activityId}/history`,
+        method: "GET",
+        secure: true,
+        ...params,
+      }),
   };
   publisherController = {
     /**
@@ -1871,11 +2021,11 @@ export class Api<
   };
   loginFilterController = {
     /**
-     * @description Spring Security가 처리하는 로그인 API
+     * @description Spring Security가 처리하는 이메일 인증 로그인 API
      *
      * @tags login-filter-controller
      * @name Login
-     * @summary 로그인
+     * @summary 이메일 인증 로그인
      * @request POST:/api/login
      * @secure
      */
@@ -1886,6 +2036,23 @@ export class Api<
         body: data,
         secure: true,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description Spring Security가 처리하는 Google OAuth2 로그인 API. 성공 시, {baseUrl}/oauth2/success?accessToken={accessToken}&refreshToken={refreshToken} 으로 리다이렉트됩니다. 실패 시, {baseUrl}/oauth2/failure?error={error} 으로 리다이렉트됩니다. baseUrl은 application.properties의 kakao.pay.redirect-base-url로 설정된 값입니다.
+     *
+     * @tags login-filter-controller
+     * @name Oauth2Login
+     * @summary Google OAuth2 로그인
+     * @request GET:/oauth2/authorization/google
+     * @secure
+     */
+    oauth2Login: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/oauth2/authorization/google`,
+        method: "GET",
+        secure: true,
         ...params,
       }),
   };
@@ -1920,6 +2087,7 @@ export class Api<
         bookId?: number;
         spine?: string;
         me: boolean;
+        keyword?: string;
       },
       params: RequestParams = {},
     ) =>
@@ -2753,6 +2921,40 @@ export class Api<
     getActivity: (activityId: number, params: RequestParams = {}) =>
       this.request<ApiSuccessResponseActivityFetchResponse, any>({
         path: `/api/activities/${activityId}`,
+        method: "GET",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description 활동에 참여한 유저들의 활동 점수를 조회합니다. 점수는 하이라이트, 하이라이트 댓글, 토론, 토론 댓글의 개수에 따라 계산됩니다. 하이라이트는 3점, 하이라이트 댓글은 1점, 토론은 5점, 토론 댓글은 2점입니다.
+     *
+     * @tags activity-controller
+     * @name GetActivityTop5Scores
+     * @summary 상위 5명의 활동 점수 조회
+     * @request GET:/api/activities/{activityId}/scores
+     * @secure
+     */
+    getActivityTop5Scores: (activityId: number, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseListActivityScoreResponse, any>({
+        path: `/api/activities/${activityId}/scores`,
+        method: "GET",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description 특정 활동에 등록된 최신 하이라이트 5개를 조회합니다.
+     *
+     * @tags activity-controller
+     * @name GetRecentHighlights
+     * @summary 최근 메모 조회
+     * @request GET:/api/activities/{activityId}/highlights/recent
+     * @secure
+     */
+    getRecentHighlights: (activityId: number, params: RequestParams = {}) =>
+      this.request<ApiSuccessResponseListHighlightPreviewResponse, any>({
+        path: `/api/activities/${activityId}/highlights/recent`,
         method: "GET",
         secure: true,
         ...params,

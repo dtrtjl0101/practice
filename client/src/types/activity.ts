@@ -9,4 +9,6 @@ export type Activity = {
   endTime: string;
   description: string;
   isParticipant: boolean;
+  highlightCount?: number;
+  discussionCount?: number;
 };

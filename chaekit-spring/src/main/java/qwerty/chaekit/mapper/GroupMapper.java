@@ -38,6 +38,7 @@ public class GroupMapper {
                 .leaderNickname(group.getGroupLeader().getNickname())
                 .leaderProfileImageURL(convertToPublicImageURL(group.getGroupLeader().getProfileImageKey()))
                 .memberCount((int) group.memberCount())
+                .isAutoApproval(group.isAutoApproval())
                 .build();
     }
 

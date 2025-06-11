@@ -13,19 +13,25 @@ import {
   Chip,
   Container,
   Divider,
-  Grid,
   Icon,
   IconButton,
   LinearProgress,
   Modal,
-  Pagination,
   Paper,
   Skeleton,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
-import { Add, Cancel, Check, Timelapse, Group } from "@mui/icons-material";
+import {
+  Add,
+  Cancel,
+  Check,
+  Timelapse,
+  Group,
+  StickyNote2,
+  CoPresent,
+} from "@mui/icons-material";
 import Popover from "@mui/material/Popover";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { Dayjs } from "dayjs";
@@ -34,6 +40,7 @@ import LinkButton from "../../../LinkButton";
 import { useNavigate } from "@tanstack/react-router";
 import BookSearchInput from "../../../BookSearchInput";
 import { useSnackbar } from "notistack";
+import { ActivityNotificationSection } from "./ActivityNotification";
 
 export function DayStatusChip(props: { startTime: string; endTime: string }) {
   const { startTime, endTime } = props;
@@ -62,10 +69,11 @@ export function DayStatusChip(props: { startTime: string; endTime: string }) {
   return <Chip label={label} color={color} icon={<Timelapse />} size="small" />;
 }
 
-export function ActivityCard(props: { groupId: number; canCreate?: boolean }) {
+export function CurrentActivityCard(props: {
+  groupId: number;
+  canCreate?: boolean;
+}) {
   const { groupId, canCreate } = props;
-  const [page, setPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
   const [activityCreateModalOpen, setActivityCreateModalOpen] = useState(false);
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
@@ -75,12 +83,12 @@ export function ActivityCard(props: { groupId: number; canCreate?: boolean }) {
     isFetching,
     refetch,
   } = useQuery({
-    queryKey: ["activity", groupId, page],
+    queryKey: ["currentActivity", groupId],
     queryFn: async () => {
       const response = await API_CLIENT.activityController.getAllActivities(
         groupId,
         {
-          page,
+          page: 0,
           size: 1,
           sort: ["startTime,desc"],
         }
@@ -90,11 +98,10 @@ export function ActivityCard(props: { groupId: number; canCreate?: boolean }) {
         console.error(response.errorMessage);
         throw new Error(response.errorCode);
       }
-
-      setTotalPages(response.data.totalPages!);
-
       const activity = response.data.content![0] as Activity | undefined;
-
+      if (activity?.endTime && new Date(activity?.endTime) < new Date()) {
+        return undefined;
+      }
       return activity;
     },
   });
@@ -240,7 +247,7 @@ export function ActivityCard(props: { groupId: number; canCreate?: boolean }) {
         <Stack spacing={2}>
           <Box sx={{ display: "flex", flexDirection: "row" }}>
             <Typography variant="h4" sx={{ mr: "auto" }}>
-              모임 활동
+              함께 읽기
             </Typography>
             {canCreate && (
               <IconButton onClick={() => setActivityCreateModalOpen(true)}>
@@ -252,66 +259,165 @@ export function ActivityCard(props: { groupId: number; canCreate?: boolean }) {
           {isFetching ? (
             <ActivityPlaceHolder />
           ) : activity ? (
-            <Stack spacing={2} direction={{ xs: "column", sm: "row" }}>
-              <BookInfo activity={activity} />
-              <Stack spacing={1} sx={{ flexGrow: 1 }}>
-                <Stack spacing={1}>
-                  <Typography variant="h5">{activity.bookTitle}</Typography>
-                  <Stack direction={"row"} alignItems={"center"} spacing={2}>
-                    <Typography
-                      variant="body2"
-                      color="textSecondary"
-                      sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
-                    >
-                      <DayStatusChip
-                        startTime={activity.startTime}
-                        endTime={activity.endTime}
-                      />
-                      {new Date(activity.startTime).toLocaleDateString()} ~{" "}
-                      {new Date(activity.endTime).toLocaleDateString()}
-                    </Typography>
+            <Stack spacing={2}>
+              <Stack spacing={2} direction={{ xs: "column", sm: "row" }}>
+                <BookInfo activity={activity} />
+                <Stack spacing={2} sx={{ flexGrow: 1 }}>
+                  {/* Header Section with Book Info and Stats */}
 
-                    <Button
-                      sx={{ ml: "auto", gap: 0.5 }}
-                      onClick={handleProgressPopoverOpen}
+                  {/* Title and Status Section */}
+                  <Stack
+                    direction={{ xs: "column", lg: "row" }}
+                    justifyContent="space-between"
+                    alignItems={{ xs: "flex-start", lg: "flex-start" }}
+                    spacing={2}
+                  >
+                    {/* Left: Title and Author */}
+                    <Stack spacing={1} sx={{ flex: 1 }}>
+                      <Stack
+                        direction={{ xs: "column", sm: "row" }}
+                        alignItems={{ xs: "flex-start", sm: "center" }}
+                        spacing={1}
+                      >
+                        <Typography variant="h5" fontWeight={600}>
+                          {activity.bookTitle}
+                        </Typography>
+                        <DayStatusChip
+                          startTime={activity.startTime}
+                          endTime={activity.endTime}
+                        />
+                      </Stack>
+                      <Typography variant="subtitle1" color="text.secondary">
+                        {activity.bookAuthor}
+                      </Typography>
+                    </Stack>
+
+                    {/* Right: Stats Section */}
+                    <Stack
+                      direction="row"
+                      spacing={0.5}
+                      sx={{
+                        alignSelf: { xs: "stretch", lg: "flex-start" },
+                        justifyContent: { xs: "flex-end", lg: "flex-end" },
+                      }}
                     >
-                      <Icon>
-                        <Group />
-                      </Icon>
-                      {activityReadProgresses.length}
-                    </Button>
+                      {/* Participants */}
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 0.5,
+                          p: 1,
+                          borderRadius: 1,
+                          color: "primary.main",
+                          cursor: "pointer",
+                          transition: "all 0.2s ease-in-out",
+                          "&:hover": {
+                            bgcolor: (theme) =>
+                              alpha(theme.palette.primary.main, 0.08),
+                            transform: "translateY(-1px)",
+                          },
+                        }}
+                        onClick={(e) => handleProgressPopoverOpen(e)}
+                      >
+                        <Group fontSize="small" />
+                        <Typography variant="body2" fontWeight={500}>
+                          {activityReadProgresses.length}
+                        </Typography>
+                      </Box>
+
+                      {/* Notes */}
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 0.5,
+                          p: 1,
+                          borderRadius: 1,
+                          color: "primary.main",
+                          cursor: "pointer",
+                          transition: "all 0.2s ease-in-out",
+                          "&:hover": {
+                            bgcolor: (theme) =>
+                              alpha(theme.palette.primary.main, 0.08),
+                            transform: "translateY(-1px)",
+                          },
+                        }}
+                        onClick={(e) => e}
+                      >
+                        <StickyNote2 fontSize="small" />
+                        <Typography variant="body2" fontWeight={500}>
+                          {activity.highlightCount ?? 0}
+                        </Typography>
+                      </Box>
+
+                      {/* Presentations */}
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 0.5,
+                          p: 1,
+                          borderRadius: 1,
+                          color: "primary.main",
+                          cursor: "pointer",
+                          transition: "all 0.2s ease-in-out",
+                          "&:hover": {
+                            bgcolor: (theme) =>
+                              alpha(theme.palette.primary.main, 0.08),
+                            transform: "translateY(-1px)",
+                          },
+                        }}
+                        onClick={(e) => e}
+                      >
+                        <CoPresent fontSize="small" />
+                        <Typography variant="body2" fontWeight={500}>
+                          {activity.discussionCount ?? 0}
+                        </Typography>
+                      </Box>
+                    </Stack>
                   </Stack>
-                </Stack>
-                <Divider />
-                <Typography variant="body1" flexGrow={1}>
-                  {activity.description}
-                </Typography>
-                <Stack
-                  direction={"row"}
-                  spacing={2}
-                  justifyContent={"flex-end"}
-                  alignItems={"center"}
-                >
-                  <Grid
-                    container
-                    direction={"row"}
-                    spacing={1}
+
+                  <Divider />
+
+                  {/* Description */}
+                  <Typography
+                    variant="body1"
                     sx={{
-                      flexGrow: 1,
-                      alignContent: "flex-end",
-                      justifyContent: "flex-end",
-                      flexWrap: "wrap",
+                      flex: 1,
+                      lineHeight: 1.6,
+                      color: "text.secondary",
                     }}
+                  >
+                    {activity.description}
+                  </Typography>
+
+                  {/* Action Buttons */}
+                  <Stack
+                    direction={{ xs: "column", sm: "row" }}
+                    spacing={1}
+                    justifyContent="flex-end"
+                    alignItems={{ xs: "stretch", sm: "center" }}
+                    sx={{ mt: "auto" }}
                   >
                     {!activity.isParticipant && (
                       <Button
                         variant="contained"
                         onClick={onJoinActivityButtonClicked}
+                        sx={{
+                          fontWeight: 600,
+                          boxShadow: 1,
+                          "&:hover": {
+                            boxShadow: 2,
+                            transform: "translateY(-1px)",
+                          },
+                          transition: "all 0.2s ease-in-out",
+                        }}
                       >
-                        {/* TODO: 가입되었으면 리더로 가는 버튼 표시 */}
                         활동 참여하기
                       </Button>
                     )}
+
                     {activity.isParticipant && (
                       <>
                         <LinkButton
@@ -324,11 +430,21 @@ export function ActivityCard(props: { groupId: number; canCreate?: boolean }) {
                             temporalProgress: false,
                             location: myReadProgress?.cfi || null,
                           }}
+                          sx={{
+                            fontWeight: 600,
+                            boxShadow: 1,
+                            "&:hover": {
+                              boxShadow: 2,
+                              transform: "translateY(-1px)",
+                            },
+                            transition: "all 0.2s ease-in-out",
+                          }}
                         >
                           {`책 읽으러 가기${myReadProgress?.percentage ? ` (${Math.round(myReadProgress.percentage)}%)` : ""}`}
                         </LinkButton>
+
                         <LinkButton
-                          variant="contained"
+                          variant="outlined"
                           to={
                             "/groups/$groupId/activities/$activityId/discussions"
                           }
@@ -336,29 +452,35 @@ export function ActivityCard(props: { groupId: number; canCreate?: boolean }) {
                             groupId: groupId,
                             activityId: activity.activityId,
                           }}
+                          sx={{
+                            fontWeight: 600,
+                            borderWidth: 1.5,
+                            "&:hover": {
+                              borderWidth: 1.5,
+                              transform: "translateY(-1px)",
+                              boxShadow: 1,
+                            },
+                            transition: "all 0.2s ease-in-out",
+                          }}
                         >
                           토론게시판
                         </LinkButton>
                       </>
                     )}
-                  </Grid>
+                  </Stack>
                 </Stack>
               </Stack>
+              <Divider />
+              <ActivityNotificationSection
+                activityId={activity.activityId}
+                groupId={groupId}
+              />
             </Stack>
           ) : (
             <Typography variant="body1" sx={{ mt: 2 }} color="textSecondary">
-              아직 활동이 없어요
+              현재 진행 중인 활동이 없어요
             </Typography>
           )}
-          <Divider />
-          <Pagination
-            page={page + 1}
-            count={totalPages}
-            onChange={(_, page) => {
-              setPage(page - 1);
-            }}
-            sx={{ width: "100%", justifyItems: "center" }}
-          />
         </Stack>
       </Paper>
     </>
@@ -399,67 +521,37 @@ export function BookInfo(props: { activity: Activity }) {
 
   if (!activity) {
     return (
-      <Stack width={256} alignItems={"center"} alignSelf={"center"}>
+      <Stack width={180} alignItems={"center"} alignSelf={"center"}>
         <Skeleton
           variant="rectangular"
-          width={192}
-          height={256}
+          height={200}
+          width={150}
           sx={{ borderRadius: 2 }}
         />
-        <Skeleton variant="text" width={180} />
-        <Skeleton variant="text" width={120} />
       </Stack>
     );
   }
 
   return (
-    <Stack spacing={2} width={256} alignItems={"center"} alignSelf={"center"}>
-      <CardActionArea
+    <CardActionArea
+      sx={{
+        display: "flex",
+        width: 180,
+        alignItems: "center",
+        borderRadius: 2,
+      }}
+    >
+      <CardMedia
+        image={activity.coverImageURL}
         sx={{
-          display: "flex",
-          width: 256,
-          alignItems: "center",
+          height: 200,
+          width: 150,
           borderRadius: 2,
+          flexShrink: 0,
+          bgcolor: alpha("#000", 0.05),
         }}
-      >
-        <CardMedia
-          image={activity.coverImageURL}
-          sx={{
-            height: 200,
-            width: 150,
-            borderRadius: 2,
-            flexShrink: 0,
-            bgcolor: alpha("#000", 0.05),
-          }}
-        />
-      </CardActionArea>
-      <Stack spacing={1} sx={{ flex: 1 }}>
-        <CardActionArea
-          sx={{
-            width: "100%",
-            display: "flex",
-            alignItems: "center",
-            borderRadius: 2,
-          }}
-        >
-          <Typography variant="h6" color="text.primary">
-            {activity.bookTitle}
-          </Typography>
-        </CardActionArea>
-        <CardActionArea
-          sx={{
-            width: "100%",
-            display: "flex",
-            alignItems: "center",
-            borderRadius: 2,
-          }}
-        >
-          <Typography variant="body2" color="text.secondary">
-            {activity.bookAuthor}
-          </Typography>
-        </CardActionArea>
-      </Stack>
-    </Stack>
+      />
+    </CardActionArea>
   );
 }
 

@@ -1,5 +1,6 @@
 import { Close, Note, NoteAdd, Timelapse } from "@mui/icons-material";
 import {
+  Avatar,
   Badge,
   Box,
   Drawer,
@@ -7,7 +8,6 @@ import {
   FormControlLabel,
   IconButton,
   Slider,
-  Snackbar,
   Stack,
   styled,
   Switch,
@@ -32,6 +32,11 @@ import HighlightCreationModal from "../component/HighlightCreationModal";
 import loadLocations from "../utils/loadLocations";
 import Coachmark, { useCoachmark } from "../component/Coachmark";
 import useThrottle from "../utils/useThrottle";
+import { useAtomValue } from "jotai";
+import State from "../states";
+import { Role } from "../types/role";
+import { enqueueSnackbar } from "notistack";
+import generateUserColor from "../utils/generateUserColor";
 
 export const Route = createFileRoute("/reader/$bookId")({
   component: RouteComponent,
@@ -79,6 +84,7 @@ function RouteComponent() {
   const { bookId } = Route.useParams();
   const { groupId, activityId, temporalProgress, location } = Route.useSearch();
 
+  const user = useAtomValue(State.Auth.user);
   const theme = useTheme();
   const [highlightsInPage, setHighlightsInPage] = useState<Highlight[]>([]);
   const [rendition, setRendition] = useState<Rendition | undefined>(undefined);
@@ -94,8 +100,6 @@ function RouteComponent() {
   const [focusedHighlight, setFocusedHighlight] = useState<Highlight | null>(
     null
   );
-  const [readTogetherSnackbarOpen, setReadTogetherSnackbarOpen] =
-    useState(!!activityId);
   const [selectionRightBottomPosition, setSelectionRightBottomPosition] =
     useState({
       left: 0,
@@ -122,41 +126,69 @@ function RouteComponent() {
     }
   }, [location]);
 
-  const queryParam: HighlightQueryParam = createHighlightQueryParam(
+  const queryParam = {
     bookId,
-    activityId
-  );
+    activityId,
+  };
 
   const { data: highlights, refetch: refetchHighlights } = useQuery({
     queryKey: ["highlights", queryParam],
     queryFn: async () => {
       // NOTE: 하이라이트가 100개 이상 없다고 가정
-      const response = await API_CLIENT.highlightController.getHighlights({
-        page: 0,
-        size: 100,
-        ...queryParam,
-      });
-      if (!response.isSuccessful) {
-        throw new Error(response.errorMessage);
-      }
 
-      return response.data.content!.map((highlight) => highlight as Highlight);
+      const highlights = queryParam.activityId
+        ? await (async () => {
+            const [responsePrivate, responsePublic] = await Promise.all([
+              API_CLIENT.highlightController.getHighlights({
+                page: 0,
+                size: 100,
+                me: false,
+                bookId: queryParam.bookId,
+                activityId: queryParam.activityId,
+              }),
+              API_CLIENT.highlightController.getHighlights({
+                page: 0,
+                size: 100,
+                me: true,
+                bookId: queryParam.bookId,
+              }),
+            ]);
+            if (!responsePrivate.isSuccessful) {
+              throw new Error(responsePrivate.errorMessage);
+            }
+            if (!responsePublic.isSuccessful) {
+              throw new Error(responsePublic.errorMessage);
+            }
+
+            const highlights = [
+              ...(responsePrivate.data.content || []),
+              ...(responsePublic.data.content || []),
+            ];
+            return highlights as Highlight[];
+          })()
+        : await (async () => {
+            const response = await API_CLIENT.userController.getMyHighlights({
+              page: 0,
+              size: 100,
+              bookId: queryParam.bookId,
+            });
+            if (!response.isSuccessful) {
+              throw new Error(response.errorMessage);
+            }
+            return response.data.content || [];
+          })();
+
+      return highlights.sort((a, b) => {
+        const aCreatedAtt = new Date(a.createdAt || "");
+        const bCreatedAt = new Date(b.createdAt || "");
+        return bCreatedAt.getTime() - aCreatedAtt.getTime();
+      }) as Highlight[];
     },
     placeholderData: keepPreviousData,
     initialData: [],
   });
 
   const previousHighlightsInPage = useRef<Highlight[]>([]);
-
-  const readProgressSliderMarks = useMemo(() => {
-    if (!rendition) {
-      return [];
-    }
-    const marks: { value: number }[] = highlights.map((highlight) => ({
-      value: rendition.book.locations.percentageFromCfi(highlight.cfi) * 100,
-    }));
-    return marks;
-  }, [rendition, highlights]);
 
   useEffect(() => {
     previousHighlightsInPage.current = highlightsInPage;
@@ -184,7 +216,7 @@ function RouteComponent() {
 
     setHighlightsInPage(newMemosInPage);
     return;
-  }, [highlights, rendition, location, setHighlightsInPage]);
+  }, [highlights, rendition?.location, location, setHighlightsInPage]);
 
   const onHighlightClick = (highlight: Highlight) => {
     if (!openHighlightDrawer) {
@@ -216,6 +248,7 @@ function RouteComponent() {
         {
           transition: "all 0.3s ease-out",
           opacity: shouldFade ? 0 : 0.7,
+          fill: generateUserColor(highlight.authorId),
         }
       );
     });
@@ -285,8 +318,9 @@ function RouteComponent() {
     memo: string;
     cfi: string;
     highlightContent: string;
+    activityId?: number;
   }) => {
-    const { cfi, memo, highlightContent } = props;
+    const { cfi, memo, highlightContent, activityId } = props;
     const response = await API_CLIENT.highlightController.createHighlight({
       memo,
       cfi,
@@ -297,9 +331,14 @@ function RouteComponent() {
     });
 
     if (!response.isSuccessful) {
-      throw new Error(response.errorMessage);
+      enqueueSnackbar(response.errorMessage, {
+        variant: "error",
+      });
     }
 
+    enqueueSnackbar("하이라이트가 저장되었습니다.", {
+      variant: "success",
+    });
     refetchHighlights();
   };
 
@@ -316,6 +355,58 @@ function RouteComponent() {
     });
 
   const throttledSetLocation = useThrottle(setLocation, 500);
+
+  const { data: members } = useQuery({
+    queryKey: ["activityReadProgresses", activityId],
+    queryFn: async () => {
+      const response =
+        await API_CLIENT.readingProgressController.getProgressFromActivity(
+          activityId!,
+          {
+            pageable: {
+              page: 0,
+              size: 100,
+            },
+          }
+        );
+      if (!response.isSuccessful) {
+        throw new Error(response.errorMessage);
+      }
+      return response.data.content || [];
+    },
+    initialData: [],
+    enabled: !!activityId,
+    refetchInterval: 1000 * 10,
+  });
+
+  const readProgressSliderMarks = useMemo(() => {
+    if (!rendition) {
+      return [];
+    }
+    const marks: ReaderProgressSliderMark[] = [
+      ...highlights.map((highlight) => {
+        return {
+          type: "memo",
+          value:
+            rendition.book.locations.percentageFromCfi(highlight.cfi) * 100,
+        } as ReaderProgressSliderMark;
+      }),
+      ...members
+        .filter((member) =>
+          user?.role === Role.ROLE_USER ? member.userId !== user.userId : true
+        )
+        .map((member) => {
+          return {
+            type: "member",
+            value: member.percentage || 0,
+            memberName: member.userNickname,
+            profileImageUrl: member.userProfileImageURL || "",
+            memberId: member.userId || 0,
+          } as ReaderProgressSliderMark;
+        }),
+    ];
+    return marks;
+  }, [rendition?.book.locations, highlights, members]);
 
   return (
     <>
@@ -392,31 +483,6 @@ function RouteComponent() {
             }}
             marks={readProgressSliderMarks}
           />
-          <Snackbar
-            anchorOrigin={{ vertical: "top", horizontal: "center" }}
-            open={readTogetherSnackbarOpen}
-            onClose={() => {
-              setReadTogetherSnackbarOpen(false);
-            }}
-            action={
-              <IconButton
-                size="small"
-                aria-label="close"
-                color="inherit"
-                onClick={() => setReadTogetherSnackbarOpen(false)}
-              >
-                <Close />
-              </IconButton>
-            }
-            message="함께읽기 활성화됨"
-            autoHideDuration={3000}
-            sx={{
-              position: "absolute",
-              top: theme.spacing(2),
-              left: "50%",
-              transform: "translateX(-50%)",
-            }}
-          />
           <Stack
             direction="column"
             alignItems="flex-end"
@@ -491,6 +557,8 @@ function RouteComponent() {
           onClose={() => setOpenHighlightCreationModal(false)}
           selection={selection}
           addHighlight={addHighlight}
+          currentActivityId={activityId}
+          bookId={bookId}
         />
         <Drawer
           anchor="right"
@@ -498,10 +566,20 @@ function RouteComponent() {
           onClose={() => setOpenHighlightDrawer(false)}
         >
           <Stack width={320} height={"100%"}>
-            <Stack direction={"row"} p={2}>
+            <Stack direction={"row"} p={2} pb={0}>
               <Typography variant="h6" align="left" flexGrow={1} noWrap>
                 하이라이트
               </Typography>
+
+              <IconButton
+                onClick={() => {
+                  setOpenHighlightDrawer(false);
+                }}
+              >
+                <Close />
+              </IconButton>
+            </Stack>
+            <Box p={2} pt={0} alignSelf={"end"}>
               <FormControlLabel
                 control={
                   <Switch
@@ -512,14 +590,7 @@ function RouteComponent() {
                 }
                 label="현재 페이지만"
               />
-              <IconButton
-                onClick={() => {
-                  setOpenHighlightDrawer(false);
-                }}
-              >
-                <Close />
-              </IconButton>
-            </Stack>
+            </Box>
             <Box height={"100%"} overflow="auto">
               <Stack spacing={1} p={2}>
                 {(showHighlightsOnOnlyCurrentPage
@@ -614,6 +685,9 @@ function RouteComponent() {
             newRendition.once("started", async () => {
               await loadLocations(bookId, newRendition).then(forceUpdate);
             });
+            newRendition.on("rendered", () => {
+              forceUpdate();
+            });
             setRendition(newRendition);
           }}
         />
@@ -638,31 +712,6 @@ function diffMemos(prev: Highlight[], next: Highlight[]): HighlightDiff {
   };
 }
 
-type HighlightQueryParam = {
-  me: boolean;
-  bookId: number;
-  activityId?: number;
-  spine?: string;
-};
-
-function createHighlightQueryParam(
-  bookId: number,
-  activityId?: number
-): HighlightQueryParam {
-  const param: HighlightQueryParam = activityId
-    ? {
-        me: false,
-        bookId,
-        activityId,
-      }
-    : {
-        me: true,
-        bookId,
-      };
-
-  return param;
-}
-
 const ReadProgressSlider = styled(Slider)(({ theme }) => ({
   height: 5,
   zIndex: theme.zIndex.fab,
@@ -681,9 +730,73 @@ const ReadProgressSlider = styled(Slider)(({ theme }) => ({
   },
 }));
 
-function ReadProgressSliderMark(props: { style: { left: string } }) {
+function ReadProgressSliderMark(props: {
+  "data-index": number;
+  style: { left: string };
+  ownerState: {
+    marks: ReaderProgressSliderMark[];
+  };
+}) {
   const theme = useTheme();
   const left = props.style.left;
+  const mark = props.ownerState.marks[props["data-index"]];
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  if (mark.type === "member") {
+    return (
+      <Box
+        sx={{
+          position: "absolute",
+          left,
+          top: 20,
+          transform: "translate(-50%, -50%)",
+        }}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
+        <Avatar
+          src={mark.profileImageUrl}
+          sx={{
+            width: 24,
+            height: 24,
+            borderRadius: "50% 0 50% 50%",
+            transform: "rotate(-45deg)",
+            transition: "all 0.3s",
+            border: `2px solid ${generateUserColor(mark.memberId)}`,
+          }}
+        />
+        {showTooltip && (
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: -40,
+              left: "50%",
+              transform: "translateX(-50%)",
+              backgroundColor: "rgba(0, 0, 0, 0.8)",
+              color: "white",
+              padding: "4px 8px",
+              borderRadius: "4px",
+              fontSize: "12px",
+              whiteSpace: "nowrap",
+              zIndex: theme.zIndex.tooltip,
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: -4,
+                left: "50%",
+                transform: "translateX(-50%)",
+                borderLeft: "4px solid transparent",
+                borderRight: "4px solid transparent",
+                borderBottom: "4px solid rgba(0, 0, 0, 0.8)",
+              },
+            }}
+          >
+            {mark.memberName}
+          </Box>
+        )}
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -700,3 +813,15 @@ function ReadProgressSliderMark(props: { style: { left: string } }) {
     />
   );
 }
+
+type ReaderProgressSliderMark = { value: number } & (
+  | {
+      type: "memo";
+    }
+  | {
+      type: "member";
+      profileImageUrl: string;
+      memberName: string;
+      memberId: number;
+    }
+);

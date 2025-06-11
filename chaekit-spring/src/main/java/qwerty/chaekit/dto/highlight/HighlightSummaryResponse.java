@@ -3,6 +3,8 @@ package qwerty.chaekit.dto.highlight;
 import lombok.Builder;
 import qwerty.chaekit.domain.highlight.Highlight;
 
+import java.time.LocalDateTime;
+
 @Builder
 public record HighlightSummaryResponse(
         Long id,
@@ -13,7 +15,8 @@ public record HighlightSummaryResponse(
         String spine,
         String cfi,
         String memo,
-        String highlightContent
+        String highlightContent,
+        LocalDateTime createdAt
 ) {
     /*
      * fetch required:
@@ -30,6 +33,7 @@ public record HighlightSummaryResponse(
                 .cfi(highlight.getCfi())
                 .memo(highlight.getMemo())
                 .highlightContent(highlight.getHighlightcontent())
+                .createdAt(highlight.getCreatedAt())
                 .build();
     }
 }

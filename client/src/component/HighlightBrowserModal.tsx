@@ -1,28 +1,46 @@
 import {
+  Avatar,
   Box,
   Button,
   Card,
   CardActions,
   CircularProgress,
-  Dialog,
   Divider,
   Grid,
   IconButton,
+  Input,
   List,
+  ListItemAvatar,
   ListItemButton,
   ListItemText,
+  Menu,
+  MenuItem,
   Modal,
   Paper,
   Stack,
+  TextField,
   Typography,
   useTheme,
 } from "@mui/material";
 import { Highlight } from "../types/highlight";
-import { Fragment, useState } from "react";
-import { Delete, Edit, Sort } from "@mui/icons-material";
+import { Fragment, useEffect, useState } from "react";
+import {
+  Delete,
+  Edit,
+  Preview,
+  Public,
+  PublicOff,
+  Search,
+  Sort,
+} from "@mui/icons-material";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import API_CLIENT from "../api/api";
 import { setResponsiveStyleValueSm } from "../utils/setResponsiveStyleValue";
+import ActivitySelectModal from "./ActivitySelectModal";
+import { useSnackbar } from "notistack";
+import LinkListItemButton from "./LinkListItemButton";
+import { LinkIconButton } from "./_pathlessLayout/groups/$groupId/LinkIconButton";
+import useThrottle from "../utils/useThrottle";
 
 type HighlightFilterKind =
   | {
@@ -31,6 +49,11 @@ type HighlightFilterKind =
   | {
       kind: "ActivityHighlights";
       activityId: number;
+    }
+  | {
+      kind: "OtherActivityHighlights";
+      activityId: number;
+      activityName: string;
     };
 
 export default function HighlightBrowserModal(props: {
@@ -46,22 +69,32 @@ export default function HighlightBrowserModal(props: {
   const [selectedHighlight, setSelectedHighlight] = useState<Highlight | null>(
     null
   );
-  const [openFilterDialog, setOpenFilterDialog] = useState(false);
+  const [filterMenuAnchorElement, setFilterMenuAnchorElement] =
+    useState<HTMLElement | null>(null);
   const [highlightFilterKind, setHighlightFilterKind] =
     useState<HighlightFilterKind>({ kind: "MyHighlights" });
+  const [activitySelectModalOpen, setActivitySelectModalOpen] = useState(false);
+  const [keyword, setKeyword] = useState("");
+  const [keywordToSearch, setKeywordToSearch] = useState("");
 
   const {
     data: highlightPages,
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
+    refetch,
   } = useInfiniteQuery({
-    queryKey: ["highlights", highlightFilterKind],
+    queryKey: ["highlights", highlightFilterKind, keywordToSearch],
     queryFn: async ({ pageParam }) => {
-      const response = await API_CLIENT.highlightController.getHighlights({
+      const fetchFunction =
+        highlightFilterKind.kind === "MyHighlights"
+          ? API_CLIENT.userController.getMyHighlights
+          : API_CLIENT.highlightController.getHighlights;
+      const response = await fetchFunction({
         page: pageParam,
         size: 30,
         ...getHighlightFilter(highlightFilterKind),
+        keyword: keywordToSearch || undefined,
       });
       if (!response.isSuccessful) {
         console.error(response.errorCode);
@@ -77,6 +110,8 @@ export default function HighlightBrowserModal(props: {
       return undefined;
     },
   });
+
+  const setKeywordToSearchWithThreshold = useThrottle(setKeywordToSearch, 500);
 
   const onHighlightClick = (highlight: Highlight) => {
     setSelectedHighlight(highlight);
@@ -101,61 +136,56 @@ export default function HighlightBrowserModal(props: {
       }}
     >
       <>
-        <Dialog
-          open={openFilterDialog}
-          onClose={() => setOpenFilterDialog(false)}
+        <ActivitySelectModal
+          open={activitySelectModalOpen}
+          onClose={() => setActivitySelectModalOpen(false)}
+          onSelect={(activity) => {
+            setHighlightFilterKind({
+              kind: "OtherActivityHighlights",
+              activityId: activity.id,
+              activityName: activity.name,
+            });
+            setActivitySelectModalOpen(false);
+            setFilterMenuAnchorElement(null);
+          }}
+        />
+        <Menu
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "center",
+          }}
+          open={!!filterMenuAnchorElement}
+          anchorEl={filterMenuAnchorElement}
+          onClose={() => setFilterMenuAnchorElement(null)}
         >
-          <Box sx={{ padding: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              필터 선택
-            </Typography>
-            <List>
-              <ListItemButton
-                onClick={() => {
-                  setHighlightFilterKind({ kind: "MyHighlights" });
-                  setOpenFilterDialog(false);
-                }}
-              >
-                <ListItemText primary="내 모든 하이라이트" />
-              </ListItemButton>
-              <ListItemButton
-                onClick={() => {
-                  setHighlightFilterKind({
-                    kind: "ActivityHighlights",
-                    activityId: activityId!,
-                  });
-                  setOpenFilterDialog(false);
-                }}
-              >
-                <ListItemText primary="현재 활동의 하이라이트" />
-              </ListItemButton>
-
-              {/*<ListItemButton
-                onClick={() => {
-                  console.log("특정 활동에서 공개된 내 하이라이트 목록");
-                  setOpenFilterDialog(false);
-                }}
-              >
-                <ListItemText primary="특정 활동에서 공개된 내 하이라이트 목록" />
-              </ListItemButton>
-              <ListItemButton
-                onClick={() => {
-                  console.log("특정 활동에서 공개된 모든 하이라이트 조회");
-                  setOpenFilterDialog(false);
-                }}
-              >
-                <ListItemText primary="특정 활동에서 공개된 모든 하이라이트 조회" />
-              </ListItemButton> */}
-            </List>
-            <Box
-              sx={{ display: "flex", justifyContent: "flex-end", marginTop: 2 }}
+          <MenuItem
+            onClick={() => {
+              setHighlightFilterKind({ kind: "MyHighlights" });
+              setFilterMenuAnchorElement(null);
+            }}
+          >
+            {getHighlightFilterLabel({ kind: "MyHighlights" })}
+          </MenuItem>
+          {activityId && (
+            <MenuItem
+              onClick={() => {
+                setHighlightFilterKind({
+                  kind: "ActivityHighlights",
+                  activityId,
+                });
+                setFilterMenuAnchorElement(null);
+              }}
             >
-              <Button variant="text" onClick={() => setOpenFilterDialog(false)}>
-                닫기
-              </Button>
-            </Box>
-          </Box>
-        </Dialog>
+              {getHighlightFilterLabel({
+                kind: "ActivityHighlights",
+                activityId,
+              })}
+            </MenuItem>
+          )}
+          <MenuItem onClick={() => setActivitySelectModalOpen(true)}>
+            다른 활동의 하이라이트
+          </MenuItem>
+        </Menu>
         <Box
           sx={{
             position: "absolute",
@@ -191,13 +221,32 @@ export default function HighlightBrowserModal(props: {
                   }}
                 >
                   <Stack spacing={1} sx={{ flexGrow: 1, overflow: "hidden" }}>
-                    <Box
-                      padding={1}
-                      sx={{ display: "flex", justifyContent: "flex-end" }}
-                    >
-                      <IconButton onClick={() => setOpenFilterDialog(true)}>
-                        <Sort />
-                      </IconButton>
+                    <Box sx={{ px: 2, py: 1 }}>
+                      <Input
+                        value={keyword}
+                        onChange={(e) => {
+                          setKeyword(e.target.value);
+                          setKeywordToSearchWithThreshold(e.target.value);
+                        }}
+                        placeholder="하이라이트 검색"
+                        fullWidth
+                        size="small"
+                        startAdornment={
+                          <IconButton edge="start" disabled>
+                            <Search />
+                          </IconButton>
+                        }
+                        endAdornment={
+                          <IconButton
+                            edge="end"
+                            onClick={(e) =>
+                              setFilterMenuAnchorElement(e.currentTarget)
+                            }
+                          >
+                            <Sort />
+                          </IconButton>
+                        }
+                      />
                     </Box>
                     <Divider />
                     <List sx={{ flexGrow: 1, overflowY: "auto" }}>
@@ -249,6 +298,10 @@ export default function HighlightBrowserModal(props: {
                   onHighlightUseButtonClick={
                     onUseHighlight && onHighlightUseButtonClick
                   }
+                  onEditHighlight={(highlight) => {
+                    setSelectedHighlight(highlight || null);
+                    refetch();
+                  }}
                 />
               ) : (
                 <HighlightViewerPlaceholder onClose={onClose} />
@@ -282,7 +335,7 @@ function HighlightListItem(props: {
         secondary={
           <>
             <Typography
-              variant="body2"
+              variant="body1"
               color="textSecondary"
               component={"span"}
             >
@@ -291,14 +344,37 @@ function HighlightListItem(props: {
             <Typography
               variant="body2"
               color="textSecondary"
+              component="span"
+              display="block"
+              noWrap
+            >
+              {highlight.groupName
+                ? `${highlight.groupName} - ${highlight.bookTitle}`
+                : highlight.bookTitle}
+            </Typography>
+            <Typography
+              variant="body2"
+              color="textSecondary"
               component={"span"}
               display={"block"}
+              textAlign={"right"}
             >
-              createdAt
+              {new Date(highlight.createdAt).toLocaleDateString("ko-KR", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+              })}
             </Typography>
           </>
         }
       />
+      <IconButton size="small" sx={{ ml: 1 }} disabled>
+        {highlight.activityId ? (
+          <Public fontSize="small" color="action" />
+        ) : (
+          <PublicOff fontSize="small" color="disabled" />
+        )}
+      </IconButton>
     </ListItemButton>
   );
 }
@@ -356,70 +432,268 @@ function HighlightViewer(props: {
   highlight: Highlight;
   onClose: () => void;
   onHighlightUseButtonClick?: (highlight: Highlight) => void;
+  onEditHighlight: (highlight?: Highlight) => void;
 }) {
-  const { highlight, onClose, onHighlightUseButtonClick } = props;
+  const { highlight, onClose, onHighlightUseButtonClick, onEditHighlight } =
+    props;
+  const [activitySelectModalOpen, setActivitySelectModalOpen] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
+  const [isEditing, setIsEditing] = useState(false);
+  const [memo, setMemo] = useState(highlight.memo || "");
 
   // null/undefined 체크 및 기본값 설정
   const highlightContent = highlight.highlightContent || "";
-  const memo = highlight.memo || "";
+
+  const handlePublishHighlight = async (activityId: number) => {
+    const response = await API_CLIENT.highlightController.updateHighlight(
+      highlight.id,
+      {
+        activityId,
+      }
+    );
+
+    if (!response.isSuccessful) {
+      enqueueSnackbar(response.errorMessage, { variant: "error" });
+      setActivitySelectModalOpen(false);
+      return;
+    }
+    enqueueSnackbar("하이라이트가 공개되었습니다.", { variant: "success" });
+    setActivitySelectModalOpen(false);
+    onEditHighlight({ ...highlight, activityId });
+  };
+
+  const onEditButtonClicked = () => {
+    if (highlight.activityId) {
+      enqueueSnackbar("한번 공개한 하이라이트는 활동을 변경할 수 없습니다.", {
+        variant: "warning",
+      });
+      return;
+    }
+    setIsEditing(true);
+  };
+
+  const onDeleteButtonClicked = async () => {
+    if (highlight.activityId) {
+      enqueueSnackbar("한번 공개한 하이라이트는 삭제할 수 없습니다.", {
+        variant: "warning",
+      });
+      return;
+    }
+
+    const response = await API_CLIENT.highlightController.deleteHighlight(
+      highlight.id
+    );
+
+    if (!response.isSuccessful) {
+      enqueueSnackbar(response.errorMessage, { variant: "error" });
+      return;
+    }
+    enqueueSnackbar("하이라이트가 삭제되었습니다.", { variant: "success" });
+    onEditHighlight();
+  };
+
+  const onEditComplete = async () => {
+    const response = await API_CLIENT.highlightController.updateHighlight(
+      highlight.id,
+      {
+        memo: memo,
+      }
+    );
+
+    if (!response.isSuccessful) {
+      enqueueSnackbar(response.errorMessage, { variant: "error" });
+      return;
+    }
+    enqueueSnackbar("하이라이트가 수정되었습니다.", { variant: "success" });
+    setIsEditing(false);
+    onEditHighlight({ ...highlight, memo });
+  };
+
+  useEffect(() => {
+    setMemo(highlight.memo || "");
+  }, [highlight]);
 
   return (
-    <Grid
-      size={setResponsiveStyleValueSm(12, 8)}
-      sx={{ height: setResponsiveStyleValueSm("none", "100%") }}
-    >
-      <Card
-        variant="outlined"
-        elevation={2}
-        sx={{
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
+    <>
+      <ActivitySelectModal
+        open={activitySelectModalOpen}
+        onClose={() => setActivitySelectModalOpen(false)}
+        onSelect={({ id }) => {
+          handlePublishHighlight(id);
         }}
+        description="하이라이트를 공개할 활동을 선택하세요. 한번 공개한 하이라이트는 활동을 변경할 수 없습니다."
+        bookId={highlight.bookId}
+      />
+      <Grid
+        size={setResponsiveStyleValueSm(12, 8)}
+        sx={{ height: setResponsiveStyleValueSm("none", "100%") }}
       >
-        <Stack spacing={1} sx={{ flexGrow: 1, overflow: "hidden" }}>
-          <Box padding={1} sx={{ display: "flex", justifyContent: "flex-end" }}>
-            <IconButton color="secondary">
-              <Edit />
-            </IconButton>
-            <IconButton color="error">
-              <Delete />
-            </IconButton>
-          </Box>
-          <Divider />
-          <Stack
-            spacing={1}
-            sx={{ flexGrow: 1, overflowY: "auto", padding: 2 }}
-          >
-            <Typography
-              variant="body2"
-              color="textSecondary"
-              textAlign={"right"}
+        <Card
+          variant="outlined"
+          elevation={2}
+          sx={{
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <Stack spacing={1} sx={{ flexGrow: 1, overflow: "hidden" }}>
+            <Box
+              padding={1}
+              sx={{ display: "flex", justifyContent: "flex-end" }}
             >
-              createdAt
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              {highlightContent}
-            </Typography>
-            <Divider />
-            <Typography variant="body1">{memo}</Typography>
-          </Stack>
-          <CardActions sx={{ justifyContent: "flex-end" }}>
-            <Button variant="outlined" color="secondary" onClick={onClose}>
-              취소
-            </Button>
-            {onHighlightUseButtonClick && (
-              <Button
-                variant="contained"
-                onClick={() => onHighlightUseButtonClick(highlight)}
+              <LinkIconButton
+                color="secondary"
+                to={"/reader/$bookId"}
+                params={{
+                  bookId: highlight.bookId,
+                }}
+                search={{
+                  activityId: highlight.activityId,
+                  groupId: highlight.groupId,
+                  location: highlight.cfi,
+                  temporalProgress: true,
+                }}
               >
-                선택
-              </Button>
+                <Preview />
+              </LinkIconButton>
+              <IconButton
+                color="secondary"
+                onClick={() => {
+                  if (highlight.activityId) {
+                    enqueueSnackbar(
+                      "한번 공개한 하이라이트는 활동을 변경할 수 없습니다.",
+                      { variant: "warning" }
+                    );
+                    return;
+                  }
+                  setActivitySelectModalOpen(true);
+                }}
+              >
+                {highlight.activityId ? <Public /> : <PublicOff />}
+              </IconButton>
+              <IconButton color="secondary" onClick={onEditButtonClicked}>
+                <Edit />
+              </IconButton>
+              <IconButton color="error" onClick={onDeleteButtonClicked}>
+                <Delete />
+              </IconButton>
+            </Box>
+            <Divider />
+            <Stack
+              spacing={1}
+              sx={{ flexGrow: 1, overflowY: "auto", padding: 2 }}
+            >
+              <Stack
+                justifyContent={"space-between"}
+                alignItems={"flex-end"}
+                direction="row"
+              >
+                <Stack direction="row" spacing={0.5} alignItems="center">
+                  <Avatar src={highlight.authorProfileImageURL} />
+                  <Typography noWrap>{highlight.authorName}</Typography>
+                </Stack>
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  noWrap
+                  component={"span"}
+                >
+                  {new Date(highlight.createdAt).toLocaleDateString("ko-KR", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  })}
+                </Typography>
+              </Stack>
+              <Typography variant="body2" color="textSecondary">
+                {highlightContent}
+              </Typography>
+              <Divider />
+              {isEditing ? (
+                <TextField
+                  multiline
+                  fullWidth
+                  minRows={3}
+                  value={memo}
+                  onChange={(e) => setMemo(e.target.value)}
+                />
+              ) : (
+                <Typography variant="body1">{memo}</Typography>
+              )}
+            </Stack>
+            {highlight.groupName && highlight.groupId && (
+              <LinkListItemButton
+                to={"/groups/$groupId"}
+                params={{
+                  groupId: highlight.groupId,
+                }}
+                sx={{ flexGrow: 0 }}
+              >
+                <ListItemAvatar>
+                  <Avatar variant="rounded" src={highlight.groupImageURL} />
+                </ListItemAvatar>
+                <ListItemText primary={<>{highlight.groupName}</>} />
+              </LinkListItemButton>
             )}
-          </CardActions>
-        </Stack>
-      </Card>
-    </Grid>
+            <LinkListItemButton
+              to={"/books/$bookId"}
+              params={{ bookId: highlight.bookId }}
+              sx={{ flexGrow: 0 }}
+            >
+              <ListItemAvatar>
+                <Avatar variant="rounded" src={highlight.bookCoverImageURL} />
+              </ListItemAvatar>
+              <ListItemText
+                primary={highlight.bookTitle}
+                secondary={highlight.bookAuthor}
+              />
+            </LinkListItemButton>
+            <CardActions sx={{ justifyContent: "flex-end" }}>
+              {isEditing ? (
+                <>
+                  <Button
+                    variant="outlined"
+                    color="secondary"
+                    onClick={() => {
+                      setIsEditing(false);
+                      setMemo(highlight.memo || "");
+                    }}
+                  >
+                    취소
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={onEditComplete}
+                  >
+                    수정 완료
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="outlined"
+                    color="secondary"
+                    onClick={onClose}
+                  >
+                    취소
+                  </Button>
+                  {onHighlightUseButtonClick && (
+                    <Button
+                      variant="contained"
+                      onClick={() => onHighlightUseButtonClick(highlight)}
+                    >
+                      선택
+                    </Button>
+                  )}
+                </>
+              )}
+            </CardActions>
+          </Stack>
+        </Card>
+      </Grid>
+    </>
   );
 }
 
@@ -439,5 +713,21 @@ function getHighlightFilter(kind: HighlightFilterKind): HighlightFilter {
         me: true,
         activityId: kind.activityId,
       };
+    case "OtherActivityHighlights":
+      return {
+        me: true,
+        activityId: kind.activityId,
+      };
+  }
+}
+
+function getHighlightFilterLabel(kind: HighlightFilterKind): string {
+  switch (kind.kind) {
+    case "MyHighlights":
+      return "내 모든 하이라이트";
+    case "ActivityHighlights":
+      return "현재 활동의 하이라이트";
+    case "OtherActivityHighlights":
+      return `${kind.activityName}의 하이라이트`;
   }
 }
