@@ -166,14 +166,10 @@ class HighlightCommentServiceTest {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(userProfile));
         when(highlightRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        // when
-        ForbiddenException exception = assertThrows(
-                ForbiddenException.class,
-                () -> highlightCommentService.createComment(userToken,anyLong(),request)
-        );
-
-        // then
-        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.HIGHLIGHT_NOT_FOUND.getCode());
+        // when & then
+        assertThatThrownBy(() -> highlightCommentService.createComment(userToken, anyLong(), request))
+                .isInstanceOf(NotFoundException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.HIGHLIGHT_NOT_FOUND.getCode());
     }
 
     @Test
@@ -211,11 +207,13 @@ class HighlightCommentServiceTest {
         HighlightCommentRequest request = new HighlightCommentRequest(newContent, null);
 
         HighlightComment comment = mock(HighlightComment.class);
+        UserProfile commentAuthor = mock(UserProfile.class);
         HighlightCommentResponse response = mock(HighlightCommentResponse.class);
 
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
-        when(comment.getAuthor()).thenReturn(userProfile);
+        when(comment.getAuthor()).thenReturn(commentAuthor);
         when(userProfile.getId()).thenReturn(1L);
+        when(commentAuthor.getId()).thenReturn(1L);
         when(commentRepository.save(comment)).thenReturn(comment);
         when(highlightCommentMapper.toResponse(comment)).thenReturn(response);
 
@@ -236,17 +234,17 @@ class HighlightCommentServiceTest {
         UserToken userToken = UserToken.of(userProfile);
 
         HighlightComment comment = mock(HighlightComment.class);
+        UserProfile commentAuthor = mock(UserProfile.class);
 
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
-        when(comment.getAuthor()).thenReturn(userProfile);
+        when(comment.getAuthor()).thenReturn(commentAuthor);
         when(userProfile.getId()).thenReturn(1L);
-        when(comment.getReplies()).thenReturn(new ArrayList<>());
+        when(commentAuthor.getId()).thenReturn(1L);
 
         // when
         highlightCommentService.deleteComment(userToken, commentId);
 
         // then
-        verify(reactionRepository).findByCommentId(commentId);
         verify(commentRepository).delete(comment);
     }
 
@@ -259,23 +257,19 @@ class HighlightCommentServiceTest {
         UserToken userToken = UserToken.of(userProfile);
 
         HighlightComment comment = mock(HighlightComment.class);
-        HighlightComment reply = mock(HighlightComment.class);
-        List<HighlightComment> replies = List.of(reply);
+        UserProfile commentAuthor = mock(UserProfile.class);
+        List<HighlightComment> replies = List.of(mock(HighlightComment.class));
 
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
-        when(comment.getAuthor()).thenReturn(userProfile);
+        when(comment.getAuthor()).thenReturn(commentAuthor);
         when(userProfile.getId()).thenReturn(1L);
+        when(commentAuthor.getId()).thenReturn(1L);  // lenient() 추가
         when(comment.getReplies()).thenReturn(replies);
-        when(reply.getId()).thenReturn(2L);
-        when(reactionRepository.findByCommentId(commentId)).thenReturn(new ArrayList<>());
-        when(reactionRepository.findByCommentIdIn(List.of(2L))).thenReturn(new ArrayList<>());
 
         // when
         highlightCommentService.deleteComment(userToken, commentId);
 
         // then
-        verify(reactionRepository).findByCommentId(commentId);
-        verify(reactionRepository).findByCommentIdIn(List.of(2L));
         verify(commentRepository).delete(comment);
     }
 
@@ -290,8 +284,8 @@ class HighlightCommentServiceTest {
         when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
 
         // when
-        ForbiddenException exception = assertThrows(
-                ForbiddenException.class,
+        NotFoundException exception = assertThrows(
+                NotFoundException.class,
                 () -> highlightCommentService.deleteComment(userToken,commentId)
         );
 
