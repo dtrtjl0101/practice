@@ -15,7 +15,7 @@ import API_CLIENT from "../api/api";
 import { useEffect, useState } from "react";
 import { paymentSuccessToken } from "../types/paymentSuccessMessage";
 import { setResponsiveStyleValueSm } from "../utils/setResponsiveStyleValue";
-import { useAtomValue } from "jotai";
+import { useAtom } from "jotai";
 import State from "../states";
 
 export default function CreditPurchaseModal(props: {
@@ -23,7 +23,7 @@ export default function CreditPurchaseModal(props: {
   onClose: () => void;
   onPurchased?: () => void;
 }) {
-  const user = useAtomValue(State.Auth.user);
+  const [user, setUser] = useAtom(State.Auth.user);
   const { open, onClose, onPurchased } = props;
   const [purchasing, setPurchasing] = useState(false);
   const [popup, setPopup] = useState<Window | null>(null);
@@ -94,6 +94,16 @@ export default function CreditPurchaseModal(props: {
     const listenMessage = (event: MessageEvent) => {
       if (event.origin !== window.location.origin) return;
       if (event.data === paymentSuccessToken) {
+        if (isUser && user.firstPaymentBenefit == true) {
+          setUser((prev) => {
+            // firstPaymentBenefit 해제
+            if (!prev) return prev;
+            return {
+              ...prev,
+              firstPaymentBenefit: false,
+            };
+          });
+        }
         refetchMyWallet();
         if (popup) {
           popup.close();
