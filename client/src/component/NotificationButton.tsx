@@ -14,6 +14,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../api/api";
 import { useRef, useState } from "react";
 import { Notification } from "../types/notification";
+import { useSnackbar } from "notistack";
 import LinkButton from "./LinkButton";
 import { Client } from "@stomp/stompjs";
 import { ENV } from "../env";
@@ -26,6 +27,7 @@ export default function NotificationButton() {
   const clientRef = useRef<Client | null>(null);
   const user = useAtomValue(State.Auth.user);
   const userId = user?.role === Role.ROLE_USER && user.userId;
+  const { enqueueSnackbar } = useSnackbar();
 
   const { data: notifications, refetch: refetchNotifications } = useQuery({
     queryKey: ["notifications"],
@@ -61,6 +63,7 @@ export default function NotificationButton() {
           client.subscribe(`/topic/notification/${userId}`, function (message) {
             const notification = JSON.parse(message.body);
             console.log(notification);
+            enqueueSnackbar(notification.message, { variant: "info" });
             refetchNotifications();
           });
         },
