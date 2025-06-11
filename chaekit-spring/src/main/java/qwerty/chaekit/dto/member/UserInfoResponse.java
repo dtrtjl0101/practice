@@ -21,10 +21,12 @@ public record UserInfoResponse(
         String recentActivityBookTitle,
         String recentActivityBookAuthor,
         String recentActivityBookCoverImageURL,
+        Boolean firstPaymentBenefit,
         LocalDateTime createdAt
         
 ){
-    public static UserInfoResponse of(UserProfile user, String profileImageURL, Activity recentActivity, String groupImageURL, String bookImageURL) {
+    public static UserInfoResponse of(UserProfile user, String profileImageURL, Activity recentActivity, String groupImageURL, String bookImageURL,
+                                      Boolean firstPaymentBenefit) {
         return UserInfoResponse.builder()
                 .memberId(user.getMember().getId())
                 .email(user.getMember().getEmail())
@@ -42,6 +44,7 @@ public record UserInfoResponse(
                 .recentActivityBookAuthor(recentActivity == null ? null : recentActivity.getBook().getAuthor())
                 .recentActivityBookCoverImageURL(bookImageURL)
                 
+                .firstPaymentBenefit(firstPaymentBenefit)
                 .createdAt(user.getCreatedAt())
                 .build();
     }
