@@ -144,31 +144,25 @@ class HighlightReactionServiceTest {
         // given
         Long userId = 1L;
         Long highlightId = 1L;
-        UserProfile userProfile = mock(UserProfile.class);
-        UserToken userToken = UserToken.of(userProfile);
-        HighlightReactionRequest request = new HighlightReactionRequest(null, ReactionType.GREAT);
-
+        UserToken userToken = mock(UserToken.class);
+        UserProfile user = mock(UserProfile.class);
         Highlight highlight = mock(Highlight.class);
-        HighlightReaction existingReaction = HighlightReaction.builder()
-                .author(userProfile)
-                .highlight(highlight)
-                .reactionType(request.reactionType())
-                .build();
+        HighlightReaction existingReaction = mock(HighlightReaction.class);
+        Activity activity = mock(Activity.class);
 
-        when(entityFinder.findUser(anyLong())).thenReturn(userProfile);
+        when(userToken.userId()).thenReturn(userId);
+        when(entityFinder.findUser(userId)).thenReturn(user);
         when(entityFinder.findHighlight(highlightId)).thenReturn(highlight);
         when(highlight.isPublic()).thenReturn(true);
-        when(highlight.getId()).thenReturn(highlightId);
-        when(highlight.getActivity()).thenReturn(mock(Activity.class));
-        when(reactionRepository.findByAuthorIdAndHighlightIdAndReactionTypeAndCommentIdIsNull(
-                userId, highlightId, request.reactionType())).thenReturn(Optional.of(existingReaction));
-        when(userProfile.getId()).thenReturn(userId);
-        when(userProfile.getNickname()).thenReturn("testUser");
+        when(highlight.getActivity()).thenReturn(activity);
+        when(reactionRepository.findByAuthorIdAndHighlightIdAndReactionTypeAndCommentIdIsNull(userId, highlightId, ReactionType.GREAT))
+                .thenReturn(Optional.of(existingReaction));
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
 
         // when
         BadRequestException exception = assertThrows(
                 BadRequestException.class,
-                () -> highlightReactionService.addReaction(userToken, highlightId, request)
+                () -> highlightReactionService.addReaction(userToken, highlightId, new HighlightReactionRequest(null, ReactionType.GREAT))
         );
 
         // then

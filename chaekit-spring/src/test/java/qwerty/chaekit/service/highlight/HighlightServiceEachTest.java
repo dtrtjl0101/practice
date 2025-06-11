@@ -88,6 +88,13 @@ class HighlightServiceEachTest {
         when(entityFinder.findEbook(bookId)).thenReturn(ebook);
         when(entityFinder.findActivity(activityId)).thenReturn(activity);
         when(highlightRepository.save(any(Highlight.class))).thenReturn(highlight);
+        when(highlight.getBook()).thenReturn(ebook);
+        when(highlight.getSpine()).thenReturn("spine");
+        when(highlight.getCfi()).thenReturn("cfi");
+        when(highlight.getMemo()).thenReturn("memo");
+        when(highlight.getHighlightcontent()).thenReturn("highlightContent");
+        when(highlight.isPublic()).thenReturn(true);
+        when(highlight.getAuthor()).thenReturn(user);
 
         // when
         HighlightPostResponse response = highlightService.createHighlight(userToken, request);
@@ -118,6 +125,12 @@ class HighlightServiceEachTest {
         when(entityFinder.findUser(userId)).thenReturn(user);
         when(entityFinder.findEbook(bookId)).thenReturn(ebook);
         when(highlightRepository.save(any(Highlight.class))).thenReturn(highlight);
+        when(highlight.getBook()).thenReturn(ebook);
+        when(highlight.getSpine()).thenReturn("spine");
+        when(highlight.getCfi()).thenReturn("cfi");
+        when(highlight.getMemo()).thenReturn("memo");
+        when(highlight.getHighlightcontent()).thenReturn("highlightContent");
+        when(highlight.isPublic()).thenReturn(false);
 
         // when
         HighlightPostResponse response = highlightService.createHighlight(userToken, request);
@@ -141,7 +154,7 @@ class HighlightServiceEachTest {
         // when
         BadRequestException exception = assertThrows(
                 BadRequestException.class,
-                () -> highlightService.fetchHighlights(userToken, pageable, null, null, "spine", false)
+                () -> highlightService.fetchHighlights(userToken, pageable, null, null, "spine", false,"me")
         );
 
         // then
@@ -159,6 +172,7 @@ class HighlightServiceEachTest {
         UserToken userToken = mock(UserToken.class);
         Highlight highlight = mock(Highlight.class);
         Activity newActivity = mock(Activity.class);
+        Ebook ebook = mock(Ebook.class);
 
         HighlightPutRequest request = new HighlightPutRequest(newActivityId, "newMemo");
 
@@ -167,6 +181,12 @@ class HighlightServiceEachTest {
         when(entityFinder.findHighlight(highlightId)).thenReturn(highlight);
         when(entityFinder.findActivity(newActivityId)).thenReturn(newActivity);
         when(highlightRepository.save(any(Highlight.class))).thenReturn(highlight);
+        when(highlight.getBook()).thenReturn(ebook);
+        when(highlight.getSpine()).thenReturn("spine");
+        when(highlight.getCfi()).thenReturn("cfi");
+        when(highlight.getMemo()).thenReturn("newMemo");
+        when(highlight.getHighlightcontent()).thenReturn("highlightContent");
+        when(highlight.isPublic()).thenReturn(true);
 
         // when
         HighlightPostResponse response = highlightService.updateHighlight(userToken, highlightId, request);
@@ -210,6 +230,7 @@ class HighlightServiceEachTest {
         UserToken userToken = mock(UserToken.class);
         Highlight highlight = mock(Highlight.class);
         List<DiscussionHighlight> discussionHighlights = List.of();
+        Ebook ebook = mock(Ebook.class);
 
         when(userToken.userId()).thenReturn(userId);
         when(entityFinder.findUser(userId)).thenReturn(user);
@@ -217,6 +238,9 @@ class HighlightServiceEachTest {
         when(highlight.isAuthor(user)).thenReturn(true);
         when(discussionHighlightRepository.findByHighlight(highlight)).thenReturn(discussionHighlights);
         when(highlight.getAuthor()).thenReturn(user);
+        when(highlight.getBook()).thenReturn(ebook);
+        when(ebook.getCoverImageKey()).thenReturn("coverImageKey");
+        when(fileService.convertToPublicImageURL("coverImageKey")).thenReturn("coverImageURL");
         when(user.getProfileImageKey()).thenReturn("profileImageKey");
         when(fileService.convertToPublicImageURL("profileImageKey")).thenReturn("profileImageURL");
 

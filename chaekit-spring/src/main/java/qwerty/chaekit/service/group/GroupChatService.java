@@ -54,7 +54,7 @@ public class GroupChatService {
                 .content(request.content())
                 .createdAt(savedChat.getCreatedAt())
                 .build();
-        
+
         simpMessagingTemplate.convertAndSend("/topic/group/" + response.groupId(), response);
         return response;
     }
@@ -63,9 +63,9 @@ public class GroupChatService {
         ReadingGroup group = entityFinder.findGroup(groupId);
         Page<GroupChat> savedChats = groupChatRepository.findByGroupOrderByCreatedAtDesc(group, pageable);
         //groupChatConsumer.subscribeToGroupChat(groupId);
-        
+
         return PageResponse.of(savedChats.map(chat -> GroupChatResponse.of(
-                chat, 
+                chat,
                 fileService.convertToPublicImageURL(chat.getAuthor().getProfileImageKey()))
         ));
     }
