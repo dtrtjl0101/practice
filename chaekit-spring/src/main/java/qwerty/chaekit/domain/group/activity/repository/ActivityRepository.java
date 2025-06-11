@@ -73,4 +73,14 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
     """)
     List<ActivityScoreDto> calculateTop5Scores(@Param("activityId") Long activityId, Pageable pageable);
 
+    @Query("""
+    SELECT a
+    FROM Activity a
+    LEFT JOIN ActivityMember am ON a.id = am.activity.id
+    WHERE am.user.id = :userId
+    ORDER BY am.createdAt DESC
+    """)
+    List<Activity> findRecentActivityByUserId(@Param("userId") Long userId, Pageable pageable);
+
+
 }
