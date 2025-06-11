@@ -3,6 +3,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import API_CLIENT from "../api/api";
 import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import { paymentSuccessToken } from "../types/paymentSuccessMessage";
+import State from "../states";
+import { useAtom } from "jotai";
 
 export const Route = createFileRoute("/credits/payment/success")({
   component: RouteComponent,
@@ -19,6 +21,7 @@ export const Route = createFileRoute("/credits/payment/success")({
 
 function RouteComponent() {
   const { pgToken } = Route.useSearch();
+  const [loggedInUser, setLoggedInUser] = useAtom(State.Auth.user);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["kakaoPaySuccess", pgToken],
@@ -36,6 +39,16 @@ function RouteComponent() {
       if (window.opener) {
         const opener = window.opener as Window;
         opener.postMessage(paymentSuccessToken);
+      }
+      if (loggedInUser?.firstPaymentBenefit == true) {
+        setLoggedInUser((prev) => {
+          // firstPaymentBenefit 해제
+          if (!prev) return prev;
+          return {
+            ...prev,
+            firstPaymentBenefit: false,
+          };
+        });
       }
       window.close();
       return data;
