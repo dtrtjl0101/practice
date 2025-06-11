@@ -39,10 +39,6 @@ class GroupChatServiceTest {
     private GroupChatRepository groupChatRepository;
     @Mock
     private EntityFinder entityFinder;
-    @Mock
-    private GroupChatProducer groupChatProducer;
-    @Mock
-    private GroupChatConsumer groupChatConsumer;
 
     @Test
     @DisplayName("채팅 생성")
@@ -75,7 +71,6 @@ class GroupChatServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.content()).isEqualTo(content);
         verify(groupChatRepository).save(any(GroupChat.class));
-        verify(groupChatProducer).sendMessage(any(GroupChatResponse.class));
     }
 
     @Test

@@ -44,8 +44,6 @@ public class NotificationServiceTest {
     private NotificationJpaRepository notificationJpaRepository;
     @Mock
     private UserProfileRepository userProfileRepository;
-    @Mock
-    private NotificationProducer notificationProducer;
 
     @Test
     void createGroupJoinRequestNotification_success() {
@@ -63,7 +61,6 @@ public class NotificationServiceTest {
 
         //then
         verify(notificationJpaRepository).save(any(Notification.class));
-        verify(notificationProducer).sendNotification(any(NotificationResponse.class), eq("1"));
     }
 
     @Test
@@ -81,7 +78,6 @@ public class NotificationServiceTest {
 
         //then
         verify(notificationJpaRepository).save(any(Notification.class));
-        verify(notificationProducer).sendNotification(any(NotificationResponse.class), eq("1"));
     }
 
     @Test
@@ -99,7 +95,6 @@ public class NotificationServiceTest {
 
         //then
         verify(notificationJpaRepository).save(any(Notification.class));
-        verify(notificationProducer).sendNotification(any(NotificationResponse.class), eq("1"));
     }
 
     @Test
@@ -146,7 +141,7 @@ public class NotificationServiceTest {
 
         //then
         verify(notificationJpaRepository).save(any(Notification.class));
-        verify(notificationProducer).sendNotification(any(NotificationResponse.class), eq("1"));
+        //verify(notificationProducer).sendNotification(any(NotificationResponse.class), eq("1"));
     }
 
     @Test
@@ -164,7 +159,7 @@ public class NotificationServiceTest {
 
         //then
         verify(notificationJpaRepository).save(any(Notification.class));
-        verify(notificationProducer).sendNotification(any(NotificationResponse.class), eq("1"));
+        //verify(notificationProducer).sendNotification(any(NotificationResponse.class), eq("1"));
     }
 
     @Test
@@ -183,7 +178,7 @@ public class NotificationServiceTest {
 
         //then
         verify(notificationJpaRepository).save(any(Notification.class));
-        verify(notificationProducer).sendNotification(any(NotificationResponse.class), eq("1"));
+        //verify(notificationProducer).sendNotification(any(NotificationResponse.class), eq("1"));
     }
 
     @Test
@@ -204,7 +199,7 @@ public class NotificationServiceTest {
 
         //then
         verify(notificationJpaRepository).save(any(Notification.class));
-        verify(notificationProducer).sendNotification(any(NotificationResponse.class), eq("1"));
+        //verify(notificationProducer).sendNotification(any(NotificationResponse.class), eq("1"));
     }
 
     @Test
@@ -221,7 +216,7 @@ public class NotificationServiceTest {
 
         //then
         verify(notificationJpaRepository).save(any(Notification.class));
-        verify(notificationProducer).sendNotification(any(NotificationResponse.class), eq("1"));
+        //verify(notificationProducer).sendNotification(any(NotificationResponse.class), eq("1"));
     }
 
     @Test

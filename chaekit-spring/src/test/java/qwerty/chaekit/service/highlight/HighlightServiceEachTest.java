@@ -141,7 +141,7 @@ class HighlightServiceEachTest {
         // when
         BadRequestException exception = assertThrows(
                 BadRequestException.class,
-                () -> highlightService.fetchHighlights(userToken, pageable, null, null, "spine", false)
+                () -> highlightService.fetchHighlights(userToken, pageable, null, null, "spine", false,"me")
         );
 
         // then
