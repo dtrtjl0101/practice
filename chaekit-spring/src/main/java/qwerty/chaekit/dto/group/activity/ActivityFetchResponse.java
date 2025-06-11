@@ -17,9 +17,11 @@ public record ActivityFetchResponse(
         LocalDate startTime,
         LocalDate endTime,
         String description,
-        boolean isParticipant
+        boolean isParticipant,
+        Long highlightCount,
+        Long discussionCount
 ) {
-    public static ActivityFetchResponse of(Activity activity, String coverImageURL, boolean isParticipant) {
+    public static ActivityFetchResponse of(Activity activity, String coverImageURL, boolean isParticipant, Long highlightCount, Long discussionCount) {
         return ActivityFetchResponse.builder()
                 .groupId(activity.getGroup().getId())
                 .activityId(activity.getId())
@@ -32,6 +34,8 @@ public record ActivityFetchResponse(
                 .endTime(activity.getEndTime())
                 .description(activity.getDescription())
                 .isParticipant(isParticipant)
+                .highlightCount(highlightCount)
+                .discussionCount(discussionCount)
                 .build();
     }
 }

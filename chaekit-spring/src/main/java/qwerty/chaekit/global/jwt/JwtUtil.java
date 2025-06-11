@@ -71,7 +71,6 @@ public class JwtUtil {
     }
 
     public String createAccessToken(Long memberId, Long userId, Long publisherId, String email, String role) {
-        log.info("publisherId: {}", publisherId);
         return createToken(
                 builder -> builder
                         .claim("type", "access")

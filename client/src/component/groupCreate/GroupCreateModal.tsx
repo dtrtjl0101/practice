@@ -14,12 +14,14 @@ export default function GroupCreateModal(props: {
   const { enqueueSnackbar } = useSnackbar();
 
   const handleEditDone = async (data: GroupEditData) => {
-    const { name, description, tags, groupImage } = data;
+    const { name, description, tags, groupImage, autoApproval } = data;
+
     const response = await API_CLIENT.groupController.createGroup({
       name,
       description,
       tags,
       groupImage,
+      autoApproval,
     });
 
     if (!response.isSuccessful) {

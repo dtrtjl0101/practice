@@ -1,4 +1,5 @@
 import API_CLIENT from "../api/api";
+import { ENV } from "../env";
 class BookStorage {
   private db: Promise<IDBDatabase>;
   constructor() {
@@ -28,7 +29,7 @@ class BookStorage {
       const request = db
         .transaction("books", "readonly")
         .objectStore("books")
-        .get(bookId);
+        .get(getBookKey(bookId));
 
       request.onsuccess = (event) => {
         const result = (event.target as IDBRequest).result;
@@ -50,7 +51,7 @@ class BookStorage {
       const request = db
         .transaction("books", "readwrite")
         .objectStore("books")
-        .put({ id: bookId, book });
+        .put({ id: getBookKey(bookId), book });
       request.onsuccess = () => {
         resolve();
       };
@@ -109,4 +110,8 @@ async function saveBookToIndexedDB(bookId: number, book: ArrayBuffer) {
   await bookStorage.setBook(bookId, book).catch((error) => {
     console.error("Failed to save book to IndexedDB", error);
   });
+}
+
+function getBookKey(bookId: number): string {
+  return `${ENV.CHAEKIT_API_ENDPOINT}-${bookId}`;
 }

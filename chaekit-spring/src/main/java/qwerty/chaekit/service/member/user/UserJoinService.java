@@ -85,6 +85,7 @@ public class UserJoinService {
                 .nickname(user.getNickname())
                 .profileImageURL(profileImageKey)
                 .role(Role.ROLE_USER)
+                .firstPaymentBenefit(true)
                 .build();
     }
 }

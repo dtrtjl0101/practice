@@ -17,6 +17,9 @@ import API_CLIENT from "../api/api";
 import { AuthState } from "../states/auth";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { Role } from "../types/role";
+import { Google } from "@mui/icons-material";
+import { ENV } from "../env";
+import { OAuthMessage } from "../types/oauthMessage";
 
 export const Route = createFileRoute("/login")({
   component: RouteComponent,
@@ -62,6 +65,73 @@ function RouteComponent() {
     }
   }, [login, navigate, email, password]);
 
+  const onGoogleLoginClick = useCallback(() => {
+    const width = 500;
+    const height = 600;
+    const left = window.screenX + (window.outerWidth - width) / 2;
+    const top = window.screenY + (window.outerHeight - height) / 2;
+
+    API_CLIENT.loginFilterController.oauth2Login;
+
+    const popup = window.open(
+      `${ENV.CHAEKIT_API_ENDPOINT}/oauth2/authorization/google`,
+      "oauth2_popup",
+      `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
+    );
+
+    if (!popup) {
+      enqueueSnackbar("팝업이 차단되었습니다. 팝업 차단을 해제해주세요.", {
+        variant: "error",
+      });
+      return;
+    }
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) {
+        return;
+      }
+      const message = event.data as OAuthMessage;
+      if (message.type === "OAUTH_SUCCESS") {
+        const loggedInUser = message.user;
+
+        login(loggedInUser);
+        enqueueSnackbar("Google 로그인에 성공했습니다.", {
+          variant: "success",
+        });
+
+        if (loggedInUser.role === Role.ROLE_ADMIN) {
+          navigate({ to: "/mypage/admin", replace: true });
+        } else if (loggedInUser.role === Role.ROLE_PUBLISHER) {
+          navigate({ to: "/mypage/publisher", replace: true });
+        } else {
+          navigate({ to: "/mypage", replace: true });
+        }
+
+        popup.close();
+        window.removeEventListener("message", handleMessage);
+        return;
+      }
+
+      if (message.type === "OAUTH_ERROR") {
+        enqueueSnackbar(`Google 로그인에 실패했습니다: ${message.error}`, {
+          variant: "error",
+        });
+        popup.close();
+        window.removeEventListener("message", handleMessage);
+        return;
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+
+    const checkClosed = setInterval(() => {
+      if (popup.closed) {
+        clearInterval(checkClosed);
+        window.removeEventListener("message", handleMessage);
+      }
+    }, 1000);
+  }, [enqueueSnackbar, login, navigate]);
+
   return (
     <Container maxWidth="sm" sx={{ my: 8 }}>
       <Card variant="outlined">
@@ -95,6 +165,14 @@ function RouteComponent() {
           <Divider />
           <Button fullWidth variant="contained" onClick={onLoginButtonClick}>
             로그인
+          </Button>
+          <Button
+            fullWidth
+            variant="outlined"
+            startIcon={<Google />}
+            onClick={onGoogleLoginClick}
+          >
+            Google로 로그인
           </Button>
           <Button
             fullWidth

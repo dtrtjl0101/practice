@@ -1,6 +1,7 @@
 package qwerty.chaekit.domain.group.activity.discussion.comment.repository;
 
 import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment;
+import qwerty.chaekit.domain.group.activity.discussion.comment.dto.DiscussionCommentCountDto;
 
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,8 @@ public interface DiscussionCommentRepository {
 
 
     Long countCommentsByDiscussionId(Long discussionId);
-    Map<Long, Long> countCommentsByDiscussionIds(List<Long> discussionIds);
+    Map<Long, DiscussionCommentCountDto> countStanceCommentsByDiscussionIds(List<Long> discussionIds);
+    Map<Long, DiscussionCommentCountDto> countCommentsByDiscussionIds(List<Long> discussionIds);
     Long countByParentId(Long parentId);
 
 }

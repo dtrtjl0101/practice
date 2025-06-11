@@ -14,6 +14,7 @@ import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.group.activity.activitymember.ActivityMember;
 import qwerty.chaekit.domain.group.activity.activitymember.ActivityMemberRepository;
+import qwerty.chaekit.domain.group.activity.dto.ActivityWithCountsResponse;
 import qwerty.chaekit.domain.group.activity.repository.ActivityRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.dto.group.activity.ActivityFetchResponse;
@@ -272,10 +273,12 @@ class ActivityServiceTest {
         Activity activity1 = new Activity(1L, readingGroup, ebook, LocalDate.parse("2025-04-01"), LocalDate.parse("2026-04-14"), "Activity 1");
         Activity activity2 = new Activity(2L, readingGroup, ebook, LocalDate.parse("2025-04-15"), LocalDate.parse("2026-04-28"), "Activity 2");
 
-        List<Activity> activityList = List.of(activity1, activity2);
-        Page<Activity> page = new PageImpl<>(activityList);
+        List<ActivityWithCountsResponse> activityList = List.of(
+                new ActivityWithCountsResponse(activity1, 0L, 0L)
+                , new ActivityWithCountsResponse(activity2, 0L, 0L));
+        Page<ActivityWithCountsResponse> page = new PageImpl<>(activityList);
 
-        given(activityRepository.findByGroup_IdWithBook(groupId, pageable)).willReturn(page);
+        given(activityRepository.findByGroupIdWithCounts(groupId, pageable)).willReturn(page);
 
         // when
         PageResponse<ActivityFetchResponse> result = activityService.fetchAllActivities(userLogin, pageable, groupId);
@@ -349,7 +352,8 @@ class ActivityServiceTest {
         Ebook ebook = Ebook.builder().id(3L).coverImageKey("cover-key").build();
         Activity activity = Activity.builder().id(activityId).group(dummyGroup(5L, null)).book(ebook).build();
 
-        when(activityRepository.findByIdWithBook(activityId)).thenReturn(Optional.of(activity));
+        when(activityRepository.findByIdWithCounts(activityId)).thenReturn(Optional.of(new ActivityWithCountsResponse(activity, 0L, 0L)));
+
         doNothing().when(activityPolicy).assertJoined(userId, activityId);
         when(fileService.convertToPublicImageURL("cover-key")).thenReturn("public-url");
 
