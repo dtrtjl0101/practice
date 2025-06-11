@@ -78,6 +78,18 @@ public class ReadingProgressHistoryService {
         // 사용자별로 그룹화 후, 날짜별로 정렬
         Map<Long, List<ReadingProgressHistory>> historiesByUser = histories.stream()
                 .collect(Collectors.groupingBy(h -> h.getUser().getId()));
+        
+        // 현재 실시간 진행률
+        List<ActivityMember> activityMembers = activityMemberRepository.findByActivity(activity);
+        List<Long> userIdList = activityMembers.stream()
+                .map(activityMember -> activityMember.getUser().getId()).toList();
+        Map<Long, Long> currentPercentageByUser = ebookPurchaseRepository.findByUserIdInAndEbook(userIdList, activity.getBook())
+                .stream().collect(
+                        Collectors.toMap(
+                                ep -> ep.getUser().getId(),
+                                EbookPurchase::getPercentage
+                        )
+                );
 
         // 사용자별 보정된 진행률 시계열 생성 (날짜별 최대 진행률 유지)
         Map<Long, Map<LocalDate, Long>> fixedProgressByUser = new HashMap<>();
@@ -95,7 +107,12 @@ public class ReadingProgressHistoryService {
             Map<LocalDate, Long> progressMap = new LinkedHashMap<>();
             long maxSoFar = 0L;
             for (LocalDate day : days) {
-                long p = rawByDate.getOrDefault(day, 0L);
+                long p;
+                if(day.equals(LocalDate.now())) {
+                    p = currentPercentageByUser.getOrDefault(userId,0L); // 오늘은 현재 퍼센테이지 적용
+                } else {
+                    p = rawByDate.getOrDefault(day, 0L);
+                }
                 maxSoFar = Math.max(maxSoFar, p);
                 progressMap.put(day, maxSoFar);
             }
