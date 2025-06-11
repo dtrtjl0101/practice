@@ -3,6 +3,7 @@ package qwerty.chaekit.service.group;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.group.ReadingGroup;
@@ -24,9 +25,8 @@ import qwerty.chaekit.service.util.FileService;
 public class GroupChatService {
     private final GroupChatRepository groupChatRepository;
     private final EntityFinder entityFinder;
-    private final GroupChatProducer groupChatProducer;
-    private final GroupChatConsumer groupChatConsumer;
     private final FileService fileService;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
     @Transactional
     public GroupChatResponse createChat(UserToken userToken, Long groupId, GroupChatRequest request) {
@@ -55,8 +55,7 @@ public class GroupChatService {
                 .createdAt(savedChat.getCreatedAt())
                 .build();
 
-        groupChatProducer.sendMessage(response);
-
+        simpMessagingTemplate.convertAndSend("/topic/group/" + response.groupId(), response);
         return response;
     }
 
@@ -64,9 +63,9 @@ public class GroupChatService {
         ReadingGroup group = entityFinder.findGroup(groupId);
         Page<GroupChat> savedChats = groupChatRepository.findByGroupOrderByCreatedAtDesc(group, pageable);
         //groupChatConsumer.subscribeToGroupChat(groupId);
-        
+
         return PageResponse.of(savedChats.map(chat -> GroupChatResponse.of(
-                chat, 
+                chat,
                 fileService.convertToPublicImageURL(chat.getAuthor().getProfileImageKey()))
         ));
     }

@@ -82,17 +82,22 @@ public class CreditService {
         try {
             kakaoPayService.cancelKakaoPayPayment(tid, response.amount().total());
             log.info("카카오페이 결제 취소 완료: tid={} 이유={}", tid, ex.getMessage());
-            throw new RuntimeException("시스템 오류로 결제가 자동 환불되었습니다.");
+            throw new RuntimeException("시스템 오류로 결제가 자동 환불되었습니다.", ex);
         } catch (PaymentCancelFailedException cancelEx) {
             log.error("카카오페이 결제 취소 실패: tid={}, 이유={}", tid, cancelEx.getMessage());
-            throw new RuntimeException("결제 취소에 실패했습니다. 고객센터에 문의해주세요.");
+            throw new RuntimeException("결제 취소에 실패했습니다. 고객센터에 문의해주세요.", ex);
         }
     }
 
     private void finalizePayment(KakaoPayApproveResponse response, Long userId) {
         CreditWallet wallet = creditWalletRepository.findByUser_Id(userId)
                 .orElseThrow(() -> new IllegalStateException("Credit Wallet not found"));
-        wallet.addCredit(response.amount().total());
+        int creditAmount = CreditProduct.getCreditProduct(Integer.parseInt(response.item_code())).getCreditAmount();
+        if (isFirstPurchase(wallet)) {
+            log.info("첫 결제 사용자: userId={}, creditAmount={}", userId, creditAmount);
+            creditAmount = (int) (creditAmount * 1.1); // 첫 결제 시 10% 보너스
+        }
+        wallet.addCredit(creditAmount);
         creditPaymentTransactionRepository.save(
                 CreditPaymentTransaction.builder()
                         .tid(response.tid())
@@ -101,11 +106,15 @@ public class CreditService {
                         .creditProductName(response.item_name())
                         .wallet(wallet)
                         .transactionType(CreditPaymentTransactionType.CHARGE)
-                        .creditAmount(CreditProduct.getCreditProduct(Integer.parseInt(response.item_code())).getCreditAmount())
+                        .creditAmount(creditAmount)
                         .paymentAmount(response.amount().total())
                         .approvedAt(response.approved_at())
                         .build()
         );
+    }
+
+    private boolean isFirstPurchase(CreditWallet wallet) {
+        return creditWalletRepository.existsByUserAndPaymentTransactionsEmpty(wallet.getUser());
     }
 
     @Transactional(readOnly = true)

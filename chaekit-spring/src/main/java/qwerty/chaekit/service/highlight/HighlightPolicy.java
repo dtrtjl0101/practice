@@ -24,6 +24,5 @@ public class HighlightPolicy {
 
     public void assertUpdatable(Long userId, Highlight highlight) {
         UserProfile user = UserProfile.builder().id(userId).build();
-        assertUpdatable(user, highlight);
-    }
+        assertUpdatable(user, highlight);}
 }
