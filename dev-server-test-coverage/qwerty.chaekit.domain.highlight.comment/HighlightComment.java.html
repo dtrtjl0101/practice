@@ -36,16 +36,16 @@ public class HighlightComment extends BaseEntity {
     @JoinColumn(name = &quot;parent_id&quot;)
     private HighlightComment parent;
     
-<span class="nc" id="L39">    @OneToMany(mappedBy = &quot;parent&quot;, cascade = CascadeType.ALL, orphanRemoval = true)</span>
+<span class="fc" id="L39">    @OneToMany(mappedBy = &quot;parent&quot;, cascade = CascadeType.ALL, orphanRemoval = true)</span>
     private List&lt;HighlightComment&gt; replies = new ArrayList&lt;&gt;();
     
     @Builder
-<span class="nc" id="L43">    public HighlightComment(UserProfile author, Highlight highlight, String content, HighlightComment parent) {</span>
-<span class="nc" id="L44">        this.author = author;</span>
-<span class="nc" id="L45">        this.highlight = highlight;</span>
-<span class="nc" id="L46">        this.content = content;</span>
-<span class="nc" id="L47">        this.parent = parent;</span>
-<span class="nc" id="L48">    }</span>
+<span class="fc" id="L43">    public HighlightComment(UserProfile author, Highlight highlight, String content, HighlightComment parent) {</span>
+<span class="fc" id="L44">        this.author = author;</span>
+<span class="fc" id="L45">        this.highlight = highlight;</span>
+<span class="fc" id="L46">        this.content = content;</span>
+<span class="fc" id="L47">        this.parent = parent;</span>
+<span class="fc" id="L48">    }</span>
     
     public void updateContent(String comment) {
 <span class="nc" id="L51">        this.content = comment;</span>

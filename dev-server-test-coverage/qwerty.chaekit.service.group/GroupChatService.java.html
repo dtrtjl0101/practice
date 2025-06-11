@@ -30,43 +30,43 @@ public class GroupChatService {
 
     @Transactional
     public GroupChatResponse createChat(UserToken userToken, Long groupId, GroupChatRequest request) {
-<span class="nc" id="L33">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
-<span class="nc" id="L34">        ReadingGroup group = entityFinder.findGroup(groupId);</span>
+<span class="fc" id="L33">        UserProfile user = entityFinder.findUser(userToken.userId());</span>
+<span class="fc" id="L34">        ReadingGroup group = entityFinder.findGroup(groupId);</span>
 
-<span class="nc bnc" id="L36" title="All 2 branches missed.">        if (group.isNotAcceptedMember(user)) {</span>
-<span class="nc" id="L37">            throw new ForbiddenException(ErrorCode.MEMBER_NOT_FOUND);</span>
+<span class="fc bfc" id="L36" title="All 2 branches covered.">        if (group.isNotAcceptedMember(user)) {</span>
+<span class="fc" id="L37">            throw new ForbiddenException(ErrorCode.MEMBER_NOT_FOUND);</span>
         }
 
-<span class="nc" id="L40">        GroupChat chat = GroupChat.builder()</span>
-<span class="nc" id="L41">                .group(group)</span>
-<span class="nc" id="L42">                .author(user)</span>
-<span class="nc" id="L43">                .content(request.content())</span>
-<span class="nc" id="L44">                .build();</span>
+<span class="fc" id="L40">        GroupChat chat = GroupChat.builder()</span>
+<span class="fc" id="L41">                .group(group)</span>
+<span class="fc" id="L42">                .author(user)</span>
+<span class="fc" id="L43">                .content(request.content())</span>
+<span class="fc" id="L44">                .build();</span>
         
-<span class="nc" id="L46">        GroupChat savedChat = groupChatRepository.save(chat);</span>
+<span class="fc" id="L46">        GroupChat savedChat = groupChatRepository.save(chat);</span>
 
-<span class="nc" id="L48">        GroupChatResponse response = GroupChatResponse.builder()</span>
-<span class="nc" id="L49">                .chatId(savedChat.getId())</span>
-<span class="nc" id="L50">                .groupId(groupId)</span>
-<span class="nc" id="L51">                .authorId(user.getId())</span>
-<span class="nc" id="L52">                .authorName(user.getNickname())</span>
-<span class="nc" id="L53">                .authorProfileImage(fileService.convertToPublicImageURL(user.getProfileImageKey()))</span>
-<span class="nc" id="L54">                .content(request.content())</span>
-<span class="nc" id="L55">                .createdAt(savedChat.getCreatedAt())</span>
-<span class="nc" id="L56">                .build();</span>
-        
-<span class="nc" id="L58">        simpMessagingTemplate.convertAndSend(&quot;/topic/group/&quot; + response.groupId(), response);</span>
-<span class="nc" id="L59">        return response;</span>
+<span class="fc" id="L48">        GroupChatResponse response = GroupChatResponse.builder()</span>
+<span class="fc" id="L49">                .chatId(savedChat.getId())</span>
+<span class="fc" id="L50">                .groupId(groupId)</span>
+<span class="fc" id="L51">                .authorId(user.getId())</span>
+<span class="fc" id="L52">                .authorName(user.getNickname())</span>
+<span class="fc" id="L53">                .authorProfileImage(fileService.convertToPublicImageURL(user.getProfileImageKey()))</span>
+<span class="fc" id="L54">                .content(request.content())</span>
+<span class="fc" id="L55">                .createdAt(savedChat.getCreatedAt())</span>
+<span class="fc" id="L56">                .build();</span>
+
+<span class="fc" id="L58">        simpMessagingTemplate.convertAndSend(&quot;/topic/group/&quot; + response.groupId(), response);</span>
+<span class="fc" id="L59">        return response;</span>
     }
 
     public PageResponse&lt;GroupChatResponse&gt; getChats(Long groupId, Pageable pageable) {//과거메세지 받아오는용도
-<span class="nc" id="L63">        ReadingGroup group = entityFinder.findGroup(groupId);</span>
-<span class="nc" id="L64">        Page&lt;GroupChat&gt; savedChats = groupChatRepository.findByGroupOrderByCreatedAtDesc(group, pageable);</span>
+<span class="fc" id="L63">        ReadingGroup group = entityFinder.findGroup(groupId);</span>
+<span class="fc" id="L64">        Page&lt;GroupChat&gt; savedChats = groupChatRepository.findByGroupOrderByCreatedAtDesc(group, pageable);</span>
         //groupChatConsumer.subscribeToGroupChat(groupId);
-        
-<span class="nc" id="L67">        return PageResponse.of(savedChats.map(chat -&gt; GroupChatResponse.of(</span>
-                chat, 
-<span class="nc" id="L69">                fileService.convertToPublicImageURL(chat.getAuthor().getProfileImageKey()))</span>
+
+<span class="fc" id="L67">        return PageResponse.of(savedChats.map(chat -&gt; GroupChatResponse.of(</span>
+                chat,
+<span class="fc" id="L69">                fileService.convertToPublicImageURL(chat.getAuthor().getProfileImageKey()))</span>
         ));
     }
 }   

@@ -24,28 +24,28 @@ public class PublisherNotificationService {
     private final PublisherProfileRepository publisherProfileRepository;
 
     public PageResponse&lt;NotificationResponse&gt; getNotifications(PublisherToken token, Pageable pageable) {
-<span class="nc" id="L27">        PublisherProfile publisher = publisherProfileRepository.findById(token.publisherId())</span>
-<span class="nc" id="L28">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));</span>
+<span class="fc" id="L27">        PublisherProfile publisher = publisherProfileRepository.findById(token.publisherId())</span>
+<span class="fc" id="L28">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));</span>
 
-<span class="nc" id="L30">        Page&lt;Notification&gt; notifications = notificationJpaRepository.findByPublisherOrderByCreatedAtDesc(publisher, pageable);</span>
-<span class="nc" id="L31">        Page&lt;NotificationResponse&gt; responsePage = notifications.map(NotificationResponse::of);</span>
+<span class="fc" id="L30">        Page&lt;Notification&gt; notifications = notificationJpaRepository.findByPublisherOrderByCreatedAtDesc(publisher, pageable);</span>
+<span class="fc" id="L31">        Page&lt;NotificationResponse&gt; responsePage = notifications.map(NotificationResponse::of);</span>
         
-<span class="nc" id="L33">        return PageResponse.of(responsePage);</span>
+<span class="fc" id="L33">        return PageResponse.of(responsePage);</span>
     }
 
     @Transactional
     public void markAsRead(PublisherToken token, Long notificationId) {
-<span class="nc" id="L38">        PublisherProfile publisher = publisherProfileRepository.findById(token.publisherId())</span>
-<span class="nc" id="L39">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));</span>
+<span class="fc" id="L38">        PublisherProfile publisher = publisherProfileRepository.findById(token.publisherId())</span>
+<span class="pc" id="L39">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.PUBLISHER_NOT_FOUND));</span>
 
-<span class="nc" id="L41">        Notification notification = notificationJpaRepository.findById(notificationId)</span>
-<span class="nc" id="L42">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.NOTIFICATION_NOT_FOUND));</span>
+<span class="fc" id="L41">        Notification notification = notificationJpaRepository.findById(notificationId)</span>
+<span class="fc" id="L42">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.NOTIFICATION_NOT_FOUND));</span>
 
-<span class="nc bnc" id="L44" title="All 2 branches missed.">        if (!notification.getPublisher().getId().equals(publisher.getId())) {</span>
-<span class="nc" id="L45">            throw new ForbiddenException(ErrorCode.NOTIFICATION_NOT_YOURS);</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">        if (!notification.getPublisher().getId().equals(publisher.getId())) {</span>
+<span class="fc" id="L45">            throw new ForbiddenException(ErrorCode.NOTIFICATION_NOT_YOURS);</span>
         }
 
-<span class="nc" id="L48">        notification.markAsRead();</span>
-<span class="nc" id="L49">    }</span>
+<span class="fc" id="L48">        notification.markAsRead();</span>
+<span class="fc" id="L49">    }</span>
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

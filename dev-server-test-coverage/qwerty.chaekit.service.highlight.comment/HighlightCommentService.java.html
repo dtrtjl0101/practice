@@ -39,141 +39,141 @@ public class HighlightCommentService {
     private final HighlightCommentMapper highlightCommentMapper;
 
     public HighlightCommentResponse createComment(UserToken userToken, Long highlightId, HighlightCommentRequest request) {
-<span class="nc" id="L42">        Long userId = userToken.userId();</span>
+<span class="fc" id="L42">        Long userId = userToken.userId();</span>
 
-<span class="nc" id="L44">        UserProfile commentAuthor = userRepository.findById(userId)</span>
-<span class="nc" id="L45">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
+<span class="fc" id="L44">        UserProfile commentAuthor = userRepository.findById(userId)</span>
+<span class="pc" id="L45">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
 
-<span class="nc" id="L47">        Highlight highlight = highlightRepository.findById(highlightId)</span>
-<span class="nc" id="L48">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));</span>
+<span class="fc" id="L47">        Highlight highlight = highlightRepository.findById(highlightId)</span>
+<span class="fc" id="L48">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));</span>
 
-<span class="nc" id="L50">        activityPolicy.assertJoined(commentAuthor, highlight.getActivity());</span>
+<span class="fc" id="L50">        activityPolicy.assertJoined(commentAuthor, highlight.getActivity());</span>
         
-<span class="nc bnc" id="L52" title="All 2 branches missed.">        if (!highlight.isPublic()) {</span>
-<span class="nc" id="L53">            throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_PUBLIC);</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">        if (!highlight.isPublic()) {</span>
+<span class="fc" id="L53">            throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_PUBLIC);</span>
         }
         
         HighlightComment parent;
-<span class="nc bnc" id="L57" title="All 2 branches missed.">        if (request.parentId() != null) {</span>
-<span class="nc" id="L58">            parent = commentRepository.findById(request.parentId())</span>
-<span class="nc" id="L59">                    .orElseThrow(() -&gt; new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        if (request.parentId() != null) {</span>
+<span class="fc" id="L58">            parent = commentRepository.findById(request.parentId())</span>
+<span class="pc" id="L59">                    .orElseThrow(() -&gt; new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));</span>
 
-<span class="nc bnc" id="L61" title="All 2 branches missed.">            if (!parent.getHighlight().getId().equals(highlightId)) {</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">            if (!parent.getHighlight().getId().equals(highlightId)) {</span>
 <span class="nc" id="L62">                throw new ForbiddenException(ErrorCode.COMMENT_PARENT_MISMATCH);</span>
             }
         } else {
-<span class="nc" id="L65">            parent = null;</span>
+<span class="fc" id="L65">            parent = null;</span>
         }
         
-<span class="nc" id="L68">        HighlightComment comment = HighlightComment.builder()</span>
-<span class="nc" id="L69">                .author(commentAuthor)</span>
-<span class="nc" id="L70">                .highlight(highlight)</span>
-<span class="nc" id="L71">                .content(request.content())</span>
-<span class="nc" id="L72">                .parent(parent)</span>
-<span class="nc" id="L73">                .build();</span>
+<span class="fc" id="L68">        HighlightComment comment = HighlightComment.builder()</span>
+<span class="fc" id="L69">                .author(commentAuthor)</span>
+<span class="fc" id="L70">                .highlight(highlight)</span>
+<span class="fc" id="L71">                .content(request.content())</span>
+<span class="fc" id="L72">                .parent(parent)</span>
+<span class="fc" id="L73">                .build();</span>
         
-<span class="nc" id="L75">        HighlightComment savedComment = commentRepository.save(comment);</span>
+<span class="fc" id="L75">        HighlightComment savedComment = commentRepository.save(comment);</span>
         
-<span class="nc bnc" id="L77" title="All 2 branches missed.">        if (parent != null) {</span>
-<span class="nc" id="L78">            parent.addReply(savedComment);</span>
+<span class="fc bfc" id="L77" title="All 2 branches covered.">        if (parent != null) {</span>
+<span class="fc" id="L78">            parent.addReply(savedComment);</span>
         }
 
-<span class="nc bnc" id="L81" title="All 2 branches missed.">        if (parent != null) {</span>
-<span class="nc bnc" id="L82" title="All 2 branches missed.">            if (!parent.getAuthor().getId().equals(userId)) {</span>
-<span class="nc" id="L83">                notificationService.createHighlightCommentReplyNotification(parent.getAuthor(), commentAuthor, parent);</span>
+<span class="fc bfc" id="L81" title="All 2 branches covered.">        if (parent != null) {</span>
+<span class="pc bpc" id="L82" title="1 of 2 branches missed.">            if (!parent.getAuthor().getId().equals(userId)) {</span>
+<span class="fc" id="L83">                notificationService.createHighlightCommentReplyNotification(parent.getAuthor(), commentAuthor, parent);</span>
             }
-<span class="nc bnc" id="L85" title="All 4 branches missed.">            if (!highlight.getAuthor().getId().equals(userId) &amp;&amp; !highlight.getAuthor().getId().equals(parent.getAuthor().getId())) {</span>
-<span class="nc" id="L86">                notificationService.createHighlightCommentReplyNotification(highlight.getAuthor(), commentAuthor, parent);</span>
+<span class="pc bpc" id="L85" title="2 of 4 branches missed.">            if (!highlight.getAuthor().getId().equals(userId) &amp;&amp; !highlight.getAuthor().getId().equals(parent.getAuthor().getId())) {</span>
+<span class="fc" id="L86">                notificationService.createHighlightCommentReplyNotification(highlight.getAuthor(), commentAuthor, parent);</span>
             }
         } else {
-<span class="nc bnc" id="L89" title="All 2 branches missed.">            if (!highlight.getAuthor().getId().equals(userId)) {</span>
-<span class="nc" id="L90">                notificationService.createHighlightCommentNotification(highlight.getAuthor(), commentAuthor, highlight);</span>
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">            if (!highlight.getAuthor().getId().equals(userId)) {</span>
+<span class="fc" id="L90">                notificationService.createHighlightCommentNotification(highlight.getAuthor(), commentAuthor, highlight);</span>
             }
         }
         
-<span class="nc" id="L94">        return highlightCommentMapper.toResponse(savedComment);</span>
+<span class="fc" id="L94">        return highlightCommentMapper.toResponse(savedComment);</span>
     }
     
     @Transactional(readOnly = true)
     public List&lt;HighlightCommentResponse&gt; getComments(UserToken userToken, Long highlightId) {
-<span class="nc" id="L99">        UserProfile author = userRepository.findById(userToken.userId())</span>
-<span class="nc" id="L100">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
+<span class="fc" id="L99">        UserProfile author = userRepository.findById(userToken.userId())</span>
+<span class="pc" id="L100">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
         
-<span class="nc" id="L102">        Highlight highlight = highlightRepository.findById(highlightId)</span>
-<span class="nc" id="L103">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));</span>
+<span class="fc" id="L102">        Highlight highlight = highlightRepository.findById(highlightId)</span>
+<span class="pc" id="L103">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.HIGHLIGHT_NOT_FOUND));</span>
         
-<span class="nc bnc" id="L105" title="All 2 branches missed.">        if (!highlight.isPublic()) {</span>
+<span class="pc bpc" id="L105" title="1 of 2 branches missed.">        if (!highlight.isPublic()) {</span>
 <span class="nc" id="L106">            throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_PUBLIC);</span>
         }
 
-<span class="nc" id="L109">        activityPolicy.assertJoined(author, highlight.getActivity());</span>
+<span class="fc" id="L109">        activityPolicy.assertJoined(author, highlight.getActivity());</span>
 
-<span class="nc" id="L111">        List&lt;HighlightComment&gt; rootComments = commentRepository.findRootCommentsByHighlightId(highlightId);</span>
+<span class="fc" id="L111">        List&lt;HighlightComment&gt; rootComments = commentRepository.findRootCommentsByHighlightId(highlightId);</span>
 
-<span class="nc" id="L113">        Set&lt;Long&gt; allCommentIds = new HashSet&lt;&gt;();</span>
-<span class="nc bnc" id="L114" title="All 2 branches missed.">        for (HighlightComment rootComment : rootComments) {</span>
-<span class="nc" id="L115">            allCommentIds.add(rootComment.getId());</span>
-<span class="nc bnc" id="L116" title="All 2 branches missed.">            for (HighlightComment reply : rootComment.getReplies()) {</span>
+<span class="fc" id="L113">        Set&lt;Long&gt; allCommentIds = new HashSet&lt;&gt;();</span>
+<span class="fc bfc" id="L114" title="All 2 branches covered.">        for (HighlightComment rootComment : rootComments) {</span>
+<span class="fc" id="L115">            allCommentIds.add(rootComment.getId());</span>
+<span class="pc bpc" id="L116" title="1 of 2 branches missed.">            for (HighlightComment reply : rootComment.getReplies()) {</span>
 <span class="nc" id="L117">                allCommentIds.add(reply.getId());</span>
 <span class="nc" id="L118">            }</span>
-<span class="nc" id="L119">        }</span>
+<span class="fc" id="L119">        }</span>
 
         final Map&lt;Long, List&lt;HighlightReaction&gt;&gt; reactionsByCommentId;
         
-<span class="nc bnc" id="L123" title="All 2 branches missed.">        if (!allCommentIds.isEmpty()) {</span>
-<span class="nc" id="L124">            List&lt;HighlightReaction&gt; allReactions = reactionRepository.findByCommentIdIn(new ArrayList&lt;&gt;(allCommentIds));</span>
-<span class="nc" id="L125">            reactionsByCommentId = allReactions.stream()</span>
-<span class="nc" id="L126">                    .collect(Collectors.groupingBy(reaction -&gt; reaction.getComment().getId()));</span>
-<span class="nc" id="L127">        } else {</span>
+<span class="pc bpc" id="L123" title="1 of 2 branches missed.">        if (!allCommentIds.isEmpty()) {</span>
+<span class="fc" id="L124">            List&lt;HighlightReaction&gt; allReactions = reactionRepository.findByCommentIdIn(new ArrayList&lt;&gt;(allCommentIds));</span>
+<span class="fc" id="L125">            reactionsByCommentId = allReactions.stream()</span>
+<span class="pc" id="L126">                    .collect(Collectors.groupingBy(reaction -&gt; reaction.getComment().getId()));</span>
+<span class="fc" id="L127">        } else {</span>
 <span class="nc" id="L128">            reactionsByCommentId = Collections.emptyMap();</span>
         }
 
-<span class="nc" id="L131">        return rootComments.stream()</span>
-<span class="nc" id="L132">                .map(comment -&gt; highlightCommentMapper.toResponse(comment, reactionsByCommentId))</span>
-<span class="nc" id="L133">                .collect(Collectors.toList());</span>
+<span class="fc" id="L131">        return rootComments.stream()</span>
+<span class="fc" id="L132">                .map(comment -&gt; highlightCommentMapper.toResponse(comment, reactionsByCommentId))</span>
+<span class="fc" id="L133">                .collect(Collectors.toList());</span>
     }
     
     public HighlightCommentResponse updateComment(UserToken userToken, Long commentId, HighlightCommentRequest request) {
-<span class="nc" id="L137">        Long userId = userToken.userId();</span>
+<span class="fc" id="L137">        Long userId = userToken.userId();</span>
         
-<span class="nc" id="L139">        HighlightComment comment = commentRepository.findById(commentId)</span>
-<span class="nc" id="L140">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));</span>
+<span class="fc" id="L139">        HighlightComment comment = commentRepository.findById(commentId)</span>
+<span class="pc" id="L140">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));</span>
         
-<span class="nc bnc" id="L142" title="All 2 branches missed.">        if (!comment.getAuthor().getId().equals(userId)) {</span>
+<span class="pc bpc" id="L142" title="1 of 2 branches missed.">        if (!comment.getAuthor().getId().equals(userId)) {</span>
 <span class="nc" id="L143">            throw new ForbiddenException(ErrorCode.COMMENT_NOT_YOURS);</span>
         }
         
-<span class="nc" id="L146">        comment.updateContent(request.content());</span>
-<span class="nc" id="L147">        return highlightCommentMapper.toResponse(commentRepository.save(comment));</span>
+<span class="fc" id="L146">        comment.updateContent(request.content());</span>
+<span class="fc" id="L147">        return highlightCommentMapper.toResponse(commentRepository.save(comment));</span>
     }
     
     public void deleteComment(UserToken userToken, Long commentId) {
-<span class="nc" id="L151">        Long userId = userToken.userId();</span>
+<span class="fc" id="L151">        Long userId = userToken.userId();</span>
         
-<span class="nc" id="L153">        HighlightComment comment = commentRepository.findById(commentId)</span>
-<span class="nc" id="L154">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));</span>
+<span class="fc" id="L153">        HighlightComment comment = commentRepository.findById(commentId)</span>
+<span class="fc" id="L154">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));</span>
         
-<span class="nc bnc" id="L156" title="All 2 branches missed.">        if (!comment.getAuthor().getId().equals(userId)) {</span>
-<span class="nc" id="L157">            throw new ForbiddenException(ErrorCode.COMMENT_NOT_YOURS);</span>
+<span class="fc bfc" id="L156" title="All 2 branches covered.">        if (!comment.getAuthor().getId().equals(userId)) {</span>
+<span class="fc" id="L157">            throw new ForbiddenException(ErrorCode.COMMENT_NOT_YOURS);</span>
         }
 
-<span class="nc" id="L160">        List&lt;HighlightReaction&gt; reactions = reactionRepository.findByCommentId(commentId);</span>
-<span class="nc bnc" id="L161" title="All 2 branches missed.">        for (HighlightReaction reaction : reactions) {</span>
+<span class="fc" id="L160">        List&lt;HighlightReaction&gt; reactions = reactionRepository.findByCommentId(commentId);</span>
+<span class="pc bpc" id="L161" title="1 of 2 branches missed.">        for (HighlightReaction reaction : reactions) {</span>
 <span class="nc" id="L162">            reactionRepository.delete(reaction);</span>
 <span class="nc" id="L163">        }</span>
 
-<span class="nc bnc" id="L165" title="All 2 branches missed.">        if (!comment.getReplies().isEmpty()) {</span>
-<span class="nc" id="L166">            List&lt;Long&gt; replyIds = comment.getReplies().stream()</span>
-<span class="nc" id="L167">                    .map(HighlightComment::getId)</span>
-<span class="nc" id="L168">                    .collect(Collectors.toList());</span>
+<span class="fc bfc" id="L165" title="All 2 branches covered.">        if (!comment.getReplies().isEmpty()) {</span>
+<span class="fc" id="L166">            List&lt;Long&gt; replyIds = comment.getReplies().stream()</span>
+<span class="fc" id="L167">                    .map(HighlightComment::getId)</span>
+<span class="fc" id="L168">                    .collect(Collectors.toList());</span>
             
-<span class="nc" id="L170">            List&lt;HighlightReaction&gt; replyReactions = reactionRepository.findByCommentIdIn(replyIds);</span>
-<span class="nc bnc" id="L171" title="All 2 branches missed.">            for (HighlightReaction reaction : replyReactions) {</span>
+<span class="fc" id="L170">            List&lt;HighlightReaction&gt; replyReactions = reactionRepository.findByCommentIdIn(replyIds);</span>
+<span class="pc bpc" id="L171" title="1 of 2 branches missed.">            for (HighlightReaction reaction : replyReactions) {</span>
 <span class="nc" id="L172">                reactionRepository.delete(reaction);</span>
 <span class="nc" id="L173">            }</span>
         }
         
-<span class="nc" id="L176">        commentRepository.delete(comment);</span>
-<span class="nc" id="L177">    }</span>
+<span class="fc" id="L176">        commentRepository.delete(comment);</span>
+<span class="fc" id="L177">    }</span>
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

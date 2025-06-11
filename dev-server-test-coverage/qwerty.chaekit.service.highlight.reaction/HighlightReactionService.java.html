@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 @Transactional
 @RequiredArgsConstructor
 public class HighlightReactionService {
-    private final HighlightRepository highlightRepository;
+    //private final HighlightRepository highlightRepository;
     private final HighlightCommentRepository commentRepository;
     private final HighlightReactionRepository reactionRepository;
     private final UserProfileRepository userRepository;
@@ -41,77 +41,77 @@ public class HighlightReactionService {
     private final EntityFinder entityFinder;
 
     public HighlightReactionResponse addReaction(UserToken userToken, Long highlightId, HighlightReactionRequest request) {
-<span class="nc" id="L44">        Long userId = userToken.userId();</span>
+<span class="fc" id="L44">        Long userId = userToken.userId();</span>
 
-<span class="nc" id="L46">        UserProfile author = entityFinder.findUser(userId);</span>
-<span class="nc" id="L47">        Highlight highlight = entityFinder.findHighlight(highlightId);</span>
+<span class="fc" id="L46">        UserProfile author = entityFinder.findUser(userId);</span>
+<span class="fc" id="L47">        Highlight highlight = entityFinder.findHighlight(highlightId);</span>
 
-<span class="nc" id="L49">        activityPolicy.assertJoined(author, highlight.getActivity());</span>
+<span class="fc" id="L49">        activityPolicy.assertJoined(author, highlight.getActivity());</span>
         
-<span class="nc bnc" id="L51" title="All 2 branches missed.">        if (!highlight.isPublic()) {</span>
-<span class="nc" id="L52">            throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_PUBLIC);</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">        if (!highlight.isPublic()) {</span>
+<span class="fc" id="L52">            throw new ForbiddenException(ErrorCode.HIGHLIGHT_NOT_PUBLIC);</span>
         }
 
-<span class="nc" id="L55">        HighlightComment comment = null;</span>
+<span class="fc" id="L55">        HighlightComment comment = null;</span>
         Optional&lt;HighlightReaction&gt; highlightReaction;
 
-<span class="nc bnc" id="L58" title="All 2 branches missed.">        if (request.commentId() != null) {</span>
-<span class="nc" id="L59">            comment = commentRepository.findById(request.commentId())</span>
-<span class="nc" id="L60">                    .orElseThrow(() -&gt; new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">        if (request.commentId() != null) {</span>
+<span class="fc" id="L59">            comment = commentRepository.findById(request.commentId())</span>
+<span class="fc" id="L60">                    .orElseThrow(() -&gt; new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));</span>
 
-<span class="nc bnc" id="L62" title="All 2 branches missed.">            if (!comment.getHighlight().getId().equals(highlightId)) {</span>
-<span class="nc" id="L63">                throw new ForbiddenException(ErrorCode.COMMENT_PARENT_MISMATCH);</span>
+<span class="fc bfc" id="L62" title="All 2 branches covered.">            if (!comment.getHighlight().getId().equals(highlightId)) {</span>
+<span class="fc" id="L63">                throw new ForbiddenException(ErrorCode.COMMENT_PARENT_MISMATCH);</span>
             }
 
-<span class="nc" id="L66">            highlightReaction = reactionRepository.findByAuthorIdAndCommentIdAndReactionType(</span>
-<span class="nc" id="L67">                    userId, comment.getId(), request.reactionType());</span>
+<span class="fc" id="L66">            highlightReaction = reactionRepository.findByAuthorIdAndCommentIdAndReactionType(</span>
+<span class="fc" id="L67">                    userId, comment.getId(), request.reactionType());</span>
         } else {
-<span class="nc" id="L69">            highlightReaction = reactionRepository.findByAuthorIdAndHighlightIdAndReactionTypeAndCommentIdIsNull(</span>
-<span class="nc" id="L70">                    userId, highlightId, request.reactionType());</span>
+<span class="fc" id="L69">            highlightReaction = reactionRepository.findByAuthorIdAndHighlightIdAndReactionTypeAndCommentIdIsNull(</span>
+<span class="fc" id="L70">                    userId, highlightId, request.reactionType());</span>
         }
         
-<span class="nc bnc" id="L73" title="All 2 branches missed.">        if (highlightReaction.isPresent()) {</span>
-<span class="nc" id="L74">            throw new BadRequestException(ErrorCode.REACTION_ALREADY_EXISTS);</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">        if (highlightReaction.isPresent()) {</span>
+<span class="fc" id="L74">            throw new BadRequestException(ErrorCode.REACTION_ALREADY_EXISTS);</span>
         }
 
-<span class="nc" id="L77">        HighlightReaction reaction = HighlightReaction.builder()</span>
-<span class="nc" id="L78">                .author(userRepository.getReferenceById(userId))</span>
-<span class="nc" id="L79">                .highlight(highlight)</span>
-<span class="nc" id="L80">                .comment(comment)</span>
-<span class="nc" id="L81">                .reactionType(request.reactionType())</span>
-<span class="nc" id="L82">                .build();</span>
+<span class="fc" id="L77">        HighlightReaction reaction = HighlightReaction.builder()</span>
+<span class="fc" id="L78">                .author(userRepository.getReferenceById(userId))</span>
+<span class="fc" id="L79">                .highlight(highlight)</span>
+<span class="fc" id="L80">                .comment(comment)</span>
+<span class="fc" id="L81">                .reactionType(request.reactionType())</span>
+<span class="fc" id="L82">                .build();</span>
 
-<span class="nc" id="L84">        HighlightReaction savedReaction = reactionRepository.save(reaction);</span>
+<span class="fc" id="L84">        HighlightReaction savedReaction = reactionRepository.save(reaction);</span>
 
-<span class="nc" id="L86">        return HighlightReactionResponse.of(savedReaction);</span>
+<span class="fc" id="L86">        return HighlightReactionResponse.of(savedReaction);</span>
     }
 
     public List&lt;HighlightReactionResponse&gt; getHighlightReactions(UserToken userToken, Long highlightId) {
-<span class="nc" id="L90">        Highlight highlight = entityFinder.findHighlight(highlightId);</span>
-<span class="nc bnc" id="L91" title="All 2 branches missed.">        if(highlight.isPublic()) {</span>
-<span class="nc" id="L92">            activityPolicy.assertJoined(userToken.userId(), highlight.getActivity().getId());</span>
+<span class="fc" id="L90">        Highlight highlight = entityFinder.findHighlight(highlightId);</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        if(highlight.isPublic()) {</span>
+<span class="fc" id="L92">            activityPolicy.assertJoined(userToken.userId(), highlight.getActivity().getId());</span>
         } else {
-<span class="nc" id="L94">            highlightPolicy.assertUpdatable(userToken.userId(), highlight);</span>
+<span class="fc" id="L94">            highlightPolicy.assertUpdatable(userToken.userId(), highlight);</span>
         }
 
-<span class="nc" id="L97">        List&lt;HighlightReaction&gt; reactions = reactionRepository.findByHighlightIdAndCommentIdIsNull(highlightId);</span>
+<span class="fc" id="L97">        List&lt;HighlightReaction&gt; reactions = reactionRepository.findByHighlightIdAndCommentIdIsNull(highlightId);</span>
 
-<span class="nc" id="L99">        return reactions.stream()</span>
-<span class="nc" id="L100">                .map(HighlightReactionResponse::of)</span>
-<span class="nc" id="L101">                .collect(Collectors.toList());</span>
+<span class="fc" id="L99">        return reactions.stream()</span>
+<span class="fc" id="L100">                .map(HighlightReactionResponse::of)</span>
+<span class="fc" id="L101">                .collect(Collectors.toList());</span>
     }
 
     public void deleteReaction(UserToken userToken, Long reactionId) {
-<span class="nc" id="L105">        Long userId = userToken.userId();</span>
+<span class="fc" id="L105">        Long userId = userToken.userId();</span>
 
-<span class="nc" id="L107">        HighlightReaction reaction = reactionRepository.findById(reactionId)</span>
-<span class="nc" id="L108">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.REACTION_NOT_FOUND));</span>
+<span class="fc" id="L107">        HighlightReaction reaction = reactionRepository.findById(reactionId)</span>
+<span class="pc" id="L108">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.REACTION_NOT_FOUND));</span>
 
-<span class="nc bnc" id="L110" title="All 2 branches missed.">        if (!reaction.getAuthor().getId().equals(userId)) {</span>
-<span class="nc" id="L111">            throw new ForbiddenException(ErrorCode.NOT_REACTION_AUTHOR);</span>
+<span class="fc bfc" id="L110" title="All 2 branches covered.">        if (!reaction.getAuthor().getId().equals(userId)) {</span>
+<span class="fc" id="L111">            throw new ForbiddenException(ErrorCode.NOT_REACTION_AUTHOR);</span>
         }
 
-<span class="nc" id="L114">        reactionRepository.delete(reaction);</span>
-<span class="nc" id="L115">    }</span>
+<span class="fc" id="L114">        reactionRepository.delete(reaction);</span>
+<span class="fc" id="L115">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

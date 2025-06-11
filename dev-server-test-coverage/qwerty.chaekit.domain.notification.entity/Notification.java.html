@@ -57,18 +57,18 @@ public class Notification extends BaseEntity {
     private boolean isRead;
 
     @Builder
-<span class="nc" id="L60">    public Notification(UserProfile receiver, UserProfile sender, PublisherProfile publisher, ReadingGroup group, Highlight highlight, Discussion discussion, DiscussionComment discussionComment, NotificationType type, String message) {</span>
-<span class="nc" id="L61">        this.receiver = receiver;</span>
-<span class="nc" id="L62">        this.sender = sender;</span>
-<span class="nc" id="L63">        this.publisher = publisher;</span>
-<span class="nc" id="L64">        this.group = group;</span>
-<span class="nc" id="L65">        this.highlight = highlight;</span>
-<span class="nc" id="L66">        this.discussion = discussion;</span>
-<span class="nc" id="L67">        this.discussionComment = discussionComment;</span>
-<span class="nc" id="L68">        this.type = type;</span>
-<span class="nc" id="L69">        this.message = message;</span>
-<span class="nc" id="L70">        this.isRead = false;</span>
-<span class="nc" id="L71">    }</span>
+<span class="fc" id="L60">    public Notification(UserProfile receiver, UserProfile sender, PublisherProfile publisher, ReadingGroup group, Highlight highlight, Discussion discussion, DiscussionComment discussionComment, NotificationType type, String message) {</span>
+<span class="fc" id="L61">        this.receiver = receiver;</span>
+<span class="fc" id="L62">        this.sender = sender;</span>
+<span class="fc" id="L63">        this.publisher = publisher;</span>
+<span class="fc" id="L64">        this.group = group;</span>
+<span class="fc" id="L65">        this.highlight = highlight;</span>
+<span class="fc" id="L66">        this.discussion = discussion;</span>
+<span class="fc" id="L67">        this.discussionComment = discussionComment;</span>
+<span class="fc" id="L68">        this.type = type;</span>
+<span class="fc" id="L69">        this.message = message;</span>
+<span class="fc" id="L70">        this.isRead = false;</span>
+<span class="fc" id="L71">    }</span>
 
     public void markAsRead() {
 <span class="nc" id="L74">        this.isRead = true;</span>

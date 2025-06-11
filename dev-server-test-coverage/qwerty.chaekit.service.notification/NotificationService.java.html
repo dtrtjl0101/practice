@@ -34,12 +34,12 @@ public class NotificationService {
 
     @Transactional
     public void createGroupJoinRequestNotification(UserProfile receiver, UserProfile sender, ReadingGroup group) {
-<span class="nc" id="L37">        String message = String.format(&quot;%s님이 %s 그룹에 가입을 요청했습니다.&quot;, sender.getNickname(), group.getName());</span>
-<span class="nc" id="L38">        Notification notification = new Notification(receiver, sender, null,group, null,null,null,NotificationType.GROUP_JOIN_REQUEST, message);</span>
-<span class="nc" id="L39">        notificationJpaRepository.save(notification);</span>
-<span class="nc" id="L40">        NotificationResponse response = NotificationResponse.of(notification);</span>
-<span class="nc" id="L41">        simpMessagingTemplate.convertAndSend(&quot;/topic/notification/&quot; + notification.getReceiver().getId(), response);</span>
-<span class="nc" id="L42">    }</span>
+<span class="fc" id="L37">        String message = String.format(&quot;%s님이 %s 그룹에 가입을 요청했습니다.&quot;, sender.getNickname(), group.getName());</span>
+<span class="fc" id="L38">        Notification notification = new Notification(receiver, sender, null,group, null,null,null,NotificationType.GROUP_JOIN_REQUEST, message);</span>
+<span class="fc" id="L39">        notificationJpaRepository.save(notification);</span>
+<span class="fc" id="L40">        NotificationResponse response = NotificationResponse.of(notification);</span>
+<span class="fc" id="L41">        simpMessagingTemplate.convertAndSend(&quot;/topic/notification/&quot; + notification.getReceiver().getId(), response);</span>
+<span class="fc" id="L42">    }</span>
 
     @Transactional
     public void createGroupJoinApprovedNotification(UserProfile receiver, UserProfile sender, ReadingGroup group) {
@@ -77,12 +77,12 @@ public class NotificationService {
 <span class="nc" id="L77">        notificationJpaRepository.save(notification);</span>
 <span class="nc" id="L78">    }</span>
 
-    @Transactional
-    public void createPublisherRejectedNotification(PublisherProfile publisher, UserProfile admin) {
-<span class="nc" id="L82">        String message = &quot;출판사 가입이 거절되었습니다.&quot;;</span>
-<span class="nc" id="L83">        Notification notification = new Notification(null, admin, publisher,null, null,null,null,NotificationType.PUBLISHER_REJECTED, message);</span>
-<span class="nc" id="L84">        notificationJpaRepository.save(notification);</span>
-<span class="nc" id="L85">    }</span>
+//    @Transactional
+//    public void createPublisherRejectedNotification(PublisherProfile publisher, UserProfile admin) {
+//        String message = &quot;출판사 가입이 거절되었습니다.&quot;;
+//        Notification notification = new Notification(null, admin, publisher,null, null,null,null,NotificationType.PUBLISHER_REJECTED, message);
+//        notificationJpaRepository.save(notification);
+//    }
 
     @Transactional
     public void createDiscussionCommentNotification(UserProfile receiver, UserProfile sender, Discussion discussion) {
@@ -149,28 +149,28 @@ public class NotificationService {
 <span class="nc" id="L149">    }</span>
 
     public PageResponse&lt;NotificationResponse&gt; getNotifications(UserToken userToken, Pageable pageable) {
-<span class="nc" id="L152">        UserProfile userProfile = userProfileRepository.findById(userToken.userId())</span>
-<span class="nc" id="L153">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
+<span class="fc" id="L152">        UserProfile userProfile = userProfileRepository.findById(userToken.userId())</span>
+<span class="fc" id="L153">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
 
-<span class="nc" id="L155">        Page&lt;Notification&gt; notifications = notificationJpaRepository.findByReceiverOrderByCreatedAtDesc(userProfile, pageable);</span>
-<span class="nc" id="L156">        Page&lt;NotificationResponse&gt; responsePage = notifications.map(NotificationResponse::of);</span>
+<span class="fc" id="L155">        Page&lt;Notification&gt; notifications = notificationJpaRepository.findByReceiverOrderByCreatedAtDesc(userProfile, pageable);</span>
+<span class="fc" id="L156">        Page&lt;NotificationResponse&gt; responsePage = notifications.map(NotificationResponse::of);</span>
         
-<span class="nc" id="L158">        return PageResponse.of(responsePage);</span>
+<span class="fc" id="L158">        return PageResponse.of(responsePage);</span>
     }
 
     @Transactional
     public void markAsRead(UserToken userToken, Long notificationId) {
-<span class="nc" id="L163">        UserProfile userProfile = userProfileRepository.findById(userToken.userId())</span>
-<span class="nc" id="L164">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
+<span class="fc" id="L163">        UserProfile userProfile = userProfileRepository.findById(userToken.userId())</span>
+<span class="pc" id="L164">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
 
-<span class="nc" id="L166">        Notification notification = notificationJpaRepository.findById(notificationId)</span>
-<span class="nc" id="L167">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.NOTIFICATION_NOT_FOUND));</span>
+<span class="fc" id="L166">        Notification notification = notificationJpaRepository.findById(notificationId)</span>
+<span class="pc" id="L167">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.NOTIFICATION_NOT_FOUND));</span>
 
-<span class="nc bnc" id="L169" title="All 2 branches missed.">        if (!notification.getReceiver().getId().equals(userProfile.getId())) {</span>
-<span class="nc" id="L170">            throw new ForbiddenException(ErrorCode.NOTIFICATION_NOT_YOURS);</span>
+<span class="fc bfc" id="L169" title="All 2 branches covered.">        if (!notification.getReceiver().getId().equals(userProfile.getId())) {</span>
+<span class="fc" id="L170">            throw new ForbiddenException(ErrorCode.NOTIFICATION_NOT_YOURS);</span>
         }
 
-<span class="nc" id="L173">        notification.markAsRead();</span>
-<span class="nc" id="L174">    }</span>
+<span class="fc" id="L173">        notification.markAsRead();</span>
+<span class="fc" id="L174">    }</span>
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
