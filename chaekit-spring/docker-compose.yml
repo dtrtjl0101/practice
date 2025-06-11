@@ -67,13 +67,8 @@ services:
       # CORS
       CORS_ALLOWED_ORIGINS: http://localhost:*,https://chaekit.com,https://*.chaekit.com
 
-      # Kafka
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: chaekit-kafka:9092
-
     depends_on:
       chaekit-mysql:
-        condition: service_healthy
-      chaekit-kafka:
         condition: service_healthy
     ports:
       - "${LOCAL_SERVER_PORT}:8080"
