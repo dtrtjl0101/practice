@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.highlight.Highlight;
 import qwerty.chaekit.domain.highlight.comment.HighlightComment;
 import qwerty.chaekit.domain.highlight.comment.repository.HighlightCommentRepository;
@@ -105,27 +106,31 @@ class HighlightCommentServiceTest {
         HighlightComment parentComment = mock(HighlightComment.class);
         HighlightComment savedComment = mock(HighlightComment.class);
         HighlightCommentResponse response = mock(HighlightCommentResponse.class);
+        Activity activity = mock(Activity.class);
 
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(userProfile));
         when(highlightRepository.findById(anyLong())).thenReturn(Optional.of(highlight));
         when(highlight.isPublic()).thenReturn(true);
         when(highlight.getAuthor()).thenReturn(highlightAuthor);
+        when(highlight.getActivity()).thenReturn(activity);
         when(commentRepository.findById(parentId)).thenReturn(Optional.of(parentComment));
         when(parentComment.getHighlight()).thenReturn(highlight);
         when(parentComment.getAuthor()).thenReturn(parentAuthor);
+        when(parentComment.getId()).thenReturn(parentId);
         when(userProfile.getId()).thenReturn(1L);
         when(parentAuthor.getId()).thenReturn(2L);
         when(highlightAuthor.getId()).thenReturn(3L);
         when(commentRepository.save(any(HighlightComment.class))).thenReturn(savedComment);
         when(highlightCommentMapper.toResponse(savedComment)).thenReturn(response);
+        when(highlight.getId()).thenReturn(1L);
 
         // when
         HighlightCommentResponse result = highlightCommentService.createComment(userToken, 1L, request);
 
         // then
         assertThat(result).isEqualTo(response);
-        verify(activityPolicy).assertJoined(userProfile, highlight.getActivity());
-        verify(notificationService).createHighlightCommentReplyNotification(any(), any(), any());
+        verify(activityPolicy).assertJoined(userProfile, activity);
+        verify(notificationService, times(2)).createHighlightCommentReplyNotification(any(), any(), any());
     }
 
     @Test
@@ -203,19 +208,22 @@ class HighlightCommentServiceTest {
         Long commentId = 1L;
         String newContent = "수정된 댓글";
         UserProfile userProfile = mock(UserProfile.class);
-        UserToken userToken = UserToken.of(userProfile);
+        UserToken userToken = mock(UserToken.class);
         HighlightCommentRequest request = new HighlightCommentRequest(newContent, null);
 
         HighlightComment comment = mock(HighlightComment.class);
         UserProfile commentAuthor = mock(UserProfile.class);
         HighlightCommentResponse response = mock(HighlightCommentResponse.class);
 
+        when(userToken.userId()).thenReturn(1L);
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
         when(comment.getAuthor()).thenReturn(commentAuthor);
         when(userProfile.getId()).thenReturn(1L);
         when(commentAuthor.getId()).thenReturn(1L);
         when(commentRepository.save(comment)).thenReturn(comment);
         when(highlightCommentMapper.toResponse(comment)).thenReturn(response);
+        when(comment.getId()).thenReturn(1L);
+        when(comment.getContent()).thenReturn(newContent);
 
         // when
         HighlightCommentResponse result = highlightCommentService.updateComment(userToken, commentId, request);
@@ -231,11 +239,12 @@ class HighlightCommentServiceTest {
         // given
         Long commentId = 1L;
         UserProfile userProfile = mock(UserProfile.class);
-        UserToken userToken = UserToken.of(userProfile);
+        UserToken userToken = mock(UserToken.class);
 
         HighlightComment comment = mock(HighlightComment.class);
         UserProfile commentAuthor = mock(UserProfile.class);
 
+        when(userToken.userId()).thenReturn(1L);
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
         when(comment.getAuthor()).thenReturn(commentAuthor);
         when(userProfile.getId()).thenReturn(1L);
@@ -254,16 +263,17 @@ class HighlightCommentServiceTest {
         // given
         Long commentId = 1L;
         UserProfile userProfile = mock(UserProfile.class);
-        UserToken userToken = UserToken.of(userProfile);
+        UserToken userToken = mock(UserToken.class);
 
         HighlightComment comment = mock(HighlightComment.class);
         UserProfile commentAuthor = mock(UserProfile.class);
         List<HighlightComment> replies = List.of(mock(HighlightComment.class));
 
+        when(userToken.userId()).thenReturn(1L);
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
         when(comment.getAuthor()).thenReturn(commentAuthor);
         when(userProfile.getId()).thenReturn(1L);
-        when(commentAuthor.getId()).thenReturn(1L);  // lenient() 추가
+        when(commentAuthor.getId()).thenReturn(1L);
         when(comment.getReplies()).thenReturn(replies);
 
         // when
