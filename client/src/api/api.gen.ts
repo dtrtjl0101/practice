@@ -79,6 +79,11 @@ export interface LoginResponse {
    * @example "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
    */
   accessToken: string;
+  /**
+   * 프로모션 대상 여부
+   * @example true
+   */
+  firstPaymentBenefit: boolean;
 }
 
 export interface RefreshTokenRequest {
@@ -577,29 +582,18 @@ export interface UserInfoResponse {
   nickname?: string;
   profileImageURL?: string;
   role?: string;
-}
-
-export interface UserPatchRequest {
-  nickname?: string;
-  /** @format binary */
-  profileImage?: File;
-}
-
-/** API 에러 응답을 감싸는 클래스 */
-export interface ApiSuccessResponseUserInfoResponse {
-  isSuccessful?: boolean;
-  data?: UserInfoResponse;
-}
-
-export interface UserInfoResponse {
   /** @format int64 */
-  memberId?: number;
-  email?: string;
+  recentGroupId?: number;
+  recentGroupName?: string;
+  recentGroupImageURL?: string;
   /** @format int64 */
-  userId?: number;
-  nickname?: string;
-  profileImageURL?: string;
-  role?: string;
+  recentActivityId?: number;
+  recentActivityBookTitle?: string;
+  recentActivityBookAuthor?: string;
+  recentActivityBookCoverImageURL?: string;
+  firstPaymentBenefit?: boolean;
+  /** @format date-time */
+  createdAt?: string;
 }
 
 export interface HighlightPutRequest {
