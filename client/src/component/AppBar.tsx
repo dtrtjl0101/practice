@@ -100,10 +100,14 @@ export default function AppBar(props: {
                 {myWallet && (
                   <Tooltip
                     title={
-                      user?.firstPaymentBenefit ? "첫 결제 10% 추가 증정!" : ""
+                      user.role === Role.ROLE_USER && user.firstPaymentBenefit
+                        ? "첫 결제 10% 추가 증정!"
+                        : ""
                     }
                     arrow
-                    disableHoverListener={!user?.firstPaymentBenefit} // 조건 아닐 땐 비활성
+                    disableHoverListener={
+                      user.role != Role.ROLE_USER || user.firstPaymentBenefit
+                    } // 조건 아닐 땐 비활성
                   >
                     <Chip
                       label={`${myWallet.balance?.toLocaleString() ?? 0} 크레딧`}
@@ -118,20 +122,22 @@ export default function AppBar(props: {
                         cursor: "pointer",
                         position: "relative",
                         overflow: "hidden", // 반사광이 바깥으로 튀지 않도록
-                        "&::before": user?.firstPaymentBenefit
-                          ? {
-                              content: '""',
-                              position: "absolute",
-                              top: 0,
-                              left: "-75%",
-                              width: "50%",
-                              height: "100%",
-                              background:
-                                "linear-gradient(120deg, transparent, rgba(255,255,255,0.4), transparent)",
-                              transform: "skewX(-20deg)",
-                              animation: "shine 2.5s infinite",
-                            }
-                          : {},
+                        "&::before":
+                          user.role === Role.ROLE_USER &&
+                          user.firstPaymentBenefit
+                            ? {
+                                content: '""',
+                                position: "absolute",
+                                top: 0,
+                                left: "-75%",
+                                width: "50%",
+                                height: "100%",
+                                background:
+                                  "linear-gradient(120deg, transparent, rgba(255,255,255,0.4), transparent)",
+                                transform: "skewX(-20deg)",
+                                animation: "shine 2.5s infinite",
+                              }
+                            : {},
                         "@keyframes shine": {
                           "0%": {
                             left: "-75%",

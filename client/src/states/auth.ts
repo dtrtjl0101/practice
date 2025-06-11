@@ -24,6 +24,7 @@ export namespace AuthState {
       }
     | {
         role: Role.ROLE_ADMIN;
+        firstPaymentBenefit: boolean;
       }
   );
   export const user = atom<LoggedInUser | undefined>();

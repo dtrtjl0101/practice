@@ -88,6 +88,7 @@ describe("getLoggedInUserFromLocalStorage", () => {
       profileImageURL: "admin.jpg",
       refreshToken: "admin-refresh-token",
       accessToken: "admin-access-token",
+      firstPaymentBenefit: false,
     };
 
     localStorageMock.getItem.mockReturnValue(JSON.stringify(adminData));
