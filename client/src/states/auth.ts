@@ -10,12 +10,12 @@ export namespace AuthState {
     profileImageURL: string;
     refreshToken: string;
     accessToken: string;
-    firstPaymentBenefit: boolean;
   } & (
     | {
         userId: number;
         nickname: string;
         role: Role.ROLE_USER;
+        firstPaymentBenefit: boolean;
       }
     | {
         publisherId: number;
