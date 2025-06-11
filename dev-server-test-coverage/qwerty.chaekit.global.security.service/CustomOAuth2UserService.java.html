@@ -59,32 +59,31 @@ public class CustomOAuth2UserService implements OAuth2UserService&lt;OAuth2UserR
 <span class="nc" id="L59">                            .build();</span>
 <span class="nc" id="L60">                    log.info(&quot;OAuth2 User Profile Created: {}&quot;, userProfile);</span>
 <span class="nc" id="L61">                    userProfileRepository.save(userProfile);</span>
-
-<span class="nc" id="L63">                    return newMember;</span>
+<span class="nc" id="L62">                    creditWalletRepository.save(</span>
+<span class="nc" id="L63">                            CreditWallet.builder()</span>
+<span class="nc" id="L64">                                    .user(userProfile)</span>
+<span class="nc" id="L65">                                    .build()</span>
+                    );
+<span class="nc" id="L67">                    return newMember;</span>
                 });
 
-<span class="nc" id="L66">        UserProfile userProfile = userProfileRepository.findByMember_Id(member.getId()).orElse(null);</span>
-<span class="nc" id="L67">        creditWalletRepository.save(</span>
-<span class="nc" id="L68">                CreditWallet.builder()</span>
-<span class="nc" id="L69">                        .user(userProfile)</span>
-<span class="nc" id="L70">                        .build()</span>
-        );
-<span class="nc" id="L72">        return new CustomUserDetails(member, userProfile, null, attributes);</span>
+<span class="nc" id="L70">        UserProfile userProfile = userProfileRepository.findByMember_Id(member.getId()).orElse(null);</span>
+<span class="nc" id="L71">        return new CustomUserDetails(member, userProfile, null, attributes);</span>
     }
 
     private String generateUniqueNickname(String base) {
-<span class="nc" id="L76">        final int MAX_ATTEMPTS = 10;</span>
+<span class="nc" id="L75">        final int MAX_ATTEMPTS = 10;</span>
 
-<span class="nc bnc" id="L78" title="All 2 branches missed.">        for (int i = 0; i &lt; MAX_ATTEMPTS; i++) {</span>
-<span class="nc" id="L79">            String code = String.format(&quot;_%04d&quot;, (int)(Math.random() * 10000));</span>
-<span class="nc" id="L80">            String candidate = base + code;</span>
-<span class="nc" id="L81">            boolean exists = userProfileRepository.existsByNickname(candidate);</span>
-<span class="nc bnc" id="L82" title="All 2 branches missed.">            if (!exists) {</span>
-<span class="nc" id="L83">                return candidate;</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">        for (int i = 0; i &lt; MAX_ATTEMPTS; i++) {</span>
+<span class="nc" id="L78">            String code = String.format(&quot;_%04d&quot;, (int)(Math.random() * 10000));</span>
+<span class="nc" id="L79">            String candidate = base + code;</span>
+<span class="nc" id="L80">            boolean exists = userProfileRepository.existsByNickname(candidate);</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">            if (!exists) {</span>
+<span class="nc" id="L82">                return candidate;</span>
             }
         }
 
-<span class="nc" id="L87">        throw new RuntimeException(&quot;중복되지 않는 닉네임을 생성할 수 없습니다.&quot;);</span>
+<span class="nc" id="L86">        throw new RuntimeException(&quot;중복되지 않는 닉네임을 생성할 수 없습니다.&quot;);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
