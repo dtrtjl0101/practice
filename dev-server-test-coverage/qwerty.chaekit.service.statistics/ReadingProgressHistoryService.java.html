@@ -93,62 +93,61 @@ public class ReadingProgressHistoryService {
 
         // 사용자별 보정된 진행률 시계열 생성 (날짜별 최대 진행률 유지)
 <span class="nc" id="L95">        Map&lt;Long, Map&lt;LocalDate, Long&gt;&gt; fixedProgressByUser = new HashMap&lt;&gt;();</span>
-<span class="nc bnc" id="L96" title="All 2 branches missed.">        for (Map.Entry&lt;Long, List&lt;ReadingProgressHistory&gt;&gt; entry : historiesByUser.entrySet()) {</span>
-<span class="nc" id="L97">            Long userId = entry.getKey();</span>
-<span class="nc" id="L98">            List&lt;ReadingProgressHistory&gt; userHistories = entry.getValue();</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">        for (Long userId : userIdList) {</span>
+<span class="nc" id="L97">            List&lt;ReadingProgressHistory&gt; userHistories = historiesByUser.getOrDefault(userId, Collections.emptyList());</span>
 
-<span class="nc" id="L100">            Map&lt;LocalDate, Long&gt; rawByDate = userHistories.stream()</span>
-<span class="nc" id="L101">                    .collect(Collectors.toMap(</span>
-<span class="nc" id="L102">                            h -&gt; h.getCreatedAt().toLocalDate(),</span>
+<span class="nc" id="L99">            Map&lt;LocalDate, Long&gt; rawByDate = userHistories.stream()</span>
+<span class="nc" id="L100">                    .collect(Collectors.toMap(</span>
+<span class="nc" id="L101">                            h -&gt; h.getCreatedAt().toLocalDate(),</span>
                             ReadingProgressHistory::getPercentage,
-                            Math::max // 같은 날 중복 있을 경우 최대값
+                            Math::max
                     ));
 
-<span class="nc" id="L107">            Map&lt;LocalDate, Long&gt; progressMap = new LinkedHashMap&lt;&gt;();</span>
-<span class="nc" id="L108">            long maxSoFar = 0L;</span>
-<span class="nc bnc" id="L109" title="All 2 branches missed.">            for (LocalDate day : days) {</span>
+<span class="nc" id="L106">            Map&lt;LocalDate, Long&gt; progressMap = new LinkedHashMap&lt;&gt;();</span>
+<span class="nc" id="L107">            long maxSoFar = 0L;</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">            for (LocalDate day : days) {</span>
                 long p;
-<span class="nc bnc" id="L111" title="All 2 branches missed.">                if(day.equals(LocalDate.now())) {</span>
-<span class="nc" id="L112">                    p = currentPercentageByUser.getOrDefault(userId,0L); // 오늘은 현재 퍼센테이지 적용</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">                if (day.equals(LocalDate.now())) {</span>
+<span class="nc" id="L111">                    p = currentPercentageByUser.getOrDefault(userId, 0L);</span>
                 } else {
-<span class="nc" id="L114">                    p = rawByDate.getOrDefault(day, 0L);</span>
+<span class="nc" id="L113">                    p = rawByDate.getOrDefault(day, 0L);</span>
                 }
-<span class="nc" id="L116">                maxSoFar = Math.max(maxSoFar, p);</span>
-<span class="nc" id="L117">                progressMap.put(day, maxSoFar);</span>
-<span class="nc" id="L118">            }</span>
-<span class="nc" id="L119">            fixedProgressByUser.put(userId, progressMap);</span>
-<span class="nc" id="L120">        }</span>
+<span class="nc" id="L115">                maxSoFar = Math.max(maxSoFar, p);</span>
+<span class="nc" id="L116">                progressMap.put(day, maxSoFar);</span>
+<span class="nc" id="L117">            }</span>
+<span class="nc" id="L118">            fixedProgressByUser.put(userId, progressMap);</span>
+<span class="nc" id="L119">        }</span>
 
         // 날짜별 평균 계산 + 내 진행률 보정
-<span class="nc" id="L123">        List&lt;ReadingProgressHistoryResponse&gt; responses = new ArrayList&lt;&gt;();</span>
-<span class="nc" id="L124">        long myMax = 0L;</span>
+<span class="nc" id="L122">        List&lt;ReadingProgressHistoryResponse&gt; responses = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L123">        long myMax = 0L;</span>
 
-<span class="nc bnc" id="L126" title="All 2 branches missed.">        for (LocalDate day : days) {</span>
-<span class="nc" id="L127">            List&lt;Long&gt; progresses = new ArrayList&lt;&gt;();</span>
-<span class="nc" id="L128">            long myProgress = 0L;</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">        for (LocalDate day : days) {</span>
+<span class="nc" id="L126">            List&lt;Long&gt; progresses = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L127">            long myProgress = 0L;</span>
 
-<span class="nc bnc" id="L130" title="All 2 branches missed.">            for (Map.Entry&lt;Long, Map&lt;LocalDate, Long&gt;&gt; entry : fixedProgressByUser.entrySet()) {</span>
-<span class="nc" id="L131">                Long userId = entry.getKey();</span>
-<span class="nc" id="L132">                Long p = entry.getValue().getOrDefault(day, 0L);</span>
+<span class="nc bnc" id="L129" title="All 2 branches missed.">            for (Map.Entry&lt;Long, Map&lt;LocalDate, Long&gt;&gt; entry : fixedProgressByUser.entrySet()) {</span>
+<span class="nc" id="L130">                Long userId = entry.getKey();</span>
+<span class="nc" id="L131">                Long p = entry.getValue().getOrDefault(day, 0L);</span>
 
-<span class="nc" id="L134">                progresses.add(p);</span>
+<span class="nc" id="L133">                progresses.add(p);</span>
 
-<span class="nc bnc" id="L136" title="All 2 branches missed.">                if (userId.equals(user.getId())) {</span>
-<span class="nc bnc" id="L137" title="All 2 branches missed.">                    myProgress = day.isBefore(joinDate) ? 0L : p;</span>
+<span class="nc bnc" id="L135" title="All 2 branches missed.">                if (userId.equals(user.getId())) {</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">                    myProgress = day.isBefore(joinDate) ? 0L : p;</span>
                 }
-<span class="nc" id="L139">            }</span>
+<span class="nc" id="L138">            }</span>
 
-<span class="nc" id="L141">            myMax = Math.max(myMax, myProgress);</span>
-<span class="nc" id="L142">            double avg = progresses.stream().mapToLong(Long::longValue).average().orElse(0.0);</span>
+<span class="nc" id="L140">            myMax = Math.max(myMax, myProgress);</span>
+<span class="nc" id="L141">            double avg = progresses.stream().mapToLong(Long::longValue).average().orElse(0.0);</span>
 
-<span class="nc" id="L144">            responses.add(ReadingProgressHistoryResponse.builder()</span>
-<span class="nc" id="L145">                    .date(day)</span>
-<span class="nc" id="L146">                    .myPercentage(myMax)</span>
-<span class="nc" id="L147">                    .averagePercentage(avg)</span>
-<span class="nc" id="L148">                    .build());</span>
-<span class="nc" id="L149">        }</span>
+<span class="nc" id="L143">            responses.add(ReadingProgressHistoryResponse.builder()</span>
+<span class="nc" id="L144">                    .date(day)</span>
+<span class="nc" id="L145">                    .myPercentage(myMax)</span>
+<span class="nc" id="L146">                    .averagePercentage(avg)</span>
+<span class="nc" id="L147">                    .build());</span>
+<span class="nc" id="L148">        }</span>
 
-<span class="nc" id="L151">        return responses;</span>
+<span class="nc" id="L150">        return responses;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -2,6 +2,7 @@
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import qwerty.chaekit.domain.ebook.credit.wallet.CreditWalletRepository;
 import qwerty.chaekit.domain.member.Member;
 import qwerty.chaekit.domain.member.enums.Role;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
@@ -18,46 +19,49 @@ public class LoginResponseFactory {
     private final JwtUtil jwtUtil;
     private final RefreshTokenService refreshTokenService;
     private final FileService fileService;
+    private final CreditWalletRepository creditWalletRepository;
 
     public LoginResponse createLoginResponse(CustomUserDetails customUserDetails) {
-<span class="nc" id="L23">        Member member = customUserDetails.member();</span>
-<span class="nc bnc" id="L24" title="All 2 branches missed.">        if (member == null) {</span>
-<span class="nc" id="L25">            throw new IllegalArgumentException(&quot;Member details are required to create a login response.&quot;);</span>
+<span class="nc" id="L25">        Member member = customUserDetails.member();</span>
+<span class="nc bnc" id="L26" title="All 2 branches missed.">        if (member == null) {</span>
+<span class="nc" id="L27">            throw new IllegalArgumentException(&quot;Member details are required to create a login response.&quot;);</span>
         }
         
-<span class="nc" id="L28">        UserProfile user = customUserDetails.user();</span>
-<span class="nc" id="L29">        PublisherProfile publisher = customUserDetails.publisher();</span>
-<span class="nc" id="L30">        String profileImageKey = null;</span>
-<span class="nc" id="L31">        Long memberId = member.getId();</span>
-<span class="nc" id="L32">        Long publisherId = null;</span>
-<span class="nc" id="L33">        Long userId = null;</span>
-<span class="nc bnc" id="L34" title="All 2 branches missed.">        if (publisher != null) {</span>
-<span class="nc" id="L35">            profileImageKey = publisher.getProfileImageKey();</span>
-<span class="nc" id="L36">            publisherId = publisher.getId();</span>
+<span class="nc" id="L30">        UserProfile user = customUserDetails.user();</span>
+<span class="nc" id="L31">        PublisherProfile publisher = customUserDetails.publisher();</span>
+<span class="nc" id="L32">        String profileImageKey = null;</span>
+<span class="nc" id="L33">        Long memberId = member.getId();</span>
+<span class="nc" id="L34">        Long publisherId = null;</span>
+<span class="nc" id="L35">        Long userId = null;</span>
+<span class="nc bnc" id="L36" title="All 2 branches missed.">        if (publisher != null) {</span>
+<span class="nc" id="L37">            profileImageKey = publisher.getProfileImageKey();</span>
+<span class="nc" id="L38">            publisherId = publisher.getId();</span>
         }
-<span class="nc bnc" id="L38" title="All 2 branches missed.">        if (user != null) {</span>
-<span class="nc" id="L39">            profileImageKey = user.getProfileImageKey();</span>
-<span class="nc" id="L40">            userId = user.getId();</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">        if (user != null) {</span>
+<span class="nc" id="L41">            profileImageKey = user.getProfileImageKey();</span>
+<span class="nc" id="L42">            userId = user.getId();</span>
         }
 
-<span class="nc" id="L43">        String profileImageURL = fileService.convertToPublicImageURL(profileImageKey);</span>
-<span class="nc" id="L44">        Role role = member.getRole();</span>
+<span class="nc" id="L45">        String profileImageURL = fileService.convertToPublicImageURL(profileImageKey);</span>
+<span class="nc" id="L46">        Role role = member.getRole();</span>
 
-<span class="nc" id="L46">        String refreshToken = refreshTokenService.issueRefreshToken(memberId);</span>
-<span class="nc" id="L47">        String accessToken = jwtUtil.createAccessToken(memberId, userId, publisherId, member.getEmail(), role.name());</span>
+<span class="nc" id="L48">        String refreshToken = refreshTokenService.issueRefreshToken(memberId);</span>
+<span class="nc" id="L49">        String accessToken = jwtUtil.createAccessToken(memberId, userId, publisherId, member.getEmail(), role.name());</span>
+<span class="nc" id="L50">        boolean firstPaymentBenefit = creditWalletRepository.existsByUserAndPaymentTransactionsEmpty(user);</span>
 
-<span class="nc" id="L49">        return LoginResponse.builder()</span>
-<span class="nc" id="L50">                .refreshToken(refreshToken)</span>
-<span class="nc" id="L51">                .accessToken(accessToken)</span>
-<span class="nc" id="L52">                .memberId(member.getId())</span>
-<span class="nc" id="L53">                .email(member.getEmail())</span>
-<span class="nc bnc" id="L54" title="All 2 branches missed.">                .userId(user != null ? user.getId() : null)</span>
-<span class="nc bnc" id="L55" title="All 2 branches missed.">                .nickname(user != null ? user.getNickname() : null)</span>
-<span class="nc bnc" id="L56" title="All 2 branches missed.">                .publisherId(publisher != null ? publisher.getId() : null)</span>
-<span class="nc bnc" id="L57" title="All 2 branches missed.">                .publisherName(publisher != null ? publisher.getPublisherName() : null)</span>
-<span class="nc" id="L58">                .profileImageURL(profileImageURL)</span>
-<span class="nc" id="L59">                .role(role)</span>
-<span class="nc" id="L60">                .build();</span>
+<span class="nc" id="L52">        return LoginResponse.builder()</span>
+<span class="nc" id="L53">                .refreshToken(refreshToken)</span>
+<span class="nc" id="L54">                .accessToken(accessToken)</span>
+<span class="nc" id="L55">                .memberId(member.getId())</span>
+<span class="nc" id="L56">                .email(member.getEmail())</span>
+<span class="nc bnc" id="L57" title="All 2 branches missed.">                .userId(user != null ? user.getId() : null)</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">                .nickname(user != null ? user.getNickname() : null)</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">                .publisherId(publisher != null ? publisher.getId() : null)</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">                .publisherName(publisher != null ? publisher.getPublisherName() : null)</span>
+<span class="nc" id="L61">                .profileImageURL(profileImageURL)</span>
+<span class="nc" id="L62">                .role(role)</span>
+<span class="nc" id="L63">                .firstPaymentBenefit(firstPaymentBenefit)</span>
+<span class="nc" id="L64">                .build();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
