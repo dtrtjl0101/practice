@@ -106,7 +106,7 @@ export default function AppBar(props: {
                     }
                     arrow
                     disableHoverListener={
-                      user.role != Role.ROLE_USER || user.firstPaymentBenefit
+                      user.role != Role.ROLE_USER || !user.firstPaymentBenefit
                     } // 조건 아닐 땐 비활성
                   >
                     <Chip
