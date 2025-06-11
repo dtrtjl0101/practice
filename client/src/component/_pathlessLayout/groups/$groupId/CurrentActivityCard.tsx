@@ -48,14 +48,14 @@ export function DayStatusChip(props: { startTime: string; endTime: string }) {
   const { label, color }: { label: string; color: "info" | "secondary" } =
     useMemo(() => {
       const now = new Date();
-      const start = new Date(startTime);
-      const end = new Date(endTime);
+      const start = new Date(`${startTime}T00:00:00+09:00`);
+      const end = new Date(`${endTime}T00:00:00+09:00`);
 
       if (now < start) {
         return { label: `시작전`, color: "secondary" };
       } else if (now <= end) {
         const daysToEnd = Math.ceil(
-          (end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+          (end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
         );
         return {
           label: `D-${daysToEnd === 0 ? "day" : daysToEnd}`,
@@ -91,7 +91,7 @@ export function CurrentActivityCard(props: {
           page: 0,
           size: 1,
           sort: ["startTime,desc"],
-        }
+        },
       );
 
       if (!response.isSuccessful) {
@@ -120,7 +120,7 @@ export function CurrentActivityCard(props: {
               page: 0,
               size: 100,
             },
-          }
+          },
         );
       if (!response.isSuccessful) throw new Error(response.errorMessage);
       return response.data!.content!;
@@ -159,13 +159,13 @@ export function CurrentActivityCard(props: {
       return;
     }
     const response = await API_CLIENT.activityController.joinActivity(
-      activity.activityId
+      activity.activityId,
     );
     if (!response.isSuccessful) {
       switch (response.errorCode) {
         case "EBOOK_NOT_PURCHASED": {
           const shouldMoveToPurchasePage = confirm(
-            "활동에 참여하기 위해서는 책을 구매해야 합니다. 구매 페이지로 이동하시겠습니까?"
+            "활동에 참여하기 위해서는 책을 구매해야 합니다. 구매 페이지로 이동하시겠습니까?",
           );
           if (shouldMoveToPurchasePage) {
             navigate({
@@ -610,7 +610,7 @@ export function ActivityCreateModal(props: {
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState<Dayjs>(dayjs(new Date()));
   const [endDate, setEndDate] = useState<Dayjs>(
-    dayjs(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000))
+    dayjs(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)),
   );
   const [book, setBook] = useState<BookMetadata | null>(null);
   const { enqueueSnackbar } = useSnackbar();
@@ -631,7 +631,7 @@ export function ActivityCreateModal(props: {
         endTime: endDate.toISOString(),
         startTime: startDate.toISOString(),
         description,
-      }
+      },
     );
     if (!response.isSuccessful) {
       enqueueSnackbar(response.errorMessage, { variant: "error" });

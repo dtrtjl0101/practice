@@ -11,7 +11,16 @@ import {
   Paper,
   Divider,
 } from "@mui/material";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
 import { TrendingUp, MenuBook, Timeline } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../../../../api/api";
@@ -55,7 +64,10 @@ function CustomTooltip({ active, payload, label }: any) {
           {label}
         </Typography>
         {payload.map((entry: any, index: number) => (
-          <Box key={index} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Box
+            key={index}
+            sx={{ display: "flex", alignItems: "center", gap: 1 }}
+          >
             <Box
               sx={{
                 width: 12,
@@ -80,14 +92,20 @@ function CustomTooltip({ active, payload, label }: any) {
   return null;
 }
 
-export function ReadingProgressChart({ activityId }: { activityId: number; bookId: number }) {
+export function ReadingProgressChart({
+  activityId,
+}: {
+  activityId: number;
+  bookId: number;
+}) {
   const theme = useTheme();
 
   // Activity 정보 가져오기
   const { data: activityInfo } = useQuery({
     queryKey: ["activityInfo", activityId],
     queryFn: async () => {
-      const response = await API_CLIENT.activityController.getActivity(activityId);
+      const response =
+        await API_CLIENT.activityController.getActivity(activityId);
       if (!response.isSuccessful) {
         throw new Error(response.error);
       }
@@ -98,7 +116,10 @@ export function ReadingProgressChart({ activityId }: { activityId: number; bookI
   const { data: readingProgressHistory, isLoading } = useQuery({
     queryKey: ["readingProgressHistory", activityId],
     queryFn: async () => {
-      const response = await API_CLIENT.readingProgressController.getProgressHistory(activityId);
+      const response =
+        await API_CLIENT.readingProgressController.getProgressHistory(
+          activityId,
+        );
       if (!response.isSuccessful) {
         throw new Error(response.error);
       }
@@ -111,13 +132,17 @@ export function ReadingProgressChart({ activityId }: { activityId: number; bookI
   const chartData = useMemo(() => {
     if (!activityInfo) return [];
 
-    const startDate = new Date(activityInfo.startTime);
-    const endDate = new Date(activityInfo.endTime);
+    const startDate = new Date(`${activityInfo.startTime}T00:00:00+09:00`);
+    const endDate = new Date(`${activityInfo.endTime}T00:00:00+09:00`);
     const today = new Date();
 
     // 모든 날짜 범위 생성 (startDate부터 endDate까지)
     const dateRange = [];
-    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+    for (
+      let d = new Date(startDate);
+      d <= endDate;
+      d.setDate(d.getDate() + 1)
+    ) {
       dateRange.push(new Date(d));
     }
 
@@ -133,9 +158,16 @@ export function ReadingProgressChart({ activityId }: { activityId: number; bookI
       const isFuture = date > today;
 
       // 목표 독서율 계산 (startTime: 0%, endTime: 100%의 직선)
-      const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-      const currentDay = Math.ceil((date.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-      const targetPercentage = Math.min(100, Math.max(0, (currentDay / totalDays) * 100));
+      const totalDays = Math.ceil(
+        (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
+      );
+      const currentDay = Math.ceil(
+        (date.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
+      );
+      const targetPercentage = Math.min(
+        100,
+        Math.max(0, (currentDay / totalDays) * 100),
+      );
 
       // 기존 데이터가 있는 경우
       if (progressMap.has(dateKey) && !isFuture) {
@@ -202,12 +234,21 @@ export function ReadingProgressChart({ activityId }: { activityId: number; bookI
     return (
       <Card variant="outlined">
         <CardContent sx={{ p: 3 }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            sx={{ mb: 3 }}
+          >
             <Stack direction="row" spacing={2}>
               <Typography variant="h4" sx={{ mb: 2 }}>
                 진행도
               </Typography>
-              <Typography alignSelf="end" variant="subtitle1" color="text.secondary">
+              <Typography
+                alignSelf="end"
+                variant="subtitle1"
+                color="text.secondary"
+              >
                 전일 기준
               </Typography>
             </Stack>
@@ -220,7 +261,9 @@ export function ReadingProgressChart({ activityId }: { activityId: number; bookI
             }}
           >
             <Timeline sx={{ fontSize: 48, mb: 1, opacity: 0.3 }} />
-            <Typography variant="body2">아직 진행도 데이터가 없습니다</Typography>
+            <Typography variant="body2">
+              아직 진행도 데이터가 없습니다
+            </Typography>
           </Box>
         </CardContent>
       </Card>
@@ -231,16 +274,30 @@ export function ReadingProgressChart({ activityId }: { activityId: number; bookI
     <Paper sx={{ p: 2 }} variant="outlined">
       {/* 헤더 */}
       <Stack spacing={2}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+          sx={{ mb: 3 }}
+        >
           <Stack direction="row" spacing={2}>
             <Typography variant="h4" sx={{ mb: 2 }}>
               진행도
             </Typography>
-            <Typography alignSelf="end" variant="subtitle1" color="text.secondary">
+            <Typography
+              alignSelf="end"
+              variant="subtitle1"
+              color="text.secondary"
+            >
               전일 기준
             </Typography>
           </Stack>
-          <Chip icon={<MenuBook />} label={`${totalDays}일간`} size="small" variant="outlined" />
+          <Chip
+            icon={<MenuBook />}
+            label={`${totalDays}일간`}
+            size="small"
+            variant="outlined"
+          />
         </Stack>
         <Divider />
 
@@ -301,7 +358,11 @@ export function ReadingProgressChart({ activityId }: { activityId: number; bookI
                 <Typography variant="body2" color="text.secondary">
                   모임 평균
                 </Typography>
-                <Typography variant="h6" fontWeight={700} color="secondary.main">
+                <Typography
+                  variant="h6"
+                  fontWeight={700}
+                  color="secondary.main"
+                >
                   {avgProgress}%
                 </Typography>
               </Box>
@@ -312,7 +373,10 @@ export function ReadingProgressChart({ activityId }: { activityId: number; bookI
         {/* 차트 */}
         <Box sx={{ height: 300, width: "100%" }}>
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
+            <LineChart
+              data={chartData}
+              margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
+            >
               <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
               <XAxis
                 dataKey="dateString"
@@ -424,21 +488,43 @@ function ProgressChartSkeleton({ message }: { message: string }) {
   return (
     <Card variant="outlined">
       <CardContent sx={{ p: 3 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+          sx={{ mb: 3 }}
+        >
           <Stack direction="row" spacing={2}>
             <Typography variant="h4" sx={{ mb: 2 }}>
               진행도
             </Typography>
-            <Typography alignSelf="end" variant="subtitle1" color="text.secondary">
+            <Typography
+              alignSelf="end"
+              variant="subtitle1"
+              color="text.secondary"
+            >
               전일 기준
             </Typography>
           </Stack>
-          <Skeleton variant="rectangular" width={80} height={24} sx={{ borderRadius: 2 }} />
+          <Skeleton
+            variant="rectangular"
+            width={80}
+            height={24}
+            sx={{ borderRadius: 2 }}
+          />
         </Stack>
 
         <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
-          <Skeleton variant="rectangular" height={80} sx={{ flex: 1, borderRadius: 2 }} />
-          <Skeleton variant="rectangular" height={80} sx={{ flex: 1, borderRadius: 2 }} />
+          <Skeleton
+            variant="rectangular"
+            height={80}
+            sx={{ flex: 1, borderRadius: 2 }}
+          />
+          <Skeleton
+            variant="rectangular"
+            height={80}
+            sx={{ flex: 1, borderRadius: 2 }}
+          />
         </Stack>
 
         <Box
