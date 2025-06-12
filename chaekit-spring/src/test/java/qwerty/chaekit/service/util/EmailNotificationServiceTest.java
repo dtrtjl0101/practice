@@ -16,7 +16,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class EmailNotificationServiceTest {
+class EmailNotificationServiceTest{
+
 
     @InjectMocks
     private EmailNotificationService emailNotificationService;
