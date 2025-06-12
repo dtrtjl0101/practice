@@ -5,6 +5,9 @@ import {
   AutoStories,
   TrendingUp,
   Add,
+  Schedule,
+  ArrowForward,
+  Group,
 } from "@mui/icons-material";
 import {
   Container,
@@ -20,8 +23,10 @@ import {
   Grid,
   Paper,
   Alert,
+  Divider,
+  Skeleton,
 } from "@mui/material";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import BookList, { BookListKind } from "../../component/BookList";
 import GroupCreateModal from "../../component/groupCreate/GroupCreateModal";
@@ -32,6 +37,7 @@ import { AuthState } from "../../states/auth";
 import { useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../../api/api";
 import UserProfileEditModal from "../../component/UserProfileEditModal";
+import { UserProfile } from "../../types/userInfo";
 
 export const Route = createFileRoute("/mypage/")({
   component: RouteComponent,
@@ -65,7 +71,7 @@ function RouteComponent() {
           <StatsSection userId={user?.memberId} />
 
           {/* 최근 활동 */}
-          <RecentActivitySection />
+          <RecentActivitySection userId={user?.memberId} />
 
           {/* 기존 기능들 */}
           <ManagementSection
@@ -90,13 +96,7 @@ function ProfileSection({ userId }: { userId: number }) {
       if (!response.isSuccessful) {
         throw new Error(response.error);
       }
-      const formattedUserData = {
-        nickname: response.data?.nickname || "",
-        profileImageURL: response.data?.profileImageURL || "",
-        email: response.data?.email || "",
-        role: response.data?.role || "ROLE_USER",
-      };
-      return formattedUserData;
+      return response.data as UserProfile;
     },
   });
 
@@ -105,7 +105,14 @@ function ProfileSection({ userId }: { userId: number }) {
       <UserProfileEditModal
         open={openProfileEditModal}
         onClose={() => setOpenProfileEditModal(false)}
-        userData={userProfile}
+        userData={
+          userProfile as {
+            nickname: string;
+            email: string;
+            profileImageURL?: string;
+            role: string;
+          }
+        }
         userId={userId}
       />
 
@@ -129,6 +136,12 @@ function ProfileSection({ userId }: { userId: number }) {
               </Box>
               <Typography variant="body2" color="text.secondary" mb={1}>
                 {userProfile?.email}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" mb={1}>
+                회원가입일:{" "}
+                {new Date(userProfile?.createdAt ?? 0).toLocaleDateString(
+                  "ko-KR",
+                )}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 역할:{" "}
@@ -264,18 +277,265 @@ function StatsSection({ userId }: { userId: number }) {
   );
 }
 
-function RecentActivitySection() {
+interface RecentActivity {
+  recentGroupId: number;
+  recentGroupName: string;
+  recentGroupImageURL: string;
+  recentActivityId: number;
+  recentActivityBookTitle: string;
+  recentActivityBookAuthor: string;
+  recentActivityBookCoverImageURL: string;
+}
+
+function RecentActivitySection({ userId }: { userId: number }) {
+  const navigate = useNavigate();
+
+  // 최근 활동 데이터 가져오기
+  const {
+    data: recentActivity,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["recentActivity", userId],
+    queryFn: async () => {
+      try {
+        // 사용자 정보에서 최근 활동 정보 가져오기
+        const response = await API_CLIENT.userController.userInfo();
+
+        if (!response.isSuccessful) {
+          throw new Error(response.error);
+        }
+
+        const data = response.data;
+
+        // 최근 활동이 있는지 확인
+        if (data.recentGroupId && data.recentActivityId) {
+          return {
+            recentGroupId: data.recentGroupId,
+            recentGroupName: data.recentGroupName,
+            recentGroupImageURL: data.recentGroupImageURL,
+            recentActivityId: data.recentActivityId,
+            recentActivityBookTitle: data.recentActivityBookTitle,
+            recentActivityBookAuthor: data.recentActivityBookAuthor,
+            recentActivityBookCoverImageURL:
+              data.recentActivityBookCoverImageURL,
+          } as RecentActivity;
+        }
+
+        return null;
+      } catch (error) {
+        console.error("최근 활동 조회 실패:", error);
+        return null;
+      }
+    },
+    retry: 1,
+    staleTime: 5 * 60 * 1000, // 5분간 캐시
+  });
+
+  const handleNavigateToActivity = () => {
+    if (recentActivity) {
+      navigate({
+        to: "/groups/$groupId",
+        params: {
+          groupId: recentActivity.recentGroupId,
+        },
+      });
+    }
+  };
+
+  const handleNavigateToGroup = () => {
+    if (recentActivity) {
+      navigate({
+        to: "/groups/$groupId",
+        params: { groupId: recentActivity.recentGroupId },
+      });
+    }
+  };
+
   return (
     <Card variant="outlined">
-      <CardHeader title="최근 활동" titleTypographyProps={{ variant: "h6" }} />
+      <CardHeader
+        title="최근 활동"
+        titleTypographyProps={{ variant: "h6" }}
+        action={
+          recentActivity && (
+            <Button
+              size="small"
+              endIcon={<ArrowForward />}
+              onClick={() =>
+                navigate({ to: "/groups", search: { searchTerms: [] } })
+              }
+              sx={{ fontSize: "0.875rem" }}
+            >
+              전체 보기
+            </Button>
+          )
+        }
+      />
       <CardContent>
-        <Stack spacing={2}>
-          <Alert severity="info">구현 예정입니다...</Alert>
-        </Stack>
+        {isLoading ? (
+          <RecentActivitySkeleton />
+        ) : error ? (
+          <Alert severity="error">최근 활동을 불러오는데 실패했습니다.</Alert>
+        ) : !recentActivity ? (
+          <Box
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            py={4}
+            color="text.secondary"
+          >
+            <Schedule sx={{ fontSize: 48, opacity: 0.5, mb: 2 }} />
+            <Typography variant="body2" mb={2}>
+              최근 참여한 활동이 없습니다
+            </Typography>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<Group />}
+              onClick={() =>
+                navigate({ to: "/groups", search: { searchTerms: [] } })
+              }
+            >
+              모임 둘러보기
+            </Button>
+          </Box>
+        ) : (
+          <Paper
+            elevation={0}
+            sx={{
+              p: 2,
+              border: "1px solid",
+              borderColor: "divider",
+              borderRadius: 2,
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              "&:hover": {
+                borderColor: "primary.main",
+                boxShadow: 2,
+                transform: "translateY(-1px)",
+              },
+            }}
+            onClick={handleNavigateToActivity}
+          >
+            <Stack spacing={2}>
+              {/* 그룹 정보 */}
+              <Box
+                display="flex"
+                alignItems="center"
+                gap={1.5}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleNavigateToGroup();
+                }}
+                sx={{
+                  cursor: "pointer",
+                  p: 1,
+                  borderRadius: 1,
+                  "&:hover": { bgcolor: "action.hover" },
+                }}
+              >
+                <Avatar
+                  src={recentActivity.recentGroupImageURL}
+                  sx={{ width: 32, height: 32, bgcolor: "primary.main" }}
+                >
+                  {recentActivity.recentGroupName.charAt(0)}
+                </Avatar>
+                <Box flex={1}>
+                  <Typography variant="subtitle2" fontWeight={600} noWrap>
+                    {recentActivity.recentGroupName}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    독서 모임
+                  </Typography>
+                </Box>
+                <Group sx={{ fontSize: 16, color: "action.active" }} />
+              </Box>
+
+              <Divider />
+
+              {/* 활동 정보 - 도서 기반 */}
+              <Box display="flex" alignItems="center" gap={1.5}>
+                <Avatar
+                  src={recentActivity.recentActivityBookCoverImageURL}
+                  variant="rounded"
+                  sx={{
+                    width: 40,
+                    height: 50,
+                    bgcolor: "grey.200",
+                    "& img": {
+                      objectFit: "cover",
+                    },
+                  }}
+                >
+                  📚
+                </Avatar>
+                <Box flex={1}>
+                  <Typography variant="body2" fontWeight={600} mb={0.5} noWrap>
+                    {recentActivity.recentActivityBookTitle}
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    display="block"
+                    mb={0.5}
+                  >
+                    {recentActivity.recentActivityBookAuthor}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    독서 활동
+                  </Typography>
+                </Box>
+                <ArrowForward sx={{ fontSize: 16, color: "action.active" }} />
+              </Box>
+            </Stack>
+          </Paper>
+        )}
       </CardContent>
     </Card>
   );
 }
+
+function RecentActivitySkeleton() {
+  return (
+    <Paper
+      elevation={0}
+      sx={{
+        p: 2,
+        border: "1px solid",
+        borderColor: "divider",
+        borderRadius: 2,
+      }}
+    >
+      <Stack spacing={2}>
+        {/* 그룹 정보 스켈레톤 */}
+        <Box display="flex" alignItems="center" gap={1.5}>
+          <Skeleton variant="circular" width={32} height={32} />
+          <Box flex={1}>
+            <Skeleton width="60%" height={20} />
+            <Skeleton width="40%" height={16} />
+          </Box>
+        </Box>
+
+        <Divider />
+
+        {/* 활동 정보 스켈레톤 */}
+        <Box display="flex" alignItems="center" gap={1.5}>
+          <Skeleton variant="circular" width={20} height={20} />
+          <Box flex={1}>
+            <Skeleton width="80%" height={18} />
+            <Box display="flex" gap={1} mt={0.5}>
+              <Skeleton width={60} height={16} />
+              <Skeleton width={80} height={16} />
+            </Box>
+          </Box>
+        </Box>
+      </Stack>
+    </Paper>
+  );
+}
+
+export default RecentActivitySection;
 
 function ManagementSection({
   onOpenHighlightBrowser,

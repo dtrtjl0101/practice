@@ -24,9 +24,19 @@ interface UserProfileEditModalProps {
   userData:
     | {
         nickname: string;
-        email: string;
         profileImageURL?: string;
-        role: string;
+        email: string;
+        memberId?: number;
+        role?: string;
+        recentGroupId?: number;
+        recentGroupName?: string;
+        recentGroupImageURL?: string;
+        recentActivityId?: number;
+        recentActivityBookTitle?: string;
+        recentActivityBookAuthor?: string;
+        recentActivityBookCoverImageURL?: string;
+        firstPaymentBenefit?: boolean;
+        createdAt?: string;
       }
     | undefined;
   userId: number;
