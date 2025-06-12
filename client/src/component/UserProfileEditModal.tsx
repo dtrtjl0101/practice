@@ -15,8 +15,10 @@ import {
 } from "@mui/material";
 import { CameraAlt, Close, Edit } from "@mui/icons-material";
 import { useState, useRef, useEffect } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import API_CLIENT from "../api/api";
+import { useSetAtom } from "jotai";
+import State from "../states";
 
 interface UserProfileEditModalProps {
   open: boolean;
@@ -24,19 +26,9 @@ interface UserProfileEditModalProps {
   userData:
     | {
         nickname: string;
-        profileImageURL?: string;
         email: string;
-        memberId?: number;
-        role?: string;
-        recentGroupId?: number;
-        recentGroupName?: string;
-        recentGroupImageURL?: string;
-        recentActivityId?: number;
-        recentActivityBookTitle?: string;
-        recentActivityBookAuthor?: string;
-        recentActivityBookCoverImageURL?: string;
-        firstPaymentBenefit?: boolean;
-        createdAt?: string;
+        profileImageURL?: string;
+        role: string;
       }
     | undefined;
   userId: number;
@@ -46,26 +38,27 @@ export default function UserProfileEditModal({
   open,
   onClose,
   userData,
-  userId,
 }: UserProfileEditModalProps) {
   const [nickname, setNickname] = useState(userData?.nickname || "");
-  const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
+  const [profileImageFile, setProfileImageFile] = useState<File | undefined>(
+    undefined,
+  );
   const [profileImagePreview, setProfileImagePreview] = useState<string | null>(
     userData?.profileImageURL || null,
   );
-  console.log("userData", userData);
-
+  const updateProfile = useSetAtom(State.Auth.user);
   const [error, setError] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const queryClient = useQueryClient();
 
   // 프로필 업데이트 mutation
   const updateProfileMutation = useMutation({
     mutationFn: async (data: { nickname?: string; profileImage?: File }) => {
+      const { nickname, profileImage } = data;
+
       const response = await API_CLIENT.userController.updateUserInfo({
-        nickname: data.nickname,
-        profileImage: data.profileImage,
+        nickname,
+        profileImage,
       });
 
       if (!response.isSuccessful) {
@@ -76,8 +69,15 @@ export default function UserProfileEditModal({
     },
     onSuccess: () => {
       // 사용자 프로필 쿼리 무효화하여 최신 데이터 다시 가져오기
-      queryClient.invalidateQueries({ queryKey: ["userProfile", userId] });
       setError(null);
+      updateProfile((prev) => {
+        if (prev)
+          return {
+            ...prev,
+            nickname: nickname,
+            profileImageFile: profileImageFile,
+          };
+      });
       onClose();
     },
     onError: (error: Error) => {
@@ -87,10 +87,10 @@ export default function UserProfileEditModal({
 
   // 모달이 열릴 때마다 초기값 설정
   useEffect(() => {
-    if (open) {
-      setNickname(userData?.nickname || "");
-      setProfileImageFile(null);
-      setProfileImagePreview(userData?.profileImageURL || null);
+    if (open && userData) {
+      setNickname(userData.nickname || "");
+      setProfileImageFile(undefined);
+      setProfileImagePreview(userData.profileImageURL || null);
       setError(null);
     }
   }, [open, userData]);
@@ -130,10 +130,35 @@ export default function UserProfileEditModal({
       return;
     }
 
-    updateProfileMutation.mutate({
-      nickname: nickname.trim(),
-      profileImage: profileImageFile || undefined,
-    });
+    if (nickname.trim().length < 2) {
+      setError("닉네임은 2글자 이상 입력해주세요.");
+      return;
+    }
+
+    if (nickname.trim().length > 20) {
+      setError("닉네임은 20글자 이하로 입력해주세요.");
+      return;
+    }
+
+    // 변경사항이 있는지 확인
+    const hasNicknameChange = nickname.trim() !== userData?.nickname;
+    const hasImageChange = profileImageFile !== null;
+
+    if (!hasNicknameChange && !hasImageChange) {
+      setError("변경된 내용이 없습니다.");
+      return;
+    }
+
+    const updateData: { nickname?: string; profileImage?: File } = {};
+
+    if (hasNicknameChange) {
+      updateData.nickname = nickname.trim();
+    }
+    if (hasImageChange) {
+      updateData.profileImage = profileImageFile;
+    }
+
+    updateProfileMutation.mutate(updateData);
   };
 
   const handleClose = () => {
