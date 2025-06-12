@@ -17,7 +17,6 @@ import { CameraAlt, Close, Edit } from "@mui/icons-material";
 import { useState, useRef, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import API_CLIENT from "../api/api";
-import { UserPatchRequest } from "../api/api.gen";
 
 interface UserProfileEditModalProps {
   open: boolean;
