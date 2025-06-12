@@ -40,56 +40,56 @@ public class EbookPurchaseService {
 
     @Transactional
     public EbookPurchaseResponse purchaseEbook(Long ebookId, Long userId) {
-<span class="nc" id="L43">        UserProfile buyer = userRepository.findById(userId)</span>
-<span class="nc" id="L44">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
-<span class="nc" id="L45">        CreditWallet wallet = creditWalletRepository.findByUser_Id(userId)</span>
-<span class="nc" id="L46">                .orElseThrow(() -&gt; new IllegalStateException(&quot;크레딧 지갑이 존재하지 않습니다.&quot;));</span>
+<span class="fc" id="L43">        UserProfile buyer = userRepository.findById(userId)</span>
+<span class="pc" id="L44">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.USER_NOT_FOUND));</span>
+<span class="fc" id="L45">        CreditWallet wallet = creditWalletRepository.findByUser_Id(userId)</span>
+<span class="pc" id="L46">                .orElseThrow(() -&gt; new IllegalStateException(&quot;크레딧 지갑이 존재하지 않습니다.&quot;));</span>
 
-<span class="nc" id="L48">        Ebook ebook = ebookRepository.findByIdWithPublisher(ebookId)</span>
-<span class="nc" id="L49">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.EBOOK_NOT_FOUND));</span>
+<span class="fc" id="L48">        Ebook ebook = ebookRepository.findByIdWithPublisher(ebookId)</span>
+<span class="pc" id="L49">                .orElseThrow(() -&gt; new NotFoundException(ErrorCode.EBOOK_NOT_FOUND));</span>
 
-<span class="nc bnc" id="L51" title="All 2 branches missed.">        if(ebookPurchaseRepository.existsByUserIdAndEbookId(userId, ebookId)) {</span>
-<span class="nc" id="L52">            throw new BadRequestException(ErrorCode.EBOOK_ALREADY_PURCHASED);</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">        if(ebookPurchaseRepository.existsByUserIdAndEbookId(userId, ebookId)) {</span>
+<span class="fc" id="L52">            throw new BadRequestException(ErrorCode.EBOOK_ALREADY_PURCHASED);</span>
         }
 
-<span class="nc" id="L55">        int ebookPrice = ebook.getPrice();</span>
+<span class="fc" id="L55">        int ebookPrice = ebook.getPrice();</span>
         try {
-<span class="nc" id="L57">            wallet.useCredit(ebookPrice);</span>
-<span class="nc" id="L58">        } catch (Exception e) {</span>
-<span class="nc" id="L59">            throw new BadRequestException(ErrorCode.CREDIT_NOT_ENOUGH);</span>
-<span class="nc" id="L60">        }</span>
+<span class="fc" id="L57">            wallet.useCredit(ebookPrice);</span>
+<span class="fc" id="L58">        } catch (Exception e) {</span>
+<span class="fc" id="L59">            throw new BadRequestException(ErrorCode.CREDIT_NOT_ENOUGH);</span>
+<span class="fc" id="L60">        }</span>
 
-<span class="nc" id="L62">        CreditUsageTransaction savedTransaction = creditUsageTransactionRepository.save(</span>
-<span class="nc" id="L63">                CreditUsageTransaction.builder()</span>
-<span class="nc" id="L64">                        .wallet(wallet)</span>
-<span class="nc" id="L65">                        .creditAmount(ebookPrice)</span>
-<span class="nc" id="L66">                        .transactionType(CreditUsageTransactionType.PURCHASE)</span>
-<span class="nc" id="L67">                        .build()</span>
+<span class="fc" id="L62">        CreditUsageTransaction savedTransaction = creditUsageTransactionRepository.save(</span>
+<span class="fc" id="L63">                CreditUsageTransaction.builder()</span>
+<span class="fc" id="L64">                        .wallet(wallet)</span>
+<span class="fc" id="L65">                        .creditAmount(ebookPrice)</span>
+<span class="fc" id="L66">                        .transactionType(CreditUsageTransactionType.PURCHASE)</span>
+<span class="fc" id="L67">                        .build()</span>
         );
 
-<span class="nc" id="L70">        ebookPurchaseRepository.save(</span>
-<span class="nc" id="L71">                EbookPurchase.builder()</span>
-<span class="nc" id="L72">                        .user(buyer)</span>
-<span class="nc" id="L73">                        .ebook(ebook)</span>
-<span class="nc" id="L74">                        .transaction(savedTransaction)</span>
-<span class="nc" id="L75">                        .build()</span>
+<span class="fc" id="L70">        ebookPurchaseRepository.save(</span>
+<span class="fc" id="L71">                EbookPurchase.builder()</span>
+<span class="fc" id="L72">                        .user(buyer)</span>
+<span class="fc" id="L73">                        .ebook(ebook)</span>
+<span class="fc" id="L74">                        .transaction(savedTransaction)</span>
+<span class="fc" id="L75">                        .build()</span>
         );
 
-<span class="nc" id="L78">        return EbookPurchaseResponse.of(</span>
+<span class="fc" id="L78">        return EbookPurchaseResponse.of(</span>
                 userId,
                 ebook,
                 savedTransaction,
-<span class="nc" id="L82">                fileService.getEbookDownloadUrl(ebook.getFileKey())</span>
+<span class="fc" id="L82">                fileService.getEbookDownloadUrl(ebook.getFileKey())</span>
         );
     }
 
     public PageResponse&lt;EbookFetchResponse&gt; getMyBooks(Long userId, Pageable pageable) {
-<span class="nc" id="L87">        Page&lt;EbookPurchase&gt; purchases = ebookPurchaseRepository.findByUserIdWithEbook(userId, pageable);</span>
-<span class="nc" id="L88">        return PageResponse.of(</span>
-<span class="nc" id="L89">                purchases.map(</span>
-<span class="nc" id="L90">                purchase -&gt; EbookFetchResponse.of(</span>
-<span class="nc" id="L91">                        purchase.getEbook(),</span>
-<span class="nc" id="L92">                        fileService.convertToPublicImageURL(purchase.getEbook().getCoverImageKey()),</span>
+<span class="fc" id="L87">        Page&lt;EbookPurchase&gt; purchases = ebookPurchaseRepository.findByUserIdWithEbook(userId, pageable);</span>
+<span class="fc" id="L88">        return PageResponse.of(</span>
+<span class="fc" id="L89">                purchases.map(</span>
+<span class="fc" id="L90">                purchase -&gt; EbookFetchResponse.of(</span>
+<span class="fc" id="L91">                        purchase.getEbook(),</span>
+<span class="fc" id="L92">                        fileService.convertToPublicImageURL(purchase.getEbook().getCoverImageKey()),</span>
                         true
                 )));
     }

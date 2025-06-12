@@ -17,67 +17,67 @@ public class EmailNotificationService {
     // 본인 인증 이메일 전송
     @Async
     public void sendVerificationEmail(String toEmail, String verificationCode) {
-<span class="nc" id="L20">        String subject = &quot;책잇 이메일 본인 인증&quot;;</span>
-<span class="nc" id="L21">        String text = &quot;&lt;h3&gt;본인 인증을 위해 아래 인증코드를 입력하세요.&lt;/h3&gt;&quot; +</span>
+<span class="fc" id="L20">        String subject = &quot;책잇 이메일 본인 인증&quot;;</span>
+<span class="fc" id="L21">        String text = &quot;&lt;h3&gt;본인 인증을 위해 아래 인증코드를 입력하세요.&lt;/h3&gt;&quot; +</span>
                 &quot;&lt;p&gt;인증 코드: &quot; + verificationCode + &quot;&lt;/p&gt;&quot;;
 
-<span class="nc" id="L24">        sendEmail(toEmail, subject, text);</span>
-<span class="nc" id="L25">    }</span>
+<span class="fc" id="L24">        sendEmail(toEmail, subject, text);</span>
+<span class="fc" id="L25">    }</span>
 
     // 출판사 계정 승인 이메일 전송
     @Async
     public void sendPublisherApprovalEmail(String toEmail) {
-<span class="nc" id="L30">        String subject = &quot;출판사 계정 승인 알림&quot;;</span>
-<span class="nc" id="L31">        String text = &quot;&lt;h3&gt;축하합니다! 출판사 계정이 승인되었습니다.&lt;/h3&gt;&quot; +</span>
+<span class="fc" id="L30">        String subject = &quot;출판사 계정 승인 알림&quot;;</span>
+<span class="fc" id="L31">        String text = &quot;&lt;h3&gt;축하합니다! 출판사 계정이 승인되었습니다.&lt;/h3&gt;&quot; +</span>
                 &quot;&lt;p&gt;이제 출판사 계정을 통해 전자책을 업로드할 수 있습니다.&lt;/p&gt;&quot;;
 
-<span class="nc" id="L34">        sendEmail(toEmail, subject, text);</span>
-<span class="nc" id="L35">    }</span>
+<span class="fc" id="L34">        sendEmail(toEmail, subject, text);</span>
+<span class="fc" id="L35">    }</span>
 
     // 독서모임 참여 승인 이메일 전송
     @Async
     public void sendReadingGroupApprovalEmail(String toEmail) {
-<span class="nc" id="L40">        String subject = &quot;독서모임 참여 승인 알림&quot;;</span>
-<span class="nc" id="L41">        String text = &quot;&lt;h3&gt;축하합니다! 독서모임 참여가 승인되었습니다.&lt;/h3&gt;&quot; +</span>
+<span class="fc" id="L40">        String subject = &quot;독서모임 참여 승인 알림&quot;;</span>
+<span class="fc" id="L41">        String text = &quot;&lt;h3&gt;축하합니다! 독서모임 참여가 승인되었습니다.&lt;/h3&gt;&quot; +</span>
                 &quot;&lt;p&gt;모임에 참여하여 책을 함께 읽을 수 있습니다.&lt;/p&gt;&quot;;
 
-<span class="nc" id="L44">        sendEmail(toEmail, subject, text);</span>
-<span class="nc" id="L45">    }</span>
+<span class="fc" id="L44">        sendEmail(toEmail, subject, text);</span>
+<span class="fc" id="L45">    }</span>
 
     @Async
     public void sendPublisherRejectionEmail(String toEmail, String reason) {
-<span class="nc" id="L49">        String subject = &quot;출판사 계정 거절 알림&quot;;</span>
-<span class="nc" id="L50">        String text = &quot;&lt;h3&gt;안녕하세요, 책잇입니다.&lt;/h3&gt;&quot; +</span>
+<span class="fc" id="L49">        String subject = &quot;출판사 계정 거절 알림&quot;;</span>
+<span class="fc" id="L50">        String text = &quot;&lt;h3&gt;안녕하세요, 책잇입니다.&lt;/h3&gt;&quot; +</span>
                 &quot;&lt;p&gt;출판사 계정이 거절되었습니다. 다시 문의해주세요.&lt;/p&gt;&quot; +
                 &quot;&lt;p&gt;거절 사유: &quot; + reason + &quot;&lt;/p&gt;&quot;;
 
-<span class="nc" id="L54">        sendEmail(toEmail, subject, text);</span>
-<span class="nc" id="L55">    }</span>
+<span class="fc" id="L54">        sendEmail(toEmail, subject, text);</span>
+<span class="fc" id="L55">    }</span>
 
     @Async
     public void sendEbookRejectionEmail(String toEmail, String reason) {
-<span class="nc" id="L59">        String subject = &quot;전자책 등록 반려 알림&quot;;</span>
-<span class="nc" id="L60">        String text = &quot;&lt;h3&gt;안녕하세요, 책잇입니다.&lt;/h3&gt;&quot; +</span>
+<span class="fc" id="L59">        String subject = &quot;전자책 등록 반려 알림&quot;;</span>
+<span class="fc" id="L60">        String text = &quot;&lt;h3&gt;안녕하세요, 책잇입니다.&lt;/h3&gt;&quot; +</span>
                 &quot;&lt;p&gt;전자책 등록이 거절되었습니다. 다시 문의해주세요.&lt;/p&gt;&quot; +
                 &quot;&lt;p&gt;거절 사유: &quot; + reason + &quot;&lt;/p&gt;&quot;;
 
-<span class="nc" id="L64">        sendEmail(toEmail, subject, text);</span>
-<span class="nc" id="L65">    }</span>
+<span class="fc" id="L64">        sendEmail(toEmail, subject, text);</span>
+<span class="fc" id="L65">    }</span>
 
     // 공통된 이메일 전송 메서드
     private void sendEmail(String toEmail, String subject, String text) {
         try {
-<span class="nc" id="L70">            MimeMessage message = javaMailSender.createMimeMessage();</span>
-<span class="nc" id="L71">            MimeMessageHelper helper = new MimeMessageHelper(message, true);</span>
+<span class="fc" id="L70">            MimeMessage message = javaMailSender.createMimeMessage();</span>
+<span class="fc" id="L71">            MimeMessageHelper helper = new MimeMessageHelper(message, true);</span>
 
-<span class="nc" id="L73">            helper.setTo(toEmail);</span>
-<span class="nc" id="L74">            helper.setSubject(subject);</span>
-<span class="nc" id="L75">            helper.setText(text, true); // true는 HTML 텍스트임을 의미</span>
+<span class="fc" id="L73">            helper.setTo(toEmail);</span>
+<span class="fc" id="L74">            helper.setSubject(subject);</span>
+<span class="fc" id="L75">            helper.setText(text, true); // true는 HTML 텍스트임을 의미</span>
 
-<span class="nc" id="L77">            javaMailSender.send(message);</span>
-<span class="nc" id="L78">        } catch (Exception e) {</span>
-<span class="nc" id="L79">            log.warn(&quot;Failed to send email&quot;, e);</span>
-<span class="nc" id="L80">        }</span>
-<span class="nc" id="L81">    }</span>
+<span class="fc" id="L77">            javaMailSender.send(message);</span>
+<span class="fc" id="L78">        } catch (Exception e) {</span>
+<span class="fc" id="L79">            log.warn(&quot;Failed to send email&quot;, e);</span>
+<span class="fc" id="L80">        }</span>
+<span class="fc" id="L81">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

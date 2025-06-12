@@ -21,13 +21,13 @@ public class StatisticsService {
     private final GroupRepository groupRepository;
 
     public MainStatisticResponse getMainStatistics() {
-<span class="nc" id="L24">        long totalGroups = groupRepository.count();</span>
-<span class="nc" id="L25">        long totalUsers = userProfileRepository.count();</span>
-<span class="nc" id="L26">        long totalEbooks = ebookRepository.count();</span>
-<span class="nc" id="L27">        long totalActivities = activityRepository.count();</span>
-<span class="nc" id="L28">        long increasedActivities = activityRepository.countByCreatedAtAfter(LocalDateTime.now().minusMonths(1));</span>
+<span class="fc" id="L24">        long totalGroups = groupRepository.count();</span>
+<span class="fc" id="L25">        long totalUsers = userProfileRepository.count();</span>
+<span class="fc" id="L26">        long totalEbooks = ebookRepository.count();</span>
+<span class="fc" id="L27">        long totalActivities = activityRepository.count();</span>
+<span class="fc" id="L28">        long increasedActivities = activityRepository.countByCreatedAtAfter(LocalDateTime.now().minusMonths(1));</span>
 
-<span class="nc" id="L30">        return new MainStatisticResponse(</span>
+<span class="fc" id="L30">        return new MainStatisticResponse(</span>
             totalGroups,
             totalUsers,
             totalEbooks,

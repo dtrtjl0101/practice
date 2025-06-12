@@ -42,14 +42,14 @@ public class CreditWallet extends BaseEntity {
 <span class="fc" id="L42">    }</span>
 
     public void addCredit(long amount) {
-<span class="nc" id="L45">        this.balance += amount;</span>
-<span class="nc" id="L46">    }</span>
+<span class="fc" id="L45">        this.balance += amount;</span>
+<span class="fc" id="L46">    }</span>
 
     public void useCredit(long amount) {
-<span class="nc bnc" id="L49" title="All 2 branches missed.">        if (this.balance &lt; amount) {</span>
-<span class="nc" id="L50">            throw new IllegalArgumentException(&quot;Insufficient balance&quot;);</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        if (this.balance &lt; amount) {</span>
+<span class="fc" id="L50">            throw new IllegalArgumentException(&quot;Insufficient balance&quot;);</span>
         }
-<span class="nc" id="L52">        this.balance -= amount;</span>
-<span class="nc" id="L53">    }</span>
+<span class="fc" id="L52">        this.balance -= amount;</span>
+<span class="fc" id="L53">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

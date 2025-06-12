@@ -26,60 +26,60 @@ public class S3Service {
 
     // Download URL
     public String getPresignedDownloadUrl(String bucket, String fileKey, Long expirationTime) {
-<span class="nc" id="L29">        GetObjectRequest getObjectRequest = GetObjectRequest.builder()</span>
-<span class="nc" id="L30">                .bucket(bucket)</span>
-<span class="nc" id="L31">                .key(fileKey)</span>
-<span class="nc" id="L32">                .build();</span>
+<span class="fc" id="L29">        GetObjectRequest getObjectRequest = GetObjectRequest.builder()</span>
+<span class="fc" id="L30">                .bucket(bucket)</span>
+<span class="fc" id="L31">                .key(fileKey)</span>
+<span class="fc" id="L32">                .build();</span>
 
-<span class="nc" id="L34">        PresignedGetObjectRequest presignedRequest = s3Presigner.presignGetObject(builder -&gt; builder</span>
+<span class="pc" id="L34">        PresignedGetObjectRequest presignedRequest = s3Presigner.presignGetObject(builder -&gt; builder</span>
 <span class="nc" id="L35">                .getObjectRequest(getObjectRequest)</span>
 <span class="nc" id="L36">                .signatureDuration(Duration.ofSeconds(expirationTime))</span>
         );
-<span class="nc" id="L38">        return presignedRequest.url().toString();</span>
+<span class="fc" id="L38">        return presignedRequest.url().toString();</span>
     }
 
     // Upload
     public boolean isFileMissing(MultipartFile file) {
-<span class="nc bnc" id="L43" title="All 2 branches missed.">        return file == null</span>
-<span class="nc bnc" id="L44" title="All 2 branches missed.">                || file.isEmpty()</span>
-<span class="nc bnc" id="L45" title="All 2 branches missed.">                || file.getOriginalFilename() == null</span>
-<span class="nc bnc" id="L46" title="All 2 branches missed.">                || file.getOriginalFilename().isBlank();</span>
+<span class="fc bfc" id="L43" title="All 2 branches covered.">        return file == null</span>
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">                || file.isEmpty()</span>
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">                || file.getOriginalFilename() == null</span>
+<span class="pc bpc" id="L46" title="1 of 2 branches missed.">                || file.getOriginalFilename().isBlank();</span>
     }
 
     public String uploadFile(String bucket, S3Directory directory, MultipartFile file) {
-<span class="nc bnc" id="L50" title="All 2 branches missed.">        if (isFileMissing(file)) {</span>
-<span class="nc" id="L51">            throw new BadRequestException(ErrorCode.FILE_MISSING);</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        if (isFileMissing(file)) {</span>
+<span class="fc" id="L51">            throw new BadRequestException(ErrorCode.FILE_MISSING);</span>
         }
-<span class="nc" id="L53">        String fileName = file.getOriginalFilename();</span>
-<span class="nc" id="L54">        String extension = Objects.requireNonNull(fileName).substring(fileName.lastIndexOf(&quot;.&quot;));</span>
+<span class="fc" id="L53">        String fileName = file.getOriginalFilename();</span>
+<span class="fc" id="L54">        String extension = Objects.requireNonNull(fileName).substring(fileName.lastIndexOf(&quot;.&quot;));</span>
 
-<span class="nc" id="L56">        assertByS3DirectoryRule(directory, file, extension);</span>
+<span class="fc" id="L56">        assertByS3DirectoryRule(directory, file, extension);</span>
 
-<span class="nc" id="L58">        String fileKey = directory.getPath() + UUID.randomUUID() + extension;</span>
-<span class="nc" id="L59">        uploadToS3(bucket, fileKey, file);</span>
-<span class="nc" id="L60">        return fileKey;</span>
+<span class="fc" id="L58">        String fileKey = directory.getPath() + UUID.randomUUID() + extension;</span>
+<span class="fc" id="L59">        uploadToS3(bucket, fileKey, file);</span>
+<span class="fc" id="L60">        return fileKey;</span>
     }
 
     private static void assertByS3DirectoryRule(S3Directory directory, MultipartFile file, String extension) {
-<span class="nc bnc" id="L64" title="All 2 branches missed.">        if (file.getSize() &gt; directory.getMaxSize()) {</span>
-<span class="nc" id="L65">            throw new BadRequestException(ErrorCode.FILE_SIZE_EXCEEDED);</span>
+<span class="fc bfc" id="L64" title="All 2 branches covered.">        if (file.getSize() &gt; directory.getMaxSize()) {</span>
+<span class="fc" id="L65">            throw new BadRequestException(ErrorCode.FILE_SIZE_EXCEEDED);</span>
         }
-<span class="nc bnc" id="L67" title="All 2 branches missed.">        if (!directory.getAllowedExtensions().contains(extension)) {</span>
-<span class="nc" id="L68">            throw new BadRequestException(ErrorCode.INVALID_EXTENSION);</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        if (!directory.getAllowedExtensions().contains(extension)) {</span>
+<span class="fc" id="L68">            throw new BadRequestException(ErrorCode.INVALID_EXTENSION);</span>
         }
-<span class="nc" id="L70">    }</span>
+<span class="fc" id="L70">    }</span>
 
     private void uploadToS3(String bucket, String fileKey, MultipartFile file) {
-<span class="nc" id="L73">        try (InputStream inputStream = file.getInputStream()) {</span>
-<span class="nc" id="L74">            s3Client.putObject(</span>
-<span class="nc" id="L75">                    PutObjectRequest.builder()</span>
-<span class="nc" id="L76">                            .bucket(bucket)</span>
-<span class="nc" id="L77">                            .key(fileKey)</span>
-<span class="nc" id="L78">                            .build(),</span>
-<span class="nc" id="L79">                    RequestBody.fromInputStream(inputStream, file.getSize()));</span>
-<span class="nc" id="L80">        } catch (Exception e) {</span>
-<span class="nc" id="L81">            throw new RuntimeException(&quot;Failed to upload file to S3&quot;, e);</span>
-<span class="nc" id="L82">        }</span>
-<span class="nc" id="L83">    }</span>
+<span class="fc" id="L73">        try (InputStream inputStream = file.getInputStream()) {</span>
+<span class="fc" id="L74">            s3Client.putObject(</span>
+<span class="fc" id="L75">                    PutObjectRequest.builder()</span>
+<span class="fc" id="L76">                            .bucket(bucket)</span>
+<span class="fc" id="L77">                            .key(fileKey)</span>
+<span class="fc" id="L78">                            .build(),</span>
+<span class="fc" id="L79">                    RequestBody.fromInputStream(inputStream, file.getSize()));</span>
+<span class="fc" id="L80">        } catch (Exception e) {</span>
+<span class="fc" id="L81">            throw new RuntimeException(&quot;Failed to upload file to S3&quot;, e);</span>
+<span class="fc" id="L82">        }</span>
+<span class="fc" id="L83">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

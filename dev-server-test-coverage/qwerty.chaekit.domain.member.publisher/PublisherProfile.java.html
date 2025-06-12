@@ -46,15 +46,15 @@ public class PublisherProfile extends BaseEntity {
 <span class="fc" id="L46">        approvalStatus = PublisherApprovalStatus.REJECTED;</span>
 <span class="fc" id="L47">    }</span>
     public boolean isApproved() {
-<span class="nc bnc" id="L49" title="All 2 branches missed.">        return approvalStatus == PublisherApprovalStatus.APPROVED;</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        return approvalStatus == PublisherApprovalStatus.APPROVED;</span>
     }
 
     public boolean isNotAdmin() {
-<span class="nc bnc" id="L53" title="All 2 branches missed.">        return !isAdmin();</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        return !isAdmin();</span>
     }
     
     public boolean isAdmin() {
-<span class="nc" id="L57">        return member.isAdmin();</span>
+<span class="fc" id="L57">        return member.isAdmin();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

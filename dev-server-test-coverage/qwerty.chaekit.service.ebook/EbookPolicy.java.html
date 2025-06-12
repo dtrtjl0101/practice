@@ -16,8 +16,8 @@ public class EbookPolicy {
     private final EbookPurchaseRepository ebookPurchaseRepository;
 
     public void assertEBookPurchased(UserProfile user, Ebook ebook) {
-<span class="pc bpc" id="L19" title="1 of 2 branches missed.">        if (!ebookPurchaseRepository.existsByUserIdAndEbookId(user.getId(), ebook.getId())) {</span>
-<span class="nc" id="L20">            throw new ForbiddenException(ErrorCode.EBOOK_NOT_PURCHASED);</span>
+<span class="fc bfc" id="L19" title="All 2 branches covered.">        if (!ebookPurchaseRepository.existsByUserIdAndEbookId(user.getId(), ebook.getId())) {</span>
+<span class="fc" id="L20">            throw new ForbiddenException(ErrorCode.EBOOK_NOT_PURCHASED);</span>
         }
 <span class="fc" id="L22">    }</span>
 }

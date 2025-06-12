@@ -4,14 +4,14 @@ import lombok.Getter;
 
 import java.util.Arrays;
 
-<span class="nc" id="L7">@Getter</span>
+<span class="fc" id="L7">@Getter</span>
 public enum CreditProduct {
-<span class="nc" id="L9">    CREDIT_2000(&quot;2000 크레딧&quot;, 1, 2000, 2000),</span>
-<span class="nc" id="L10">    CREDIT_3000(&quot;3000 크레딧&quot;, 2, 3000, 3000),</span>
-<span class="nc" id="L11">    CREDIT_5000(&quot;5000 크레딧&quot;, 3, 5000, 5000),</span>
-<span class="nc" id="L12">    CREDIT_10000(&quot;10000 크레딧&quot;, 4, 10000, 10000),</span>
-<span class="nc" id="L13">    CREDIT_30000(&quot;30000 크레딧&quot;, 5, 30000, 30000),</span>
-<span class="nc" id="L14">    CREDIT_50000(&quot;50000 크레딧&quot;, 6, 50000, 50000),</span>
+<span class="fc" id="L9">    CREDIT_2000(&quot;2000 크레딧&quot;, 1, 2000, 2000),</span>
+<span class="fc" id="L10">    CREDIT_3000(&quot;3000 크레딧&quot;, 2, 3000, 3000),</span>
+<span class="fc" id="L11">    CREDIT_5000(&quot;5000 크레딧&quot;, 3, 5000, 5000),</span>
+<span class="fc" id="L12">    CREDIT_10000(&quot;10000 크레딧&quot;, 4, 10000, 10000),</span>
+<span class="fc" id="L13">    CREDIT_30000(&quot;30000 크레딧&quot;, 5, 30000, 30000),</span>
+<span class="fc" id="L14">    CREDIT_50000(&quot;50000 크레딧&quot;, 6, 50000, 50000),</span>
     ;
 
     public final String name;
@@ -19,18 +19,18 @@ public enum CreditProduct {
     public final int creditAmount;
     public final int price;
 
-<span class="nc" id="L22">    CreditProduct(String name, int id, int creditAmount, int price) {</span>
-<span class="nc" id="L23">        this.name = name;</span>
-<span class="nc" id="L24">        this.id = id;</span>
-<span class="nc" id="L25">        this.creditAmount = creditAmount;</span>
-<span class="nc" id="L26">        this.price = price;</span>
-<span class="nc" id="L27">    }</span>
+<span class="fc" id="L22">    CreditProduct(String name, int id, int creditAmount, int price) {</span>
+<span class="fc" id="L23">        this.name = name;</span>
+<span class="fc" id="L24">        this.id = id;</span>
+<span class="fc" id="L25">        this.creditAmount = creditAmount;</span>
+<span class="fc" id="L26">        this.price = price;</span>
+<span class="fc" id="L27">    }</span>
 
     public static CreditProduct getCreditProduct(int id) {
-<span class="nc" id="L30">        return Arrays.stream(CreditProduct.values())</span>
-<span class="nc bnc" id="L31" title="All 2 branches missed.">                .filter(product -&gt; product.id == id)</span>
-<span class="nc" id="L32">                .findFirst()</span>
-<span class="nc" id="L33">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid credit product ID: &quot; + id));</span>
+<span class="fc" id="L30">        return Arrays.stream(CreditProduct.values())</span>
+<span class="pc bpc" id="L31" title="1 of 2 branches missed.">                .filter(product -&gt; product.id == id)</span>
+<span class="fc" id="L32">                .findFirst()</span>
+<span class="pc" id="L33">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid credit product ID: &quot; + id));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
