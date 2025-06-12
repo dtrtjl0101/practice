@@ -1,7 +1,10 @@
 package qwerty.chaekit.dto.member;
 
 import lombok.Builder;
+import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.member.user.UserProfile;
+
+import java.time.LocalDateTime;
 
 @Builder
 public record UserInfoResponse(
@@ -10,9 +13,20 @@ public record UserInfoResponse(
         Long userId,
         String nickname,
         String profileImageURL,
-        String role
+        String role,
+        Long recentGroupId,
+        String recentGroupName,
+        String recentGroupImageURL,
+        Long recentActivityId,
+        String recentActivityBookTitle,
+        String recentActivityBookAuthor,
+        String recentActivityBookCoverImageURL,
+        Boolean firstPaymentBenefit,
+        LocalDateTime createdAt
+        
 ){
-    public static UserInfoResponse of(UserProfile user, String profileImageURL) {
+    public static UserInfoResponse of(UserProfile user, String profileImageURL, Activity recentActivity, String groupImageURL, String bookImageURL,
+                                      Boolean firstPaymentBenefit) {
         return UserInfoResponse.builder()
                 .memberId(user.getMember().getId())
                 .email(user.getMember().getEmail())
@@ -20,6 +34,18 @@ public record UserInfoResponse(
                 .nickname(user.getNickname())
                 .profileImageURL(profileImageURL)
                 .role(user.getMember().getRole().name())
+                
+                .recentGroupId(recentActivity == null ? null : recentActivity.getGroup().getId())
+                .recentGroupName(recentActivity == null ? null : recentActivity.getGroup().getName())
+                .recentGroupImageURL(recentActivity == null ? null : groupImageURL)
+                
+                .recentActivityId(recentActivity == null ? null : recentActivity.getId())
+                .recentActivityBookTitle(recentActivity == null ? null : recentActivity.getBook().getTitle())
+                .recentActivityBookAuthor(recentActivity == null ? null : recentActivity.getBook().getAuthor())
+                .recentActivityBookCoverImageURL(bookImageURL)
+                
+                .firstPaymentBenefit(firstPaymentBenefit)
+                .createdAt(user.getCreatedAt())
                 .build();
     }
 }

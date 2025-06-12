@@ -43,5 +43,9 @@ public record LoginResponse(
 
         @Schema(description = "Access Token (API 인증용)", example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
         @NotNull
-        String accessToken
+        String accessToken,
+        
+        @Schema(description = "프로모션 대상 여부", example = "true")
+        @NotNull
+        Boolean firstPaymentBenefit
 ) {}

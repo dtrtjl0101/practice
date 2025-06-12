@@ -118,7 +118,7 @@ export function ReadingProgressChart({
     queryFn: async () => {
       const response =
         await API_CLIENT.readingProgressController.getProgressHistory(
-          activityId
+          activityId,
         );
       if (!response.isSuccessful) {
         throw new Error(response.error);
@@ -132,8 +132,8 @@ export function ReadingProgressChart({
   const chartData = useMemo(() => {
     if (!activityInfo) return [];
 
-    const startDate = new Date(activityInfo.startTime);
-    const endDate = new Date(activityInfo.endTime);
+    const startDate = new Date(`${activityInfo.startTime}T00:00:00+09:00`);
+    const endDate = new Date(`${activityInfo.endTime}T00:00:00+09:00`);
     const today = new Date();
 
     // 모든 날짜 범위 생성 (startDate부터 endDate까지)
@@ -155,23 +155,22 @@ export function ReadingProgressChart({
 
     const result = dateRange.map((date, _) => {
       const dateKey = date.toDateString();
-      const isToday = date.toDateString() === today.toDateString();
       const isFuture = date > today;
 
       // 목표 독서율 계산 (startTime: 0%, endTime: 100%의 직선)
       const totalDays = Math.ceil(
-        (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+        (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
       );
       const currentDay = Math.ceil(
-        (date.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+        (date.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
       );
       const targetPercentage = Math.min(
         100,
-        Math.max(0, (currentDay / totalDays) * 100)
+        Math.max(0, (currentDay / totalDays) * 100),
       );
 
       // 기존 데이터가 있는 경우
-      if (progressMap.has(dateKey) && !isFuture && !isToday) {
+      if (progressMap.has(dateKey) && !isFuture) {
         const data = progressMap.get(dateKey);
         return {
           date,
@@ -329,7 +328,7 @@ export function ReadingProgressChart({
                   내 진행도
                 </Typography>
                 <Typography variant="h6" fontWeight={700} color="primary.main">
-                  {myProgress}%
+                  {Math.round(myProgress)}%
                 </Typography>
               </Box>
             </Stack>
@@ -364,7 +363,7 @@ export function ReadingProgressChart({
                   fontWeight={700}
                   color="secondary.main"
                 >
-                  {avgProgress}%
+                  {Math.round(avgProgress)}%
                 </Typography>
               </Box>
             </Stack>

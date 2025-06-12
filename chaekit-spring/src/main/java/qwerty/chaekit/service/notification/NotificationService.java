@@ -3,7 +3,7 @@ package qwerty.chaekit.service.notification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.group.ReadingGroup;
@@ -30,7 +30,7 @@ import qwerty.chaekit.global.security.resolver.UserToken;
 public class NotificationService {
     private final NotificationJpaRepository notificationJpaRepository;
     private final UserProfileRepository userProfileRepository;
-    private final NotificationProducer notificationProducer;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
     @Transactional
     public void createGroupJoinRequestNotification(UserProfile receiver, UserProfile sender, ReadingGroup group) {
@@ -38,7 +38,7 @@ public class NotificationService {
         Notification notification = new Notification(receiver, sender, null,group, null,null,null,NotificationType.GROUP_JOIN_REQUEST, message);
         notificationJpaRepository.save(notification);
         NotificationResponse response = NotificationResponse.of(notification);
-        notificationProducer.sendNotification(response, receiver.getId().toString());
+        simpMessagingTemplate.convertAndSend("/topic/notification/" + notification.getReceiver().getId(), response);
     }
 
     @Transactional
@@ -48,7 +48,7 @@ public class NotificationService {
         notificationJpaRepository.save(notification);
         if (receiver != null) {
             NotificationResponse response = NotificationResponse.of(notification);
-            notificationProducer.sendNotification(response, receiver.getId().toString());
+            simpMessagingTemplate.convertAndSend("/topic/notification/" + notification.getReceiver().getId(), response);
         }
     }
 
@@ -59,16 +59,16 @@ public class NotificationService {
         notificationJpaRepository.save(notification);
         if (receiver != null) {
             NotificationResponse response = NotificationResponse.of(notification);
-            notificationProducer.sendNotification(response, receiver.getId().toString());
+            simpMessagingTemplate.convertAndSend("/topic/notification/" + notification.getReceiver().getId(), response);
         }
     }
 
-    @Transactional
-    public void createPublisherJoinRequestNotification(UserProfile admin, PublisherProfile publisher) {
-        String message = String.format("%s님이 출판사 가입을 요청했습니다.", publisher.getPublisherName());
-        Notification notification = new Notification(null,admin, publisher, null, null,null,null,NotificationType.PUBLISHER_JOIN_REQUEST, message);
-        notificationJpaRepository.save(notification);
-    }
+//    @Transactional
+//    public void createPublisherJoinRequestNotification(UserProfile admin, PublisherProfile publisher) {
+//        String message = String.format("%s님이 출판사 가입을 요청했습니다.", publisher.getPublisherName());
+//        Notification notification = new Notification(null,admin, publisher, null, null,null,null,NotificationType.PUBLISHER_JOIN_REQUEST, message);
+//        notificationJpaRepository.save(notification);
+//    }
 
     @Transactional
     public void createPublisherApprovedNotification(PublisherProfile publisher, UserProfile admin) {
@@ -77,12 +77,12 @@ public class NotificationService {
         notificationJpaRepository.save(notification);
     }
 
-    @Transactional
-    public void createPublisherRejectedNotification(PublisherProfile publisher, UserProfile admin) {
-        String message = "출판사 가입이 거절되었습니다.";
-        Notification notification = new Notification(null, admin, publisher,null, null,null,null,NotificationType.PUBLISHER_REJECTED, message);
-        notificationJpaRepository.save(notification);
-    }
+//    @Transactional
+//    public void createPublisherRejectedNotification(PublisherProfile publisher, UserProfile admin) {
+//        String message = "출판사 가입이 거절되었습니다.";
+//        Notification notification = new Notification(null, admin, publisher,null, null,null,null,NotificationType.PUBLISHER_REJECTED, message);
+//        notificationJpaRepository.save(notification);
+//    }
 
     @Transactional
     public void createDiscussionCommentNotification(UserProfile receiver, UserProfile sender, Discussion discussion) {
@@ -91,7 +91,7 @@ public class NotificationService {
         notificationJpaRepository.save(notification);
         if (receiver != null) {
             NotificationResponse response = NotificationResponse.of(notification);
-            notificationProducer.sendNotification(response, receiver.getId().toString());
+            simpMessagingTemplate.convertAndSend("/topic/notification/" + notification.getReceiver().getId(), response);
         }
     }
 
@@ -102,7 +102,7 @@ public class NotificationService {
         notificationJpaRepository.save(notification);
         if (receiver != null) {
             NotificationResponse response = NotificationResponse.of(notification);
-            notificationProducer.sendNotification(response, receiver.getId().toString());
+            simpMessagingTemplate.convertAndSend("/topic/notification/" + notification.getReceiver().getId(), response);
         }
     }
 
@@ -115,7 +115,7 @@ public class NotificationService {
         notificationJpaRepository.save(notification);
         if (receiver != null) {
             NotificationResponse response = NotificationResponse.of(notification);
-            notificationProducer.sendNotification(response, receiver.getId().toString());
+            simpMessagingTemplate.convertAndSend("/topic/notification/" + notification.getReceiver().getId(), response);
         }
     }
 
@@ -128,7 +128,7 @@ public class NotificationService {
         notificationJpaRepository.save(notification);
         if (receiver != null) {
             NotificationResponse response = NotificationResponse.of(notification);
-            notificationProducer.sendNotification(response, receiver.getId().toString());
+            simpMessagingTemplate.convertAndSend("/topic/notification/" + notification.getReceiver().getId(), response);
         }
     }
     
@@ -144,7 +144,7 @@ public class NotificationService {
         notificationJpaRepository.save(notification);
         if (receiver != null) {
             NotificationResponse response = NotificationResponse.of(notification);
-            notificationProducer.sendNotification(response, receiver.getId().toString());
+            simpMessagingTemplate.convertAndSend("/topic/notification/" + notification.getReceiver().getId(), response);
         }
     }
 

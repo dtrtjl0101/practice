@@ -69,33 +69,84 @@ public class ReadingProgressHistoryService {
 
         LocalDate start = activity.getStartTime();
         LocalDate end = activity.getEndTime();
+        List<LocalDate> days = start.datesUntil(end.plusDays(1)).toList();
 
         List<ReadingProgressHistory> histories = historyRepository
                 .findByActivityAndCreatedAtBetween(activity,
                         start.atStartOfDay(), end.plusDays(1).atStartOfDay());
 
-        Map<LocalDate, List<ReadingProgressHistory>> map = histories.stream()
-                .collect(Collectors.groupingBy(h -> h.getCreatedAt().toLocalDate().minusDays(1)));
+        // 사용자별로 그룹화 후, 날짜별로 정렬
+        Map<Long, List<ReadingProgressHistory>> historiesByUser = histories.stream()
+                .collect(Collectors.groupingBy(h -> h.getUser().getId()));
+        
+        // 현재 실시간 진행률
+        List<ActivityMember> activityMembers = activityMemberRepository.findByActivity(activity);
+        List<Long> userIdList = activityMembers.stream()
+                .map(activityMember -> activityMember.getUser().getId()).toList();
+        Map<Long, Long> currentPercentageByUser = ebookPurchaseRepository.findByUserIdInAndEbook(userIdList, activity.getBook())
+                .stream().collect(
+                        Collectors.toMap(
+                                ep -> ep.getUser().getId(),
+                                EbookPurchase::getPercentage
+                        )
+                );
 
-        List<LocalDate> days = start.datesUntil(end.plusDays(1)).toList();
-        List<ReadingProgressHistoryResponse> responses = new ArrayList<>();
-        for (LocalDate day : days) {
-            List<ReadingProgressHistory> daily = map.getOrDefault(day, Collections.emptyList());
-            double avg = daily.stream().mapToLong(ReadingProgressHistory::getPercentage).average().orElse(0.0);
-            long my = daily.stream()
-                    .filter(h -> h.getUser().getId().equals(user.getId()))
-                    .mapToLong(ReadingProgressHistory::getPercentage)
-                    .findFirst()
-                    .orElse(0L);
-            if (day.isBefore(joinDate)) {
-                my = 0L;
+        // 사용자별 보정된 진행률 시계열 생성 (날짜별 최대 진행률 유지)
+        Map<Long, Map<LocalDate, Long>> fixedProgressByUser = new HashMap<>();
+        for (Long userId : userIdList) {
+            List<ReadingProgressHistory> userHistories = historiesByUser.getOrDefault(userId, Collections.emptyList());
+
+            Map<LocalDate, Long> rawByDate = userHistories.stream()
+                    .collect(Collectors.toMap(
+                            h -> h.getCreatedAt().toLocalDate(),
+                            ReadingProgressHistory::getPercentage,
+                            Math::max
+                    ));
+
+            Map<LocalDate, Long> progressMap = new LinkedHashMap<>();
+            long maxSoFar = 0L;
+            for (LocalDate day : days) {
+                long p;
+                if (day.equals(LocalDate.now())) {
+                    p = currentPercentageByUser.getOrDefault(userId, 0L);
+                } else {
+                    p = rawByDate.getOrDefault(day, 0L);
+                }
+                maxSoFar = Math.max(maxSoFar, p);
+                progressMap.put(day, maxSoFar);
             }
+            fixedProgressByUser.put(userId, progressMap);
+        }
+
+        // 날짜별 평균 계산 + 내 진행률 보정
+        List<ReadingProgressHistoryResponse> responses = new ArrayList<>();
+        long myMax = 0L;
+
+        for (LocalDate day : days) {
+            List<Long> progresses = new ArrayList<>();
+            long myProgress = 0L;
+
+            for (Map.Entry<Long, Map<LocalDate, Long>> entry : fixedProgressByUser.entrySet()) {
+                Long userId = entry.getKey();
+                Long p = entry.getValue().getOrDefault(day, 0L);
+
+                progresses.add(p);
+
+                if (userId.equals(user.getId())) {
+                    myProgress = day.isBefore(joinDate) ? 0L : p;
+                }
+            }
+
+            myMax = Math.max(myMax, myProgress);
+            double avg = progresses.stream().mapToLong(Long::longValue).average().orElse(0.0);
+
             responses.add(ReadingProgressHistoryResponse.builder()
                     .date(day)
-                    .myPercentage(my)
+                    .myPercentage(myMax)
                     .averagePercentage(avg)
                     .build());
         }
+
         return responses;
     }
 }
