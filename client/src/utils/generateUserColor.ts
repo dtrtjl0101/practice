@@ -1,12 +1,6 @@
+const COLOR_TABLE: number[] = [0, 60, 120, 180, 240, 300];
 function simpleHash(input: number): number {
-  let hash = 0;
-  const str = input.toString();
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash;
-  }
-  return Math.abs(hash);
+  return COLOR_TABLE[input % COLOR_TABLE.length]!;
 }
 
 export default function generateUserColor(userId: number): string {
