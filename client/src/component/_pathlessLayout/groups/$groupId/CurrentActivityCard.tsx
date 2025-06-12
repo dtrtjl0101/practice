@@ -98,11 +98,16 @@ export function CurrentActivityCard(props: {
         console.error(response.errorMessage);
         throw new Error(response.errorCode);
       }
-      const activity = response.data.content![0] as Activity | undefined;
-      if (activity?.endTime && new Date(activity?.endTime) < new Date()) {
-        return undefined;
+      if (activity?.endTime) {
+        const end = new Date(`${activity.endTime}T23:59:59+09:00`);
+        const now = new Date();
+        console.log(end, now);
+
+        if (now > end) {
+          return undefined;
+        }
       }
-      return activity;
+      return response.data.content?.at(0);
     },
   });
 
