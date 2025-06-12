@@ -186,7 +186,7 @@ export function ReadingProgressChart({
       }
 
       // 미래 날짜인 경우 - null로 처리해서 라인을 끊음
-      if (isToday || isFuture) {
+      if (isFuture) {
         return {
           date,
           dateString: date.toLocaleDateString("ko-KR", {
