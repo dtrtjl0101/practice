@@ -328,7 +328,7 @@ export function ReadingProgressChart({
                   내 진행도
                 </Typography>
                 <Typography variant="h6" fontWeight={700} color="primary.main">
-                  {myProgress}%
+                  {Math.round(myProgress)}%
                 </Typography>
               </Box>
             </Stack>
@@ -363,7 +363,7 @@ export function ReadingProgressChart({
                   fontWeight={700}
                   color="secondary.main"
                 >
-                  {avgProgress}%
+                  {Math.round(avgProgress)}%
                 </Typography>
               </Box>
             </Stack>

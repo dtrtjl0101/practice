@@ -98,18 +98,23 @@ export function CurrentActivityCard(props: {
         console.error(response.errorMessage);
         throw new Error(response.errorCode);
       }
-      const activity = response.data.content![0] as Activity | undefined;
-      if (activity?.endTime && new Date(activity?.endTime) < new Date()) {
-        return undefined;
+      if (activity?.endTime) {
+        const end = new Date(`${activity.endTime}T23:59:59+09:00`);
+        const now = new Date();
+        console.log(end, now);
+
+        if (now > end) {
+          return undefined;
+        }
       }
-      return activity;
+      return (response.data.content?.at(0) as Activity) || undefined;
     },
   });
 
   const { data: activityReadProgresses } = useQuery({
     queryKey: ["activityReadProgresses", activity?.activityId],
     queryFn: async () => {
-      if (!activity) {
+      if (!activity?.activityId) {
         return [];
       }
       const response =
@@ -155,7 +160,7 @@ export function CurrentActivityCard(props: {
   const progressPopoverOpen = Boolean(progressPopoverAnchor);
 
   const onJoinActivityButtonClicked = async () => {
-    if (!activity) {
+    if (!activity?.activityId || !activity.bookId) {
       return;
     }
     const response = await API_CLIENT.activityController.joinActivity(
@@ -191,7 +196,7 @@ export function CurrentActivityCard(props: {
         groupId={groupId}
         open={activityCreateModalOpen}
         onClose={() => setActivityCreateModalOpen(false)}
-        onCreate={(_activity) => {
+        onCreate={() => {
           enqueueSnackbar("활동이 생성되었습니다.", { variant: "success" });
           refetch();
         }}

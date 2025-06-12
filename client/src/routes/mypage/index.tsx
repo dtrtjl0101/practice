@@ -147,7 +147,6 @@ function ProfileSection({ userId }: { userId: number }) {
                 startIcon={<Edit />}
                 onClick={() => setOpenProfileEditModal(true)}
                 sx={{ borderRadius: 2 }}
-                disabled={true} // API 준비 전까지 비활성화
               >
                 프로필 편집
               </Button>
@@ -295,11 +294,7 @@ function ManagementSection({
           >
             하이라이트 관리
           </Button>
-          <Button
-            variant="outlined"
-            startIcon={<AutoStories />}
-            disabled // API 준비 전까지 비활성화
-          >
+          <Button variant="outlined" startIcon={<AutoStories />}>
             읽은 책 관리
           </Button>
         </Stack>

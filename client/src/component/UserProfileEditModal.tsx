@@ -14,7 +14,7 @@ import {
   Stack,
 } from "@mui/material";
 import { CameraAlt, Close, Edit } from "@mui/icons-material";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import API_CLIENT from "../api/api";
 
@@ -41,7 +41,7 @@ export default function UserProfileEditModal({
   const [nickname, setNickname] = useState(userData?.nickname || "");
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [profileImagePreview, setProfileImagePreview] = useState<string | null>(
-    userData?.profileImageURL || null
+    userData?.profileImageURL || null,
   );
   console.log("userData", userData);
 
@@ -53,17 +53,10 @@ export default function UserProfileEditModal({
   // 프로필 업데이트 mutation
   const updateProfileMutation = useMutation({
     mutationFn: async (data: { nickname?: string; profileImage?: File }) => {
-      const formData = new FormData();
-      if (data.nickname) {
-        formData.append("nickname", data.nickname);
-      }
-      if (data.profileImage) {
-        formData.append("profileImage", data.profileImage);
-      }
-
-      const response = await API_CLIENT.userController.updateUserInfo(
-        formData as any
-      );
+      const response = await API_CLIENT.userController.updateUserInfo({
+        nickname: data.nickname,
+        profileImage: data.profileImage,
+      });
 
       if (!response.isSuccessful) {
         throw new Error(response.error || "프로필 업데이트에 실패했습니다.");
@@ -83,17 +76,17 @@ export default function UserProfileEditModal({
   });
 
   // 모달이 열릴 때마다 초기값 설정
-  useState(() => {
+  useEffect(() => {
     if (open) {
       setNickname(userData?.nickname || "");
       setProfileImageFile(null);
       setProfileImagePreview(userData?.profileImageURL || null);
       setError(null);
     }
-  });
+  }, [open, userData]);
 
   const handleProfileImageChange = (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
     if (file) {

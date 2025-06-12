@@ -30,15 +30,15 @@ export function DayStatusChip(props: { startTime: string; endTime: string }) {
 
   const { label, color }: { label: string; color: "info" | "secondary" } =
     useMemo(() => {
+      const start = new Date(`${startTime}T00:00:00+09:00`);
+      const end = new Date(`${endTime}T23:59:59+09:00`);
       const now = new Date();
-      const start = new Date(startTime);
-      const end = new Date(endTime);
 
       if (now < start) {
         return { label: `시작전`, color: "secondary" };
       } else if (now <= end) {
-        const daysToEnd = Math.ceil(
-          (end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+        const daysToEnd = Math.floor(
+          (end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
         );
         return {
           label: `D-${daysToEnd === 0 ? "day" : daysToEnd}`,
@@ -72,10 +72,10 @@ export function PastActivityCard(props: {
       const response = await API_CLIENT.activityController.getAllActivities(
         groupId,
         {
-          page,
+          page: 0,
           size: 10, // 더 많이 가져와서 필터링
           sort: ["startTime,desc"],
-        }
+        },
       );
 
       if (!response.isSuccessful) {
@@ -88,7 +88,7 @@ export function PastActivityCard(props: {
 
       // 종료된 활동만 필터링
       const pastActivities = allActivities.filter((activity) => {
-        const endDate = new Date(activity.endTime);
+        const endDate = new Date(`${activity.endTime}T23:59:59+09:00`);
         return endDate < now;
       });
 
@@ -118,7 +118,7 @@ export function PastActivityCard(props: {
               page: 0,
               size: 100,
             },
-          }
+          },
         );
       if (!response.isSuccessful) throw new Error(response.errorMessage);
       return response.data!.content!;
@@ -157,13 +157,13 @@ export function PastActivityCard(props: {
       return;
     }
     const response = await API_CLIENT.activityController.joinActivity(
-      activity.activityId
+      activity.activityId,
     );
     if (!response.isSuccessful) {
       switch (response.errorCode) {
         case "EBOOK_NOT_PURCHASED": {
           const shouldMoveToPurchasePage = confirm(
-            "활동에 참여하기 위해서는 책을 구매해야 합니다. 구매 페이지로 이동하시겠습니까?"
+            "활동에 참여하기 위해서는 책을 구매해야 합니다. 구매 페이지로 이동하시겠습니까?",
           );
           if (shouldMoveToPurchasePage) {
             navigate({
