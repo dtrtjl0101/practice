@@ -1,10 +1,9 @@
-package qwerty.chaekit.service.util;
+package qwerty.chaekit.service.notification;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -24,7 +23,6 @@ import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.domain.notification.entity.Notification;
-import qwerty.chaekit.domain.notification.entity.NotificationType;
 import qwerty.chaekit.domain.notification.repository.NotificationJpaRepository;
 import qwerty.chaekit.dto.notification.NotificationResponse;
 import qwerty.chaekit.dto.page.PageResponse;
@@ -37,6 +35,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -46,13 +45,16 @@ import static org.mockito.Mockito.*;
 class NotificationServiceTest {
 
     @InjectMocks
-    private EmailNotificationService emailNotificationService;
-
+    private NotificationService notificationService;
+    
     @Mock
-    private JavaMailSender javaMailSender;
-
+    private NotificationJpaRepository notificationJpaRepository;
+    
     @Mock
-    private MimeMessage mimeMessage;
+    private SimpMessagingTemplate simpMessagingTemplate;
+    
+    @Mock
+    private UserProfileRepository userProfileRepository;
 
     private UserProfile receiver;
     private UserProfile sender;
@@ -93,10 +95,10 @@ class NotificationServiceTest {
         when(notificationJpaRepository.save(any(Notification.class))).thenReturn(notification);
 
         // when
-        emailNotificationService.sendVerificationEmail(toEmail, verificationCode);
+        notificationService.createGroupJoinRequestNotification(receiver, sender, group);
 
         // then
-        verify(javaMailSender).send(any(MimeMessage.class));
+        
     }
 
     @Test
@@ -224,7 +226,7 @@ class NotificationServiceTest {
             .thenReturn(notificationPage);
 
         // when
-        emailNotificationService.sendReadingGroupApprovalEmail(toEmail);
+        PageResponse<NotificationResponse> result = notificationService.getNotifications(userToken, pageable);
 
         // then
         assertThat(result.content()).hasSize(1);
@@ -245,24 +247,6 @@ class NotificationServiceTest {
         assertThatThrownBy(() -> notificationService.getNotifications(userToken, pageable))
             .isInstanceOf(NotFoundException.class)
             .hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NOT_FOUND.getCode());
-    }
-
-    @Test
-    void sendEbookRejectionEmail_성공() throws MessagingException {
-        // given
-        UserToken userToken = new UserToken(false, 1L, 1L, "test@test.com");
-        Long notificationId = 1L;
-
-        when(userProfileRepository.findById(userToken.userId())).thenReturn(Optional.of(receiver));
-        when(notificationJpaRepository.findById(notificationId)).thenReturn(Optional.of(notification));
-        when(notification.getReceiver()).thenReturn(receiver);
-        when(receiver.getId()).thenReturn(1L);
-
-        // when
-        emailNotificationService.sendEbookRejectionEmail(toEmail, reason);
-
-        // then
-        verify(javaMailSender).send(any(MimeMessage.class));
     }
 
     @Test
