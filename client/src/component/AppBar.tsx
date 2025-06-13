@@ -8,16 +8,27 @@ import {
   IconButton,
   Chip,
   Tooltip,
+  BottomNavigation,
+  BottomNavigationAction,
 } from "@mui/material";
 import { createLink } from "@tanstack/react-router";
 import { useAtom } from "jotai";
+import { useLocation } from "@tanstack/react-router";
 import { AuthState } from "../states/auth";
 import { Role } from "../types/role";
 import useLogout from "../api/login/useLogout";
 import LinkButton from "./LinkButton";
 import NotificationButton from "./NotificationButton";
 import State from "../states";
-import { Menu, Nightlight, Sunny } from "@mui/icons-material";
+import {
+  Menu,
+  Nightlight,
+  Sunny,
+  Home,
+  Person,
+  Book,
+  Group,
+} from "@mui/icons-material";
 import { useEffect, useState } from "react";
 import SideNavigationBar, { NavigationItem } from "./SideNavigatorBar";
 import { useQuery } from "@tanstack/react-query";
@@ -33,6 +44,7 @@ export default function AppBar(props: {
   const { logout } = useLogout();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [creditPurchaseModalOpen, setCreditPurchaseModalOpen] = useState(false);
+  const location = useLocation();
 
   const isUser = user && user.role === Role.ROLE_USER;
   const isAdmin = user && user.role === Role.ROLE_ADMIN;
@@ -71,6 +83,16 @@ export default function AppBar(props: {
       localStorage.setItem("colorScheme", next);
       return next;
     });
+  };
+
+  // Get current bottom navigation value based on pathname
+  const getBottomNavValue = () => {
+    const pathname = location.pathname;
+    if (pathname === "/") return 0;
+    if (pathname.startsWith("/books")) return 1;
+    if (pathname.startsWith("/groups")) return 2;
+    if (pathname.startsWith("/mypage")) return 3;
+    return 0;
   };
 
   return (
@@ -209,8 +231,50 @@ export default function AppBar(props: {
           </Stack>
         </Toolbar>
       </MuiAppBar>
+
+      <BottomNavigation
+        value={getBottomNavValue()}
+        showLabels
+        sx={{
+          display: { xs: "flex", sm: "none" },
+          height: 64,
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1000,
+        }}
+      >
+        <LinkBottomNavigationAction label="홈" icon={<Home />} to="/" />
+        <LinkBottomNavigationAction
+          label="도서"
+          icon={<Book />}
+          to="/books"
+          search={{ title: "" }}
+        />
+        <LinkBottomNavigationAction
+          label="모임"
+          icon={<Group />}
+          to="/groups"
+          search={{ searchTerms: [] }}
+        />
+        {user && (
+          <LinkBottomNavigationAction
+            label="마이페이지"
+            icon={<Person />}
+            to={
+              isAdmin
+                ? "/mypage/admin"
+                : isPublisher
+                  ? "/mypage/publisher"
+                  : "/mypage"
+            }
+          />
+        )}
+      </BottomNavigation>
     </>
   );
 }
 
 const LogoButton = createLink(Button);
+const LinkBottomNavigationAction = createLink(BottomNavigationAction);
