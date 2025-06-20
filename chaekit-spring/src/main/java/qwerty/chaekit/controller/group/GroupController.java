@@ -33,6 +33,10 @@ public class GroupController {
     private final GroupService groupService;
     private final GroupMemberService groupMemberService;
 
+    @Operation(
+            summary = "모임 생성",
+            description = "새로운 모임을 생성합니다."
+    )
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiSuccessResponse<GroupPostResponse> createGroup(
             @Parameter(hidden = true) @Login UserToken userToken,
@@ -78,6 +82,10 @@ public class GroupController {
         return ApiSuccessResponse.of(groupService.getCreatedGroups(userToken, pageable));
     }
 
+    @Operation(
+            summary = "특정 모임 정보 조회",
+            description = "특정 모임의 상세 정보를 조회합니다."
+    )
     @GetMapping("/{groupId}/info")
     public ApiSuccessResponse<GroupFetchResponse> getGroup(
             @Parameter(hidden = true) @Login(required = false) UserToken userToken,
@@ -85,6 +93,10 @@ public class GroupController {
         return ApiSuccessResponse.of(groupService.fetchGroup(userToken, groupId));
     }
 
+    @Operation(
+            summary = "모임 정보 수정",
+            description = "특정 모임의 정보를 수정합니다. 프로필 사진, 이름, 설명, 태그 등을 수정할 수 있습니다."
+    )
     @PatchMapping(value = "/{groupId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiSuccessResponse<GroupPostResponse> updateGroup(
             @Parameter(hidden = true) @Login UserToken userToken,
@@ -93,6 +105,10 @@ public class GroupController {
         return ApiSuccessResponse.of(groupService.updateGroup(userToken, groupId, request));
     }
 
+    @Operation(
+            summary = "모임 가입 요청",
+            description = "특정 모임에 가입 요청을 보냅니다. 모임장이 승인해야 가입됩니다."
+    )
     @PostMapping("/{groupId}/join")
     public ApiSuccessResponse<GroupJoinResponse> requestJoinGroup(
             @Parameter(hidden = true) @Login UserToken userToken,
@@ -112,6 +128,10 @@ public class GroupController {
         return ApiSuccessResponse.of(groupMemberService.getGroupMembers(groupId, pageable));
     }
     
+    @Operation(
+            summary = "모임 가입 요청 승인",
+            description = "모임장이 특정 사용자의 가입 요청을 승인합니다."
+    )
     @PatchMapping("/{groupId}/members/{userId}/approve")
     public ApiSuccessResponse<GroupJoinResponse> approveJoinRequest(
             @Parameter(hidden = true) @Login UserToken userToken,
@@ -120,6 +140,10 @@ public class GroupController {
         return ApiSuccessResponse.of(groupMemberService.approveJoinRequest(userToken, groupId, userId));
     }
 
+    @Operation(
+            summary = "모임 가입 요청 거절",
+            description = "모임장이 특정 사용자의 가입 요청을 거절합니다."
+    )
     @PatchMapping("/{groupId}/members/{userId}/reject")
     public ApiSuccessResponse<Void> rejectJoinRequest(
             @Parameter(hidden = true) @Login UserToken userToken,
@@ -129,6 +153,10 @@ public class GroupController {
         return ApiSuccessResponse.emptyResponse();
     }
 
+    @Operation(
+            summary = "모임 탈퇴",
+            description = "가입된 모임에서 탈퇴합니다."
+    )
     @DeleteMapping("/{groupId}/members/leave")
     public ApiSuccessResponse<Void> leaveGroup(
             @Parameter(hidden = true) @Login UserToken userToken,
@@ -137,6 +165,10 @@ public class GroupController {
         return ApiSuccessResponse.emptyResponse();
     }
 
+    @Operation(
+            summary = "모임 대기중인 멤버 목록 조회",
+            description = "모임장이 승인 대기 중인 멤버 목록을 조회합니다."
+    )
     @GetMapping("/{groupId}/members/pending")
     public ApiSuccessResponse<PageResponse<GroupMemberResponse>> getPendingList(
             @Parameter(hidden = true) @Login UserToken userToken,
