@@ -25,6 +25,11 @@ public class ActivityController {
     private final ActivityService activityService;
     private final HighlightService highlightService;
 
+    @Operation(
+            summary = "모임 활동 생성",
+            description = "새로운 모임 활동을 생성합니다. " +
+                    "활동 제목, 전자책 id, 설명, 시작일, 종료일 등을 포함할 수 있습니다."
+    )
     @PostMapping("/api/groups/{groupId}/activities")
     public ApiSuccessResponse<ActivityPostResponse> createActivity(@Login UserToken userToken,
                                                                    @PathVariable long groupId,
@@ -32,6 +37,11 @@ public class ActivityController {
         return ApiSuccessResponse.of(activityService.createActivity(userToken, groupId, activityPostRequest));
     }
 
+    @Operation(
+            summary = "모임 활동 목록 조회",
+            description = "특정 모임의 모든 활동을 조회합니다. " +
+                    "활동 제목, 전자책 정보, 시작일, 종료일 등을 포함합니다."
+    )
     @GetMapping("/api/groups/{groupId}/activities")
     public ApiSuccessResponse<PageResponse<ActivityFetchResponse>> getAllActivities(
             @Parameter(hidden = true) @Login(required = false) UserToken userToken,
@@ -41,6 +51,11 @@ public class ActivityController {
         return ApiSuccessResponse.of(activityService.fetchAllActivities(userToken, pageable, groupId));
     }
 
+    @Operation(
+            summary = "모임 활동 상세 조회",
+            description = "특정 모임 활동의 상세 정보를 조회합니다. " +
+                    "활동 제목, 전자책 정보, 설명, 시작일, 종료일, 참여자 목록 등을 포함합니다."
+    )
     @GetMapping("/api/activities/{activityId}")
     public ApiSuccessResponse<ActivityFetchResponse> getActivity(
             @Parameter(hidden = true) @Login UserToken userToken,
@@ -48,6 +63,10 @@ public class ActivityController {
         return ApiSuccessResponse.of(activityService.fetchActivity(userToken, activityId));
     }
 
+    @Operation(
+            summary = "모임 활동 수정",
+            description = "특정 모임 활동의 정보를 수정합니다. "
+    )
     @PatchMapping("/api/groups/{groupId}/activities")
     public ApiSuccessResponse<ActivityPostResponse> updateActivity(@Login UserToken userToken,
                                          @PathVariable long groupId,
