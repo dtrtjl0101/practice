@@ -47,13 +47,13 @@ public class EbookController {
         return ApiSuccessResponse.of(ebookService.fetchById(userToken, ebookId));
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "전자책 업로드", description = "출판사가 전자책 파일과 정보를 업로드합니다.")
-    public ApiSuccessResponse<EbookPostResponse> uploadFile(
-            @Parameter(hidden = true) @Login PublisherToken publisherToken,
-            @Parameter(description = "전자책 업로드 요청 데이터") @ModelAttribute EbookPostRequest request) {
-        return ApiSuccessResponse.of(ebookFileService.uploadEbook(publisherToken, request));
-    }
+//    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    @Operation(summary = "전자책 업로드", description = "출판사가 전자책 파일과 정보를 업로드합니다.")
+//    public ApiSuccessResponse<EbookPostResponse> uploadFile(
+//            @Parameter(hidden = true) @Login PublisherToken publisherToken,
+//            @Parameter(description = "전자책 업로드 요청 데이터") @ModelAttribute EbookPostRequest request) {
+//        return ApiSuccessResponse.of(ebookFileService.uploadEbook(publisherToken, request));
+//    }
 
     @GetMapping("/{ebookId}/download")
     @Operation(summary = "전자책 다운로드 URL 생성", description = "책을 구매한 사용자에게 전자책 다운로드를 위한 URL을 생성합니다.")
@@ -63,14 +63,14 @@ public class EbookController {
         return ApiSuccessResponse.of(ebookFileService.getPresignedEbookUrlForUser(userToken, ebookId));
     }
 
-    @GetMapping("/{ebookId}/publisher-download")
-    @Operation(summary = "출판사용 전자책 다운로드 URL 생성", description = "출판사가 자신이 업로드한 전자책을 다운로드하기 위한 URL을 생성합니다.")
-    public ApiSuccessResponse<EbookDownloadResponse> getPresignedEbookUrlForPublisher(
-            @Parameter(hidden = true) @Login PublisherToken publisherToken,
-            @Parameter(description = "다운로드할 전자책 ID") @PathVariable Long ebookId
-    ) {
-        return ApiSuccessResponse.of(ebookFileService.getPresignedEbookUrlForPublisher(publisherToken, ebookId));
-    }
+//    @GetMapping("/{ebookId}/publisher-download")
+//    @Operation(summary = "출판사용 전자책 다운로드 URL 생성", description = "출판사가 자신이 업로드한 전자책을 다운로드하기 위한 URL을 생성합니다.")
+//    public ApiSuccessResponse<EbookDownloadResponse> getPresignedEbookUrlForPublisher(
+//            @Parameter(hidden = true) @Login PublisherToken publisherToken,
+//            @Parameter(description = "다운로드할 전자책 ID") @PathVariable Long ebookId
+//    ) {
+//        return ApiSuccessResponse.of(ebookFileService.getPresignedEbookUrlForPublisher(publisherToken, ebookId));
+//    }
     
     @PostMapping("/{ebookId}/view")
     @Operation(summary = "전자책 조회수 증가", description = "사용자가 전자책을 조회할 때마다 조회수를 증가시킵니다.")
