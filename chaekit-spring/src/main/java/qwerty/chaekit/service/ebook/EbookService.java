@@ -46,16 +46,16 @@ public class EbookService {
         );
     }
     
-    public PageResponse<EbookFetchResponse> fetchBooksByPublisher(PublisherToken token, Pageable pageable) {
-        PublisherProfile publisher = entityFinder.findPublisher(token.publisherId());
-        Page<EbookFetchResponse> page = ebookRepository.findAllByPublisher(publisher, pageable)
-                .map(ebook -> EbookFetchResponse.of(
-                        ebook,
-                        fileService.convertToPublicImageURL(ebook.getCoverImageKey()),
-                        false
-                ));
-        return PageResponse.of(page);
-    }
+//    public PageResponse<EbookFetchResponse> fetchBooksByPublisher(PublisherToken token, Pageable pageable) {
+//        PublisherProfile publisher = entityFinder.findPublisher(token.publisherId());
+//        Page<EbookFetchResponse> page = ebookRepository.findAllByPublisher(publisher, pageable)
+//                .map(ebook -> EbookFetchResponse.of(
+//                        ebook,
+//                        fileService.convertToPublicImageURL(ebook.getCoverImageKey()),
+//                        false
+//                ));
+//        return PageResponse.of(page);
+//    }
 
     @Transactional
     public void incrementEbookViewCount(Long ebookId) {

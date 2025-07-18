@@ -42,12 +42,12 @@ public class EbookFileService {
     private final EmailNotificationService emailNotificationService;
 
     @Transactional
-    public EbookPostResponse uploadEbook(PublisherToken publisherToken, EbookPostRequest request) {
-        PublisherProfile publisher = entityFinder.findPublisher(publisherToken.publisherId());
+    public EbookPostResponse uploadEbook(EbookPostRequest request) {
+        //PublisherProfile publisher = entityFinder.findPublisher(publisherToken.publisherId());
 
-        if(!publisher.isApproved()) {
-            throw new ForbiddenException(ErrorCode.PUBLISHER_NOT_APPROVED);
-        }
+//        if(!publisher.isApproved()) {
+//            throw new ForbiddenException(ErrorCode.PUBLISHER_NOT_APPROVED);
+//        }
 
         String fileKey = fileService.uploadEbook(request.file());
         String coverImageKey = fileService.uploadEbookCoverImageIfPresent(request.coverImageFile());
@@ -61,13 +61,13 @@ public class EbookFileService {
                 .price(request.price())
                 .fileKey(fileKey)
                 .coverImageKey(coverImageKey)
-                .publisher(publisher)
+                //.publisher(publisher)
                 .build();
         EbookRequest saved = ebookRequestRepository.save(ebookRequest);
 
-        if (publisher.isAdmin()) {
-            approveRequest(saved);
-        }
+//        if (publisher.isAdmin()) {
+//            approveRequest(saved);
+//        }
 
         return EbookPostResponse.of(saved.toEbook(), ebookRequest.getId(), coverImageURL);
     }
@@ -86,13 +86,13 @@ public class EbookFileService {
     }
     
     @Transactional
-    public EbookDownloadResponse getPresignedEbookUrlForPublisher(PublisherToken publisherToken, Long ebookId) {
-        PublisherProfile publisher = entityFinder.findPublisher(publisherToken.publisherId());
+    public EbookDownloadResponse getPresignedEbookUrlForPublisher(Long ebookId) {
+        //PublisherProfile publisher = entityFinder.findPublisher(publisherToken.publisherId());
         Ebook ebook = entityFinder.findEbook(ebookId);
 
-        if (!ebook.isOwnedBy(publisher)) {
-            throw new ForbiddenException(ErrorCode.EBOOK_NOT_OWNED);
-        }
+//        if (!ebook.isOwnedBy(publisher)) {
+//            throw new ForbiddenException(ErrorCode.EBOOK_NOT_OWNED);
+//        }
 
         String ebookFileKey = ebook.getFileKey();
         String downloadUrl = fileService.getEbookDownloadUrl(ebookFileKey);
@@ -101,13 +101,13 @@ public class EbookFileService {
     }
     
     @Transactional
-    public EbookDownloadResponse getPresignedTempEbookUrlForPublisher(PublisherToken publisherToken, Long ebookRequestId) {
-        PublisherProfile publisher = entityFinder.findPublisher(publisherToken.publisherId());
+    public EbookDownloadResponse getPresignedTempEbookUrlForPublisher( Long ebookRequestId) {
+        //PublisherProfile publisher = entityFinder.findPublisher(publisherToken.publisherId());
         EbookRequest ebookRequest = entityFinder.findEbookRequest(ebookRequestId);
 
-        if (!ebookRequest.isRequestedBy(publisher) && publisher.isNotAdmin()) {
-            throw new ForbiddenException(ErrorCode.EBOOK_REQUEST_NOT_YOURS);
-        }
+//        if (!ebookRequest.isRequestedBy(publisher) && publisher.isNotAdmin()) {
+//            throw new ForbiddenException(ErrorCode.EBOOK_REQUEST_NOT_YOURS);
+//        }
 
         String ebookFileKey = ebookRequest.getFileKey();
         String downloadUrl = fileService.getEbookDownloadUrl(ebookFileKey);
@@ -116,40 +116,38 @@ public class EbookFileService {
     }
     
     @Transactional
-    public void approveEbookByAdmin(PublisherToken publisherToken, Long requestId) {
-        PublisherProfile publisher = entityFinder.findPublisher(publisherToken.publisherId());
+    public void approveEbookByAdmin(Long requestId) {
+        //PublisherProfile publisher = entityFinder.findPublisher(publisherToken.publisherId());
         EbookRequest request = entityFinder.findEbookRequest(requestId);
         
-        assertAdmin(publisher);
+        //assertAdmin(publisher);
         assertRequestIsPending(request);
 
         approveRequest(request);
     }
 
-    @Transactional
-    public void rejectEbookByAdmin(PublisherToken publisherToken, Long requestId, EbookRequestRejectRequest requestBody) {
-        PublisherProfile publisher = entityFinder.findPublisher(publisherToken.publisherId());
-        EbookRequest request = entityFinder.findEbookRequest(requestId);
-        
-        assertAdmin(publisher);
-        assertRequestIsPending(request);
-        
-        request.reject(requestBody.reason());
-        emailNotificationService.sendEbookRejectionEmail(publisher.getMember().getEmail(), requestBody.reason());
-    }
+//    @Transactional
+//    public void rejectEbookByAdmin(Long requestId, EbookRequestRejectRequest requestBody) {
+//        //PublisherProfile publisher = entityFinder.findPublisher(publisherToken.publisherId());
+//        EbookRequest request = entityFinder.findEbookRequest(requestId);
+//
+//        //assertAdmin(publisher);
+//        assertRequestIsPending(request);
+//
+//        request.reject(requestBody.reason());
+//        emailNotificationService.sendEbookRejectionEmail(requestBody.reason());
+//    }
 
     @Transactional(readOnly = true)
-    public PageResponse<EbookRequestFetchResponse> getEbookRequests(
-            PublisherToken publisherToken, Pageable pageable
-    ) {
-        PublisherProfile publisher = entityFinder.findPublisher(publisherToken.publisherId());
+    public PageResponse<EbookRequestFetchResponse> getEbookRequests(Pageable pageable) {
+        //PublisherProfile publisher = entityFinder.findPublisher(publisherToken.publisherId());
         
-        if (publisher.isNotAdmin()) {
-            return PageResponse.of(
-                    ebookRequestRepository.findByPublisher(publisher, pageable)
-                            .map(ebookRequestMapper::toFetchResponse)
-            );
-        }
+//        if (publisher.isNotAdmin()) {
+//            return PageResponse.of(
+//                    ebookRequestRepository.findByPublisher(publisher, pageable)
+//                            .map(ebookRequestMapper::toFetchResponse)
+//            );
+//        }
 
         return PageResponse.of(
                 ebookRequestRepository.findByStatusIn(
@@ -161,11 +159,11 @@ public class EbookFileService {
         );
     }
 
-    private void assertAdmin(PublisherProfile publisher) {
-        if (publisher.isNotAdmin()) {
-            throw new ForbiddenException(ErrorCode.ONLY_ADMIN);
-        }
-    }
+//    private void assertAdmin(PublisherProfile publisher) {
+//        if (publisher.isNotAdmin()) {
+//            throw new ForbiddenException(ErrorCode.ONLY_ADMIN);
+//        }
+//    }
 
     private void assertRequestIsPending(EbookRequest request) {
         if (request.isNotPending()) {
