@@ -69,7 +69,6 @@ public class UserJoinService {
         String accessToken = jwtUtil.createAccessToken(
                 member.getId(),
                 user.getId(),
-                null,
                 member.getEmail(),
                 member.getRole().name()
         );

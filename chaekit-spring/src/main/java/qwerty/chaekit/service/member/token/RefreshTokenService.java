@@ -30,7 +30,7 @@ public class RefreshTokenService {
     private final MemberRepository memberRepository;
     private final JwtUtil jwtUtil;
     private final UserProfileRepository userProfileRepository;
-    private final PublisherProfileRepository publisherProfileRepository;
+    //private final PublisherProfileRepository publisherProfileRepository;
     private final RedisTemplate<String, String> redisTemplate;
     private final JwtProperties jwtProperties;
 
@@ -54,9 +54,9 @@ public class RefreshTokenService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
         UserProfile user = userProfileRepository.findByMember_Id(memberId).orElse(null);
-        PublisherProfile publisher = publisherProfileRepository.findByMember_Id(memberId).orElse(null);
+        //PublisherProfile publisher = publisherProfileRepository.findByMember_Id(memberId).orElse(null);
 
-        String newAccessToken = jwtUtil.createAccessToken(member, user, publisher);
+        String newAccessToken = jwtUtil.createAccessToken(member, user);
 
         return RefreshTokenResponse.builder()
                 .accessToken(newAccessToken)
