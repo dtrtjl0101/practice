@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Order(2)
 public class DummyDataInitializer implements ApplicationRunner {
     private final DummyUserFactory dummyUserFactory;
-    private final DummyPublisherFactory dummyPublisherFactory;
+    //private final DummyPublisherFactory dummyPublisherFactory;
     private final DummyEbookFactory dummyEbookFactory;
     private final DummyGroupFactory dummyGroupFactory;
     private final DummyBigDataFactory dummyBigDataFactory;
@@ -26,7 +26,7 @@ public class DummyDataInitializer implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         log.info("더미 데이터를 생성을 시도합니다.");
         dummyUserFactory.saveDummyUsers();
-        dummyPublisherFactory.saveDummyPublishers();
+        //dummyPublisherFactory.saveDummyPublishers();
         dummyEbookFactory.saveDummyEbooks();
         dummyGroupFactory.saveDummyGroups();
         
