@@ -38,50 +38,50 @@ public class EbookPurchaseService {
     private final FileService fileService;
     private final EntityFinder entityFinder;
 
-    @Transactional
-    public EbookPurchaseResponse purchaseEbook(Long ebookId, Long userId) {
-        UserProfile buyer = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
-        CreditWallet wallet = creditWalletRepository.findByUser_Id(userId)
-                .orElseThrow(() -> new IllegalStateException("크레딧 지갑이 존재하지 않습니다."));
-
-        Ebook ebook = ebookRepository.findByIdWithPublisher(ebookId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.EBOOK_NOT_FOUND));
-
-        if(ebookPurchaseRepository.existsByUserIdAndEbookId(userId, ebookId)) {
-            throw new BadRequestException(ErrorCode.EBOOK_ALREADY_PURCHASED);
-        }
-
-        int ebookPrice = ebook.getPrice();
-        try {
-            wallet.useCredit(ebookPrice);
-        } catch (Exception e) {
-            throw new BadRequestException(ErrorCode.CREDIT_NOT_ENOUGH);
-        }
-
-        CreditUsageTransaction savedTransaction = creditUsageTransactionRepository.save(
-                CreditUsageTransaction.builder()
-                        .wallet(wallet)
-                        .creditAmount(ebookPrice)
-                        .transactionType(CreditUsageTransactionType.PURCHASE)
-                        .build()
-        );
-
-        ebookPurchaseRepository.save(
-                EbookPurchase.builder()
-                        .user(buyer)
-                        .ebook(ebook)
-                        .transaction(savedTransaction)
-                        .build()
-        );
-
-        return EbookPurchaseResponse.of(
-                userId,
-                ebook,
-                savedTransaction,
-                fileService.getEbookDownloadUrl(ebook.getFileKey())
-        );
-    }
+//    @Transactional
+//    public EbookPurchaseResponse purchaseEbook(Long ebookId, Long userId) {
+//        UserProfile buyer = userRepository.findById(userId)
+//                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+//        CreditWallet wallet = creditWalletRepository.findByUser_Id(userId)
+//                .orElseThrow(() -> new IllegalStateException("크레딧 지갑이 존재하지 않습니다."));
+//
+//        Ebook ebook = ebookRepository.findByIdWithPublisher(ebookId)
+//                .orElseThrow(() -> new NotFoundException(ErrorCode.EBOOK_NOT_FOUND));
+//
+//        if(ebookPurchaseRepository.existsByUserIdAndEbookId(userId, ebookId)) {
+//            throw new BadRequestException(ErrorCode.EBOOK_ALREADY_PURCHASED);
+//        }
+//
+//        int ebookPrice = ebook.getPrice();
+//        try {
+//            wallet.useCredit(ebookPrice);
+//        } catch (Exception e) {
+//            throw new BadRequestException(ErrorCode.CREDIT_NOT_ENOUGH);
+//        }
+//
+//        CreditUsageTransaction savedTransaction = creditUsageTransactionRepository.save(
+//                CreditUsageTransaction.builder()
+//                        .wallet(wallet)
+//                        .creditAmount(ebookPrice)
+//                        .transactionType(CreditUsageTransactionType.PURCHASE)
+//                        .build()
+//        );
+//
+//        ebookPurchaseRepository.save(
+//                EbookPurchase.builder()
+//                        .user(buyer)
+//                        .ebook(ebook)
+//                        .transaction(savedTransaction)
+//                        .build()
+//        );
+//
+//        return EbookPurchaseResponse.of(
+//                userId,
+//                ebook,
+//                savedTransaction,
+//                fileService.getEbookDownloadUrl(ebook.getFileKey())
+//        );
+//    }
 
     public PageResponse<EbookFetchResponse> getMyBooks(Long userId, Pageable pageable) {
         Page<EbookPurchase> purchases = ebookPurchaseRepository.findByUserIdWithEbook(userId, pageable);

@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.ebook.repository.EbookRepository;
-import qwerty.chaekit.domain.member.publisher.PublisherProfile;
+//import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.global.init.dummy.DummyEbook;
 import qwerty.chaekit.service.member.admin.AdminService;
 

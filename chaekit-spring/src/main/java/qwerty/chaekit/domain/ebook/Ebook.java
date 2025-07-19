@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.BatchSize;
 import qwerty.chaekit.domain.BaseEntity;
-import qwerty.chaekit.domain.member.publisher.PublisherProfile;
+//import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 
 @Entity
 @Getter

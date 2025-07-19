@@ -9,7 +9,7 @@ import qwerty.chaekit.domain.ebook.repository.EbookRepository;
 import qwerty.chaekit.domain.ebook.request.EbookRequest;
 import qwerty.chaekit.domain.ebook.request.EbookRequestRepository;
 import qwerty.chaekit.domain.ebook.request.EbookRequestStatus;
-import qwerty.chaekit.domain.member.publisher.PublisherProfile;
+//import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.dto.ebook.request.EbookRequestFetchResponse;
 import qwerty.chaekit.dto.ebook.request.EbookRequestRejectRequest;

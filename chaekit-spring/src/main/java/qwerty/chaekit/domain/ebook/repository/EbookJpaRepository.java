@@ -1,5 +1,6 @@
 package qwerty.chaekit.domain.ebook.repository;
 
+import jakarta.validation.constraints.Null;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -7,7 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import qwerty.chaekit.domain.ebook.Ebook;
-import qwerty.chaekit.domain.member.publisher.PublisherProfile;
+//import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 
 import java.util.Optional;
 
@@ -18,7 +19,7 @@ public interface EbookJpaRepository extends JpaRepository<Ebook, Long> {
     
     boolean existsByTitle(String title);
 
-    //Page<Ebook> findAllByPublisher(PublisherProfile publisher, Pageable pageable);
+    //Page<Ebook> findAllByPublisher(N, Pageable pageable);
 
     @Modifying
     @Query("UPDATE Ebook e SET e.viewCount = e.viewCount + 1 WHERE e.id = :ebookId")

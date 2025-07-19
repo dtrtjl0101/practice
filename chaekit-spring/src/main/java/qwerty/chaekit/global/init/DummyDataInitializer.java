@@ -19,7 +19,7 @@ public class DummyDataInitializer implements ApplicationRunner {
     //private final DummyPublisherFactory dummyPublisherFactory;
     private final DummyEbookFactory dummyEbookFactory;
     private final DummyGroupFactory dummyGroupFactory;
-    private final DummyBigDataFactory dummyBigDataFactory;
+    //private final DummyBigDataFactory dummyBigDataFactory;
 
     @Override
     @Transactional
@@ -30,6 +30,6 @@ public class DummyDataInitializer implements ApplicationRunner {
         dummyEbookFactory.saveDummyEbooks();
         dummyGroupFactory.saveDummyGroups();
         
-        dummyBigDataFactory.generateDummyDataForTest();
+        //dummyBigDataFactory.generateDummyDataForTest();
     }
 }

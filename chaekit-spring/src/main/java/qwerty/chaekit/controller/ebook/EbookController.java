@@ -14,7 +14,7 @@ import qwerty.chaekit.dto.ebook.upload.EbookPostResponse;
 import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
-import qwerty.chaekit.global.security.resolver.PublisherToken;
+//import qwerty.chaekit.global.security.resolver.PublisherToken;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.ebook.EbookFileService;
 import qwerty.chaekit.service.ebook.EbookService;
