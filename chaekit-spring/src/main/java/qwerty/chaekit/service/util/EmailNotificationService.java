@@ -24,32 +24,12 @@ public class EmailNotificationService {
         sendEmail(toEmail, subject, text);
     }
 
-    // 출판사 계정 승인 이메일 전송
-    @Async
-    public void sendPublisherApprovalEmail(String toEmail) {
-        String subject = "출판사 계정 승인 알림";
-        String text = "<h3>축하합니다! 출판사 계정이 승인되었습니다.</h3>" +
-                "<p>이제 출판사 계정을 통해 전자책을 업로드할 수 있습니다.</p>";
-
-        sendEmail(toEmail, subject, text);
-    }
-
     // 독서모임 참여 승인 이메일 전송
     @Async
     public void sendReadingGroupApprovalEmail(String toEmail) {
         String subject = "독서모임 참여 승인 알림";
         String text = "<h3>축하합니다! 독서모임 참여가 승인되었습니다.</h3>" +
                 "<p>모임에 참여하여 책을 함께 읽을 수 있습니다.</p>";
-
-        sendEmail(toEmail, subject, text);
-    }
-
-    @Async
-    public void sendPublisherRejectionEmail(String toEmail, String reason) {
-        String subject = "출판사 계정 거절 알림";
-        String text = "<h3>안녕하세요, 책잇입니다.</h3>" +
-                "<p>출판사 계정이 거절되었습니다. 다시 문의해주세요.</p>" +
-                "<p>거절 사유: " + reason + "</p>";
 
         sendEmail(toEmail, subject, text);
     }

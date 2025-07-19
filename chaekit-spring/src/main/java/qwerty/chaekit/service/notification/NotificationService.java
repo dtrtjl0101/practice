@@ -11,7 +11,6 @@ import qwerty.chaekit.domain.group.activity.discussion.Discussion;
 import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment;
 import qwerty.chaekit.domain.highlight.Highlight;
 import qwerty.chaekit.domain.highlight.comment.HighlightComment;
-import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.domain.notification.entity.Notification;
