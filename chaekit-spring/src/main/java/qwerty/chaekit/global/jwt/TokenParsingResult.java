@@ -6,7 +6,6 @@ public record TokenParsingResult(
         TokenStatus status,
         Long memberId,
         Long userId,
-        Long publisherId,
         String email,
         String role
 ) {
@@ -14,17 +13,16 @@ public record TokenParsingResult(
         return new TokenParsingResult(status,
                 claims.get("memberId", Long.class),
                 claims.get("userId", Long.class),
-                claims.get("publisherId", Long.class),
                 claims.get("email", String.class),
                 claims.get("role", String.class));
     }
 
     public static TokenParsingResult of(TokenStatus status) {
-        return new TokenParsingResult(status, null, null, null, null, null);
+        return new TokenParsingResult(status, null, null, null,  null);
     }
 
-    public static TokenParsingResult of(TokenStatus status, Long memberId, Long userId, Long publisherId, String email, String role) {
-        return new TokenParsingResult(status, memberId, userId, publisherId, email, role);
+    public static TokenParsingResult of(TokenStatus status, Long memberId, Long userId, String email, String role) {
+        return new TokenParsingResult(status, memberId, userId, email, role);
     }
 
     public String getStatus() {

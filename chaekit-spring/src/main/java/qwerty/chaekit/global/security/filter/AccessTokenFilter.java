@@ -51,18 +51,18 @@ public class AccessTokenFilter extends OncePerRequestFilter {
                 .email(parsedToken.email())
                 .role(Role.from(parsedToken.role()))
                 .build();
-        PublisherProfile publisher = parsedToken.publisherId() != null ?
-                PublisherProfile.builder()
-                        .id(parsedToken.publisherId())
-                        .build()
-                : null;
+//        PublisherProfile publisher = parsedToken.publisherId() != null ?
+//                PublisherProfile.builder()
+//                        .id(parsedToken.publisherId())
+//                        .build()
+//                : null;
         UserProfile user = parsedToken.userId() != null ?
                 UserProfile.builder()
                         .id(parsedToken.userId())
                         .build()
                 : null;
 
-        CustomUserDetails customUserDetails = new CustomUserDetails(member, user, publisher);
+        CustomUserDetails customUserDetails = new CustomUserDetails(member, user);
 
         Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
 

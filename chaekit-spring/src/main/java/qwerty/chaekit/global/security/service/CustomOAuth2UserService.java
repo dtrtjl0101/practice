@@ -68,7 +68,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                 });
 
         UserProfile userProfile = userProfileRepository.findByMember_Id(member.getId()).orElse(null);
-        return new CustomUserDetails(member, userProfile, null, attributes);
+        return new CustomUserDetails(member, userProfile, attributes);
     }
 
     private String generateUniqueNickname(String base) {

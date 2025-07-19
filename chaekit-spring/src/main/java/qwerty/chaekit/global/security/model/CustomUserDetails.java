@@ -5,7 +5,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import qwerty.chaekit.domain.member.Member;
-import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.user.UserProfile;
 
 import java.util.ArrayList;
@@ -18,15 +17,14 @@ import java.util.Map;
 public record CustomUserDetails(
         @Nullable Member member,
         @Nullable UserProfile user,
-        @Nullable PublisherProfile publisher,
         Map<String, Object> attributes
 ) implements UserDetails, OAuth2User {
-    public CustomUserDetails(Member member, @Nullable UserProfile user, @Nullable PublisherProfile publisher) {
-        this(member, user, publisher, Collections.emptyMap());
+    public CustomUserDetails(Member member, @Nullable UserProfile user) {
+        this(member, user,Collections.emptyMap());
     }
     
     public static CustomUserDetails anonymous() {
-        return new CustomUserDetails(null, null, null);
+        return new CustomUserDetails(null, null);
     }
 
     @Override
