@@ -13,11 +13,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.ebook.repository.EbookRepository;
-import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.dto.ebook.EbookFetchResponse;
 import qwerty.chaekit.dto.page.PageResponse;
-import qwerty.chaekit.global.security.resolver.PublisherToken;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.service.util.EntityFinder;
 import qwerty.chaekit.service.util.FileService;
@@ -58,16 +56,11 @@ class EbookServiceTest {
 
         UserProfile user = mock(UserProfile.class);
 
-        PublisherProfile publisher = PublisherProfile.builder()
-                .id(1L)
-                .publisherName("Test Publisher")
-                .build();
 
         Ebook ebook = mock(Ebook.class);
         when(ebook.getId()).thenReturn(1L);
         when(ebook.getTitle()).thenReturn(title);
         when(ebook.getAuthor()).thenReturn(author);
-        when(ebook.getPublisher()).thenReturn(publisher);
         when(ebook.getCoverImageKey()).thenReturn("test-cover.jpg");
 
         String coverImageUrl = "http://test.com/test-cover.jpg";
@@ -107,16 +100,11 @@ class EbookServiceTest {
 
         UserToken userToken = UserToken.of(null, null, null);
 
-        PublisherProfile publisher = PublisherProfile.builder()
-                .id(1L)
-                .publisherName("Test Publisher")
-                .build();
 
         Ebook ebook = mock(Ebook.class);
         when(ebook.getId()).thenReturn(1L);
         when(ebook.getTitle()).thenReturn(title);
         when(ebook.getAuthor()).thenReturn(author);
-        when(ebook.getPublisher()).thenReturn(publisher);
         when(ebook.getCoverImageKey()).thenReturn("test-cover.jpg");
 
         String coverImageUrl = "http://test.com/test-cover.jpg";
@@ -149,16 +137,10 @@ class EbookServiceTest {
         UserProfile user = mock(UserProfile.class);
         when(user.isPurchased(any(Ebook.class))).thenReturn(true);
 
-        PublisherProfile publisher = PublisherProfile.builder()
-                .id(1L)
-                .publisherName("Test Publisher")
-                .build();
-
         Ebook ebook = mock(Ebook.class);
         when(ebook.getId()).thenReturn(ebookId);
         when(ebook.getTitle()).thenReturn("Test Book");
         when(ebook.getAuthor()).thenReturn("Test Author");
-        when(ebook.getPublisher()).thenReturn(publisher);
         when(ebook.getCoverImageKey()).thenReturn("test-cover.jpg");
 
         String coverImageUrl = "http://test.com/test-cover.jpg";
@@ -178,45 +160,7 @@ class EbookServiceTest {
         assertThat(response.isPurchased()).isTrue();
     }
 
-    @Test
-    @DisplayName("출판사별 이북 조회 성공")
-    void fetchBooksByPublisher_Success() {
-        // given
-        Long publisherId = 1L;
-        Pageable pageable = PageRequest.of(0, 10);
 
-        PublisherToken token = PublisherToken.of(1L, publisherId, "publisher@test.com");
-
-        PublisherProfile publisher = PublisherProfile.builder()
-                .id(publisherId)
-                .publisherName("Test Publisher")
-                .build();
-
-        Ebook ebook = mock(Ebook.class);
-        when(ebook.getId()).thenReturn(1L);
-        when(ebook.getTitle()).thenReturn("Test Book");
-        when(ebook.getAuthor()).thenReturn("Test Author");
-        when(ebook.getPublisher()).thenReturn(publisher);
-        when(ebook.getCoverImageKey()).thenReturn("test-cover.jpg");
-
-        String coverImageUrl = "http://test.com/test-cover.jpg";
-
-        // when
-        when(entityFinder.findPublisher(publisherId)).thenReturn(publisher);
-        when(ebookRepository.findAllByPublisher(publisher, pageable))
-                .thenReturn(new PageImpl<>(List.of(ebook)));
-        when(fileService.convertToPublicImageURL(any())).thenReturn(coverImageUrl);
-
-        PageResponse<EbookFetchResponse> response = ebookService.fetchBooksByPublisher(token, pageable);
-
-        // then
-        assertThat(response.content()).hasSize(1);
-        assertThat(response.content().get(0).id()).isEqualTo(ebook.getId());
-        assertThat(response.content().get(0).title()).isEqualTo(ebook.getTitle());
-        assertThat(response.content().get(0).author()).isEqualTo(ebook.getAuthor());
-        assertThat(response.content().get(0).bookCoverImageURL()).isEqualTo(coverImageUrl);
-        assertThat(response.content().get(0).isPurchased()).isFalse();
-    }
 
     @Test
     @DisplayName("이북 조회수 증가 성공")

@@ -41,20 +41,6 @@ class EmailNotificationServiceTest{
         // then
         verify(javaMailSender).send(any(MimeMessage.class));
     }
-
-    @Test
-    void sendPublisherApprovalEmail_성공() throws MessagingException {
-        // given
-        String toEmail = "publisher@example.com";
-        when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
-
-        // when
-        emailNotificationService.sendPublisherApprovalEmail(toEmail);
-
-        // then
-        verify(javaMailSender).send(any(MimeMessage.class));
-    }
-
     @Test
     void sendReadingGroupApprovalEmail_성공() throws MessagingException {
         // given
@@ -67,21 +53,6 @@ class EmailNotificationServiceTest{
         // then
         verify(javaMailSender).send(any(MimeMessage.class));
     }
-
-    @Test
-    void sendPublisherRejectionEmail_성공() throws MessagingException {
-        // given
-        String toEmail = "publisher@example.com";
-        String reason = "서류 미비";
-        when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
-
-        // when
-        emailNotificationService.sendPublisherRejectionEmail(toEmail, reason);
-
-        // then
-        verify(javaMailSender).send(any(MimeMessage.class));
-    }
-
     @Test
     void sendEbookRejectionEmail_성공() throws MessagingException {
         // given

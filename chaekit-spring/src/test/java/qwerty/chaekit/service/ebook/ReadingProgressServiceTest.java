@@ -15,7 +15,6 @@ import qwerty.chaekit.domain.ebook.purchase.repository.EbookPurchaseRepository;
 import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.group.activity.activitymember.ActivityMember;
 import qwerty.chaekit.domain.group.activity.activitymember.ActivityMemberRepository;
-import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.dto.ebook.purchase.ReadingProgressRequest;
 import qwerty.chaekit.dto.ebook.purchase.ReadingProgressResponse;
@@ -68,16 +67,11 @@ class ReadingProgressServiceTest {
                 .id(userId)
                 .build();
 
-        PublisherProfile publisher = PublisherProfile.builder()
-                .id(1L)
-                .publisherName("Test Publisher")
-                .build();
 
         Ebook ebook = Ebook.builder()
                 .id(bookId)
                 .title("Test Book")
                 .author("Test Author")
-                .publisher(publisher)
                 .build();
 
         EbookPurchase ebookPurchase = EbookPurchase.builder()
@@ -113,16 +107,11 @@ class ReadingProgressServiceTest {
                 .id(userId)
                 .build();
 
-        PublisherProfile publisher = PublisherProfile.builder()
-                .id(1L)
-                .publisherName("Test Publisher")
-                .build();
 
         Ebook ebook = Ebook.builder()
                 .id(bookId)
                 .title("Test Book")
                 .author("Test Author")
-                .publisher(publisher)
                 .build();
 
         // when
@@ -151,16 +140,10 @@ class ReadingProgressServiceTest {
                 .id(userId)
                 .build();
 
-        PublisherProfile publisher = PublisherProfile.builder()
-                .id(1L)
-                .publisherName("Test Publisher")
-                .build();
-
         Ebook ebook = Ebook.builder()
                 .id(bookId)
                 .title("Test Book")
                 .author("Test Author")
-                .publisher(publisher)
                 .build();
 
         EbookPurchase ebookPurchase = EbookPurchase.builder()
@@ -202,16 +185,11 @@ class ReadingProgressServiceTest {
         Long bookId = 1L;
         Pageable pageable = PageRequest.of(0, 10);
 
-        PublisherProfile publisher = PublisherProfile.builder()
-                .id(1L)
-                .publisherName("Test Publisher")
-                .build();
 
         Ebook ebook = Ebook.builder()
                 .id(bookId)
                 .title("Test Book")
                 .author("Test Author")
-                .publisher(publisher)
                 .build();
 
         Activity activity = Activity.builder()

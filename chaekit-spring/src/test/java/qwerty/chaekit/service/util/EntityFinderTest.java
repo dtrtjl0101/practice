@@ -19,8 +19,6 @@ import qwerty.chaekit.domain.group.activity.repository.ActivityRepository;
 import qwerty.chaekit.domain.group.repository.GroupRepository;
 import qwerty.chaekit.domain.highlight.Highlight;
 import qwerty.chaekit.domain.highlight.repository.HighlightRepository;
-import qwerty.chaekit.domain.member.publisher.PublisherProfile;
-import qwerty.chaekit.domain.member.publisher.PublisherProfileRepository;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.global.exception.NotFoundException;
@@ -40,8 +38,6 @@ class EntityFinderTest {
 
     @Mock
     private UserProfileRepository userRepository;
-    @Mock
-    private PublisherProfileRepository publisherRepository;
     @Mock
     private EbookRepository ebookRepository;
     @Mock
@@ -83,31 +79,6 @@ class EntityFinderTest {
             .hasFieldOrPropertyWithValue("errorCode", USER_NOT_FOUND.getCode());
     }
 
-    @Test
-    void findPublisher_성공() {
-        // given
-        Long publisherId = 1L;
-        PublisherProfile expectedPublisher = PublisherProfile.builder().id(publisherId).build();
-        when(publisherRepository.findById(publisherId)).thenReturn(Optional.of(expectedPublisher));
-
-        // when
-        PublisherProfile result = entityFinder.findPublisher(publisherId);
-
-        // then
-        assertThat(result).isEqualTo(expectedPublisher);
-    }
-
-    @Test
-    void findPublisher_실패_존재하지_않음() {
-        // given
-        Long publisherId = 1L;
-        when(publisherRepository.findById(publisherId)).thenReturn(Optional.empty());
-
-        // when & then
-        assertThatThrownBy(() -> entityFinder.findPublisher(publisherId))
-            .isInstanceOf(NotFoundException.class)
-            .hasFieldOrPropertyWithValue("errorCode", PUBLISHER_NOT_FOUND.getCode());
-    }
 
     @Test
     void findEbook_성공() {

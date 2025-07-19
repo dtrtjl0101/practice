@@ -19,7 +19,6 @@ import qwerty.chaekit.domain.group.activity.discussion.Discussion;
 import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment;
 import qwerty.chaekit.domain.highlight.Highlight;
 import qwerty.chaekit.domain.highlight.comment.HighlightComment;
-import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
 import qwerty.chaekit.domain.notification.entity.Notification;
@@ -60,7 +59,6 @@ class NotificationServiceTest {
     private UserProfile sender;
     private ReadingGroup group;
     private Notification notification;
-    private PublisherProfile publisher;
     private Discussion discussion;
     private DiscussionComment discussionComment;
     private Highlight highlight;
@@ -72,7 +70,6 @@ class NotificationServiceTest {
         sender = mock(UserProfile.class);
         group = mock(ReadingGroup.class);
         notification = mock(Notification.class);
-        publisher = mock(PublisherProfile.class);
         discussion = mock(Discussion.class);
         discussionComment = mock(DiscussionComment.class);
         highlight = mock(Highlight.class);
@@ -127,19 +124,6 @@ class NotificationServiceTest {
         // then
         verify(notificationJpaRepository).save(any(Notification.class));
         verify(simpMessagingTemplate).convertAndSend(eq("/topic/notification/1"), any(NotificationResponse.class));
-    }
-
-    @Test
-    @DisplayName("출판사 승인 알림 생성 성공")
-    void createPublisherApprovedNotificationSuccess() {
-        // given
-        when(notificationJpaRepository.save(any(Notification.class))).thenReturn(notification);
-
-        // when
-        notificationService.createPublisherApprovedNotification(publisher, sender);
-
-        // then
-        verify(notificationJpaRepository).save(any(Notification.class));
     }
 
     @Test

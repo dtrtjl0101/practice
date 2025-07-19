@@ -13,7 +13,6 @@ import qwerty.chaekit.domain.ebook.Ebook;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.group.activity.Activity;
 import qwerty.chaekit.domain.group.activity.repository.ActivityRepository;
-import qwerty.chaekit.domain.member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.dto.group.activity.ActivityFetchResponse;
 import qwerty.chaekit.dto.group.activity.ActivityPatchRequest;
@@ -57,8 +56,8 @@ class ActivityServiceTest {
         groupLeaderLogin = testFixtureFactory.createUserToken(groupLeader.getMember(), groupLeader);
         anotherLogin = testFixtureFactory.createUserToken(anotherUser.getMember(), anotherUser);
 
-        PublisherProfile publisher = testFixtureFactory.createPublisher("publisher_email", "publisher_name");
-        dummyEbook = testFixtureFactory.createEbook("dummy_ebook", publisher, "author", "description", "file_key");
+        //PublisherProfile publisher = testFixtureFactory.createPublisher("publisher_email", "publisher_name");
+        dummyEbook = testFixtureFactory.createEbook("dummy_ebook", "author", "description", "file_key");
         dummyGroup = testFixtureFactory.createGroup("dummy_group", groupLeader);
 
         testFixtureFactory.createEbookPurchase(groupLeader, dummyEbook);
