@@ -29,9 +29,9 @@ public class Notification extends BaseEntity {
     @JoinColumn(name = "sender_id")
     private UserProfile sender;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "publisher_id")
-    private PublisherProfile publisher;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "publisher_id")
+//    private PublisherProfile publisher;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
@@ -57,10 +57,9 @@ public class Notification extends BaseEntity {
     private boolean isRead;
 
     @Builder
-    public Notification(UserProfile receiver, UserProfile sender, PublisherProfile publisher, ReadingGroup group, Highlight highlight, Discussion discussion, DiscussionComment discussionComment, NotificationType type, String message) {
+    public Notification(UserProfile receiver, UserProfile sender, ReadingGroup group, Highlight highlight, Discussion discussion, DiscussionComment discussionComment, NotificationType type, String message) {
         this.receiver = receiver;
         this.sender = sender;
-        this.publisher = publisher;
         this.group = group;
         this.highlight = highlight;
         this.discussion = discussion;

@@ -36,9 +36,9 @@ public class EbookRequest extends BaseEntity {
 
     private String coverImageKey;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "publisher_id")
-    private PublisherProfile publisher;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "publisher_id")
+//    private PublisherProfile publisher;
 
     
     @ManyToOne(fetch = FetchType.LAZY)
@@ -55,8 +55,7 @@ public class EbookRequest extends BaseEntity {
     public EbookRequest(
             Long id, String title, String author, String description, 
             long size, int price, 
-            String fileKey, String coverImageKey, 
-            PublisherProfile publisher, String rejectReason) {
+            String fileKey, String coverImageKey, String rejectReason) {
         this.id = id;
         this.title = title;
         this.author = author;
@@ -65,7 +64,6 @@ public class EbookRequest extends BaseEntity {
         this.price = price;
         this.fileKey = fileKey;
         this.coverImageKey = coverImageKey;
-        this.publisher = publisher;
         this.status = EbookRequestStatus.PENDING;
         this.rejectReason = rejectReason;
     }
@@ -79,7 +77,6 @@ public class EbookRequest extends BaseEntity {
                 .price(this.price)
                 .fileKey(this.fileKey)
                 .coverImageKey(this.coverImageKey)
-                .publisher(this.publisher)
                 .build();
     }
     
@@ -95,9 +92,5 @@ public class EbookRequest extends BaseEntity {
     public void reject(String reason) {
         this.status = EbookRequestStatus.REJECTED;
         this.rejectReason = reason;
-    }
-
-    public boolean isRequestedBy(PublisherProfile publisher) {
-        return publisher.getId().equals(this.publisher.getId());
     }
 }

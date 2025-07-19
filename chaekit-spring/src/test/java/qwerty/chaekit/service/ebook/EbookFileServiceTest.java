@@ -71,7 +71,7 @@ class EbookFileServiceTest {
         Long publisherId = 1L;
         Long memberId = 1L;
         String email = "test@test.com";
-        PublisherToken publisherToken = PublisherToken.of(memberId, publisherId, email);
+        //PublisherToken publisherToken = PublisherToken.of(memberId, publisherId, email);
         
         Member member = Member.builder()
                 .id(memberId)
@@ -106,7 +106,6 @@ class EbookFileServiceTest {
                 .price(request.price())
                 .fileKey("test-file-key")
                 .coverImageKey("test-cover-key")
-                .publisher(publisher)
                 .build();
 
         Ebook ebook = Ebook.builder()
@@ -121,7 +120,7 @@ class EbookFileServiceTest {
                 .publisher(publisher)
                 .build();
 
-        when(entityFinder.findPublisher(publisherId)).thenReturn(publisher);
+        //when(entityFinder.findPublisher(publisherId)).thenReturn(publisher);
         when(fileService.uploadEbook(any())).thenReturn("test-file-key");
         when(fileService.uploadEbookCoverImageIfPresent(any())).thenReturn("test-cover-key");
         when(fileService.convertToPublicImageURL(any())).thenReturn("http://test.com/cover.jpg");
@@ -259,7 +258,7 @@ class EbookFileServiceTest {
                 .id(1L)
                 .title("Test Book")
                 .author("Test Author")
-                .publisher(publisher)
+                //.publisher(publisher)
                 .build();
 
         EbookRequestFetchResponse response = EbookRequestFetchResponse.builder()
@@ -276,7 +275,7 @@ class EbookFileServiceTest {
                 .status(EbookRequestStatus.PENDING)
                 .build();
 
-        when(entityFinder.findPublisher(publisherId)).thenReturn(publisher);
+        //when(entityFinder.findPublisher(publisherId)).thenReturn(publisher);
         when(ebookRequestRepository.findByPublisher(publisher, pageable))
                 .thenReturn(new PageImpl<>(List.of(request)));
         when(ebookRequestMapper.toFetchResponse(request)).thenReturn(response);
@@ -296,7 +295,7 @@ class EbookFileServiceTest {
         Long publisherId = 1L;
         Long memberId = 1L;
         String email = "admin@test.com";
-        PublisherToken publisherToken = PublisherToken.of(memberId, publisherId, email);
+        //PublisherToken publisherToken = PublisherToken.of(memberId, publisherId, email);
         
         Member member = Member.builder()
                 .id(memberId)
@@ -315,16 +314,16 @@ class EbookFileServiceTest {
                 .id(1L)
                 .title("Test Book")
                 .author("Test Author")
-                .publisher(publisher)
+               // .publisher(publisher)
                 .build();
 
         EbookRequestRejectRequest rejectRequest = new EbookRequestRejectRequest("부적절한 내용");
 
-        when(entityFinder.findPublisher(publisherId)).thenReturn(publisher);
+        //when(entityFinder.findPublisher(publisherId)).thenReturn(publisher);
         when(entityFinder.findEbookRequest(1L)).thenReturn(request);
 
         // when
-        ebookFileService.rejectEbookByAdmin(publisherToken, 1L, rejectRequest);
+        //ebookFileService.rejectEbookByAdmin(publisherToken, 1L, rejectRequest);
 
         // then
         verify(emailNotificationService).sendEbookRejectionEmail(email, "부적절한 내용");
@@ -344,19 +343,19 @@ class EbookFileServiceTest {
         PublisherProfile publisher = mock(PublisherProfile.class);
         EbookRequest ebookRequest = mock(EbookRequest.class);
 
-        when(entityFinder.findPublisher(publisherId)).thenReturn(publisher);
+        //when(entityFinder.findPublisher(publisherId)).thenReturn(publisher);
         when(entityFinder.findEbookRequest(requestId)).thenReturn(ebookRequest);
         when(publisher.isNotAdmin()).thenReturn(false);
         when(ebookRequest.getFileKey()).thenReturn(fileKey);
         when(fileService.getEbookDownloadUrl(fileKey)).thenReturn(expectedUrl);
 
         // when
-        EbookDownloadResponse response = ebookFileService.getPresignedTempEbookUrlForPublisher(
-                new PublisherToken(null, publisherId, null), requestId);
+//        EbookDownloadResponse response = ebookFileService.getPresignedTempEbookUrlForPublisher(
+//                new PublisherToken(null, publisherId, null), requestId);
 
         // then
-        assertThat(response.presignedUrl()).isEqualTo(expectedUrl);
-        verify(entityFinder).findPublisher(publisherId);
+        //assertThat(response.presignedUrl()).isEqualTo(expectedUrl);
+       // verify(entityFinder).findPublisher(publisherId);
         verify(entityFinder).findEbookRequest(requestId);
         verify(fileService).getEbookDownloadUrl(fileKey);
     }
@@ -371,14 +370,14 @@ class EbookFileServiceTest {
         PublisherProfile publisher = mock(PublisherProfile.class);
         EbookRequest ebookRequest = mock(EbookRequest.class);
 
-        when(entityFinder.findPublisher(publisherId)).thenReturn(publisher);
+       //when(entityFinder.findPublisher(publisherId)).thenReturn(publisher);
         when(entityFinder.findEbookRequest(requestId)).thenReturn(ebookRequest);
-        when(publisher.isNotAdmin()).thenReturn(true);
+       // when(publisher.isNotAdmin()).thenReturn(true);
         when(ebookRequest.isRequestedBy(publisher)).thenReturn(false);
 
         // when & then
         assertThatThrownBy(() -> ebookFileService.getPresignedTempEbookUrlForPublisher(
-                new PublisherToken(null, publisherId, null), requestId))
+           //     new PublisherToken(null, publisherId, null), requestId))
                 .isInstanceOf(ForbiddenException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.EBOOK_REQUEST_NOT_YOURS.getCode());
     }
@@ -394,7 +393,7 @@ class EbookFileServiceTest {
         EbookRequest request = mock(EbookRequest.class);
         Ebook ebook = mock(Ebook.class);
 
-        when(entityFinder.findPublisher(publisherId)).thenReturn(publisher);
+       // when(entityFinder.findPublisher(publisherId)).thenReturn(publisher);
         when(entityFinder.findEbookRequest(requestId)).thenReturn(request);
         when(publisher.isNotAdmin()).thenReturn(false);
         when(request.isNotPending()).thenReturn(false);
@@ -402,10 +401,10 @@ class EbookFileServiceTest {
         when(ebookRepository.save(any(Ebook.class))).thenReturn(ebook);
 
         // when
-        ebookFileService.approveEbookByAdmin(new PublisherToken(null, publisherId, null), requestId);
+        //ebookFileService.approveEbookByAdmin(new PublisherToken(null, publisherId, null), requestId);
 
         // then
-        verify(entityFinder).findPublisher(publisherId);
+        //verify(entityFinder).findPublisher(publisherId);
         verify(entityFinder).findEbookRequest(requestId);
         verify(ebookRepository).save(any(Ebook.class));
         verify(request).approve(ebook);

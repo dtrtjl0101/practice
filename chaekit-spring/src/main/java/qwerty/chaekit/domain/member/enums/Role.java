@@ -4,7 +4,6 @@ import java.util.Arrays;
 
 public enum Role {
     ROLE_USER,
-    ROLE_PUBLISHER,
     ROLE_ADMIN;
 
     public static Role from(String value) {

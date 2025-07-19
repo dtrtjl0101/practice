@@ -53,10 +53,10 @@ public class EbookRepositoryImpl implements EbookRepository {
         return ebookJpaRepository.findById(id);
     }
 
-    @Override
-    public Optional<Ebook> findByIdWithPublisher(Long id) {
-        return ebookJpaRepository.findByIdWithPublisher(id);
-    }
+//    @Override
+//    public Optional<Ebook> findByIdWithPublisher(Long id) {
+//        return ebookJpaRepository.findByIdWithPublisher(id);
+//    }
 
     @Override
     public Ebook save(Ebook ebook) {
@@ -68,10 +68,10 @@ public class EbookRepositoryImpl implements EbookRepository {
         return ebookJpaRepository.existsByTitle(name);
     }
 
-    @Override
-    public Page<Ebook> findAllByPublisher(PublisherProfile publisher, Pageable pageable) {
-        return ebookJpaRepository.findAllByPublisher(publisher, pageable);
-    }
+//    @Override
+//    public Page<Ebook> findAllByPublisher(PublisherProfile publisher, Pageable pageable) {
+//        return ebookJpaRepository.findAllByPublisher(publisher, pageable);
+//    }
 
     @Override
     public void incrementViewCount(Long ebookId) {

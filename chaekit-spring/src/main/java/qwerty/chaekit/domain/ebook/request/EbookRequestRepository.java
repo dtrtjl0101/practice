@@ -10,5 +10,5 @@ import java.util.List;
 public interface EbookRequestRepository extends JpaRepository<EbookRequest, Long> {
     Page<EbookRequest> findByStatusIn(List<EbookRequestStatus> statuses, Pageable pageable);
 
-    Page<EbookRequest> findByPublisher(PublisherProfile publisher, Pageable pageable);
+    //Page<EbookRequest> findByPublisher(PublisherProfile publisher, Pageable pageable);
 }

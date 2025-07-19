@@ -11,7 +11,7 @@ import qwerty.chaekit.domain.notification.entity.NotificationType;
 public interface NotificationJpaRepository extends JpaRepository<Notification, Long> {
     Page<Notification> findByReceiverOrderByCreatedAtDesc(UserProfile receiver, Pageable pageable);
     Page<Notification> findByReceiverId(Long receiverId, Pageable pageable);
-    Page<Notification> findByPublisherOrderByCreatedAtDesc(PublisherProfile publisher, Pageable pageable);
+    //Page<Notification> findByPublisherOrderByCreatedAtDesc(PublisherProfile publisher, Pageable pageable);
     Page<Notification> findByTypeAndReceiverIsNull(NotificationType type, Pageable pageable);
     Page<Notification> findByHighlightId(Long highlightId, Pageable pageable);
 } 

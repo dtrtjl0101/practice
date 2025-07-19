@@ -13,12 +13,12 @@ import java.util.Optional;
 
 @Repository
 public interface EbookJpaRepository extends JpaRepository<Ebook, Long> {
-    @Query("SELECT e FROM Ebook e LEFT JOIN FETCH e.publisher WHERE e.id = :id")
-    Optional<Ebook> findByIdWithPublisher(Long id);
+//    @Query("SELECT e FROM Ebook e LEFT JOIN FETCH e.publisher WHERE e.id = :id")
+//    Optional<Ebook> findByIdWithPublisher(Long id);
     
     boolean existsByTitle(String title);
 
-    Page<Ebook> findAllByPublisher(PublisherProfile publisher, Pageable pageable);
+    //Page<Ebook> findAllByPublisher(PublisherProfile publisher, Pageable pageable);
 
     @Modifying
     @Query("UPDATE Ebook e SET e.viewCount = e.viewCount + 1 WHERE e.id = :ebookId")
