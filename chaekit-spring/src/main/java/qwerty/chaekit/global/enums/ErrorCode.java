@@ -13,7 +13,7 @@ public enum ErrorCode {
     BOOK_ID_REQUIRED("BOOK_ID_REQUIRED", "책 ID가 필요합니다"),
     // member
     MEMBER_ALREADY_EXISTS("MEMBER_ALREADY_EXISTS", "이미 존재하는 회원입니다"),
-    PUBLISHER_ALREADY_EXISTS("PUBLISHER_ALREADY_EXISTS", "이미 존재하는 출판사 이름입니다"),
+    //PUBLISHER_ALREADY_EXISTS("PUBLISHER_ALREADY_EXISTS", "이미 존재하는 출판사 이름입니다"),
     NICKNAME_ALREADY_EXISTS("NICKNAME_ALREADY_EXISTS", "이미 존재하는 닉네임입니다"),
     // group
     GROUP_NAME_DUPLICATED("GROUP_NAME_DUPLICATED", "독서모임 이름이 중복되었습니다"),
@@ -40,7 +40,7 @@ public enum ErrorCode {
     INVALID_EXTENSION("INVALID_EXTENSION", "허용되지 않는 확장자입니다"),
     FILE_SIZE_EXCEEDED("FILE_SIZE_EXCEED", "파일 크기가 초과되었습니다"),
     // admin
-    PUBLISHER_ALREADY_ACCEPTED("PUBLISHER_ALREADY_ACCEPTED", "이미 승인된 출판사입니다"),
+    //PUBLISHER_ALREADY_ACCEPTED("PUBLISHER_ALREADY_ACCEPTED", "이미 승인된 출판사입니다"),
     // credit payment
     INVALID_CREDIT_PRODUCT_ID("INVALID_CREDIT_PRODUCT_ID", "유효하지 않은 크레딧 상품 ID입니다"),
     INVALID_PAYMENT_SESSION("INVALID_PAYMENT_SESSION", "결제 세션이 만료됐거나 유효하지 않습니다"),
@@ -67,20 +67,20 @@ public enum ErrorCode {
     ACTIVITY_MEMBER_ONLY("ACTIVITY_MEMBER_ONLY", "해당 독서모임 활동에 가입한 경우에만 가능합니다"),
     DISCUSSION_COMMENT_NOT_YOURS("DISCUSSION_COMMENT_NOT_YOURS", "해당 댓글은 본인이 작성한 것이 아닙니다"),
     EBOOK_NOT_PURCHASED("EBOOK_NOT_PURCHASED", "해당 전자책을 구매한 회원만 사용할 수 있는 기능입니다"),
-    PUBLISHER_NOT_APPROVED("PUBLISHER_NOT_APPROVED", "현재 출판사 계정이 승인되지 않았습니다"),
+    //PUBLISHER_NOT_APPROVED("PUBLISHER_NOT_APPROVED", "현재 출판사 계정이 승인되지 않았습니다"),
     DISCUSSION_HAS_COMMENTS("DISCUSSION_HAS_COMMENTS", "댓글이 달린 토론은 삭제할 수 없습니다"),
     EBOOK_REQUEST_NOT_YOURS("EBOOK_REQUEST_NOT_YOURS", "현재 출판사 계정으로 등록한 전자책 요청이 아닙니다"),
 
     LOGIN_REQUIRED("LOGIN_REQUIRED", "로그인이 필요합니다"),
     ONLY_USER("ONLY_USER", "일반 회원만 사용할 수 있는 기능입니다"),
-    ONLY_PUBLISHER("ONLY_PUBLISHER", "출판사 회원만 사용할 수 있는 기능입니다"),
+    //ONLY_PUBLISHER("ONLY_PUBLISHER", "출판사 회원만 사용할 수 있는 기능입니다"),
     ONLY_ADMIN("ONLY_ADMIN", "관리자만 사용할 수 있는 기능입니다"),
 
 
     // NOT_FOUND
     MEMBER_NOT_FOUND("MEMBER_NOT_FOUND", "해당 회원이 존재하지 않습니다"),
     EBOOK_NOT_FOUND("EBOOK_NOT_FOUND", "해당 전자책이 존재하지 않습니다"),
-    PUBLISHER_NOT_FOUND("PUBLISHER_NOT_FOUND", "해당 출판사가 존재하지 않습니다"),
+    //PUBLISHER_NOT_FOUND("PUBLISHER_NOT_FOUND", "해당 출판사가 존재하지 않습니다"),
     USER_NOT_FOUND("USER_NOT_FOUND", "일반 회원이 아니거나 존재하지 않습니다"),
     GROUP_NOT_FOUND("GROUP_NOT_FOUND", "해당 독서모임이 존재하지 않습니다"),
     HIGHLIGHT_NOT_FOUND("HIGHLIGHT_NOT_FOUND", "해당 하이라이트가 존재하지 않습니다"),

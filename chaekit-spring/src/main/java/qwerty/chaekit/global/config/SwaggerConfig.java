@@ -44,8 +44,7 @@ public class SwaggerConfig {
                 .addOperationCustomizer((operation, handlerMethod) -> {
                     if (operation.getParameters() != null) {
                         operation.getParameters().removeIf(param ->
-                                (param.getName().equals("userToken")
-                                        || param.getName().equals("publisherToken"))
+                                (param.getName().equals("userToken"))
                                         || param.getName().equals("token"));
                     }
                     return operation;
