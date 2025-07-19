@@ -24,9 +24,6 @@ public class EbookRequestMapper {
                 .size(ebookRequest.getSize())
                 .price(ebookRequest.getPrice())
                 .coverImageURL(convertToPublicImageURL(ebookRequest.getCoverImageKey()))
-                .publisherId(ebookRequest.getPublisher().getId())
-                .publisherName(ebookRequest.getPublisher().getPublisherName())
-                .publisherEmail(ebookRequest.getPublisher().getMember().getEmail())
                 .status(ebookRequest.getStatus())
                 .rejectReason(ebookRequest.getRejectReason())
                 .build();
