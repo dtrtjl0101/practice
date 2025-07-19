@@ -12,11 +12,11 @@ import java.util.Optional;
 public interface EbookRepository {
     Page<Ebook> findAllByTitleAndAuthor(String title, String author, Pageable pageable);
     Optional<Ebook> findById(Long id);
-    Optional<Ebook> findByIdWithPublisher(Long id);
+    //Optional<Ebook> findByIdWithPublisher(Long id);
     Ebook save(Ebook ebook);
     boolean existsByTitle(String title);
 
-    Page<Ebook> findAllByPublisher(PublisherProfile publisher, Pageable pageable);
+   // Page<Ebook> findAllByPublisher(PublisherProfile publisher, Pageable pageable);
     void incrementViewCount(Long ebookId);
     long count();
 }

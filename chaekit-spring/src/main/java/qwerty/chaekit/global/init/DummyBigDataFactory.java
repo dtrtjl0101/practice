@@ -56,14 +56,14 @@ public class DummyBigDataFactory {
     public void generateDummyDataForTest() {
         // 1. 출판물 5권 조회 (더미 도서)
         // 출판사 ID는 관리자 서비스에서 가져옵니다.
-        Long publisherId = adminService.getAdminPublisherId();
-        PublisherProfile publisher = entityFinder.findPublisher(publisherId);
+        //Long publisherId = adminService.getAdminPublisherId();
+        //PublisherProfile publisher = entityFinder.findPublisher(publisherId);
         Random random = new Random();
-        List<Ebook> ebooks = ebookRepository.findAllByPublisher(publisher, PageRequest.of(0, 5))
-                .stream()
-                .toList();
-        log.info("더미 도서 데이터가 {}개 조회되었습니다.", ebooks.size());
-        ebooks.forEach(ebook -> ebook.resetViewCount(1000L + random.nextInt(2001)));
+//        List<Ebook> ebooks = ebookRepository.findAllByPublisher(publisher, PageRequest.of(0, 5))
+//                .stream()
+//                .toList();
+//        log.info("더미 도서 데이터가 {}개 조회되었습니다.", ebooks.size());
+//        ebooks.forEach(ebook -> ebook.resetViewCount(1000L + random.nextInt(2001)));
 
         // 2. 일반 사용자 100명 생성
         if (userProfileRepository.findByMember_Email("test1@dummy.com").isPresent()) {
