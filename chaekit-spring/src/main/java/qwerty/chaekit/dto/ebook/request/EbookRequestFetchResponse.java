@@ -14,9 +14,6 @@ public record EbookRequestFetchResponse(
         long size,
         int price,
         String coverImageURL,
-        Long publisherId,
-        String publisherName,
-        String publisherEmail,
         EbookRequestStatus status,
         String rejectReason
 ) { }

@@ -20,7 +20,7 @@ import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.enums.ErrorCode;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.ForbiddenException;
-import qwerty.chaekit.global.security.resolver.PublisherToken;
+//import qwerty.chaekit.global.security.resolver.PublisherToken;
 import qwerty.chaekit.global.security.resolver.UserToken;
 import qwerty.chaekit.mapper.EbookRequestMapper;
 import qwerty.chaekit.service.util.EmailNotificationService;
