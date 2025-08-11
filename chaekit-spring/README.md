@@ -51,8 +51,6 @@
 
 프로젝트 루트에 `.env` 파일을 생성하고 아래 내용을 채워주세요:
 
-### MySQL
-
 ```env
 # DB
 DB_URL=jdbc:mysql://localhost:3306/chaekit
@@ -110,16 +108,7 @@ KAFKA_BOOTSTRAP_SERVERS=localhost:9092
 
 ```
 
-### H2
-
-```env
-# DB
-DB_URL=jdbc:h2:mem:testdb
-DB_USERNAME=sa
-DB_PASSWORD=password
-
-DB_DRIVER_CLASS=org.h2.Driver
-JPA_DIALECT=org.hibernate.dialect.H2Dialect
-~~~~
-(이하 동일)
-```
+## dev 서버 배포시 주의사항
+1. ec2의 홈 디렉토리에 'app' 디렉토리를 만들고 리포지토리를 가져옵니다.
+2. .env 등을 통해 docker-compose.yml에서 요구하는 환경변수를 설정합니다.
+3. https 인증서를 발급받아 /nginx/certs에 fullchain.pem, privkey.pem을 등록한다. 

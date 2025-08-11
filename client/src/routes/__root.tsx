@@ -55,7 +55,7 @@ function RouteComponent() {
   const user = useAtomValue(State.Auth.user);
   const matches = useMatches();
   const shouldHideNavigationShell = matches.some((match) =>
-    navigationShellHidePathIds.includes(match.routeId)
+    navigationShellHidePathIds.includes(match.routeId),
   );
 
   const isAdmin = user && user.role === Role.ROLE_ADMIN;

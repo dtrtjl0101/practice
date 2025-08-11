@@ -48,14 +48,14 @@ export function DayStatusChip(props: { startTime: string; endTime: string }) {
   const { label, color }: { label: string; color: "info" | "secondary" } =
     useMemo(() => {
       const now = new Date();
-      const start = new Date(startTime);
-      const end = new Date(endTime);
+      const start = new Date(`${startTime}T00:00:00+09:00`);
+      const end = new Date(`${endTime}T23:59:59+09:00`);
 
       if (now < start) {
         return { label: `시작전`, color: "secondary" };
       } else if (now <= end) {
-        const daysToEnd = Math.ceil(
-          (end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+        const daysToEnd = Math.floor(
+          (end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
         );
         return {
           label: `D-${daysToEnd === 0 ? "day" : daysToEnd}`,
@@ -91,25 +91,30 @@ export function CurrentActivityCard(props: {
           page: 0,
           size: 1,
           sort: ["startTime,desc"],
-        }
+        },
       );
 
       if (!response.isSuccessful) {
         console.error(response.errorMessage);
         throw new Error(response.errorCode);
       }
-      const activity = response.data.content![0] as Activity | undefined;
-      if (activity?.endTime && new Date(activity?.endTime) < new Date()) {
-        return undefined;
+      if (activity?.endTime) {
+        const end = new Date(`${activity.endTime}T23:59:59+09:00`);
+        const now = new Date();
+        console.log(end, now);
+
+        if (now > end) {
+          return undefined;
+        }
       }
-      return activity;
+      return (response.data.content?.at(0) as Activity) || undefined;
     },
   });
 
   const { data: activityReadProgresses } = useQuery({
     queryKey: ["activityReadProgresses", activity?.activityId],
     queryFn: async () => {
-      if (!activity) {
+      if (!activity?.activityId) {
         return [];
       }
       const response =
@@ -120,7 +125,7 @@ export function CurrentActivityCard(props: {
               page: 0,
               size: 100,
             },
-          }
+          },
         );
       if (!response.isSuccessful) throw new Error(response.errorMessage);
       return response.data!.content!;
@@ -155,17 +160,17 @@ export function CurrentActivityCard(props: {
   const progressPopoverOpen = Boolean(progressPopoverAnchor);
 
   const onJoinActivityButtonClicked = async () => {
-    if (!activity) {
+    if (!activity?.activityId || !activity.bookId) {
       return;
     }
     const response = await API_CLIENT.activityController.joinActivity(
-      activity.activityId
+      activity.activityId,
     );
     if (!response.isSuccessful) {
       switch (response.errorCode) {
         case "EBOOK_NOT_PURCHASED": {
           const shouldMoveToPurchasePage = confirm(
-            "활동에 참여하기 위해서는 책을 구매해야 합니다. 구매 페이지로 이동하시겠습니까?"
+            "활동에 참여하기 위해서는 책을 구매해야 합니다. 구매 페이지로 이동하시겠습니까?",
           );
           if (shouldMoveToPurchasePage) {
             navigate({
@@ -191,7 +196,7 @@ export function CurrentActivityCard(props: {
         groupId={groupId}
         open={activityCreateModalOpen}
         onClose={() => setActivityCreateModalOpen(false)}
-        onCreate={(_activity) => {
+        onCreate={() => {
           enqueueSnackbar("활동이 생성되었습니다.", { variant: "success" });
           refetch();
         }}
@@ -610,7 +615,7 @@ export function ActivityCreateModal(props: {
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState<Dayjs>(dayjs(new Date()));
   const [endDate, setEndDate] = useState<Dayjs>(
-    dayjs(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000))
+    dayjs(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)),
   );
   const [book, setBook] = useState<BookMetadata | null>(null);
   const { enqueueSnackbar } = useSnackbar();
@@ -631,7 +636,7 @@ export function ActivityCreateModal(props: {
         endTime: endDate.toISOString(),
         startTime: startDate.toISOString(),
         description,
-      }
+      },
     );
     if (!response.isSuccessful) {
       enqueueSnackbar(response.errorMessage, { variant: "error" });

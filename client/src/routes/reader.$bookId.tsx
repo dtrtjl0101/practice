@@ -98,13 +98,12 @@ function RouteComponent() {
   const navigate = Route.useNavigate();
   const [localReadProgress, setLocalReadProgress] = useState<number>(0);
   const [focusedHighlight, setFocusedHighlight] = useState<Highlight | null>(
-    null
+    null,
   );
-  const [selectionRightBottomPosition, setSelectionRightBottomPosition] =
-    useState({
-      left: 0,
-      top: 0,
-    });
+  const [selectionRightTopPosition, setSelectionRightTopPosition] = useState({
+    left: 0,
+    top: 0,
+  });
   const readerRef = useRef<ReactReader | null>(null);
   const [showHighlightsOnOnlyCurrentPage, setShowAllHighlights] =
     useState(true);
@@ -249,7 +248,7 @@ function RouteComponent() {
           transition: "all 0.3s ease-out",
           opacity: shouldFade ? 0 : 0.7,
           fill: generateUserColor(highlight.authorId),
-        }
+        },
       );
     });
   };
@@ -260,7 +259,7 @@ function RouteComponent() {
     }
     const { added, removed } = diffMemos(
       previousHighlightsInPage.current,
-      highlightsInPage
+      highlightsInPage,
     );
     updateHighlight({ added, removed });
   }, [rendition, highlightsInPage]);
@@ -288,7 +287,7 @@ function RouteComponent() {
     }
     const newReadProgress = Math.max(
       Math.min(rendition.book.locations.percentageFromCfi(location) * 100, 100),
-      0
+      0,
     );
     setLocalReadProgress(newReadProgress);
     if (temporalProgress) {
@@ -367,7 +366,7 @@ function RouteComponent() {
               page: 0,
               size: 100,
             },
-          }
+          },
         );
       if (!response.isSuccessful) {
         throw new Error(response.errorMessage);
@@ -393,7 +392,7 @@ function RouteComponent() {
       }),
       ...members
         .filter((member) =>
-          user?.role === Role.ROLE_USER ? member.userId !== user.userId : true
+          user?.role === Role.ROLE_USER ? member.userId !== user.userId : true,
         )
         .map((member) => {
           return {
@@ -460,7 +459,7 @@ function RouteComponent() {
               setDragProgress(percent);
               setIsDragging(true);
               const cfi = rendition?.book.locations.cfiFromPercentage(
-                percent / 100
+                percent / 100,
               );
               if (!cfi) {
                 return;
@@ -471,7 +470,7 @@ function RouteComponent() {
               const percent = typeof value === "number" ? value : value[0];
               setIsDragging(false);
               const cfi = rendition?.book.locations.cfiFromPercentage(
-                percent / 100
+                percent / 100,
               );
               if (!cfi) {
                 return;
@@ -541,8 +540,9 @@ function RouteComponent() {
               size="small"
               sx={{
                 position: "absolute",
-                left: selectionRightBottomPosition.left,
-                top: selectionRightBottomPosition.top,
+                left: selectionRightTopPosition.left,
+                top: selectionRightTopPosition.top,
+                transform: "translateY(-100%)",
               }}
               onClick={() => {
                 setOpenHighlightCreationModal(true);
@@ -644,7 +644,7 @@ function RouteComponent() {
                   setFocusedHighlight(null);
                 }
               },
-              { once: true }
+              { once: true },
             );
 
             const selectionClientRect = selection
@@ -665,15 +665,12 @@ function RouteComponent() {
               return;
             }
 
-            setSelectionRightBottomPosition({
+            setSelectionRightTopPosition({
               left:
                 selectionClientRect.left +
                 selectionClientRect.width +
                 viewerClientRect.left,
-              top:
-                selectionClientRect.top +
-                selectionClientRect.height * 0.5 +
-                viewerClientRect.top,
+              top: selectionClientRect.top + viewerClientRect.top,
             });
             setSelection({
               text: selection.toString(),
@@ -699,11 +696,11 @@ function RouteComponent() {
 function diffMemos(prev: Highlight[], next: Highlight[]): HighlightDiff {
   const added = next.filter(
     (highlight) =>
-      !prev.some((prevHighlight) => prevHighlight.id === highlight.id)
+      !prev.some((prevHighlight) => prevHighlight.id === highlight.id),
   );
   const removed = prev.filter(
     (highlight) =>
-      !next.some((nextHighlight) => nextHighlight.id === highlight.id)
+      !next.some((nextHighlight) => nextHighlight.id === highlight.id),
   );
 
   return {
