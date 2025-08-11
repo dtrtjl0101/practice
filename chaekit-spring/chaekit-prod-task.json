@@ -4,13 +4,13 @@
       {
           "name": "chaekit-container-0807",
           "image": "880996438467.dkr.ecr.ap-northeast-2.amazonaws.com/testserver1/testserver1_backend",
-          "cpu": 0,
-          "memory": 1024,
+          "cpu": 256,
+          "memory": 512,
           "portMappings": [
               {
                   "name": "chaekit0806-80-tcp",
                   "containerPort": 8080,
-                  "hostPort": 0,
+                  "hostPort": 8080,
                   "protocol": "tcp",
                   "appProtocol": "http"
               }
@@ -183,8 +183,6 @@
   "requiresCompatibilities": [
       "EC2"
   ],
-  "cpu": "1024",
-  "memory": "3072",
   "runtimePlatform": {
       "cpuArchitecture": "X86_64",
       "operatingSystemFamily": "LINUX"
