@@ -97,9 +97,9 @@ jobs:
             GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET}}
 
       - name: Deploy ECS task definition #ECS에 배포(서비스 업데이트)
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v3
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
-          cluster: chaekit-spring-prod-cluster # 여러분의 ECS 클러스터 이름
-          service: chaekit-spring-prod-cluster-service # 여러분의 ECS 서비스 이름
+          cluster: chaekit-cluster-0807 # 여러분의 ECS 클러스터 이름
+          service: chaekit-cluster-service # 여러분의 ECS 서비스 이름
           wait-for-service-stability: true
