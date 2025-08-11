@@ -78,7 +78,7 @@ jobs:
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: chaekit-spring/chaekit-prod-task.json
-          container-name: chaekit-cluster-0807
+          container-name: chaekit-container-0807
           image: ${{ steps.image-path.outputs.ecs-deploy-image }}
           environment-variables: |
             DB_URL=${{ secrets.DB_URL }}
