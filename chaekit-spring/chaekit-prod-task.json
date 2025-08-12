@@ -1,193 +1,132 @@
 {
-  "taskDefinitionArn": "arn:aws:ecs:ap-northeast-2:880996438467:task-definition/chaekit-task-0807:1",
-  "containerDefinitions": [
-      {
-          "name": "chaekit-container-0807",
-          "image": "880996438467.dkr.ecr.ap-northeast-2.amazonaws.com/testserver1/testserver1_backend",
-          "cpu": 256,
-          "memory": 512,
-          "portMappings": [
-              {
-                  "name": "chaekit0806-80-tcp",
-                  "containerPort": 8080,
-                  "hostPort": 8080,
-                  "protocol": "tcp",
-                  "appProtocol": "http"
-              }
-          ],
-          "essential": true,
-          "environment": [
-              {
-                  "name": "GOOGLE_CLIENT_SECRET",
-                  "value": ""
-              },
-              {
-                  "name": "SPRING_PROFILES_ACTIVE",
-                  "value": "prod"
-              },
-              {
-                  "name": "KAKAO_PAY_CID",
-                  "value": ""
-              },
-              {
-                  "name": "KAKAO_PAY_SECRET_KEY",
-                  "value": ""
-              },
-              {
-                  "name": "EBOOK_MAX_FILE_SIZE",
-                  "value": "20971520"
-              },
-              {
-                  "name": "AWS_S3_REGION",
-                  "value": "ap-northeast-2"
-              },
-              {
-                  "name": "ADMIN_PASSWORD",
-                  "value": ""
-              },
-              {
-                  "name": "SECRET_ACCESS_KEY",
-                  "value": ""
-              },
-              {
-                  "name": "DB_USERNAME",
-                  "value": ""
-              },
-              {
-                  "name": "JWT_SECRET",
-                  "value": ""
-              },
-              {
-                  "name": "AWS_ACCESS_KEY_ID",
-                  "value": ""
-              },
-              {
-                  "name": "DB_URL",
-                  "value": ""
-              },
-              {
-                  "name": "GMAIL_ADDRESS",
-                  "value": ""
-              },
-              {
-                  "name": "GMAIL_PASSWORD",
-                  "value": ""
-              },
-              {
-                  "name": "CORS_ALLOWED_ORIGINS",
-                  "value": "http://localhost:*,https://chaekit.com"
-              },
-              {
-                  "name": "GOOGLE_CLIENT_ID",
-                  "value": ""
-              },
-              {
-                  "name": "JWT_EXPIRATION_MS",
-                  "value": "3600000"
-              },
-              {
-                  "name": "JPA_DIALECT",
-                  "value": "org.hibernate.dialect.MySQLDialect"
-              },
-              {
-                  "name": "KAKAO_PAY_REDIRECT_BASE_URL",
-                  "value": "https://chaekit.com"
-              },
-              {
-                  "name": "JWT_REFRESH_EXPIRATION_MS",
-                  "value": "1209600000"
-              },
-              {
-                  "name": "PRESIGNED_URL_EXPIRATION_TIME",
-                  "value": "3600"
-              },
-              {
-                  "name": "ADMIN_NAME",
-                  "value": "admin"
-              },
-              {
-                  "name": "DB_DRIVER_CLASS",
-                  "value": "com.mysql.cj.jdbc.Driver"
-              },
-              {
-                  "name": "EBOOK_BUCKET_NAME",
-                  "value": "chaekit"
-              },
-              {
-                  "name": "IMAGE_BUCKET_NAME",
-                  "value": "chaekit-image"
-              },
-              {
-                  "name": "ADMIN_EMAIL",
-                  "value": "admin@example.com"
-              },
-              {
-                  "name": "DB_PASSWORD",
-                  "value": ""
-              },
-              {
-                  "name": "REDIS_URL",
-                  "value": ""
-              }
-          ],
-          "environmentFiles": [],
-          "mountPoints": [],
-          "volumesFrom": [],
-          "ulimits": [],
-          "logConfiguration": {
-              "logDriver": "awslogs",
-              "options": {
-                  "awslogs-group": "/ecs/chaekit-task-0807",
-                  "awslogs-create-group": "true",
-                  "awslogs-region": "ap-northeast-2",
-                  "awslogs-stream-prefix": "ecs"
-              },
-              "secretOptions": []
-          },
-          "systemControls": []
-      }
-  ],
-  "family": "chaekit-task-0807",
-  "executionRoleArn": "arn:aws:iam::880996438467:role/ecsTaskExecutionRole",
-  "networkMode": "bridge",
-  "revision": 1,
-  "volumes": [],
-  "status": "ACTIVE",
-  "requiresAttributes": [
-      {
-          "name": "com.amazonaws.ecs.capability.logging-driver.awslogs"
-      },
-      {
-          "name": "ecs.capability.execution-role-awslogs"
-      },
-      {
-          "name": "com.amazonaws.ecs.capability.ecr-auth"
-      },
-      {
-          "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
-      },
-      {
-          "name": "ecs.capability.execution-role-ecr-pull"
-      },
-      {
-          "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
-      },
-      {
-          "name": "com.amazonaws.ecs.capability.docker-remote-api.1.29"
-      }
-  ],
-  "placementConstraints": [],
-  "compatibilities": [
-      "EC2"
-  ],
-  "requiresCompatibilities": [
-      "EC2"
-  ],
-  "runtimePlatform": {
-      "cpuArchitecture": "X86_64",
-      "operatingSystemFamily": "LINUX"
-  },
-  "registeredAt": "2025-08-07T11:45:59.926Z",
-  "registeredBy": "arn:aws:iam::880996438467:root",
-  "tags": []
+    "family": "chaekit-task-0807",
+    "networkMode": "bridge",
+    "executionRoleArn": "arn:aws:iam::880996438467:role/ecsTaskExecutionRole",
+    "requiresCompatibilities": ["EC2"],
+    "cpu": "256",
+    "memory": "512",
+    "containerDefinitions": [
+        {
+            "name": "chaekit-container-0807",
+            "essential": true,
+            "portMappings": [
+                {
+                    "containerPort": 8080,
+                    "hostPort": 8080,
+                    "protocol": "tcp"
+                }
+            ],
+            "environment": [
+                {
+                    "name": "SPRING_PROFILES_ACTIVE",
+                    "value": "prod"
+                },
+                {
+                    "name": "DB_URL"
+                },
+                {
+                    "name": "DB_USERNAME"
+                },
+                {
+                    "name": "DB_PASSWORD"
+                },
+                {
+                    "name": "DB_DRIVER_CLASS",
+                    "value": "com.mysql.cj.jdbc.Driver"
+                },
+                {
+                    "name": "JPA_DIALECT",
+                    "value": "org.hibernate.dialect.MySQLDialect"
+                },
+                {
+                    "name": "REDIS_URL"
+                },
+                {
+                    "name": "JWT_SECRET"
+                },
+                {
+                    "name": "JWT_EXPIRATION_MS",
+                    "value": "3600000"
+                },
+                {
+                    "name": "JWT_REFRESH_EXPIRATION_MS",
+                    "value": "1209600000"
+                },
+                {
+                    "name": "ADMIN_NAME",
+                    "value": "admin"
+                },
+                {
+                    "name": "ADMIN_EMAIL",
+                    "value": "admin@example.com"
+                },
+                {
+                    "name": "ADMIN_PASSWORD"
+                },
+                {
+                    "name": "GMAIL_ADDRESS"
+                },
+                {
+                    "name": "GMAIL_PASSWORD"
+                },
+                {
+                    "name": "GOOGLE_CLIENT_ID"
+                },
+                {
+                    "name": "GOOGLE_CLIENT_SECRET"
+                },
+                {
+                    "name": "KAKAO_PAY_REDIRECT_BASE_URL",
+                    "value": "https://chaekit.com"
+                },
+                {
+                    "name": "KAKAO_PAY_CID"
+                },
+                {
+                    "name": "KAKAO_PAY_SECRET_KEY"
+                },
+                {
+                    "name": "EBOOK_BUCKET_NAME",
+                    "value": "chaekit"
+                },
+                {
+                    "name": "IMAGE_BUCKET_NAME",
+                    "value": "chaekit-image"
+                },
+                {
+                    "name": "AWS_S3_REGION",
+                    "value": "ap-northeast-2"
+                },
+                {
+                    "name": "EBOOK_MAX_FILE_SIZE",
+                    "value": "20971520"
+                },
+                {
+                    "name": "PRESIGNED_URL_EXPIRATION_TIME",
+                    "value": "3600"
+                },
+                {
+                    "name": "AWS_ACCESS_KEY_ID"
+                },
+                {
+                    "name": "SECRET_ACCESS_KEY"
+                },
+                {
+                    "name": "CORS_ALLOWED_ORIGINS",
+                    "value": "http://localhost:*,https://chaekit.com"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/chaekit-task-0807",
+                    "awslogs-region": "ap-northeast-2",
+                    "awslogs-stream-prefix": "ecs",
+                    "mode": "non-blocking",
+                    "max-buffer-size": "25m",
+                    "awslogs-create-group": "true"
+                }
+            }
+        }
+    ]
 }
