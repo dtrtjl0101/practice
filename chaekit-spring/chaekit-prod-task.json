@@ -8,7 +8,6 @@
     "containerDefinitions": [
         {
             "name": "chaekit-container-0807",
-            "image": "880996438467.dkr.ecr.ap-northeast-2.amazonaws.com/testserver1/testserver1_backend",
             "essential": true,
             "portMappings": [
                 {
