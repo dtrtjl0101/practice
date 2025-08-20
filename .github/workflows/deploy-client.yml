@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 env:
   AWS_DEFAULT_REGION: ap-northeast-2
-  DOMAIN_NAME: chaekit.com
+  DOMAIN_NAME: chaekit.click
   BRANCH_NAME: "" # Should be set in the job
   STACK_NAME: "" # Should be set in the job
   ZONE_ID: ${{ secrets.ZONE_ID }}
