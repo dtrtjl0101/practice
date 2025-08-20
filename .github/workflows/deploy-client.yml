@@ -67,7 +67,9 @@ jobs:
 
       - name: Bootstrap cdk
         working-directory: client/cdk
-        run: bunx cdk bootstrap
+        run: |
+          bunx cdk bootstrap aws://880996438467/ap-northeast-2
+          bunx cdk bootstrap aws://880996438467/us-east-1
 
       - name: Deploy client
         working-directory: client/cdk
