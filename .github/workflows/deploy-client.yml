@@ -65,9 +65,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
 
-      - name: Bootstrap cdk
+      - name: Bootstrap CDK (ap-northeast-2)
         working-directory: client/cdk
-        run: bunx cdk bootstrap
+        run: bunx cdk bootstrap aws://880996438467/ap-northeast-2 --region ap-northeast-2
+
+      - name: Bootstrap CDK (us-east-1)
+        working-directory: client/cdk
+        run: bunx cdk bootstrap aws://880996438467/us-east-1 --region us-east-1
+
 
       - name: Deploy client
         working-directory: client/cdk
