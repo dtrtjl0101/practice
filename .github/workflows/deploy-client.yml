@@ -69,12 +69,25 @@ jobs:
         working-directory: client/cdk
         run: bunx cdk bootstrap aws://880996438467/ap-northeast-2 --region ap-northeast-2
 
+      - name: Login to AWS
+        uses: aws-actions/configure-aws-credentials@v4.1.0
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
       - name: Bootstrap CDK (us-east-1)
         working-directory: client/cdk
         run: bunx cdk bootstrap aws://880996438467/us-east-1 --region us-east-1
 
+      - name: Login to AWS (default region)
+        uses: aws-actions/configure-aws-credentials@v4.1.0
+        with:
+            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY }}
+            aws-region: ap-northeast-2
 
-      - name: Deploy client
+      - name: Deploy client #..
         working-directory: client/cdk
         run: |
           bunx cdk deploy --require-approval never --all
