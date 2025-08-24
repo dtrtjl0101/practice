@@ -13,9 +13,9 @@ env:
   AWS_DEFAULT_REGION: ap-northeast-2
   DOMAIN_NAME: chaekit.click
   BRANCH_NAME: "" # Should be set in the job
-  STACK_NAME: "" # Should be set in the job!!!
+  STACK_NAME: "" # Should be set in the job
   ZONE_ID: ${{ secrets.ZONE_ID }}
-  VITE_CHAEKIT_API_ENDPOINT: "" # Should be set in the job
+  VITE_CHAEKIT_API_ENDPOINT: "" # Should be set in the job!
 jobs:
   deploy-client:
     runs-on: ubuntu-latest
@@ -58,21 +58,18 @@ jobs:
         working-directory: client/cdk
         run: bun install --frozen-lockfile
 
-      - name: Login to AWS (default region)
+      - name: Login to AWS
         uses: aws-actions/configure-aws-credentials@v4.1.0
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY }}
-          aws-region: ap-northeast-2
+          aws-region: ${{ env.AWS_DEFAULT_REGION }}
 
-      - name: Bootstrap CDK (ap-northeast-2)
+      - name: Bootstrap cdk
         working-directory: client/cdk
-        run: bunx cdk bootstrap aws://880996438467/ap-northeast-2 --region ap-northeast-2 --cloudformation-execution-policies arn:aws:iam::aws:policy/AdministratorAccess
-
-      - name: Bootstrap CDK (us-east-1)
-        working-directory: client/cdk
-        run: bunx cdk bootstrap aws://880996438467/us-east-1 --region us-east-1 --cloudformation-execution-policies arn:aws:iam::aws:policy/AdministratorAccess
+        run: bunx cdk bootstrap
 
       - name: Deploy client
         working-directory: client/cdk
-        run: bunx cdk deploy --require-approval never --all
+        run: |
+          bunx cdk deploy --require-approval never --all
