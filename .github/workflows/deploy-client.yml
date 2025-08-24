@@ -15,7 +15,7 @@ env:
   BRANCH_NAME: "" # Should be set in the job
   STACK_NAME: "" # Should be set in the job
   ZONE_ID: ${{ secrets.ZONE_ID }}
-  VITE_CHAEKIT_API_ENDPOINT: "" # Should be set in the job!!
+  VITE_CHAEKIT_API_ENDPOINT: "" # Should be set in the job!!!
 jobs:
   deploy-client:
     runs-on: ubuntu-latest
