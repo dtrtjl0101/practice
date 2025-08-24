@@ -1,5 +1,4 @@
 name: deploy-client
-
 on:
   push:
     branches:
@@ -7,35 +6,31 @@ on:
     paths:
       - "client/**"
       - ".github/workflows/deploy-client.yml"
-
 concurrency:
   group: deploy-client
   cancel-in-progress: true
-
 env:
   AWS_DEFAULT_REGION: ap-northeast-2
   DOMAIN_NAME: chaekit.click
-  BRANCH_NAME: "" # Will be set dynamically
-  STACK_NAME: ""  # Will be set dynamically
+  BRANCH_NAME: "" # Should be set in the job
+  STACK_NAME: "" # Should be set in the job
   ZONE_ID: ${{ secrets.ZONE_ID }}
-  VITE_CHAEKIT_API_ENDPOINT: "" # Will be set dynamically
-
+  VITE_CHAEKIT_API_ENDPOINT: "" # Should be set in the job!!!!
 jobs:
   deploy-client:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set branch, stack, API endpoint
+      - name: set BRANCH_NAME, STACK_NAME, VITE_CHAEKIT_API_ENDPOINT
         run: |
           export BRANCH_NAME=$(echo "${{ github.event.ref }}" | tr "[:upper:]" "[:lower:]" | sed -e "s#refs/heads/##g" -e 's/\//-/g' -e 's/|/-/g')
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
           export STACK_NAME=$(echo $BRANCH_NAME | tr "[:upper:]" "[:lower:]" | tr -cd '[:alnum:]')
           echo "STACK_NAME=$STACK_NAME" >> $GITHUB_ENV
-          if [ $BRANCH_NAME = "main" ]; then
-            export VITE_CHAEKIT_API_ENDPOINT="${{ vars.CHAEKIT_API_ENDPOINT }}"
-          else
-            export VITE_CHAEKIT_API_ENDPOINT="${{ vars.CHAEKIT_DEV_API_ENDPOINT }}"
+          if [ $BRANCH_NAME = "main" ]; \
+            then export VITE_CHAEKIT_API_ENDPOINT="${{ vars.CHAEKIT_API_ENDPOINT }}"; \
+            else export VITE_CHAEKIT_API_ENDPOINT="${{ vars.CHAEKIT_DEV_API_ENDPOINT }}"; \
           fi
           echo "VITE_CHAEKIT_API_ENDPOINT=$VITE_CHAEKIT_API_ENDPOINT" >> $GITHUB_ENV
 
@@ -59,7 +54,7 @@ jobs:
         working-directory: client
         run: bun run build
 
-      - name: Install CDK bun dependencies
+      - name: Install cdk bun dependencies
         working-directory: client/cdk
         run: bun install --frozen-lockfile
 
@@ -70,26 +65,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
 
-      - name: Bootstrap us-east-1
+      - name: Bootstrap cdk
         working-directory: client/cdk
-        run: bunx cdk bootstrap aws://880996438467/us-east-1
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY }}
-          AWS_REGION: us-east-1
-
-      - name: Bootstrap ap-northeast-2
-        working-directory: client/cdk
-        run: bunx cdk bootstrap aws://880996438467/ap-northeast-2
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY }}
-          AWS_REGION: ap-northeast-2
+        run: bunx cdk bootstrap
 
       - name: Deploy client
         working-directory: client/cdk
-        run: bunx cdk deploy --require-approval never --all
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY }}
-          AWS_REGION: ap-northeast-2
+        run: |
+          bunx cdk deploy --require-approval never --all
