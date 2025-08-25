@@ -13,9 +13,9 @@ env:
   AWS_DEFAULT_REGION: ap-northeast-2
   DOMAIN_NAME: chaekit.click
   BRANCH_NAME: "" # Should be set in the job
-  STACK_NAME: "" # Should be set in the job
+  STACK_NAME: "" # Should be set in the job!
   ZONE_ID: ${{ secrets.ZONE_ID }}
-  VITE_CHAEKIT_API_ENDPOINT: "" # Should be set in the job!!!
+  VITE_CHAEKIT_API_ENDPOINT: https://api.chaekit.click # Should be set in the job!!!
 jobs:
   deploy-client:
     runs-on: ubuntu-latest
