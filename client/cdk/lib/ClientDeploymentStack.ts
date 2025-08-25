@@ -16,8 +16,7 @@ export class ClientDeploymentStack extends cdk.Stack {
     const bucketName = `${process.env.BRANCH_NAME}-chaekit-client`;
     const domainName = `${process.env.DOMAIN_NAME}`;
     const subDomainName = `${process.env.BRANCH_NAME}`;
-    const clientDomainName =
-      subDomainName === "main" ? domainName : `${subDomainName}.${domainName}`;
+    const clientDomainName = domainName;
     const zoneId = `${process.env.ZONE_ID}`;
 
     // S3 버킷 생성
