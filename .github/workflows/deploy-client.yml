@@ -53,7 +53,7 @@ jobs:
       - name: Build client
         working-directory: client
         run: |
-          echo "VITE_CHAEKIT_API_ENDPOINT is: ${{ env.VITE_CHAEKIT_API_ENDPOINT }}"
+          echo "VITE_CHAEKIT_API_ENDPOINT is: $VITE_CHAEKIT_API_ENDPOINT"
           bun run build
 
       - name: Install cdk bun dependencies
