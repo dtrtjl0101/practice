@@ -11,10 +11,11 @@ const certificationStack = new CertificationStack(app, "CertificationStack", {
   },
 });
 new ClientDeploymentStack(app, "ClientDeploymentStack", {
-  certificate: certificationStack.certificate,
+  //certificate: certificationStack.certificate,
   stackName: `${process.env.STACK_NAME}ClientDeploymentStack`,
   crossRegionReferences: true,
   env: {
+    account: process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.AWS_DEFAULT_REGION,
   },
 });
