@@ -25,14 +25,10 @@ export class CertificationStack extends cdk.Stack {
       }
     );
 
-    this.certificate = new cdk.aws_certificatemanager.Certificate(
+    this.certificate = cdk.aws_certificatemanager.Certificate.fromCertificateArn(
       this,
-      "Certificate",
-      {
-        domainName: clientDomainName,
-        validation:
-          cdk.aws_certificatemanager.CertificateValidation.fromDns(zone),
-      }
+        "ExistingCertificate",
+      "arn:aws:acm:us-east-1:880996438467:certificate/c1bdc28e-96c0-4b11-a70f-6fddfbf44b00"
     );
   }
 }
