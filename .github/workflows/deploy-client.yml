@@ -15,7 +15,7 @@ env:
   BRANCH_NAME: "" # Should be set in the job
   STACK_NAME: "" # Should be set in the job!
   ZONE_ID: ${{ secrets.ZONE_ID }}
-  VITE_CHAEKIT_API_ENDPOINT: "https://chaekit.click/api" # Should be set in the job!!!
+  VITE_CHAEKIT_API_ENDPOINT: "" # Should be set in the job!!
 jobs:
   deploy-client:
     runs-on: ubuntu-latest
@@ -52,7 +52,9 @@ jobs:
 
       - name: Build client
         working-directory: client
-        run: bun run build
+        run: |
+          echo "VITE_CHAEKIT_API_ENDPOINT is: $VITE_CHAEKIT_API_ENDPOINT"
+          bun run build
 
       - name: Install cdk bun dependencies
         working-directory: client/cdk
