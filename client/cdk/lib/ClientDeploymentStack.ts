@@ -49,7 +49,7 @@ export class ClientDeploymentStack extends cdk.Stack {
       "arn:aws:acm:us-east-1:880996438467:certificate/0226ca66-f211-4a3c-8409-6e512bf43297"
     );
 
-    // CloudFront 배포!
+    // CloudFront 배포!!
     const cloudFront = new cloudfront.Distribution(this, "ClientCloudFront", {
       defaultRootObject: "index.html",
       defaultBehavior: {
