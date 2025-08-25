@@ -78,7 +78,7 @@
                 },
                 {
                     "name": "KAKAO_PAY_REDIRECT_BASE_URL",
-                    "value": "https://chaekit.com"
+                    "value": "https://chaekit.click"
                 },
                 {
                     "name": "KAKAO_PAY_CID"
@@ -114,7 +114,7 @@
                 },
                 {
                     "name": "CORS_ALLOWED_ORIGINS",
-                    "value": "http://localhost:*,https://chaekit.com"
+                    "value": "http://localhost:*,https://chaekit.click"
                 }
             ],
             "logConfiguration": {
