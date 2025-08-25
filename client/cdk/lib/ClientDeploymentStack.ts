@@ -79,7 +79,7 @@ export class ClientDeploymentStack extends cdk.Stack {
       })
     );
 
-    // Route53 A 레코드 생성
+    // Route53 A 레코드 생성!
     new route53.ARecord(this, "ClientRecord", {
       zone,
       recordName: clientDomainName,
