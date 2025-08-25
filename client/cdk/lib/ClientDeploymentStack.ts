@@ -10,16 +10,8 @@ import * as s3_deployment from "aws-cdk-lib/aws-s3-deployment";
 import * as iam from "aws-cdk-lib/aws-iam";
 
 export class ClientDeploymentStack extends cdk.Stack {
-  constructor(
-    scope: Construct,
-    id: string,
-    props: cdk.StackProps & {
-      certificate: acm.ICertificate;
-    }
-  ) {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
-
-    const { certificate } = props;
 
     const bucketName = `${process.env.BRANCH_NAME}-chaekit-client`;
     const domainName = `${process.env.DOMAIN_NAME}`;
@@ -51,6 +43,13 @@ export class ClientDeploymentStack extends cdk.Stack {
     // S3Origin 생성 (CDK v2)
     const s3BucketOrigin = new S3Origin(bucket, { originAccessIdentity });
 
+    // ACM 인증서 가져오기 (us-east-1)
+    const certificate = acm.Certificate.fromCertificateArn(
+      this,
+      "ExistingCertificate",
+      "arn:aws:acm:us-east-1:880996438467:certificate/0226ca66-f211-4a3c-8409-6e512bf43297"
+    );
+
     // CloudFront 배포
     const cloudFront = new cloudfront.Distribution(this, "ClientCloudFront", {
       defaultRootObject: "index.html",
@@ -61,7 +60,7 @@ export class ClientDeploymentStack extends cdk.Stack {
         { httpStatus: 403, responseHttpStatus: 200, responsePagePath: "/", ttl: cdk.Duration.seconds(0) },
         { httpStatus: 404, responseHttpStatus: 200, responsePagePath: "/", ttl: cdk.Duration.seconds(0) },
       ],
-      certificate, // us-east-1 ACM 인증서
+      certificate,  // ✅ 수정된 부분
       domainNames: [clientDomainName],
     });
 
