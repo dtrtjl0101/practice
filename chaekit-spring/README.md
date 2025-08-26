@@ -81,7 +81,7 @@ GOOGLE_CLIENT_ID={구글 클라이언트 아이디}
 GOOGLE_CLIENT_SECRET={구글 클라이언트 시크릿}
 
 # Kakao Pay
-KAKAO_PAY_REDIRECT_BASE_URL=https://dev.chaekit.com
+KAKAO_PAY_REDIRECT_BASE_URL=https://dev.chaekit.click
 KAKAO_PAY_CID=TC0ONETIME
 KAKAO_PAY_SECRET_KEY={카카오페이 secret key}
 
@@ -98,7 +98,7 @@ EBOOK_MAX_FILE_SIZE=20971520
 PRESIGNED_URL_EXPIRATION_TIME=3600
 
 # CORS
-CORS_ALLOWED_ORIGINS=http://localhost:5173,https://chaekit.com,https://*.chaekit.com
+CORS_ALLOWED_ORIGINS=http://localhost:5173,https://chaekit.click,https://*.chaekit.click
 
 # Local Server Port
 LOCAL_SERVER_PORT=8080
