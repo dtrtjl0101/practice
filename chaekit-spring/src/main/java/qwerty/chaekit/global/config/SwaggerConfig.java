@@ -24,9 +24,9 @@ public class SwaggerConfig {
                 .servers(List.of(
                         new Server().url("http://localhost:8080")
                                 .description("Local Server"),
-                        new Server().url("https://dev.api.chaekit.com")
+                        new Server().url("https://dev.api.chaekit.click")
                                 .description("Development Server"),
-                        new Server().url("https://api.chaekit.com")
+                        new Server().url("https://api.chaekit.click")
                                 .description("Production Server")
                 ))
                 .components(new Components().addSecuritySchemes("BearerAuth",
