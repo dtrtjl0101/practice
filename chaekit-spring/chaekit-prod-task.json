@@ -78,7 +78,7 @@
                 },
                 {
                     "name": "KAKAO_PAY_REDIRECT_BASE_URL",
-                    "value": "https://chaekit.click"
+                    "value": "https://api.chaekit.click/login/oauth2/code/google"
                 },
                 {
                     "name": "KAKAO_PAY_CID"
