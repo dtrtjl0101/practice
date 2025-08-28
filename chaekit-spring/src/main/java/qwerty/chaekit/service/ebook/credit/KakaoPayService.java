@@ -200,7 +200,7 @@ public class KakaoPayService {
     private HttpHeaders createKakaoPayHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "KakaoAK " + kakaoPayProperties.secretKey());
+        headers.set("Authorization", "SECRET_KEY " + kakaoPayProperties.secretKey());
         return headers;
     }
 }
