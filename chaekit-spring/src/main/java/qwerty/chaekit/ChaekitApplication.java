@@ -19,5 +19,5 @@ public class ChaekitApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(ChaekitApplication.class, args);
 	}
-
+/**/
 }
