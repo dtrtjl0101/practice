@@ -1,3 +1,6 @@
+networks:
+  k6-network:
+
 services:
   nginx:
     image: nginx:latest
@@ -9,6 +12,9 @@ services:
       - ./nginx/certs:/etc/nginx/certs:ro
     depends_on:
       - chaekit-spring
+    networks:
+      - k6-network
+
   chaekit-spring:
     build: .
     volumes:
@@ -22,7 +28,7 @@ services:
       # DB
       DB_URL: jdbc:mysql://chaekit-mysql:3306/chaekit?serverTimezone=Asia/Seoul
       DB_USERNAME: root
-      DB_PASSWORD: "0000"
+      DB_PASSWORD: testpassword
       DB_DRIVER_CLASS: com.mysql.cj.jdbc.Driver
       JPA_DIALECT: org.hibernate.dialect.MySQL8Dialect
 
@@ -54,6 +60,9 @@ services:
 
       # Spring
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      #LOGGING_LEVEL_ORG_SPRINGFRAMEWORK: DEBUG
+      #LOGGING_LEVEL_COM_ZAXXER_HIKARI: TRACE
+
 
       # AWS
       EBOOK_BUCKET_NAME: chaekit
@@ -65,8 +74,7 @@ services:
       PRESIGNED_URL_EXPIRATION_TIME: 3600
 
       # CORS
-      CORS_ALLOWED_ORIGINS: http://localhost:*,https://chaekit.com,https://*.chaekit.com
-
+      CORS_ALLOWED_ORIGINS: http://localhost:*,https://chaekit.click,https://*.chaekit.click
     depends_on:
       chaekit-mysql:
         condition: service_healthy
@@ -77,11 +85,14 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+    networks:
+      - k6-network
+
   chaekit-mysql:
     image: mysql
     environment:
       MYSQL_DATABASE: chaekit
-      MYSQL_ROOT_PASSWORD: "0000"
+      MYSQL_ROOT_PASSWORD: "testpassword"
       command: --innodb-buffer-pool-size=64M
     ports:
       - "3306:3306"
@@ -91,6 +102,8 @@ services:
       test: ["CMD", "mysqladmin", "ping"]
       interval: 5s
       retries: 10
+    networks:
+      - k6-network
 
   chaekit-redis:
     image: redis
@@ -101,7 +114,36 @@ services:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       retries: 10
+    networks:
+      - k6-network
+
+  influxdb:
+    image: influxdb:1.8
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb-data:/var/lib/influxdb
+    environment:
+      - INFLUXDB_DB=k6
+    networks:
+      - k6-network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - influxdb
+    networks:
+      - k6-network
 
 volumes:
   chaekit-mysql-data:
   gradle-cache:
+  influxdb-data:
+  grafana-data:

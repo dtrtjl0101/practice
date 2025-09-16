@@ -9,7 +9,7 @@ CREATE TABLE group_review (
     KEY `FK_group_review_activity` (activity_id),
     KEY `FK_group_review_author` (author_id),
     PRIMARY KEY (id),
-    CONSTRAINT `FK_group_review_activity` FOREIGN KEY (activity_id) REFERENCES chaekit.`activity` (id),
+    CONSTRAINT `FK_group_review_activity` FOREIGN KEY (activity_id) REFERENCES `activity` (id),
     CONSTRAINT `FK_group_review_author` FOREIGN KEY (author_id) REFERENCES `user_profile` (id)
 );
 
